@@ -1,0 +1,15 @@
+@import url("reset.css");
+
+GtkWindow {
+    background-color: rgba(104,112,116, 0.6);
+    border-radius: 4px;
+}
+
+.input {
+    color: rgba(230, 230, 230, 0.7);
+    border: 1px solid rgba(170, 170, 170, 0.7);
+    border-radius: 4px;
+    font-size: 30px;
+    padding: 10px;
+    background-color: rgba(71,75,77, 0.9);
+}

@@ -3,9 +3,7 @@
 # This file is in the public domain
 ### END LICENSE
 
-from locale import gettext as _
-
-from gi.repository import Gtk # pylint: disable=E0611
+from gi.repository import Gtk  # pylint: disable=E0611
 import logging
 logger = logging.getLogger('ulauncher')
 
@@ -13,17 +11,32 @@ from ulauncher_lib import Window
 from ulauncher.AboutUlauncherDialog import AboutUlauncherDialog
 from ulauncher.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 
+
 # See ulauncher_lib.Window.py for more details about how this class works
 class UlauncherWindow(Window):
     __gtype_name__ = "UlauncherWindow"
     
-    def finish_initializing(self, builder): # pylint: disable=E1002
+    def finish_initializing(self, builder):  # pylint: disable=E1002
         """Set up the main window"""
         super(UlauncherWindow, self).finish_initializing(builder)
-        w = Gtk.Window()
 
         self.AboutDialog = AboutUlauncherDialog
         self.PreferencesDialog = PreferencesUlauncherDialog
 
-        # Code for other initialization actions should be added here.
+        provider = Gtk.CssProvider()
+        provider.load_from_path('data/ui/Ulauncher.css')
+        self.apply_css(self, provider)
 
+        self.screen = self.get_screen()
+        self.visual = self.screen.get_rgba_visual()
+        if self.visual is not None and self.screen.is_composited():
+            self.set_visual(self.visual)
+
+
+    def apply_css(self, widget, provider):
+        Gtk.StyleContext.add_provider(widget.get_style_context(),
+                                      provider,
+                                      Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        if isinstance(widget, Gtk.Container):
+            widget.forall(self.apply_css, provider)
