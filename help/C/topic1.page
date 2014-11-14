@@ -1,0 +1,18 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="topic"
+      id="topic1">
+
+<info>
+  <link type="guide" xref="index#contents"/>
+  <credit type="author">
+    <name>Your Name</name>
+    <email>Your E-mail</email>
+    <years>2010</years>
+  </credit>
+  <desc>Optional short description of Topic 1 for contents page</desc>
+</info>
+
+<title>Topic 1</title>
+<p>This is an example topic page. It's main function is to describe one topic.</p>
+
+</page>

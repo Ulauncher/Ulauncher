@@ -1,0 +1,44 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="index">
+
+<info>
+  <!-- This shows in the title bar so does not show [icon] -->
+  <title type="text">Ulauncher</title>
+  <desc>The <app>Ulauncher</app> help.</desc>
+  <credit type="author">
+    <name>Your Name</name>
+    <email>Your E-mail</email>
+    <years>2010</years>
+  </credit>
+  <license href="http://creativecommons.org/licenses/by-sa/3.0/">
+  <p>Creative Commons Attribution-Share Alike 3.0 Unported License</p>
+  </license>
+</info>
+
+<title>
+<!-- This shows on the page in title font -->
+<!-- the icon only shows when installed -->
+<media type="image" mime="image/png" src="figures/icon.png">[icon]</media>
+<app>Ulauncher</app> Help
+</title>
+
+<p>This is an example guide page. It's main function is to link together the help topics.</p>
+
+<!-- This is the visible index -->
+<section id="contents" style="2column">
+<!-- other pages needs to have a link to index#contents for this to work -->
+<title>Contents</title>
+</section>
+
+<note>
+  <!-- delete this note -->
+  <p>
+    Your script or application looks better if it has help files similar to other applications in ubuntu.
+  </p>
+  <p>
+    Some people think that help files are only for apps that are difficult to use.
+  </p>
+</note>
+
+</page>

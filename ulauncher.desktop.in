@@ -1,0 +1,8 @@
+[Desktop Entry]
+_Name=Ulauncher
+_Comment=Ulauncher application
+Categories=GNOME;Utility;
+Exec=ulauncher
+Icon=ulauncher
+Terminal=false
+Type=Application
