@@ -32,6 +32,7 @@ class UlauncherWindow(Window):
         if self.visual is not None and self.screen.is_composited():
             self.set_visual(self.visual)
 
+        self.bindkeys()
 
     def apply_css(self, widget, provider):
         Gtk.StyleContext.add_provider(widget.get_style_context(),
@@ -40,3 +41,18 @@ class UlauncherWindow(Window):
 
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css, provider)
+
+    def cb_hotkeys(self, key):
+        if self.is_visible():
+            self.hide()
+        else:
+            self.show()
+
+    def bindkeys(self):
+        try:
+            from gi.repository import Keybinder
+            print "Trying to bind hotkeys."
+            Keybinder.init()
+            Keybinder.bind("<Ctrl>space", self.cb_hotkeys)
+        except ImportError:
+            print "Unable to import Keybinder, hotkeys not available."
