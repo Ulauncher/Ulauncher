@@ -27,7 +27,7 @@ def main():
     'constructor for your class instances'
     parse_options()
 
-    # Run the application.    
+    # Run the application.
     window = UlauncherWindow.UlauncherWindow()
     window.show()
     Gtk.main()

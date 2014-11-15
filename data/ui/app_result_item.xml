@@ -1,0 +1,7 @@
+<glade-catalog name="app_result_item" domain="glade-3"
+               depends="gtk+" version="1.0">
+  <glade-widget-classes>
+    <glade-widget-class title="App Result Item" name="AppResultItem"
+                        generic-name="AppResultItem" parent="GtkFrame"/>
+  </glade-widget-classes>
+</glade-catalog>

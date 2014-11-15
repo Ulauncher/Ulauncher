@@ -5,29 +5,61 @@
   <!-- interface-requires ulauncher_window 1.0 -->
   <!-- interface-local-resource-path ../media -->
   <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="width_request">600</property>
+    <property name="width_request">500</property>
     <property name="can_focus">False</property>
+    <property name="has_focus">True</property>
     <property name="title" translatable="yes">uLauncher</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="icon">../media/ulauncher.svg</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <property name="urgency_hint">True</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
-    <property name="gravity">center</property>
     <property name="has_resize_grip">False</property>
     <child>
-      <object class="GtkEntry" id="input">
+      <object class="GtkBox" id="box2">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
-        <style>
-          <class name="input"/>
-        </style>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkEntry" id="input">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <style>
+              <class name="input"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="result_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="orientation">vertical</property>
+            <style>
+              <class name="result-box"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+kill $(ps aux | grep 'ulauncher' | grep -v grep | awk '{print $2}')
+
+quickly run -- --verbose

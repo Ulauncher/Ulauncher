@@ -8,7 +8,7 @@
 """this dialog adjusts values in gsettings
 """
 
-from gi.repository import Gtk # pylint: disable=E0611
+from gi.repository import Gtk  # pylint: disable=E0611
 import logging
 logger = logging.getLogger('ulauncher_lib')
 
