@@ -1,4 +1,7 @@
+import logging
 from gi.repository import Gtk, GdkPixbuf
+
+logger = logging.getLogger(__name__)
 
 
 class ResultItem(Gtk.Frame):
@@ -32,8 +35,9 @@ class ResultItem(Gtk.Frame):
         iconWgt = self.builder.get_object('item-icon')
         if isinstance(icon, str):
             try:
-                iconWgt.set_from_pixbuf(load_icon(icon))
-            except:
+                iconWgt.set_from_pixbuf(self.load_icon(icon))
+            except Exception as e:
+                logger.debug('Failed to load icon from file %s -> %s', icon, e)
                 self.set_default_icon()
         elif isinstance(icon, GdkPixbuf.Pixbuf):
             iconWgt.set_from_pixbuf(icon)

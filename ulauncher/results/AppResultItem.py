@@ -23,6 +23,8 @@ class AppResultItem(ResultItem):
     def run(self):
         """
         Return True if launcher window needs to be hidden
+
+        TODO: exclude launched app logs from ulauncher output
         """
         if not self.metadata['desktop_file']:
             return
