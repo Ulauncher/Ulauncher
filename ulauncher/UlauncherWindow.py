@@ -123,23 +123,27 @@ class UlauncherWindow(Window):
         else:
             self.result_box.set_margin_bottom(0)
 
-    KEY_UP = 111
-    KEY_DOWN = 116
-    KEY_ENTER = 36
-    KEY_NUM_ENTER = 104
-    KEY_ESC = 9
-
     def on_key_press_event(self, widget, event):
-        keycode = event.get_keycode()[1]
+        keyval = event.get_keyval()
+        keyname = Gdk.keyval_name(keyval[1])
+        alt = event.state & Gdk.ModifierType.MOD1_MASK
 
         if self.results_nav:
-            if keycode == self.KEY_UP:
+            if keyname == 'Up':
                 self.results_nav.go_up()
-            elif keycode == self.KEY_DOWN:
+            elif keyname == 'Down':
                 self.results_nav.go_down()
-            elif keycode in (self.KEY_ENTER, self.KEY_NUM_ENTER):
+            elif keyname in ('Return', 'KP_Enter'):
                 if self.results_nav.enter():
                     self.hide()
+            elif alt and keyname.isdigit() and 0 < int(keyname) < 10:
+                # on Alt+<num>
+                try:
+                    if self.results_nav.enter(int(keyname) - 1):
+                        self.hide()
+                except IndexError:
+                    # selected non-existing result item
+                    pass
 
-        if keycode == self.KEY_ESC:
+        if keyname == 'Escape':
             self.hide()

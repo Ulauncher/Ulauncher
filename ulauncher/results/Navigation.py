@@ -30,6 +30,15 @@ class Navigation(object):
         index = self.selected + 1 if self.selected is not None and self.selected < self.items_num else 0
         self.select(index)
 
-    def enter(self):
-        if self.selected is not None:
+    def enter(self, index=None):
+        """
+        Enter into selected item, unless 'index' is passed
+        """
+        if index:
+            if not (0 < index < self.items_num):
+                raise IndexError
+
+            self.select(index)
+            return self.enter()
+        elif self.selected is not None:
             return self.items[self.selected].run()
