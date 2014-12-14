@@ -126,6 +126,7 @@ class UlauncherWindow(Window):
     KEY_UP = 111
     KEY_DOWN = 116
     KEY_ENTER = 36
+    KEY_NUM_ENTER = 104
     KEY_ESC = 9
 
     def on_key_press_event(self, widget, event):
@@ -136,7 +137,7 @@ class UlauncherWindow(Window):
                 self.results_nav.go_up()
             elif keycode == self.KEY_DOWN:
                 self.results_nav.go_down()
-            elif keycode == self.KEY_ENTER:
+            elif keycode in (self.KEY_ENTER, self.KEY_NUM_ENTER):
                 if self.results_nav.enter():
                     self.hide()
 
