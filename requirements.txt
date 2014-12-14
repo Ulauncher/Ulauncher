@@ -1,3 +1,0 @@
-python-Levenshtein
-fuzzywuzzy
-Keybinder
