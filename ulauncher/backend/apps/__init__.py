@@ -89,7 +89,7 @@ def start_sync():
     Add all known .desktop files to DB and start watchdog
     """
 
-    desktop_dirs = filter(os.path.exists, DESKTOP_DIRS)
+    desktop_dirs = filter(os.path.exists, map(os.path.expanduser, DESKTOP_DIRS))
 
     map(_add_app, find_apps(desktop_dirs))
 
