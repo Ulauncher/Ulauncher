@@ -8,7 +8,7 @@ from . AppResultItem import AppResultItem
 from gi.repository import Gtk, Gio
 
 
-icon_theme = Gtk.IconTheme()
+icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +30,9 @@ def find_apps(text):
         if isinstance(icon, Gio.ThemedIcon):
             try:
                 icon_name = icon.get_names()[0]
-                r['icon'] = icon_theme.load_icon(icon_name, AppResultItem.ICON_SIZE, Gtk.IconLookupFlags.FORCE_SIZE)
+                r['icon'] = icon_theme.lookup_icon(icon_name,
+                                                   AppResultItem.ICON_SIZE,
+                                                   Gtk.IconLookupFlags.FORCE_SIZE).load_icon()
             except Exception as e:
                 logger.debug('Could not load icon for %s -> %s', r['desktop_file'], e)
         elif isinstance(icon, Gio.FileIcon):
