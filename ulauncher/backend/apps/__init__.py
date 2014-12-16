@@ -95,7 +95,7 @@ def start_sync():
 
     event_handler = AppEventHandler()
     observer = Observer()
-    map(lambda path: observer.schedule(event_handler, os.path.expanduser(path), recursive=False), desktop_dirs)
+    map(lambda path: observer.schedule(event_handler, path, recursive=False), desktop_dirs)
     observer.start()
 
     return observer
