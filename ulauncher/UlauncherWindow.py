@@ -9,6 +9,7 @@ import threading
 from gi.repository import Gtk, Gdk, Keybinder
 
 from ulauncher_lib import Window
+from ulauncher_lib.Display import display
 from ulauncher.AboutUlauncherDialog import AboutUlauncherDialog
 from ulauncher.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 from . results import find_results_for_input
@@ -53,7 +54,13 @@ class UlauncherWindow(Window):
 
     def position_window(self):
         window_width = self.get_size()[0]
-        self.move(Gdk.Screen.width() / 2 - window_width / 2, Gdk.Screen.height() / 3)
+        current_screen = display.get_current_screen_geometry()
+
+        # The topmost pixel of the window should be at 1/4 of the current screen's height
+        # Window should be positioned in the center horizontally
+        # Also, add offset x and y, in order to move window to the current screen
+        self.move(current_screen['width'] / 2 - window_width / 2 + current_screen['x'],
+                  current_screen['height'] / 4 + current_screen['y'])
 
     def init_styles(self):
         self.provider = Gtk.CssProvider()
