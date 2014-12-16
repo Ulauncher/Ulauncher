@@ -89,11 +89,13 @@ def start_sync():
     Add all known .desktop files to DB and start watchdog
     """
 
-    map(_add_app, find_apps(DESKTOP_DIRS))
+    desktop_dirs = filter(os.path.exists, map(os.path.expanduser, DESKTOP_DIRS))
+
+    map(_add_app, find_apps(desktop_dirs))
 
     event_handler = AppEventHandler()
     observer = Observer()
-    map(lambda path: observer.schedule(event_handler, os.path.expanduser(path), recursive=False), DESKTOP_DIRS)
+    map(lambda path: observer.schedule(event_handler, path, recursive=False), desktop_dirs)
     observer.start()
 
     return observer
