@@ -7,8 +7,6 @@
   <object class="AppResultItem" id="item-frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="label_xalign">0</property>
-    <property name="shadow_type">none</property>
     <child>
       <object class="GtkBox" id="item-container">
         <property name="visible">True</property>

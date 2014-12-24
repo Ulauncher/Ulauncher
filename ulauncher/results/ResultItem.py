@@ -4,16 +4,28 @@ from gi.repository import Gtk, GdkPixbuf
 logger = logging.getLogger(__name__)
 
 
-class ResultItem(Gtk.Frame):
+class ResultItem(Gtk.EventBox):
     __gtype_name__ = "ResultItem"
     ICON_SIZE = 40
+
+    index = None
+    builder = None
 
     @classmethod
     def load_icon(cls, image_src):
         return GdkPixbuf.Pixbuf.new_from_file_at_size(image_src, cls.ICON_SIZE, cls.ICON_SIZE)
 
+    def set_index(self, index):
+        self.index = index
+
     def set_builder(self, builder):
+
         self.builder = builder
+
+        item_frame = self.builder.get_object('item-frame')
+        item_frame.connect("button-press-event", self.on_click)
+        item_frame.connect("enter_notify_event", self.on_mouse_hover)
+        item_frame.connect("leave_notify_event", self.on_mouse_leave)
 
     def select(self):
         return self.get_style_context().add_class('selected')
@@ -45,7 +57,17 @@ class ResultItem(Gtk.Frame):
             self.set_default_icon()
 
     def set_name(self, name):
+
         self.builder.get_object('item-name').set_text(name)
+
+    def on_click(self, widget, event):
+        self.get_toplevel().select_item(self.index)
+
+    def on_mouse_hover(self, widget, event):
+        return self.get_style_context().add_class('hover')
+
+    def on_mouse_leave(self, widget, event):
+        return self.get_style_context().remove_class('hover')
 
     def set_description(self, description):
         if description:
