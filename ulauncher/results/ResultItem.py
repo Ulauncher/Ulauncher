@@ -25,7 +25,6 @@ class ResultItem(Gtk.EventBox):
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-press-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
-        item_frame.connect("leave_notify_event", self.on_mouse_leave)
 
     def select(self):
         return self.get_style_context().add_class('selected')
@@ -62,12 +61,10 @@ class ResultItem(Gtk.EventBox):
 
     def on_click(self, widget, event):
         self.get_toplevel().select_item(self.index)
+        self.get_toplevel().open_item()
 
     def on_mouse_hover(self, widget, event):
-        return self.get_style_context().add_class('hover')
-
-    def on_mouse_leave(self, widget, event):
-        return self.get_style_context().remove_class('hover')
+        self.get_toplevel().select_item(self.index)
 
     def set_description(self, description):
         if description:

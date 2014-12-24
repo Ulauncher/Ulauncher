@@ -20,9 +20,6 @@ GtkWindow {
 .item-frame.selected {
     background-color: #6F6D65;
 }
-.item-frame.hover {
-    background-color: #8C8B88;
-}
 
 .item-text {
     color: rgba(230, 230, 230, 0.7);

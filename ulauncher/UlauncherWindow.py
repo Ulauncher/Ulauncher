@@ -118,6 +118,8 @@ class UlauncherWindow(Window):
 
     def select_item(self, index):
         self.results_nav.select(index)
+
+    def open_item(self):
         self.results_nav.enter()
 
     def on_results(self, results):
