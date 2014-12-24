@@ -23,7 +23,7 @@ class ResultItem(Gtk.EventBox):
         self.builder = builder
 
         item_frame = self.builder.get_object('item-frame')
-        item_frame.connect("button-press-event", self.on_click)
+        item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
 
     def select(self):
@@ -60,11 +60,11 @@ class ResultItem(Gtk.EventBox):
         self.builder.get_object('item-name').set_text(name)
 
     def on_click(self, widget, event):
-        self.get_toplevel().select_item(self.index)
-        self.get_toplevel().open_item()
+        self.get_toplevel().select_result_item(self.index)
+        self.get_toplevel().enter_result_item()
 
     def on_mouse_hover(self, widget, event):
-        self.get_toplevel().select_item(self.index)
+        self.get_toplevel().select_result_item(self.index)
 
     def set_description(self, description):
         if description:

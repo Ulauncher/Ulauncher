@@ -116,10 +116,10 @@ class UlauncherWindow(Window):
         else:
             self.on_results([])
 
-    def select_item(self, index):
+    def select_result_item(self, index):
         self.results_nav.select(index)
 
-    def open_item(self):
+    def enter_result_item(self):
         self.results_nav.enter()
 
     def on_results(self, results):
