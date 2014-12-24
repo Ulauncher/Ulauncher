@@ -34,3 +34,6 @@ GtkWindow {
     font-family: "Ubuntu Mono", monospace;
     padding: 5px;
 }
+.selected .item-shortcut {
+    padding: 15px;
+}
