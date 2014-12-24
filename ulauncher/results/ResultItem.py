@@ -1,3 +1,5 @@
+# -*- Mode: Python; coding: utf-8;
+
 import logging
 from gi.repository import Gtk, GdkPixbuf
 
@@ -7,6 +9,7 @@ logger = logging.getLogger(__name__)
 class ResultItem(Gtk.EventBox):
     __gtype_name__ = "ResultItem"
     ICON_SIZE = 40
+    shortcut = None
 
     index = None
     builder = None
@@ -17,6 +20,8 @@ class ResultItem(Gtk.EventBox):
 
     def set_index(self, index):
         self.index = index
+        self.shortcut = 'Alt+%s' % (index + 1)
+        self.set_shortcut(self.shortcut)
 
     def set_builder(self, builder):
 
@@ -27,10 +32,12 @@ class ResultItem(Gtk.EventBox):
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
 
     def select(self):
-        return self.get_style_context().add_class('selected')
+        self.set_shortcut('⏎')
+        self.get_style_context().add_class('selected')
 
     def deselect(self):
-        return self.get_style_context().remove_class('selected')
+        self.set_shortcut(self.shortcut)
+        self.get_style_context().remove_class('selected')
 
     def set_default_icon(self):
         """
@@ -72,8 +79,8 @@ class ResultItem(Gtk.EventBox):
         else:
             self.builder.get_object('item-descr').destroy()
 
-    def set_shortcut(self, shortcut_num):
-        self.builder.get_object('item-shortcut').set_text('Alt+' + str(shortcut_num))
+    def set_shortcut(self, text):
+        return self.builder.get_object('item-shortcut').set_text(text)
 
     def set_metadata(self, metadata):
         self.metadata = metadata
