@@ -24,6 +24,7 @@ def two_row_items(ui_file):
 
                 item_frame.set_icon(item['icon'])
                 item_frame.set_name(item['name'])
+                item_frame.set_index(i)
                 item_frame.set_description(item['description'])
                 item_frame.set_shortcut(i + 1)
                 item_frame.set_metadata(item)

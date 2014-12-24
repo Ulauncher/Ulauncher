@@ -116,6 +116,12 @@ class UlauncherWindow(Window):
         else:
             self.on_results([])
 
+    def select_result_item(self, index):
+        self.results_nav.select(index)
+
+    def enter_result_item(self):
+        self.results_nav.enter()
+
     def on_results(self, results):
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
