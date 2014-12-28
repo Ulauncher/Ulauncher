@@ -6,7 +6,7 @@ class Navigation(object):
 
     def __init__(self, items):
         """
-        :param [Gtk.Widget] items:
+        :param [ResultItem] items:
         """
         self.items = items
         self.items_num = len(items)
@@ -41,4 +41,4 @@ class Navigation(object):
             self.select(index)
             return self.enter()
         elif self.selected is not None:
-            return self.items[self.selected].run()
+            return self.items[self.selected].enter()

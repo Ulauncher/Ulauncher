@@ -85,7 +85,7 @@ class ResultItem(Gtk.EventBox):
     def set_metadata(self, metadata):
         self.metadata = metadata
 
-    def run(self):
+    def enter(self):
         """
         Should be implemented in derived classes
         Return True if launcher window needs to be hidden
