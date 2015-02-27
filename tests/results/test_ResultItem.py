@@ -16,7 +16,6 @@ class TestResultItem(object):
 
     @pytest.fixture
     def builder(self):
-        # builder.get_object.return_value = mock.MagicMock()
         return mock.MagicMock()
 
     @pytest.fixture
