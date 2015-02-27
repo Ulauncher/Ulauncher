@@ -1,0 +1,10 @@
+#!/bin/bash
+
+testCmd="PYTHONPATH=`pwd` py.test --pep8"
+
+if [ $# -eq 0 ]
+    then
+eval "$testCmd tests"
+else
+eval "$testCmd $1"
+fi
