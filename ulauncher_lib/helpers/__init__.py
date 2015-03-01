@@ -12,6 +12,7 @@ import os
 from ulauncher_lib.ulauncherconfig import get_data_file
 from ulauncher_lib.Builder import Builder
 
+from .lru_cache import lru_cache
 from locale import gettext as _
 
 

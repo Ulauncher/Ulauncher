@@ -1,5 +1,6 @@
 from ulauncher_lib.ulauncherconfig import get_data_file
-from . ResultItem import ResultItem
+from .ResultItem import ResultItem
+from .IconLoader import load_image
 from ulauncher.backend.apps.desktop_reader import read_desktop_file
 
 
@@ -15,7 +16,7 @@ class AppResultItem(ResultItem):
 
     __gtype_name__ = "AppResultItem"
     ICON_SIZE = 40
-    default_app_icon = ResultItem.load_icon(get_data_file('media', 'default_app_icon.png'))
+    default_app_icon = load_image(get_data_file('media', 'default_app_icon.png'), ICON_SIZE)
 
     def set_default_icon(self):
         self.builder.get_object('item-icon').set_from_pixbuf(self.default_app_icon)
