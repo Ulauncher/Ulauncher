@@ -20,7 +20,7 @@ class AppResultItem(ResultItem):
     def set_default_icon(self):
         self.builder.get_object('item-icon').set_from_pixbuf(self.default_app_icon)
 
-    def run(self):
+    def enter(self):
         """
         Return True if launcher window needs to be hidden
 

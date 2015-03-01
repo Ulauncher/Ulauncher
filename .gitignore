@@ -2,3 +2,6 @@
 **/*.pyc
 **/*~
 **/*#
+.cache
+ulauncherc
+*.egg-info

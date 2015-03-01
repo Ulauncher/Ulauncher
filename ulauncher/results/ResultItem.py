@@ -19,11 +19,17 @@ class ResultItem(Gtk.EventBox):
         return GdkPixbuf.Pixbuf.new_from_file_at_size(image_src, cls.ICON_SIZE, cls.ICON_SIZE)
 
     def set_index(self, index):
+        """
+        Set index for the item and assign shortcut
+        """
         self.index = index
         self.shortcut = 'Alt+%s' % (index + 1)
         self.set_shortcut(self.shortcut)
 
     def set_builder(self, builder):
+        """
+        :param Gtk.Builder builder:
+        """
 
         self.builder = builder
 
@@ -47,8 +53,7 @@ class ResultItem(Gtk.EventBox):
 
     def set_icon(self, icon):
         """
-        Icon can be either a string - path to file
-        or a PixBuf object
+        Icon can be either a string (path to file) or a PixBuf object
         """
         iconWgt = self.builder.get_object('item-icon')
         if isinstance(icon, str):
@@ -63,7 +68,6 @@ class ResultItem(Gtk.EventBox):
             self.set_default_icon()
 
     def set_name(self, name):
-
         self.builder.get_object('item-name').set_text(name)
 
     def on_click(self, widget, event):
@@ -85,7 +89,7 @@ class ResultItem(Gtk.EventBox):
     def set_metadata(self, metadata):
         self.metadata = metadata
 
-    def run(self):
+    def enter(self):
         """
         Should be implemented in derived classes
         Return True if launcher window needs to be hidden

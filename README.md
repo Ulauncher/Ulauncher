@@ -1,3 +1,6 @@
+Ulauncher
+=========
+
 # TODO before release v1.0
 
 * unit tests
@@ -9,3 +12,12 @@
 * pack resources
 * find a UI designer
 * release
+
+Run tests
+=========
+
+`./test`
+
+or
+
+`./test path/to/testFile.py`
