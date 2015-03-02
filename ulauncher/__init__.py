@@ -13,7 +13,8 @@ import dbus.service
 from gi.repository import Gtk  # pylint: disable=E0611
 from dbus.mainloop.glib import DBusGMainLoop
 
-from ulauncher import UlauncherWindow, Indicator
+from ulauncher import UlauncherWindow
+from ulauncher.Indicator import Indicator
 from ulauncher_lib import set_up_logging, get_version
 from ulauncher_lib.ulauncherconfig import get_data_file
 
@@ -57,13 +58,8 @@ def main():
         UlauncherDbusService(window)
         window.show()
 
-        indicator = Indicator.Indicator("ulauncher")
-        indicator.set_icon(get_data_file('media', 'default_app_icon.png'))
-        indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
-        indicator.add_menu_item(window.on_mnu_about_activate, "About")
-        indicator.add_seperator()
-        indicator.add_menu_item(Gtk.main_quit, "Exit")
-        indicator.show_menu()
+        indicator = Indicator.create("ulauncher", window)
+        indicator.show()
 
         Gtk.main()
 

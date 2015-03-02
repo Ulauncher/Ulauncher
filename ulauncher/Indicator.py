@@ -1,12 +1,23 @@
 import logging
 
-from gi.repository import Gtk
-from gi.repository import AppIndicator3
+from gi.repository import Gtk, AppIndicator3
+from ulauncher_lib.ulauncherconfig import get_data_file
 
 logger = logging.getLogger(__name__)
 
 
 class Indicator:
+
+    @classmethod
+    def create(cls, iconname, window):
+        indicator = cls(iconname)
+        indicator.set_icon(get_data_file('media', 'default_app_icon.png'))
+        indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
+        indicator.add_menu_item(window.on_mnu_about_activate, "About")
+        indicator.add_seperator()
+        indicator.add_menu_item(Gtk.main_quit, "Exit")
+        return indicator
+
     def __init__(self, iconname):
 
         self.__menu = Gtk.Menu()
@@ -32,7 +43,7 @@ class Indicator:
         menu_item = Gtk.SeparatorMenuItem()
         self.__menu.append(menu_item)
 
-    def show_menu(self):
+    def show(self):
         self.__menu.show_all()
 
     def get_tray_menu(self):
