@@ -58,6 +58,8 @@ def main():
         UlauncherDbusService(window)
         window.show()
 
+        # for some mysterious reasons, indicator initialization doesn't work
+        # if you call Indicator.create(...).show() or if you put this code anywhere else
         indicator = Indicator.create("ulauncher", window)
         indicator.show()
 
