@@ -54,19 +54,6 @@ class Window(Gtk.Window):
         self.settings = Gio.Settings("net.launchpad.ulauncher")
         self.settings.connect('changed', self.on_preferences_changed)
 
-        # Optional application indicator support
-        # Run 'quickly add indicator' to get started.
-        # More information:
-        #  http://owaislone.org/quickly-add-indicator/
-        #  https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
-        try:
-            from ulauncher import indicator
-            # self is passed so methods of this class can be called from indicator.py
-            # Comment this next line out to disable appindicator
-            self.indicator = indicator.new_application_indicator(self)
-        except ImportError:
-            pass
-
     def on_mnu_contents_activate(self, widget, data=None):
         show_uri(self, "ghelp:%s" % get_help_uri())
 

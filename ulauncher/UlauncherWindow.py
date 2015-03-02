@@ -4,7 +4,6 @@
 ### END LICENSE
 
 import logging
-import datetime
 import threading
 from gi.repository import Gtk, Gdk, Keybinder
 
@@ -79,7 +78,7 @@ class UlauncherWindow(Window):
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css, provider)
 
-    def on_focus_out_event(self, *args):
+    def on_focus_out_event(self, widget, event):
         # apparently Gtk doesn't provide a mechanism to tell if window is in focus
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
