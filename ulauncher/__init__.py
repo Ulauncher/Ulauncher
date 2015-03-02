@@ -16,7 +16,6 @@ from dbus.mainloop.glib import DBusGMainLoop
 from ulauncher import UlauncherWindow
 from ulauncher.Indicator import Indicator
 from ulauncher_lib import set_up_logging, get_version
-from ulauncher_lib.ulauncherconfig import get_data_file
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'

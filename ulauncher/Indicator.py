@@ -54,6 +54,6 @@ class Indicator:
         self.get_tray_menu()
 
         def pos(menu, aicon):
-            return (Gtk.StatusIcon.position_menu(menu, aicon))
+            return Gtk.StatusIcon.position_menu(menu, aicon)
 
         self.__menu.popup(None, None, pos, icon, button, time)
