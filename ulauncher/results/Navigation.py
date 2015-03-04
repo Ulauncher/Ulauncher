@@ -12,6 +12,17 @@ class Navigation(object):
         self.items_num = len(items)
         self.selected = None
 
+    def get_selected_index(self):
+        return self.selected
+
+    def get_selected_desktop_file(self):
+        index = self.get_selected_index()
+        return self.items[index].get_desktop_file_path()
+
+    def get_index_by_desktop_file(self, path):
+
+        return next((index for index, item in enumerate(self.items) if item.get_desktop_file_path() == path), None)
+
     def select(self, index):
         if not (0 < index < self.items_num):
             index = 0

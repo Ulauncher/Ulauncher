@@ -1,6 +1,5 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
-
 import logging
 import threading
 from gi.repository import Gtk, Gdk, Keybinder
@@ -12,6 +11,7 @@ from ulauncher.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 from . results import find_results_for_input
 from . results.Navigation import Navigation
 from . backend.apps import start_sync
+from .backend.user_queries import db as db_user_queries
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,9 @@ class UlauncherWindow(Window):
         self.results_nav.select(index)
 
     def enter_result_item(self):
-        self.results_nav.enter()
+        if self.results_nav.enter():
+            self.hide()
+            self.save_user_query()
 
     def on_results(self, results):
         self.results_nav = None
@@ -128,7 +130,15 @@ class UlauncherWindow(Window):
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.results_nav = Navigation(self.result_box.get_children())
-            self.results_nav.select(0)
+
+            selected_index = 0
+            desktop_file = db_user_queries.find(self.input.get_text())
+            if desktop_file:
+
+                #try to get index of item by desktop file
+                selected_index = self.results_nav.get_index_by_desktop_file(desktop_file) or 0
+
+            self.results_nav.select(selected_index)
             self.apply_css(self.result_box, self.provider)
         else:
             self.result_box.set_margin_bottom(0)
@@ -146,6 +156,7 @@ class UlauncherWindow(Window):
             elif keyname in ('Return', 'KP_Enter'):
                 if self.results_nav.enter():
                     self.hide()
+                    self.save_user_query()
             elif alt and keyname.isdigit() and 0 < int(keyname) < 10:
                 # on Alt+<num>
                 try:
@@ -157,3 +168,11 @@ class UlauncherWindow(Window):
 
         if keyname == 'Escape':
             self.hide()
+
+    def save_user_query(self):
+
+        desktop_file_path = self.results_nav.get_selected_desktop_file()
+        if desktop_file_path:
+
+            db_user_queries.put(self.input.get_text(), desktop_file_path)
+            db_user_queries.commit()

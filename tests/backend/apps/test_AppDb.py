@@ -54,6 +54,6 @@ class TestAppDb(object):
     def test_remove(self, app_db):
         app_db.put({'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})
         app_db.put({'name': 'james', 'description': 'test', 'desktop_file': 'james.desktop', 'icon': 'icon'})
-        assert app_db.records.get('james')
+        assert app_db.get_records().get('james')
         app_db.remove('james')
-        assert not app_db.records.get('james')
+        assert not app_db.get_records().get('james')

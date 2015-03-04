@@ -15,6 +15,7 @@ class ResultItem(Gtk.EventBox):
 
     index = None
     builder = None
+    name = None
     __is_destroyed = False
 
     def set_index(self, index):
@@ -69,6 +70,10 @@ class ResultItem(Gtk.EventBox):
 
     def set_name(self, name):
         self.builder.get_object('item-name').set_text(name)
+        self.name = name
+
+    def get_name(self):
+        return self.name
 
     def on_click(self, widget, event):
         self.get_toplevel().select_result_item(self.index)
@@ -91,6 +96,10 @@ class ResultItem(Gtk.EventBox):
 
     def set_metadata(self, metadata):
         self.metadata = metadata
+
+    def get_desktop_file_path(self):
+
+        return self.metadata.get('desktop_file')
 
     def enter(self):
         """

@@ -1,4 +1,3 @@
-import threading
 import logging
 import sys
 import os
@@ -6,10 +5,10 @@ import time
 from watchdog.observers import Observer
 from watchdog import events
 from xdg.BaseDirectory import xdg_config_home
-from AppDb import AppDb
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
+from .AppDb import AppDb
 
-__all__ = ['db', 'find', 'start_sync']
+__all__ = ['db', 'dbQueries', 'find', 'start_sync']
 
 logger = logging.getLogger(__name__)
 db = AppDb(os.path.join(xdg_config_home, 'ulauncher', 'applist.db'))
