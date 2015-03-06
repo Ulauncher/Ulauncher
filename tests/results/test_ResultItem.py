@@ -22,12 +22,6 @@ class TestResultItem(object):
     def pixbuf(self):
         return mock.Mock(spec=GdkPixbuf.Pixbuf)
 
-    @pytest.fixture
-    def mock_load_icon(self, pixbuf, result_item, mocker):
-        mock_load_icon = mocker.patch.object(result_item, 'load_icon')
-        mock_load_icon.return_value = pixbuf
-        return mock_load_icon
-
     def test_set_index(self, result_item, mocker):
         mock_set_shortcut = mocker.patch.object(result_item, 'set_shortcut')
 
@@ -50,23 +44,13 @@ class TestResultItem(object):
         mock_set_shortcut.assert_called_once_with(result_item.shortcut)
         mock_get_style_context.return_value.remove_class.assert_called_once_with('selected')
 
-    def test_set_icon_called_with_path(self, result_item, builder, mock_load_icon, pixbuf):
+    def test_set_icon(self, result_item, builder, mocker, pixbuf):
         iconWgt = mock.MagicMock()
         builder.get_object.return_value = iconWgt
-
-        result_item.set_icon('path')
-        builder.get_object.assert_called_with('item-icon')
-        mock_load_icon.assert_called_once_with('path')
-        iconWgt.set_from_pixbuf.assert_called_once_with(pixbuf)
-
-    def test_set_icon_called_with_pixbuf(self, result_item, builder, mock_load_icon, pixbuf):
-        iconWgt = mock.MagicMock()
-        builder.get_object.return_value = iconWgt
+        load_icon = mocker.patch('ulauncher.results.ResultItem.load_icon')
 
         result_item.set_icon(pixbuf)
-        builder.get_object.assert_called_with('item-icon')
-        assert not mock_load_icon.called
-        iconWgt.set_from_pixbuf.assert_called_once_with(pixbuf)
+        load_icon.assert_called_with(pixbuf, result_item.ICON_SIZE, mock.ANY)
 
     def test_set_name(self, result_item, builder):
         result_item.set_name('test name')
