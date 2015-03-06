@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-### BEGIN LICENSE
-# This file is in the public domain
-### END LICENSE
 
-###################### DO NOT TOUCH THIS (HEAD TO THE SECOND PART) ######################
+# DO NOT TOUCH THIS (HEAD TO THE SECOND PART)
 
 import os
 import sys
@@ -16,7 +13,8 @@ except ImportError:
     sys.exit(1)
 assert DistUtilsExtra.auto.__version__ >= '2.18', 'needs DistUtilsExtra.auto >= 2.18'
 
-def update_config(libdir, values = {}):
+
+def update_config(libdir, values={}):
 
     filename = os.path.join(libdir, 'ulauncher_lib/ulauncherconfig.py')
     oldvalues = {}
@@ -25,7 +23,7 @@ def update_config(libdir, values = {}):
         fout = file(filename + '.new', 'w')
 
         for line in fin:
-            fields = line.split(' = ') # Separate variable from value
+            fields = line.split(' = ')  # Separate variable from value
             if fields[0] in values:
                 oldvalues[fields[0]] = fields[1].strip()
                 line = "%s = %s\n" % (fields[0], values[fields[0]])
@@ -69,6 +67,7 @@ def move_desktop_file(root, target_data, prefix):
 
     return desktop_file
 
+
 def update_desktop_file(filename, target_pkgdata, target_scripts):
 
     try:
@@ -92,6 +91,7 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
     except (OSError, IOError), e:
         print ("ERROR: Can't find %s" % filename)
         sys.exit(1)
+
 
 def compile_schemas(root, target_data):
     if target_data == '/usr/':
@@ -118,20 +118,17 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
         update_desktop_file(desktop_file, target_pkgdata, target_scripts)
         compile_schemas(self.root, target_data)
 
-        
-##################################################################################
-###################### YOU SHOULD MODIFY ONLY WHAT IS BELOW ######################
-##################################################################################
+
+# YOU SHOULD MODIFY ONLY WHAT IS BELOW
 
 DistUtilsExtra.auto.setup(
     name='ulauncher',
     version='0.1',
-    #license='GPL-3',
-    #author='Your Name',
-    #author_email='email@ubuntu.com',
-    #description='UI for managing …',
-    #long_description='Here a longer description',
-    #url='https://launchpad.net/ulauncher',
+    license='GPL-3',
+    author='Aleksandr Gornostal',
+    author_email='sanya.gornostal@gmail.com',
+    # description='UI for managing …',
+    # long_description='Here a longer description',
+    # url='https://launchpad.net/ulauncher',
     cmdclass={'install': InstallAndUpdateDataDirectory}
-    )
-
+)
