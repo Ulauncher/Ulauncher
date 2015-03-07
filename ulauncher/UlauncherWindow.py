@@ -135,7 +135,7 @@ class UlauncherWindow(Window):
             desktop_file = db_user_queries.find(self.input.get_text())
             if desktop_file:
 
-                #try to get index of item by desktop file
+                # try to get index of item by desktop file
                 selected_index = self.results_nav.get_index_by_desktop_file(desktop_file) or 0
 
             self.results_nav.select(selected_index)
