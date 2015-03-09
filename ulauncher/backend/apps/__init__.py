@@ -6,12 +6,14 @@ from watchdog.observers import Observer
 from watchdog import events
 from xdg.BaseDirectory import xdg_config_home
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
-from .AppDb import AppDb
+from gi.repository import Gtk
+from .AppDb import AppDb as ApplicationDb  # to be able to mock AppDb deps. in unit tests
+from ulauncher_lib.helpers import run_async
 
-__all__ = ['db', 'dbQueries', 'find', 'start_sync']
+__all__ = ['db', 'find', 'start_sync']
 
 logger = logging.getLogger(__name__)
-db = AppDb(os.path.join(xdg_config_home, 'ulauncher', 'applist.db'))
+db = ApplicationDb(os.path.join(xdg_config_home, 'ulauncher', 'applist.db'))
 
 
 def find(*args, **kw):
@@ -25,83 +27,72 @@ def find(*args, **kw):
     return db.find(*args, **kw)
 
 
-def _add_app(app):
-    """
-    Add app to DB
-    :param Gio.DesktopAppInfo app:
-    """
-    db.put({"desktop_file": app.get_filename(),
-            "name": app.get_name(),
-            "description": app.get_description(),
-            "icon": app.get_string('Icon')})
-
-
-def _is_desktop_file(src_path):
-    """
-    Return True if file has .desktop extension
-    """
-    return os.path.splitext(src_path)[1] == '.desktop'
-
-
-def _remove_file(src_path):
-    """
-    Remove .desktop file from DB
-    :param str src_path:
-    """
-    db.remove(src_path)
-
-
-def _add_file(src_path):
-    """
-    Add .desktop file to DB
-    """
-    try:
-        app = read_desktop_file(src_path)
-        if filter_app(app):
-            _add_app(app)
-    except:
-        logger.warning('Cannot add %s to DB -> %s', app.get_filename(), e)
-
-
 class AppEventHandler(events.FileSystemEventHandler):
+    def __init__(self, db):
+        super(AppEventHandler, self).__init__()
+        self.__db = db
+
+    def _add_file(self, src_path):
+        """
+        Add .desktop file to DB
+        """
+        try:
+            app = read_desktop_file(src_path)
+            if filter_app(app):
+                self.__db.put_app(app)
+        except Exception as e:
+            logger.warning('Cannot add %s to DB -> %s' % (src_path, e))
+
+    def _is_desktop_file(self, src_path):
+        """
+        Return True if file has .desktop extension
+        """
+        return os.path.splitext(src_path)[1] == '.desktop'
+
+    def _remove_file(self, src_path):
+        """
+        Remove .desktop file from DB
+        :param str src_path:
+        """
+        self.__db.remove(src_path)
+
     def on_created(self, event):
-        if isinstance(event, events.FileCreatedEvent) and _is_desktop_file(event.src_path):
-            _add_file(event.src_path)
+        if isinstance(event, events.FileCreatedEvent) and self._is_desktop_file(event.src_path):
+            self._add_file(event.src_path)
 
     def on_deleted(self, event):
-        if isinstance(event, events.FileDeletedEvent) and _is_desktop_file(event.src_path):
-            _remove_file(event.src_path)
+        if isinstance(event, events.FileDeletedEvent) and self._is_desktop_file(event.src_path):
+            self._remove_file(event.src_path)
 
     def on_modified(self, event):
-        if isinstance(event, events.FileModifiedEvent) and _is_desktop_file(event.src_path):
-            _add_file(event.src_path)
+        if isinstance(event, events.FileModifiedEvent) and self._is_desktop_file(event.src_path):
+            self._add_file(event.src_path)
 
     def on_moved(self, event):
-        if isinstance(event, events.FileMovedEvent) and _is_desktop_file(event.src_path):
-            _remove_file(event.src_path)
-        if isinstance(event, events.FileMovedEvent) and _is_desktop_file(event.dest_path):
-            _add_file(event.dest_path)
+        if isinstance(event, events.FileMovedEvent) and self._is_desktop_file(event.src_path):
+            self._remove_file(event.src_path)
+        if isinstance(event, events.FileMovedEvent) and self._is_desktop_file(event.dest_path):
+            self._add_file(event.dest_path)
 
 
+@run_async
 def start_sync():
     """
-    Add all known .desktop files to DB and start watchdog
+    Add all known .desktop files to the DB and start watchdog
     """
 
-    desktop_dirs = filter(os.path.exists, map(os.path.expanduser, DESKTOP_DIRS))
+    added_apps = map(lambda app: db.put_app(app), find_apps())
+    logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
 
-    map(_add_app, find_apps(desktop_dirs))
-
-    event_handler = AppEventHandler()
+    event_handler = AppEventHandler(db)
     observer = Observer()
-    map(lambda path: observer.schedule(event_handler, path, recursive=False), desktop_dirs)
+    map(lambda path: observer.schedule(event_handler, path, recursive=True), DESKTOP_DIRS)
     observer.start()
-
-    return observer
 
 
 if __name__ == "__main__":
-    observer = start_sync(*sys.argv[1:])
+    thread = start_sync(*sys.argv[1:])
+    thread.join()
     try:
         while True:
             time.sleep(1)

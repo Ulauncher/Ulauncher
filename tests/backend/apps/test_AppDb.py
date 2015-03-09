@@ -7,37 +7,39 @@ from ulauncher.backend.apps.AppDb import AppDb
 class TestAppDb(object):
 
     @pytest.fixture
-    def db_name(self, tmpdir):
-        return os.path.join(str(tmpdir), 'testdb')
-
-    @pytest.fixture
-    def app_db(self, db_name):
-        return AppDb(db_name).open()
+    def app_db(self):
+        return AppDb('test')
 
     @pytest.fixture
     def db_with_data(self, app_db):
-        app_db.put({'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})
-        app_db.put({'name': 'james', 'description': 'test', 'desktop_file': 'james.desktop', 'icon': 'icon'})
-        app_db.put({'name': 'o.jody', 'description': 'test', 'desktop_file': 'o.jdy.desktop', 'icon': 'icon'})
-        app_db.put({'name': 'sandy', 'description': 'test', 'desktop_file': 'sandy.desktop', 'icon': 'icon'})
-        app_db.put({'name': 'sane', 'description': 'test', 'desktop_file': 'jane.desktop', 'icon': 'icon'})
+        app_db.put('john.desktop', {'name': 'john', 'description': 'test',
+                   'desktop_file': 'john.desktop', 'icon': 'icon'})
+        app_db.put('james.desktop', {'name': 'james', 'description': 'test',
+                   'desktop_file': 'james.desktop', 'icon': 'icon'})
+        app_db.put('o.jody.desktop', {'name': 'o.jody', 'description': 'test',
+                   'desktop_file': 'o.jdy.desktop', 'icon': 'icon'})
+        app_db.put('sandy.desktop', {'name': 'sandy', 'description': 'test',
+                   'desktop_file': 'sandy.desktop', 'icon': 'icon'})
+        app_db.put('sane.desktop', {'name': 'sane', 'description': 'test',
+                   'desktop_file': 'jane.desktop', 'icon': 'icon'})
         return app_db
 
-    def test_open_raises_ioerror(self):
-        """It raises IOError if 'name' is a directory"""
+    @pytest.fixture(autouse=True)
+    def get_app_icon_pixbuf(self, mocker):
+        return mocker.patch('ulauncher.backend.apps.AppDb.get_app_icon_pixbuf')
 
-        with pytest.raises(IOError):
-            AppDb('/tmp').open()
+    def test_put_app(self, app_db, get_app_icon_pixbuf, mocker):
+        app = mock.MagicMock()
+        put = mocker.patch.object(app_db, 'put')
 
-    def test_commit(self, db_name):
-        """It saves changes to disk"""
+        app_db.put_app(app)
 
-        db = AppDb(db_name).open()
-        db.put({"desktop_file": "test_commit", "name": "hello"})
-        db.commit()
-
-        db = AppDb(db_name).open()
-        db.find('hello')[0]['desktop_file'] == 'test_commit'
+        put.assert_called_with(app.get_name.return_value, pytest.DictHasValus({
+            "desktop_file": app.get_filename.return_value,
+            "name": app.get_name.return_value,
+            "description": app.get_description.return_value,
+            "icon": get_app_icon_pixbuf.return_value
+        }))
 
     def test_find_max_results(self, db_with_data):
         """It returns no more than limit"""
@@ -50,10 +52,3 @@ class TestAppDb(object):
 
         len(db_with_data.find('jo', min_score=50)) == 2
         len(db_with_data.find('jo', min_score=92)) == 0
-
-    def test_remove(self, app_db):
-        app_db.put({'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})
-        app_db.put({'name': 'james', 'description': 'test', 'desktop_file': 'james.desktop', 'icon': 'icon'})
-        assert app_db.get_records().get('james')
-        app_db.remove('james')
-        assert not app_db.get_records().get('james')

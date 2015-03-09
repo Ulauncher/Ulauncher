@@ -44,13 +44,18 @@ class TestResultItem(object):
         mock_set_shortcut.assert_called_once_with(result_item.shortcut)
         mock_get_style_context.return_value.remove_class.assert_called_once_with('selected')
 
-    def test_set_icon(self, result_item, builder, mocker, pixbuf):
+    def test_set_icon(self, result_item, builder, pixbuf):
         iconWgt = mock.MagicMock()
         builder.get_object.return_value = iconWgt
-        load_icon = mocker.patch('ulauncher.results.ResultItem.load_icon')
 
         result_item.set_icon(pixbuf)
-        load_icon.assert_called_with(pixbuf, result_item.ICON_SIZE, mock.ANY)
+        iconWgt.set_from_pixbuf.assert_called_with(pixbuf)
+
+    def test_set_icon_default(self, result_item, mocker):
+        set_default_icon = mocker.patch.object(result_item, 'set_default_icon')
+
+        result_item.set_icon(None)
+        set_default_icon.assert_called_with()
 
     def test_set_name(self, result_item, builder):
         result_item.set_name('test name')

@@ -9,8 +9,10 @@ import os
 
 from ulauncher_lib.ulauncherconfig import get_data_file
 from ulauncher_lib.Builder import Builder
+from gi.repository import GdkPixbuf
 
 from .lru_cache import lru_cache
+from .run_async import run_async
 from locale import gettext as _
 
 
@@ -103,3 +105,11 @@ def alias(alternative_function_name):
         function.aliases.append(alternative_function_name)
         return function
     return decorator
+
+
+@lru_cache(maxsize=50)
+def load_image(path, size):
+    """
+    Return Pixbuf instance
+    """
+    return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
