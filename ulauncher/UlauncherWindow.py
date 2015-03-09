@@ -8,7 +8,8 @@ from ulauncher_lib import Window
 from ulauncher_lib.Display import display
 from ulauncher.AboutUlauncherDialog import AboutUlauncherDialog
 from ulauncher.PreferencesUlauncherDialog import PreferencesUlauncherDialog
-from . results import find_results_for_input
+from . results.AppResultItem import AppResultItem  # this import is needed for Gtk to find AppResultItem class
+from . results import find_apps
 from . results.Navigation import Navigation
 from . backend.apps import start_sync
 from .backend.user_queries import db as db_user_queries
@@ -108,10 +109,7 @@ class UlauncherWindow(Window):
         Triggered by user input
         """
         query = entry.get_text()
-        if query:
-            find_results_for_input(query, self.on_results)
-        else:
-            self.on_results([])
+        self.on_results(find_apps(query))
 
     def select_result_item(self, index):
         self.results_nav.select(index)
@@ -124,7 +122,7 @@ class UlauncherWindow(Window):
     def on_results(self, results):
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
-        results = list(results)
+        results = list(results)  # generator -> list
         if results:
             map(self.result_box.add, results)
             self.result_box.show_all()

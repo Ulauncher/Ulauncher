@@ -1,8 +1,7 @@
 # -*- Mode: Python; coding: utf-8;
 
 import logging
-from gi.repository import Gtk, GdkPixbuf
-from .IconLoader import load_icon, get_loading_placeholder
+from gi.repository import Gtk
 
 
 logger = logging.getLogger(__name__)
@@ -10,13 +9,11 @@ logger = logging.getLogger(__name__)
 
 class ResultItem(Gtk.EventBox):
     __gtype_name__ = "ResultItem"
-    ICON_SIZE = 40
     shortcut = None
 
     index = None
     builder = None
     name = None
-    __is_destroyed = False
 
     def set_index(self, index):
         """
@@ -36,7 +33,6 @@ class ResultItem(Gtk.EventBox):
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
-        item_frame.connect("destroy", self.on_destroy)
 
     def select(self):
         self.set_shortcut('⏎')
@@ -54,19 +50,10 @@ class ResultItem(Gtk.EventBox):
 
     def set_icon(self, icon):
         """
-        Icon can be either a string (path to file) or a PixBuf object
+        Icon can be either a PixBuf instance or None (the default is used)
         """
-
-        def on_icon_loaded(icon):
-            if self.__is_destroyed:
-                return
-            iconWgt.set_from_pixbuf(icon) if icon else self.set_default_icon()
-
         iconWgt = self.builder.get_object('item-icon')
-        is_ready = load_icon(icon, self.ICON_SIZE, on_icon_loaded)
-
-        if not is_ready:
-            iconWgt.set_from_pixbuf(get_loading_placeholder(self.ICON_SIZE))
+        iconWgt.set_from_pixbuf(icon) if icon else self.set_default_icon()
 
     def set_name(self, name):
         self.builder.get_object('item-name').set_text(name)
@@ -78,9 +65,6 @@ class ResultItem(Gtk.EventBox):
     def on_click(self, widget, event):
         self.get_toplevel().select_result_item(self.index)
         self.get_toplevel().enter_result_item()
-
-    def on_destroy(self, event):
-        self.__is_destroyed = True
 
     def on_mouse_hover(self, widget, event):
         self.get_toplevel().select_result_item(self.index)

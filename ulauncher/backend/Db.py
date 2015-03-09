@@ -4,6 +4,10 @@ from distutils.dir_util import mkpath
 
 
 class Db(object):
+    """
+    Key-value in-memory database
+    Use open() method to load DB from a file and commit() to save it
+    """
 
     _name = None
     _records = None
@@ -51,3 +55,9 @@ class Db(object):
 
     def get_records(self):
         return self._records
+
+    def put(self, key, value):
+        self._records[key] = value
+
+    def find(self, key):
+        return self._records.get(key)
