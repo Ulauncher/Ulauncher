@@ -22,6 +22,10 @@ class TestAppDb(object):
                    'desktop_file': 'sandy.desktop', 'icon': 'icon'})
         app_db.put('sane.desktop', {'name': 'sane', 'description': 'test',
                    'desktop_file': 'jane.desktop', 'icon': 'icon'})
+        app_db.put('libre.calc', {'name': 'LibreOffice Calc', 'description': 'test',
+                   'desktop_file': 'libre.calc', 'icon': 'icon'})
+        app_db.put('calc', {'name': 'Calc', 'description': 'test',
+                   'desktop_file': 'calc', 'icon': 'icon'})
         return app_db
 
     @pytest.fixture(autouse=True)
@@ -50,5 +54,10 @@ class TestAppDb(object):
     def test_find_filters_by_min_score(self, db_with_data):
         """It returns matches only if score > min_score"""
 
-        len(db_with_data.find('jo', min_score=50)) == 2
-        len(db_with_data.find('jo', min_score=92)) == 0
+        assert len(db_with_data.find('jo', min_score=50)) == 2
+        assert len(db_with_data.find('jo', min_score=92)) == 0
+
+    def test_find_scrores_higher_items_start_with_query(self, db_with_data):
+        results = db_with_data.find('cal')
+        assert results[0]['desktop_file'] == 'calc'
+        assert results[1]['desktop_file'] == 'libre.calc'

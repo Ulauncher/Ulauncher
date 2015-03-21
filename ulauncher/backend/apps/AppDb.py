@@ -24,8 +24,22 @@ class AppDb(Db):
         :param int min_score: min score for search results [0..100]
         """
         return map(lambda i: i[0],
-                   process.extractBests(name,
-                                        self.get_records().values(),
-                                        processor=lambda i: i['name'],
-                                        limit=limit,
-                                        score_cutoff=min_score))
+                   fixScores(name, process.extractBests(name,
+                                                        self.get_records().values(),
+                                                        processor=lambda i: i['name'],
+                                                        limit=limit,
+                                                        score_cutoff=min_score)))
+
+
+def fixScores(text, items):
+    """
+    fuzzywuzzy's extractBests sometimes doesn't give a higher score to an entry that starts with a query text
+    This function fixes that by adding 100 to a score for those entries
+
+    :param list items: e.g., [({'name':'office calc'}, 90), ({'name':'calc'}, 86), ({'name':'something'}, 0)]
+
+    """
+    text = text.lower()
+    return sorted(map(lambda i: (i[0], i[1] + 100) if i[0]['name'].lower().startswith(text) else i, items),
+                  key=lambda i: i[1],
+                  reverse=True)
