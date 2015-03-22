@@ -113,3 +113,13 @@ def load_image(path, size):
     Return Pixbuf instance
     """
     return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
+
+
+def recursive_search(rootdir='.', suffix=''):
+    """
+    Search files recursively in rootdir
+    """
+    suffix = suffix.lower()
+    return [os.path.join(looproot, filename)
+            for looproot, _, filenames in os.walk(rootdir)
+            for filename in filenames if filename.lower().endswith(suffix)]

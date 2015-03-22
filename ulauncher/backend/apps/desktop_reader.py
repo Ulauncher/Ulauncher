@@ -2,6 +2,7 @@ import os
 from glob import glob
 from itertools import chain
 from gi.repository import Gio
+from ulauncher_lib.helpers import recursive_search
 
 
 DESKTOP_DIRS = filter(os.path.exists, map(os.path.expanduser, [
@@ -20,7 +21,7 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     TODO: search recursively
     """
     return chain.from_iterable(
-        map(lambda f: os.path.join(f_path, f), glob(f_path + '/*.desktop')) for f_path in dirs)
+        map(lambda f: os.path.join(f_path, f), recursive_search(f_path, '.desktop')) for f_path in dirs)
 
 
 def filter_app(app):
