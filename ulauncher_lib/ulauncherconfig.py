@@ -6,6 +6,7 @@ __all__ = [
     'project_path_not_found',
     'get_data_file',
     'get_data_path',
+    'SETTINGS_FILE_PATH'
 ]
 
 # Where your project will look for your data (for instance, images and ui
@@ -17,6 +18,9 @@ __version__ = 'VERSION'
 import os
 
 from locale import gettext as _
+from xdg.BaseDirectory import xdg_config_home
+
+SETTINGS_FILE_PATH = os.path.join(xdg_config_home, 'ulauncher', 'settings.json')
 
 
 class project_path_not_found(Exception):

@@ -13,12 +13,14 @@ from . results import find_apps
 from . results.Navigation import Navigation
 from . backend.apps import start_sync
 from .backend.user_queries import db as db_user_queries
+from service_locator import getSettings
 
 logger = logging.getLogger(__name__)
 
 
 class UlauncherWindow(Window):
     __gtype_name__ = "UlauncherWindow"
+    __current_accel_name = None
 
     def get_widget(self, id):
         """
@@ -36,9 +38,11 @@ class UlauncherWindow(Window):
         self.builder = builder
         self.window = self.get_widget('ulauncher_window')
         self.input = self.get_widget('input')
+        self.prefs_btn = self.get_widget('prefs_btn')
         self.result_box = builder.get_object("result_box")
 
         self.input.connect('changed', self.on_input_changed)
+        self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
 
         self.set_keep_above(True)
 
@@ -47,8 +51,9 @@ class UlauncherWindow(Window):
 
         self.position_window()
         self.init_styles()
-        self.bind_keys()
+        self.bind_show_app_hotkey(getSettings().get_property('hotkey-show-app'))
         start_sync()
+        Keybinder.init()
 
     def position_window(self):
         window_width = self.get_size()[0]
@@ -99,10 +104,17 @@ class UlauncherWindow(Window):
     def cb_toggle_visibility(self, key):
         self.hide() if self.is_visible() else self.show_window()
 
-    def bind_keys(self):
-        logger.info("Trying to bind hotkeys")
-        Keybinder.init()
-        Keybinder.bind("<Ctrl>space", self.cb_toggle_visibility)
+    def bind_show_app_hotkey(self, accel_name):
+        if self.__current_accel_name == accel_name:
+            return
+
+        if self.__current_accel_name:
+            Keybinder.unbind(self.__current_accel_name)
+            self.__current_accel_name = None
+
+        logger.info("Trying to bind app hotkey: %s" % accel_name)
+        Keybinder.bind(accel_name, self.cb_toggle_visibility)
+        self.__current_accel_name = accel_name
 
     def on_input_changed(self, entry):
         """

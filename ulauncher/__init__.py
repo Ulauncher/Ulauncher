@@ -11,9 +11,9 @@ import dbus.service
 from gi.repository import Gtk  # pylint: disable=E0611
 from dbus.mainloop.glib import DBusGMainLoop
 
-from ulauncher import UlauncherWindow
 from ulauncher.Indicator import Indicator
 from ulauncher_lib import set_up_logging, get_version
+from .service_locator import getUlauncherWindow, getIndicator, getSettings
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
@@ -51,14 +51,12 @@ def main():
     else:
 
         logger.debug("Starting a new instance...")
-        window = UlauncherWindow.UlauncherWindow()
+        window = getUlauncherWindow()
         UlauncherDbusService(window)
         window.show()
 
-        # for some mysterious reasons, indicator initialization doesn't work
-        # if you call Indicator.create(...).show() or if you put this code anywhere else
-        indicator = Indicator.create("ulauncher", window)
-        indicator.show()
+        if getSettings().get_property('show-indicator-icon'):
+            getIndicator().show()
 
         Gtk.main()
 
