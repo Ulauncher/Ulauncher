@@ -1,14 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires about_ulauncher_dialog 1.0 -->
   <!-- interface-requires gtk+ 3.0 -->
   <object class="AboutUlauncherDialog" id="about_ulauncher_dialog">
-    <property name="can_focus">False</property>
+    <property name="license" translatable="yes"># Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
+# 
+# Contributors:
+# Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;
+# 
+# This program is free software: you can redistribute it and/or modify it 
+# under the terms of the GNU General Public License version 3, as published 
+# by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful, but 
+# WITHOUT ANY WARRANTY; without even the implied warranties of 
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+# PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along 
+# with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+</property><property name="copyright" translatable="yes">Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;</property><property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="icon">../media/ulauncher.svg</property>
     <property name="type_hint">normal</property>
     <property name="program_name">Ulauncher</property>
-    <property name="authors"></property>
+    <property name="authors">Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
+
+Contributors:
+Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;
+</property>
     <property name="logo">../media/ulauncher.svg</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">

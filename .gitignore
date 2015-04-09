@@ -5,3 +5,4 @@
 .cache
 ulauncherc
 *.egg-info
+build

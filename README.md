@@ -1,29 +1,15 @@
 Ulauncher
 =========
 
-# TODO before release v1.0
-
-* unit tests
-* search in Google, etc.
-* preferences
-* open files and directories
-* test on other Linux distributions
-* performance testing on HDD
-* pack resources
-* find a UI designer
-* release
+`./run`
 
 Run tests
 =========
 
-`./test`
-
-or
-
-`./test path/to/testFile.py`
+`./test [file_path]`
 
 
 License
 =======
 
-See the [LICENSE](LICENSE) file for license rights and limitations (GNU GPL v3.0).
+See the [COPYING](COPYING) file for license rights and limitations (GNU GPL v3.0).

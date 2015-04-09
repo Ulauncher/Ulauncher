@@ -6,7 +6,7 @@ from gi.repository import Gio, Gtk  # pylint: disable=E0611
 import logging
 logger = logging.getLogger('ulauncher_lib')
 
-from . helpers import get_builder, show_uri, get_help_uri
+from . helpers import get_builder
 
 
 # This class is meant to be subclassed by UlauncherWindow.  It provides
@@ -49,8 +49,6 @@ class Window(Gtk.Window):
         self.preferences_dialog = None  # instance
         self.AboutDialog = None  # class
 
-    def on_mnu_contents_activate(self, widget, data=None):
-        show_uri(self, "ghelp:%s" % get_help_uri())
 
     def on_mnu_about_activate(self, widget, data=None):
         """Display the about box for ulauncher."""
