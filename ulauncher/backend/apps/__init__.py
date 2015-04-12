@@ -4,16 +4,15 @@ import os
 import time
 from watchdog.observers import Observer
 from watchdog import events
-from xdg.BaseDirectory import xdg_config_home
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
 from gi.repository import Gtk
 from .AppDb import AppDb as ApplicationDb  # to be able to mock AppDb deps. in unit tests
-from ulauncher_lib.helpers import run_async
+from ulauncher_lib.helpers import run_async, get_config_dir
 
 __all__ = ['db', 'find', 'start_sync']
 
 logger = logging.getLogger(__name__)
-db = ApplicationDb(os.path.join(xdg_config_home, 'ulauncher', 'applist.db'))
+db = ApplicationDb(os.path.join(get_config_dir(), 'applist.db'))
 
 
 def find(*args, **kw):

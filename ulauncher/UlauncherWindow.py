@@ -6,6 +6,7 @@ from gi.repository import Gtk, Gdk, Keybinder
 
 from ulauncher_lib import Window
 from ulauncher_lib.Display import display
+from ulauncher_lib.ulauncherconfig import get_data_file
 from ulauncher.AboutUlauncherDialog import AboutUlauncherDialog
 from ulauncher.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 from . results.AppResultItem import AppResultItem  # this import is needed for Gtk to find AppResultItem class
@@ -67,7 +68,7 @@ class UlauncherWindow(Window):
 
     def init_styles(self):
         self.provider = Gtk.CssProvider()
-        self.provider.load_from_path('data/ui/ulauncher.css')
+        self.provider.load_from_path(get_data_file('ui', 'ulauncher.css'))
         self.apply_css(self, self.provider)
         self.screen = self.get_screen()
         self.visual = self.screen.get_rgba_visual()

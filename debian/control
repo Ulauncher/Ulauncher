@@ -2,10 +2,11 @@ Source: ulauncher
 Section: python
 Priority: extra
 Build-Depends: debhelper (>= 8),
- python (>= 2.6.6-3~),
+ python-all (>= 2.7~),
+ dh-python,
  python-distutils-extra (>= 2.10)
 Maintainer: Aleksandr Gornostal <sanya.gornostal@gmail.com>
-Standards-Version: 3.9.3
+Standards-Version: 3.9.5
 X-Python-Version: >= 2.7
 
 Package: ulauncher
@@ -15,10 +16,12 @@ Depends: ${misc:Depends},
  python-xdg,
  gir1.2-gtk-3.0,
  python-dbus,
- gir1.2-keybinder-3.0,
+ python-levenshtein,
+ libgtk-3-0 (>= 3.10),
+ gir1.2-keybinder-3.0 (>= 0.3),
+ libkeybinder-3.0-0,
  gir1.2-glib-2.0,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-appindicator3-0.1
-Description: Ulauncher provides a convenient and fast way to run your desktop applications
- UNKNOWN
-
+Description: Provides a convenient and fast way to run your desktop applications
+ See https://github.com/gornostal/ulauncher/ for more information

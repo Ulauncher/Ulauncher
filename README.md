@@ -12,4 +12,4 @@ Run tests
 License
 =======
 
-See the [COPYING](COPYING) file for license rights and limitations (GNU GPL v3.0).
+See the [LICENSE](LICENSE) file for license rights and limitations (GNU GPL v3.0).

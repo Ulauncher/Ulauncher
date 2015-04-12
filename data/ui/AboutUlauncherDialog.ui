@@ -3,20 +3,21 @@
   <!-- interface-requires gtk+ 3.0 -->
   <object class="AboutUlauncherDialog" id="about_ulauncher_dialog">
     <property name="license" translatable="yes"># Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
-# 
-# Contributors:
+#
+# Maintainers:
+# Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
 # Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;
-# 
-# This program is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU General Public License version 3, as published 
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 3, as published
 # by the Free Software Foundation.
-# 
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranties of 
-# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranties of
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 # PURPOSE.  See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along 
+#
+# You should have received a copy of the GNU General Public License along
 # with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 </property><property name="copyright" translatable="yes">Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;</property><property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -25,7 +26,8 @@
     <property name="program_name">Ulauncher</property>
     <property name="authors">Copyright (C) 2015 Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
 
-Contributors:
+Maintainers:
+Aleksandr Gornostal &lt;sanya.gornostal@gmail.com&gt;
 Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;
 </property>
     <property name="logo">../media/ulauncher.svg</property>

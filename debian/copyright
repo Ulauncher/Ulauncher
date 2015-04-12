@@ -5,7 +5,6 @@ Source: https://github.com/gornostal/ulauncher
 
 Files: *
 Copyright: (C) 2015 Aleksandr Gornostal <sanya.gornostal@gmail.com>
-Copyright: (C) 2015 Aleksandr Gornostal <sanya.gornostal@gmail.com></property><property name="can_focus">False</property>
 License: GPL-3
  The full text of the GPL is distributed in
  /usr/share/common-licenses/GPL-3 on Debian systems.

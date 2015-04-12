@@ -14,6 +14,8 @@ from gi.repository import GdkPixbuf
 from .lru_cache import lru_cache
 from .run_async import run_async
 from locale import gettext as _
+from xdg.BaseDirectory import xdg_config_home
+from distutils.dir_util import mkpath
 
 
 def get_builder(builder_file_name):
@@ -54,17 +56,21 @@ def set_up_logging(opts):
     null_handler = NullHandler()
     root.addHandler(null_handler)
 
-    formatter = logging.Formatter("%(levelname)s:%(name)s: %(funcName)s() '%(message)s'")
+    formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(funcName)s() '%(message)s'")
 
     logger = logging.getLogger('ulauncher')
     logger_sh = logging.StreamHandler()
     logger_sh.setFormatter(formatter)
     logger.addHandler(logger_sh)
 
+    logger.debug('testing...')
+
     lib_logger = logging.getLogger('ulauncher_lib')
     lib_logger_sh = logging.StreamHandler()
     lib_logger_sh.setFormatter(formatter)
     lib_logger.addHandler(lib_logger_sh)
+
+    logger.setLevel(logging.INFO)
 
     # Set the logging level to show debug messages.
     if opts.verbose:
@@ -72,6 +78,17 @@ def set_up_logging(opts):
         logger.debug('logging enabled')
     if opts.verbose > 1:
         lib_logger.setLevel(logging.DEBUG)
+
+    # set up login to a file
+    log_file = os.path.join(get_config_dir(), 'last.log')
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    lib_logger.addHandler(file_handler)
 
 
 def alias(alternative_function_name):
@@ -83,6 +100,15 @@ def alias(alternative_function_name):
         function.aliases.append(alternative_function_name)
         return function
     return decorator
+
+
+def get_config_dir():
+    config_dir = os.path.join(xdg_config_home, 'ulauncher')
+
+    if not os.path.exists(config_dir):
+        mkpath(config_dir)
+
+    return config_dir
 
 
 @lru_cache(maxsize=50)

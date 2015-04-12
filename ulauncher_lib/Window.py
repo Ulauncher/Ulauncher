@@ -49,7 +49,6 @@ class Window(Gtk.Window):
         self.preferences_dialog = None  # instance
         self.AboutDialog = None  # class
 
-
     def on_mnu_about_activate(self, widget, data=None):
         """Display the about box for ulauncher."""
         if self.AboutDialog is not None:
