@@ -49,9 +49,6 @@ class Window(Gtk.Window):
         self.preferences_dialog = None  # instance
         self.AboutDialog = None  # class
 
-        self.settings = Gio.Settings("net.launchpad.ulauncher")
-        self.settings.connect('changed', self.on_preferences_changed)
-
     def on_mnu_contents_activate(self, widget, data=None):
         show_uri(self, "ghelp:%s" % get_help_uri())
 
@@ -88,9 +85,6 @@ class Window(Gtk.Window):
         """Called when the UlauncherWindow is closed."""
         # Clean up code for saving application state should be added here.
         Gtk.main_quit()
-
-    def on_preferences_changed(self, settings, key, data=None):
-        logger.debug('preference changed: %s = %s' % (key, str(settings.get_value(key))))
 
     def on_preferences_dialog_destroyed(self, widget, data=None):
         '''only affects gui
