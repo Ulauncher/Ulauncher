@@ -26,6 +26,10 @@ class TestAppDb(object):
                    'desktop_file': 'libre.calc', 'icon': 'icon'})
         app_db.put('calc', {'name': 'Calc', 'description': 'test',
                    'desktop_file': 'calc', 'icon': 'icon'})
+        app_db.put('Guake Terminal', {'name': 'Guake Terminal', 'description': 'test',
+                   'desktop_file': 'Guake Terminal', 'icon': 'icon'})
+        app_db.put('Keyboard', {'name': 'Keyboard', 'description': 'test',
+                   'desktop_file': 'Keyboard', 'icon': 'icon'})
         return app_db
 
     @pytest.fixture(autouse=True)
@@ -55,9 +59,18 @@ class TestAppDb(object):
         """It returns matches only if score > min_score"""
 
         assert len(db_with_data.find('jo', min_score=50)) == 2
-        assert len(db_with_data.find('jo', min_score=92)) == 0
+        assert len(db_with_data.find('Jo', min_score=92)) == 1
 
     def test_find_scrores_higher_items_start_with_query(self, db_with_data):
-        results = db_with_data.find('cal')
+        results = db_with_data.find('cal', min_score=90)
+        assert results[0]['desktop_file'] == 'calc'
+        assert results[1]['desktop_file'] == 'libre.calc'
+
+        results = db_with_data.find('ke', min_score=80)
+        assert results[0]['desktop_file'] == 'Keyboard'
+        assert results[1]['desktop_file'] == 'Guake Terminal'
+
+    def test_find_takes_into_account_spaces_in_names(self, db_with_data):
+        results = db_with_data.find('cal', min_score=70)
         assert results[0]['desktop_file'] == 'calc'
         assert results[1]['desktop_file'] == 'libre.calc'
