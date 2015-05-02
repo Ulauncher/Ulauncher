@@ -52,6 +52,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
             app = read_desktop_file(pathname)
             if filter_app(app):
                 self.__db.put_app(app)
+                logger.info('New app was added "%s" (%s)' % (app.get_name(), app.get_filename()))
         except Exception as e:
             logger.warning('Cannot add %s to DB -> %s' % (pathname, e))
 
@@ -61,6 +62,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         :param str pathname:
         """
         self.__db.remove_by_path(pathname)
+        logger.info('App was removed (%s)' % pathname)
 
     @only_desktop_files
     def process_IN_CREATE(self, event):

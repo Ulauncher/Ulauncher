@@ -1,9 +1,12 @@
 import os
+import logging
 from glob import glob
 from itertools import chain
 from gi.repository import Gio
 from ulauncher_lib.helpers import recursive_search
 from ulauncher_lib.ulauncherconfig import CONFIG_DIR
+
+logger = logging.getLogger(__name__)
 
 
 DESKTOP_DIRS = filter(os.path.exists, map(os.path.expanduser, [
@@ -35,11 +38,12 @@ def filter_app(app):
 def read_desktop_file(file):
     """
     :param str file: path to .desktop
-    :return Gio.DesktopAppInfo:
+    :return Gio.DesktopAppInfo|None:
     """
     try:
         return Gio.DesktopAppInfo.new_from_filename(file)
-    except:
+    except Exception as e:
+        logger.warning('Unable to read desktop file "%s": %s' % (file, e))
         return None
 
 
