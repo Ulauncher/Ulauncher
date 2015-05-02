@@ -15,7 +15,20 @@ class AppDb(Db):
             "description": app.get_description(),
             "icon": get_app_icon_pixbuf(app)
         }
+        # use name as a key in order to skip duplicates
         return self.put(record['name'], record)
+
+    def remove_by_path(self, desktop_file):
+        """
+        :desktop_file str: path to a desktop file
+        """
+        records = self.get_records()
+        for key in records.iterkeys():
+            if records[key].get('desktop_file') == desktop_file:
+                del records[key]
+                return True
+
+        return False
 
     def _calculate_score(self, query, rec_name):
         """

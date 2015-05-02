@@ -7,14 +7,13 @@
 import logging
 import os
 
-from ulauncher_lib.ulauncherconfig import get_data_file
+from ulauncher_lib.ulauncherconfig import get_data_file, CACHE_DIR
 from ulauncher_lib.Builder import Builder
 from gi.repository import GdkPixbuf
 
 from .lru_cache import lru_cache
 from .run_async import run_async
 from locale import gettext as _
-from xdg.BaseDirectory import xdg_config_home
 from distutils.dir_util import mkpath
 
 
@@ -80,7 +79,7 @@ def set_up_logging(opts):
         lib_logger.setLevel(logging.DEBUG)
 
     # set up login to a file
-    log_file = os.path.join(get_config_dir(), 'last.log')
+    log_file = os.path.join(CACHE_DIR, 'last.log')
     if os.path.exists(log_file):
         os.remove(log_file)
 
@@ -100,15 +99,6 @@ def alias(alternative_function_name):
         function.aliases.append(alternative_function_name)
         return function
     return decorator
-
-
-def get_config_dir():
-    config_dir = os.path.join(xdg_config_home, 'ulauncher')
-
-    if not os.path.exists(config_dir):
-        mkpath(config_dir)
-
-    return config_dir
 
 
 @lru_cache(maxsize=50)

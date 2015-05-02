@@ -3,10 +3,11 @@ from glob import glob
 from itertools import chain
 from gi.repository import Gio
 from ulauncher_lib.helpers import recursive_search
+from ulauncher_lib.ulauncherconfig import CONFIG_DIR
 
 
 DESKTOP_DIRS = filter(os.path.exists, map(os.path.expanduser, [
-    '~/.config/ulauncher/apps',  # ulauncher specific apps
+    os.path.join(CONFIG_DIR, 'apps'),  # ulauncher specific apps
     '/usr/local/share/applications',
     '/usr/share/applications',
     '~/.local/share/applications'
@@ -17,8 +18,6 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     """
     :param list dirs:
     :return list:
-
-    TODO: search recursively
     """
     return chain.from_iterable(
         map(lambda f: os.path.join(f_path, f), recursive_search(f_path, '.desktop')) for f_path in dirs)

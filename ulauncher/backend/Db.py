@@ -42,13 +42,13 @@ class Db(object):
 
         return self
 
-    def remove(self, desktop_file):
+    def remove(self, key):
         """
-        :param str desktop_file:
+        :param str key:
         :return bool: True if record was removed
         """
         try:
-            del self._records[desktop_file]
+            del self._records[key]
             return True
         except KeyError:
             return False

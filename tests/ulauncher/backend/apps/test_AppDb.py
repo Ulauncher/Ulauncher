@@ -20,7 +20,7 @@ class TestAppDb(object):
                    'desktop_file': 'o.jdy.desktop', 'icon': 'icon'})
         app_db.put('sandy.desktop', {'name': 'sandy', 'description': 'test',
                    'desktop_file': 'sandy.desktop', 'icon': 'icon'})
-        app_db.put('sane.desktop', {'name': 'sane', 'description': 'test',
+        app_db.put('jane.desktop', {'name': 'jane', 'description': 'test',
                    'desktop_file': 'jane.desktop', 'icon': 'icon'})
         app_db.put('libre.calc', {'name': 'LibreOffice Calc', 'description': 'test',
                    'desktop_file': 'libre.calc', 'icon': 'icon'})
@@ -35,6 +35,11 @@ class TestAppDb(object):
     @pytest.fixture(autouse=True)
     def get_app_icon_pixbuf(self, mocker):
         return mocker.patch('ulauncher.backend.apps.AppDb.get_app_icon_pixbuf')
+
+    def test_remove_by_path(self, db_with_data):
+        assert db_with_data.get_records().get('jane.desktop')
+        assert db_with_data.remove_by_path('jane.desktop')
+        assert not db_with_data.get_records().get('jane.desktop')
 
     def test_put_app(self, app_db, get_app_icon_pixbuf, mocker):
         app = mock.MagicMock()
