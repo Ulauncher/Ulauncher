@@ -15,6 +15,13 @@ Run tests
 `./test [file_path]`
 
 
+Conventions
+===========
+
+* *Config directory* (`~/.config/ulauncher/apps`) should contain only human-readable config files or other assets
+* *Cache directory* (`~/.cache/ulauncher/apps`) should contain auto-generated files (logs, user query DB, etc.)
+
+
 License
 =======
 
