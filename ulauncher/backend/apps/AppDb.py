@@ -9,13 +9,32 @@ class AppDb(Db):
         """
         :param Gio.DesktopAppInfo app:
         """
+
+        is_plugin = False
+        if app.get_string('Plugin') == 'true':
+            is_plugin = True
+
+        show_no_result = False
+        if app.get_string('ShowNoResult') == 'true':
+            show_no_result = True
+
         record = {
             "desktop_file": app.get_filename(),
             "name": app.get_name(),
             "description": app.get_description(),
-            "icon": get_app_icon_pixbuf(app)
+            "icon": get_app_icon_pixbuf(app),
+            "is_plugin": is_plugin,
+            "show_no_result": show_no_result
         }
+
         return self.put(record['name'], record)
+
+    def get_plugins(self, params):
+
+        if "show_no_result" in params:
+            return filter(lambda x: x.get("is_plugin") is True and x.get("show_no_result") == params["show_no_result"], self.get_records().values())
+
+        return []
 
     def find(self, name, limit=9, min_score=0):
         """

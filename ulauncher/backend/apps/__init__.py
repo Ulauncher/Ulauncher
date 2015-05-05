@@ -27,6 +27,10 @@ def find(*args, **kw):
     return db.find(*args, **kw)
 
 
+def get_plugins(params):
+    return db.get_plugins(params)
+
+
 class AppEventHandler(events.FileSystemEventHandler):
     def __init__(self, db):
         super(AppEventHandler, self).__init__()

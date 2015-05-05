@@ -11,6 +11,10 @@ class Navigation(object):
         self.items = items
         self.items_num = len(items)
         self.selected = None
+        self.query = ''
+
+    def set_query(self, value):
+        self.query = value
 
     def get_selected_index(self):
         return self.selected
@@ -52,4 +56,4 @@ class Navigation(object):
             self.select(index)
             return self.enter()
         elif self.selected is not None:
-            return self.items[self.selected].enter()
+            return self.items[self.selected].enter(self.query)
