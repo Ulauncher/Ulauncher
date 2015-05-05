@@ -27,8 +27,6 @@ class AppResultItem(ResultItem):
     def enter(self, query=''):
         """
         Return True if launcher window needs to be hidden
-
-        TODO: exclude launched app logs from ulauncher output
         """
         desktop_file = self.metadata['desktop_file']
         if not desktop_file:

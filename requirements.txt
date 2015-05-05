@@ -1,4 +1,3 @@
-fuzzywuzzy
 watchdog
 mock
 pytest

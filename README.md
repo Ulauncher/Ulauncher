@@ -1,26 +1,25 @@
+Install Dependencies
+====================
+
+1. `sudo apt-get install python-xdg gir1.2-gtk-3.0 python-dbus python-levenshtein libgtk-3-0 gir1.2-keybinder-3.0 libkeybinder-3.0-0 gir1.2-glib-2.0 gir1.2-gdkpixbuf-2.0 gir1.2-appindicator3-0.1`
+2. `sudo pip install -r requirements.txt`
+
 Ulauncher
 =========
 
-# TODO before release v1.0
-
-* unit tests
-* search in Google, etc.
-* preferences
-* open files and directories
-* test on other Linux distributions
-* performance testing on HDD
-* pack resources
-* find a UI designer
-* release
+`./run`
 
 Run tests
 =========
 
-`./test`
+`./test [file_path]`
 
-or
 
-`./test path/to/testFile.py`
+Conventions
+===========
+
+* *Config directory* (`~/.config/ulauncher/apps`) should contain only human-readable config files or other assets
+* *Cache directory* (`~/.cache/ulauncher/apps`) should contain auto-generated files (logs, user query DB, etc.)
 
 
 License

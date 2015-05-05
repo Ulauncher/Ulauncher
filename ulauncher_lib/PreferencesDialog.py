@@ -6,7 +6,7 @@ from gi.repository import Gtk  # pylint: disable=E0611
 import logging
 logger = logging.getLogger('ulauncher_lib')
 
-from . helpers import get_builder, show_uri, get_help_uri
+from . helpers import get_builder
 
 
 class PreferencesDialog(Gtk.Dialog):

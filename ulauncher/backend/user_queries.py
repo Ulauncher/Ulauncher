@@ -1,8 +1,8 @@
 import os
-from xdg.BaseDirectory import xdg_config_home
+from ulauncher_lib.ulauncherconfig import CACHE_DIR
 from .Db import Db
 
 __all__ = ['db']
 
-db = Db(os.path.join(xdg_config_home, 'ulauncher', 'user_queries.db'))
+db = Db(os.path.join(CACHE_DIR, 'user_queries.db'))
 db.open()

@@ -12,15 +12,17 @@ __all__ = [
 # Where your project will look for your data (for instance, images and ui
 # files). By default, this is ../data, relative your trunk layout
 __ulauncher_data_directory__ = '../data/'
-__license__ = ''
+__license__ = 'GPL-3'
 __version__ = 'VERSION'
 
 import os
 
 from locale import gettext as _
-from xdg.BaseDirectory import xdg_config_home
+from xdg.BaseDirectory import xdg_config_home, xdg_cache_home
 
-SETTINGS_FILE_PATH = os.path.join(xdg_config_home, 'ulauncher', 'settings.json')
+CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
+CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher')
+SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
 
 
 class project_path_not_found(Exception):

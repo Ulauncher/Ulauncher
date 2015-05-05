@@ -2,18 +2,17 @@ import logging
 import sys
 import os
 import time
-from watchdog.observers import Observer
-from watchdog import events
-from xdg.BaseDirectory import xdg_config_home
+import pyinotify
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
 from gi.repository import Gtk
 from .AppDb import AppDb as ApplicationDb  # to be able to mock AppDb deps. in unit tests
 from ulauncher_lib.helpers import run_async
+from ulauncher_lib.ulauncherconfig import CONFIG_DIR, CACHE_DIR
 
 __all__ = ['db', 'find', 'start_sync']
 
 logger = logging.getLogger(__name__)
-db = ApplicationDb(os.path.join(xdg_config_home, 'ulauncher', 'applist.db'))
+db = ApplicationDb(os.path.join(CACHE_DIR, 'applist.db'))
 
 
 def find(*args, **kw):
@@ -27,78 +26,85 @@ def find(*args, **kw):
     return db.find(*args, **kw)
 
 
+def only_desktop_files(fn):
+    """
+    Decorator for pyinotify.ProcessEvent
+    Triggers event handler only for desktop files
+    """
+
+    def decorator_fn(self, event, *args, **kwargs):
+        if os.path.splitext(event.pathname)[1] == '.desktop':
+            return fn(self, event, *args, **kwargs)
+
+    return decorator_fn
+
+
+class InotifyEventHandler(pyinotify.ProcessEvent):
 def get_plugins(params):
     return db.get_plugins(params)
 
 
 class AppEventHandler(events.FileSystemEventHandler):
     def __init__(self, db):
-        super(AppEventHandler, self).__init__()
+        super(InotifyEventHandler, self).__init__()
         self.__db = db
 
-    def _add_file(self, src_path):
+    def _add_file(self, pathname):
         """
         Add .desktop file to DB
         """
         try:
-            app = read_desktop_file(src_path)
+            app = read_desktop_file(pathname)
             if filter_app(app):
                 self.__db.put_app(app)
         except Exception as e:
-            logger.warning('Cannot add %s to DB -> %s' % (src_path, e))
+            logger.warning('Cannot add %s to DB -> %s' % (pathname, e))
 
-    def _is_desktop_file(self, src_path):
-        """
-        Return True if file has .desktop extension
-        """
-        return os.path.splitext(src_path)[1] == '.desktop'
-
-    def _remove_file(self, src_path):
+    def _remove_file(self, pathname):
         """
         Remove .desktop file from DB
-        :param str src_path:
+        :param str pathname:
         """
-        self.__db.remove(src_path)
+        self.__db.remove_by_path(pathname)
 
-    def on_created(self, event):
-        if isinstance(event, events.FileCreatedEvent) and self._is_desktop_file(event.src_path):
-            self._add_file(event.src_path)
+    @only_desktop_files
+    def process_IN_CREATE(self, event):
+        self._add_file(event.pathname)
 
-    def on_deleted(self, event):
-        if isinstance(event, events.FileDeletedEvent) and self._is_desktop_file(event.src_path):
-            self._remove_file(event.src_path)
+    @only_desktop_files
+    def process_IN_DELETE(self, event):
+        self._remove_file(event.pathname)
 
-    def on_modified(self, event):
-        if isinstance(event, events.FileModifiedEvent) and self._is_desktop_file(event.src_path):
-            self._add_file(event.src_path)
+    @only_desktop_files
+    def process_IN_MODIFY(self, event):
+        self._add_file(event.pathname)
 
-    def on_moved(self, event):
-        if isinstance(event, events.FileMovedEvent) and self._is_desktop_file(event.src_path):
-            self._remove_file(event.src_path)
-        if isinstance(event, events.FileMovedEvent) and self._is_desktop_file(event.dest_path):
-            self._add_file(event.dest_path)
+    @only_desktop_files
+    def process_IN_MOVED_FROM(self, event):
+        self._remove_file(event.pathname)
+
+    @only_desktop_files
+    def process_IN_MOVED_TO(self, event):
+        self._add_file(event.pathname)
 
 
 @run_async
 def start_sync():
     """
-    Add all known .desktop files to the DB and start watchdog
+    Add all known .desktop files to the DB and start inotify watcher
     """
 
     added_apps = map(lambda app: db.put_app(app), find_apps())
     logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
 
-    event_handler = AppEventHandler(db)
-    observer = Observer()
-    map(lambda path: observer.schedule(event_handler, path, recursive=True), DESKTOP_DIRS)
-    observer.start()
+    # make sure ~/.config/ulauncher/apps exists
+    apps_path = os.path.join(CONFIG_DIR, 'apps')
+    if not os.path.exists(apps_path):
+        os.makedirs(apps_path)
 
-
-if __name__ == "__main__":
-    thread = start_sync(*sys.argv[1:])
-    thread.join()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        pass
+    wm = pyinotify.WatchManager()
+    handler = InotifyEventHandler(db)
+    notifier = pyinotify.ThreadedNotifier(wm, handler)
+    notifier.setDaemon(True)
+    notifier.start()
+    wm.add_watch(DESKTOP_DIRS, pyinotify.ALL_EVENTS, rec=True, auto_add=True)

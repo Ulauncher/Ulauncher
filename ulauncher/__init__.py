@@ -35,6 +35,7 @@ def main():
     options = parse_options()
     set_up_logging(options)
     logger = logging.getLogger('ulauncher')
+    logger.info('Ulauncher version: %s' % get_version())
 
     # start DBus loop
     DBusGMainLoop(set_as_default=True)

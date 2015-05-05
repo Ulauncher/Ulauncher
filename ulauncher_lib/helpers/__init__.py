@@ -7,13 +7,14 @@
 import logging
 import os
 
-from ulauncher_lib.ulauncherconfig import get_data_file
+from ulauncher_lib.ulauncherconfig import get_data_file, CACHE_DIR
 from ulauncher_lib.Builder import Builder
 from gi.repository import GdkPixbuf
 
 from .lru_cache import lru_cache
 from .run_async import run_async
 from locale import gettext as _
+from distutils.dir_util import mkpath
 
 
 def get_builder(builder_file_name):
@@ -54,17 +55,21 @@ def set_up_logging(opts):
     null_handler = NullHandler()
     root.addHandler(null_handler)
 
-    formatter = logging.Formatter("%(levelname)s:%(name)s: %(funcName)s() '%(message)s'")
+    formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(funcName)s() '%(message)s'")
 
     logger = logging.getLogger('ulauncher')
     logger_sh = logging.StreamHandler()
     logger_sh.setFormatter(formatter)
     logger.addHandler(logger_sh)
 
+    logger.debug('testing...')
+
     lib_logger = logging.getLogger('ulauncher_lib')
     lib_logger_sh = logging.StreamHandler()
     lib_logger_sh.setFormatter(formatter)
     lib_logger.addHandler(lib_logger_sh)
+
+    logger.setLevel(logging.INFO)
 
     # Set the logging level to show debug messages.
     if opts.verbose:
@@ -73,27 +78,16 @@ def set_up_logging(opts):
     if opts.verbose > 1:
         lib_logger.setLevel(logging.DEBUG)
 
+    # set up login to a file
+    log_file = os.path.join(CACHE_DIR, 'last.log')
+    if os.path.exists(log_file):
+        os.remove(log_file)
 
-def get_help_uri(page=None):
-    # help_uri from source tree - default language
-    here = os.path.dirname(__file__)
-    help_uri = os.path.abspath(os.path.join(here, '..', 'help', 'C'))
-
-    if not os.path.exists(help_uri):
-        # installed so use gnome help tree - user's language
-        help_uri = 'ulauncher'
-
-    # unspecified page is the index.page
-    if page is not None:
-        help_uri = '%s#%s' % (help_uri, page)
-
-    return help_uri
-
-
-def show_uri(parent, link):
-    from gi.repository import Gtk  # pylint: disable=E0611
-    screen = parent.get_screen()
-    Gtk.show_uri(screen, link, Gtk.get_current_event_time())
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    lib_logger.addHandler(file_handler)
 
 
 def alias(alternative_function_name):
