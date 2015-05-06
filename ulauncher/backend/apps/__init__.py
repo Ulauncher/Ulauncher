@@ -39,12 +39,11 @@ def only_desktop_files(fn):
     return decorator_fn
 
 
-class InotifyEventHandler(pyinotify.ProcessEvent):
 def get_plugins(params):
     return db.get_plugins(params)
 
 
-class AppEventHandler(events.FileSystemEventHandler):
+class InotifyEventHandler(pyinotify.ProcessEvent):
     def __init__(self, db):
         super(InotifyEventHandler, self).__init__()
         self.__db = db
