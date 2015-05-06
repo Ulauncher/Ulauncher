@@ -1,6 +1,7 @@
 import logging
 
 from gi.repository import Gtk, AppIndicator3
+from ulauncher_lib.ulauncherconfig import get_data_file
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class Indicator(object):
     @classmethod
     def create(cls, iconname, window):
         indicator = cls(iconname)
-        indicator.set_icon('application-default-icon')
+        indicator.set_icon(get_data_file('media', 'indicator-icon.svg'))
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
         indicator.add_menu_item(window.on_mnu_about_activate, "About")
         indicator.add_seperator()
