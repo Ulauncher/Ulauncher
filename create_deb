@@ -1,11 +1,19 @@
 #!/bin/bash
 
+# Run with --bin to create .deb file
+
 export tmpdir="/tmp/ulauncher_deb"
 export tmpsrc="$tmpdir/src"
 rm -rf $tmpdir
 mkdir -p $tmpsrc
 cp -r {AUTHORS,bin,data,debian,LICENSE,README.md,setup.cfg,setup.py,ulauncher,ulauncher.desktop.in,ulauncher_lib} $tmpsrc
 cd $tmpsrc
+
+if [ "$1" = "--bin" ]
+    then
+dpkg-buildpackage -tc -us -sa -k$GPGKEY
+else
 dpkg-buildpackage -tc -S -sa -k$GPGKEY
+fi
 
 echo "RUN: cd $tmpdir"
