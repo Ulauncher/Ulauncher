@@ -3,6 +3,8 @@ import sys
 import os
 import time
 import pyinotify
+from Queue import Queue
+from threading import Event
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
 from gi.repository import Gtk
 from .AppDb import AppDb as ApplicationDb  # to be able to mock AppDb deps. in unit tests
@@ -40,11 +42,46 @@ def only_desktop_files(fn):
 
 
 class InotifyEventHandler(pyinotify.ProcessEvent):
-    def __init__(self, db):
+    __stop_object = object()  # pass to add_file_deffered() in order to terminate the worker thread
+
+    def __init__(self, db, defer_time=0):
         super(InotifyEventHandler, self).__init__()
         self.__db = db
 
-    def _add_file(self, pathname):
+        self._defer_time = defer_time
+        self._file_queue = Queue()
+        self._init_file_queue_worker()
+
+    @run_async
+    def _init_file_queue_worker(self):
+        """
+        Add files to the DB with a delay of {_defer_time} sec,
+        otherwise .desktop file may not be ready while application is being installed
+
+        call self.add_file_deffered(self.__stop_object) in order to terminate the worker thread
+        """
+        while True:
+            (pathname, put_time) = self._file_queue.get(True)
+
+            if pathname is self.__stop_object:
+                return
+
+            time_passed = time.time() - put_time
+            if time_passed < self._defer_time:
+                time.sleep(self._defer_time)
+            try:
+                self._add_file_sync(pathname)
+            except Exception as e:
+                # catch every exception in order to keep while loop going
+                logger.warning("_add_file_sync raised exception: %s" % e)
+
+    def add_file_deffered(self, pathname):
+        """
+        Add .desktop file to DB {_defer_time} seconds later
+        """
+        self._file_queue.put((pathname, time.time()))
+
+    def _add_file_sync(self, pathname):
         """
         Add .desktop file to DB
         """
@@ -66,7 +103,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
 
     @only_desktop_files
     def process_IN_CREATE(self, event):
-        self._add_file(event.pathname)
+        self.add_file_deffered(event.pathname)
 
     @only_desktop_files
     def process_IN_DELETE(self, event):
@@ -74,7 +111,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
 
     @only_desktop_files
     def process_IN_MODIFY(self, event):
-        self._add_file(event.pathname)
+        self.add_file_deffered(event.pathname)
 
     @only_desktop_files
     def process_IN_MOVED_FROM(self, event):
@@ -82,7 +119,13 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
 
     @only_desktop_files
     def process_IN_MOVED_TO(self, event):
-        self._add_file(event.pathname)
+        self.add_file_deffered(event.pathname)
+
+    def stop_workers(self):
+        """
+        Mainly for testing purposes
+        """
+        self.add_file_deffered(self.__stop_object)
 
 
 @run_async
@@ -100,7 +143,7 @@ def start_sync():
         os.makedirs(apps_path)
 
     wm = pyinotify.WatchManager()
-    handler = InotifyEventHandler(db)
+    handler = InotifyEventHandler(db, defer_time=4)  # add apps to the DB 4 seconds later after they were installed
     notifier = pyinotify.ThreadedNotifier(wm, handler)
     notifier.setDaemon(True)
     notifier.start()

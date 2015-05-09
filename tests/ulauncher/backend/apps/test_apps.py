@@ -1,7 +1,7 @@
 import pytest
 import mock
 import pyinotify
-
+from time import sleep
 from ulauncher.backend.apps.AppDb import AppDb
 from ulauncher.backend.apps import InotifyEventHandler
 
@@ -13,8 +13,10 @@ class TestInotifyEventHandler:
         return mock.create_autospec(AppDb)
 
     @pytest.fixture
-    def event_handler(self, db):
-        return InotifyEventHandler(db)
+    def event_handler(self, db, request):
+        event_handler = InotifyEventHandler(db, defer_time=0)
+        request.addfinalizer(event_handler.stop_workers)
+        return event_handler
 
     @pytest.fixture
     def event(self):
@@ -33,8 +35,18 @@ class TestInotifyEventHandler:
         filter_app.return_value = True
         return filter_app
 
+    def test_add_file_deffered(self, db, app, request):
+        "Verify app addition is deferred by a specified time"
+        event_handler = InotifyEventHandler(db, defer_time=.1)
+        event_handler.add_file_deffered('mypath')
+        assert not db.put_app.called
+        sleep(.15)
+        db.put_app.assert_called_with(app)
+        request.addfinalizer(event_handler.stop_workers)
+
     def test_on_created_add_app(self, event_handler, event, db, app):
         event_handler.process_IN_CREATE(event)
+        sleep(.01)
         db.put_app.assert_called_with(app)
 
     def test_on_created_dont_add(self, event_handler, event, db, app):
@@ -56,6 +68,7 @@ class TestInotifyEventHandler:
 
     def test_on_modified(self, event_handler, event, db, app):
         event_handler.process_IN_MODIFY(event)
+        sleep(.01)
         db.put_app.assert_called_with(app)
 
     def test_on_modified_dont_modify(self, event_handler, event, db, app):
@@ -69,4 +82,5 @@ class TestInotifyEventHandler:
 
     def test_on_moved_to(self, event_handler, event, db, app):
         event_handler.process_IN_MOVED_TO(event)
+        sleep(.01)
         db.put_app.assert_called_with(app)
