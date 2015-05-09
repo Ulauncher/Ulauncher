@@ -18,7 +18,7 @@ class AppResultItem(ResultItem):
 
     __gtype_name__ = "AppResultItem"
 
-    default_app_icon = get_themed_icon_by_name('application-default-icon')
+    default_app_icon = get_themed_icon_by_name('image-missing')
 
     def set_default_icon(self):
         self.builder.get_object('item-icon').set_from_pixbuf(self.default_app_icon)
