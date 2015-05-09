@@ -1,4 +1,3 @@
-watchdog
 mock
 pytest
 pytest-pep8
