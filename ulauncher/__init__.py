@@ -2,6 +2,7 @@
 
 
 import sys
+import os
 import optparse
 import logging
 from locale import gettext as _
@@ -13,6 +14,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 from ulauncher.Indicator import Indicator
 from ulauncher_lib import set_up_logging, get_version
+from ulauncher_lib.ulauncherconfig import CACHE_DIR, CONFIG_DIR
 from .service_locator import getUlauncherWindow, getIndicator, getSettings
 
 
@@ -32,6 +34,15 @@ def parse_options():
 
 
 def main():
+    # make sure ~/.config/ulauncher/apps exists
+    apps_path = os.path.join(CONFIG_DIR, 'apps')
+    if not os.path.exists(apps_path):
+        os.makedirs(apps_path)
+
+    # make sure ~/.cache/ulauncher exists
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+
     options = parse_options()
     set_up_logging(options)
     logger = logging.getLogger('ulauncher')

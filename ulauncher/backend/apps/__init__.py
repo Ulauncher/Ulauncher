@@ -9,7 +9,7 @@ from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_ap
 from gi.repository import Gtk
 from .AppDb import AppDb as ApplicationDb  # to be able to mock AppDb deps. in unit tests
 from ulauncher_lib.helpers import run_async
-from ulauncher_lib.ulauncherconfig import CONFIG_DIR, CACHE_DIR
+from ulauncher_lib.ulauncherconfig import CACHE_DIR
 
 __all__ = ['db', 'find', 'start_sync']
 
@@ -136,11 +136,6 @@ def start_sync():
 
     added_apps = map(lambda app: db.put_app(app), find_apps())
     logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
-
-    # make sure ~/.config/ulauncher/apps exists
-    apps_path = os.path.join(CONFIG_DIR, 'apps')
-    if not os.path.exists(apps_path):
-        os.makedirs(apps_path)
 
     wm = pyinotify.WatchManager()
     handler = InotifyEventHandler(db, defer_time=4)  # add apps to the DB 4 seconds later after they were installed
