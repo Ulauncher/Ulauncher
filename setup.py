@@ -117,7 +117,7 @@ DistUtilsExtra.auto.setup(
     license='GPL-3',
     author='Aleksandr Gornostal',
     author_email='sanya.gornostal@gmail.com',
-    description='Ulauncher provides a convenient and fast way to run your desktop applications',
+    description='Ulauncher provides a convenient and fast way to launch your desktop applications',
     url='https://github.com/gornostal/ulauncher',
     cmdclass={'install': InstallAndUpdateDataDirectory}
 )

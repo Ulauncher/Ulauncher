@@ -22,6 +22,8 @@ Depends: ${misc:Depends},
  libkeybinder-3.0-0,
  gir1.2-glib-2.0,
  gir1.2-gdkpixbuf-2.0,
- gir1.2-appindicator3-0.1
-Description: Provides a convenient and fast way to run your desktop applications
- See https://github.com/gornostal/ulauncher/ for more information
+ gir1.2-appindicator3-0.1,
+ python-pyinotify,
+ python-levenshtein
+Description: Provides a convenient and fast way to launch your desktop applications
+ See https://github.com/Ulauncher/Ulauncher/ for more information
