@@ -14,9 +14,7 @@ class TestInotifyEventHandler:
 
     @pytest.fixture
     def event_handler(self, db, request):
-        event_handler = InotifyEventHandler(db, defer_time=0)
-        request.addfinalizer(event_handler.stop_workers)
-        return event_handler
+        return InotifyEventHandler(db, defer_time=0)
 
     @pytest.fixture
     def event(self):
@@ -42,7 +40,6 @@ class TestInotifyEventHandler:
         assert not db.put_app.called
         sleep(.15)
         db.put_app.assert_called_with(app)
-        request.addfinalizer(event_handler.stop_workers)
 
     def test_on_created_add_app(self, event_handler, event, db, app):
         event_handler.process_IN_CREATE(event)

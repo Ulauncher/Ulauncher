@@ -42,8 +42,6 @@ def only_desktop_files(fn):
 
 
 class InotifyEventHandler(pyinotify.ProcessEvent):
-    __stop_object = object()  # pass to add_file_deffered() in order to terminate the worker thread
-
     def __init__(self, db, defer_time=0):
         super(InotifyEventHandler, self).__init__()
         self.__db = db
@@ -57,14 +55,9 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         """
         Add files to the DB with a delay of {_defer_time} sec,
         otherwise .desktop file may not be ready while application is being installed
-
-        call self.add_file_deffered(self.__stop_object) in order to terminate the worker thread
         """
         while True:
             (pathname, put_time) = self._file_queue.get(True)
-
-            if pathname is self.__stop_object:
-                return
 
             time_passed = time.time() - put_time
             if time_passed < self._defer_time:
@@ -120,12 +113,6 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
     @only_desktop_files
     def process_IN_MOVED_TO(self, event):
         self.add_file_deffered(event.pathname)
-
-    def stop_workers(self):
-        """
-        Mainly for testing purposes
-        """
-        self.add_file_deffered(self.__stop_object)
 
 
 @run_async
