@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import pyinotify
+from functools import wraps
 from Queue import Queue
 from threading import Event
 from desktop_reader import DESKTOP_DIRS, find_apps, read_desktop_file, filter_app
@@ -28,22 +29,24 @@ def find(*args, **kw):
     return db.find(*args, **kw)
 
 
-def only_desktop_files(fn):
+def only_desktop_files(func):
     """
     Decorator for pyinotify.ProcessEvent
-    Triggers event handler only for desktop files
+    Triggers event handler only for *.desktop files
     """
 
-    def decorator_fn(self, event, *args, **kwargs):
+    @wraps(func)
+    def decorator_func(self, event, *args, **kwargs):
         if os.path.splitext(event.pathname)[1] == '.desktop':
-            return fn(self, event, *args, **kwargs)
+            return func(self, event, *args, **kwargs)
 
-    return decorator_fn
+    return decorator_func
 
 
 class InotifyEventHandler(pyinotify.ProcessEvent):
     RETRY_INTERVAL = 2  # seconds
-    RETRY_TIME_LIMIT = 30  # seconds
+    RETRY_TIME_SPAN = (5, 30)  # make an attempt to process desktop file within 5 to 30 seconds after event came in
+    # otherwise application icon or .desktop file itself may not be ready
 
     class InvalidDesktopFile(IOError):
         pass
@@ -63,7 +66,12 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         """
         while True:
             for pathname, start_time in self._deferred_files.items():
-                if time.time() - start_time > self.RETRY_TIME_LIMIT:
+                time_passed = time.time() - start_time
+                if time_passed < self.RETRY_TIME_SPAN[0]:
+                    # skip this file for now
+                    continue
+
+                if time_passed > self.RETRY_TIME_SPAN[1]:
                     # give up on file after time limit
                     del self._deferred_files[pathname]
 
@@ -148,4 +156,6 @@ def start_sync():
     notifier = pyinotify.ThreadedNotifier(wm, handler)
     notifier.setDaemon(True)
     notifier.start()
-    wm.add_watch(DESKTOP_DIRS, pyinotify.ALL_EVENTS, rec=True, auto_add=True)
+    mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MODIFY | \
+        pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
+    wm.add_watch(DESKTOP_DIRS, mask, rec=True, auto_add=True)

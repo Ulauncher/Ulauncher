@@ -15,6 +15,7 @@ class TestInotifyEventHandler:
     @pytest.fixture
     def event_handler(self, db):
         InotifyEventHandler.RETRY_INTERVAL = 0.05
+        InotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
         return InotifyEventHandler(db)
 
     @pytest.fixture
@@ -39,6 +40,7 @@ class TestInotifyEventHandler:
         filter_app.return_value = False  # this will make _add_file_sync fail at first
 
         InotifyEventHandler.RETRY_INTERVAL = 0.05
+        InotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
         event_handler = InotifyEventHandler(db)
         event_handler.add_file_deffered('mypath')
         sleep(.07)
