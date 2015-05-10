@@ -18,10 +18,12 @@ class AppResultItem(ResultItem):
 
     __gtype_name__ = "AppResultItem"
 
-    default_app_icon = get_themed_icon_by_name('application-default-icon')
+    def __init__(self):
+        super(AppResultItem, self).__init__()
+        self._default_app_icon = get_themed_icon_by_name('application-default-icon')
 
     def set_default_icon(self):
-        self.builder.get_object('item-icon').set_from_pixbuf(self.default_app_icon)
+        self.builder.get_object('item-icon').set_from_pixbuf(self._default_app_icon)
 
     def enter(self):
         """

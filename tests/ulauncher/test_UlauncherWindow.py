@@ -21,6 +21,7 @@ class TestUlauncherWindow:
     def window(self, mocker):
         return UlauncherWindow()
 
+    @pytest.mark.with_display
     def test_bind_show_app_hotkey(self, window, Keybinder):
         accel_name = '<Primary><Alt>f'
         window.bind_show_app_hotkey(accel_name)

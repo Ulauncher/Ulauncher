@@ -43,6 +43,7 @@ class TestPreferencesUlauncherDialog:
         dialog.finish_initializing(builder)
         return dialog
 
+    @pytest.mark.with_display
     def test_finish_initializing(self, dialog, builder, settings):
         # it removes dialog_action_area
         builder.get_object('dialog_action_area').destroy.assert_called_with()
@@ -78,6 +79,7 @@ class TestPreferencesUlauncherDialog:
         assert not ulauncherWindow.bind_show_app_hotkey.called
         assert not widget.set_text.called
 
+    @pytest.mark.with_display
     def test_on_hotkey_show_app_key_press_event__valid_hotkey(self, dialog, ulauncherWindow, settings):
         widget = mock.MagicMock()
         event = mock.MagicMock()
