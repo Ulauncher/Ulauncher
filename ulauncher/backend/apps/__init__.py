@@ -52,7 +52,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         self._file_queue = Queue()
         self._init_file_queue_worker()
 
-    @run_async
+    @run_async(daemon=True)
     def _init_file_queue_worker(self):
         """
         Add files to the DB with a delay of {_defer_time} sec,

@@ -1,4 +1,8 @@
-def run_async(func):
+from threading import Thread
+from functools import wraps
+
+
+def run_async(*args, **kwargs):
     """
         run_async(func)
             function decorator, intended to make "func" run in a separate
@@ -10,7 +14,7 @@ def run_async(func):
             def task1():
                 do_something
 
-            @run_async
+            @run_async(daemon=True)
             def task2():
                 do_something_too
 
@@ -20,13 +24,22 @@ def run_async(func):
             t1.join()
             t2.join()
     """
-    from threading import Thread
-    from functools import wraps
+    daemon = kwargs.get('daemon', False)
 
-    @wraps(func)
-    def async_func(*args, **kwargs):
-        func_hl = Thread(target=func, args=args, kwargs=kwargs)
-        func_hl.start()
-        return func_hl
+    def _run_async(func):
+        @wraps(func)
+        def async_func(*args, **kwargs):
+            func_hl = Thread(target=func, args=args, kwargs=kwargs)
+            func_hl.setDaemon(daemon)
+            func_hl.start()
+            return func_hl
 
-    return async_func
+        return async_func
+
+    if len(args) == 1 and not kwargs and callable(args[0]):
+        # No arguments, this is the decorator
+        # Set default values for the arguments
+        return _run_async(args[0])
+    else:
+        # This is just returning the decorator
+        return _run_async
