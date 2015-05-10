@@ -3,8 +3,7 @@
 Install Dependencies
 ====================
 
-1. `sudo apt-get install -y python-xdg gir1.2-gtk-3.0 python-dbus libgtk-3-0 gir1.2-keybinder-3.0 libkeybinder-3.0-0 gir1.2-glib-2.0 gir1.2-gdkpixbuf-2.0 gir1.2-appindicator3-0.1 python-pyinotify python-levenshtein python-pip`
-2. `sudo pip install -r requirements.txt`
+1. `./install_deps` - runs apt-get install for all needed dependencies
 
 Ulauncher
 =========
