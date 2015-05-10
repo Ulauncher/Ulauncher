@@ -42,49 +42,68 @@ def only_desktop_files(fn):
 
 
 class InotifyEventHandler(pyinotify.ProcessEvent):
-    def __init__(self, db, defer_time=0):
+    RETRY_INTERVAL = 2  # seconds
+    RETRY_TIME_LIMIT = 30  # seconds
+
+    class InvalidDesktopFile(IOError):
+        pass
+
+    def __init__(self, db):
         super(InotifyEventHandler, self).__init__()
         self.__db = db
 
-        self._defer_time = defer_time
-        self._file_queue = Queue()
-        self._init_file_queue_worker()
+        self._deferred_files = {}  # key is a file path, value is an addition time
+        self._init_worker()
 
     @run_async(daemon=True)
-    def _init_file_queue_worker(self):
+    def _init_worker(self):
         """
-        Add files to the DB with a delay of {_defer_time} sec,
+        Add files to the DB with some delay,
         otherwise .desktop file may not be ready while application is being installed
         """
         while True:
-            (pathname, put_time) = self._file_queue.get(True)
+            for pathname, start_time in self._deferred_files.items():
+                if time.time() - start_time > self.RETRY_TIME_LIMIT:
+                    # give up on file after time limit
+                    del self._deferred_files[pathname]
 
-            time_passed = time.time() - put_time
-            if time_passed < self._defer_time:
-                time.sleep(self._defer_time)
-            try:
-                self._add_file_sync(pathname)
-            except Exception as e:
-                # catch every exception in order to keep while loop going
-                logger.warning("_add_file_sync raised exception: %s" % e)
+                try:
+                    self._add_file_sync(pathname)
+                except self.InvalidDesktopFile:
+                    # retry
+                    pass
+                except Exception as e:
+                    # give up on unexpected exception
+                    logger.warning("Unexpected exception: %s" % e)
+                    del self._deferred_files[pathname]
+                else:
+                    # success
+                    del self._deferred_files[pathname]
+
+            time.sleep(self.RETRY_INTERVAL)
 
     def add_file_deffered(self, pathname):
         """
-        Add .desktop file to DB {_defer_time} seconds later
+        Add .desktop file to DB a little bit later
         """
-        self._file_queue.put((pathname, time.time()))
+        self._deferred_files[pathname] = time.time()
 
     def _add_file_sync(self, pathname):
         """
         Add .desktop file to DB
+
+        Raises self.InvalidDesktopFile if failed to add an app
         """
         try:
             app = read_desktop_file(pathname)
             if filter_app(app):
                 self.__db.put_app(app)
                 logger.info('New app was added "%s" (%s)' % (app.get_name(), app.get_filename()))
+            else:
+                raise self.InvalidDesktopFile(pathname)
         except Exception as e:
             logger.warning('Cannot add %s to DB -> %s' % (pathname, e))
+            raise self.InvalidDesktopFile(pathname)
 
     def _remove_file(self, pathname):
         """
@@ -125,7 +144,7 @@ def start_sync():
     logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
 
     wm = pyinotify.WatchManager()
-    handler = InotifyEventHandler(db, defer_time=4)  # add apps to the DB 4 seconds later after they were installed
+    handler = InotifyEventHandler(db)
     notifier = pyinotify.ThreadedNotifier(wm, handler)
     notifier.setDaemon(True)
     notifier.start()

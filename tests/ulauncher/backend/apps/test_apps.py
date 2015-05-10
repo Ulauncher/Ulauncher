@@ -13,8 +13,9 @@ class TestInotifyEventHandler:
         return mock.create_autospec(AppDb)
 
     @pytest.fixture
-    def event_handler(self, db, request):
-        return InotifyEventHandler(db, defer_time=0)
+    def event_handler(self, db):
+        InotifyEventHandler.RETRY_INTERVAL = 0.05
+        return InotifyEventHandler(db)
 
     @pytest.fixture
     def event(self):
@@ -33,17 +34,22 @@ class TestInotifyEventHandler:
         filter_app.return_value = True
         return filter_app
 
-    def test_add_file_deffered(self, db, app, request):
-        "Verify app addition is deferred by a specified time"
-        event_handler = InotifyEventHandler(db, defer_time=.1)
+    def test_add_file_deffered_retries_several_times(self, db, app, mocker):
+        filter_app = mocker.patch('ulauncher.backend.apps.filter_app')
+        filter_app.return_value = False  # this will make _add_file_sync fail at first
+
+        InotifyEventHandler.RETRY_INTERVAL = 0.05
+        event_handler = InotifyEventHandler(db)
         event_handler.add_file_deffered('mypath')
+        sleep(.07)
         assert not db.put_app.called
-        sleep(.15)
+        filter_app.return_value = True  # now file should be added successfully
+        sleep(.14)
         db.put_app.assert_called_with(app)
 
     def test_on_created_add_app(self, event_handler, event, db, app):
         event_handler.process_IN_CREATE(event)
-        sleep(.01)
+        sleep(.06)
         db.put_app.assert_called_with(app)
 
     def test_on_created_dont_add(self, event_handler, event, db, app):
@@ -65,7 +71,7 @@ class TestInotifyEventHandler:
 
     def test_on_modified(self, event_handler, event, db, app):
         event_handler.process_IN_MODIFY(event)
-        sleep(.01)
+        sleep(.06)
         db.put_app.assert_called_with(app)
 
     def test_on_modified_dont_modify(self, event_handler, event, db, app):
@@ -79,5 +85,5 @@ class TestInotifyEventHandler:
 
     def test_on_moved_to(self, event_handler, event, db, app):
         event_handler.process_IN_MOVED_TO(event)
-        sleep(.01)
+        sleep(.06)
         db.put_app.assert_called_with(app)
