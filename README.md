@@ -1,4 +1,4 @@
-[![Build Status](https://semaphoreci.com/api/v1/projects/75187cd4-f9eb-4135-b9fb-63e74f48d2dd/420152/shields_badge.svg)](https://semaphoreci.com/agornostal/ulauncher)
+Dev: [![Build Status](https://semaphoreci.com/api/v1/projects/75187cd4-f9eb-4135-b9fb-63e74f48d2dd/420152/shields_badge.svg)](https://semaphoreci.com/agornostal/ulauncher)
 
 Install Dependencies
 ====================
