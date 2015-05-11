@@ -11,7 +11,6 @@
     <property name="window_position">center</property>
     <property name="icon">../media/ulauncher.svg</property>
     <property name="type_hint">normal</property>
-    <property name="has_resize_grip">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox1">
         <property name="visible">True</property>
