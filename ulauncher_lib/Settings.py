@@ -13,12 +13,7 @@ GPROPERTIES = {
                             "Show app indicator",
                             None,
                             True,
-                            GObject.PARAM_READWRITE),
-    "launch-at-login": (bool,
-                        "Show app indicator",
-                        None,
-                        True,
-                        GObject.PARAM_READWRITE),
+                            GObject.PARAM_READWRITE)
 }
 
 

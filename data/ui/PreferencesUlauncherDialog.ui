@@ -102,9 +102,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSwitch" id="launch_at_login">
+              <object class="GtkSwitch" id="autostart">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
               </object>
@@ -131,7 +130,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="show_indicator_icon_label1">
+              <object class="GtkLabel" id="autostart_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>

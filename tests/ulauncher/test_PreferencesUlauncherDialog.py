@@ -18,6 +18,18 @@ class TestPreferencesUlauncherDialog:
     def ulauncherWindow(self, mocker):
         return mocker.patch('ulauncher.PreferencesUlauncherDialog.getUlauncherWindow').return_value
 
+    @pytest.fixture(autouse=True)
+    def autostart_pref(self, mocker):
+        return mocker.patch('ulauncher.PreferencesUlauncherDialog.AutostartPreference').return_value
+
+    @pytest.fixture
+    def widget(self):
+        return mock.MagicMock()
+
+    @pytest.fixture
+    def event(self):
+        return mock.MagicMock()
+
     @pytest.fixture
     def builder(self):
         """
@@ -51,9 +63,7 @@ class TestPreferencesUlauncherDialog:
         builder.get_object('show_indicator_icon').set_active.assert_called_with(settings.get_property.return_value)
         builder.get_object('hotkey_show_app').set_text.assert_called_with('Ctrl+Space')
 
-    def test_on_show_indicator_icon_notify(self, dialog, builder, settings, indicator):
-        widget = mock.MagicMock()
-        event = mock.MagicMock()
+    def test_on_show_indicator_icon_notify(self, dialog, builder, settings, indicator, widget, event):
         event.name = 'active'
 
         widget.get_active.return_value = True
@@ -67,9 +77,7 @@ class TestPreferencesUlauncherDialog:
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
-    def test_on_hotkey_show_app_key_press_event__invalid_hotkey(self, dialog, ulauncherWindow):
-        widget = mock.MagicMock()
-        event = mock.MagicMock()
+    def test_on_hotkey_show_app_key_press_event__invalid_hotkey(self, dialog, ulauncherWindow, widget, event):
         (key, mode) = Gtk.accelerator_parse('BackSpace')
         event.keyval = key
         event.state = mode
@@ -80,9 +88,7 @@ class TestPreferencesUlauncherDialog:
         assert not widget.set_text.called
 
     @pytest.mark.with_display
-    def test_on_hotkey_show_app_key_press_event__valid_hotkey(self, dialog, ulauncherWindow, settings):
-        widget = mock.MagicMock()
-        event = mock.MagicMock()
+    def test_on_hotkey_show_app_key_press_event__valid_hotkey(self, dialog, ulauncherWindow, settings, widget, event):
         accel_name = '<Primary><Alt>g'
         (key, mode) = Gtk.accelerator_parse(accel_name)
         event.keyval = key
@@ -94,3 +100,14 @@ class TestPreferencesUlauncherDialog:
         widget.set_text.assert_called_with('Ctrl+Alt+G')
         settings.set_property.assert_called_with('hotkey-show-app', accel_name)
         settings.save_to_file.assert_called_with()
+
+    def test_on_autostart_notify(self, dialog, widget, event, autostart_pref):
+        event.name = 'active'
+
+        widget.get_active.return_value = True
+        dialog.on_autostart_notify(widget, event)
+        autostart_pref.switch.assert_called_with(True)
+
+        widget.get_active.return_value = False
+        dialog.on_autostart_notify(widget, event)
+        autostart_pref.switch.assert_called_with(False)

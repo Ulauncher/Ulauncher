@@ -28,6 +28,9 @@ def parse_options():
     parser.add_option(
         "-v", "--verbose", action="count", dest="verbose",
         help=_("Show debug messages (-vv debugs ulauncher_lib also)"))
+    parser.add_option(
+        "--hide-window", action="store_true",
+        help=_("Hide window upon application startup"))
     (options, args) = parser.parse_args()
 
     return options
@@ -65,7 +68,8 @@ def main():
         logger.debug("Starting a new instance...")
         window = getUlauncherWindow()
         UlauncherDbusService(window)
-        window.show()
+        if not options.hide_window:
+            window.show()
 
         if getSettings().get_property('show-indicator-icon'):
             getIndicator().show()

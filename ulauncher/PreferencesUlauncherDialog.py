@@ -4,6 +4,7 @@ from gi.repository import Gio, Gtk, Gdk, Keybinder
 from locale import gettext as _
 from ulauncher_lib.PreferencesDialog import PreferencesDialog
 from ulauncher.service_locator import getSettings, getIndicator, getUlauncherWindow
+from .AutostartPreference import AutostartPreference
 
 
 logger = logging.getLogger(__name__)
@@ -24,11 +25,15 @@ class PreferencesUlauncherDialog(PreferencesDialog):
         self.builder.get_object('dialog_action_area').destroy()
 
         self.settings = getSettings()
+        self.__init_indicator_switch()
+        self.__init_app_hotkey()
+        self.__init_autostart_switch()
 
-        # set user preferences
+    def __init_indicator_switch(self):
         indicator_switch = self.builder.get_object('show_indicator_icon')
         indicator_switch.set_active(self.settings.get_property('show-indicator-icon'))
 
+    def __init_app_hotkey(self):
         app_hotkey = self.builder.get_object('hotkey_show_app')
         self.app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')
         try:
@@ -39,6 +44,14 @@ class PreferencesUlauncherDialog(PreferencesDialog):
         self.app_hotkey_current_label = Gtk.accelerator_get_label(key, mode)
         app_hotkey.set_text(self.app_hotkey_current_label)
 
+    def __init_autostart_switch(self):
+        self._autostart_pref = AutostartPreference()
+        self._autostart_switch = self.builder.get_object('autostart')
+        autostart_allowed = self._autostart_pref.is_allowed()
+        self._autostart_switch.set_sensitive(autostart_allowed)
+        if autostart_allowed:
+            self._autostart_switch.set_active(self._autostart_pref.is_on())
+
     def on_show_indicator_icon_notify(self, widget, event):
         if event.name == 'active':
             show_indicator = widget.get_active()
@@ -46,6 +59,14 @@ class PreferencesUlauncherDialog(PreferencesDialog):
             indicator = getIndicator()
             indicator.show() if show_indicator else indicator.hide()
             self.settings.save_to_file()
+
+    def on_autostart_notify(self, widget, event):
+        if event.name == 'active':
+            is_on = widget.get_active()
+            try:
+                self._autostart_pref.switch(is_on)
+            except Exception as e:
+                logger.warning('Caught an error while switching "autostart": %s' % e)
 
     def is_valid_hotkey(self, label, accel_name):
         """
