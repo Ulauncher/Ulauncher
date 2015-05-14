@@ -1,3 +1,4 @@
+import os
 import logging
 from .ResultItem import ResultItem
 from ulauncher.backend.apps.icon_loader import get_themed_icon_by_name
@@ -25,7 +26,7 @@ class AppResultItem(ResultItem):
     def set_default_icon(self):
         self.builder.get_object('item-icon').set_from_pixbuf(self._default_app_icon)
 
-    def enter(self):
+    def enter(self, query=''):
         """
         Return True if launcher window needs to be hidden
         """
@@ -34,5 +35,11 @@ class AppResultItem(ResultItem):
             return
 
         app = read_desktop_file(desktop_file)
-        logger.info('Run application %s (%s)' % (app.get_name(), desktop_file))
-        return app.launch()
+        '''If it's not a plugin'''
+        if app.get_string('Plugin') != 'true':
+            logger.info('Run application %s (%s)' % (app.get_name(), desktop_file))
+            return app.launch()
+        else:
+            command = app.get_string('Exec').replace("%query%", query.replace(" ", '+'))
+            os.system(command)
+        return True

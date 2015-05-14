@@ -123,6 +123,8 @@ class UlauncherWindow(Window):
         """
         query = entry.get_text()
         self.on_results(find_apps(query))
+        if self.results_nav:
+            self.results_nav.set_query(query)
 
     def select_result_item(self, index):
         self.results_nav.select(index)

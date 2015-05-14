@@ -31,8 +31,14 @@ def filter_app(app):
     :param Gio.DesktopAppInfo app:
     Returns True if app can be added to the database
     """
-    return app and not (app.get_is_hidden() or app.get_nodisplay() or app.get_string('Type') != 'Application' or
-                        not app.get_string('Name'))
+
+    if app.get_is_hidden() or app.get_nodisplay():
+        return None
+
+    if app.get_string('Type') != 'Application' or not app.get_string('Name'):
+        return None
+
+    return app
 
 
 def read_desktop_file(file):
