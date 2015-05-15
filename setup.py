@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
-# DO NOT TOUCH THIS (HEAD TO THE SECOND PART)
-
 import os
 import sys
 
@@ -16,7 +14,7 @@ assert DistUtilsExtra.auto.__version__ >= '2.18', 'needs DistUtilsExtra.auto >= 
 
 def update_config(libdir, values={}):
 
-    filename = os.path.join(libdir, 'ulauncher_lib/ulauncherconfig.py')
+    filename = os.path.join(libdir, 'ulauncher/config.py')
     oldvalues = {}
     try:
         fin = file(filename, 'r')
@@ -45,8 +43,7 @@ def move_desktop_file(root, target_data, prefix):
     # normal data files anywhere we want, the desktop file needs to exist in
     # the main system to be found.  Only actually useful for /opt installs.
 
-    old_desktop_path = os.path.normpath(root + target_data +
-                                        '/share/applications')
+    old_desktop_path = os.path.normpath(root + target_data + '/share/applications')
     old_desktop_file = old_desktop_path + '/ulauncher.desktop'
     desktop_path = os.path.normpath(root + prefix + '/share/applications')
     desktop_file = desktop_path + '/ulauncher.desktop'
@@ -108,8 +105,6 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
         desktop_file = move_desktop_file(self.root, target_data, self.prefix)
         update_desktop_file(desktop_file, target_pkgdata, target_scripts)
 
-
-# YOU SHOULD MODIFY ONLY WHAT IS BELOW
 
 DistUtilsExtra.auto.setup(
     name='ulauncher',

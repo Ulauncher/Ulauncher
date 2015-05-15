@@ -1,21 +1,19 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-
-
 import sys
 import os
 import optparse
 import logging
 from locale import gettext as _
+from gi.repository import Gtk
 
 import dbus
 import dbus.service
-from gi.repository import Gtk  # pylint: disable=E0611
 from dbus.mainloop.glib import DBusGMainLoop
 
-from ulauncher.Indicator import Indicator
-from ulauncher_lib import set_up_logging, get_version
-from ulauncher_lib.ulauncherconfig import CACHE_DIR, CONFIG_DIR
-from .service_locator import getUlauncherWindow, getIndicator, getSettings
+from .helpers import set_up_logging
+from .config import get_version, CACHE_DIR, CONFIG_DIR
+from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+from ulauncher.ui.AppIndicator import AppIndicator
+from ulauncher.utils.Settings import Settings
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
@@ -27,7 +25,7 @@ def parse_options():
     parser = optparse.OptionParser(version="%%prog %s" % get_version())
     parser.add_option(
         "-v", "--verbose", action="count", dest="verbose",
-        help=_("Show debug messages (-vv debugs ulauncher_lib also)"))
+        help=_("Show debug messages"))
     parser.add_option(
         "--hide-window", action="store_true",
         help=_("Hide window upon application startup"))
@@ -36,7 +34,7 @@ def parse_options():
     return options
 
 
-def main():
+def _create_dirs():
     # make sure ~/.config/ulauncher/apps exists
     apps_path = os.path.join(CONFIG_DIR, 'apps')
     if not os.path.exists(apps_path):
@@ -45,6 +43,21 @@ def main():
     # make sure ~/.cache/ulauncher exists
     if not os.path.exists(CACHE_DIR):
         os.makedirs(CACHE_DIR)
+
+
+class UlauncherDbusService(dbus.service.Object):
+    def __init__(self, window):
+        self.window = window
+        bus_name = dbus.service.BusName(DBUS_SERVICE, bus=dbus.SessionBus())
+        super(UlauncherDbusService, self).__init__(bus_name, DBUS_PATH)
+
+    @dbus.service.method(DBUS_SERVICE)
+    def show_window(self):
+        self.window.show_window()
+
+
+def main():
+    _create_dirs()
 
     options = parse_options()
     set_up_logging(options)
@@ -57,34 +70,19 @@ def main():
     instance = bus.request_name(DBUS_SERVICE)
 
     if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-
         logger.debug("Getting the existing instance...")
-        logger.debug("Showing a main window...")
         show_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("show_window")
         show_window()
-
     else:
-
         logger.debug("Starting a new instance...")
-        window = getUlauncherWindow()
+        window = UlauncherWindow.get_instance()
         UlauncherDbusService(window)
         if not options.hide_window:
             window.show()
 
-        if getSettings().get_property('show-indicator-icon'):
-            getIndicator().show()
+        if Settings.get_instance().get_property('show-indicator-icon'):
+            AppIndicator.get_instance().show()
 
         Gtk.main()
 
     sys.exit(0)
-
-
-class UlauncherDbusService(dbus.service.Object):
-    def __init__(self, window):
-        self.window = window
-        bus_name = dbus.service.BusName(DBUS_SERVICE, bus=dbus.SessionBus())
-        super(UlauncherDbusService, self).__init__(bus_name, DBUS_PATH)
-
-    @dbus.service.method(DBUS_SERVICE)
-    def show_window(self):
-        self.window.show_window()

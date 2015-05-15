@@ -6,7 +6,7 @@ export tmpdir="/tmp/ulauncher_deb"
 export tmpsrc="$tmpdir/src"
 rm -rf "$tmpdir/*"
 mkdir -p $tmpsrc
-cp -r {AUTHORS,bin,data,debian,LICENSE,README.md,setup.cfg,setup.py,ulauncher,ulauncher.desktop.in,ulauncher_lib} $tmpsrc
+cp -r {AUTHORS,bin,data,debian,LICENSE,README.md,setup.cfg,setup.py,ulauncher,ulauncher.desktop.in} $tmpsrc
 cd $tmpsrc
 
 if [ "$1" = "--bin" ]
