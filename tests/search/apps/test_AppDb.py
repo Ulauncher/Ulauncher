@@ -43,6 +43,7 @@ class TestAppDb(object):
 
     def test_put_app(self, app_db, get_app_icon_pixbuf, mocker):
         app = mock.MagicMock()
+        app.get_string.return_value = None
         put = mocker.patch.object(app_db, 'put')
 
         app_db.put_app(app)

@@ -20,7 +20,7 @@ class AppDb(KeyValueDb):
         """
         record = {
             "desktop_file": app.get_filename(),
-            "name": app.get_name(),
+            "name": app.get_string('X-GNOME-FullName') or app.get_name(),
             "description": app.get_description(),
             "icon": get_app_icon_pixbuf(app)
         }
