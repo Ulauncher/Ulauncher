@@ -7,9 +7,13 @@ from gi.repository import Gtk, Gdk, Keybinder
 from ulauncher.helpers import singleton
 from ulauncher.utils.display import get_current_screen_geometry
 from ulauncher.config import get_data_file
-from ulauncher.ui.AppResultItem import AppResultItem  # this import is needed for Gtk to find AppResultItem class
+from ulauncher.ui import create_item_widgets
+
+# this import is needed for Gtk to find AppResultItemWidget class
+from ulauncher.ui.AppResultItemWidget import AppResultItemWidget
+
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.ui import app_search_results
+from ulauncher.search import discover_search_modes, start_search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.UserQueryDb import UserQueryDb
 from ulauncher.utils.Settings import Settings
@@ -55,6 +59,8 @@ class UlauncherWindow(WindowBase):
 
         self.AboutDialog = AboutUlauncherDialog
         self.PreferencesDialog = PreferencesUlauncherDialog
+
+        self.search_modes = discover_search_modes()
 
         self.position_window()
         self.init_styles()
@@ -123,39 +129,43 @@ class UlauncherWindow(WindowBase):
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
         self.__current_accel_name = accel_name
 
+    def get_user_query(self):
+        return self.input.get_text().strip()
+
     def on_input_changed(self, entry):
         """
         Triggered by user input
         """
-        query = entry.get_text()
-        self.on_results(app_search_results(query))
+        start_search(self.get_user_query(), self.search_modes)
 
     def select_result_item(self, index):
         self.results_nav.select(index)
 
-    def enter_result_item(self):
-        if self.results_nav.enter():
+    def enter_result_item(self, index=None):
+        if not self.results_nav.enter(self.get_user_query(), index):
+            # close the window if it has to be closed on enter
             self.hide()
             self.save_user_query()
 
-    def on_results(self, results):
+    def show_results(self, result_items):
+        """
+        :param list result_items: list of ResultItem instances
+        """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
-        results = list(results)  # generator -> list
+        results = list(create_item_widgets(result_items, self.get_user_query()))  # generator -> list
         if results:
             map(self.result_box.add, results)
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.results_nav = ItemNavigation(self.result_box.get_children())
 
-            selected_index = 0
+            # select the same item user previously selected for this query
             user_queries = UserQueryDb.get_instance()
-            desktop_file = user_queries.find(self.input.get_text())
-            if desktop_file:
-                # try to get index of item by desktop file
-                selected_index = self.results_nav.get_index_by_desktop_file(desktop_file) or 0
-
+            name = user_queries.find(self.get_user_query())
+            selected_index = self.results_nav.get_index_by_name(name) or 0 if name else 0
             self.results_nav.select(selected_index)
+
             self.apply_css(self.result_box, self.provider)
         else:
             self.result_box.set_margin_bottom(0)
@@ -171,14 +181,11 @@ class UlauncherWindow(WindowBase):
             elif keyname == 'Down':
                 self.results_nav.go_down()
             elif keyname in ('Return', 'KP_Enter'):
-                if self.results_nav.enter():
-                    self.hide()
-                    self.save_user_query()
+                self.enter_result_item()
             elif alt and keyname.isdigit() and 0 < int(keyname) < 10:
                 # on Alt+<num>
                 try:
-                    if self.results_nav.enter(int(keyname) - 1):
-                        self.hide()
+                    self.enter_result_item(int(keyname) - 1)
                 except IndexError:
                     # selected non-existing result item
                     pass
@@ -187,8 +194,8 @@ class UlauncherWindow(WindowBase):
             self.hide()
 
     def save_user_query(self):
-        desktop_file_path = self.results_nav.get_selected_desktop_file()
-        if desktop_file_path:
+        name = self.results_nav.get_selected_name()
+        if name:
             user_queries = UserQueryDb.get_instance()
-            user_queries.put(self.input.get_text(), desktop_file_path)
-            user_queries.commit()
+            user_queries.put(self.get_user_query(), name)
+            user_queries.commit()  # save to disk

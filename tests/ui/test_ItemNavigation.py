@@ -1,14 +1,14 @@
 import pytest
 import mock
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.ui.ResultItem import ResultItem
+from ulauncher.ui.ResultItemWidget import ResultItemWidget
 
 
 class TestItemNavigation(object):
 
     @pytest.fixture
     def items(self):
-        return map(lambda _: mock.create_autospec(ResultItem), range(5))
+        return map(lambda _: mock.create_autospec(ResultItemWidget), range(5))
 
     @pytest.fixture
     def nav(self, items):
@@ -50,15 +50,43 @@ class TestItemNavigation(object):
         nav.go_down()
         items[0].select.assert_called_once_with()
 
-    def test_enter_in_selected(self, nav, items):
-        nav.select(4)
-        nav.enter()
-        items[4].enter.assert_called_once_with()
+    def test_enter_by_index(self, nav, items, mocker):
+        action_on_enter = mocker.patch.object(nav, "_action_on_enter")
+        nav.enter('test', 3)
+        action_on_enter.assert_called_once_with(items[3], 'test')
 
-    def test_enter_by_index(self, nav, items):
-        nav.enter(3)
-        items[3].enter.assert_called_once_with()
+    def test_enter_no_index(self, nav, items, mocker):
+        action_on_enter = mocker.patch.object(nav, "_action_on_enter")
+        nav.select(2)
+        nav.enter('test')
+        action_on_enter.assert_called_once_with(items[2], 'test')
 
-    def test_enter_in_non_existing(self, nav):
-        with pytest.raises(IndexError):
-            nav.enter(13)
+    def test_action_on_enter(self, nav, items):
+        item = items[0]
+        item.get_keyword.return_value = 'query'
+
+        assert nav._action_on_enter(item, 'query arg1') is item.on_enter.return_value.keep_app_open.return_value
+        item.on_enter.assert_called_with(argument='arg1')
+        item.on_enter.return_value.run_all.assert_called_with()
+
+    def test_action_on_enter_wrong_keyword(self, nav, items, mocker):
+        SetUserQueryAction = mocker.patch('ulauncher.ui.ItemNavigation.SetUserQueryAction')
+        item = items[0]
+        item.get_keyword.return_value = 'query'
+
+        assert nav._action_on_enter(item, 'qery arg1') is item.on_enter.return_value.keep_app_open.return_value
+        item.on_enter.assert_called_with(argument=None)
+        item.on_enter.return_value.run_all.assert_called_with()
+        item.on_enter.return_value.add.assert_called_with(SetUserQueryAction.return_value)
+        SetUserQueryAction.assert_called_with('query ')
+
+    def test_action_on_enter_no_args(self, nav, items, mocker):
+        SetUserQueryAction = mocker.patch('ulauncher.ui.ItemNavigation.SetUserQueryAction')
+        item = items[0]
+        item.get_keyword.return_value = 'query'
+
+        assert nav._action_on_enter(item, 'qery') is item.on_enter.return_value.keep_app_open.return_value
+        item.on_enter.assert_called_with(argument=None)
+        item.on_enter.return_value.run_all.assert_called_with()
+        item.on_enter.return_value.add.assert_called_with(SetUserQueryAction.return_value)
+        SetUserQueryAction.assert_called_with('query ')

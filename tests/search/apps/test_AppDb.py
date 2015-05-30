@@ -55,28 +55,14 @@ class TestAppDb(object):
             "icon": get_app_icon_pixbuf.return_value
         }))
 
-    def test_find_max_results(self, db_with_data):
-        """It returns no more than limit"""
+    def test_find_returns_sorted_results(self, db_with_data, mocker):
+        SortedResultList = mocker.patch('ulauncher.search.apps.AppDb.SortedResultList')
+        result_list = SortedResultList.return_value
+        AppResultItem = mocker.patch('ulauncher.search.apps.AppDb.AppResultItem')
 
-        assert len(db_with_data.find('j', limit=3)) == 3
-        assert len(db_with_data.find('j', limit=2)) == 2
+        assert db_with_data.find('bro') is result_list
+        result_list.append.assert_called_with(AppResultItem.return_value)
+        SortedResultList.assert_called_with('bro', min_score=mock.ANY, limit=9)
 
-    def test_find_filters_by_min_score(self, db_with_data):
-        """It returns matches only if score > min_score"""
-
-        assert len(db_with_data.find('jo', min_score=50)) == 2
-        assert len(db_with_data.find('Jo', min_score=92)) == 1
-
-    def test_find_scrores_higher_items_start_with_query(self, db_with_data):
-        results = db_with_data.find('cal', min_score=90)
-        assert results[0]['desktop_file'] == 'calc'
-        assert results[1]['desktop_file'] == 'libre.calc'
-
-        results = db_with_data.find('ke', min_score=80)
-        assert results[0]['desktop_file'] == 'Keyboard'
-        assert results[1]['desktop_file'] == 'Guake Terminal'
-
-    def test_find_takes_into_account_spaces_in_names(self, db_with_data):
-        results = db_with_data.find('cal', min_score=70)
-        assert results[0]['desktop_file'] == 'calc'
-        assert results[1]['desktop_file'] == 'libre.calc'
+        for rec in db_with_data.get_records().values():
+            AppResultItem.assert_any_call(rec)

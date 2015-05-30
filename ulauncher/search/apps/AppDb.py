@@ -1,9 +1,10 @@
 import os
-from Levenshtein import ratio
 
 from ulauncher.helpers import singleton
 from ulauncher.utils.KeyValueDb import KeyValueDb
 from ulauncher.utils.icon_loader import get_app_icon_pixbuf
+from .AppResultItem import AppResultItem
+from ulauncher.search.SortedResultList import SortedResultList
 from ulauncher.config import CACHE_DIR
 
 
@@ -39,51 +40,19 @@ class AppDb(KeyValueDb):
 
         return False
 
-    def _calculate_score(self, query, rec_name):
+    def find(self, query, result_list=None):
         """
-        Calculate score for each word from rec_name separately
-        and then take the best one
-        """
-        rec_name = rec_name.lower()
-
-        # improve score (max. by 50%) for queries that occur in a record name:
-        # formula: 50 - (<index of substr>/<name length>)
-        extra_score = 0
-        if query in rec_name:
-            index = rec_name.index(query)
-            extra_score += 50 - (index * 50. / len(rec_name))
-
-            # add extra 10% to a score, if record starts with a query
-            extra_score += 10 if index == 0 else 0
-
-        best_score = 0
-        for word in rec_name.split(' '):
-            score = ratio(query, word) * 100 + extra_score
-
-            if score > best_score:
-                best_score = score
-
-        return best_score
-
-    def find(self, name, limit=9, min_score=0):
-        """
-        :param str name: name to search for
-        :param int limit: max number of results
-        :param int min_score: min score for search results [0..100]
-        :return list: [{<record dict>}, ...]
+        :param str query: query to search for
+        :param ResultList result_list:
+        :return ResultList:
         """
 
-        if not name:
-            return []
+        result_list = result_list or SortedResultList(query, min_score=68, limit=9)
 
-        name = name.lower()
-        matches = []  # (score, record) tuples
+        if not query:
+            return result_list
 
         for rec in self.get_records().values():
-            score = self._calculate_score(name, rec['name'])
+            result_list.append(AppResultItem(rec))
 
-            if score >= min_score:
-                matches.append((score, rec))
-
-        # sort and return only first `limit` number of items
-        return map(lambda (_, r): r, sorted(matches, reverse=True)[:limit])
+        return result_list

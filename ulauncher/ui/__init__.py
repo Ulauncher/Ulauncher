@@ -1,42 +1,16 @@
 import os
 from gi.repository import Gtk
 from ulauncher.config import get_data_file
-from ulauncher.search.apps.AppDb import AppDb
-
-ICON_SIZE = 40
+from ulauncher.ext.ResultItem import ResultItem
 
 
-def two_row_items(ui_file):
-    """
-    :param str ui_file: name of *.ui file for result item
+def create_item(result_item, index, query):
+    if isinstance(result_item, ResultItem):
+        ui_file = 'result_item'  # default item UI
+    else:
+        raise TypeError('Invalid type "%s" for result item' % type(result_item))
 
-    (Returns decorator function)
-    func should return a list of dictionaries
-    Each item is a dictionary with properties: icon_path, name, description
-    Only  (str) `name` is mandatory
-    Returns a list items as Gtk widgets
-    """
-    def items_decorator(func):
-        def wrapper(*args, **kw):
-            for i, item in enumerate(func(*args, **kw)):
-                builder = create_item(ui_file)
-                item_frame = builder.get_object('item-frame')
-                item_frame.set_builder(builder)
-
-                item_frame.set_icon(item['icon'])
-                item_frame.set_name(item['name'])
-                item_frame.set_index(i)
-                item_frame.set_description(item['description'])
-                item_frame.set_metadata(item)
-
-                yield item_frame
-
-        return wrapper
-    return items_decorator
-
-
-def create_item(builder_file_name):
-    glade_filename = get_data_file('ui', '%s.ui' % (builder_file_name,))
+    glade_filename = get_data_file('ui', '%s.ui' % ui_file)
     if not os.path.exists(glade_filename):
         glade_filename = None
 
@@ -44,9 +18,12 @@ def create_item(builder_file_name):
     builder.set_translation_domain('ulauncher')
     builder.add_from_file(glade_filename)
 
-    return builder
+    item_frame = builder.get_object('item-frame')
+    item_frame.initialize(builder, result_item, index, query)
+
+    return item_frame
 
 
-@two_row_items(ui_file='app_result_item')
-def app_search_results(text):
-    return AppDb.get_instance().find(text, min_score=68, limit=9)
+def create_item_widgets(results, query):
+    for i, result_item in enumerate(results):
+        yield create_item(result_item, i, query)

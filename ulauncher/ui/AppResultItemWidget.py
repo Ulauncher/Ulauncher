@@ -1,12 +1,12 @@
 import logging
-from .ResultItem import ResultItem
+from .ResultItemWidget import ResultItemWidget
 from ulauncher.utils.icon_loader import get_themed_icon_by_name
 from ulauncher.utils.desktop import read_desktop_file
 
 logger = logging.getLogger(__name__)
 
 
-class AppResultItem(ResultItem):
+class AppResultItemWidget(ResultItemWidget):
     """
     Each app item in the result list is an instance of this class
 
@@ -19,20 +19,8 @@ class AppResultItem(ResultItem):
     __gtype_name__ = "AppResultItem"
 
     def __init__(self):
-        super(AppResultItem, self).__init__()
+        super(AppResultItemWidget, self).__init__()
         self._default_app_icon = get_themed_icon_by_name('application-default-icon')
 
     def set_default_icon(self):
         self.builder.get_object('item-icon').set_from_pixbuf(self._default_app_icon)
-
-    def enter(self):
-        """
-        Return True if launcher window needs to be hidden
-        """
-        desktop_file = self.metadata['desktop_file']
-        if not desktop_file:
-            return
-
-        app = read_desktop_file(desktop_file)
-        logger.info('Run application %s (%s)' % (app.get_name(), desktop_file))
-        return app.launch()

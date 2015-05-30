@@ -2,9 +2,9 @@
 <!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.8"/>
-  <!-- interface-requires app_result_item 1.0 -->
+  <!-- interface-requires result_item 1.0 -->
   <!-- interface-local-resource-path ../media -->
-  <object class="AppResultItem" id="item-frame">
+  <object class="ResultItemWidget" id="item-frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
@@ -38,7 +38,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Application Name</property>
+                <property name="label" translatable="yes"></property>
                 <property name="ellipsize">middle</property>
                 <property name="max_width_chars">1</property>
                 <style>
@@ -57,7 +57,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Description Description Description Description Description Description Description Description Description Description </property>
+                <property name="label" translatable="yes"></property>
                 <property name="ellipsize">middle</property>
                 <property name="max_width_chars">1</property>
                 <style>

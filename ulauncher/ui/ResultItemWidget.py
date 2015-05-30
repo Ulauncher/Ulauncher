@@ -6,13 +6,29 @@ from gi.repository import Gtk
 logger = logging.getLogger(__name__)
 
 
-class ResultItem(Gtk.EventBox):
-    __gtype_name__ = "ResultItem"
+class ResultItemWidget(Gtk.EventBox):
+    __gtype_name__ = "ResultItemWidget"
     shortcut = None
 
     index = None
     builder = None
     name = None
+    query = None
+    item_object = None
+
+    def initialize(self, builder, item_object, index, query):
+        self.builder = builder
+        item_frame = self.builder.get_object('item-frame')
+        item_frame.connect("button-release-event", self.on_click)
+        item_frame.connect("enter_notify_event", self.on_mouse_hover)
+
+        self.item_object = item_object
+        self.query = query
+        self.set_index(index)
+
+        self.set_icon(item_object.get_icon())
+        self.set_name(item_object.get_name())
+        self.set_description(item_object.get_description())
 
     def set_index(self, index):
         """
@@ -22,17 +38,6 @@ class ResultItem(Gtk.EventBox):
         self.shortcut = 'Alt+%s' % (index + 1)
         self.set_shortcut(self.shortcut)
 
-    def set_builder(self, builder):
-        """
-        :param Gtk.Builder builder:
-        """
-
-        self.builder = builder
-
-        item_frame = self.builder.get_object('item-frame')
-        item_frame.connect("button-release-event", self.on_click)
-        item_frame.connect("enter_notify_event", self.on_mouse_hover)
-
     def select(self):
         self.set_shortcut('⏎')
         self.get_style_context().add_class('selected')
@@ -41,21 +46,16 @@ class ResultItem(Gtk.EventBox):
         self.set_shortcut(self.shortcut)
         self.get_style_context().remove_class('selected')
 
-    def set_default_icon(self):
-        """
-        If we don't set any icon, it will be a default stock icon gtk-missing-image
-        """
-        pass
-
     def set_icon(self, icon):
         """
         Icon can be either a PixBuf instance or None (the default is used)
         """
-        iconWgt = self.builder.get_object('item-icon')
-        iconWgt.set_from_pixbuf(icon) if icon else self.set_default_icon()
+        if icon:
+            iconWgt = self.builder.get_object('item-icon')
+            iconWgt.set_from_pixbuf(icon)
 
     def set_name(self, name):
-        self.builder.get_object('item-name').set_text(name)
+        self.builder.get_object('item-name').set_text(name.replace('{query}', self.query or '...'))
         self.name = name
 
     def get_name(self):
@@ -70,23 +70,15 @@ class ResultItem(Gtk.EventBox):
 
     def set_description(self, description):
         if description:
-            self.builder.get_object('item-descr').set_text(description)
+            self.builder.get_object('item-descr').set_text(description.replace('{query}', self.query or '...'))
         else:
             self.builder.get_object('item-descr').destroy()
 
     def set_shortcut(self, text):
         return self.builder.get_object('item-shortcut').set_text(text)
 
-    def set_metadata(self, metadata):
-        self.metadata = metadata
+    def on_enter(self, argument=None):
+        return self.item_object.on_enter(argument)
 
-    def get_desktop_file_path(self):
-
-        return self.metadata.get('desktop_file')
-
-    def enter(self):
-        """
-        Should be implemented in derived classes
-        Return True if launcher window needs to be hidden
-        """
-        pass
+    def get_keyword(self):
+        return self.item_object.get_keyword()

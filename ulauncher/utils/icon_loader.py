@@ -29,4 +29,6 @@ def get_app_icon_pixbuf(app, icon_size=ICON_SIZE):
 
 
 def get_themed_icon_by_name(icon_name, icon_size=ICON_SIZE):
+    # TODO: use icon_theme.choose_icon([], ..)
+    # Also update all code that calls this fn. to provide alternative names
     return icon_theme.load_icon(icon_name, icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
