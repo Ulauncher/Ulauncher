@@ -131,7 +131,7 @@ class UlauncherWindow(WindowBase):
         self.__current_accel_name = accel_name
 
     def get_user_query(self):
-        return Query(self.input.get_text().strip())
+        return Query(self.input.get_text())
 
     def on_input_changed(self, entry):
         """

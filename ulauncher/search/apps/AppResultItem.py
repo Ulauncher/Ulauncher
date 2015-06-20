@@ -20,5 +20,5 @@ class AppResultItem(ResultItem):
     def get_icon(self):
         return self.record.get('icon')
 
-    def on_enter(self):
+    def on_enter(self, query):
         return ActionList((LaunchAppAction(self.record.get('desktop_file')),))

@@ -24,10 +24,10 @@ class TestSortedResultList:
         string_score.return_value = 41
         res_list.append(ri1)
         assert ri1 in res_list
-        string_score.assert_called_with('bro', ri1.get_keyword.return_value)
+        string_score.assert_called_with('bro', ri1.get_name.return_value)
 
         ri2 = self.result_item()
-        ri2.get_keyword.return_value = None
+        ri2.get_name.return_value = None
         string_score.return_value = 12
         res_list.append(ri2)
         assert ri2 not in res_list

@@ -11,8 +11,7 @@ class DefaultSearchMode(SearchMode):
 
     def on_query(self, query):
         custom_items = [GoogleResultItem(), WikipediaResultItem()]
-        keyword = query.get_keyword()
-        action_item = next((i for i in custom_items if i.get_keyword() == keyword), None)
+        action_item = next((i for i in custom_items if query.startswith('%s ' % i.get_keyword())), None)
 
         if action_item:
             result_list = (action_item,)

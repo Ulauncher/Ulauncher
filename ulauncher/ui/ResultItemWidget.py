@@ -77,8 +77,8 @@ class ResultItemWidget(Gtk.EventBox):
     def set_shortcut(self, text):
         return self.builder.get_object('item-shortcut').set_text(text)
 
-    def on_enter(self, argument=None):
-        return self.item_object.on_enter(argument)
+    def on_enter(self, query):
+        return self.item_object.on_enter(query)
 
     def get_keyword(self):
         return self.item_object.get_keyword()
