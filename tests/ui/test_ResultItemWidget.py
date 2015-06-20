@@ -1,5 +1,3 @@
-# -*- Mode: Python; coding: utf-8;
-
 import pytest
 import mock
 from gi.repository import Gtk, GdkPixbuf
@@ -49,15 +47,15 @@ class TestResultItem(object):
         result_item_wgt.set_index(2)
         mock_set_shortcut.assert_called_once_with('Alt+3')
 
-    def test_select(self, result_item_wgt, mocker):
+    def test_select(self, result_item_wgt, mocker, builder):
         mock_set_shortcut = mocker.patch.object(result_item_wgt, 'set_shortcut')
         mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
 
         result_item_wgt.select()
-        mock_set_shortcut.assert_called_once_with('⏎')
+        mock_set_shortcut.assert_called_once_with('')
         mock_get_style_context.return_value.add_class.assert_called_once_with('selected')
 
-    def test_deselect(self, result_item_wgt, mocker):
+    def test_deselect(self, result_item_wgt, mocker, builder):
         mock_set_shortcut = mocker.patch.object(result_item_wgt, 'set_shortcut')
         mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
 
@@ -101,7 +99,12 @@ class TestResultItem(object):
 
     def test_set_shortcut(self, result_item_wgt, builder):
         result_item_wgt.set_shortcut('Alt+1')
-        builder.get_object.return_value.set_text.assert_called_with('Alt+1')
+        builder.get_object.return_value.set_label.assert_called_with('Alt+1')
+        builder.get_object.return_value.set_always_show_image.assert_called_with(False)
+
+        result_item_wgt.set_shortcut('')
+        builder.get_object.return_value.set_label.assert_called_with('')
+        builder.get_object.return_value.set_always_show_image.assert_called_with(True)
 
     def test_on_enter(self, result_item_wgt, item_obj):
         assert result_item_wgt.on_enter('test') is item_obj.on_enter.return_value

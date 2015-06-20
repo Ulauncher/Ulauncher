@@ -1,5 +1,3 @@
-# -*- Mode: Python; coding: utf-8;
-
 import logging
 from gi.repository import Gtk
 
@@ -21,6 +19,8 @@ class ResultItemWidget(Gtk.EventBox):
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
+        item_frame.connect("enter_notify_event", self.on_mouse_hover)
+        builder.get_object('item-shortcut').connect("clicked", self.on_click)
 
         self.item_object = item_object
         self.query = query
@@ -39,12 +39,12 @@ class ResultItemWidget(Gtk.EventBox):
         self.set_shortcut(self.shortcut)
 
     def select(self):
-        self.set_shortcut('⏎')
         self.get_style_context().add_class('selected')
+        self.set_shortcut('')
 
     def deselect(self):
-        self.set_shortcut(self.shortcut)
         self.get_style_context().remove_class('selected')
+        self.set_shortcut(self.shortcut)
 
     def set_icon(self, icon):
         """
@@ -61,7 +61,7 @@ class ResultItemWidget(Gtk.EventBox):
     def get_name(self):
         return self.name
 
-    def on_click(self, widget, event):
+    def on_click(self, widget, event=None):
         self.get_toplevel().select_result_item(self.index)
         self.get_toplevel().enter_result_item()
 
@@ -72,10 +72,13 @@ class ResultItemWidget(Gtk.EventBox):
         if description:
             self.builder.get_object('item-descr').set_text(description)
         else:
-            self.builder.get_object('item-descr').destroy()
+            self.builder.get_object('item-descr').destroy()  # remove description label
+            self.builder.get_object('item-name').set_margin_top(8)  # shift name label down to the center
 
     def set_shortcut(self, text):
-        return self.builder.get_object('item-shortcut').set_text(text)
+        item_shortcut = self.builder.get_object('item-shortcut')
+        item_shortcut.set_always_show_image(False if text else True)
+        item_shortcut.set_label(text)
 
     def on_enter(self, query):
         return self.item_object.on_enter(query)

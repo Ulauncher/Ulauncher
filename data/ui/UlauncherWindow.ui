@@ -4,13 +4,8 @@
   <requires lib="gtk+" version="3.8"/>
   <!-- interface-requires ulauncher_window 1.0 -->
   <!-- interface-local-resource-path ../media -->
-  <object class="GtkImage" id="prefs_img">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-preferences</property>
-  </object>
   <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="width_request">500</property>
+    <property name="width_request">550</property>
     <property name="can_focus">False</property>
     <property name="has_focus">True</property>
     <property name="title" translatable="yes">uLauncher</property>
@@ -23,68 +18,102 @@
     <property name="decorated">False</property>
     <property name="deletable">False</property>
     <child>
-      <object class="GtkBox" id="box2">
+      <object class="GtkFixed" id="fixed1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkFixed" id="fixed1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkEntry" id="input">
-                <property name="width_request">500</property>
-                <property name="height_request">60</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <style>
-                  <class name="input"/>
-                </style>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="prefs_btn">
-                <property name="width_request">15</property>
-                <property name="height_request">15</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Preferences</property>
-                <property name="image">prefs_img</property>
-                <property name="always_show_image">True</property>
-              </object>
-              <packing>
-                <property name="x">485</property>
-                <property name="y">15</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="result_box">
+          <object class="GtkEventBox" id="box1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
-            <property name="orientation">vertical</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <child>
+              <object class="GtkBox" id="box2">
+                <property name="visible">True</property>
+                <property name="app_paintable">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkEntry" id="input">
+                    <property name="width_request">500</property>
+                    <property name="height_request">60</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="has_focus">True</property>
+                    <property name="is_focus">True</property>
+                    <property name="can_default">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="margin_left">25</property>
+                    <property name="margin_right">25</property>
+                    <property name="margin_top">10</property>
+                    <property name="margin_bottom">10</property>
+                    <style>
+                      <class name="input"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="result_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <style>
+                      <class name="result-box"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <style>
+                  <class name="wrapper"/>
+                </style>
+              </object>
+            </child>
             <style>
-              <class name="result-box"/>
+              <class name="wrapper"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="prefs_btn">
+            <property name="name">prefs_btn</property>
+            <property name="width_request">17</property>
+            <property name="height_request">17</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">Preferences</property>
+            <property name="relief">half</property>
+            <property name="always_show_image">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <style>
+              <class name="prefs-btn"/>
             </style>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="x">538</property>
+            <property name="y">42</property>
           </packing>
         </child>
       </object>

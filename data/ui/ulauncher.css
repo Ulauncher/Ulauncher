@@ -1,39 +1,49 @@
 @import url("reset.css");
 
 GtkWindow {
-    background-color: rgba(104,112,116, 0.8);
-    border-radius: 4px;
+    border-radius: 10px;
+    background-color: rgba(0,0,0, 0.2);
+}
+
+.wrapper {
+    background-color: #3b3b3b;
+    border-radius: 10px;
 }
 
 .input {
-    color: rgba(230, 230, 230, 0.7);
-    border: 1px solid rgba(170, 170, 170, 0.7);
+    color: #ddd;
     border-radius: 4px;
-    font-size: 30px;
+    font-size: 28px;
     padding: 10px;
-    background-color: rgba(71,75,77, 0.96);
-}
-
-.item-frame {
-    background-color: rgb(71,75,77);
-}
-.item-frame.selected {
-    background-color: #6F6D65;
+    background-color: #595959;
+    box-shadow: inset 0 1px 9px 3px rgba(0,0,0, 0.3);
 }
 
 .item-text {
-    color: rgba(230, 230, 230, 0.7);
+    color: #999;
 }
 .item-name {
+    color: #bbb;
     font-size: 120%;
+}
+
+.selected .item-box {
+    border-radius: 10px;
+    background-color: #4675ab;
+}
+.selected .item-box .item-text {
+    color: #99ccff;
+}
+.selected .item-box .item-name {
+    color: #eee;
 }
 .item-descr {
     font-size: 80%;
 }
-.item-shortcut {
-    font-family: "Ubuntu Mono", monospace;
-    padding: 5px;
+
+.prefs-btn {
+    background-image: url('../media/prefs.png');
 }
-.selected .item-shortcut {
-    padding: 15px;
+.prefs-btn:hover {
+    background-position: 0 -27px;
 }
