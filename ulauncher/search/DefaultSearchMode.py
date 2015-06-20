@@ -5,12 +5,14 @@ from ulauncher.search.apps.AppDb import AppDb
 
 from ulauncher.search.web.GoogleResultItem import GoogleResultItem
 from ulauncher.search.web.WikipediaResultItem import WikipediaResultItem
+from ulauncher.search.web.StackoverflowResultItem import StackoverflowResultItem
 
 
 class DefaultSearchMode(SearchMode):
 
     def on_query(self, query):
-        custom_items = [GoogleResultItem(), WikipediaResultItem()]
+        custom_items = [GoogleResultItem(), WikipediaResultItem(), StackoverflowResultItem()]
+        default_items = custom_items[:2]
         action_item = next((i for i in custom_items if query.startswith('%s ' % i.get_keyword())), None)
 
         if action_item:
@@ -18,13 +20,12 @@ class DefaultSearchMode(SearchMode):
         else:
             result_list = AppDb.get_instance().find(query)
 
-            if len(result_list):
-                # add web search items
-                result_list.extend(custom_items)
+            # add web search items
+            result_list.extend(custom_items)
 
             if not len(result_list) and query:
                 # default search
                 map(lambda i: i.set_default_search(True), custom_items)
-                result_list = custom_items
+                result_list = default_items
 
         return ActionList((RenderResultListAction(result_list),))

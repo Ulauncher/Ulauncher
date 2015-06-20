@@ -46,7 +46,7 @@ class TestDefaultSearchMode:
 
     def test_on_query__default_search(self, GoogleItem, search_mode, AppDb, Render, ActionList, SearchMode):
         query = Query('search')
-        AppDb.get_instance.return_value.find.return_value = []
+        AppDb.get_instance.return_value.find.return_value.__iter__.return_value = []
         assert search_mode.on_query(query) == ActionList.return_value
         assert Render.called
         ActionList.assert_called_with((Render.return_value,))
