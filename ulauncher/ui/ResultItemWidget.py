@@ -28,7 +28,7 @@ class ResultItemWidget(Gtk.EventBox):
 
         self.set_icon(item_object.get_icon())
         self.set_name(item_object.get_name())
-        self.set_description(item_object.get_description())
+        self.set_description(item_object.get_description(query))
 
     def set_index(self, index):
         """
@@ -55,7 +55,7 @@ class ResultItemWidget(Gtk.EventBox):
             iconWgt.set_from_pixbuf(icon)
 
     def set_name(self, name):
-        self.builder.get_object('item-name').set_text(name.replace('{query}', self.query or '...'))
+        self.builder.get_object('item-name').set_text(name)
         self.name = name
 
     def get_name(self):
@@ -70,7 +70,7 @@ class ResultItemWidget(Gtk.EventBox):
 
     def set_description(self, description):
         if description:
-            self.builder.get_object('item-descr').set_text(description.replace('{query}', self.query or '...'))
+            self.builder.get_object('item-descr').set_text(description)
         else:
             self.builder.get_object('item-descr').destroy()
 

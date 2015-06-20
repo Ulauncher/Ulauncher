@@ -17,6 +17,7 @@ from ulauncher.search import discover_search_modes, start_search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.UserQueryDb import UserQueryDb
 from ulauncher.utils.Settings import Settings
+from ulauncher.ext.Query import Query
 from .WindowBase import WindowBase
 from .AboutUlauncherDialog import AboutUlauncherDialog
 from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
@@ -130,7 +131,7 @@ class UlauncherWindow(WindowBase):
         self.__current_accel_name = accel_name
 
     def get_user_query(self):
-        return self.input.get_text().strip()
+        return Query(self.input.get_text().strip())
 
     def on_input_changed(self, entry):
         """

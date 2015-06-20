@@ -1,4 +1,5 @@
 from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
+from ulauncher.ext.Query import Query
 
 
 class ItemNavigation(object):
@@ -55,39 +56,6 @@ class ItemNavigation(object):
             return self.enter(query)
         elif self.selected is not None:
             item = self.items[self.selected]
-            return self._action_on_enter(item, query)
-
-    def _action_on_enter(self, item, query_str):
-        """
-        Returns True if something needs to be rendered
-        """
-        q = Query(query_str)
-        keyword = item.get_keyword()
-        is_keyword_misspelled = keyword and q.get_keyword() != keyword
-
-        # in order to use argument, keyword should match item's keyword
-        argument = q.get_argument() if not is_keyword_misspelled else None
-        action_list = item.on_enter(argument=argument)
-        if is_keyword_misspelled:
-            action_list.add(SetUserQueryAction('%s ' % keyword))
-        action_list.run_all()
-
-        return action_list.keep_app_open()
-
-
-class Query(object):
-    """
-    Parses user's query
-    """
-
-    def __init__(self, query):
-        self.query = query.strip()
-
-    def get_keyword(self):
-        return self.query.split(' ', 1)[0]
-
-    def get_argument(self):
-        try:
-            return self.query.split(' ', 1)[1].strip()
-        except IndexError:
-            return None
+            action_list = item.on_enter(query)
+            action_list.run_all()
+            return action_list.keep_app_open()

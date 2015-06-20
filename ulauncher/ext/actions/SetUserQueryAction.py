@@ -1,3 +1,4 @@
+from gi.repository import Gtk
 from .BaseAction import BaseAction
 
 
@@ -12,3 +13,4 @@ class SetUserQueryAction(BaseAction):
     def run(self):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         UlauncherWindow.get_instance().input.set_text(self.new_query)
+        UlauncherWindow.get_instance().input.set_position(len(self.new_query))

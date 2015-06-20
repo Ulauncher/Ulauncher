@@ -2,6 +2,7 @@ import os
 import pytest
 import mock
 from ulauncher.search.apps.AppDb import AppDb
+from collections import Iterable
 
 
 class TestAppDb(object):
@@ -66,3 +67,6 @@ class TestAppDb(object):
 
         for rec in db_with_data.get_records().values():
             AppResultItem.assert_any_call(rec)
+
+    def test_find_empty_query(self, db_with_data, mocker):
+        assert isinstance(db_with_data.find(''), Iterable)

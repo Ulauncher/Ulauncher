@@ -10,11 +10,9 @@ class ResultItem(object):
     def get_name(self):
         raise RuntimeError("%s#get_name() is not implemented" % self.__class__.__name__)
 
-    def get_description(self):
+    def get_description(self, query):
         """
-        optional.
-        {query} is replaced by a query that follows after a keyword
-        If there is no query, ... is used
+        optional
         """
 
     def get_icon(self):
@@ -26,7 +24,7 @@ class ResultItem(object):
     def include_in_results(self):
         return True  # show among apps and other result items
 
-    def on_enter(self, argument=None):
+    def on_enter(self, query):
         """
         :param str argument: it is passed only if get_keyword() is implemented
         This allows you to create flows with a result item

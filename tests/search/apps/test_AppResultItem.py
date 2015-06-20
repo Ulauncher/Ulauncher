@@ -1,6 +1,7 @@
 import mock
 import pytest
 from ulauncher.search.apps.AppResultItem import AppResultItem
+from ulauncher.ext.Query import Query
 
 
 class TestAppResultItem:
@@ -18,7 +19,7 @@ class TestAppResultItem:
         assert item.get_name() == 'TestAppResultItem'
 
     def test_get_description(self, item):
-        assert item.get_description() == 'Description of TestAppResultItem'
+        assert item.get_description(Query('q')) == 'Description of TestAppResultItem'
 
     def test_get_icon(self, item):
         assert item.get_icon() == 'icon123'

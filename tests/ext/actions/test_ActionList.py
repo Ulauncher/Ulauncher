@@ -16,6 +16,8 @@ class TestActionList:
         assert l.keep_app_open()
         l = ActionList((self.create_action(False), self.create_action(False)))
         assert not l.keep_app_open()
+        l = ActionList()
+        assert l.keep_app_open()
 
     def test_run_all(self):
         l = ActionList((self.create_action(False), self.create_action(True), self.create_action(False)))

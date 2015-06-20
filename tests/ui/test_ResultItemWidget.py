@@ -41,6 +41,7 @@ class TestResultItem(object):
         set_index.assert_called_with(3)
         set_name.assert_called_with(item_obj.get_name.return_value)
         set_description.assert_called_with(item_obj.get_description.return_value)
+        item_obj.get_description.assert_called_with('query')
 
     def test_set_index(self, result_item_wgt, mocker):
         mock_set_shortcut = mocker.patch.object(result_item_wgt, 'set_shortcut')

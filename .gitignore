@@ -7,3 +7,5 @@ ulauncherc
 *.egg-info
 build
 po
+.coverage
+htmlcov

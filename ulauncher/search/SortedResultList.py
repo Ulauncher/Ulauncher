@@ -38,6 +38,9 @@ class SortedResultList(object):
     def __contains__(self, item):
         return item in self._items
 
+    def extend(self, items):
+        map(lambda i: self.append(i), items)
+
     def append(self, result_item):
         score = string_score(self._query, result_item.get_keyword() or result_item.get_name())
         if score >= self._min_score:

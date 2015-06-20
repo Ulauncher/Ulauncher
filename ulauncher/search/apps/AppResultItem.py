@@ -14,11 +14,11 @@ class AppResultItem(ResultItem):
     def get_name(self):
         return self.record.get('name')
 
-    def get_description(self):
+    def get_description(self, query):
         return self.record.get('description')
 
     def get_icon(self):
         return self.record.get('icon')
 
-    def on_enter(self, argument=None):
+    def on_enter(self):
         return ActionList((LaunchAppAction(self.record.get('desktop_file')),))
