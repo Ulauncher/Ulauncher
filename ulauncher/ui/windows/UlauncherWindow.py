@@ -163,7 +163,7 @@ class UlauncherWindow(WindowBase):
             map(self.result_box.add, results)
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
-            self.result_box.set_margin_top(5)
+            self.result_box.set_margin_top(3)
             self.results_nav = ItemNavigation(self.result_box.get_children())
 
             # select the same item user previously selected for this query

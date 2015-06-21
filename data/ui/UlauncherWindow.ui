@@ -45,8 +45,8 @@
                     <property name="is_focus">True</property>
                     <property name="can_default">True</property>
                     <property name="receives_default">True</property>
-                    <property name="margin_left">25</property>
-                    <property name="margin_right">25</property>
+                    <property name="margin_left">24</property>
+                    <property name="margin_right">24</property>
                     <property name="margin_top">10</property>
                     <property name="margin_bottom">10</property>
                     <style>
