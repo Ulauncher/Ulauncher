@@ -30,4 +30,4 @@ def test_create_item(result_item, Builder, get_data_file):
     Builder.return_value.get_object.return_value.initialize.assert_called_with(
         Builder.return_value, result_item, 1, 'test')
     Builder.return_value.add_from_file.assert_called_with(get_data_file.return_value)
-    get_data_file.assert_called_with('ui', 'result_item.ui')
+    get_data_file.assert_called_with('ui', '%s.ui' % result_item.UI_FILE)

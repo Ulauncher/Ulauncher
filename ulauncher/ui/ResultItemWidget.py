@@ -20,7 +20,6 @@ class ResultItemWidget(Gtk.EventBox):
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
-        builder.get_object('item-shortcut').connect("clicked", self.on_click)
 
         self.item_object = item_object
         self.query = query
@@ -35,16 +34,16 @@ class ResultItemWidget(Gtk.EventBox):
         Set index for the item and assign shortcut
         """
         self.index = index
-        self.shortcut = 'Alt+%s' % (index + 1)
+        # Alt+1..9, then Alt+a..z
+        index_text = index + 1 if index < 9 else chr(97 + index - 9)
+        self.shortcut = 'Alt+%s' % index_text
         self.set_shortcut(self.shortcut)
 
     def select(self):
         self.get_style_context().add_class('selected')
-        self.set_shortcut('')
 
     def deselect(self):
         self.get_style_context().remove_class('selected')
-        self.set_shortcut(self.shortcut)
 
     def set_icon(self, icon):
         """
@@ -69,16 +68,18 @@ class ResultItemWidget(Gtk.EventBox):
         self.get_toplevel().select_result_item(self.index)
 
     def set_description(self, description):
+        description_obj = self.builder.get_object('item-descr')
+        if not description_obj:
+            return
+
         if description:
-            self.builder.get_object('item-descr').set_text(description)
+            description_obj.set_text(description)
         else:
-            self.builder.get_object('item-descr').destroy()  # remove description label
+            description_obj.destroy()  # remove description label
             self.builder.get_object('item-name').set_margin_top(8)  # shift name label down to the center
 
     def set_shortcut(self, text):
-        item_shortcut = self.builder.get_object('item-shortcut')
-        item_shortcut.set_always_show_image(False if text else True)
-        item_shortcut.set_label(text)
+        self.builder.get_object('item-shortcut').set_text(text)
 
     def on_enter(self, query):
         return self.item_object.on_enter(query)

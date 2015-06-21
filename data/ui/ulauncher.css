@@ -47,3 +47,14 @@ GtkWindow {
 .prefs-btn:hover {
     background-position: 0 -27px;
 }
+
+
+/**
+ * Small result item
+ */
+.small-result-item.selected .item-box {
+    border-radius: 5px
+}
+.small-result-item .item-name {
+    font-size: 100%;
+}

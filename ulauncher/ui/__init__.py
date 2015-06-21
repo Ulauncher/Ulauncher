@@ -1,16 +1,10 @@
 import os
 from gi.repository import Gtk
 from ulauncher.config import get_data_file
-from ulauncher.ext.ResultItem import ResultItem
 
 
 def create_item(result_item, index, query):
-    if isinstance(result_item, ResultItem):
-        ui_file = 'result_item'  # default item UI
-    else:
-        raise TypeError('Invalid type "%s" for result item' % type(result_item))
-
-    glade_filename = get_data_file('ui', '%s.ui' % ui_file)
+    glade_filename = get_data_file('ui', '%s.ui' % result_item.UI_FILE)
     if not os.path.exists(glade_filename):
         glade_filename = None
 

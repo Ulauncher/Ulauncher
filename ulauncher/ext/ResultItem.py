@@ -1,5 +1,8 @@
 class ResultItem(object):
 
+    ICON_SIZE = 40
+    UI_FILE = 'result_item'
+
     score = None  # used by SortedResultList class to maintain sorted by score order of items
 
     def get_keyword(self):

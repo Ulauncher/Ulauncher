@@ -1,4 +1,5 @@
 from .DefaultSearchMode import DefaultSearchMode as UlauncherSearch  # rename to avoid name collision with the module
+from .file_browser.FileBrowserMode import FileBrowserMode
 
 
 def discover_search_modes():
@@ -6,7 +7,7 @@ def discover_search_modes():
     Run once at startup and
     TODO: implement plugin auto-discovery in v2
     """
-    return []
+    return [FileBrowserMode()]
 
 
 default_search_mode = UlauncherSearch()

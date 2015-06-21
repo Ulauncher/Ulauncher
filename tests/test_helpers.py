@@ -12,3 +12,5 @@ def test_string_score():
     assert string_score('ie', 'LibreOffice Calc') < 40
     assert string_score('', 'LibreOffice Calc') == 0
     assert string_score('0', 'LibreOffice Calc') == 0
+
+    assert string_score('.pdf', 'testfile.pdf') > string_score('.pdf', 'dpdf')

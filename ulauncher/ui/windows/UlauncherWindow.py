@@ -9,8 +9,9 @@ from ulauncher.utils.display import get_current_screen_geometry
 from ulauncher.config import get_data_file
 from ulauncher.ui import create_item_widgets
 
-# this import is needed for Gtk to find AppResultItemWidget class
-from ulauncher.ui.AppResultItemWidget import AppResultItemWidget
+# these imports are needed for Gtk to find widget classes
+from ulauncher.ui.ResultItemWidget import ResultItemWidget
+from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import discover_search_modes, start_search
@@ -193,6 +194,13 @@ class UlauncherWindow(WindowBase):
                 # on Alt+<num>
                 try:
                     self.enter_result_item(int(keyname) - 1)
+                except IndexError:
+                    # selected non-existing result item
+                    pass
+            elif alt and len(keyname) == 1 and 97 <= ord(keyname) <= 122:
+                # on Alt+<char>
+                try:
+                    self.enter_result_item(ord(keyname) - 97 + 9)
                 except IndexError:
                     # selected non-existing result item
                     pass

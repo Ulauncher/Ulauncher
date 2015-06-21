@@ -3,7 +3,6 @@ from ulauncher.ext.actions.ActionList import ActionList
 from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
 from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
 from ulauncher.helpers import load_image
-from ulauncher.utils.icon_loader import ICON_SIZE
 
 
 class WebResultItem(ResultItem):
@@ -35,7 +34,7 @@ class WebResultItem(ResultItem):
             return self.description.replace('{query}', '...')
 
     def get_icon(self):
-        return load_image(self.icon_path, ICON_SIZE)
+        return load_image(self.icon_path, self.ICON_SIZE)
 
     def on_enter(self, query):
         action_list = ActionList()

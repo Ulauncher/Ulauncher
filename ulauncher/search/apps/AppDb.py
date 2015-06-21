@@ -23,7 +23,7 @@ class AppDb(KeyValueDb):
             "desktop_file": app.get_filename(),
             "name": app.get_string('X-GNOME-FullName') or app.get_name(),
             "description": app.get_description(),
-            "icon": get_app_icon_pixbuf(app)
+            "icon": get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
         }
         # use name as a key in order to skip duplicates
         return self.put(record['name'], record)

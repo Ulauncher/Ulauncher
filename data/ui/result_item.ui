@@ -3,13 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.8"/>
   <!-- interface-requires result_item 1.0 -->
-  <!-- interface-requires app_result_item 1.0 -->
   <!-- interface-local-resource-path ../media -->
-  <object class="GtkImage" id="return-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">../media/return.png</property>
-  </object>
   <object class="ResultItemWidget" id="item-frame">
     <property name="name">item_frame</property>
     <property name="visible">True</property>
@@ -46,7 +40,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFixed" id="fixed1">
+              <object class="GtkFixed" id="name_wrapper">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
@@ -94,19 +88,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="item-shortcut">
-                <property name="label" translatable="yes">button</property>
-                <property name="name">item_shortcut</property>
-                <property name="margin_left">10</property>
-                <property name="width_request">40</property>
-                <property name="height_request">40</property>
+              <object class="GtkLabel" id="item-shortcut">
+                <property name="name">item-shortcut</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="receives_default">False</property>
-                <property name="image">return-icon</property>
-                <property name="focus_on_click">False</property>
-                <property name="xalign">0.5</property>
+                <property name="margin_left">15</property>
+                <property name="label">Alt+1</property>
                 <style>
+                  <class name="item-shortcut"/>
                   <class name="item-text"/>
                 </style>
               </object>

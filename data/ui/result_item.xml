@@ -1,4 +1,4 @@
-<glade-catalog name="app_result_item" domain="glade-3"
+<glade-catalog name="result_item" domain="glade-3"
                depends="gtk+" version="1.0">
   <glade-widget-classes>
     <glade-widget-class title="Result Item Widget" name="ResultItemWidget"

@@ -123,6 +123,10 @@ def string_score(query, string):
         # add extra 10% to a score, if record starts with a query
         extra_score += 10 if index == 0 else 0
 
+    # special case: improve score for query that is a file extension name
+    if query.startswith('.') and string.endswith(query):
+        extra_score += 30
+
     best_score = 0
     words = string.split(' ')
     words.append(string)  # add the whole record name too
