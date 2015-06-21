@@ -65,9 +65,13 @@ class UlauncherWindow(WindowBase):
 
         self.position_window()
         self.init_styles()
-        self.bind_show_app_hotkey(Settings.get_instance().get_property('hotkey-show-app'))
-        start_app_watcher()
+
+        # bind hotkey
         Keybinder.init()
+        accel_name = Settings.get_instance().get_property('hotkey-show-app')
+        self.bind_show_app_hotkey(accel_name)
+
+        start_app_watcher()
 
     def position_window(self):
         window_width = self.get_size()[0]
