@@ -77,11 +77,11 @@ class UlauncherWindow(WindowBase):
         window_width = self.get_size()[0]
         current_screen = get_current_screen_geometry()
 
-        # The topmost pixel of the window should be at 1/4 of the current screen's height
+        # The topmost pixel of the window should be at 1/5 of the current screen's height
         # Window should be positioned in the center horizontally
         # Also, add offset x and y, in order to move window to the current screen
         self.move(current_screen['width'] / 2 - window_width / 2 + current_screen['x'],
-                  current_screen['height'] / 4 + current_screen['y'])
+                  current_screen['height'] / 5 + current_screen['y'])
 
     def init_styles(self):
         self.provider = Gtk.CssProvider()
