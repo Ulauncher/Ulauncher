@@ -1,27 +1,27 @@
+from ulauncher.helpers import singleton
 from .DefaultSearchMode import DefaultSearchMode as UlauncherSearch  # rename to avoid name collision with the module
 from .file_browser.FileBrowserMode import FileBrowserMode
 
 
-def discover_search_modes():
-    """
-    Run once at startup and
-    TODO: implement plugin auto-discovery in v2
-    """
-    return [FileBrowserMode()]
+class Search(object):
 
+    @classmethod
+    @singleton
+    def get_instance(cls):
+        return cls(UlauncherSearch(), [FileBrowserMode()])
 
-default_search_mode = UlauncherSearch()
+    def __init__(self, default_search_mode, search_modes):
+        self.default_search_mode = default_search_mode
+        self.search_modes = search_modes
 
+    def start(self, query):
+        """
+        Iterate over all search modes and run first enabled. Fallback to DefaultSearchMode
+        """
+        self.choose_search_mode(query).on_query(query).run_all()
 
-def start_search(query, search_modes):
-    """
-    Iterate over all search modes and run first enabled. Fallback to DefaultSearchMode
-    """
+    def choose_search_mode(self, query):
+        return next((mode for mode in self.search_modes if mode.is_enabled(query)), self.default_search_mode)
 
-    search_mode = default_search_mode
-    for mode in search_modes:
-        if mode.is_enabled(query):
-            search_mode = mode
-            break
-
-    search_mode.on_query(query).run_all()
+    def on_key_press_event(self, widget, event, query):
+        self.choose_search_mode(query).on_key_press_event(widget, event, query)

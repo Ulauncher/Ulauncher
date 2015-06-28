@@ -1,4 +1,5 @@
 import os
+from gi.repository import Gdk
 from ulauncher.ext.SearchMode import SearchMode
 from ulauncher.ext.actions.ActionList import ActionList
 from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
@@ -40,28 +41,43 @@ class FileBrowserMode(SearchMode):
     def filter_dot_files(self, file_list):
         return filter(lambda f: not f.startswith('.'), file_list)
 
+    def on_key_press_event(self, widget, event, query):
+        keyval = event.get_keyval()
+        keyname = Gdk.keyval_name(keyval[1])
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        if keyname == 'BackSpace' and not ctrl and widget.get_position() == len(query):
+            # stop key press event if:
+            # it's a BackSpace key and
+            # Ctrl modifier is not pressed and
+            # cursor is at the last position
+            widget.emit_stop_by_name('key-press-event')
+            path = Path(query)
+            SetUserQueryAction(os.path.join(path.get_dirname(), '')).run()
+
     def on_query(self, query):
+        if query == '~':
+            return ActionList((SetUserQueryAction('~/'),))
+
         path = Path(query)
 
         try:
             existing_dir = path.get_existing_dir()
-        except InvalidPathError:
-            return ActionList((RenderResultListAction([]),))
-
-        if existing_dir == str(path):
-            results = self.list_files(str(path), sort_by_usage=True)
-            result_items = map(self.create_result_item, map(lambda name: os.path.join(existing_dir, name),
-                               self.filter_dot_files(results)[:self.RESULT_LIMIT]))
-        else:
-            results = self.list_files(existing_dir)
-            search_for = path.get_search_part()
-            if not search_for.startswith('.'):
-                # don't show dot files in the results
-                results = map(lambda name: os.path.join(existing_dir, name), self.filter_dot_files(results))
+            if existing_dir == str(path):
+                results = self.list_files(str(path), sort_by_usage=True)
+                result_items = map(self.create_result_item, map(lambda name: os.path.join(existing_dir, name),
+                                   self.filter_dot_files(results)[:self.RESULT_LIMIT]))
             else:
-                results = map(lambda name: os.path.join(existing_dir, name), results)
+                results = self.list_files(existing_dir)
+                search_for = path.get_search_part()
+                if not search_for.startswith('.'):
+                    # don't show dot files in the results
+                    results = map(lambda name: os.path.join(existing_dir, name), self.filter_dot_files(results))
+                else:
+                    results = map(lambda name: os.path.join(existing_dir, name), results)
 
-            result_items = SortedResultList(search_for, min_score=40, limit=self.RESULT_LIMIT)
-            result_items.extend(map(self.create_result_item, reversed(results)))
+                result_items = SortedResultList(search_for, min_score=40, limit=self.RESULT_LIMIT)
+                result_items.extend(map(self.create_result_item, reversed(results)))
+        except (InvalidPathError, OSError):
+            return ActionList((RenderResultListAction([]),))
 
         return ActionList((RenderResultListAction(result_items),))

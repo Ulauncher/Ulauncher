@@ -17,6 +17,9 @@ class Path(object):
     def get_basename(self):
         return os.path.basename(self._path.rstrip('/'))
 
+    def get_dirname(self):
+        return os.path.dirname(self.get_user_path())
+
     def is_dir(self):
         return os.path.isdir(self._path)
 

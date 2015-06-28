@@ -1,5 +1,6 @@
 import mock
 import pytest
+from gi.repository import Gdk
 from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.search.file_browser.Path import Path, InvalidPathError
 from ulauncher.search.file_browser.FileQueries import FileQueries
@@ -19,6 +20,10 @@ class TestFileBrowserMode:
     @pytest.fixture
     def ActionList(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.ActionList')
+
+    @pytest.fixture
+    def SetUserQueryAction(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SetUserQueryAction')
 
     @pytest.fixture
     def SortedResultList(self, mocker):
@@ -92,3 +97,56 @@ class TestFileBrowserMode:
         assert mode.on_query('/usr/bin/foo') == ActionList.return_value
         SortedResultList.assert_called_with(path.get_search_part.return_value, min_score=40, limit=3)
         RenderResultListAction.assert_called_with(SortedResultList.return_value)
+
+    def test_on_key_press_event(self, mode, mocker, SetUserQueryAction):
+        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
+                                   return_value='BackSpace')
+        widget = mock.MagicMock()
+        event = mock.MagicMock()
+        event.state = 0
+        query = '/usr/bin/'
+        widget.get_position.return_value = len(query)
+        mode.on_key_press_event(widget, event, query)
+
+        SetUserQueryAction.assert_called_with('/usr/')
+        SetUserQueryAction.return_value.run.assert_called_with()
+        widget.emit_stop_by_name.assert_called_with('key-press-event')
+
+    def test_on_key_press_event__not_backspace(self, mode, mocker, SetUserQueryAction):
+        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
+                                   return_value='Enter')
+        widget = mock.MagicMock()
+        event = mock.MagicMock()
+        event.state = 0
+        query = '/usr/bin/'
+        widget.get_position.return_value = len(query)
+        mode.on_key_press_event(widget, event, query)
+
+        assert not SetUserQueryAction.called
+        assert not widget.emit_stop_by_name.called
+
+    def test_on_key_press_event__ctrl_pressed(self, mode, mocker, SetUserQueryAction):
+        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
+                                   return_value='BackSpace')
+        widget = mock.MagicMock()
+        event = mock.MagicMock()
+        event.state = Gdk.ModifierType.MOD2_MASK | Gdk.ModifierType.CONTROL_MASK
+        query = '/usr/bin/'
+        widget.get_position.return_value = len(query)
+        mode.on_key_press_event(widget, event, query)
+
+        assert not SetUserQueryAction.called
+        assert not widget.emit_stop_by_name.called
+
+    def test_on_key_press_event__wrong_cursor_position(self, mode, mocker, SetUserQueryAction):
+        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
+                                   return_value='BackSpace')
+        widget = mock.MagicMock()
+        event = mock.MagicMock()
+        event.state = 0
+        query = '/usr/bin/'
+        widget.get_position.return_value = 3
+        mode.on_key_press_event(widget, event, query)
+
+        assert not SetUserQueryAction.called
+        assert not widget.emit_stop_by_name.called

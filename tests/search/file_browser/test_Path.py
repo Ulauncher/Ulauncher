@@ -40,3 +40,10 @@ class TestPath:
         assert Path('/bin').get_basename() == 'bin'
         assert Path('/usr/bin/My Videos').get_basename() == 'My Videos'
         assert Path('~/foo/bar//').get_basename() == 'bar'
+
+    def test_get_dirname(self):
+        assert Path('~/Pictures/').get_dirname() == '~'
+        assert Path('~/').get_dirname() == ''
+        assert Path('~').get_dirname() == ''
+        assert Path('/').get_dirname() == ''
+        assert Path('/usr/bin/foo').get_dirname() == '/usr/bin'

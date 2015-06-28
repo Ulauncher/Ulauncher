@@ -14,7 +14,7 @@ from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.search import discover_search_modes, start_search
+from ulauncher.search import Search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.utils.Settings import Settings
 from ulauncher.ext.Query import Query
@@ -60,8 +60,6 @@ class UlauncherWindow(WindowBase):
 
         self.AboutDialog = AboutUlauncherDialog
         self.PreferencesDialog = PreferencesUlauncherDialog
-
-        self.search_modes = discover_search_modes()
 
         self.position_window()
         self.init_styles()
@@ -141,7 +139,7 @@ class UlauncherWindow(WindowBase):
         """
         Triggered by user input
         """
-        start_search(self.get_user_query(), self.search_modes)
+        Search.get_instance().start(self.get_user_query())
 
     def select_result_item(self, index):
         self.results_nav.select(index)
@@ -171,10 +169,11 @@ class UlauncherWindow(WindowBase):
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
 
-    def on_key_press_event(self, widget, event):
+    def on_input_key_press_event(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
+        Search.get_instance().on_key_press_event(widget, event, self.get_user_query())
 
         if self.results_nav:
             if keyname == 'Up':
