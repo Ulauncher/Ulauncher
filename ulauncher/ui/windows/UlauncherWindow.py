@@ -16,7 +16,6 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import discover_search_modes, start_search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
-from ulauncher.search.UserQueryDb import UserQueryDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.ext.Query import Query
 from .WindowBase import WindowBase
@@ -151,7 +150,6 @@ class UlauncherWindow(WindowBase):
         if not self.results_nav.enter(self.get_user_query(), index):
             # close the window if it has to be closed on enter
             self.hide()
-            self.save_user_query()
 
     def show_results(self, result_items):
         """
@@ -162,17 +160,12 @@ class UlauncherWindow(WindowBase):
         results = list(create_item_widgets(result_items, self.get_user_query()))  # generator -> list
         if results:
             map(self.result_box.add, results)
+            self.results_nav = ItemNavigation(self.result_box.get_children())
+            self.results_nav.select_default(self.get_user_query())
+
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
-            self.results_nav = ItemNavigation(self.result_box.get_children())
-
-            # select the same item user previously selected for this query
-            user_queries = UserQueryDb.get_instance()
-            name = user_queries.find(self.get_user_query())
-            selected_index = self.results_nav.get_index_by_name(name) or 0 if name else 0
-            self.results_nav.select(selected_index)
-
             self.apply_css(self.result_box, self.provider)
         else:
             self.result_box.set_margin_bottom(0)
@@ -207,10 +200,3 @@ class UlauncherWindow(WindowBase):
 
         if keyname == 'Escape':
             self.hide()
-
-    def save_user_query(self):
-        name = self.results_nav.get_selected_name()
-        if name:
-            user_queries = UserQueryDb.get_instance()
-            user_queries.put(self.get_user_query(), name)
-            user_queries.commit()  # save to disk

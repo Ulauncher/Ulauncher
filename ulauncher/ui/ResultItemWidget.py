@@ -86,3 +86,6 @@ class ResultItemWidget(Gtk.EventBox):
 
     def get_keyword(self):
         return self.item_object.get_keyword()
+
+    def selected_by_default(self, query):
+        return self.item_object.selected_by_default(query)

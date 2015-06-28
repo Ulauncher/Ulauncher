@@ -25,7 +25,16 @@ class ResultItem(object):
         """
 
     def include_in_results(self):
-        return True  # show among apps and other result items
+        """
+        Return True to display item among apps in the default search
+        """
+        return True
+
+    def selected_by_default(self, query):
+        """
+        Return True if item should be selected by default
+        """
+        return False
 
     def on_enter(self, query):
         """

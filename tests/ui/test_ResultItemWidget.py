@@ -101,3 +101,6 @@ class TestResultItem(object):
 
     def test_get_keyword(self, result_item_wgt, item_obj):
         assert result_item_wgt.get_keyword() is item_obj.get_keyword.return_value
+
+    def test_selected_by_default(self, result_item_wgt, item_obj):
+        assert result_item_wgt.selected_by_default('q') is item_obj.selected_by_default.return_value

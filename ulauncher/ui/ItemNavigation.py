@@ -18,12 +18,12 @@ class ItemNavigation(object):
     def get_selected_index(self):
         return self.selected
 
-    def get_selected_name(self):
-        index = self.get_selected_index()
-        return self.items[index].get_name()
-
-    def get_index_by_name(self, name):
-        return next((index for index, item in enumerate(self.items) if item.get_name() == name), None)
+    def select_default(self, query):
+        """
+        Selects item that should be selected by default
+        If no such items found, select the first one in the list
+        """
+        self.select(next((index for index, item in enumerate(self.items) if item.selected_by_default(query)), 0))
 
     def select(self, index):
         if not (0 < index < self.items_num):
