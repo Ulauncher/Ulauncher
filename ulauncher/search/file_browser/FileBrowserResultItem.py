@@ -23,7 +23,7 @@ class FileBrowserResultItem(SmallResultItem):
         return self.path.get_basename()
 
     def get_icon(self):
-        return get_file_icon(str(self.path), self.ICON_SIZE)
+        return get_file_icon(self.path, self.ICON_SIZE)
 
     def on_enter(self, query):
         self._file_queries.put(str(self.path))

@@ -5,24 +5,25 @@ from ulauncher.search.file_browser.Path import Path, InvalidPathError
 
 class TestPath:
 
-    def test_get_existing_path(self):
-        assert Path('/usr/bin').get_existing_path() == '/usr/bin'
-        assert Path('/usr/bin/foo').get_existing_path() == '/usr/bin'
-        assert Path('/usr/bin/foo/bar').get_existing_path() == '/usr/bin'
-        assert Path('/usr/bin/.').get_existing_path() == '/usr/bin'
-        assert Path('~/foo/bar').get_existing_path() == os.path.expanduser('~')
+    def test_get_existing_dir(self):
+        assert Path('/usr/bin').get_existing_dir() == '/usr/bin'
+        assert Path('/usr/bin/foo').get_existing_dir() == '/usr/bin'
+        assert Path('/usr/bin/foo/bar').get_existing_dir() == '/usr/bin'
+        assert Path('/usr/bin/.').get_existing_dir() == '/usr/bin'
+        assert Path('/usr/bin/sh').get_existing_dir() == '/usr/bin'
+        assert Path('~/foo/bar').get_existing_dir() == os.path.expanduser('~')
 
-    def test_get_existing_path__caches(self, mocker):
+    def test_get_existing_dir__caches(self, mocker):
         path = Path('/usr/bin/foo')
-        assert path.get_existing_path() == '/usr/bin'
+        assert path.get_existing_dir() == '/usr/bin'
         os_path_exitst = mocker.patch('ulauncher.search.file_browser.Path.os.path.exists')
-        assert path.get_existing_path() == '/usr/bin'
-        assert path.get_existing_path() == '/usr/bin'
+        assert path.get_existing_dir() == '/usr/bin'
+        assert path.get_existing_dir() == '/usr/bin'
         assert not os_path_exitst.called
 
-    def test_get_existing_path__raises(self):
+    def test_get_existing_dir__raises(self):
         with pytest.raises(InvalidPathError):
-            assert Path('~~').get_existing_path()
+            assert Path('~~').get_existing_dir()
 
     def test_get_search_part(self):
         assert Path('/usr/bin').get_search_part() == ''

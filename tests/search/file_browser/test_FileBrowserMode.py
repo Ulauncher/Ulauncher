@@ -69,7 +69,7 @@ class TestFileBrowserMode:
         ActionList.assert_called_once_with((RenderResultListAction.return_value,))
 
         # invalid path
-        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Path.get_existing_path',
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Path.get_existing_dir',
                      side_effect=InvalidPathError)
         assert mode.on_query('~~') == ActionList.return_value
         ActionList.assert_called_with((RenderResultListAction.return_value,))
@@ -78,7 +78,7 @@ class TestFileBrowserMode:
     def test_on_query__existing_path(self, mode, mocker, ActionList, RenderResultListAction):
         mode.RESULT_LIMIT = 3
         mocker.patch.object(mode, 'list_files', return_value=sorted(['a', 'd', 'b', '.c', 'e'], reverse=True))
-        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Path.get_existing_path',
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Path.get_existing_dir',
                      return_value='/usr/bin')
         mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
         assert mode.on_query('/usr/bin') == ActionList.return_value

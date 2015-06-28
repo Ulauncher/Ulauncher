@@ -44,22 +44,22 @@ class FileBrowserMode(SearchMode):
         path = Path(query)
 
         try:
-            existing_path = path.get_existing_path()
+            existing_dir = path.get_existing_dir()
         except InvalidPathError:
             return ActionList((RenderResultListAction([]),))
 
-        if existing_path == str(path):
+        if existing_dir == str(path):
             results = self.list_files(str(path), sort_by_usage=True)
-            result_items = map(self.create_result_item, map(lambda name: os.path.join(existing_path, name),
+            result_items = map(self.create_result_item, map(lambda name: os.path.join(existing_dir, name),
                                self.filter_dot_files(results)[:self.RESULT_LIMIT]))
         else:
-            results = self.list_files(existing_path)
+            results = self.list_files(existing_dir)
             search_for = path.get_search_part()
             if not search_for.startswith('.'):
                 # don't show dot files in the results
-                results = map(lambda name: os.path.join(existing_path, name), self.filter_dot_files(results))
+                results = map(lambda name: os.path.join(existing_dir, name), self.filter_dot_files(results))
             else:
-                results = map(lambda name: os.path.join(existing_path, name), results)
+                results = map(lambda name: os.path.join(existing_dir, name), results)
 
             result_items = SortedResultList(search_for, min_score=40, limit=self.RESULT_LIMIT)
             result_items.extend(map(self.create_result_item, reversed(results)))

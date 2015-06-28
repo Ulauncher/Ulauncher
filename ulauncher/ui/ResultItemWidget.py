@@ -47,7 +47,7 @@ class ResultItemWidget(Gtk.EventBox):
 
     def set_icon(self, icon):
         """
-        Icon can be either a PixBuf instance or None (the default is used)
+        :param PixBuf icon:
         """
         if icon:
             iconWgt = self.builder.get_object('item-icon')

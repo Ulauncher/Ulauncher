@@ -27,7 +27,7 @@ class TestFileBrowserResultItem:
     def test_icon(self, result_item, path, mocker):
         get_file_icon = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.get_file_icon')
         assert result_item.get_icon() == get_file_icon.return_value
-        get_file_icon.assert_called_with(str(path), result_item.ICON_SIZE)
+        get_file_icon.assert_called_with(path, result_item.ICON_SIZE)
 
     def test_on_enter(self, result_item, path, mocker, file_queries):
         ActionList = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.ActionList')

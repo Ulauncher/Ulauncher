@@ -16,10 +16,3 @@ class SmallResultItemWidget(ResultItemWidget):
     """
 
     __gtype_name__ = "SmallResultItemWidget"
-
-    def __init__(self):
-        super(SmallResultItemWidget, self).__init__()
-        self._default_app_icon = get_themed_icon_by_name('application-default-icon', SmallResultItem.ICON_SIZE)
-
-    def set_default_icon(self):
-        self.builder.get_object('item-icon').set_from_pixbuf(self._default_app_icon)
