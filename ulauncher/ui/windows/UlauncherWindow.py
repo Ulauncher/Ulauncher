@@ -144,8 +144,8 @@ class UlauncherWindow(WindowBase):
     def select_result_item(self, index):
         self.results_nav.select(index)
 
-    def enter_result_item(self, index=None):
-        if not self.results_nav.enter(self.get_user_query(), index):
+    def enter_result_item(self, index=None, alt=False):
+        if not self.results_nav.enter(self.get_user_query(), index, alt=alt):
             # close the window if it has to be closed on enter
             self.hide()
 
@@ -180,6 +180,8 @@ class UlauncherWindow(WindowBase):
                 self.results_nav.go_up()
             elif keyname == 'Down':
                 self.results_nav.go_down()
+            elif alt and keyname in ('Return', 'KP_Enter'):
+                self.enter_result_item(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
                 self.enter_result_item()
             elif alt and keyname.isdigit() and 0 < int(keyname) < 10:

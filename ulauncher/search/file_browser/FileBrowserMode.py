@@ -45,13 +45,14 @@ class FileBrowserMode(SearchMode):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        if keyname == 'BackSpace' and not ctrl and widget.get_position() == len(query):
+        path = Path(query)
+        if keyname == 'BackSpace' and not ctrl and widget.get_position() == len(query) and path.is_dir():
             # stop key press event if:
             # it's a BackSpace key and
             # Ctrl modifier is not pressed and
-            # cursor is at the last position
+            # cursor is at the last position and
+            # path exists and it's a directory
             widget.emit_stop_by_name('key-press-event')
-            path = Path(query)
             SetUserQueryAction(os.path.join(path.get_dirname(), '')).run()
 
     def on_query(self, query):

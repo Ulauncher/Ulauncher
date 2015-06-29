@@ -43,7 +43,7 @@ class ItemNavigation(object):
         index = self.selected + 1 if self.selected is not None and self.selected < self.items_num else 0
         self.select(index)
 
-    def enter(self, query, index=None):
+    def enter(self, query, index=None, alt=False):
         """
         Enter into selected item, unless 'index' is passed
         Return boolean - True if Ulauncher window should be closed
@@ -56,6 +56,8 @@ class ItemNavigation(object):
             return self.enter(query)
         elif self.selected is not None:
             item = self.items[self.selected]
-            action_list = item.on_enter(query)
+            action_list = item.on_enter(query) if not alt else item.on_alt_enter(query)
+            if not action_list:
+                return True
             action_list.run_all()
             return action_list.keep_app_open()

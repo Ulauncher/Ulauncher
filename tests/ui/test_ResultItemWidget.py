@@ -99,6 +99,10 @@ class TestResultItem(object):
         assert result_item_wgt.on_enter('test') is item_obj.on_enter.return_value
         item_obj.on_enter.assert_called_with('test')
 
+    def test_on_alt_enter(self, result_item_wgt, item_obj):
+        assert result_item_wgt.on_alt_enter('test') is item_obj.on_alt_enter.return_value
+        item_obj.on_alt_enter.assert_called_with('test')
+
     def test_get_keyword(self, result_item_wgt, item_obj):
         assert result_item_wgt.get_keyword() is item_obj.get_keyword.return_value
 

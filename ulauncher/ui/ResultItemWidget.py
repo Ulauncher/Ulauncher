@@ -84,6 +84,9 @@ class ResultItemWidget(Gtk.EventBox):
     def on_enter(self, query):
         return self.item_object.on_enter(query)
 
+    def on_alt_enter(self, query):
+        return self.item_object.on_alt_enter(query)
+
     def get_keyword(self):
         return self.item_object.get_keyword()
 

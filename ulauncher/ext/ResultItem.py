@@ -43,3 +43,11 @@ class ResultItem(object):
         Return ActionList()
         """
         raise RuntimeError("%s#on_enter() is not implemented" % self.__class__.__name__)
+
+    def on_alt_enter(self, query):
+        """
+        Optional alternative enter
+
+        :param str argument: it is passed only if get_keyword() is implemented
+        Return ActionList()
+        """

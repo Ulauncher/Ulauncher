@@ -150,3 +150,16 @@ class TestFileBrowserMode:
 
         assert not SetUserQueryAction.called
         assert not widget.emit_stop_by_name.called
+
+    def test_on_key_press_event__not_dir(self, mode, mocker, SetUserQueryAction):
+        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
+                                   return_value='BackSpace')
+        widget = mock.MagicMock()
+        event = mock.MagicMock()
+        event.state = 0
+        query = '/usr/b/'
+        widget.get_position.return_value = len(query)
+        mode.on_key_press_event(widget, event, query)
+
+        assert not SetUserQueryAction.called
+        assert not widget.emit_stop_by_name.called
