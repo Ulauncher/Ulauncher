@@ -19,6 +19,8 @@ class TestUlauncherWindow:
 
     @pytest.fixture
     def window(self, mocker):
+        # don't run first_bind_app_hotkey()
+        mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.first_bind_app_hotkey')
         return UlauncherWindow()
 
     @pytest.mark.with_display

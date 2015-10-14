@@ -18,6 +18,7 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import Search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.run_async import run_async
 from ulauncher.ext.Query import Query
 from .WindowBase import WindowBase
 from .AboutUlauncherDialog import AboutUlauncherDialog
@@ -31,6 +32,7 @@ class UlauncherWindow(WindowBase):
 
     _current_accel_name = None
     _resultsRenderTime = 0
+    _mainWindowWasActivated = False
 
     @classmethod
     @singleton
@@ -70,7 +72,7 @@ class UlauncherWindow(WindowBase):
         # bind hotkey
         Keybinder.init()
         accel_name = Settings.get_instance().get_property('hotkey-show-app')
-        self.bind_show_app_hotkey(accel_name)
+        self.first_bind_app_hotkey(accel_name)
 
         start_app_watcher()
 
@@ -113,6 +115,7 @@ class UlauncherWindow(WindowBase):
         self.is_focused = True
 
     def show_window(self):
+        self._mainWindowWasActivated = True
         # works only when the following methods are called in that exact order
         self.input.set_text('')
         self.position_window()
@@ -134,6 +137,19 @@ class UlauncherWindow(WindowBase):
         logger.info("Trying to bind app hotkey: %s" % accel_name)
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
         self._current_accel_name = accel_name
+
+    @run_async
+    def first_bind_app_hotkey(self, accel_name):
+        """
+        Work around issue #16 -- rebind with a 5 sec interval on autostart,
+        because sometimes, when user logs in, Keybinder.bind() silently fails to bind
+        """
+        rebindInterval = 5
+        # rebind until user activates main or preferences window
+        while not self._prefsWereActivated and not self._mainWindowWasActivated:
+            self.bind_show_app_hotkey(accel_name)
+            logger.debug('Rebinding in %s seconds...' % rebindInterval)
+            time.sleep(rebindInterval)
 
     def get_user_query(self):
         return Query(self.input.get_text())

@@ -10,6 +10,8 @@ from . import get_builder
 class WindowBase(Gtk.Window):
     __gtype_name__ = "Window"
 
+    _prefsWereActivated = False
+
     # To construct a new instance of this method, the following notable
     # methods are called in this order:
     # __new__(cls)
@@ -60,6 +62,7 @@ class WindowBase(Gtk.Window):
            and the user chooses Preferences from the menu a second time;
            use the present() method to move the already-open dialog
            where the user can see it."""
+        self._prefsWereActivated = True
         if self.preferences_dialog is not None:
             logger.debug('show existing preferences_dialog')
             self.preferences_dialog.present()
