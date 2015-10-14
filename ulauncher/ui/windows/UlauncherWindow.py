@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 class UlauncherWindow(WindowBase):
     __gtype_name__ = "UlauncherWindow"
-    __current_accel_name = None
+
+    _current_accel_name = None
     _resultsRenderTime = 0
 
     @classmethod
@@ -123,16 +124,16 @@ class UlauncherWindow(WindowBase):
         self.hide() if self.is_visible() else self.show_window()
 
     def bind_show_app_hotkey(self, accel_name):
-        if self.__current_accel_name == accel_name:
+        if self._current_accel_name == accel_name:
             return
 
-        if self.__current_accel_name:
-            Keybinder.unbind(self.__current_accel_name)
-            self.__current_accel_name = None
+        if self._current_accel_name:
+            Keybinder.unbind(self._current_accel_name)
+            self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s" % accel_name)
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
-        self.__current_accel_name = accel_name
+        self._current_accel_name = accel_name
 
     def get_user_query(self):
         return Query(self.input.get_text())

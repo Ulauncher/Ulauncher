@@ -5,7 +5,7 @@ from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ext.ResultItem import ResultItem
 
 
-class TestResultItem(object):
+class TestResultItemWidget(object):
 
     @pytest.fixture
     def item_obj(self):
@@ -81,7 +81,7 @@ class TestResultItem(object):
 
         result_item_wgt.set_index(4)
         result_item_wgt.on_mouse_hover(None, None)
-        mock_get_toplevel.return_value.select_result_item.assert_called_with(4)
+        mock_get_toplevel.return_value.select_result_item.assert_called_with(4, onHover=True)
 
     def test_set_description(self, result_item_wgt, builder):
         result_item_wgt.set_description('test description')
