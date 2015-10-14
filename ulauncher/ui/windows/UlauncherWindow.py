@@ -1,5 +1,6 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
+import time
 import logging
 import threading
 from gi.repository import Gtk, Gdk, Keybinder
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 class UlauncherWindow(WindowBase):
     __gtype_name__ = "UlauncherWindow"
     __current_accel_name = None
+    _resultsRenderTime = 0
 
     @classmethod
     @singleton
@@ -141,8 +143,10 @@ class UlauncherWindow(WindowBase):
         """
         Search.get_instance().start(self.get_user_query())
 
-    def select_result_item(self, index):
-        self.results_nav.select(index)
+    def select_result_item(self, index, onHover=False):
+        if time.time() - self._resultsRenderTime > 0.05:
+            # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
+            self.results_nav.select(index)
 
     def enter_result_item(self, index=None, alt=False):
         if not self.results_nav.enter(self.get_user_query(), index, alt=alt):
@@ -157,6 +161,7 @@ class UlauncherWindow(WindowBase):
         self.result_box.foreach(lambda w: w.destroy())
         results = list(create_item_widgets(result_items, self.get_user_query()))  # generator -> list
         if results:
+            self._resultsRenderTime = time.time()
             map(self.result_box.add, results)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self.get_user_query())

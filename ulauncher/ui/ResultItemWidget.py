@@ -19,7 +19,6 @@ class ResultItemWidget(Gtk.EventBox):
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
-        item_frame.connect("enter_notify_event", self.on_mouse_hover)
 
         self.item_object = item_object
         self.query = query
@@ -65,7 +64,7 @@ class ResultItemWidget(Gtk.EventBox):
         self.get_toplevel().enter_result_item()
 
     def on_mouse_hover(self, widget, event):
-        self.get_toplevel().select_result_item(self.index)
+        self.get_toplevel().select_result_item(self.index, onHover=True)
 
     def set_description(self, description):
         description_obj = self.builder.get_object('item-descr')

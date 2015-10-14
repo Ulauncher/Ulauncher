@@ -263,6 +263,7 @@ def auto_connect_by_name(callback_obj, builder):
             if widget is callback_obj:
                 handler_names.append("on_%s" % sig)
 
+            # print 'sig: %-30s handler_names: %s' % (sig, handler_names)
             do_connect(item, sig, handler_names, callback_handler_dict, builder.connections)
 
     log_unconnected_functions(callback_handler_dict, builder.connections)
