@@ -257,13 +257,16 @@ def auto_connect_by_name(callback_obj, builder):
             sig = sig.replace("-", "_")
             handler_names = ["on_%s_%s" % (widget_name, sig)]
 
+            # log all possible event handler names
+            # if widget_name == 'notebook':
+            #     print widget_name, handler_names
+
             # Using the convention that the top level window is not
             # specified in the handler name. That is use
             # on_destroy() instead of on_windowname_destroy()
             if widget is callback_obj:
                 handler_names.append("on_%s" % sig)
 
-            # print 'sig: %-30s handler_names: %s' % (sig, handler_names)
             do_connect(item, sig, handler_names, callback_handler_dict, builder.connections)
 
     log_unconnected_functions(callback_handler_dict, builder.connections)
