@@ -74,7 +74,7 @@ class UlauncherWindow(WindowBase):
         # bind in the main thread
         GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
-        start_app_watcher()
+        # start_app_watcher()
 
     def position_window(self):
         window_width = self.get_size()[0]
