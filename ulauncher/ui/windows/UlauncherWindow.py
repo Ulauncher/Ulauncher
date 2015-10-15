@@ -144,12 +144,17 @@ class UlauncherWindow(WindowBase):
         Work around issue #16 -- rebind with a 5 sec interval on autostart,
         because sometimes, when user logs in, Keybinder.bind() silently fails to bind
         """
+        self.bind_show_app_hotkey(accel_name)
+
         rebindInterval = 5
-        # rebind until user activates main or preferences window
-        while not self._prefsWereActivated and not self._mainWindowWasActivated:
-            self.bind_show_app_hotkey(accel_name)
-            logger.debug('Rebinding in %s seconds...' % rebindInterval)
+        initTime = time.time()
+
+        # Rebind until user activates main or preferences window.
+        # Stop rebinding after 30 sec.
+        while not self._prefsWereActivated and not self._mainWindowWasActivated and time.time() - initTime < 30:
             time.sleep(rebindInterval)
+            logger.debug('Rebinding hotkey...')
+            self.bind_show_app_hotkey(accel_name)
 
     def get_user_query(self):
         return Query(self.input.get_text())
