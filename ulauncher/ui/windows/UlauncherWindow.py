@@ -138,7 +138,7 @@ class UlauncherWindow(WindowBase):
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
         self._current_accel_name = accel_name
 
-    @run_async
+    @run_async(daemon=True)
     def first_bind_app_hotkey(self, accel_name):
         """
         Work around issue #16 -- rebind with a 5 sec interval on autostart,

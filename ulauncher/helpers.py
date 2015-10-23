@@ -36,7 +36,7 @@ def set_up_logging(opts):
     logger_sh = logging.StreamHandler()
     logger_sh.setFormatter(formatter)
     logger.addHandler(logger_sh)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)  # Temporarily set DEBUG by default
 
     # Set the logging level to show debug messages.
     if opts.verbose:
@@ -68,9 +68,14 @@ def alias(alternative_function_name):
 @lru_cache(maxsize=50)
 def load_image(path, size):
     """
-    Return Pixbuf instance
+    Returns:
+        Pixbuf instance or None if new_from_file_at_size() raises
     """
-    return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
+    logger = logging.getLogger(__name__)
+    try:
+        return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
+    except Exception as e:
+        logger.warn('Could not load image %s. E: %s' % (path, e))
 
 
 def recursive_search(rootdir='.', suffix=''):
