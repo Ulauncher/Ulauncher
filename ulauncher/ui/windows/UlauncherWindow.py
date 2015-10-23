@@ -18,7 +18,6 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import Search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.run_async import run_async
 from ulauncher.ext.Query import Query
 from .WindowBase import WindowBase
 from .AboutUlauncherDialog import AboutUlauncherDialog
@@ -72,7 +71,7 @@ class UlauncherWindow(WindowBase):
         # bind hotkey
         Keybinder.init()
         accel_name = Settings.get_instance().get_property('hotkey-show-app')
-        self.first_bind_app_hotkey(accel_name)
+        self.bind_show_app_hotkey(accel_name)
 
         start_app_watcher()
 
@@ -137,24 +136,6 @@ class UlauncherWindow(WindowBase):
         logger.info("Trying to bind app hotkey: %s" % accel_name)
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
         self._current_accel_name = accel_name
-
-    @run_async(daemon=True)
-    def first_bind_app_hotkey(self, accel_name):
-        """
-        Work around issue #16 -- rebind with a 5 sec interval on autostart,
-        because sometimes, when user logs in, Keybinder.bind() silently fails to bind
-        """
-        self.bind_show_app_hotkey(accel_name)
-
-        rebindInterval = 5
-        initTime = time.time()
-
-        # Rebind until user activates main or preferences window.
-        # Stop rebinding after 30 sec.
-        while not self._prefsWereActivated and not self._mainWindowWasActivated and time.time() - initTime < 30:
-            time.sleep(rebindInterval)
-            logger.debug('Rebinding hotkey...')
-            self.bind_show_app_hotkey(accel_name)
 
     def get_user_query(self):
         return Query(self.input.get_text())
