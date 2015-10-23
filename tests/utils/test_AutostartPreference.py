@@ -88,7 +88,7 @@ class TestAutostartPreference:
             f.write(''.join((desktop_content, 'X-GNOME-Autostart-enabled=false\n')))
         autostart.switch(True)
         assert 'X-GNOME-Autostart-enabled=true' in self.get_lines(ul_autostart_path)
-        assert 'Exec=ulauncher --hide-window' in self.get_lines(ul_autostart_path)
+        assert 'Exec=ulauncher' in self.get_lines(ul_autostart_path)
 
     def test_switch__on_when_autostart_doesnt_exist(self, autostart, autostart_path):
         ul_autostart_path = os.path.join(autostart_path, 'ulauncher.desktop')
