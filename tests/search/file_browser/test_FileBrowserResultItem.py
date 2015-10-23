@@ -20,6 +20,14 @@ class TestFileBrowserResultItem:
         return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.ActionList')
 
     @pytest.fixture
+    def Path(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.Path')
+
+    @pytest.fixture
+    def OpenFolderItem(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.OpenFolderItem')
+
+    @pytest.fixture
     def result_item(self, path, file_queries, mocker):
         FileQueries = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.FileQueries')
         FileQueries.get_instance.return_value = file_queries
@@ -43,5 +51,12 @@ class TestFileBrowserResultItem:
         path.is_dir.return_value = False
         assert result_item.on_enter('query') == ActionList.return_value
 
-    def test_on_alt_enter(self, result_item, ActionList):
+    def test_on_alt_enter_dir(self, result_item, ActionList, path, OpenFolderItem):
         assert result_item.on_alt_enter('query') == ActionList.return_value
+        OpenFolderItem.assert_called_with(path)
+
+    def test_on_alt_enter_file(self, result_item, ActionList, path, OpenFolderItem, Path):
+        path.is_dir.return_value = False
+        assert result_item.on_alt_enter('query') == ActionList.return_value
+        Path.assert_called_with(path.get_dirname.return_value)
+        OpenFolderItem.assert_called_with(Path.return_value)

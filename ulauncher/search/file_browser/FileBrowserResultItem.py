@@ -6,6 +6,7 @@ from ulauncher.ext.actions.RenderResultListAction import RenderResultListAction
 from ulauncher.ext.actions.ActionList import ActionList
 from ulauncher.ext.actions.OpenAction import OpenAction
 from .FileQueries import FileQueries
+from .Path import Path
 
 from .alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
 from .alt_menu.OpenFolderItem import OpenFolderItem
@@ -48,6 +49,6 @@ class FileBrowserResultItem(SmallResultItem):
 
     def _get_file_alt_menu(self):
         "Return list of ResultItems"
-        open_folder = OpenFolderItem(self.path.get_dirname())
+        open_folder = OpenFolderItem(Path(self.path.get_dirname()))
         open_folder.set_name('Open Containing Folder')
         return [open_folder, CopyPathToClipboardItem(self.path)]
