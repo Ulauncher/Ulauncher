@@ -147,7 +147,7 @@ class UlauncherWindow(WindowBase):
         Search.get_instance().start(self.get_user_query())
 
     def select_result_item(self, index, onHover=False):
-        if time.time() - self._resultsRenderTime > 0.05:
+        if time.time() - self._resultsRenderTime > 0.1:
             # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
             self.results_nav.select(index)
 
