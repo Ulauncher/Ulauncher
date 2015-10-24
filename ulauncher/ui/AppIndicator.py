@@ -15,7 +15,7 @@ class AppIndicator(object):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         window = UlauncherWindow.get_instance()
         indicator = cls("ulauncher")
-        indicator.set_icon(get_data_file('media', 'indicator-icon.svg'))
+        indicator.set_icon('ulauncher-indicator')
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
         indicator.add_menu_item(window.on_mnu_about_activate, "About")
         indicator.add_seperator()

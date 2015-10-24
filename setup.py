@@ -114,5 +114,13 @@ DistUtilsExtra.auto.setup(
     author_email='sanya.gornostal@gmail.com',
     description='Ulauncher provides a convenient and fast way to launch your desktop applications',
     url='https://github.com/gornostal/ulauncher',
+    data_files=[
+        ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
+        ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+        ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
+        ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+        ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
+        ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
+    ],
     cmdclass={'install': InstallAndUpdateDataDirectory}
 )

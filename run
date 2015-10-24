@@ -2,4 +2,6 @@
 
 kill $(ps aux | grep 'ulauncher' | grep -v grep | awk '{print $2}')
 
+python setup.py install_data --install-dir="$HOME/.local"
+
 ./bin/ulauncher -vv

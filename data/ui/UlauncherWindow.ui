@@ -11,7 +11,7 @@
     <property name="title" translatable="yes">uLauncher</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">../media/ulauncher.svg</property>
+    <property name="icon_name">ulauncher</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="urgency_hint">True</property>

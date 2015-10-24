@@ -9,7 +9,7 @@
     <property name="title" translatable="yes">Ulauncher Preferences</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">../media/ulauncher.svg</property>
+    <property name="icon_name">ulauncher</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox1">
