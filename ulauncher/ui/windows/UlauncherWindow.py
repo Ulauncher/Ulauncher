@@ -3,7 +3,7 @@
 import time
 import logging
 import threading
-from gi.repository import Gtk, Gdk, Keybinder
+from gi.repository import Gtk, Gdk, GLib, Keybinder
 
 from ulauncher.helpers import singleton
 from ulauncher.utils.display import get_current_screen_geometry
@@ -71,7 +71,8 @@ class UlauncherWindow(WindowBase):
         # bind hotkey
         Keybinder.init()
         accel_name = Settings.get_instance().get_property('hotkey-show-app')
-        self.bind_show_app_hotkey(accel_name)
+        # bind in the main thread
+        GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
 
