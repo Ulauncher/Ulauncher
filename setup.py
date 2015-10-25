@@ -106,7 +106,7 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
 
 DistUtilsExtra.auto.setup(
     name='ulauncher',
-    version='0.1',
+    version='1.0.0',
     license='GPL-3',
     author='Aleksandr Gornostal',
     author_email='sanya.gornostal@gmail.com',

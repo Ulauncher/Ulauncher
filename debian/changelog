@@ -1,3 +1,10 @@
+ulauncher (1.0.0) trusty; urgency=medium
+
+  * Bug fixes;
+  * Added themed indicator icons
+
+ -- Aleksandr Gornostal <sanya.gornostal@gmail.com>  Sun, 25 Oct 2015 12:50:47 +0200
+
 ulauncher (0.1) trusty; urgency=medium
 
   * Initial release.
