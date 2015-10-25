@@ -1,7 +1,6 @@
 #!/bin/sh
 
-kill $(ps aux | grep 'ulauncher' | grep -v grep | awk '{print $2}')
-
+# install media files to ~/.local to be able to load icons by name
 python setup.py install_data --install-dir="$HOME/.local"
 
 ./bin/ulauncher -vv

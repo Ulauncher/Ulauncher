@@ -2,6 +2,7 @@ import sys
 import os
 import optparse
 import logging
+import time
 from locale import gettext as _
 from gi.repository import Gtk
 
@@ -14,6 +15,7 @@ from .config import get_version, CACHE_DIR, CONFIG_DIR
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.run_async import run_async
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
@@ -83,6 +85,19 @@ def main():
         if Settings.get_instance().get_property('show-indicator-icon'):
             AppIndicator.get_instance().show()
 
-        Gtk.main()
+        @run_async
+        def run_main():
+            Gtk.main()
+
+        main_thread = run_main()
+
+        # workaround to make Ctrl+C quiting the app
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info('On KeyboardInterrupt')
+            Gtk.main_quit()
+            main_thread.join()
 
     sys.exit(0)
