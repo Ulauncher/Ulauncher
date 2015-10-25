@@ -49,7 +49,7 @@ ULAUNCHER_FILE_ICON_DB = ['3g2', '3gp', 'ai', 'air', 'asf', 'avi', 'bib', 'cls',
                           'xlsx', 'xml', 'xpi', 'zip']
 
 SPECIAL_DIRS = {
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): 'folder-downloads',
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): 'folder-download',
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS): 'folder-documents',
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC): 'folder-music',
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES): 'folder-pictures',
