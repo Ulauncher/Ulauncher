@@ -93,7 +93,7 @@ def main():
 
         # workaround to make Ctrl+C quiting the app
         try:
-            while True:
+            while main_thread.is_alive():
                 time.sleep(1)
         except KeyboardInterrupt:
             logger.info('On KeyboardInterrupt')
