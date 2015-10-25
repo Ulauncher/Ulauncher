@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Ulauncher
+Comment=Ulauncher application
+Exec=__ulauncher_exec__
+Icon=ulauncher
+Path=__ulauncher_bin__
+Type=Application
+Categories=GNOME;GTK;

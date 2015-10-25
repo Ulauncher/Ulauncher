@@ -1,16 +1,40 @@
 Dev: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/420163/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
 
-Install Dependencies
-====================
-
-1. `./install_deps` - runs apt-get install for all needed dependencies
-
 Ulauncher
-=========
+========
 
-`./run`
+**Ulauncher** is a desktop application for Linux that allows users to launch installed applications 
+and open file directories using a fast and convenient UI.
 
-Run tests
+It's written in Python and uses GTK as a GUI toolkit.
+
+Install
+======
+
+### From PPA
+
+```
+sudo add-apt-repository ppa:agornostal/ulauncher
+sudo apt-get update
+sudo apt-get install ulauncher
+```
+
+### From Sources
+
+*Useful for developers or those who want to use latest source code*
+
+```
+git clone https://github.com/Ulauncher/Ulauncher.git
+cd Ulauncher
+./install_deps
+./run
+```
+
+`./run` will copy icon files to `~/.local/share/icons/` and `.desktop` file to `~/.local/share/applications/`. Then it will run the app.
+
+After you run `./run` once, you can find and start ulauncher from your OS launcher (like Ubuntu Dash, etc.)
+
+Run Unit Tests
 =========
 
 `./test [file_path]`
