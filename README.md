@@ -1,16 +1,25 @@
 Dev: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/420163/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
-Mater: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/581066/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
+Master: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/581066/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
 
-Ulauncher
+[Ulauncher](https://ulauncher.io)
 ========
 
-**Ulauncher** is a desktop application for Linux that allows users to launch installed applications 
+**[Ulauncher](https://ulauncher.io)** is a desktop application for Linux that allows users to launch installed applications 
 and open file directories using a fast and convenient UI.
 
 It's written in Python and uses GTK as a GUI toolkit.
 
-Install
-======
+***
+:warning: **Currently it is tested and distributed only for *Debian-based* distors.**  
+To run Ulauncher on rpm-based OS, clone the repo and install needed dependencies manually (see `install_deps` file).  
+*[Help us create RPM distribution!](https://github.com/Ulauncher/Ulauncher/issues/27)*
+***
+
+<img height="220" aligh="left" src="http://i.imgur.com/YAiF0ue.png">
+<img height="200" aligh="left" src="http://i.imgur.com/VN9LaTT.png">
+
+Install & Run
+===========
 
 ### From PPA
 
@@ -18,6 +27,7 @@ Install
 sudo add-apt-repository ppa:agornostal/ulauncher
 sudo apt-get update
 sudo apt-get install ulauncher
+ulauncher
 ```
 
 ### From Sources
@@ -35,18 +45,11 @@ cd Ulauncher
 
 After you run `./run` once, you can find and start ulauncher from your OS launcher (like Ubuntu Dash, etc.)
 
-Run Unit Tests
-=========
+***
+### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
 
-`./test [file_path]`
-
-
-Conventions
-===========
-
-* *Config directory* (`~/.config/ulauncher/apps`) should contain only human-readable config files or other assets
-* *Cache directory* (`~/.cache/ulauncher/apps`) should contain auto-generated files (logs, user query DB, etc.)
-
+### Reed [How to Report A New Bug](https://github.com/Ulauncher/Ulauncher/wiki/How-to-Report-A-New-Bug)
+***
 
 License
 =======
