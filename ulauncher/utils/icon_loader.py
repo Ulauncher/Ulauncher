@@ -72,21 +72,24 @@ def get_file_icon(path, icon_size):
     """
     # TODO add fallbacks for folders
     # handle symbolic links /usr/share/icons/Humanity/emblems/48/emblem-symbolic-link.svg
-    if path.is_dir():
-        special_dir = SPECIAL_DIRS.get(str(path))
-        if special_dir:
-            return get_themed_icon_by_name(special_dir, icon_size)
-        return get_themed_icon_by_name('folder', icon_size)
+    try:
+        if path.is_dir():
+            special_dir = SPECIAL_DIRS.get(str(path))
+            if special_dir:
+                return get_themed_icon_by_name(special_dir, icon_size)
+            return get_themed_icon_by_name('folder', icon_size)
 
-    ext = path.get_ext()
-    if ext in ULAUNCHER_FILE_ICON_DB:
-        return load_image(get_data_file('media', 'fileicons', '%s.png' % ext), icon_size)
+        ext = path.get_ext()
+        if ext in ULAUNCHER_FILE_ICON_DB:
+            return load_image(get_data_file('media', 'fileicons', '%s.png' % ext), icon_size)
 
-    freedesktop = FREEDESKTOP_STANDARD.get(ext)
-    if freedesktop:
-        return get_themed_icon_by_name(freedesktop, icon_size)
+        freedesktop = FREEDESKTOP_STANDARD.get(ext)
+        if freedesktop:
+            return get_themed_icon_by_name(freedesktop, icon_size)
 
-    if path.is_exe():
-        return load_image(get_data_file('media', 'executable-icon.png'), icon_size)
+        if path.is_exe():
+            return load_image(get_data_file('media', 'executable-icon.png'), icon_size)
+    except Exception as e:
+        logger.warning('Icon not found %s. %s: %s' % (path, type(e).__name__, e.message))
 
     return load_image(get_data_file('media', 'unknown-file-icon.png'), icon_size)
