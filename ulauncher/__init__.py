@@ -94,7 +94,7 @@ def main():
         # workaround to make Ctrl+C quiting the app
         try:
             while main_thread.is_alive():
-                time.sleep(1)
+                time.sleep(0.5)
         except KeyboardInterrupt:
             logger.info('On KeyboardInterrupt')
             Gtk.main_quit()
