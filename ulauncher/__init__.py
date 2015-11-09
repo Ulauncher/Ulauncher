@@ -98,6 +98,5 @@ def main():
         except KeyboardInterrupt:
             logger.info('On KeyboardInterrupt')
             Gtk.main_quit()
-            main_thread.join()
 
     sys.exit(0)
