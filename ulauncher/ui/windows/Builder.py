@@ -1,15 +1,17 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 '''Enhances builder connections, provides object to access glade objects'''
 
-from gi.repository import GObject, Gtk
-
+import os
 import inspect
 import functools
 import logging
 
+from gi.repository import GObject, Gtk
+from ulauncher.config import get_data_file
+from xml.etree.cElementTree import ElementTree
+
 logger = logging.getLogger(__name__)
 
-from xml.etree.cElementTree import ElementTree
 
 # this module is big so uses some conventional prefixes and postfixes
 # *s list, except self.widgets is a dictionary
@@ -28,6 +30,24 @@ class Builder(Gtk.Builder):
     allow handlers to lookup widget name
     logs every connection made, and any on_* not made
     '''
+
+    @classmethod
+    def new_from_file(cls, builder_file_name):
+        """Return a fully-instantiated Gtk.Builder instance from specified ui
+        file
+
+        :param builder_file_name: The name of the builder file, without extension.
+            Assumed to be in the 'ui' directory under the data path.
+        """
+        # Look for the ui file that describes the user interface.
+        ui_filename = get_data_file('ui', '%s.ui' % (builder_file_name,))
+        if not os.path.exists(ui_filename):
+            ui_filename = None
+
+        builder = cls()
+        builder.set_translation_domain('ulauncher')
+        builder.add_from_file(ui_filename)
+        return builder
 
     def __init__(self):
         Gtk.Builder.__init__(self)

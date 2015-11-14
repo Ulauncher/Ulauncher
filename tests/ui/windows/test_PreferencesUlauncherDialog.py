@@ -22,92 +22,59 @@ class TestPreferencesUlauncherDialog:
     def autostart_pref(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.AutostartPreference').return_value
 
-    @pytest.fixture
-    def widget(self):
-        return mock.MagicMock()
+    @pytest.fixture(autouse=True)
+    def webview(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.WebKit2.WebView').return_value
 
-    @pytest.fixture
-    def event(self):
-        return mock.MagicMock()
+    @pytest.fixture(autouse=True)
+    def hotkey_dialog(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.HotkeyDialog').return_value
 
     @pytest.fixture
     def builder(self):
-        """
-        builder.get_object() returns the one mock object for one name
-        """
-        builder = mock.MagicMock()
-        objects = {}
-
-        def get_object(name):
-            try:
-                return objects[name]
-            except KeyError:
-                o = mock.MagicMock(name=name)
-                objects[name] = o
-                return o
-
-        builder.get_object.side_effect = get_object
-        return builder
+        return mock.MagicMock()
 
     @pytest.fixture
-    def dialog(self, builder):
+    def dialog(self, builder, mocker, settings, webview, autostart_pref, hotkey_dialog):
+        mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.PreferencesUlauncherDialog.finish_initializing')
         dialog = PreferencesUlauncherDialog()
-        dialog.finish_initializing(builder)
+        dialog.settings = settings
+        dialog.webview = webview
+        dialog.autostart_pref = autostart_pref
+        dialog.hotkey_dialog = hotkey_dialog
+        dialog.ui = mock.MagicMock()
+        dialog.builder = builder
         return dialog
 
-    @pytest.mark.with_display
-    def test_finish_initializing(self, dialog, builder, settings):
-        # it removes dialog_action_area
-        builder.get_object('dialog_action_area').destroy.assert_called_with()
-
-        builder.get_object('show_indicator_icon').set_active.assert_called_with(settings.get_property.return_value)
-        builder.get_object('hotkey_show_app').set_text.assert_called_with('Ctrl+Space')
-
-    def test_on_show_indicator_icon_notify(self, dialog, builder, settings, indicator, widget, event):
-        event.name = 'active'
-
-        widget.get_active.return_value = True
-        dialog.on_show_indicator_icon_notify(widget, event)
+    def test_prefs_set_show_indicator_icon(self, dialog, builder, settings, indicator):
+        dialog.prefs_set_show_indicator_icon({'query': {'value': 'true'}})
         indicator.show.assert_called_with()
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
-        widget.get_active.return_value = False
-        dialog.on_show_indicator_icon_notify(widget, event)
+        dialog.prefs_set_show_indicator_icon({'query': {'value': '0'}})
         indicator.hide.assert_called_with()
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
-    def test_on_hotkey_show_app_key_press_event__invalid_hotkey(self, dialog, ulauncherWindow, widget, event):
-        (key, mode) = Gtk.accelerator_parse('BackSpace')
-        event.keyval = key
-        event.state = mode
-
-        dialog.on_hotkey_show_app_key_press_event(widget, event)
-
-        assert not ulauncherWindow.bind_show_app_hotkey.called
-        assert not widget.set_text.called
-
-    @pytest.mark.with_display
-    def test_on_hotkey_show_app_key_press_event__valid_hotkey(self, dialog, ulauncherWindow, settings, widget, event):
-        accel_name = '<Primary><Alt>g'
-        (key, mode) = Gtk.accelerator_parse(accel_name)
-        event.keyval = key
-        event.state = mode
-
-        dialog.on_hotkey_show_app_key_press_event(widget, event)
-
-        ulauncherWindow.bind_show_app_hotkey.assert_called_with(accel_name)
-        widget.set_text.assert_called_with('Ctrl+Alt+G')
-        settings.set_property.assert_called_with('hotkey-show-app', accel_name)
+    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
+        hotkey = '<Primary>space'
+        dialog.prefs_set_hotkey_show_app({'query': {'value': hotkey}})
+        ulauncherWindow.bind_show_app_hotkey.assert_called_with(hotkey)
+        settings.set_property.assert_called_with('hotkey-show-app', hotkey)
         settings.save_to_file.assert_called_with()
 
-    def test_on_autostart_notify(self, dialog, widget, event, autostart_pref):
-        event.name = 'active'
-
-        widget.get_active.return_value = True
-        dialog.on_autostart_notify(widget, event)
+    def test_prefs_set_autostart(self, dialog, autostart_pref):
+        dialog.prefs_set_autostart({'query': {'value': 'true'}})
         autostart_pref.switch.assert_called_with(True)
 
-        widget.get_active.return_value = False
-        dialog.on_autostart_notify(widget, event)
+        dialog.prefs_set_autostart({'query': {'value': 'false'}})
         autostart_pref.switch.assert_called_with(False)
+
+    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
+        dialog.prefs_showhotkey_dialog({'query': {'name': 'hotkey-name'}})
+        hotkey_dialog.present.assert_called_with()
+
+    @pytest.mark.with_display
+    def test_get_app_hotkey(self, dialog, settings):
+        settings.get_property.return_value = '<Primary>B'
+        assert dialog.get_app_hotkey() == 'Ctrl+B'

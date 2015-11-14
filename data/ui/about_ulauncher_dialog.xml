@@ -1,9 +1,0 @@
-<glade-catalog name="about_ulauncher_dialog" domain="glade-3" 
-               depends="gtk+" version="1.0">
-  <glade-widget-classes>
-    <glade-widget-class title="About Ulauncher Dialog" name="AboutUlauncherDialog" 
-                        generic-name="AboutUlauncherDialog" parent="GtkAboutDialog"
-                        icon-name="widget-gtk-about-dialog"/>
-  </glade-widget-classes>
-
-</glade-catalog>
