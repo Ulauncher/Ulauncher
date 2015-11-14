@@ -61,6 +61,8 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
         mask = event.state
         if mask & Gdk.ModifierType.MOD2_MASK:
             mask ^= Gdk.ModifierType.MOD2_MASK
+        if mask & Gdk.ModifierType.MOD4_MASK:
+            mask ^= Gdk.ModifierType.MOD4_MASK
 
         accel_name = Gtk.accelerator_name(event.keyval, mask)
         display_name = Gtk.accelerator_get_label(event.keyval, mask)
