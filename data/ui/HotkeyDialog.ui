@@ -64,6 +64,7 @@
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="margin_bottom">5</property>
+                <property name="editable">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
