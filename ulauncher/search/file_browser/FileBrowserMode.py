@@ -5,7 +5,7 @@ from ulauncher.ext.actions.ActionList import ActionList
 from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
 from ulauncher.ext.actions.RenderResultListAction import RenderResultListAction
 from ulauncher.search.SortedResultList import SortedResultList
-from .Path import Path, InvalidPathError
+from ulauncher.utils.Path import Path, InvalidPathError
 from .FileBrowserResultItem import FileBrowserResultItem
 from .FileQueries import FileQueries
 
@@ -63,8 +63,8 @@ class FileBrowserMode(SearchMode):
 
         try:
             existing_dir = path.get_existing_dir()
-            if existing_dir == str(path):
-                results = self.list_files(str(path), sort_by_usage=True)
+            if existing_dir == path.get_abs_path():
+                results = self.list_files(path.get_abs_path(), sort_by_usage=True)
                 result_items = map(self.create_result_item, map(lambda name: os.path.join(existing_dir, name),
                                    self.filter_dot_files(results)[:self.RESULT_LIMIT]))
             else:

@@ -17,6 +17,7 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import Search
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
+from ulauncher.search.find.file_watcher import start as start_file_watcher
 from ulauncher.utils.Settings import Settings
 from ulauncher.ext.Query import Query
 from .Builder import Builder
@@ -86,6 +87,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
+        start_file_watcher()
 
     ######################################
     # GTK Signal Handlers

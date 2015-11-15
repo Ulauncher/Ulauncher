@@ -19,4 +19,4 @@ class CopyPathToClipboardItem(SmallResultItem):
         return get_themed_icon_by_name('edit-copy', self.ICON_SIZE)
 
     def on_enter(self, query):
-        return ActionList([CopyToClipboardAction(str(self.path))])
+        return ActionList([CopyToClipboardAction(self.path.get_abs_path())])

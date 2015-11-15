@@ -23,4 +23,4 @@ class OpenFolderItem(SmallResultItem):
         return get_themed_icon_by_name('system-file-manager', self.ICON_SIZE)
 
     def on_enter(self, query):
-        return ActionList([OpenAction(str(self.path))])
+        return ActionList([OpenAction(self.path.get_abs_path())])

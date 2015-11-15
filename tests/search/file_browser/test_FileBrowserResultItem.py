@@ -1,7 +1,7 @@
 import mock
 import pytest
 from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
-from ulauncher.search.file_browser.Path import Path
+from ulauncher.utils.Path import Path
 from ulauncher.search.file_browser.FileQueries import FileQueries
 
 
@@ -45,7 +45,7 @@ class TestFileBrowserResultItem:
         SetUserQueryAction = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.SetUserQueryAction')
         assert result_item.on_enter('query') == ActionList.return_value
         assert SetUserQueryAction.called
-        file_queries.put.assert_called_with(str(path))
+        file_queries.put.assert_called_with(path.get_abs_path.return_value)
 
         # is not dir
         path.is_dir.return_value = False

@@ -8,7 +8,7 @@ class Path(object):
     def __init__(self, query):
         self._path = os.path.expandvars(os.path.expanduser(query.lstrip()))
 
-    def __str__(self):
+    def get_abs_path(self):
         return self._path
 
     def exists(self):

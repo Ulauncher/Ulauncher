@@ -3,19 +3,19 @@ import logging
 from itertools import chain
 from gi.repository import Gio
 
-from ulauncher.helpers import recursive_search
+from ulauncher.helpers import find_files
 from ulauncher.config import DESKTOP_DIRS
 
 logger = logging.getLogger(__name__)
 
 
-def find_files(dirs=DESKTOP_DIRS):
+def find_desktop_files(dirs=DESKTOP_DIRS):
     """
     :param list dirs:
     :return list:
     """
     return chain.from_iterable(
-        map(lambda f: os.path.join(f_path, f), recursive_search(f_path, '.desktop')) for f_path in dirs)
+        map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
 
 
 def filter_app(app):
@@ -44,4 +44,4 @@ def find_apps(dirs=DESKTOP_DIRS):
     :param list dirs: list of paths to *.desktop files
     :return list: list of Gio.DesktopAppInfo objects
     """
-    return filter(filter_app, map(read_desktop_file, find_files(dirs)))
+    return filter(filter_app, map(read_desktop_file, find_desktop_files(dirs)))

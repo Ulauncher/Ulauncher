@@ -1,5 +1,8 @@
 import logging
+import re
 import os
+import time
+from fnmatch import fnmatch
 
 from distutils.dir_util import mkpath
 from locale import gettext as _
@@ -78,15 +81,15 @@ def load_image(path, size):
         logger.warn('Could not load image %s. E: %s' % (path, e))
 
 
-def recursive_search(rootdir='.', suffix=''):
+def find_files(directory, pattern=None, filter_fn=None):
     """
-    Search files recursively in rootdir
+    Search files in `directory`
+    `filter_fn` takes two arguments: directory, filename. If return value is False, file will be ignored
     """
-    suffix = suffix.lower()
-    return [os.path.join(looproot, filename)
-            for looproot, _, filenames in os.walk(rootdir)
-            for filename in filenames if filename.lower().endswith(suffix)]
-
+    for root, _, files in os.walk(directory):
+        for basename in files:
+            if (not pattern or fnmatch(basename, pattern)) and (not filter_fn or filter_fn(root, basename)):
+                yield os.path.join(root, basename)
 
 objects = {}
 
@@ -142,3 +145,11 @@ def string_score(query, string):
             best_score = score
 
     return best_score
+
+_first_cap_re = re.compile('(.)([A-Z][a-z]+)')
+_all_cap_re = re.compile('([a-z0-9])([A-Z])')
+
+
+def split_camel_case(text, sep='_'):
+    s1 = _first_cap_re.sub(r'\1%s\2' % sep, text)
+    return _all_cap_re.sub(r'\1%s\2' % sep, s1).lower()

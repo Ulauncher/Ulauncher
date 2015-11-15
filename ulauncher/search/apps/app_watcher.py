@@ -3,7 +3,6 @@ import time
 import pyinotify
 import logging
 from functools import wraps
-from gi.repository import Gtk
 
 from .AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
@@ -27,7 +26,7 @@ def _only_desktop_files(func):
     return decorator_func
 
 
-class InotifyEventHandler(pyinotify.ProcessEvent):
+class AppNotifyEventHandler(pyinotify.ProcessEvent):
     RETRY_INTERVAL = 2  # seconds
     RETRY_TIME_SPAN = (5, 30)  # make an attempt to process desktop file within 5 to 30 seconds after event came in
     # otherwise application icon or .desktop file itself may not be ready
@@ -36,7 +35,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         pass
 
     def __init__(self, db):
-        super(InotifyEventHandler, self).__init__()
+        super(AppNotifyEventHandler, self).__init__()
         self.__db = db
 
         self._deferred_files = {}  # key is a file path, value is an addition time
@@ -126,7 +125,7 @@ class InotifyEventHandler(pyinotify.ProcessEvent):
         self.add_file_deffered(event.pathname)
 
 
-@run_async
+@run_async(daemon=True)
 def start():
     """
     Add all known .desktop files to the DB and start inotify watcher
@@ -137,10 +136,10 @@ def start():
     logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
 
     wm = pyinotify.WatchManager()
-    handler = InotifyEventHandler(db)
+    handler = AppNotifyEventHandler(db)
     notifier = pyinotify.ThreadedNotifier(wm, handler)
     notifier.setDaemon(True)
-    logger.debug('Starting inotify watcher...')
+    logger.debug('Start watching desktop files...')
     notifier.start()
     mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MODIFY | \
         pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
