@@ -205,7 +205,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def show_window(self):
         self._mainWindowWasActivated = True
         # works only when the following methods are called in that exact order
-        self.input.set_text('')
         self.position_window()
         self.window.set_sensitive(True)
         self.window.present()
@@ -238,6 +237,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if not self.results_nav.enter(self.get_user_query(), index, alt=alt):
             # close the window if it has to be closed on enter
             self.hide()
+            self.input.set_text('')
 
     def show_results(self, result_items):
         """
