@@ -1,0 +1,51 @@
+.help-page-container {
+  box-sizing: border-box;
+  padding: 40px;
+}
+
+.icon {
+  &__outer-circle{
+    display: inline-block;
+    width: 94px;
+    height: 94px;
+    border-radius: 50%;
+    text-align: center;
+    background: #e0e0e0;
+
+    &--active {
+      background: #4675ab;
+    }
+  }
+
+  &__inner-circle {
+    margin-top: 7px;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    text-align: center;
+    background: #fff;
+    color: #e0e0e0;
+
+    .fa-icon {
+      margin-top: 10px;
+      color: #e0e0e0;
+      font-size: 54px;
+
+      &--active {
+        color: #4675ab;
+      }
+    }
+  }
+
+  &__label {
+    padding: 20px 0 12px 0;
+    font-size: 13px;
+  }
+
+  &__text {
+    color: #a7a7a7;
+    font-size: 10px;
+  }
+}

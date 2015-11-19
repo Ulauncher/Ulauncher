@@ -1,0 +1,22 @@
+<div class="pure-g help-page-container" ng-controller="helpController">
+  <div class="pure-u-1-4" style="text-align: center;"
+       ng-repeat="item in infoGroup">
+    <div class="icon__outer-circle"
+         ng-class="{'icon__outer-circle--active': setActive}"
+         ng-click="openUrlInBrowser(item.url)"
+         ng-mouseleave="setActive = false;"
+         ng-mouseover="setActive = true;">
+      <div class="icon__inner-circle">
+        <i class="fa {{item.icon}} fa-icon"
+           ng-class="{'fa-icon--active': setActive}"></i>
+      </div>
+    </div>
+    <div class="icon__label">
+      {{item.label | uppercase}}
+    </div>
+    <div class="icon__text"
+         ng-show="setActive">
+      {{item.text}}
+    </div>
+  </div>
+</div>

@@ -1,21 +1,16 @@
 <meta charset="utf-8">
 <title>Ulauncher Preferences</title>
+<link rel="stylesheet" href="bower_components/pure/pure-min.css">
+<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+<!-- inject:css -->
+<!-- endinject -->
 
-<table>
-    <tr>
-        <th>Launch at login:</th>
-        <td><input id="autostart" type="checkbox" /></td>
-    </tr>
-    <tr>
-        <th>Ulauncher Hotkey:</th>
-        <td><input id="hotkey-show-app" type="text" /></td>
-    </tr>
-    <tr>
-        <th>Show Tray Icon:</th>
-        <td><input id="show-indicator-icon" type="checkbox" /></td>
-    </tr>
-</table>
+<body ng-app="uLauncher">
+<main-header></main-header>
+<div ng-view></div>
 
-
-<script src="js/libs/jsonp.js"></script>
-<script src="js/prefs.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-route/angular-route.min.js"></script>
+<!-- inject:js -->
+<!-- endinject -->
+</body>

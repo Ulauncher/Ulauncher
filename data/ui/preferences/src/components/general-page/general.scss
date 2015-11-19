@@ -1,0 +1,17 @@
+.general {
+  font-size: 14px;
+  box-sizing: border-box;
+  margin: 0 35px;
+
+  &__row {
+    margin: 40px 0;
+    padding-right: 15px;
+  }
+
+  &__hint-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.07px;
+    color: #a5a5a5;
+  }
+}

@@ -1,0 +1,54 @@
+.main-header {
+  box-sizing: border-box;
+  height: 60px;
+  padding: 20px 30px;
+  background: #e4e4e4;
+  border-bottom: 1px solid #c8c8c8;
+  font-size: 13px;
+  letter-spacing: 0.04px;
+
+  &__link {
+    // hack to avoid ugly outdated link
+    // dotted border
+    outline: 0;
+
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    text-decoration: none;
+    padding-right: 25px;
+    color: #6b6b6b;
+
+    &--active {
+      color: #369;
+
+      &:after {
+        content: '';
+        position: absolute;
+        top: 36px;
+        left: 0;
+        display: inline-block;
+        height: 4px;
+        width: 83%;
+        background: #369;
+      }
+    }
+  }
+
+  &__link-icon {
+    padding: 5px;
+    font-size: 15px;
+  }
+
+  &__close-container {
+    text-align: right;
+  }
+
+  &__close {
+    cursor: pointer;
+    font-size: 30px;
+    color: #c8c8c8;
+    position: relative;
+    top: -5px;
+  }
+}
