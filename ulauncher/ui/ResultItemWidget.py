@@ -1,14 +1,12 @@
 import logging
 from gi.repository import Gtk
+from ulauncher.ui import get_theme_prop
 
 logger = logging.getLogger(__name__)
 
 
 class ResultItemWidget(Gtk.EventBox):
     __gtype_name__ = "ResultItemWidget"
-
-    HL_COLOR_SELECTED = 'white'
-    HL_COLOR_DEFAULT = 'white'
 
     shortcut = None
     index = None
@@ -58,7 +56,7 @@ class ResultItemWidget(Gtk.EventBox):
             iconWgt.set_from_pixbuf(icon)
 
     def set_name_highlighted(self, is_selected=False):
-        color = self.HL_COLOR_SELECTED if is_selected else self.HL_COLOR_DEFAULT
+        color = get_theme_prop('match_hl_color_selected') if is_selected else get_theme_prop('match_hl_color_default')
         self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
 
     def set_name(self, name):

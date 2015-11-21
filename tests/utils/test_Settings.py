@@ -38,3 +38,9 @@ class TestSettings:
 
         settings.set_property("hotkey-show-app", "foo")
         on_notify.assert_called_with(settings, mock.ANY)
+
+    def test_get_property_default(self, settings, filename):
+        with open(filename, 'w') as f:
+            f.write("{}")
+        settings.load_from_file(filename)
+        assert settings.get_property('theme-name') == 'dark'

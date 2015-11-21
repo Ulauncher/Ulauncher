@@ -1,7 +1,9 @@
 import os
+import json
 from gi.repository import Gtk
 from ulauncher.config import get_data_file
 from ulauncher.utils.lcs import lcs
+from ulauncher.utils.Settings import Settings
 from ulauncher.utils.lru_cache import lru_cache
 
 
@@ -23,6 +25,22 @@ def create_item(result_item, index, query):
 def create_item_widgets(results, query):
     for i, result_item in enumerate(results):
         yield create_item(result_item, i, query)
+
+
+def get_theme_name():
+    return Settings.get_instance().get_property('theme-name')
+
+
+@lru_cache()
+def _read_theme(name):
+    """Returns dict from data/ui/css/themes/<name>/theme.json"""
+    filename = get_data_file('ui', 'css', 'themes', name, 'theme.json')
+    with open(filename, 'r') as f:
+        return json.load(f)
+
+
+def get_theme_prop(name):
+    return _read_theme(get_theme_name())[name]
 
 
 @lru_cache(maxsize=150)

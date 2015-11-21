@@ -1,0 +1,38 @@
+@define-color bg_color #F2F2F2;
+@define-color fg_color #4675AB;
+@define-color selected_bg_color @fg_color;
+@define-color selected_fg_color #fff;
+@define-color backdrop_selected_bg_color shade (@bg_color, 0.92);
+@define-color backdrop_selected_fg_color @fg_color;
+
+/**
+ * Window
+ */
+@define-color window_shadow rgba(0,0,0, 0.2);
+@define-color window_bg @bg_color;
+
+/**
+ * Input
+ */
+@define-color input_color @fg_color;
+@define-color input_bg #fff;
+@define-color input_shadow rgba(0,0,0, 0.2);
+
+/**
+ * Result items
+ */
+@define-color item_text #888;
+@define-color item_name #666;
+@define-color item_box_selected @fg_color;
+@define-color item_text_selected #99ccff;
+@define-color item_name_selected white;
+
+@import url("../default-window-styles.css");
+
+.input {
+    border: 1px solid @fg_color;
+}
+
+.prefs-btn {
+    background-image: url('prefs.png');
+}

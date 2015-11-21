@@ -8,7 +8,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.helpers import singleton
 from ulauncher.utils.display import get_current_screen_geometry
 from ulauncher.config import get_data_file
-from ulauncher.ui import create_item_widgets
+from ulauncher.ui import create_item_widgets, get_theme_name
 
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
@@ -78,7 +78,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.PreferencesDialog = PreferencesUlauncherDialog
 
         self.position_window()
-        self.init_styles(get_data_file('ui', 'ulauncher.css'))
+        self.init_styles(get_data_file('ui', 'css', 'themes', get_theme_name(), 'theme.css'))
 
         # bind hotkey
         Keybinder.init()

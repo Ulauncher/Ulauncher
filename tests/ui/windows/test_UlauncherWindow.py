@@ -6,6 +6,10 @@ from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 class TestUlauncherWindow:
 
     @pytest.fixture(autouse=True)
+    def init_styles(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.init_styles')
+
+    @pytest.fixture(autouse=True)
     def start_sync(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.start_app_watcher')
 

@@ -16,7 +16,12 @@ GPROPERTIES = {
                             "Show app indicator",
                             None,
                             True,
-                            GObject.PARAM_READWRITE)
+                            GObject.PARAM_READWRITE),
+    "theme-name": (str,
+                   "Current theme",
+                   None,
+                   "dark",
+                   GObject.PARAM_READWRITE),
 }
 
 
@@ -76,7 +81,11 @@ class Settings(GObject.GObject):
             json.dump(self._properties, f, indent=4, sort_keys=True)
 
     def do_get_property(self, prop):
-        return self._properties[prop.name]
+        try:
+            return self._properties[prop.name]
+        except KeyError:
+            # return default
+            return GPROPERTIES[prop.name][3]
 
     def do_set_property(self, prop, value):
         self._properties[prop.name] = value

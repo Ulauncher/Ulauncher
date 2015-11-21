@@ -1,0 +1,77 @@
+@import url("../reset.css");
+
+
+GtkWindow {
+    border-radius: 10px;
+    background-color: @window_shadow;
+}
+
+.wrapper {
+    background-color: @window_bg;
+    border-radius: 10px;
+}
+
+.input {
+    color: @input_color;
+    border-radius: 4px;
+    font-size: 28px;
+    padding: 10px;
+    background-color: @input_bg;
+    box-shadow: inset 0 1px 9px 3px @input_shadow;
+}
+
+/**
+ * Selected text in input
+ */
+*:selected,
+*:selected:focused {
+    background-color: alpha (@selected_bg_color, 0.9);
+
+    color: @selected_fg_color;
+}
+
+*:selected:backdrop,
+*:selected:focused:backdrop {
+    background-color: alpha (@backdrop_selected_bg_color, 0.9);
+
+    color: @backdrop_selected_fg_color;
+}
+
+
+
+.item-text {
+    color: @item_text;
+}
+.item-name {
+    color: @item_name;
+    font-size: 120%;
+}
+
+.selected .item-box {
+    border-radius: 10px;
+    background-color: @item_box_selected;
+}
+.selected .item-box .item-text {
+    color: @item_text_selected;
+}
+.selected .item-box .item-name {
+    color: @item_name_selected;
+}
+.item-descr {
+    font-size: 80%;
+}
+
+.prefs-btn:hover {
+    background-position: 0 -27px;
+}
+
+
+/**
+ * Small result item
+ */
+.small-result-item.selected .item-box {
+    border-radius: 5px
+}
+.small-result-item .item-name {
+    font-size: 100%;
+}
