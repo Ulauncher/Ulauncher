@@ -5,7 +5,7 @@ import logging
 import threading
 from gi.repository import Gtk, Gdk, GLib, Keybinder
 
-from ulauncher.helpers import singleton
+from ulauncher.helpers import singleton, force_unicode
 from ulauncher.utils.display import get_current_screen_geometry
 from ulauncher.config import get_data_file
 from ulauncher.ui import create_item_widgets, get_theme_name
@@ -226,7 +226,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self._current_accel_name = accel_name
 
     def get_user_query(self):
-        return Query(self.input.get_text())
+        # get_text() returns str, so we need to convert it to unicode
+        return Query(force_unicode(self.input.get_text()))
 
     def select_result_item(self, index, onHover=False):
         if time.time() - self._resultsRenderTime > 0.1:

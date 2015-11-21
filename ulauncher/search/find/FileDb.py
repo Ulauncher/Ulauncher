@@ -3,7 +3,7 @@ import re
 import sqlite3
 from time import time
 
-from ulauncher.helpers import singleton, split_camel_case
+from ulauncher.helpers import singleton, split_camel_case, force_unicode
 from ulauncher.config import CACHE_DIR
 
 
@@ -62,9 +62,9 @@ class FileDb(object):
     def put_path(self, path):
         filename = os.path.basename(path)
         record = {
-            "path": path.decode('utf-8'),
-            "ext": os.path.splitext(path)[1].lower()[1:].decode('utf-8'),
-            "keywords": self._tokenize_filename(filename).decode('utf-8')
+            "path": force_unicode(path),
+            "ext": force_unicode(os.path.splitext(path)[1].lower()[1:]),
+            "keywords": force_unicode(self._tokenize_filename(filename))
         }
 
         self._conn.execute('''INSERT OR IGNORE INTO files (path, ext, keywords)
@@ -90,7 +90,7 @@ class FileDb(object):
         sql = '''SELECT path FROM files WHERE rowid in (SELECT docid FROM files_fts
                  WHERE files_fts MATCH ? limit ?);'''
         query = self._optimize_query(query)
-        for rec in self._conn.execute(sql, (query.decode('utf-8'), limit)):
+        for rec in self._conn.execute(sql, (force_unicode(query), limit)):
             if os.path.exists(rec[0]):
                 yield rec[0]
 

@@ -1,4 +1,4 @@
-class Query(str):
+class Query(unicode):
     """
     Parses user's query
     """

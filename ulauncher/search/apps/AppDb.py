@@ -1,6 +1,6 @@
 import os
 
-from ulauncher.helpers import singleton
+from ulauncher.helpers import singleton, force_unicode
 from ulauncher.utils.KeyValueDb import KeyValueDb
 from ulauncher.utils.icon_loader import get_app_icon_pixbuf
 from .AppResultItem import AppResultItem
@@ -20,9 +20,9 @@ class AppDb(KeyValueDb):
         :param Gio.DesktopAppInfo app:
         """
         record = {
-            "desktop_file": app.get_filename(),
-            "name": app.get_string('X-GNOME-FullName') or app.get_name(),
-            "description": app.get_description(),
+            "desktop_file": force_unicode(app.get_filename()),
+            "name": force_unicode(app.get_string('X-GNOME-FullName') or app.get_name()),
+            "description": force_unicode(app.get_description() or ''),
             "icon": get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
         }
         # use name as a key in order to skip duplicates

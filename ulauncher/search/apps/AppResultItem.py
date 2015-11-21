@@ -23,7 +23,7 @@ class AppResultItem(ResultItem):
         """
         :param Query query:
         """
-        return self._app_queries.find(str(query)) == self.record.get('name')
+        return self._app_queries.find(query) == self.record.get('name')
 
     def get_icon(self):
         return self.record.get('icon')

@@ -1,5 +1,6 @@
 import logging
 
+from ulauncher.helpers import force_unicode
 from ulauncher.utils.desktop import read_desktop_file
 from .BaseAction import BaseAction
 
@@ -16,5 +17,5 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        logger.info('Run application %s (%s)' % (app.get_name(), self.filename))
+        logger.info('Run application %s (%s)' % (force_unicode(app.get_name()), self.filename))
         app.launch()

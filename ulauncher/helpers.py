@@ -158,7 +158,7 @@ def string_score(query, string):
     words = string.split(' ')
     words.append(string)  # add the whole record name too
     for word in words:
-        score = ratio(query, word) * 100 + extra_score
+        score = ratio(force_unicode(query), force_unicode(word)) * 100 + extra_score
 
         if score > best_score:
             best_score = score
@@ -167,6 +167,10 @@ def string_score(query, string):
 
 _first_cap_re = re.compile('(.)([A-Z][a-z]+)')
 _all_cap_re = re.compile('([a-z0-9])([A-Z])')
+
+
+def force_unicode(text):
+    return text if isinstance(text, unicode) else text.decode('utf8')
 
 
 def split_camel_case(text, sep='_'):
