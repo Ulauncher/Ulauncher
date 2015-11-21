@@ -1,41 +1,71 @@
 @import url("reset.css");
 
+@define-color bg_color #3b3b3b;
+@define-color fg_color #ddd;
+@define-color selected_bg_color #4675ab;
+@define-color selected_fg_color #d5eaff;
+@define-color backdrop_selected_bg_color shade (@bg_color, 0.92);
+@define-color backdrop_selected_fg_color @fg_color;
+
+/**
+ * Window
+ */
+@define-color window_shadow rgba(0,0,0, 0.2);
+@define-color window_bg @bg_color;
+
+/**
+ * Input
+ */
+@define-color input_color #ddd;
+@define-color input_bg #595959;
+@define-color input_shadow rgba(0,0,0, 0.3);
+
+/**
+ * Result items
+ */
+@define-color item_text #999;
+@define-color item_name #bbb;
+@define-color item_box_selected #4675ab;
+@define-color item_text_selected #99ccff;
+@define-color item_name_selected #d5eaff;
+
+
 GtkWindow {
     border-radius: 10px;
-    background-color: rgba(0,0,0, 0.2);
+    background-color: @window_shadow;
 }
 
 .wrapper {
-    background-color: #3b3b3b;
+    background-color: @window_bg;
     border-radius: 10px;
 }
 
 .input {
-    color: #ddd;
+    color: @input_color;
     border-radius: 4px;
     font-size: 28px;
     padding: 10px;
-    background-color: #595959;
-    box-shadow: inset 0 1px 9px 3px rgba(0,0,0, 0.3);
+    background-color: @input_bg;
+    box-shadow: inset 0 1px 9px 3px @input_shadow;
 }
 
 .item-text {
-    color: #999;
+    color: @item_text;
 }
 .item-name {
-    color: #bbb;
+    color: @item_name;
     font-size: 120%;
 }
 
 .selected .item-box {
     border-radius: 10px;
-    background-color: #4675ab;
+    background-color: @item_box_selected;
 }
 .selected .item-box .item-text {
-    color: #99ccff;
+    color: @item_text_selected;
 }
 .selected .item-box .item-name {
-    color: #d5eaff;
+    color: @item_name_selected;
 }
 .item-descr {
     font-size: 80%;
@@ -57,4 +87,19 @@ GtkWindow {
 }
 .small-result-item .item-name {
     font-size: 100%;
+}
+
+
+*:selected,
+*:selected:focused {
+    background-color: alpha (@selected_bg_color, 0.9);
+
+    color: @selected_fg_color;
+}
+
+*:selected:backdrop,
+*:selected:focused:backdrop {
+    background-color: alpha (@backdrop_selected_bg_color, 0.9);
+
+    color: @backdrop_selected_fg_color;
 }
