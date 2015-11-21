@@ -15,6 +15,9 @@ class CopyPathToClipboardItem(SmallResultItem):
     def get_name(self):
         return 'Copy Path to Clipboard'
 
+    def get_name_highlighted(serlf, *args):
+        pass
+
     def get_icon(self):
         return get_themed_icon_by_name('edit-copy', self.ICON_SIZE)
 

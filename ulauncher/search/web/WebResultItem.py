@@ -25,6 +25,9 @@ class WebResultItem(ResultItem):
     def get_name(self):
         return self.name
 
+    def get_name_highlighted(serlf, *args):
+        pass
+
     def get_description(self, query):
         if self.is_default_search:
             return self.description.replace('{query}', query)

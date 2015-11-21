@@ -5,8 +5,8 @@ class Path(object):
     # cache for better performance
     __cached_existing_dir = None
 
-    def __init__(self, query):
-        self._path = os.path.expandvars(os.path.expanduser(query.lstrip()))
+    def __init__(self, path):
+        self._path = os.path.expandvars(os.path.expanduser(path.lstrip()))
 
     def get_abs_path(self):
         return self._path

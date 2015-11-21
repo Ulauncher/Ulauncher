@@ -35,7 +35,7 @@ GtkWindow {
     color: #99ccff;
 }
 .selected .item-box .item-name {
-    color: #eee;
+    color: #d5eaff;
 }
 .item-descr {
     font-size: 80%;

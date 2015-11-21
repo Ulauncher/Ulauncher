@@ -14,6 +14,9 @@ class CalcResultItem(ResultItem):
     def get_name(self):
         return str(self.result) if self.result else 'Error!'
 
+    def get_name_highlighted(serlf, *args):
+        pass
+
     def get_description(self, query):
         return 'Enter to copy to the clipboard' if self.result else self.error
 

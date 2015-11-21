@@ -16,6 +16,9 @@ class OpenFolderItem(SmallResultItem):
     def set_name(self, name):
         self._name = name
 
+    def get_name_highlighted(serlf, *args):
+        pass
+
     def get_name(self):
         return self._name
 

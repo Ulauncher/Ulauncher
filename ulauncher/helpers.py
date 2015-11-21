@@ -2,6 +2,7 @@ import logging
 import re
 import os
 import time
+import optparse
 from fnmatch import fnmatch
 
 from distutils.dir_util import mkpath
@@ -9,8 +10,26 @@ from locale import gettext as _
 from gi.repository import GdkPixbuf
 from Levenshtein import ratio
 
-from .config import get_data_file, CACHE_DIR
+from .config import get_data_file, get_version, CACHE_DIR
 from .utils.lru_cache import lru_cache
+
+
+@lru_cache()
+def parse_options():
+    """Support for command line options"""
+    parser = optparse.OptionParser(version="%%prog %s" % get_version())
+    parser.add_option(
+        "-v", "--verbose", action="count", dest="verbose",
+        help=_("Show debug messages"))
+    parser.add_option(
+        "--hide-window", action="store_true",
+        help=_("Hide window upon application startup"))
+    parser.add_option(
+        "--no-indexing", action="store_true",
+        help=_("Do not index user files"))
+    (options, args) = parser.parse_args()
+
+    return options
 
 
 def get_media_file(media_file_name):

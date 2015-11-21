@@ -1,6 +1,5 @@
 import sys
 import os
-import optparse
 import logging
 import time
 from locale import gettext as _
@@ -10,7 +9,7 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .helpers import set_up_logging
+from .helpers import set_up_logging, parse_options
 from .config import get_version, CACHE_DIR, CONFIG_DIR
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -20,20 +19,6 @@ from ulauncher.utils.run_async import run_async
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
 DBUS_PATH = '/net/launchpad/ulauncher'
-
-
-def parse_options():
-    """Support for command line options"""
-    parser = optparse.OptionParser(version="%%prog %s" % get_version())
-    parser.add_option(
-        "-v", "--verbose", action="count", dest="verbose",
-        help=_("Show debug messages"))
-    parser.add_option(
-        "--hide-window", action="store_true",
-        help=_("Hide window upon application startup"))
-    (options, args) = parser.parse_args()
-
-    return options
 
 
 def _create_dirs():

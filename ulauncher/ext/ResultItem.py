@@ -1,3 +1,6 @@
+from ulauncher.ui import highlight_text
+
+
 class ResultItem(object):
 
     ICON_SIZE = 40
@@ -11,7 +14,10 @@ class ResultItem(object):
         """
 
     def get_name(self):
-        raise RuntimeError("%s#get_name() is not implemented" % self.__class__.__name__)
+        raise RuntimeError("%s.get_name() is not implemented" % self.__class__.__name__)
+
+    def get_name_highlighted(self, query, color):
+        return highlight_text(query, self.get_name(), open_tag='<span foreground="%s">' % color, close_tag='</span>')
 
     def get_description(self, query):
         """

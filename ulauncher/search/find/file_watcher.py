@@ -4,9 +4,9 @@ import pyinotify
 import logging
 from functools import wraps
 
-from .FileDb import FileDb
-from ulauncher.helpers import find_files
+from ulauncher.helpers import find_files, parse_options
 from ulauncher.utils.run_async import run_async
+from .FileDb import FileDb
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +76,11 @@ class FileNotifyEventHandler(pyinotify.ProcessEvent):
 @run_async(daemon=True)
 def start():
     db = FileDb.get_instance().open()
-    _watch(db)
-    _reindex(db)
+    if parse_options().no_indexing:
+        logging.info('Do not run file indexing')
+    else:
+        _watch(db)
+        _reindex(db)
 
 
 def _reindex(db):

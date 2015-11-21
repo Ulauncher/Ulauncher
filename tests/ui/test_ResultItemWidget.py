@@ -37,7 +37,7 @@ class TestResultItemWidget(object):
         builder.get_object.return_value.connect.assert_any_call("button-release-event", result_item_wgt.on_click)
         builder.get_object.return_value.connect.assert_any_call("enter_notify_event", result_item_wgt.on_mouse_hover)
         set_index.assert_called_with(3)
-        set_name.assert_called_with(item_obj.get_name.return_value)
+        set_name.assert_called_with(item_obj.get_name_highlighted.return_value)
         set_description.assert_called_with(item_obj.get_description.return_value)
         item_obj.get_description.assert_called_with('query')
 

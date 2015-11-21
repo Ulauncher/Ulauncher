@@ -6,8 +6,11 @@ logger = logging.getLogger(__name__)
 
 class ResultItemWidget(Gtk.EventBox):
     __gtype_name__ = "ResultItemWidget"
-    shortcut = None
 
+    HL_COLOR_SELECTED = 'white'
+    HL_COLOR_DEFAULT = 'white'
+
+    shortcut = None
     index = None
     builder = None
     name = None
@@ -25,8 +28,8 @@ class ResultItemWidget(Gtk.EventBox):
         self.set_index(index)
 
         self.set_icon(item_object.get_icon())
-        self.set_name(item_object.get_name())
         self.set_description(item_object.get_description(query))
+        self.set_name_highlighted()
 
     def set_index(self, index):
         """
@@ -39,9 +42,11 @@ class ResultItemWidget(Gtk.EventBox):
         self.set_shortcut(self.shortcut)
 
     def select(self):
+        self.set_name_highlighted(True)
         self.get_style_context().add_class('selected')
 
     def deselect(self):
+        self.set_name_highlighted(False)
         self.get_style_context().remove_class('selected')
 
     def set_icon(self, icon):
@@ -52,8 +57,16 @@ class ResultItemWidget(Gtk.EventBox):
             iconWgt = self.builder.get_object('item-icon')
             iconWgt.set_from_pixbuf(icon)
 
+    def set_name_highlighted(self, is_selected=False):
+        color = self.HL_COLOR_SELECTED if is_selected else self.HL_COLOR_DEFAULT
+        self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
+
     def set_name(self, name):
-        self.builder.get_object('item-name').set_text(name)
+        item = self.builder.get_object('item-name')
+        if '<span' in name:  # dealing with markup
+            item.set_markup(name)
+        else:
+            item.set_text(name)
         self.name = name
 
     def get_name(self):

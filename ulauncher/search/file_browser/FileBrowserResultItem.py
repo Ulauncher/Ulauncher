@@ -27,6 +27,10 @@ class FileBrowserResultItem(SmallResultItem):
         """
         return self.path.get_basename()
 
+    def get_name_highlighted(self, query, color):
+        query = os.path.basename(query)
+        return super(FileBrowserResultItem, self).get_name_highlighted(query, color)
+
     def get_icon(self):
         return get_file_icon(self.path, self.ICON_SIZE)
 
