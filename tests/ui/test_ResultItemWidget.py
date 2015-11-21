@@ -74,7 +74,17 @@ class TestResultItemWidget(object):
         result_item_wgt.set_index(3)
         result_item_wgt.on_click(None, None)
         mock_get_toplevel.return_value.select_result_item.assert_called_with(3)
-        mock_get_toplevel.return_value.enter_result_item.assert_called_with()
+        mock_get_toplevel.return_value.enter_result_item.assert_called_with(alt=False)
+
+    def test_on_click_alt_enter(self, mocker, result_item_wgt):
+        mock_get_toplevel = mocker.patch.object(result_item_wgt, 'get_toplevel')
+
+        event = mock.MagicMock()
+        event.button = 3
+        result_item_wgt.set_index(3)
+        result_item_wgt.on_click(None, event)
+        mock_get_toplevel.return_value.select_result_item.assert_called_with(3)
+        mock_get_toplevel.return_value.enter_result_item.assert_called_with(alt=True)
 
     def test_on_mouse_hover(self, mocker, result_item_wgt):
         mock_get_toplevel = mocker.patch.object(result_item_wgt, 'get_toplevel')

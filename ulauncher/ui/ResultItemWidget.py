@@ -74,7 +74,8 @@ class ResultItemWidget(Gtk.EventBox):
 
     def on_click(self, widget, event=None):
         self.get_toplevel().select_result_item(self.index)
-        self.get_toplevel().enter_result_item()
+        alt_enter = bool(event and event.button != 1)
+        self.get_toplevel().enter_result_item(alt=alt_enter)
 
     def on_mouse_hover(self, widget, event):
         self.get_toplevel().select_result_item(self.index, onHover=True)
