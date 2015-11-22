@@ -8,7 +8,6 @@ from fnmatch import fnmatch
 from distutils.dir_util import mkpath
 from locale import gettext as _
 from gi.repository import GdkPixbuf
-from Levenshtein import ratio
 
 from .config import get_data_file, get_version, CACHE_DIR
 from .utils.lru_cache import lru_cache
@@ -130,40 +129,6 @@ def singleton(fn):
 
     return wrapper
 
-
-def string_score(query, string):
-    """
-    Calculate score for each word from string separately
-    and then take the best one
-    """
-    string = string.lower()
-    if not query or not string:
-        return 0
-
-    # improve score (max. by 50%) for queries that occur in a record name:
-    # formula: 50 - (<index of substr>/<name length>)
-    extra_score = 0
-    if query in string:
-        index = string.index(query)
-        extra_score += 50 - (index * 50. / len(string))
-
-        # add extra 10% to a score, if record starts with a query
-        extra_score += 10 if index == 0 else 0
-
-    # special case: improve score for query that is a file extension name
-    if query.startswith('.') and string.endswith(query):
-        extra_score += 30
-
-    best_score = 0
-    words = string.split(' ')
-    words.append(string)  # add the whole record name too
-    for word in words:
-        score = ratio(force_unicode(query), force_unicode(word)) * 100 + extra_score
-
-        if score > best_score:
-            best_score = score
-
-    return best_score
 
 _first_cap_re = re.compile('(.)([A-Z][a-z]+)')
 _all_cap_re = re.compile('([a-z0-9])([A-Z])')

@@ -1,4 +1,4 @@
-from ulauncher.helpers import string_score
+from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.utils.SortedCollection import SortedCollection
 
 
@@ -42,7 +42,7 @@ class SortedResultList(object):
         map(lambda i: self.append(i), items)
 
     def append(self, result_item):
-        score = string_score(self._query, result_item.get_name())
+        score = get_score(self._query, result_item.get_name())
         if score >= self._min_score:
             result_item.score = -score  # use negative to sort by score in desc. order
             self._items.insert(result_item)

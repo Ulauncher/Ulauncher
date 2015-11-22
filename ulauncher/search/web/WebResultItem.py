@@ -25,8 +25,12 @@ class WebResultItem(ResultItem):
     def get_name(self):
         return self.name
 
-    def get_name_highlighted(serlf, *args):
-        pass
+    def get_name_highlighted(self, query, color):
+        # highlight only if we did not enter Web search item keyword
+        if query.get_keyword() == self.keyword and query.get_argument():
+            return
+        else:
+            return super(WebResultItem, self).get_name_highlighted(query, color)
 
     def get_description(self, query):
         if self.is_default_search:

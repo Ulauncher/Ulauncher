@@ -47,7 +47,7 @@ class AppDb(KeyValueDb):
         :return ResultList:
         """
 
-        result_list = result_list or SortedResultList(query, min_score=60, limit=9)
+        result_list = result_list or SortedResultList(query, min_score=30, limit=9)
 
         if not query:
             return result_list
