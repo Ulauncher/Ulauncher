@@ -78,7 +78,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.PreferencesDialog = PreferencesUlauncherDialog
 
         self.position_window()
-        self.init_styles(get_data_file('ui', 'css', 'themes', get_theme_name(), 'theme.css'))
+        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), 'theme.css'))
 
         # bind hotkey
         Keybinder.init()

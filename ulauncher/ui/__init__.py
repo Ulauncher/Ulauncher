@@ -34,7 +34,7 @@ def get_theme_name():
 @lru_cache()
 def _read_theme(name):
     """Returns dict from data/ui/css/themes/<name>/theme.json"""
-    filename = get_data_file('ui', 'css', 'themes', name, 'theme.json')
+    filename = get_data_file('styles', 'themes', name, 'theme.json')
     with open(filename, 'r') as f:
         return json.load(f)
 

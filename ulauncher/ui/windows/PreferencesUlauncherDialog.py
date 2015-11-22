@@ -61,7 +61,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.ui['dialog_action_area'].destroy()
 
         self.settings = Settings.get_instance()
-        self.init_styles(get_data_file('ui', 'css', 'preferences.css'))
+        self.init_styles(get_data_file('styles', 'preferences.css'))
         self._init_webview()
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
