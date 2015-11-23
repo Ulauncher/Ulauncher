@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  angular.module('uLauncher')
+  angular.module('ulauncher')
     .service('apiService', apiService);
 
   apiService.$inject = ['$rootScope'];

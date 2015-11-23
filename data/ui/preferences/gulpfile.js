@@ -35,7 +35,7 @@ gulp.task('sass', function() {
 gulp.task('compile-templates', function() {
   return  gulp.src('src/components/**/*.html')
     .pipe(templateCache({
-        'module': 'uLauncher'
+        'module': 'ulauncher'
     }))
     .pipe(gulp.dest('.tmp/templates/'));
 });

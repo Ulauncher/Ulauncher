@@ -1,5 +1,5 @@
 (function(){
-  angular.module('uLauncher')
+  angular.module('ulauncher')
     .directive('mainHeader', mainHeader);
 
   mainHeader.$inject = [];

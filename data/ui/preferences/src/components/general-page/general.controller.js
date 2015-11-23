@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  angular.module('uLauncher')
+  angular.module('ulauncher')
     .controller('generalController', generalController);
 
   generalController.$inject = ['$scope','$element', 'apiService'];

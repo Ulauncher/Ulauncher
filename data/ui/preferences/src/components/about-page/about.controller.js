@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  angular.module('uLauncher')
+  angular.module('ulauncher')
     .controller('aboutController', aboutController);
 
   aboutController.$inject = ['$scope'];

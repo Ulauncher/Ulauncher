@@ -9,6 +9,7 @@
   "author": "gene chulkov",
   "license": "ISC",
   "devDependencies": {
+    "bower": "^1.6.5",
     "browser-sync": "^2.10.0",
     "gulp": "^3.9.0",
     "gulp-angular-templatecache": "^1.8.0",

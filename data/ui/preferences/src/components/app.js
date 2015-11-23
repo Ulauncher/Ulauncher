@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  var App = angular.module('uLauncher', [
+  var App = angular.module('ulauncher', [
     'ngRoute'
   ]);
 
