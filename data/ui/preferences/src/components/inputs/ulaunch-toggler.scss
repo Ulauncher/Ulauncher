@@ -1,0 +1,21 @@
+.ulaunch-toggler {
+  display: none;
+}
+
+.ulaunch-toggler + label:before {
+  font-family: FontAwesome;
+  display: inline-block;
+  color: #40abf3;
+  font-size: 22px;
+}
+
+.ulaunch-toggler + label:before {
+  content: "\f204";
+  letter-spacing: 10px;
+}
+
+.ulaunch-toggler:checked + label:before {
+  content: "\f205";
+  letter-spacing: 7.5px;
+}
+

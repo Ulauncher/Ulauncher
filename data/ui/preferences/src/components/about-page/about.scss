@@ -1,0 +1,28 @@
+.about-container {
+  text-align: center;
+  padding: 40px;
+
+  &__logo-label {
+    margin: 10px 0 6px 0;
+    font-size: 13px;
+    color: #b0b0b0;
+  }
+
+  &__version-label {
+    margin: 0;
+    color: #507caf;
+  }
+
+  &__copyright-text {
+    padding: 20px 35px 15px 35px;
+    border: 1px solid #7ec183;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #aeaeae;
+  }
+
+  &__logo {
+    width: 200px;
+    height: 200px;
+  }
+}
