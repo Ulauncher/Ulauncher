@@ -9,3 +9,6 @@ build
 po
 .coverage
 htmlcov
+node_modules/
+bower_components/
+.tmp/

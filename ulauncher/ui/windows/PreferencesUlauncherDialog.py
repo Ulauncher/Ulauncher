@@ -75,7 +75,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         """
         self.webview = WebKit2.WebView()
         self.ui['scrolled_window'].add(self.webview)
-        self.webview.load_uri("file://%s" % get_data_file('ui', 'preferences', 'index.html'))
+        self.webview.load_uri("file://%s" % get_data_file('preferences', 'index.html'))
 
         web_settings = self.webview.get_settings()
         web_settings.set_enable_developer_extras(True)
