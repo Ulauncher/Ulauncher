@@ -4,6 +4,7 @@ import json
 from gi.repository import Gio, Gtk, WebKit2
 from locale import gettext as _
 
+from ulauncher.helpers import parse_options
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -75,10 +76,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         """
         self.webview = WebKit2.WebView()
         self.ui['scrolled_window'].add(self.webview)
+        opts = parse_options()
         self.webview.load_uri("file://%s" % get_data_file('preferences', 'index.html'))
 
         web_settings = self.webview.get_settings()
-        web_settings.set_enable_developer_extras(True)
+        web_settings.set_enable_developer_extras(opts.dev)
         web_settings.set_enable_xss_auditor(False)
         web_settings.set_enable_write_console_messages_to_stdout(True)
 

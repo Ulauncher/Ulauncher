@@ -26,6 +26,9 @@ def parse_options():
     parser.add_option(
         "--no-indexing", action="store_true",
         help=_("Do not index user files"))
+    parser.add_option(
+        "--dev", action="store_true",
+        help=_("Development mode"))
     (options, args) = parser.parse_args()
 
     return options

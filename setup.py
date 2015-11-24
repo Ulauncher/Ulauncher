@@ -104,6 +104,16 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
         update_desktop_file(desktop_file, target_pkgdata, target_scripts)
 
 
+class DataFileList(list):
+
+    def append(self, item):
+        # don't add node_modules to data_files that DistUtilsExtra tries to add automatically
+        filename = item[1][0]
+        if 'node_modules' in filename or 'bower_components' in filename or '.tmp' in filename:
+            return
+        else:
+            return super(DataFileList, self).append(item)
+
 DistUtilsExtra.auto.setup(
     name='ulauncher',
     version='1.0.0',
@@ -112,7 +122,7 @@ DistUtilsExtra.auto.setup(
     author_email='sanya.gornostal@gmail.com',
     description='Ulauncher provides a convenient and fast way to launch your desktop applications',
     url='https://github.com/gornostal/ulauncher',
-    data_files=[
+    data_files=DataFileList([
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
         ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
@@ -120,6 +130,6 @@ DistUtilsExtra.auto.setup(
         ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
         ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
         ('share/icons/elementary/scalable/apps', ['data/media/icons/elementary/ulauncher-indicator.svg']),
-    ],
+    ]),
     cmdclass={'install': InstallAndUpdateDataDirectory}
 )
