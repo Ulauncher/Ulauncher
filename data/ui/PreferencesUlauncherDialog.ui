@@ -63,7 +63,7 @@
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window">
-            <property name="width_request">600</property>
+            <property name="width_request">700</property>
             <property name="height_request">400</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -73,7 +73,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
