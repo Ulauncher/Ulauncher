@@ -77,7 +77,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.webview = WebKit2.WebView()
         self.ui['scrolled_window'].add(self.webview)
         opts = parse_options()
-        self.webview.load_uri("file://%s" % get_data_file('preferences', 'index.html'))
+        self._load_prefs_html()
 
         web_settings = self.webview.get_settings()
         web_settings.set_enable_developer_extras(opts.dev)
@@ -94,11 +94,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
 
     def present(self, page):
-        # TODO: change URL hash
+        self._load_prefs_html(page)
         super(PreferencesUlauncherDialog, self).present()
 
     def show(self, page):
-        # TODO: change URL hash
+        self._load_prefs_html(page)
         super(PreferencesUlauncherDialog, self).show()
 
     ######################################
@@ -193,6 +193,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
     # Helpers
     ######################################
+
+    def _load_prefs_html(self, page=''):
+        self.webview.load_uri("file://%s#/%s" % (get_data_file('preferences', 'index.html'), page))
 
     def _get_bool(self, str_val):
         return str(str_val).lower() in ('true', '1', 'on')
