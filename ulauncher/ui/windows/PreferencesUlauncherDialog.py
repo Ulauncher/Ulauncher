@@ -3,11 +3,13 @@ import logging
 import json
 from gi.repository import Gio, Gtk, WebKit2
 from locale import gettext as _
+from urllib import unquote
 
 from ulauncher.helpers import parse_options
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
+from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file
 from ulauncher.utils.Router import Router, get_url_params
 from .Builder import Builder
@@ -115,7 +117,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             callback_name = params['query']['callback']
             assert callback_name
         except Exception as e:
-            logger.warning('API call failed. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('API call failed. %s: %s' % (type(e).__name__, e.message))
             return
 
         try:
@@ -133,7 +135,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             # send response
             schemeRequest.finish(stream, -1, 'text/javascript')
         except Exception as e:
-            logger.warning('Unexpected API error. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e.message))
 
     def send_webview_notification(self, name, data):
         self.webview.run_javascript('onNotification("%s", %s)' % (name, json.dumps(data)))
@@ -189,6 +191,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self._hotkey_name = url_params['query']['name']
         logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
         self.hotkey_dialog.present()
+
+    @rt.route('/open/web-url')
+    def prefs_showhotkey_dialog(self, url_params):
+        url = unquote(url_params['query']['url'])
+        logger.info('Open Web URL %s' % url)
+        OpenUrlAction(url).run()
 
     ######################################
     # Helpers
