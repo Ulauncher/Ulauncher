@@ -64,8 +64,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.ui['dialog_action_area'].destroy()
 
         self.settings = Settings.get_instance()
-        self.init_styles(get_data_file('styles', 'preferences.css'))
         self._init_webview()
+        self.init_styles(get_data_file('styles', 'preferences.css'))
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
@@ -87,6 +87,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
+        self.webview.connect('button-press-event', self.button_press_event)
 
         inspector = self.webview.get_inspector()
         inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
@@ -102,6 +103,21 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def show(self, page):
         self._load_prefs_html(page)
         super(PreferencesUlauncherDialog, self).show()
+
+    ######################################
+    # GTK event handlers
+    ######################################
+
+    def button_press_event(self, widget, event):
+        """
+        Makes preferences window draggable only by top block with a button bar
+        350x60 - size of the button bar
+        """
+        window_width = self.get_size()[0]
+        if event.button == 1 and 350 < event.x < window_width - 70 and 0 < event.y < 60:
+            self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
+
+        return False
 
     ######################################
     # WebView communication methods
