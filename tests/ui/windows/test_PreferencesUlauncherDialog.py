@@ -70,6 +70,12 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_set_autostart({'query': {'value': 'false'}})
         autostart_pref.switch.assert_called_with(False)
 
+    def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
+        dialog.prefs_set_theme_name({'query': {'value': 'light'}})
+        settings.set_property.assert_called_with('theme-name', 'light')
+        settings.save_to_file.assert_called_with()
+        ulauncherWindow.init_theme.assert_called_with()
+
     def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
         dialog.prefs_showhotkey_dialog({'query': {'name': 'hotkey-name'}})
         hotkey_dialog.present.assert_called_with()

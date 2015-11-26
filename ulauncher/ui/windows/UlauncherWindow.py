@@ -78,7 +78,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.PreferencesDialog = PreferencesUlauncherDialog
 
         self.position_window()
-        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), 'theme.css'))
+        self.init_theme()
 
         # bind hotkey
         Keybinder.init()
@@ -172,6 +172,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     ######################################
     # Helpers
     ######################################
+
+    def init_theme(self):
+        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), 'theme.css'))
 
     def activate_preferences(self, page='general'):
         """

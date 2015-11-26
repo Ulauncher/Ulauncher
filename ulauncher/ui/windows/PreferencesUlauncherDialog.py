@@ -151,7 +151,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'show-indicator-icon': self.settings.get_property('show-indicator-icon'),
             'hotkey-show-app': self.get_app_hotkey(),
             'autostart-allowed': self.autostart_pref.is_allowed(),
-            'autostart-enabled': self.autostart_pref.is_on()
+            'autostart-enabled': self.autostart_pref.is_on(),
+            'theme-name': self.settings.get_property('theme-name'),
         }
 
     @rt.route('/set/show-indicator-icon')
@@ -185,6 +186,17 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         UlauncherWindow.get_instance().bind_show_app_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
         self.settings.save_to_file()
+
+    @rt.route('/set/theme-name')
+    def prefs_set_theme_name(self, url_params):
+        name = url_params['query']['value']
+        logger.info('Set theme-name to %s' % name)
+
+        self.settings.set_property('theme-name', name)
+        self.settings.save_to_file()
+
+        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        UlauncherWindow.get_instance().init_theme()
 
     @rt.route('/show/hotkey-dialog')
     def prefs_showhotkey_dialog(self, url_params):
