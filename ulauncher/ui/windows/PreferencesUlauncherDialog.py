@@ -193,7 +193,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.hotkey_dialog.present()
 
     @rt.route('/open/web-url')
-    def prefs_showhotkey_dialog(self, url_params):
+    def prefs_open_url(self, url_params):
         url = unquote(url_params['query']['url'])
         logger.info('Open Web URL %s' % url)
         OpenUrlAction(url).run()
