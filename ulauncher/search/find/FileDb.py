@@ -1,10 +1,13 @@
 import os
 import re
 import sqlite3
+import logging
 from time import time
 
 from ulauncher.helpers import singleton, split_camel_case, force_unicode
 from ulauncher.config import CACHE_DIR
+
+logger = logging.getLogger(__name__)
 
 
 class FileDb(object):
@@ -67,9 +70,13 @@ class FileDb(object):
             "keywords": force_unicode(self._tokenize_filename(filename))
         }
 
-        self._conn.execute('''INSERT OR IGNORE INTO files (path, ext, keywords)
-                           VALUES (:path, :ext, :keywords)''', record)
-        self.commit()
+        try:
+            query = '''INSERT OR IGNORE INTO files (path, ext, keywords)
+                       VALUES (:path, :ext, :keywords)'''
+            self._conn.execute(query, record)
+            self.commit()
+        except Exception as e:
+            logger.exception('Exception %s for query: %s. Record: %s' % (e, query, record))
 
     def _tokenize_filename(self, filename):
         # split camelCased words
@@ -83,16 +90,24 @@ class FileDb(object):
         """
         Remove path from the DB
         """
-        self._conn.execute('DELETE FROM files WHERE path = ?', (path,))
-        self.commit()
+        try:
+            query = 'DELETE FROM files WHERE path = ?'
+            self._conn.execute(query, (path,))
+            self.commit()
+        except Exception as e:
+            logger.exception('Exception %s for query: %s. Path: %s' % (e, query, path))
 
     def find(self, query, limit=20):
         sql = '''SELECT path FROM files WHERE rowid in (SELECT docid FROM files_fts
                  WHERE files_fts MATCH ? limit ?);'''
-        query = self._optimize_query(query)
-        for rec in self._conn.execute(sql, (force_unicode(query), limit)):
-            if os.path.exists(rec[0]):
-                yield rec[0]
+        query = force_unicode(self._optimize_query(query))
+
+        try:
+            for rec in self._conn.execute(sql, (query, limit)):
+                if os.path.exists(rec[0]):
+                    yield rec[0]
+        except Exception as e:
+            logger.exception('Exception %s for query: %s. User query: %s' % (e, sql, query))
 
     def _optimize_query(self, query):
         """
