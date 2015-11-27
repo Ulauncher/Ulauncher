@@ -7,7 +7,9 @@
   helpController.$inject = ['$scope'];
 
   function helpController($scope) {
-    $scope.openUrlInBrowser = openUrlInBrowser
+    var vm = this;
+
+    vm.openUrlInBrowser = openUrlInBrowser
 
     function openUrlInBrowser(urllink) {
       jsonp('/open/web-url', {url: urllink}).then(function(){

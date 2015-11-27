@@ -12,6 +12,10 @@
     text-align: center;
     background: #e0e0e0;
 
+    &:hover {
+      cursor: pointer;
+    }
+
     &--active {
       background: #4675ab;
     }
@@ -42,6 +46,10 @@
   &__label {
     padding: 20px 0 12px 0;
     font-size: 13px;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   &__text {
