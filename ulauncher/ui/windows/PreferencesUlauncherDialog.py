@@ -226,6 +226,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Open Web URL %s' % url)
         OpenUrlAction(url).run()
 
+    @rt.route('/close')
+    def prefs_close(self, url_params):
+        self.hide()
+
     ######################################
     # Helpers
     ######################################
