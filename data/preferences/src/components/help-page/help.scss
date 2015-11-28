@@ -1,3 +1,6 @@
+$mainGrey: #e0e0e0;
+$steelBlue: #4675ab;
+
 .help-page-container {
   box-sizing: border-box;
   padding: 40px;
@@ -10,14 +13,14 @@
     height: 94px;
     border-radius: 50%;
     text-align: center;
-    background: #e0e0e0;
+    background: $mainGrey;
 
     &:hover {
       cursor: pointer;
     }
 
     &--active {
-      background: #4675ab;
+      background: $steelBlue;
     }
   }
 
@@ -30,15 +33,15 @@
     border-radius: 50%;
     text-align: center;
     background: #fff;
-    color: #e0e0e0;
+    color: $mainGrey;
 
     .fa-icon {
       margin-top: 10px;
-      color: #e0e0e0;
+      color: $mainGrey;
       font-size: 54px;
 
       &--active {
-        color: #4675ab;
+        color: $steelBlue;
       }
     }
   }
