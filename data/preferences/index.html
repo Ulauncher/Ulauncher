@@ -3,14 +3,31 @@
 <link rel="stylesheet" href="bower_components/pure/pure-min.css">
 <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
 <!-- inject:css -->
+<link rel="stylesheet" href=".tmp/css/main.css">
+<link rel="stylesheet" href=".tmp/css/about-page/about.css">
+<link rel="stylesheet" href=".tmp/css/general-page/general.css">
+<link rel="stylesheet" href=".tmp/css/help-page/help.css">
+<link rel="stylesheet" href=".tmp/css/inputs/ulaunch-checkbox.css">
+<link rel="stylesheet" href=".tmp/css/inputs/ulaunch-input.css">
+<link rel="stylesheet" href=".tmp/css/inputs/ulaunch-toggler.css">
+<link rel="stylesheet" href=".tmp/css/links/links.css">
+<link rel="stylesheet" href=".tmp/css/main-header/main-header.css">
 <!-- endinject -->
 
-<body ng-app="ulauncher">
+<body class="noselect" ng-app="ulauncher">
 <main-header></main-header>
 <div ng-view></div>
 
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="bower_components/angular-route/angular-route.min.js"></script>
 <!-- inject:js -->
+<script src="src/js/libs/jsonp.js"></script>
+<script src="src/components/app.js"></script>
+<script src="src/components/about-page/about.controller.js"></script>
+<script src="src/components/general-page/general.controller.js"></script>
+<script src="src/components/help-page/help.controller.js"></script>
+<script src="src/components/main-header/main-header.directive.js"></script>
+<script src="src/components/services/api.service.js"></script>
+<script src=".tmp/templates/templates.js"></script>
 <!-- endinject -->
 </body>

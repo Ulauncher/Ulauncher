@@ -10,3 +10,9 @@ body {
 body * {
   box-sizing: border-box;
 }
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
