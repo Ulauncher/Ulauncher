@@ -1,4 +1,0 @@
-#!/bin/bash
-
-rm -rf ~/.config/ulauncher
-rm -rf ~/.cache/ulauncher
