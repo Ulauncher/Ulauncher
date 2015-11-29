@@ -10,7 +10,7 @@ from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
-from ulauncher.config import get_data_file
+from ulauncher.config import get_data_file, get_version
 from ulauncher.utils.Router import Router, get_url_params
 from .Builder import Builder
 from .WindowHelper import WindowHelper
@@ -169,6 +169,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'autostart-allowed': self.autostart_pref.is_allowed(),
             'autostart-enabled': self.autostart_pref.is_on(),
             'theme-name': self.settings.get_property('theme-name'),
+            'version': get_version()
         }
 
     @rt.route('/set/show-indicator-icon')
