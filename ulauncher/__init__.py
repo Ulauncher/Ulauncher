@@ -22,10 +22,8 @@ DBUS_PATH = '/net/launchpad/ulauncher'
 
 
 def _create_dirs():
-    # make sure ~/.config/ulauncher/apps exists
-    apps_path = os.path.join(CONFIG_DIR, 'apps')
-    if not os.path.exists(apps_path):
-        os.makedirs(apps_path)
+    if not os.path.exists(CONFIG_DIR):
+        os.makedirs(CONFIG_DIR)
 
     # make sure ~/.cache/ulauncher exists
     if not os.path.exists(CACHE_DIR):
