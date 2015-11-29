@@ -7,12 +7,10 @@
   helpController.$inject = ['$scope'];
 
   function helpController($scope) {
-    var vm = this;
-
-    vm.openUrlInBrowser = openUrlInBrowser
+    this.openUrlInBrowser = openUrlInBrowser;
 
     function openUrlInBrowser(urllink) {
-      jsonp('/open/web-url', {url: urllink}).then(function(){
+      jsonp('prefs://open/web-url', {url: urllink}).then(function(){
         }, function(err){
           console.error(err);
         });
