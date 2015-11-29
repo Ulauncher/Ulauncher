@@ -1,9 +1,14 @@
+$headerHeight: 60px;
+$underlineHeight: 4px;
+$darkBlue: #369;
+$veryLightGrey: #c8c8c8;
+
 .main-header {
   box-sizing: border-box;
-  height: 60px;
-  padding: 20px 30px;
+  height: $headerHeight;
+  padding: 0 15px 0 25px;
+  border-bottom: 1px solid $veryLightGrey;
   background: #e4e4e4;
-  border-bottom: 1px solid #c8c8c8;
   font-size: 13px;
   letter-spacing: 0.04px;
 
@@ -12,25 +17,27 @@
     // dotted border
     outline: 0;
 
-    cursor: pointer;
     position: relative;
     display: inline-block;
-    text-decoration: none;
+    height: 100%;
+    padding-top: 20px;
     padding-right: 25px;
+    cursor: pointer;
+    text-decoration: none;
     color: #6b6b6b;
 
     &--active {
-      color: #369;
+      color: $darkBlue;
 
       &:after {
         content: '';
         position: absolute;
-        top: 36px;
-        left: 0;
+        top: $headerHeight - $underlineHeight;
+        left: -1.5px;
         display: inline-block;
-        height: 4px;
-        width: 83%;
-        background: #369;
+        height: $underlineHeight;
+        width: 82%;
+        background: $darkBlue;
       }
     }
   }
@@ -41,14 +48,13 @@
   }
 
   &__close-container {
+    padding-top: 15px;
     text-align: right;
   }
 
   &__close {
     cursor: pointer;
     font-size: 30px;
-    color: #c8c8c8;
-    position: relative;
-    top: -5px;
+    color: $veryLightGrey;
   }
 }

@@ -11,3 +11,8 @@ body {
 body * {
   box-sizing: border-box;
 }
+
+.noselect {
+  -webkit-user-select: none;
+  user-select: none;
+}
