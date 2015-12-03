@@ -2,9 +2,9 @@
   angular.module('ulauncher')
     .directive('mainHeader', mainHeader);
 
-  mainHeader.$inject = [];
+  mainHeader.$inject = ['$location'];
 
-  function mainHeader() {
+  function mainHeader($location) {
     return {
       restrict: 'E',
       replace: true,
@@ -13,7 +13,29 @@
     }
 
     function link(scope, elem, attrs) {
-      scope.activePage = 'general';
+      // methods
+      scope.isActivePage = isActivePage;
+
+      scope.headerLinks = [
+        {
+          name: 'general',
+          iconClass: 'fa-cog',
+          text: 'general'
+        },{
+          name: 'help',
+          iconClass: 'fa-support',
+          text: 'help'
+        },{
+          name: 'about',
+          iconClass: 'fa-info-circle',
+          text: 'about'
+        }
+      ];
+
+      function isActivePage(route) {
+        console.log($location);
+        return route === $location.path();
+      }
     }
   }
 })();

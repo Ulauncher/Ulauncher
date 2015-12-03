@@ -26,6 +26,10 @@ $veryLightGrey: #c8c8c8;
     text-decoration: none;
     color: #6b6b6b;
 
+    &:hover {
+      color: #4675ab;
+    }
+
     &--active {
       color: $darkBlue;
 
