@@ -1,22 +1,12 @@
 <div class="main-header pure-g">
   <div class="pure-u-5-6">
     <a class="main-header__link"
-       href="#/general"
-       ng-class="{'main-header__link--active': activePage === 'general'}"
-       ng-click="activePage = 'general'">
-       <i class="fa fa-cog main-header__link-icon"></i>GENERAL
-    </a>
-    <a class="main-header__link"
-       href="#/help"
-       ng-class="{'main-header__link--active': activePage === 'help'}"
-       ng-click="activePage = 'help'">
-       <i class="fa fa-support main-header__link-icon"></i>HELP
-    </a>
-    <a class="main-header__link"
-       href="#/about"
-       ng-class="{'main-header__link--active': activePage === 'about'}"
-       ng-click="activePage = 'about'">
-       <i class="fa fa-info-circle main-header__link-icon"></i>ABOUT
+      ng-repeat="link in headerLinks"
+      ng-href="#/{{link.name}}"
+      ng-class="{'main-header__link--active': isActivePage('/' + link.name)}">
+
+      <i class="fa main-header__link-icon"
+        ng-class="link.iconClass"></i>{{link.text | uppercase}}
     </a>
   </div>
   <div class="main-header__close-container pure-u-1-6">
