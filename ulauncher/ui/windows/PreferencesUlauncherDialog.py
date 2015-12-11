@@ -82,12 +82,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self._load_prefs_html()
 
         web_settings = self.webview.get_settings()
-        web_settings.set_enable_developer_extras(opts.dev)
+        web_settings.set_enable_developer_extras(bool(opts.dev))
         web_settings.set_enable_xss_auditor(False)
         web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
-        self.webview.connect('button-press-event', self.button_press_event)
+        self.webview.connect('button-press-event', self.webview_on_button_press_event)
+        self.webview.connect('context-menu', self.webview_on_context_menu)
 
         inspector = self.webview.get_inspector()
         inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
@@ -108,7 +109,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # GTK event handlers
     ######################################
 
-    def button_press_event(self, widget, event):
+    def webview_on_button_press_event(self, widget, event):
         """
         Makes preferences window draggable only by top block with a button bar
         350x60 - size of the button bar
@@ -118,6 +119,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
         return False
+
+    def webview_on_context_menu(self, *args):
+        return bool(not parse_options().dev)
 
     ######################################
     # WebView communication methods
