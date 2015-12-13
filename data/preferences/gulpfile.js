@@ -35,6 +35,10 @@ gulp.task('copy-index-html', function() {
   childProc.execSync('cp index.tmpl.html index.html');
 });
 
+gulp.task('build-checksum', function() {
+  childProc.execSync('hash git && git rev-parse HEAD > .build-checksum');
+});
+
 gulp.task('sass', function() {
   return gulp.src("src/components/**/*.scss")
     .pipe(sass())
@@ -50,7 +54,7 @@ gulp.task('compile-templates', function() {
     .pipe(gulp.dest('.tmp/templates/'));
 });
 
-gulp.task('inject-dev',['copy-index-html', 'sass', 'compile-templates'], function() {
+gulp.task('inject-dev',['copy-index-html', 'sass', 'compile-templates', 'build-checksum'], function() {
   var target = gulp.src('index.html');
   var devFiles = ['src/**/*.js', '.tmp/templates/*.js', '.tmp/css/**/*.css'];
   var sources = gulp.src(bowerCss.concat(bowerJs).concat(devFiles), {read: false});
@@ -77,7 +81,7 @@ gulp.task('build-concat-js', ['compile-templates'], function() {
     .pipe(gulp.dest('build/js'));
 });
 
-gulp.task('inject-build',['copy-index-html', 'build-concat-css', 'build-concat-js'], function() {
+gulp.task('inject-build',['copy-index-html', 'build-concat-css', 'build-concat-js', 'build-checksum'], function() {
   var target = gulp.src('index.html'),
     sources = gulp.src(['build/**/*.js', 'build/css/**/*.css'], {read: false});
 
