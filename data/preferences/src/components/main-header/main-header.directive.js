@@ -33,7 +33,6 @@
       ];
 
       function isActivePage(route) {
-        console.log($location);
         return route === $location.path();
       }
     }

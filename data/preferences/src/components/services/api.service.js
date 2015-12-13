@@ -21,11 +21,10 @@
       setAutostart: setAutostart,
       setShowIndicatorIcon: setShowIndicatorIcon,
       showHotkeyDialog: showHotkeyDialog
-    }
+    };
 
     function getAll(autostartEl, hotkeyShowAppEl, showIndicatorIconEl) {
       jsonp('prefs://get/all').then(function(data){
-        console.log(data);
         autostartEl.checked = data['autostart-enabled'];
         autostartEl.disabled = !data['autostart-allowed'];
         hotkeyShowAppEl.value = data['hotkey-show-app'];

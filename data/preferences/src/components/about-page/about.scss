@@ -1,11 +1,12 @@
 .about-container {
-  padding: 40px;
+  padding: 33px;
+  padding-bottom: 0;
   text-align: center;
 
   &__logo-label {
-    margin: 10px 0 6px 0;
-    font-size: 13px;
-    color: #b0b0b0;
+    margin: 20px 0 5px 0;
+    font-size: 20px;
+    color: #507caf;
   }
 
   &__version-label {
@@ -21,8 +22,8 @@
     color: #aeaeae;
   }
 
-  &__logo {
-    width: 200px;
-    height: 200px;
+  &__logo svg {
+    width: 190px;
+    height: 190px;
   }
 }
