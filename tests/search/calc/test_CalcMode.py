@@ -35,12 +35,13 @@ class TestCalcMode:
 
     def test_on_query(self, mode, ActionList, RenderResultListAction, CalcResultItem):
         assert mode.on_query('3+2') == ActionList.return_value
+        assert mode.on_query('3+2*') == ActionList.return_value
         ActionList.assert_called_with((RenderResultListAction.return_value,))
         RenderResultListAction.assert_called_with([CalcResultItem.return_value])
         CalcResultItem.assert_called_with(result=5)
 
     def test_on_query__invalid_expr(self, mode, ActionList, RenderResultListAction, CalcResultItem):
-        assert mode.on_query('3+') == ActionList.return_value
+        assert mode.on_query('3++') == ActionList.return_value
         ActionList.assert_called_with((RenderResultListAction.return_value,))
         RenderResultListAction.assert_called_with([CalcResultItem.return_value])
         CalcResultItem.assert_called_with(error='Invalid expression')

@@ -20,10 +20,16 @@ def eval_expr(expr):
     4
     >>> eval_expr('2**6')
     64
+    >>> eval_expr('2*6+')
+    12
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    return _eval(ast.parse(expr, mode='eval').body)
+    try:
+        return _eval(ast.parse(expr, mode='eval').body)
+    except Exception:
+        # if failed, try without the last symbol
+        return _eval(ast.parse(expr[:-1], mode='eval').body)
 
 
 def _eval(node):
