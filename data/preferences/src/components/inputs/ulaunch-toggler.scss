@@ -1,11 +1,15 @@
 .ulaunch-toggler {
   display: none;
 }
+.ulaunch-toggler + label {
+  cursor: pointer;
+  line-height: 2em;
+}
 
 .ulaunch-toggler + label:before {
   font-family: FontAwesome;
   display: inline-block;
-  color: #40abf3;
+  color: #3F7FBE;
   font-size: 22px;
 }
 

@@ -1,15 +1,28 @@
-.general {
+.general-tab {
   box-sizing: border-box;
   margin: 0 35px;
   font-size: 14px;
+  margin: 40px;
 
   &__row {
-    margin: 40px 0;
-    padding-right: 15px;
+    margin: 20px 0;
+    overflow: hidden;
+
+    > div:first-child {
+      line-height: 2em;
+      padding-right: 1em;
+      float: left;
+      width: 10em;
+    }
+
+    > div:nth-of-type(2) {
+      float: left;
+      width: auto;
+    }
   }
 
   &__hint-label {
-    margin: 0;
+    margin: 2px 0 0 0;
     font-size: 11px;
     letter-spacing: 0.07px;
     color: #a5a5a5;

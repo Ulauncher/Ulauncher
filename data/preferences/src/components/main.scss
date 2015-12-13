@@ -6,6 +6,12 @@ html {
 body {
   color: #3d3d3d;
   background: #f2f2f2;
+  font-family: Ubuntu, sans-serif;
+}
+.pure-g [class *= "pure-u"] {
+  /* pure.css for whatever reason has decided to reset font-family to sans-serif in this selector
+     so we set it to what we want */
+  font-family: Ubuntu, sans-serif;
 }
 
 body * {

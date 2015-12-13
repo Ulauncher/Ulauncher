@@ -1,37 +1,27 @@
-<div class="general" ng-controller="generalController as generalCtrl">
-  <div class="general__row pure-g">
-    <div class="pure-u-1-6" style="padding-top: 2px;">
-      Startup:
-    </div>
-    <div class="pure-u-5-6">
+<div class="general-tab" ng-controller="generalController as generalCtrl">
+
+  <div class="general-tab__row">
+    <div>Launch at Login</div>
+    <div>
       <input id="autostart" type="checkbox" class="ulaunch-checkbox">
-      <label for="autostart" ng-click="toggleAutostart($event)">
-        Launch Ulauncher at Login:
-      </label>
-      <p class="general__hint-label">Start Ulauncher automatically</p>
+      <label for="autostart" ng-click="toggleAutostart($event)"></label>
+      <p class="general-tab__hint-label">Start Ulauncher automatically</p>
     </div>
   </div>
-  <div class="general__row pure-g">
-    <div class="pure-u-1-6">
-      Ulauncher Hotkey:
-    </div>
-    <div class="pure-u-5-6">
-      <input id="hotkey-show-app" type="text" /
-             class="ulaunch-input"
-             ng-click="hotkeyShowPopup($event)">
-      <div class="pure-g">
-          <p class="general__hint-label pure-u-3-8"> Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-      </div>
+
+  <div class="general-tab__row">
+    <div>Ulauncher Hotkey</div>
+    <div>
+      <input id="hotkey-show-app" type="text" class="ulaunch-input" ng-click="hotkeyShowPopup($event)">
     </div>
   </div>
-  <div class="general__row pure-g">
-    <div class="pure-u-1-6">
-      Show Tray Icon:
-    </div>
-    <div class="pure-u-5-6">
-      <input id="show-indicator-icon" type="checkbox" class="ulaunch-toggler"/>
-      <label for="show-indicator-icon"
-             ng-click="toggleIndicatorIcon($event)"></label>
+
+  <div class="general-tab__row">
+    <div>Show Tray Icon</div>
+    <div>
+      <input id="show-indicator-icon" type="checkbox" class="ulaunch-checkbox"/>
+      <label for="show-indicator-icon" ng-click="toggleIndicatorIcon($event)"></label>
     </div>
   </div>
+
 </div>

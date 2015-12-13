@@ -1,11 +1,15 @@
 .ulaunch-checkbox {
   display: none;
 }
+.ulaunch-checkbox + label {
+  cursor: pointer;
+  line-height: 2em;
+}
 
 .ulaunch-checkbox + label:before {
   font-family: FontAwesome;
   display: inline-block;
-  color: #40abf3;
+  color: #3F7FBE;
   font-size: 18px;
 }
 
