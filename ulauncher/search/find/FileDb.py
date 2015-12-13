@@ -92,7 +92,7 @@ class FileDb(object):
         """
         try:
             query = 'DELETE FROM files WHERE path = ?'
-            self._conn.execute(query, (path,))
+            self._conn.execute(query, (force_unicode(path),))
             self.commit()
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, path))
