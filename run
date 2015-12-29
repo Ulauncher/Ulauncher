@@ -6,7 +6,7 @@ python setup.py install_data --install-dir="$HOME/.local" || exit 1
 # build preferences UI if it's not built
 pushd "data/preferences"
 if ! hash git 2>/dev/null || ! grep -q `git rev-parse HEAD` ".build-checksum"; then
-    npm i && ./gulp build || exit 1
+    npm i && ./node_modules/bower/bin/bower install --config.interactive=false && ./gulp build || exit 1
 fi
 popd
 

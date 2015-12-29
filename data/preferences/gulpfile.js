@@ -29,6 +29,7 @@ gulp.task('serve', ['sass'], function() {
     gulp.watch("src/components/**/*.html").on('change', browserSync.reload);
     gulp.watch("src/components/**/*.scss").on('change', browserSync.reload);
     gulp.watch("src/components/**/*.js").on('change', browserSync.reload);
+    gulp.watch("src/js/**/*.js").on('change', browserSync.reload);
 });
 
 gulp.task('copy-index-html', function() {
@@ -56,7 +57,8 @@ gulp.task('compile-templates', function() {
 
 gulp.task('inject-dev',['copy-index-html', 'sass', 'compile-templates', 'build-checksum'], function() {
   var target = gulp.src('index.html');
-  var devFiles = ['src/**/*.js', '.tmp/templates/*.js', '.tmp/css/**/*.css'];
+  var devFiles = ['src/components/**/*.js', '.tmp/templates/*.js', '.tmp/css/**/*.css', 'src/js/libs/*.js',
+    'src/js/fixture.js'];
   var sources = gulp.src(bowerCss.concat(bowerJs).concat(devFiles), {read: false});
 
    target.pipe(inject(sources, {addRootSlash: false}))

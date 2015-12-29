@@ -35,7 +35,7 @@
     }
 
     function setAutostart(el) {
-      jsonp('prefs://set/autostart-enabled', {value: el.checked}).then(function(){
+      jsonp('prefs://set/autostart-enabled', {value: !el.checked}).then(function(){
           el.checked = !el.checked;
       }, function(err){
           console.error(err);
