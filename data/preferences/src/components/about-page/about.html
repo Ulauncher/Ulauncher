@@ -1,10 +1,10 @@
-<div class="about-container pure-g">
+<div class="about-container pure-g" ng-controller="aboutController">
   <div class="pure-u-1-3">
     <div class="about-container__logo">
       <ng-include src="'about-page/ulauncher.svg.html'"></ng-include>
     </div>
     <p class="about-container__logo-label">Ulauncher</p>
-    <p class="about-container__version-label">v1.0.1</p>
+    <p class="about-container__version-label">v{{version}}</p>
   </div>
   <div class="pure-u-2-3">
     <section class="about-container__copyright-text">

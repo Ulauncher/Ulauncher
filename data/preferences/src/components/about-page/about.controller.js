@@ -4,11 +4,11 @@
   angular.module('ulauncher')
     .controller('aboutController', aboutController);
 
-  aboutController.$inject = ['$scope'];
+  aboutController.$inject = ['$scope', 'apiService'];
 
-  function aboutController($scope) {
-    // NOTICE: This controller is empty, but I'm almost sure
-    // it will be needed when api for opening links in native
-    // browser will be ready (for Credits button)
+  function aboutController($scope, apiService) {
+    apiService.getPrefs().then(function(data){
+        $scope.version = data.version;
+    });
   }
 })();
