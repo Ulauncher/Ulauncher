@@ -49,6 +49,12 @@ def main():
     logger = logging.getLogger('ulauncher')
     logger.info('Ulauncher version: %s' % get_version())
 
+    # log uncaught exceptions
+    def except_hook(exctype, value, tb):
+        logger.error("Uncaught exception", exc_info=(exctype, value, tb))
+
+    sys.excepthook = except_hook
+
     # start DBus loop
     DBusGMainLoop(set_as_default=True)
     bus = dbus.SessionBus()
