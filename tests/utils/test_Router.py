@@ -17,7 +17,7 @@ def test_get_url_params():
     p = get_url_params('settings://get/all/?')
     assert p['scheme'] == 'settings'
     assert p['path'] == 'get/all/'
-    assert p['query'] == None
+    assert p['query'] is None
 
 
 class TestRouter:
