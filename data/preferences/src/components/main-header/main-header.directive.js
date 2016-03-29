@@ -2,9 +2,9 @@
   angular.module('ulauncher')
     .directive('mainHeader', mainHeader);
 
-  mainHeader.$inject = ['$location'];
+  mainHeader.$inject = ['$location', 'apiService'];
 
-  function mainHeader($location) {
+  function mainHeader($location, apiService) {
     return {
       restrict: 'E',
       replace: true,
@@ -31,6 +31,10 @@
           text: 'about'
         }
       ];
+
+      scope.closePrefs = function closePrefs () {
+        apiService.close();
+      };
 
       function isActivePage(route) {
         return route === $location.path();

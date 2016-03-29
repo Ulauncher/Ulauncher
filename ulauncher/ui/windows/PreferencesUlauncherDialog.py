@@ -87,6 +87,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
+        self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
         self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
@@ -233,6 +234,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/close')
     def prefs_close(self, url_params):
+        logger.info('Close preferences')
         self.hide()
 
     ######################################

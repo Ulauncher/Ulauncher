@@ -20,7 +20,8 @@
       getPrefs: getPrefs,
       setAutostart: setAutostart,
       setShowIndicatorIcon: setShowIndicatorIcon,
-      showHotkeyDialog: showHotkeyDialog
+      showHotkeyDialog: showHotkeyDialog,
+      close: close
     };
 
     function getSetting(name) {
@@ -71,5 +72,11 @@
         });
       });
     }
+
+    function close() {
+      console.log('send /close');
+      jsonp('prefs://close');
+    }
+
   }
 })();
