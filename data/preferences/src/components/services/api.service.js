@@ -35,7 +35,6 @@
       }
 
       prefsDefer = $q.defer();
-      // console.log(prefsDefer.promise.$$state.pending);
       jsonp('prefs://get/all').then(function(data){
         prefsDefer.resolve(data);
       }, function(err){
@@ -74,7 +73,6 @@
     }
 
     function close() {
-      console.log('send /close');
       jsonp('prefs://close');
     }
 
