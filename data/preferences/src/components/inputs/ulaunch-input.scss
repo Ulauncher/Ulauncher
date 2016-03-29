@@ -8,4 +8,8 @@
   color: #3F7FBE;
   font-size: 16px;
   font-weight: 400;
+
+  &:focus {
+      outline: none;
+  }
 }

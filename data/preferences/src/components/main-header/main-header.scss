@@ -54,6 +54,8 @@ $veryLightGrey: #c8c8c8;
   &__close-container {
     padding-top: 15px;
     text-align: right;
+    /* Hide close button while we use a decorated prefs. window */
+    display: none;
   }
 
   &__close {

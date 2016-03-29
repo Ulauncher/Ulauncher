@@ -19,7 +19,7 @@
     $scope.infoGroup = [
       {
         'icon': 'fa-github',
-        'label': 'troubleshooting help',
+        'label': 'troubleshooting',
         'text': 'Find or report your issue on Github',
         'url': 'https://github.com/Ulauncher/Ulauncher/issues'
       },

@@ -22,3 +22,8 @@ body * {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.selectable {
+  -webkit-user-select: auto;
+  user-select: auto;
+}

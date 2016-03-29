@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
-  <!-- interface-requires preferences_ulauncher_dialog 1.0 -->
+  <requires lib="preferences_ulauncher_dialog" version="1.0"/>
   <object class="PreferencesUlauncherDialog" id="preferences_ulauncher_dialog">
     <property name="can_focus">False</property>
     <property name="has_focus">True</property>
@@ -10,7 +10,6 @@
     <property name="window_position">center</property>
     <property name="icon_name">ulauncher</property>
     <property name="type_hint">normal</property>
-    <property name="decorated">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox1">
         <property name="visible">True</property>

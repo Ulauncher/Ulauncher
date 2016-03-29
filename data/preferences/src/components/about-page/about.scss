@@ -14,7 +14,7 @@
     color: #507caf;
   }
 
-  &__copyright-text {
+  & .text-container {
     padding: 20px 35px 15px 35px;
     border: 1px solid #7ec183;
     border-radius: 8px;
@@ -23,11 +23,6 @@
   }
 
   &__credits-text {
-    padding: 20px 35px 15px 35px;
-    border: 1px solid #7ec183;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #aeaeae;
     text-align: left;
   }
 
