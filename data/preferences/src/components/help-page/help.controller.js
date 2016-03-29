@@ -18,27 +18,27 @@
 
     $scope.infoGroup = [
       {
-        'icon': 'fa-comments',
+        'icon': 'fa-github',
         'label': 'troubleshooting help',
-        'text': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugiat a qui necessitatibus provident fuga nobis incidunt quisquam.',
-        'url': 'mailto:ulauncher.app@gmail.com'
+        'text': 'Find or report your issue on Github',
+        'url': 'https://github.com/Ulauncher/Ulauncher/issues'
       },
       {
         'icon': 'fa-envelope',
         'label': 'email us',
-        'text': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugiat a qui necessitatibus provident fuga nobis incidunt quisquam.',
+        'text': "Email us if you didn't find answer to your question/issue on Github",
         'url': 'mailto:ulauncher.app@gmail.com'
       },
       {
         'icon': 'fa-github-alt',
         'label': 'chat on gitter',
-        'text': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugiat a qui necessitatibus provident fuga nobis incidunt quisquam.',
-        'url': 'https://github.com/Ulauncher/Ulauncher/'
+        'text': 'Chat with us on Gitter. (Keep in mind that our team leaves in Eastern European Time)',
+        'url': 'https://gitter.im/Ulauncher'
       },
       {
         'icon': 'fa-twitter',
         'label': 'follow on twitter',
-        'text': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugiat a qui necessitatibus provident fuga nobis incidunt quisquam.',
+        'text': 'Follow us to get the latest updates and news about Ulauncher',
         'url': 'https://twitter.com/UlauncherApp'
       }
     ];
