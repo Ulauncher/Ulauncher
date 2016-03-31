@@ -173,6 +173,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'hotkey-show-app': self.get_app_hotkey(),
             'autostart-allowed': self.autostart_pref.is_allowed(),
             'autostart-enabled': self.autostart_pref.is_on(),
+            'show-recent-apps': self.settings.get_property('show-recent-apps'),
             'theme-name': self.settings.get_property('theme-name'),
             'version': get_version()
         }
@@ -197,6 +198,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             self.autostart_pref.switch(is_on)
         except Exception as e:
             raise PrefsApiError('Caught an error while switching "autostart": %s' % e)
+
+    @rt.route('/set/show-recent-apps')
+    def prefs_set_show_recent_apps(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set show-recent-apps to %s' % is_on)
+        self.settings.set_property('show-recent-apps', is_on)
+        self.settings.save_to_file()
 
     @rt.route('/set/hotkey-show-app')
     def prefs_set_hotkey_show_app(self, url_params):

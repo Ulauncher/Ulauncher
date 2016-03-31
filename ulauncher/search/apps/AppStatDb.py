@@ -25,6 +25,8 @@ class AppStatDb(KeyValueDb):
         """
         Returns most frequent apps
 
+        TODO: rename to `get_most_recent` and update method to remove old apps
+
         :param int limit: limit
         :param ResultList result_list:
         :return ResultList:

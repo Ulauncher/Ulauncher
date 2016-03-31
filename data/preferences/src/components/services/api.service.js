@@ -20,6 +20,7 @@
       getPrefs: getPrefs,
       setAutostart: setAutostart,
       setShowIndicatorIcon: setShowIndicatorIcon,
+      setShowRecentApps: setShowRecentApps,
       showHotkeyDialog: showHotkeyDialog,
       close: close
     };
@@ -54,6 +55,14 @@
 
     function setShowIndicatorIcon(el) {
       jsonp('prefs://set/show-indicator-icon', {value: !el.checked}).then(function(){
+        el.checked = !el.checked;
+      }, function(err){
+        console.error(err);
+      });
+    }
+
+    function setShowRecentApps(el) {
+      jsonp('prefs://set/show-recent-apps', {value: !el.checked}).then(function(){
         el.checked = !el.checked;
       }, function(err){
         console.error(err);

@@ -32,6 +32,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     __gtype_name__ = "UlauncherWindow"
 
     _current_accel_name = None
+    _recent_apps_were_shown = False
     _resultsRenderTime = 0
     _prefsWereActivated = False
     _mainWindowWasActivated = False
@@ -216,8 +217,16 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self._show_frequent_apps()
 
     def _show_frequent_apps(self):
-        items = AppStatDb.get_instance().get_most_frequent(3)
+        if not Settings.get_instance().get_property('show-recent-apps'):
+            # clear result list if setting was changed
+            if self._recent_apps_were_shown:
+                self._recent_apps_were_shown = False
+                self.show_results([])
+            return
+
+        items = AppStatDb.get_instance().get_most_frequent(5)
         if items:
+            self._recent_apps_were_shown = True
             self.show_results(items)
 
     def cb_toggle_visibility(self, key):

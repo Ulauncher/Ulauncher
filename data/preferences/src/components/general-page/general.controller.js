@@ -7,13 +7,11 @@
   generalController.$inject = ['$scope','$element', 'apiService'];
 
   function generalController($scope, $element, apiService) {
-    $scope.toggleAutostart = toggleAutostart;
-    $scope.toggleIndicatorIcon = toggleIndicatorIcon;
-    $scope.hotkeyShowPopup = hotkeyShowPopup;
 
-    var autostartEl = document.querySelector('#autostart'),
-      hotkeyShowAppEl = document.querySelector('#hotkey-show-app'),
-      showIndicatorIconEl = document.querySelector('#show-indicator-icon');
+    var autostartEl = document.querySelector('#autostart');
+    var hotkeyShowAppEl = document.querySelector('#hotkey-show-app');
+    var showIndicatorIconEl = document.querySelector('#show-indicator-icon');
+    var showRecentApps = document.querySelector('#show-recent-apps');
 
     // get preferences and update checkboxes/inputs
     apiService.getPrefs().then(function (data){
@@ -21,6 +19,7 @@
       autostartEl.disabled = !data['autostart-allowed'];
       hotkeyShowAppEl.value = data['hotkey-show-app'];
       showIndicatorIconEl.checked = data['show-indicator-icon'];
+      showRecentApps.checked = data['show-recent-apps'];
     });
 
     // evenets watchers
@@ -28,19 +27,29 @@
       hotkeyShowAppEl.value = data.displayValue;
     });
 
-    function toggleAutostart(e) {
+    $scope.toggleAutostart = function(e) {
       e.preventDefault();
       apiService.setAutostart(autostartEl);
-    }
+    };
 
-    function toggleIndicatorIcon(e) {
+    $scope.toggleIndicatorIcon = function(e) {
       e.preventDefault();
-      apiService.setShowIndicatorIcon(showIndicatorIconEl)
-    }
+      apiService.setShowIndicatorIcon(showIndicatorIconEl);
+    };
 
-    function hotkeyShowPopup(e) {
+    $scope.hotkeyShowPopup = function(e) {
       e.preventDefault();
       apiService.showHotkeyDialog();
+    };
+
+    $scope.toggleRecentApps = function (e) {
+      e.preventDefault();
+      apiService.showHotkeyDialog();
+    };
+
+    $scope.toggleRecentApps = function(e) {
+      e.preventDefault();
+      apiService.setShowRecentApps(showRecentApps);
     }
   }
 })();
