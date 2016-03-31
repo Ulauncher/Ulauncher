@@ -19,9 +19,9 @@ class AutostartPreference(object):
         """
         Returns path to desktop file
         """
-        for info in AppDb.get_instance().get_records().values():
-            if info['name'].lower() == 'ulauncher':
-                return info['desktop_file']
+        record = AppDb.get_instance().get_by_name('Ulauncher')
+        if record:
+            return record['desktop_file']
 
     def _get_autostart_parser(self):
         """

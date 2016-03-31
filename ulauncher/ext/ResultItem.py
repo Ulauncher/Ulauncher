@@ -17,7 +17,14 @@ class ResultItem(object):
         raise RuntimeError("%s.get_name() is not implemented" % self.__class__.__name__)
 
     def get_name_highlighted(self, query, color):
-        return highlight_text(query, self.get_name(), open_tag='<span foreground="%s">' % color, close_tag='</span>')
+        if query:
+            return highlight_text(query,
+                                  self.get_name(),
+                                  open_tag='<span foreground="%s">' % color,
+                                  close_tag='</span>')
+        else:
+            # don't highlight if query is empty
+            return self.get_name()
 
     def get_description(self, query):
         """

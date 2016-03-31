@@ -16,6 +16,7 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search import Search
+from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.find.file_watcher import start as start_file_watcher
 from ulauncher.utils.Settings import Settings
@@ -212,6 +213,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.window.set_sensitive(True)
         self.window.present()
         self.present_with_time(Keybinder.get_current_event_time())
+        self._show_frequent_apps()
+
+    def _show_frequent_apps(self):
+        items = AppStatDb.get_instance().get_most_frequent(3)
+        if items:
+            self.show_results(items)
 
     def cb_toggle_visibility(self, key):
         self.hide() if self.is_visible() else self.show_window()

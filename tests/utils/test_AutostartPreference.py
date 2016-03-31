@@ -43,10 +43,7 @@ class TestAutostartPreference:
     @pytest.fixture
     def db(self, mocker, desktop_file):
         db = mocker.patch('ulauncher.utils.AutostartPreference.AppDb.get_instance').return_value
-        db.get_records.return_value = {
-            'otherapp': {'name': 'otherapp', 'desktop_file': 'otherapp.desktop'},
-            'Ulauncher': {'name': 'Ulauncher', 'desktop_file': desktop_file}
-        }
+        db.get_by_name.return_value = {'name': 'Ulauncher', 'desktop_file': desktop_file}
         return db
 
     @pytest.fixture
@@ -61,7 +58,7 @@ class TestAutostartPreference:
         assert autostart.is_allowed()
 
     def test_is_allowed__retuns_False(self, db):
-        del db.get_records.return_value['Ulauncher']
+        db.get_by_name.return_value = None
         assert not AutostartPreference().is_allowed()
 
     def test_is_on__returns_True(self, autostart, autostart_path):
