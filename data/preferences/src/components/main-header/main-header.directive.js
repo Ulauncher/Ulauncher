@@ -10,7 +10,7 @@
       replace: true,
       templateUrl: 'main-header/main-header.html',
       link: link
-    }
+    };
 
     function link(scope, elem, attrs) {
       // methods
@@ -37,7 +37,7 @@
       };
 
       function isActivePage(route) {
-        return route === $location.path();
+        return route === $location.path() || (route == '/general' && $location.path() == '/');
       }
     }
   }

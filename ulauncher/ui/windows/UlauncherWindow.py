@@ -214,9 +214,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.window.set_sensitive(True)
         self.window.present()
         self.present_with_time(Keybinder.get_current_event_time())
-        self._show_frequent_apps()
+        self._show_recent_apps()
 
-    def _show_frequent_apps(self):
+    def _show_recent_apps(self):
         if not Settings.get_instance().get_property('show-recent-apps'):
             # clear result list if setting was changed
             if self._recent_apps_were_shown:
@@ -224,7 +224,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 self.show_results([])
             return
 
-        items = AppStatDb.get_instance().get_most_frequent(5)
+        items = AppStatDb.get_instance().get_most_frequent(3)
         if items:
             self._recent_apps_were_shown = True
             self.show_results(items)

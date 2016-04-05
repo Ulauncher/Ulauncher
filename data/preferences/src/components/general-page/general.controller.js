@@ -20,6 +20,7 @@
       hotkeyShowAppEl.value = data['hotkey-show-app'];
       showIndicatorIconEl.checked = data['show-indicator-icon'];
       showRecentApps.checked = data['show-recent-apps'];
+      document.querySelector('#theme-' + data['theme-name']).checked = true;
     });
 
     // evenets watchers
@@ -50,6 +51,15 @@
     $scope.toggleRecentApps = function(e) {
       e.preventDefault();
       apiService.setShowRecentApps(showRecentApps);
-    }
+    };
+
+    $scope.setTheme = function(name, e) {
+      e.preventDefault();
+      apiService.setTheme(name).then(function(){
+        document.querySelector('#theme-' + name).checked = true;
+      }, function(error){
+        console.error(error);
+      });
+    };
   }
 })();

@@ -22,6 +22,7 @@
       setShowIndicatorIcon: setShowIndicatorIcon,
       setShowRecentApps: setShowRecentApps,
       showHotkeyDialog: showHotkeyDialog,
+      setTheme: setTheme,
       close: close
     };
 
@@ -83,6 +84,10 @@
 
     function close() {
       jsonp('prefs://close');
+    }
+
+    function setTheme(name) {
+      return jsonp('prefs://set/theme-name', {value: name});
     }
 
   }

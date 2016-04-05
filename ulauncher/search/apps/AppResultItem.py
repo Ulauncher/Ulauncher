@@ -31,8 +31,11 @@ class AppResultItem(ResultItem):
         return self.record.get('icon')
 
     def on_enter(self, query):
-        self._app_queries.put(query, self.record.get('name'))
-        self._app_queries.commit()
+        if query:
+            # don't record empty queries
+            # they occur if a user selects item from a default list
+            self._app_queries.put(query, self.record.get('name'))
+            self._app_queries.commit()
 
         self._app_stat_db.inc_count(self.record.get('desktop_file'))
         self._app_stat_db.commit()

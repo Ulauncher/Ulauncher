@@ -13,7 +13,7 @@ if (window.location.href.indexOf('browser') != -1) {
           'hotkey-show-app': 'Ctrl+Alt L',
           'autostart-allowed': true,
           'autostart-enabled': true,
-          'theme-name': 'dark',
+          'theme-name': 'light',
           'version': '1.2.3'
         });
       } else if (isMatch(url, '/set/show-indicator-icon')) {
@@ -21,6 +21,9 @@ if (window.location.href.indexOf('browser') != -1) {
         setTimeout(resolve, 0); // preventDefault doesn't work unless resolution is done in the next event loop
       } else if (isMatch(url, '/set/autostart-enabled')) {
         console.log('/set/autostart-enabled', params);
+        setTimeout(resolve, 0);
+      } else if (isMatch(url, '/set/theme-name')) {
+        console.log('/set/theme-name', params);
         setTimeout(resolve, 0);
       } else {
         reject("Unknown resource");
