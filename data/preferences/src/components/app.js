@@ -2,7 +2,7 @@
   'use strict';
 
   var App = angular.module('ulauncher', [
-    'ngRoute'
+    'ngRoute', 'ui.grid', 'ui.bootstrap', 'schemaForm'
   ]);
 
   App.config(['$routeProvider', function($routeProvider) {
@@ -12,6 +12,9 @@
       })
       .when('/general', {
           templateUrl : 'general-page/general.html'
+      })
+      .when('/shortcuts', {
+          templateUrl : 'shortcuts-page/shortcuts.html'
       })
       .when('/help', {
           templateUrl : 'help-page/help.html'

@@ -1,0 +1,48 @@
+/**
+* Workaround for angular-grid-ui issue with stretched out
+* https://github.com/angular-ui/ui-grid/issues/1776
+*/
+.ui-grid-header-canvas {
+  height: 27px;
+  max-height: 27px;
+}
+
+.shortcuts-grid {
+  margin: 10px;
+}
+.shortcuts-grid .ui-grid-viewport {
+  overflow-x: hidden !important;
+}
+.shortcuts-grid__add-button {
+  margin: 8px 10px 0 10px;
+}
+.shortcuts-grid__cell-cmd {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  line-height: 30px;
+}
+
+.shortcuts-grid__ctl-btn {
+  display: none;
+  position: absolute;
+  right: 1px;
+  top: 1px;
+}
+.ui-grid-row:hover .shortcuts-grid__ctl-btn {
+  display: block;
+}
+.shortcuts-grid__ctl-btn_edit {
+  right: 40px;
+}
+
+.shortcuts-grid__icon-cell {
+  text-align: center;
+}
+.shortcuts-grid__icon {
+  display: inline-block;
+  width: 23px;
+  height: 23px;
+  margin: 2px;
+}

@@ -7,11 +7,21 @@ var inject        = require('gulp-inject');
 var del           = require('del');
 var childProc     = require('child_process');
 
-var bowerCss = ['bower_components/pure/pure-min.css',
-                'bower_components/font-awesome/css/font-awesome.min.css'];
+var extCss = ['bower_components/pure/pure-min.css',
+              'bower_components/bootstrap/dist/css/bootstrap.min.css',
+              'bower_components/font-awesome/css/font-awesome.min.css',
+              'bower_components/angular-ui-grid/ui-grid.min.css',
+              'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-csp.css'];
 
-var bowerJs = ['bower_components/angular/angular.min.js',
-               'bower_components/angular-route/angular-route.min.js'];
+var extJs = ['bower_components/angular/angular.min.js',
+             'bower_components/objectpath/lib/ObjectPath.js',
+             'bower_components/tv4/tv4.js',
+             'bower_components/angular-route/angular-route.min.js',
+             'bower_components/angular-ui-grid/ui-grid.js',
+             'node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js',
+             'node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js',
+             'bower_components/angular-schema-form/dist/schema-form.min.js',
+             'bower_components/angular-schema-form-bootstrap/bootstrap-decorator.min.js'];
 
 // Tasks for dev environment
 // Static Server + watching scss/html/js files
@@ -41,7 +51,7 @@ gulp.task('build-checksum', function() {
 });
 
 gulp.task('sass', function() {
-  return gulp.src("src/components/**/*.scss")
+  return gulp.src("src/components/main.scss")
     .pipe(sass())
     .pipe(gulp.dest(".tmp/css/"))
     .pipe(browserSync.stream());
@@ -55,11 +65,20 @@ gulp.task('compile-templates', function() {
     .pipe(gulp.dest('.tmp/templates/'));
 });
 
-gulp.task('inject-dev',['copy-index-html', 'sass', 'compile-templates', 'build-checksum'], function() {
+gulp.task('dev-copy-fonts', function() {
+  return gulp.src(['bower_components/font-awesome/fonts/*',
+                   'bower_components/angular-ui-grid/*.ttf',
+                   'bower_components/angular-ui-grid/*.woff'])
+    .pipe(gulp.dest('.tmp/css'));
+});
+
+gulp.task('inject-dev',
+          ['copy-index-html', 'sass', 'dev-copy-fonts', 'compile-templates', 'build-checksum'],
+          function() {
   var target = gulp.src('index.html');
   var devFiles = ['src/components/**/*.js', '.tmp/templates/*.js', '.tmp/css/**/*.css', 'src/js/libs/*.js',
     'src/js/fixture.js'];
-  var sources = gulp.src(bowerCss.concat(bowerJs).concat(devFiles), {read: false});
+  var sources = gulp.src(extCss.concat(extJs).concat(devFiles), {read: false});
 
    target.pipe(inject(sources, {addRootSlash: false}))
       .pipe(gulp.dest('./'));
@@ -72,13 +91,13 @@ gulp.task('clean-build', function () {
 });
 
 gulp.task('build-concat-css', ['sass'], function() {
-  return gulp.src(bowerCss.concat(['.tmp/css/**/*.css']))
+  return gulp.src(extCss.concat(['.tmp/css/**/*.css']))
     .pipe(concat('app.min.css'))
     .pipe(gulp.dest('build/css'));
 });
 
 gulp.task('build-concat-js', ['compile-templates'], function() {
-  return gulp.src(bowerJs.concat(['src/**/*.js', '.tmp/templates/*.js']))
+  return gulp.src(extJs.concat(['src/**/*.js', '.tmp/templates/*.js']))
     .pipe(concat('app.min.js'))
     .pipe(gulp.dest('build/js'));
 });
@@ -92,7 +111,9 @@ gulp.task('inject-build',['copy-index-html', 'build-concat-css', 'build-concat-j
 });
 
 gulp.task('build-copy-fonts', function() {
-  return gulp.src('bower_components/font-awesome/fonts/*')
+  return gulp.src(['bower_components/font-awesome/fonts/*',
+                   'bower_components/angular-ui-grid/*.ttf',
+                   'bower_components/angular-ui-grid/*.woff'])
     .pipe(gulp.dest('build/fonts'));
 });
 

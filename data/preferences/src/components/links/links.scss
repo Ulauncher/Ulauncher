@@ -1,16 +1,44 @@
-.link {
-  box-sizing: border-box;
-  &--button {
-    text-decoration: none;
-    display: inline-block;
-    border: 1px solid #3c6a9f;
+.button {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-family: Ubuntu, sans-serif;
+
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+
+  &:hover {
+    color: #fff;
+    background-color: #286090;
+    border-color: #204d74;
+  }
+
+  &_large {
     border-radius: 10px;
     width: 120px;
     height: 42px;
     padding-top: 10px;
-    background: linear-gradient(to bottom, #589bcc 0%,#4b81b2 52%,#426fa0 100%);
-    color: #fff;
     font-size: 17px;
-    text-align: center;
+  }
+
+  &_white {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+  }
+  &_white:hover {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
   }
 }

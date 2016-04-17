@@ -1,0 +1,32 @@
+$imgSize: 80px;
+.file-upload__image {
+    width: $imgSize;
+    height: $imgSize;
+    background-size: contain;
+    cursor: pointer;
+    position: relative;
+    background-repeat: no-repeat;
+}
+@mixin upload-icon() {
+    content: "\f093";
+    display: block;
+    width: $imgSize;
+    height: $imgSize;
+    font-family: FontAwesome;
+    font-size: 50px;
+    text-align: center;
+    color: black;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+.file-upload__image_empty:before {
+    @include upload-icon();
+    cursor: pointer;
+    opacity: 0.5;
+}
+.file-upload__image:hover:before {
+    position: absolute;
+    @include upload-icon();
+    background: white;
+    opacity: 0.5;
+}

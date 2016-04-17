@@ -1,0 +1,11 @@
+<div class="shortcuts-grid__cell-cmd">
+    {{row.entity.cmd}}
+
+    <button class="button button_white shortcuts-grid__ctl-btn shortcuts-grid__ctl-btn_edit" ng-click="grid.appScope.edit(row, grid)">
+        <i class="fa fa-pencil"></i>
+    </button>
+
+    <button class="button button_white shortcuts-grid__ctl-btn shortcuts-grid__ctl-btn_del" ng-click="grid.appScope.delete(row, grid)">
+        <i class="fa fa-trash"></i>
+    </button>
+</div>

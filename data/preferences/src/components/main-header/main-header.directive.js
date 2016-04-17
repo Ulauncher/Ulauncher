@@ -22,6 +22,10 @@
           iconClass: 'fa-cog',
           text: 'general'
         },{
+          name: 'shortcuts',
+          iconClass: 'fa-external-link-square',
+          text: 'shortcuts'
+        },{
           name: 'help',
           iconClass: 'fa-support',
           text: 'help'

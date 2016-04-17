@@ -12,6 +12,7 @@ from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_version
 from ulauncher.utils.Router import Router, get_url_params
+from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .HotkeyDialog import HotkeyDialog
@@ -234,6 +235,32 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
         self.hotkey_dialog.present()
 
+    @rt.route('/show/file-browser')
+    def prefs_show_file_browser(self, url_params):
+        """
+        Request params: type=(image|all), name=(str)
+        """
+        file_browser_name = url_params['query']['name']
+        logger.info('Show file browser dialog for %s' % file_browser_name)
+        dialog = Gtk.FileChooserDialog("Please choose a file", self, Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        filter_images = Gtk.FileFilter()
+        filter_images.set_name("Image files")
+        filter_images.add_mime_type("image/*")
+        dialog.add_filter(filter_images)
+
+        response = dialog.run()
+        data = {
+            'name': file_browser_name,
+            'path': None
+        }
+        if response == Gtk.ResponseType.OK:
+            data['path'] = dialog.get_filename()
+
+        logger.debug('file-select %s' % data)
+        self.send_webview_notification('file-select', data)
+        dialog.destroy()
+
     @rt.route('/open/web-url')
     def prefs_open_url(self, url_params):
         url = unquote(url_params['query']['url'])
@@ -244,6 +271,31 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_close(self, url_params):
         logger.info('Close preferences')
         self.hide()
+
+    @rt.route('/shortcut/get-all')
+    def prefs_shortcut_get_all(self, url_params):
+        logger.info('Handling /shortcut/get-all')
+        shortcuts = ShortcutsDb.get_instance()
+        return shortcuts.get_sorted_records()
+
+    @rt.route('/shortcut/update')
+    @rt.route('/shortcut/add')
+    def prefs_shortcut_update(self, url_params):
+        req_data = url_params['query']
+        logger.info('Add/Update shortcut: %s' % json.dumps(req_data))
+        shortcuts = ShortcutsDb.get_instance()
+        id = shortcuts.put_shortcut(req_data['name'], req_data['keyword'], req_data['cmd'], req_data['icon'],
+                                    req_data.get('id'))
+        shortcuts.commit()
+        return {'id': id}
+
+    @rt.route('/shortcut/delete')
+    def prefs_shortcut_delete(self, url_params):
+        req_data = url_params['query']
+        logger.info('Delete shortcut: %s' % json.dumps(req_data))
+        shortcuts = ShortcutsDb.get_instance()
+        id = shortcuts.remove(req_data['id'])
+        shortcuts.commit()
 
     ######################################
     # Helpers

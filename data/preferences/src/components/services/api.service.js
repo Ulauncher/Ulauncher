@@ -9,21 +9,14 @@
   // All jsonp calls should be stored in this service
   function apiService($rootScope, $q) {
     window.onNotification = function (name, data) {
+      console.info('onNotification', name, JSON.stringify(data));
       if (name == 'hotkey-set') {
         if (data.name == 'hotkey-show-app' && data.value) {
           setHotkeyShowApp(data);
         }
+      } else if (name == 'file-select') {
+        onFileSelect(data.name, data.path);
       }
-    };
-
-    return {
-      getPrefs: getPrefs,
-      setAutostart: setAutostart,
-      setShowIndicatorIcon: setShowIndicatorIcon,
-      setShowRecentApps: setShowRecentApps,
-      showHotkeyDialog: showHotkeyDialog,
-      setTheme: setTheme,
-      close: close
     };
 
     function getSetting(name) {
@@ -89,6 +82,73 @@
     function setTheme(name) {
       return jsonp('prefs://set/theme-name', {value: name});
     }
+
+    // file select API
+
+    var pendingHandlers = {};
+
+    function showFileBrowser(type, name) {
+      var handler = $q.defer();
+      pendingHandlers[name] = handler;
+      return jsonp('prefs://show/file-browser', {name: name, type: type}).then(function(){
+        return handler.promise;
+      });
+    }
+
+    function onFileSelect(name, path) {
+      if (pendingHandlers[name]) {
+        var method = path ? 'resolve' : 'reject'; // resolve if path isn't empty
+        pendingHandlers[name][method](path);
+        delete pendingHandlers[name];
+      }
+    }
+
+    // shortcut API
+
+    function getAllShortcuts() {
+      return jsonp('prefs://shortcut/get-all');
+    }
+
+    function updateShortcut(icon, name, keyword, cmd, id) {
+      return jsonp('prefs://shortcut/update', {
+        id: id,
+        icon: icon,
+        name: name,
+        keyword: keyword,
+        cmd: cmd
+      });
+    }
+
+    function addShortcut(icon, name, keyword, cmd) {
+      return jsonp('prefs://shortcut/add', {
+        icon: icon,
+        name: name,
+        keyword: keyword,
+        cmd: cmd
+      });
+    }
+
+    function deleteShortcut(id) {
+      return jsonp('prefs://shortcut/delete', {id: id});
+    }
+
+    return {
+      getPrefs: getPrefs,
+      setAutostart: setAutostart,
+      setShowIndicatorIcon: setShowIndicatorIcon,
+      setShowRecentApps: setShowRecentApps,
+      showHotkeyDialog: showHotkeyDialog,
+      showFileBrowser: showFileBrowser,
+      setTheme: setTheme,
+      close: close,
+
+      shortcut: {
+        getAll: getAllShortcuts,
+        update: updateShortcut,
+        add: addShortcut,
+        delete: deleteShortcut
+      }
+    };
 
   }
 })();
