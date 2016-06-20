@@ -109,22 +109,24 @@
       return jsonp('prefs://shortcut/get-all');
     }
 
-    function updateShortcut(icon, name, keyword, cmd, id) {
+    function updateShortcut(icon, name, keyword, cmd, is_default_search, id) {
       return jsonp('prefs://shortcut/update', {
         id: id,
         icon: icon,
         name: name,
         keyword: keyword,
-        cmd: cmd
+        cmd: cmd,
+        is_default_search: is_default_search
       });
     }
 
-    function addShortcut(icon, name, keyword, cmd) {
+    function addShortcut(icon, name, keyword, cmd, is_default_search) {
       return jsonp('prefs://shortcut/add', {
         icon: icon,
         name: name,
         keyword: keyword,
-        cmd: cmd
+        cmd: cmd,
+        is_default_search: is_default_search
       });
     }
 

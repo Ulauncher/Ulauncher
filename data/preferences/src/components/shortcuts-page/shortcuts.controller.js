@@ -8,8 +8,17 @@
         icon: { type: 'string', title: 'Icon', format: 'file' },
         name: { type: 'string', title: 'Name' },
         keyword: { type: 'string', title: 'Keyword' },
-        cmd: { type: 'string', title: 'Query or CMD' }
+        cmd: { type: 'string', title: 'Query or CMD' },
+        is_default_search: { type: 'boolean', title: 'Default search',
+          description: 'suggest this shortcut when no items are found'}
       }
+    })
+    .config(function($sceProvider) {
+      // Completely disable SCE.  For demonstration purposes only!
+      // Do not use in new projects.
+      // This is a workaround for bug https://docs.angularjs.org/error/$sce/unsafe
+      // which occurs if form has boolean property
+      $sceProvider.enabled(false);
     })
     .controller('shortcutsController', shortcutsController);
 
@@ -90,7 +99,7 @@
     if (row) {
       vm.entity = angular.copy(row.entity);
     } else {
-      vm.entity = {icon: '', name: '', keyword: '', cmd: ''};
+      vm.entity = {icon: '', name: '', keyword: '', cmd: '', is_default_search: ''};
     }
     vm.form = [
       {
@@ -106,7 +115,8 @@
         type: 'textarea',
         key: 'cmd',
         placeholder: 'Use %s as a placeholder for a user query.'
-      }];
+      },
+      'is_default_search'];
 
     vm.grid = grid;
     vm.row = row;
@@ -115,7 +125,8 @@
     function save() {
       var entity = vm.entity;
       var method = entity && entity.id ? 'update' : 'add';
-      apiService.shortcut[method](entity.icon, entity.name, entity.keyword, entity.cmd, entity.id).then(function(resp){
+      apiService.shortcut[method](entity.icon, entity.name, entity.keyword, 
+        entity.cmd, entity.is_default_search, entity.id).then(function(resp){
         if (method == 'update') {
           // Copy row values over
           row.entity = angular.extend(row.entity, entity);

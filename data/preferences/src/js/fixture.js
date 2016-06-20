@@ -62,7 +62,8 @@ function _getShortcuts() {
       icon: 'https://assets-cdn.github.com/favicon.ico',
       name: 'Gihub',
       keyword: 'g',
-      cmd: 'http://github.com/search?q=%s'
+      cmd: 'http://github.com/search?q=%s',
+      is_default_search: true
     },
     {
       id: 'dad51010-04ee-44fc-81c4-ed6fb72cbf19',
@@ -76,14 +77,16 @@ function _getShortcuts() {
       icon: 'https://assets-cdn.github.com/favicon.ico',
       name: 'Google Maps',
       keyword: 'maps',
-      cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch'
+      cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch',
+      is_default_search: true
     },
     {
       id: 'dad51010-04ee-44fc-81c4-ed6fb72cbf19',
       icon: 'https://assets-cdn.github.com/favicon.ico',
       name: 'Google Play',
       keyword: 'play',
-      cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch'
+      cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch',
+      is_default_search: true
     },
     {
       id: 'dad51010-04ee-44fc-81c4-ed6fb72cbf19',

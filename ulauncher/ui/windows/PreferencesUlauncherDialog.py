@@ -285,7 +285,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Add/Update shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
         id = shortcuts.put_shortcut(req_data['name'], req_data['keyword'], req_data['cmd'], req_data['icon'],
-                                    req_data.get('id'))
+                                    req_data['is_default_search'], req_data.get('id'))
         shortcuts.commit()
         return {'id': id}
 
