@@ -6,6 +6,9 @@
   height: 27px;
   max-height: 27px;
 }
+.modal-body {
+  overflow: hidden;
+}
 
 .shortcuts-grid {
   margin: 10px;
@@ -14,6 +17,7 @@
   overflow-x: hidden !important;
 }
 .shortcuts-grid__add-button {
+  outline: none !important;
   margin: 8px 10px 0 10px;
 }
 .shortcuts-grid__cell-cmd {
@@ -45,4 +49,23 @@
   width: 23px;
   height: 23px;
   margin: 2px;
+}
+
+.add-shortcut__cmd textarea {
+  height: 120px;
+  margin-bottom: 5px;
+}
+.add-shortcut__name,
+.add-shortcut__keyword,
+.add-shortcut__cmd,
+.add-shortcut__is-def-search {
+  float: right;
+  width: 450px;
+}
+.add-shortcut__is-def-search {
+  margin-top: 0;
+}
+.add-shortcut__is-def-search span {
+  padding-left: 5px;
+  line-height: 25px;
 }

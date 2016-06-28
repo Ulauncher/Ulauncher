@@ -1,4 +1,10 @@
 $imgSize: 80px;
+
+.file-upload {
+    display: inline-block;
+    float: left;
+}
+
 .file-upload__image {
     width: $imgSize;
     height: $imgSize;

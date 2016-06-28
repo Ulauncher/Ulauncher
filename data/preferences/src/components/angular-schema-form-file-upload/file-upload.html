@@ -1,4 +1,4 @@
-<div class="form-group" ng-class="{'has-error': hasError()}">
+<div class="form-group file-upload" ng-class="{'has-error': hasError()}">
     <label class="control-label" ng-show="showTitle()">{{form.title}}</label>
     <div change-icon="selectFile()" ng-model="$$value$$" ng-if="!$$value$$" class="file-upload__image_empty"></div>
     <div change-icon="selectFile()" ng-model="$$value$$" ng-if="$$value$$" class="file-upload__image" ng-style="{'background-image': 'url(' + $$value$$ + ')'}"></div>

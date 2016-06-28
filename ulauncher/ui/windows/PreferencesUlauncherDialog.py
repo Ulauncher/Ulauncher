@@ -114,10 +114,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def webview_on_button_press_event(self, widget, event):
         """
         Makes preferences window draggable only by top block with a button bar
-        350x60 - size of the button bar
+        400x60 - size of the button bar
         """
         window_width = self.get_size()[0]
-        if event.button == 1 and 350 < event.x < window_width - 70 and 0 < event.y < 60:
+        if event.button == 1 and 400 < event.x < window_width - 70 and 0 < event.y < 60:
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
         return False

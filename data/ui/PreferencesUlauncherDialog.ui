@@ -63,8 +63,8 @@
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window">
-            <property name="width_request">700</property>
-            <property name="height_request">400</property>
+            <property name="width_request">800</property>
+            <property name="height_request">600</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="shadow_type">in</property>

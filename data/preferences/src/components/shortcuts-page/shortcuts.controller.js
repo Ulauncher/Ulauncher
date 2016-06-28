@@ -8,9 +8,8 @@
         icon: { type: 'string', title: 'Icon', format: 'file' },
         name: { type: 'string', title: 'Name' },
         keyword: { type: 'string', title: 'Keyword' },
-        cmd: { type: 'string', title: 'Query or CMD' },
-        is_default_search: { type: 'boolean', title: 'Default search',
-          description: 'suggest this shortcut when no items are found'}
+        cmd: { type: 'string', title: 'Query or Script' },
+        is_default_search: { type: 'boolean', title: 'Default search (suggest this shortcut when no items are found)'}
       }
     })
     .config(function($sceProvider) {
@@ -109,14 +108,29 @@
           onReadFn: "showContent"
         }
       },
-      'name',
-      'keyword',
+      {
+        key: 'name',
+        htmlClass: 'add-shortcut__name',
+      },
+      {
+        key: 'keyword',
+        htmlClass: 'add-shortcut__keyword',
+      },
       {
         type: 'textarea',
         key: 'cmd',
-        placeholder: 'Use %s as a placeholder for a user query.'
+        htmlClass: 'add-shortcut__cmd',
+        placeholder: 'Use %s as a placeholder for a user query in URL. \n' +
+          'Or write a script in a language of your choise like this: \n\n' +
+          '#!/usr/bin/env node\n'+
+          'console.log("First argument is:", process.argv[1]);'
       },
-      'is_default_search'];
+      {
+        key: 'is_default_search',
+        htmlClass: 'add-shortcut__is-def-search',
+        disableSuccessState: true
+      }
+    ];
 
     vm.grid = grid;
     vm.row = row;
@@ -125,7 +139,7 @@
     function save() {
       var entity = vm.entity;
       var method = entity && entity.id ? 'update' : 'add';
-      apiService.shortcut[method](entity.icon, entity.name, entity.keyword, 
+      apiService.shortcut[method](entity.icon, entity.name, entity.keyword,
         entity.cmd, entity.is_default_search, entity.id).then(function(resp){
         if (method == 'update') {
           // Copy row values over
