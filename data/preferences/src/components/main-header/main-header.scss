@@ -15,7 +15,7 @@ $veryLightGrey: #c8c8c8;
   &__link {
     // hack to avoid ugly outdated link
     // dotted border
-    outline: 0;
+    outline: 0 !important;
 
     position: relative;
     display: inline-block;
@@ -23,12 +23,12 @@ $veryLightGrey: #c8c8c8;
     padding-top: 20px;
     padding-right: 25px;
     cursor: pointer;
-    text-decoration: none;
+    text-decoration: none !important;
     color: #6b6b6b;
 
     &:hover {
       color: #4675ab;
-      text-decoration: none;
+      text-decoration: none !important;
     }
 
     &--active {
