@@ -44,6 +44,11 @@ cd Ulauncher
 
 After you run `./run` once, you can find and start ulauncher from your OS launcher (like Ubuntu Dash, etc.)
 
+Known Issues
+============
+
+* [inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
+
 ***
 ### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
 
