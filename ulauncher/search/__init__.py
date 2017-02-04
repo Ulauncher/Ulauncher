@@ -2,7 +2,6 @@ from ulauncher.helpers import singleton
 from .DefaultSearchMode import DefaultSearchMode as UlauncherSearch  # rename to avoid name collision with the module
 from .file_browser.FileBrowserMode import FileBrowserMode
 from .calc.CalcMode import CalcMode
-from .find.FindMode import FindMode
 
 
 class Search(object):
@@ -10,7 +9,7 @@ class Search(object):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(UlauncherSearch(), [FileBrowserMode(), CalcMode(), FindMode()])
+        return cls(UlauncherSearch(), [FileBrowserMode(), CalcMode()])
 
     def __init__(self, default_search_mode, search_modes):
         self.default_search_mode = default_search_mode
