@@ -1,6 +1,9 @@
 Dev: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/420163/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
 Master: [![Build Status](https://semaphoreci.com/api/v1/projects/9b1a4089-bf7e-4e02-833b-7cecc3c942ea/581066/shields_badge.svg)](https://semaphoreci.com/ulauncher/ulauncher)
 
+TODO: add links to .tar.gz
+TODO: update text
+
 [Ulauncher](http://ulauncher.io)
 ========
 
@@ -10,7 +13,7 @@ It's written in Python and uses GTK as a GUI toolkit.
 
 ***
 :warning: **Currently it is tested and distributed only for *Debian-based* distors.**  
-To run Ulauncher on rpm-based OS, clone the repo and install needed dependencies manually (see `install_deps` file).  
+To run Ulauncher on rpm-based OS, clone the repo and install needed dependencies manually (see `./build-utils/install-deps.sh` file).  
 *[Help us create RPM distribution!](https://github.com/Ulauncher/Ulauncher/issues/27)*
 ***
 
@@ -36,7 +39,7 @@ ulauncher
 ```
 git clone https://github.com/Ulauncher/Ulauncher.git
 cd Ulauncher
-./install_deps
+./build-utils/install-deps.sh
 ./run
 ```
 

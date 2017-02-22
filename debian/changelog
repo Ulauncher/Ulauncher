@@ -1,3 +1,9 @@
+ulauncher (2.0.0) trusty; urgency=medium
+
+  * New preferences
+
+ -- Aleksandr Gornostal <sanya.gornostal@gmail.com>  Wed, 22 Feb 2016 22:39:00 +0200
+
 ulauncher (1.0.0) trusty; urgency=medium
 
   * Bug fixes;

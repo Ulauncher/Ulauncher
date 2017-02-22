@@ -1,0 +1,16 @@
+.idea
+**/*.pyc
+**/*~
+**/*#
+.cache
+ulauncherc
+*.egg-info
+build
+.build-checksum
+po
+.coverage
+htmlcov
+node_modules/
+bower_components/
+.tmp/
+index.html
