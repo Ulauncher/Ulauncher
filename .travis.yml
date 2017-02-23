@@ -12,6 +12,7 @@ branches:
   only:
   - master
   - dev
+  - /^\d+.\d+.\d+(-\w)?$/
 deploy:
   provider: releases
   api_key:
