@@ -4,6 +4,7 @@ services:
 - docker
 before_install:
 - source ./build-utils/functions.sh
+- docker pull $BUILD_IMAGE
 script:
 - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./build-utils/run-on-pull-request.sh; fi
 - if [ ! -z "$TRAVIS_TAG" ]; then bash ./build-utils/release.sh $TRAVIS_TAG; fi
