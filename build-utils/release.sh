@@ -29,7 +29,7 @@ tarfile="$tmpdir/$name.tar.gz"
 docker run \
     --rm \
     -v $(pwd):/root/ulauncher \
-    --name ulauncher
+    --name ulauncher \
     $BUILD_IMAGE \
     bash -c "./test tests && ./build-utils/build-targz.sh"
 
