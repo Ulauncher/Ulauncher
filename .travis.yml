@@ -20,3 +20,5 @@ deploy:
   skip_cleanup: true
   on:
     repo: Ulauncher/Ulauncher
+    tags: true
+    overwrite: true

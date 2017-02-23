@@ -7,9 +7,9 @@
 # Args:
 # $1 - version
 
-echo "###############################"
+echo "################################"
 echo "# Building ulauncher-$1.tar.gz"
-echo "###############################"
+echo "################################"
 
 set -ex
 
@@ -39,6 +39,9 @@ rsync -aq --progress \
 
 rm -rf $tmpdir/data/preferences/*
 cp -r data/preferences/index.html data/preferences/build $tmpdir/data/preferences
+
+# set version to a tag name ($1)
+sed -i "s/__version__/$1/g" $tmpdir/ulauncher/config.py
 
 filename=$name
 if [ ! -z "$1" ]; then

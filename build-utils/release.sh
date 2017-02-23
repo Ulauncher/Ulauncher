@@ -25,15 +25,14 @@ if [ ! -z "$1" ]; then
     tarfile="$tmpdir-$1"
 fi
 tarfile="$tmpdir/$name.tar.gz"
-container=ulauncher-build-all
 
 docker run \
     --rm \
     -v $(pwd):/root/ulauncher \
-    --name $container
+    --name ulauncher
     $BUILD_IMAGE \
     bash -c "./test tests && ./build-utils/build-targz.sh"
 
-docker cp $container:$tarfile .
+docker cp ulauncher:$tarfile .
 
 export BUILD_ARTIFACT_TARGZ=$tarfile
