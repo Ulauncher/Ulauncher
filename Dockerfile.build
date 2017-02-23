@@ -34,3 +34,6 @@ RUN apt-get update && \
     apt-get clean
 
 COPY build-utils .
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt

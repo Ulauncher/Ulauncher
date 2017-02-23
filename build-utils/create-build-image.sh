@@ -7,9 +7,8 @@
 set -ex
 
 cd `dirname $0`
+source functions.sh
 cd ..
 
-TAG=2.0
-
-docker build -f Dockerfile.build -t ulauncher/build-image:$TAG .
-docker push ulauncher/build-image:$TAG
+docker build -f Dockerfile.build -t $BUILD_IMAGE .
+docker push $BUILD_IMAGE

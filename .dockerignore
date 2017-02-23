@@ -14,3 +14,4 @@ node_modules/
 bower_components/
 .tmp/
 index.html
+.travis.yml

@@ -25,6 +25,7 @@ class TestResultItemWidget(object):
     def pixbuf(self):
         return mock.Mock(spec=GdkPixbuf.Pixbuf)
 
+    @pytest.mark.no_docker
     def test_initialize(self, builder, item_obj, mocker):
         result_item_wgt = ResultItemWidget()
         set_index = mocker.patch.object(result_item_wgt, 'set_index')
@@ -41,22 +42,26 @@ class TestResultItemWidget(object):
         set_description.assert_called_with(item_obj.get_description.return_value)
         item_obj.get_description.assert_called_with('query')
 
+    @pytest.mark.no_docker
     def test_set_index(self, result_item_wgt, mocker):
         mock_set_shortcut = mocker.patch.object(result_item_wgt, 'set_shortcut')
 
         result_item_wgt.set_index(2)
         mock_set_shortcut.assert_called_once_with('Alt+3')
 
+    @pytest.mark.no_docker
     def test_select(self, result_item_wgt, mocker, builder):
         mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
         result_item_wgt.select()
         mock_get_style_context.return_value.add_class.assert_called_once_with('selected')
 
+    @pytest.mark.no_docker
     def test_deselect(self, result_item_wgt, mocker, builder):
         mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
         result_item_wgt.deselect()
         mock_get_style_context.return_value.remove_class.assert_called_once_with('selected')
 
+    @pytest.mark.no_docker
     def test_set_icon(self, result_item_wgt, builder, pixbuf):
         iconWgt = mock.MagicMock()
         builder.get_object.return_value = iconWgt
@@ -64,10 +69,12 @@ class TestResultItemWidget(object):
         result_item_wgt.set_icon(pixbuf)
         iconWgt.set_from_pixbuf.assert_called_with(pixbuf)
 
+    @pytest.mark.no_docker
     def test_set_name(self, result_item_wgt, builder):
         result_item_wgt.set_name('test name')
         builder.get_object.return_value.set_text.assert_called_with('test name')
 
+    @pytest.mark.no_docker
     def test_on_click(self, mocker, result_item_wgt):
         mock_get_toplevel = mocker.patch.object(result_item_wgt, 'get_toplevel')
 
@@ -76,6 +83,7 @@ class TestResultItemWidget(object):
         mock_get_toplevel.return_value.select_result_item.assert_called_with(3)
         mock_get_toplevel.return_value.enter_result_item.assert_called_with(alt=False)
 
+    @pytest.mark.no_docker
     def test_on_click_alt_enter(self, mocker, result_item_wgt):
         mock_get_toplevel = mocker.patch.object(result_item_wgt, 'get_toplevel')
 
@@ -86,6 +94,7 @@ class TestResultItemWidget(object):
         mock_get_toplevel.return_value.select_result_item.assert_called_with(3)
         mock_get_toplevel.return_value.enter_result_item.assert_called_with(alt=True)
 
+    @pytest.mark.no_docker
     def test_on_mouse_hover(self, mocker, result_item_wgt):
         mock_get_toplevel = mocker.patch.object(result_item_wgt, 'get_toplevel')
 
@@ -93,28 +102,35 @@ class TestResultItemWidget(object):
         result_item_wgt.on_mouse_hover(None, None)
         mock_get_toplevel.return_value.select_result_item.assert_called_with(4, onHover=True)
 
+    @pytest.mark.no_docker
     def test_set_description(self, result_item_wgt, builder):
         result_item_wgt.set_description('test description')
         builder.get_object.return_value.set_text.assert_called_with('test description')
 
+    @pytest.mark.no_docker
     def test_no_description(self, result_item_wgt, builder):
         result_item_wgt.set_description(None)
         builder.get_object.return_value.destroy.assert_called_with()
 
+    @pytest.mark.no_docker
     def test_set_shortcut(self, result_item_wgt, builder):
         result_item_wgt.set_shortcut('Alt+1')
         builder.get_object.return_value.set_text.assert_called_with('Alt+1')
 
+    @pytest.mark.no_docker
     def test_on_enter(self, result_item_wgt, item_obj):
         assert result_item_wgt.on_enter('test') is item_obj.on_enter.return_value
         item_obj.on_enter.assert_called_with('test')
 
+    @pytest.mark.no_docker
     def test_on_alt_enter(self, result_item_wgt, item_obj):
         assert result_item_wgt.on_alt_enter('test') is item_obj.on_alt_enter.return_value
         item_obj.on_alt_enter.assert_called_with('test')
 
+    @pytest.mark.no_docker
     def test_get_keyword(self, result_item_wgt, item_obj):
         assert result_item_wgt.get_keyword() is item_obj.get_keyword.return_value
 
+    @pytest.mark.no_docker
     def test_selected_by_default(self, result_item_wgt, item_obj):
         assert result_item_wgt.selected_by_default('q') is item_obj.selected_by_default.return_value
