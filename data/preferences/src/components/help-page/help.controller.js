@@ -32,8 +32,8 @@
       {
         'icon': 'fa-github-alt',
         'label': 'chat on gitter',
-        'text': 'Chat with us on Gitter. (Keep in mind that our team leaves in Eastern European Time)',
-        'url': 'https://gitter.im/Ulauncher'
+        'text': 'Chat with us on Gitter',
+        'url': 'https://gitter.im/Ulauncher/General'
       },
       {
         'icon': 'fa-twitter',

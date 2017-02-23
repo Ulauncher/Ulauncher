@@ -1,0 +1,50 @@
+#!/bin/bash
+
+##############################################################
+# Builds tar.gz file with (un)install script and Ulauncher src
+##############################################################
+
+# Args:
+# $1 - version
+
+echo "###############################"
+echo "# Building ulauncher-$1.tar.gz"
+echo "###############################"
+
+set -ex
+
+buildUtils=`dirname $0`
+
+bash "$buildUtils/build-preferences.sh"
+
+name="ulauncher"
+tmpdir="/tmp/$name"
+
+rm -rf $tmpdir || true
+mkdir -p $tmpdir || true
+rsync -aq --progress \
+    AUTHORS \
+    bin \
+    data \
+    LICENSE \
+    README.md \
+    setup.cfg \
+    setup.py \
+    install.sh \
+    uninstall.sh \
+    ulauncher \
+    ulauncher.desktop.dev \
+    $tmpdir \
+    --exclude-from=.gitignore
+
+rm -rf $tmpdir/data/preferences/*
+cp -r data/preferences/index.html data/preferences/build $tmpdir/data/preferences
+
+filename=$name
+if [ ! -z "$1" ]; then
+    filename="$name-$1"
+fi
+
+cd /tmp
+tar czf $filename.tar.gz $name
+rm -rf $tmpdir

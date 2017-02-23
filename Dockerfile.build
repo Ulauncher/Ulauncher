@@ -1,0 +1,39 @@
+FROM ubuntu:16.04
+
+MAINTAINER Aleksandr Gornostal
+
+WORKDIR /root/ulauncher
+
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        vim \
+        wget \
+        gobject-introspection \
+        libkeybinder-3.0-0 \
+        gir1.2-gtk-3.0 \
+        gir1.2-keybinder-3.0 \
+        gir1.2-webkit2-3.0 \
+        gir1.2-glib-2.0 \
+        gir1.2-gdkpixbuf-2.0 \
+        gir1.2-appindicator3-0.1 \
+        python-gi \
+        python-gobject \
+        python-distutils-extra \
+        python-pysqlite2 \
+        python-xdg \
+        python-dbus libgtk-3-0 \
+        python-pyinotify \
+        python-levenshtein \
+        python-pip && \
+    pip install --upgrade pip && \
+    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_6.x && \
+    bash /tmp/node-setup.sh && \
+    apt-get install -y nodejs && \
+    apt-get autoremove -y && \
+    apt-get clean
+
+COPY build-utils .
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt

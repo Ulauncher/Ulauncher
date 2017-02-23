@@ -63,7 +63,7 @@ class AutostartPreference(object):
                 autostart_info.set_filename(self._ulauncher_autostart_desktop)
 
             autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_on)).lower())
-            autostart_info.set('Exec', 'ulauncher --hide-window')  # hide main window on autostart
+            autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
             autostart_info.write()
         except Exception as e:
             raise SwitchError('Unexpected exception: %s' % e)
