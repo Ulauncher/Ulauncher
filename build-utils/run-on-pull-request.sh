@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#####################################
+# Runs pytests and builds preferences
+#####################################
+
 cd `dirname $0`
 cd ..
 
