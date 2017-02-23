@@ -8,6 +8,10 @@ before_install:
 script:
 - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./build-utils/run-on-pull-request.sh; fi
 - if [ ! -z "$TRAVIS_TAG" ]; then bash ./build-utils/release.sh $TRAVIS_TAG; fi
+branches:
+  only:
+  - master
+  - dev
 deploy:
   provider: releases
   api_key:
