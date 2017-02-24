@@ -41,7 +41,7 @@ rm -rf $tmpdir/data/preferences/*
 cp -r data/preferences/index.html data/preferences/build $tmpdir/data/preferences
 
 # set version to a tag name ($1)
-sed -i "s/__version__ = /__version__ = '$1'/g" $tmpdir/ulauncher/config.py
+sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py
 
 filename=$name
 if [ ! -z "$1" ]; then
