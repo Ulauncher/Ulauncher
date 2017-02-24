@@ -8,7 +8,7 @@ set -ex
 
 if [ -e /usr/bin/apt-get ] ; then
     sudo apt-get update
-    sudo apt-get install -y \
+    sudo apt-get install \
             gobject-introspection \
             libkeybinder-3.0-0 \
             libgtk-3-0 \
