@@ -9,6 +9,7 @@ RUN apt-get update && \
         git \
         vim \
         wget \
+        debhelper \
         gobject-introspection \
         libkeybinder-3.0-0 \
         gir1.2-gtk-3.0 \

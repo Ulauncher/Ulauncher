@@ -11,20 +11,19 @@ if [ -e /usr/bin/apt-get ] ; then
     sudo apt-get install -y \
             gobject-introspection \
             libkeybinder-3.0-0 \
+            libgtk-3-0 \
             gir1.2-gtk-3.0 \
             gir1.2-keybinder-3.0 \
             gir1.2-webkit2-3.0 \
             gir1.2-glib-2.0 \
             gir1.2-gdkpixbuf-2.0 \
             gir1.2-appindicator3-0.1 \
-            python-gi \
-            python-gobject \
+            python-dbus \
             python-distutils-extra \
-            python-pysqlite2 \
-            python-xdg \
-            python-dbus libgtk-3-0 \
+            python-levenshtein \
             python-pyinotify \
-            python-levenshtein
+            python-pysqlite2 \
+            python-xdg
 else
     echo
     echo "###########################################"
