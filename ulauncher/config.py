@@ -86,7 +86,7 @@ def get_default_shortcuts():
         "added": time()
     }
 
-    with open(get_data_file('timer-shortcut/timer.py'), 'r') as f:
+    with open(get_data_file('timer-shortcut/timer.py.src'), 'r') as f:
         timerPy = f.read()
 
     timer = {

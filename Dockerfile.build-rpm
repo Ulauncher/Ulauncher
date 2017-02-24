@@ -1,0 +1,16 @@
+FROM fedora:25
+
+MAINTAINER ulauncher.app@gmail.com
+
+WORKDIR /root/ulauncher
+
+RUN dnf install -y \
+        gcc \
+        make \
+        rpm-build \
+        python-devel \
+        rsync \
+        intltool \
+        python-distutils-extra && \
+    curl https://bootstrap.pypa.io/ez_setup.py | python2.7
+
