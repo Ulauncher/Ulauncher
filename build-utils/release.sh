@@ -20,19 +20,24 @@ cd ..
 buildUtils=`dirname $0`
 
 name="ulauncher"
-tmpdir="/tmp/"
 if [ ! -z "$1" ]; then
-    tarfile="$tmpdir-$1"
+    name="$name-$1"
 fi
-tarfile="$tmpdir/$name.tar.gz"
+tarfile="/tmp/$name.tar.gz"
+
+
+step1="ln -s /var/node_modules data/preferences" # take node modules from cache
+step2="ln -s /var/bower_components data/preferences"
+step3="./test tests"
+step4="./build-utils/build-targz.sh $1"
 
 docker run \
-    --rm \
     -v $(pwd):/root/ulauncher \
     --name ulauncher \
     $BUILD_IMAGE \
-    bash -c "./test tests && ./build-utils/build-targz.sh"
+    bash -c "$step1 && $step2 && $step3 && $step4"
 
 docker cp ulauncher:$tarfile .
+docker rm ulauncher
 
 export BUILD_ARTIFACT_TARGZ=$tarfile
