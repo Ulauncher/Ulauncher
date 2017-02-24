@@ -20,8 +20,6 @@ deploy:
   file:
     - "ulauncher-$TRAVIS_TAG.tar.gz"
   skip_cleanup: true
-  script:
-    - env
   on:
     repo: Ulauncher/Ulauncher
     tags: true

@@ -39,5 +39,3 @@ docker run \
 
 docker cp ulauncher:$tarfile .
 docker rm ulauncher
-
-export BUILD_ARTIFACT_TARGZ=$tarfile
