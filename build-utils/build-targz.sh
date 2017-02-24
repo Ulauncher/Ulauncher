@@ -7,9 +7,9 @@
 # Args:
 # $1 - version
 
-echo "################################"
+echo "###################################"
 echo "# Building ulauncher-$1.tar.gz"
-echo "################################"
+echo "###################################"
 
 set -ex
 
@@ -45,7 +45,7 @@ sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py
 
 filename=$name
 if [ ! -z "$1" ]; then
-    filename="$name-$1"
+    filename="$name_$1"
 fi
 
 cd /tmp

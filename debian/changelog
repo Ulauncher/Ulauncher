@@ -1,4 +1,4 @@
-ulauncher (2.0.0) trusty; urgency=medium
+ulauncher (%VERSION%) trusty xenial yakkety; urgency=medium
 
   * New preferences
 

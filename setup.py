@@ -116,7 +116,7 @@ class DataFileList(list):
 
 DistUtilsExtra.auto.setup(
     name='ulauncher',
-    version='1.0.0',
+    version='%VERSION%',
     license='GPL-3',
     author='Aleksandr Gornostal',
     author_email='sanya.gornostal@gmail.com',
