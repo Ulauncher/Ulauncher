@@ -24,17 +24,33 @@ if [ -e /usr/bin/apt-get ] ; then
             python-pyinotify \
             python-pysqlite2 \
             python-xdg
-else
+fi
+
+if [ -e /usr/bin/dnf ] ; then
+    sudo dnf install \
+        gobject-introspection \
+        python-gobject \
+        keybinder3 \
+        libappindicator-gtk3 \
+        webkitgtk3 \
+        dbus-python \
+        python2-pyxdg \
+        python2-inotify \
+        python-Levenshtein
+fi
+
+if [ -e /usr/bin/pacman ] ; then
     echo
-    echo "###########################################"
-    echo "# Only Debian-based distros are supported #"
-    echo "###########################################"
+    echo "###############################"
+    echo "# Arch Linux is not supported #"
+    echo "###############################"
     echo
-    echo "Please create a pull request with installation steps for RPM-based distros"
+    echo "Please create a pull request with installation steps"
     echo "https://github.com/Ulauncher/Ulauncher/blob/dev/install.sh"
     echo
     exit 1
 fi
+
 
 echo "Installing media files to ~/.local to be able to load icons by name"
 python setup.py install_data --install-dir="$HOME/.local" || exit 1

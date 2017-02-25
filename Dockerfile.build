@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-MAINTAINER Aleksandr Gornostal
+MAINTAINER ulauncher.app@gmail.com
 
 WORKDIR /root/ulauncher
 
@@ -23,11 +23,12 @@ RUN apt-get update && \
         python-distutils-extra \
         python-pysqlite2 \
         python-xdg \
-        python-dbus libgtk-3-0 \
+        python-dbus \
+        libgtk-3-0 \
         python-pyinotify \
         python-levenshtein \
         python-pip && \
-    pip install --upgrade pip && \
+    pip install --upgrade pip setuptools && \
     wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_6.x && \
     bash /tmp/node-setup.sh && \
     apt-get install -y nodejs && \

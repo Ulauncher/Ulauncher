@@ -2,17 +2,17 @@ ulauncher (%VERSION%) trusty xenial yakkety; urgency=medium
 
   * New preferences
 
- -- Aleksandr Gornostal <sanya.gornostal@gmail.com>  Wed, 22 Feb 2016 22:39:00 +0200
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Wed, 22 Feb 2016 22:39:00 +0200
 
 ulauncher (1.0.0) trusty; urgency=medium
 
   * Bug fixes;
   * Added themed indicator icons
 
- -- Aleksandr Gornostal <sanya.gornostal@gmail.com>  Sun, 25 Oct 2015 12:50:47 +0200
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sun, 25 Oct 2015 12:50:47 +0200
 
 ulauncher (0.1) trusty; urgency=medium
 
   * Initial release.
 
- -- Aleksandr Gornostal <sanya.gornostal@gmail.com>  Thu, 09 Apr 2015 10:21:19 +0300
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Thu, 09 Apr 2015 10:21:19 +0300

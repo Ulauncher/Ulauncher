@@ -32,10 +32,19 @@ step5="./build-utils/build-targz.sh $1"
 
 docker run \
     -v $(pwd):/root/ulauncher \
-    --name ulauncher \
+    --name ulauncher-deb \
     $BUILD_IMAGE \
     bash -c "$step1 && $step2 && $step3 && $step4 && $step5"
 
-docker cp ulauncher:/tmp/ulauncher_$1.tar.gz .
-docker cp ulauncher:/tmp/ulauncher_$1_all.deb .
-docker rm ulauncher
+# RPM build should go second, so preferences are build into JS/HTML files
+docker run \
+    -v $(pwd):/root/ulauncher \
+    --name ulauncher-rpm \
+    $RPM_BUILD_IMAGE \
+    bash -c "./build-utils/build-rpm.sh $1"
+
+docker cp ulauncher-deb:/tmp/ulauncher_$1.tar.gz .
+docker cp ulauncher-deb:/tmp/ulauncher_$1_all.deb .
+docker cp ulauncher-rpm:/tmp/ulauncher_$1_fedora.rpm .
+
+docker rm ulauncher-deb ulauncher-rpm

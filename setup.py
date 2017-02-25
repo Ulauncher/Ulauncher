@@ -119,9 +119,9 @@ DistUtilsExtra.auto.setup(
     version='%VERSION%',
     license='GPL-3',
     author='Aleksandr Gornostal',
-    author_email='sanya.gornostal@gmail.com',
+    author_email='ulauncher.app@gmail.com',
     description='Ulauncher provides a convenient and fast way to launch your desktop applications',
-    url='https://github.com/gornostal/ulauncher',
+    url='http://ulauncher.io',
     data_files=DataFileList([
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
