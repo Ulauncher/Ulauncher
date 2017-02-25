@@ -5,6 +5,7 @@ services:
 before_install:
   - source ./build-utils/functions.sh
   - docker pull $BUILD_IMAGE
+  - docker pull $RPM_BUILD_IMAGE
 script:
   - if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" ]; then bash ./build-utils/travis-test.sh; fi
   - if [ ! -z "$TRAVIS_TAG" ]; then bash ./build-utils/release.sh $TRAVIS_TAG; fi
@@ -20,6 +21,7 @@ deploy:
   file:
     - "ulauncher_${TRAVIS_TAG}.tar.gz"
     - "ulauncher_${TRAVIS_TAG}_all.deb"
+    - "ulauncher_${TRAVIS_TAG}_fedora.rpm"
   skip_cleanup: true
   on:
     repo: Ulauncher/Ulauncher
