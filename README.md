@@ -14,7 +14,7 @@ It's written in Python and uses GTK as a GUI toolkit.
 Install for Development
 ===========
 
-If you just want to use the app see download instructions at ulauncher.io
+If you just want to use the app see download instructions at [ulauncher.io](http://ulauncher.io)
 
 ### Dev Requirements
 
@@ -24,7 +24,7 @@ If you just want to use the app see download instructions at ulauncher.io
   You don't have to manually install those if you had already installed Ulauncher
 
 ### Build and Run
-1. `./build-utils/dev-container.sh` will take you into a Docker container from which you can run build scripts
+1. `./build-utils/dev-container.sh` will take you into a Docker container from which you can run build and test scripts
 2. `./build-utils/build-preferences.sh` build preferences UI in JS/HTML
 3. `./test tests` runs Python tests
 4. `./dev-run.sh` installs Ulauncher data to `~/.local/share/ulauncher/` and then runs the app
