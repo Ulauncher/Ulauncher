@@ -27,7 +27,6 @@ class TestHotkeyDialog:
         mocker.patch.object(dialog, 'emit')
         return dialog.emit
 
-    @pytest.mark.no_docker
     def test_on_hotkey_input_key_press_event__invalid_hotkey(self, dialog, widget, event):
         (key, mode) = Gtk.accelerator_parse('BackSpace')
         event.keyval = key
@@ -37,7 +36,6 @@ class TestHotkeyDialog:
         assert not dialog.ui['hotkey_input'].set_text.called
 
     @pytest.mark.with_display
-    @pytest.mark.no_docker
     def test_on_hotkey_input_key_press_event__valid_hotkey(self, dialog, widget, event, emit):
         accel_name = '<Primary><Alt>g'
         (key, mode) = Gtk.accelerator_parse(accel_name)
