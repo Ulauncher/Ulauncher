@@ -45,3 +45,7 @@ class TestCalcMode:
         ActionList.assert_called_with((RenderResultListAction.return_value,))
         RenderResultListAction.assert_called_with([CalcResultItem.return_value])
         CalcResultItem.assert_called_with(error='Invalid expression')
+
+    def test_on_query__result_is_0__returns_0(self, mode, CalcResultItem):
+        mode.on_query('2-2')
+        CalcResultItem.assert_called_with(result=0)

@@ -9,8 +9,10 @@ RUN apt-get update && \
         git \
         vim \
         wget \
+        xvfb \
         debhelper \
         gobject-introspection \
+        libgtk-3-0 \
         libkeybinder-3.0-0 \
         gir1.2-gtk-3.0 \
         gir1.2-keybinder-3.0 \
@@ -24,7 +26,6 @@ RUN apt-get update && \
         python-pysqlite2 \
         python-xdg \
         python-dbus \
-        libgtk-3-0 \
         python-pyinotify \
         python-levenshtein \
         python-pip && \
