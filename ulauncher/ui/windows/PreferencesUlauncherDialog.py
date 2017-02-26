@@ -1,6 +1,7 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
 import logging
 import json
+
 from gi.repository import Gio, Gtk, WebKit2
 from locale import gettext as _
 from urllib import unquote

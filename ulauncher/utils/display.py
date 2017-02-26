@@ -26,6 +26,9 @@ def get_current_screen(window=None):
 
 
 def get_current_screen_geometry(window=None):
+    """
+    Returns dict with keys: x, y, width, height
+    """
     return get_screens()[get_current_screen(window)]
 
 
@@ -38,12 +41,12 @@ def get_screens():
     screens = []
     try:
         default_screen = Gdk.Screen.get_default()
-        # logger.debug("Found {0} monitor(s).".format(default_screen.get_n_monitors()))
+        logger.debug("Found {0} monitor(s).".format(default_screen.get_n_monitors()))
 
         for i in range(default_screen.get_n_monitors()):
             rect = default_screen.get_monitor_geometry(i)
-            # logger.debug("  Monitor {0} - X: {1}, Y: {2}, W: {3}, H: {4}"
-            #              .format(i, rect.x, rect.y, rect.width, rect.height))
+            logger.debug("  Monitor {0} - X: {1}, Y: {2}, W: {3}, H: {4}"
+                         .format(i, rect.x, rect.y, rect.width, rect.height))
             screens.append({"x": rect.x,
                             "y": rect.y,
                             "width": rect.width,
