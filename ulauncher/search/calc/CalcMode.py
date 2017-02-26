@@ -53,9 +53,9 @@ class CalcMode(SearchMode):
         error_msg = 'Invalid expression'
         try:
             result = eval_expr(query)
-            if not result:
+            if result is None:
                 raise ValueError(error_msg)
-            result_item = CalcResultItem(result=eval_expr(query))
+            result_item = CalcResultItem(result=result)
         except Exception as e:
             result_item = CalcResultItem(error=e.message or error_msg)
         return ActionList((RenderResultListAction([result_item]),))

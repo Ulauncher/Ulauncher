@@ -12,7 +12,7 @@ class CalcResultItem(ResultItem):
         self.error = error
 
     def get_name(self):
-        return str(self.result) if self.result else 'Error!'
+        return str(self.result) if self.result is not None else 'Error!'
 
     def get_name_highlighted(serlf, *args):
         pass
@@ -24,7 +24,7 @@ class CalcResultItem(ResultItem):
         return load_image(get_data_file('media/calculator-icon.png'), self.ICON_SIZE)
 
     def on_enter(self, query):
-        if self.result:
+        if self.result is not None:
             return ActionList([CopyToClipboardAction(str(self.result))])
         else:
             return ActionList()
