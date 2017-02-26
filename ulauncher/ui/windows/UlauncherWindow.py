@@ -191,6 +191,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         use the present() method to move the already-open dialog
         where the user can see it.
         """
+        self.hide()
+
         self._prefsWereActivated = True
         if self.preferences_dialog is not None:
             logger.debug('show existing preferences_dialog')
@@ -219,9 +221,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.window.present()
         self.position_window()
         self.present_with_time(Keybinder.get_current_event_time())
-        self._show_recent_apps()
+        self._show_initial_results()
 
-    def _show_recent_apps(self):
+    def _show_initial_results(self):
         if not Settings.get_instance().get_property('show-recent-apps'):
             # clear result list if setting was changed
             if self._recent_apps_were_shown:
@@ -230,7 +232,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             return
 
         items = AppStatDb.get_instance().get_most_frequent(3)
-        if items:
+        if not self.input.get_text() and items:
             self._recent_apps_were_shown = True
             self.show_results(items)
 
