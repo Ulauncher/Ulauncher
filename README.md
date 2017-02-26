@@ -7,9 +7,9 @@ Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)]
 **[Ulauncher](http://ulauncher.io)** Application launcher for Linux.  
 It's written in Python and uses GTK as a GUI toolkit.
 
-<img height="220" aligh="left" src="http://i.imgur.com/3owfsfV.png?1">
-<img height="220" aligh="left" src="http://i.imgur.com/W1rryU5.png?1">
-<img height="220" aligh="left" src="http://i.imgur.com/Axhqjp0.png?1">
+<img width="290" aligh="left" src="http://i.imgur.com/3owfsfV.png?1">
+<img width="290" aligh="left" src="http://i.imgur.com/W1rryU5.png?1">
+<img width="290" aligh="left" src="http://i.imgur.com/Axhqjp0.png?1">
 
 Install for Development
 ===========
