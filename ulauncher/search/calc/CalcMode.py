@@ -55,6 +55,12 @@ class CalcMode(SearchMode):
             result = eval_expr(query)
             if result is None:
                 raise ValueError(error_msg)
+
+            # fixes issue with division where result is represented as a float (e.g., 1.0)
+            # although it is an integer (1)
+            if int(result) == result:
+                result = int(result)
+
             result_item = CalcResultItem(result=result)
         except Exception as e:
             result_item = CalcResultItem(error=e.message or error_msg)
