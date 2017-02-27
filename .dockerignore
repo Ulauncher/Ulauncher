@@ -10,8 +10,9 @@ build
 po
 .coverage
 htmlcov
-node_modules/
-bower_components/
-.tmp/
+**/node_modules
+**/bower_components
+.tmp
+.git
 index.html
 .travis.yml
