@@ -61,6 +61,7 @@ GtkWindow {
 
 .prefs-btn:hover {
     background-position: 0 -27px;
+    background-repeat: no-repeat; /* Fixes artifacts with gnome (Fedora) */
 }
 
 
