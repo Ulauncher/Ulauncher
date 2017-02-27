@@ -24,20 +24,18 @@ GtkWindow {
  * Selected text in input
  */
 *:selected,
-*:selected:focused {
+*:selected:focus {
     background-color: alpha (@selected_bg_color, 0.9);
 
     color: @selected_fg_color;
 }
 
 *:selected:backdrop,
-*:selected:focused:backdrop {
+*:selected:focus:backdrop {
     background-color: alpha (@backdrop_selected_bg_color, 0.9);
 
     color: @backdrop_selected_fg_color;
 }
-
-
 
 .item-text {
     color: @item_text;
