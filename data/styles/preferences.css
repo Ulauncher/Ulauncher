@@ -1,6 +1,9 @@
 @import url("reset.css");
 
-GtkWindow {
+/**
+ * This fixes transparent borders around the window
+ * Use * because I couldn't figure out what exact element has transp. bg.
+ */
+* {
     background-color: #e4e4e4;
-    border-radius: 3px;
 }
