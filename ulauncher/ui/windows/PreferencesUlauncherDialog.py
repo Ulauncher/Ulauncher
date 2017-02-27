@@ -6,7 +6,7 @@ from gi.repository import Gio, Gtk, WebKit2
 from locale import gettext as _
 from urllib import unquote
 
-from ulauncher.helpers import parse_options
+from ulauncher.helpers import parse_options, force_unicode
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -285,8 +285,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         req_data = url_params['query']
         logger.info('Add/Update shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
-        id = shortcuts.put_shortcut(req_data['name'], req_data['keyword'], req_data['cmd'], req_data['icon'],
-                                    req_data['is_default_search'], req_data.get('id'))
+        id = shortcuts.put_shortcut(force_unicode(req_data['name']),
+                                    force_unicode(req_data['keyword']),
+                                    force_unicode(req_data['cmd']),
+                                    req_data['icon'],
+                                    req_data['is_default_search'],
+                                    req_data.get('id'))
         shortcuts.commit()
         return {'id': id}
 
