@@ -1,0 +1,5 @@
+@import url("theme.css");
+
+.input {
+    caret-color: @caret_color;
+}

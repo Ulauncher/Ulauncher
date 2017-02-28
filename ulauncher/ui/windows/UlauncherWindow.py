@@ -12,7 +12,7 @@ gi.require_version('Keybinder', '3.0')
 
 from gi.repository import Gtk, Gdk, GLib, Keybinder
 
-from ulauncher.helpers import singleton, force_unicode
+from ulauncher.helpers import singleton, force_unicode, gtk_version_is_gte
 from ulauncher.utils.display import get_current_screen_geometry
 from ulauncher.config import get_data_file
 from ulauncher.ui import create_item_widgets, get_theme_name
@@ -181,7 +181,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     ######################################
 
     def init_theme(self):
-        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), 'theme.css'))
+        # workaround for issue with a caret-color
+        # GTK+ < 3.20 doesn't support that prop
+        css_file = 'theme-gtk-3.20.css' if gtk_version_is_gte(3, 20, 0) else 'theme.css'
+        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), css_file))
 
     def activate_preferences(self, page='general'):
         """
