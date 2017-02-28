@@ -59,3 +59,5 @@ if [ "$2" = "--deb" ]; then
 else
     dpkg-buildpackage -tc -S -sa -k$GPGKEY
 fi
+
+echo "$tmpdir/${name}_${1}_all.deb is created"
