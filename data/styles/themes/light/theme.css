@@ -17,6 +17,7 @@
 @define-color input_color @fg_color;
 @define-color input_bg #fff;
 @define-color input_shadow rgba(0,0,0, 0.2);
+@define-color caret_color lighter(@input_color);
 
 /**
  * Result items

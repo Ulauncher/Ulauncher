@@ -17,6 +17,7 @@
 @define-color input_color #ddd;
 @define-color input_bg #595959;
 @define-color input_shadow rgba(0,0,0, 0.3);
+@define-color caret_color darker(@input_color);
 
 /**
  * Result items

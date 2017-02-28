@@ -1,7 +1,7 @@
 @import url("../reset.css");
 
 
-GtkWindow {
+window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
     border-radius: 10px;
     background-color: @window_shadow;
 }
@@ -23,17 +23,19 @@ GtkWindow {
 /**
  * Selected text in input
  */
-*:selected,
+.input *:selected,
+.input *:focus,
 *:selected:focus {
     background-color: alpha (@selected_bg_color, 0.9);
-
+    border-radius: 4px;
     color: @selected_fg_color;
 }
 
-*:selected:backdrop,
-*:selected:focus:backdrop {
+.input *:backdrop,
+.input *:focus:backdrop,
+*:focus:backdrop {
     background-color: alpha (@backdrop_selected_bg_color, 0.9);
-
+    border-radius: 4px;
     color: @backdrop_selected_fg_color;
 }
 
