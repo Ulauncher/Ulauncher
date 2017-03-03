@@ -46,5 +46,6 @@ docker run \
 docker cp ulauncher-deb:/tmp/ulauncher_$1.tar.gz .
 docker cp ulauncher-deb:/tmp/ulauncher_$1_all.deb .
 docker cp ulauncher-rpm:/tmp/ulauncher_$1_fedora.rpm .
+docker cp ulauncher-rpm:/tmp/ulauncher_$1_suse.rpm .
 
 docker rm ulauncher-deb ulauncher-rpm

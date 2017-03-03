@@ -120,7 +120,7 @@ DistUtilsExtra.auto.setup(
     license='GPL-3',
     author='Aleksandr Gornostal',
     author_email='ulauncher.app@gmail.com',
-    description='Ulauncher provides a convenient and fast way to launch your desktop applications',
+    description='Application launcher for Linux',
     url='http://ulauncher.io',
     data_files=DataFileList([
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),

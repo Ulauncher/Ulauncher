@@ -1,6 +1,6 @@
 [Desktop Entry]
 _Name=Ulauncher
-_Comment=Provides a convenient and fast way to launch your desktop applications
+_Comment=Application launcher for Linux
 Categories=GNOME;Utility;
 Exec=ulauncher
 Icon=ulauncher
