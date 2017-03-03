@@ -14,4 +14,4 @@ node_modules/
 bower_components/
 .tmp/
 index.html
-aur.sh
+aur_key

@@ -22,12 +22,6 @@ except IndexError:
     sys.exit(1)
 
 try:
-    aur_key = os.environ['AUR_KEY']
-except KeyError:
-    print "ERROR: AUR_KEY env var is not provided"
-    sys.exit(1)
-
-try:
     allow_unstable = os.environ['ALLOW_UNSTABLE'] in ('1', 'true')
 except KeyError:
     print "Optional ALLOW_UNSTABLE is not set. Default to False"
@@ -92,9 +86,7 @@ def pkgbuild_from_template(targz):
 
 
 def push_update(pkgbuild):
-    ssh_key = '/tmp/aur-private'
-    with open(ssh_key, 'w') as f:
-        f.write(aur_key)
+    ssh_key = os.sep.join(project_path, 'build-utils', 'aur_key')
     run_shell(('chmod', '600', ssh_key))
     git_ssh_command = 'ssh -oStrictHostKeyChecking=no -i %s' % ssh_key
     ssh_enabled_env = dict(os.environ, GIT_SSH_COMMAND=git_ssh_command)

@@ -16,3 +16,4 @@ htmlcov
 .git
 index.html
 .travis.yml
+aur_key
