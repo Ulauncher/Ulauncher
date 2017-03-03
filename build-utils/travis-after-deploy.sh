@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 # Push new PKGBUILD to AUR
 docker run \
     --rm \
