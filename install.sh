@@ -39,18 +39,6 @@ if [ -e /usr/bin/dnf ] ; then
         python-Levenshtein
 fi
 
-if [ -e /usr/bin/pacman ] ; then
-    echo
-    echo "###############################"
-    echo "# Arch Linux is not supported #"
-    echo "###############################"
-    echo
-    echo "Please create a pull request with installation steps"
-    echo "https://github.com/Ulauncher/Ulauncher/blob/dev/install.sh"
-    echo
-    exit 1
-fi
-
 
 echo "Installing media files to ~/.local to be able to load icons by name"
 python setup.py install_data --install-dir="$HOME/.local" || exit 1
