@@ -53,6 +53,6 @@ docker rm ulauncher-deb ulauncher-rpm
 docker run \
     --rm \
     -v $(pwd):/root/ulauncher \
-    -e ALLOW_UNSTABLE:$ALLOW_UNSTABLE
+    -e ALLOW_UNSTABLE:$ALLOW_UNSTABLE \
     $ARCH_BUILD_IMAGE \
     bash -c "./build-utils/aur-update.py $1"
