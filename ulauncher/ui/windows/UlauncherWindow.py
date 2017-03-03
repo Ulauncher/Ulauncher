@@ -32,7 +32,6 @@ from .WindowHelper import WindowHelper
 from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
 
 logger = logging.getLogger(__name__)
-logger.info("Using GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
 
 
 class UlauncherWindow(Gtk.Window, WindowHelper):

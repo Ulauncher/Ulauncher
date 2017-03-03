@@ -50,7 +50,8 @@ def main():
     options = parse_options()
     set_up_logging(options)
     logger = logging.getLogger('ulauncher')
-    logger.info('Ulauncher version: %s' % get_version())
+    logger.info('Ulauncher version %s' % get_version())
+    logger.info("GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
