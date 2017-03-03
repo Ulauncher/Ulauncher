@@ -36,8 +36,6 @@ rsync -aq --progress \
     README.md \
     setup.cfg \
     setup.py \
-    install.sh \
-    uninstall.sh \
     ulauncher \
     ulauncher.desktop.in \
     $tmpdir \
