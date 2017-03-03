@@ -30,4 +30,4 @@ deploy:
     tags: true
     overwrite: true
 after_deploy:
-- ALLOW_UNSTABLE=$ALLOW_UNSTABLE bash ./build-utils/travis-after-deploy.sh $TRAVIS_TAG
+- ./build-utils/travis-after-deploy.sh $TRAVIS_TAG
