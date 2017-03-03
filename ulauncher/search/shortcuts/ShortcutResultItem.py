@@ -36,15 +36,18 @@ class ShortcutResultItem(ResultItem):
             return super(ShortcutResultItem, self).get_name_highlighted(query, color)
 
     def get_description(self, query):
-        if "\n" in self.cmd:
-            # long description. Skip it
-            return
+        if self.cmd.startswith('#!'):
+            # this is a script
+            description = ''
+        else:
+            description = self.cmd
 
-        description = self.cmd
         if self._default_search_active:
             return description.replace('%s', query)
         elif query.get_keyword() == self.keyword and query.get_argument():
             return description.replace('%s', query.get_argument())
+        elif query.get_keyword() == self.keyword and not query.get_argument():
+            return 'Type in your query and press Enter...'
         else:
             return description.replace('%s', '...')
 
