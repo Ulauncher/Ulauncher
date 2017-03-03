@@ -30,10 +30,7 @@ rsync -aq --progress \
     README.md \
     setup.cfg \
     setup.py \
-    install.sh \
-    uninstall.sh \
     ulauncher \
-    ulauncher.desktop.dev \
     ulauncher.desktop.in \
     $tmpdir \
     --exclude-from=.gitignore
