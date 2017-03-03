@@ -30,4 +30,4 @@ deploy:
     tags: true
     overwrite: true
 after_deploy:
-- ./build-utils/travis-after-deploy.sh $TRAVIS_TAG
+- bash ./build-utils/travis-after-deploy.sh $TRAVIS_TAG
