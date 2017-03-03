@@ -1,0 +1,13 @@
+FROM base/archlinux
+
+MAINTAINER ulauncher.app@gmail.com
+
+WORKDIR /root/ulauncher
+
+RUN pacman --noconfirm -Syu && \
+    pacman --noconfirm -S \
+    python2 \
+    pkgbuild-introspection \
+    git \
+    grep \
+    openssh

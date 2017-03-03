@@ -48,3 +48,10 @@ docker cp ulauncher-deb:/tmp/ulauncher_$1_all.deb .
 docker cp ulauncher-rpm:/tmp/ulauncher_$1_fedora.rpm .
 
 docker rm ulauncher-deb ulauncher-rpm
+
+# Push new PKGBUILD to AUR
+docker run \
+    --rm
+    -v $(pwd):/root/ulauncher \
+    $ARCH_BUILD_IMAGE \
+    bash -c "./build-utils/aur-update.py $1"
