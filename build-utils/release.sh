@@ -51,7 +51,7 @@ docker rm ulauncher-deb ulauncher-rpm
 
 # Push new PKGBUILD to AUR
 docker run \
-    --rm
+    --rm \
     -v $(pwd):/root/ulauncher \
     $ARCH_BUILD_IMAGE \
     bash -c "./build-utils/aur-update.py $1"
