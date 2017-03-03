@@ -27,6 +27,7 @@ from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.utils.Settings import Settings
 from ulauncher.ext.Query import Query
+from ulauncher.ext.notification import show_notification
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
@@ -253,6 +254,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         logger.info("Trying to bind app hotkey: %s" % accel_name)
         Keybinder.bind(accel_name, self.cb_toggle_visibility)
         self._current_accel_name = accel_name
+        self.notify_hotkey_change(accel_name)
+
+    def notify_hotkey_change(self, accel_name):
+        (key, mode) = Gtk.accelerator_parse(accel_name)
+        display_name = Gtk.accelerator_get_label(key, mode)
+        show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
 
     def get_user_query(self):
         # get_text() returns str, so we need to convert it to unicode

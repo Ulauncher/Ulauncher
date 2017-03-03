@@ -14,6 +14,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.start_app_watcher')
 
     @pytest.fixture(autouse=True)
+    def show_notification(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
+
+    @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
 
@@ -26,7 +30,7 @@ class TestUlauncherWindow:
         return UlauncherWindow()
 
     @pytest.mark.with_display
-    def test_bind_show_app_hotkey(self, window, Keybinder):
+    def test_bind_show_app_hotkey(self, window, Keybinder, show_notification):
         accel_name = '<Primary><Alt>f'
         window.bind_show_app_hotkey(accel_name)
         Keybinder.bind.assert_called_with(accel_name, window.cb_toggle_visibility)
@@ -37,3 +41,4 @@ class TestUlauncherWindow:
         window.bind_show_app_hotkey(new_accel_name)
         Keybinder.unbind.assert_called_with(accel_name)
         Keybinder.bind.assert_called_with(new_accel_name, window.cb_toggle_visibility)
+        show_notification.assert_called_with('Ulauncher', 'Hotkey is set to Ctrl+Alt+R')
