@@ -34,6 +34,7 @@ rsync -aq --progress \
     uninstall.sh \
     ulauncher \
     ulauncher.desktop.dev \
+    ulauncher.desktop.in \
     $tmpdir \
     --exclude-from=.gitignore
 
@@ -45,9 +46,15 @@ sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py
 
 filename=$name
 if [ ! -z "$1" ]; then
-    filename="$name_$1"
+    filename="${name}_$1"
 fi
 
 cd /tmp
 tar czf $filename.tar.gz $name
 rm -rf $tmpdir
+
+set +x
+
+echo
+echo "/tmp/$filename.tar.gz is built"
+echo

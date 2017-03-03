@@ -127,8 +127,12 @@ DistUtilsExtra.auto.setup(
         ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
         ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
         ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+
+        # these two are fore Fedora+gnome
         ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
         ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+
+        ('share/icons/breeze/apps/48', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
         ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
         ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
         ('share/icons/elementary/scalable/apps', ['data/media/icons/elementary/ulauncher-indicator.svg']),

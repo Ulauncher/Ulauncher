@@ -18,6 +18,10 @@ class TestResultItemWidget(object):
         return result_item_wgt
 
     @pytest.fixture
+    def item_box(self, result_item_wgt):
+        return result_item_wgt.item_box
+
+    @pytest.fixture
     def builder(self):
         return mock.MagicMock()
 
@@ -47,13 +51,13 @@ class TestResultItemWidget(object):
         result_item_wgt.set_index(2)
         mock_set_shortcut.assert_called_once_with('Alt+3')
 
-    def test_select(self, result_item_wgt, mocker, builder):
-        mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
+    def test_select(self, result_item_wgt, item_box, mocker, builder):
+        mock_get_style_context = mocker.patch.object(item_box, 'get_style_context')
         result_item_wgt.select()
         mock_get_style_context.return_value.add_class.assert_called_once_with('selected')
 
-    def test_deselect(self, result_item_wgt, mocker, builder):
-        mock_get_style_context = mocker.patch.object(result_item_wgt, 'get_style_context')
+    def test_deselect(self, result_item_wgt, item_box, mocker, builder):
+        mock_get_style_context = mocker.patch.object(item_box, 'get_style_context')
         result_item_wgt.deselect()
         mock_get_style_context.return_value.remove_class.assert_called_once_with('selected')
 

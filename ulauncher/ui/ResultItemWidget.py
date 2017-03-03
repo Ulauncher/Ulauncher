@@ -21,6 +21,7 @@ class ResultItemWidget(Gtk.EventBox):
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
 
+        self.item_box = builder.get_object('item-box')
         self.item_object = item_object
         self.query = query
         self.set_index(index)
@@ -41,11 +42,11 @@ class ResultItemWidget(Gtk.EventBox):
 
     def select(self):
         self.set_name_highlighted(True)
-        self.get_style_context().add_class('selected')
+        self.item_box.get_style_context().add_class('selected')
 
     def deselect(self):
         self.set_name_highlighted(False)
-        self.get_style_context().remove_class('selected')
+        self.item_box.get_style_context().remove_class('selected')
 
     def set_icon(self, icon):
         """

@@ -47,14 +47,14 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
     font-size: 120%;
 }
 
-.selected .item-box {
+.selected.item-box {
     border-radius: 10px;
     background-color: @item_box_selected;
 }
-.selected .item-box .item-text {
+.selected.item-box .item-text {
     color: @item_text_selected;
 }
-.selected .item-box .item-name {
+.selected.item-box .item-name {
     color: @item_name_selected;
 }
 .item-descr {
