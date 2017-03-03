@@ -56,8 +56,8 @@ cd $tmpsrc
 
 if [ "$2" = "--deb" ]; then
     dpkg-buildpackage -tc -us -sa -k$GPGKEY
+    echo "$tmpdir/${name}_${1}_all.deb is created"
 else
     dpkg-buildpackage -tc -S -sa -k$GPGKEY
 fi
 
-echo "$tmpdir/${name}_${1}_all.deb is created"
