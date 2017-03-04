@@ -84,6 +84,8 @@ def pkgbuild_from_template(targz):
         content = f.read()
         content = re.sub(r'%VERSION%', version, content, flags=re.M)
         content = re.sub(r'%SOURCE%', targz, content, flags=re.M)
+        if not update_stable:
+            content = re.sub(r'pkgname=ulauncher', 'pkgname=ulauncher-git', content, flags=re.M)
         return content
 
 
