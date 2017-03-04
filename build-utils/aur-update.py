@@ -10,10 +10,9 @@ import json
 from tempfile import mkdtemp
 from subprocess import call
 
-
-aur_repo = "ssh://aur@aur.archlinux.org/ulauncher.git"
-project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__file__)), '..')))
-
+print "##################################"
+print "# Updating AUR with a new PKGBUILD"
+print "##################################"
 
 try:
     version = sys.argv[1]
@@ -22,11 +21,11 @@ except IndexError:
     sys.exit(1)
 
 try:
-    allow_unstable = os.environ['ALLOW_UNSTABLE'] in ('1', 'true')
+    update_stable = os.environ['UPDATE_STABLE'] in ('1', 'true')
 except KeyError:
-    print "Optional ALLOW_UNSTABLE is not set. Default to False"
-    allow_unstable = False
-print 'ALLOW_UNSTABLE=%s' % allow_unstable
+    print "ERROR: UPDATE_STABLE is not defined"
+    sys.exit(1)
+print 'UPDATE_STABLE=%s' % update_stable
 
 try:
     allow_prerelease = os.environ['ALLOW_PRERELEASE'] in ('1', 'true')
@@ -36,20 +35,23 @@ except KeyError:
 print 'ALLOW_PRERELEASE=%s' % allow_prerelease
 
 
-print "##################################"
-print "# Updating AUR with a new PKGBUILD"
-print "##################################"
+if update_stable:
+    aur_repo = "ssh://aur@aur.archlinux.org/ulauncher.git"
+else:
+    aur_repo = "ssh://aur@aur.archlinux.org/ulauncher-git.git"
+
+project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__file__)), '..')))
 
 
 def main():
     release = fetch_release()
-    is_unstable = ' ' in release['name']  # because "x.y.z (Beta)"
-    if (not release['prerelease'] or allow_prerelease) and (not is_unstable or allow_unstable):
+    is_stable = ' ' not in release['name']  # because "x.y.z (Beta)"
+    if (not release['prerelease'] or allow_prerelease) and ((update_stable and is_stable) or not update_stable):
         targz = fetch_targz_link(release)
         pkgbuild = pkgbuild_from_template(targz)
         push_update(pkgbuild)
     else:
-        print "This pre-release. Don't update AUR"
+        print "Don't update AUR"
         sys.exit(0)
 
 
