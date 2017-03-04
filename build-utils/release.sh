@@ -49,3 +49,17 @@ docker cp ulauncher-rpm:/tmp/ulauncher_$1_fedora.rpm .
 docker cp ulauncher-rpm:/tmp/ulauncher_$1_suse.rpm .
 
 docker rm ulauncher-deb ulauncher-rpm
+
+# Push new PKGBUILD to AUR dev channel
+docker run \
+    --rm \
+    -v $(pwd):/root/ulauncher \
+    $ARCH_BUILD_IMAGE \
+    bash -c "UPDATE_STABLE=0 ./build-utils/aur-update.py $1"
+
+# Push new PKGBUILD to AUR stable channel
+docker run \
+    --rm \
+    -v $(pwd):/root/ulauncher \
+    $ARCH_BUILD_IMAGE \
+    bash -c "UPDATE_STABLE=1 ./build-utils/aur-update.py $1"

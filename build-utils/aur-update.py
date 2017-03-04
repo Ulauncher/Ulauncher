@@ -47,7 +47,7 @@ def main():
     release = fetch_release()
     is_stable = ' ' not in release['name']  # because "x.y.z (Beta)"
     if (not release['prerelease'] or allow_prerelease) and ((update_stable and is_stable) or not update_stable):
-        targz = fetch_targz_link(release)
+        targz = get_targz_link()
         pkgbuild = pkgbuild_from_template(targz)
         push_update(pkgbuild)
     else:
@@ -66,16 +66,8 @@ def fetch_release():
         sys.exit(1)
 
 
-def fetch_targz_link(release):
-    try:
-        asset = (a for a in release['assets'] if a['name'].endswith('%s.tar.gz' % version)).next()
-    except StopIteration:
-        print "ERROR: tar.gz file not found in the release"
-        sys.exit(1)
-
-    print "Found tar.gz link %s" % asset['browser_download_url']
-
-    return asset['browser_download_url']
+def get_targz_link():
+    return 'https://github.com/Ulauncher/Ulauncher/releases/download/%s/ulauncher_%s.tar.gz' % (version, version)
 
 
 def pkgbuild_from_template(targz):

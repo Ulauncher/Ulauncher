@@ -30,5 +30,3 @@ deploy:
     repo: Ulauncher/Ulauncher
     tags: true
     overwrite: true
-after_deploy:
-- bash ./build-utils/travis-after-deploy.sh $TRAVIS_TAG
