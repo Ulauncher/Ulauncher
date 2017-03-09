@@ -18,3 +18,5 @@ docker push $RPM_BUILD_IMAGE
 
 docker build -f Dockerfile.build-arch -t $ARCH_BUILD_IMAGE .
 docker push $ARCH_BUILD_IMAGE
+
+docker build -f Dockerfile.build-appimage -t $APPIMAGE_BUILD_IMAGE .

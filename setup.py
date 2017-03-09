@@ -84,24 +84,28 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
         fin.close()
         os.rename(fout.name, fin.name)
     except (OSError, IOError), e:
-        print ("ERROR: Can't find %s" % filename)
+        print("ERROR: Can't find %s" % filename)
         sys.exit(1)
 
 
 class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
     def run(self):
         DistUtilsExtra.auto.install_auto.run(self)
+        app_image_build = os.environ.get('APPIMAGE')
 
-        target_data = '/' + os.path.relpath(self.install_data, self.root) + '/'
-        target_pkgdata = target_data + 'share/ulauncher/'
-        target_scripts = '/' + os.path.relpath(self.install_scripts, self.root) + '/'
+        if app_image_build:
+            target_pkgdata = '../../../../share/ulauncher/'
+        else:
+            target_data = '/' + os.path.relpath(self.install_data, self.root) + '/'
+            target_pkgdata = target_data + 'share/ulauncher/'
+            target_scripts = '/' + os.path.relpath(self.install_scripts, self.root) + '/'
+
+            desktop_file = move_desktop_file(self.root, target_data, self.prefix)
+            update_desktop_file(desktop_file, target_pkgdata, target_scripts)
 
         values = {'__ulauncher_data_directory__': "'%s'" % (target_pkgdata),
                   '__version__': "'%s'" % self.distribution.get_version()}
         update_config(self.install_lib, values)
-
-        desktop_file = move_desktop_file(self.root, target_data, self.prefix)
-        update_desktop_file(desktop_file, target_pkgdata, target_scripts)
 
 
 class DataFileList(list):

@@ -1,0 +1,32 @@
+FROM ubuntu:16.04
+
+MAINTAINER ulauncher.app@gmail.com
+
+WORKDIR /root/ulauncher
+
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        vim \
+        wget \
+        zsync \
+        autoconf \
+        libtool \
+        make \
+        gcc \
+        python \
+        intltool \
+        libarchive-dev \
+        libtool \
+        libfuse-dev \
+        liblzma-dev \
+        libglib2.0-dev \
+        libssl-dev \
+        libinotifytools0-dev \
+        libsqlite3-dev \
+        liblz4-dev \
+        equivs && \
+        wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O /root/functions.sh && \
+        wget -q http://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz -O /root/Python-2.7.13.tgz && \
+        wget -q https://bootstrap.pypa.io/get-pip.py -O /root/get-pip.py && \
+        wget -q https://github.com/Ulauncher/Ulauncher/releases/download/2.0.30.r3/ulauncher_2.0.30.r3.tar.gz -O /root/ulauncher.tar.gz
