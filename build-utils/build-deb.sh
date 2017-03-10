@@ -25,6 +25,7 @@ echo "######################"
 set -ex
 
 buildUtils=`dirname $0`
+buildUtils=`realpath $buildUtils`
 
 bash "$buildUtils/build-preferences.sh"
 
@@ -75,11 +76,11 @@ elif [ "$2" = "--upload" ]; then
     fi
 
     # replace version and release name
-    sed -i "s/trusty/$3/g" $tmpsrc/debian/changelog
-    sed -i "s/%VERSION%/${1}-0ubuntu1ppa1~${3}/g" $tmpsrc/debian/changelog
+    sed -i "s/trusty/$RELEASE/g" $tmpsrc/debian/changelog
+    sed -i "s/%VERSION%/${1}-0ubuntu1ppa1~${RELEASE}/g" $tmpsrc/debian/changelog
 
     # import GPG keys
-    if [ gpg --list-keys | grep -q $GPGKEY ]; then
+    if gpg --list-keys | grep -q $GPGKEY; then
         echo "GPG key is already imported"
     else
         echo "Importing GPG key"
