@@ -27,5 +27,5 @@ Depends: ${misc:Depends},
  python-pyinotify,
  python-pysqlite2,
  python-xdg
-Description: Provides a convenient and fast way to launch your desktop applications
+Description: Application launcher for Linux
  See http://ulauncher.io for more information
