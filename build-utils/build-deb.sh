@@ -79,7 +79,7 @@ elif [ "$2" = "--upload" ]; then
     sed -i "s/%VERSION%/${1}-0ubuntu1ppa1~${3}/g" $tmpsrc/debian/changelog
 
     # import GPG keys
-    if [ gpg --list-keys | grep -q $GPGKEY ];
+    if [ gpg --list-keys | grep -q $GPGKEY ]; then
         echo "GPG key is already imported"
     else
         echo "Importing GPG key"
