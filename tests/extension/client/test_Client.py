@@ -1,0 +1,57 @@
+import mock
+import pytest
+import pickle
+from ulauncher.extension.client.Client import Client
+from ulauncher.extension.client.Extension import Extension
+
+
+class TestClient:
+
+    @pytest.fixture(autouse=True)
+    def SystemExitEvent(self, mocker):
+        return mocker.patch('ulauncher.extension.client.Client.SystemExitEvent')
+
+    @pytest.fixture(autouse=True)
+    def Timer(self, mocker):
+        return mocker.patch('ulauncher.extension.client.Client.Timer')
+
+    @pytest.fixture(autouse=True)
+    def run_async(self, mocker):
+        return mocker.patch('ulauncher.extension.client.Client.run_async')
+
+    @pytest.fixture(autouse=True)
+    def websocket(self, mocker):
+        return mocker.patch('ulauncher.extension.client.Client.websocket')
+
+    @pytest.fixture
+    def extension(self):
+        return mock.create_autospec(Extension)
+
+    @pytest.fixture
+    def client(self, extension):
+        return Client(extension, ws_api_url="ws://localhost:5000/test_extension")
+
+    def test_connect__WebSocketApp__is_called(self, client, websocket, run_async):
+        client.connect()
+        websocket.WebSocketApp.assert_called_with('ws://localhost:5000/test_extension',
+                                                  on_message=run_async.return_value,
+                                                  on_error=client.on_error,
+                                                  on_open=client.on_open,
+                                                  on_close=client.on_close)
+
+    def test_connect__run_forever__is_called(self, client, websocket):
+        client.connect()
+        websocket.WebSocketApp.return_value.run_forever.assert_called_with()
+
+    def test_on_message__trigger_event__is_called(self, client, extension):
+        client.on_message(mock.Mock(), pickle.dumps({'hello': 'world'}))
+        extension.trigger_event.assert_called_with({'hello': 'world'})
+
+    def test_on_close__SystemExitEvent__is_triggered(self, client, extension, SystemExitEvent):
+        client.on_close(mock.Mock())
+        extension.trigger_event.assert_called_with(SystemExitEvent.return_value)
+
+    def test_send__ws_send__is_called(self, client):
+        client.ws = mock.Mock()
+        client.send({'hello': 'world'})
+        client.ws.send.assert_called_with(pickle.dumps({'hello': 'world'}))

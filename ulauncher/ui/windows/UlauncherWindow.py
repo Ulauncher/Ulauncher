@@ -22,12 +22,14 @@ from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.search import Search
+from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.utils.Settings import Settings
-from ulauncher.ext.Query import Query
-from ulauncher.ext.notification import show_notification
+from ulauncher.search.Query import Query
+from ulauncher.utils.desktop.notification import show_notification
+from ulauncher.extension.server.ExtensionRunner import ExtensionRunner
+from ulauncher.extension.server.ExtensionServer import ExtensionServer
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
@@ -96,6 +98,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
+        ExtensionServer.get_instance().start()
+        time.sleep(0.01)
+        ExtensionRunner.get_instance().run_all()
 
     ######################################
     # GTK Signal Handlers
@@ -142,13 +147,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         Triggered by user input
         """
-        Search.get_instance().start(self.get_user_query())
+        Search.get_instance().on_query_change(self._get_user_query())
 
     def on_input_key_press_event(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        Search.get_instance().on_key_press_event(widget, event, self.get_user_query())
+        Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
             if keyname == 'Up':
@@ -261,7 +266,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         display_name = Gtk.accelerator_get_label(key, mode)
         show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
 
-    def get_user_query(self):
+    def _get_user_query(self):
         # get_text() returns str, so we need to convert it to unicode
         return Query(force_unicode(self.input.get_text()))
 
@@ -271,10 +276,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav.select(index)
 
     def enter_result_item(self, index=None, alt=False):
-        if not self.results_nav.enter(self.get_user_query(), index, alt=alt):
-            # close the window if it has to be closed on enter
-            self.hide()
-            self.input.set_text('')
+        if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
+            # hide the window if it has to be closed on enter
+            self.hide_and_clear_input()
+
+    def hide_and_clear_input(self):
+        self.hide()
+        self.input.set_text('')
 
     def show_results(self, result_items):
         """
@@ -282,12 +290,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
-        results = list(create_item_widgets(result_items, self.get_user_query()))  # generator -> list
+        results = list(create_item_widgets(result_items, self._get_user_query()))  # generator -> list
         if results:
             self._resultsRenderTime = time.time()
             map(self.result_box.add, results)
             self.results_nav = ItemNavigation(self.result_box.get_children())
-            self.results_nav.select_default(self.get_user_query())
+            self.results_nav.select_default(self._get_user_query())
 
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
@@ -296,3 +304,4 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         else:
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
+        logger.debug('render %s results' % len(results))

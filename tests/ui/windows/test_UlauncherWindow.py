@@ -22,6 +22,14 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
 
     @pytest.fixture(autouse=True)
+    def extRunner(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionRunner.get_instance').return_value
+
+    @pytest.fixture(autouse=True)
+    def extServer(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionServer.get_instance').return_value
+
+    @pytest.fixture(autouse=True)
     def Keybinder(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Keybinder')
 

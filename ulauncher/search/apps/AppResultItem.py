@@ -1,6 +1,6 @@
-from ulauncher.ext.ResultItem import ResultItem
-from ulauncher.ext.actions.LaunchAppAction import LaunchAppAction
-from ulauncher.ext.actions.ActionList import ActionList
+from ulauncher.result_list.result_item.ResultItem import ResultItem
+from ulauncher.result_list.item_action.LaunchAppAction import LaunchAppAction
+from ulauncher.result_list.item_action.ActionList import ActionList
 from .AppQueryDb import AppQueryDb
 from .AppStatDb import AppStatDb
 

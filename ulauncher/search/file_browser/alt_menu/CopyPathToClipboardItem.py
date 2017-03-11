@@ -1,7 +1,7 @@
 from ulauncher.utils.icon_loader import get_themed_icon_by_name
-from ulauncher.ext.SmallResultItem import SmallResultItem
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.result_list.result_item.SmallResultItem import SmallResultItem
+from ulauncher.result_list.item_action.ActionList import ActionList
+from ulauncher.result_list.item_action.CopyToClipboardAction import CopyToClipboardAction
 
 
 class CopyPathToClipboardItem(SmallResultItem):

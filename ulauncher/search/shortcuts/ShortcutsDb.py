@@ -5,7 +5,6 @@ from operator import itemgetter
 from ulauncher.helpers import singleton
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
 from ulauncher.utils.KeyValueJsonDb import KeyValueJsonDb
-from .ShortcutResultItem import ShortcutResultItem
 
 
 class ShortcutsDb(KeyValueJsonDb):
@@ -27,8 +26,8 @@ class ShortcutsDb(KeyValueJsonDb):
     def get_sorted_records(self):
         return [rec for rec in sorted(self.get_records().itervalues(), key=lambda rec: rec['added'])]
 
-    def get_result_items(self):
-        return [ShortcutResultItem(**rec) for rec in self.get_records().itervalues()]
+    def get_shortcuts(self):
+        return self.get_records().itervalues()
 
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
         """

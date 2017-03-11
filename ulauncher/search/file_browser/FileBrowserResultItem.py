@@ -1,10 +1,10 @@
 import os
 from ulauncher.utils.icon_loader import get_file_icon
-from ulauncher.ext.SmallResultItem import SmallResultItem
-from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
-from ulauncher.ext.actions.RenderResultListAction import RenderResultListAction
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.OpenAction import OpenAction
+from ulauncher.result_list.result_item.SmallResultItem import SmallResultItem
+from ulauncher.result_list.item_action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.result_list.item_action.RenderResultListAction import RenderResultListAction
+from ulauncher.result_list.item_action.ActionList import ActionList
+from ulauncher.result_list.item_action.OpenAction import OpenAction
 from .FileQueries import FileQueries
 from ulauncher.utils.Path import Path
 

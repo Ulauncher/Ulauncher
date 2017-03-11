@@ -1,7 +1,7 @@
 import mock
 import pytest
 from ulauncher.ui import create_item, create_item_widgets, highlight_text
-from ulauncher.ext.ResultItem import ResultItem
+from ulauncher.result_list.result_item.ResultItem import ResultItem
 from functools import partial
 
 

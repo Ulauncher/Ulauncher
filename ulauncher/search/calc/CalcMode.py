@@ -2,9 +2,9 @@ import re
 import ast
 import operator as op
 from gi.repository import Gdk
-from ulauncher.ext.SearchMode import SearchMode
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.RenderResultListAction import RenderResultListAction
+from ulauncher.search.BaseSearchMode import BaseSearchMode
+from ulauncher.result_list.item_action.ActionList import ActionList
+from ulauncher.result_list.item_action.RenderResultListAction import RenderResultListAction
 from .CalcResultItem import CalcResultItem
 
 
@@ -43,13 +43,13 @@ def _eval(node):
         raise TypeError(node)
 
 
-class CalcMode(SearchMode):
+class CalcMode(BaseSearchMode):
     RE_CALC = re.compile(r'^[\d\-\(\.][\d\*+\/\-\.e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
         return re.match(self.RE_CALC, query)
 
-    def on_query(self, query):
+    def handle_query(self, query):
         error_msg = 'Invalid expression'
         try:
             result = eval_expr(query)

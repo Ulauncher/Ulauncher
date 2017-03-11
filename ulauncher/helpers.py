@@ -25,8 +25,8 @@ def parse_options():
         "--hide-window", action="store_true",
         help=_("Hide window upon application startup"))
     parser.add_option(
-        "--no-indexing", action="store_true",
-        help=_("Do not index user files"))
+        "--no-extensions", action="store_true",
+        help=_("Do not run extensions"))
     parser.add_option(
         "--dev", action="store_true",
         help=_("Development mode"))
@@ -42,41 +42,6 @@ def get_media_file(media_file_name):
         media_filename = None
 
     return "file:///" + media_filename
-
-
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
-
-
-def set_up_logging(opts):
-    # add a handler to prevent basicConfig
-    root = logging.getLogger()
-    null_handler = NullHandler()
-    root.addHandler(null_handler)
-
-    formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(funcName)s() '%(message)s'")
-
-    logger = logging.getLogger('ulauncher')
-    logger_sh = logging.StreamHandler()
-    logger_sh.setFormatter(formatter)
-    logger.addHandler(logger_sh)
-    logger.setLevel(logging.ERROR)
-
-    # Set the logging level to show debug messages.
-    if opts.verbose:
-        logger.setLevel(logging.DEBUG)
-        logger.debug('logging enabled')
-
-    # set up login to a file
-    log_file = os.path.join(CACHE_DIR, 'last.log')
-    if os.path.exists(log_file):
-        os.remove(log_file)
-
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
 
 
 def alias(alternative_function_name):

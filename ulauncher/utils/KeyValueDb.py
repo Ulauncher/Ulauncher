@@ -59,5 +59,5 @@ class KeyValueDb(object):
     def put(self, key, value):
         self._records[key] = value
 
-    def find(self, key):
-        return self._records.get(key)
+    def find(self, key, default=None):
+        return self._records.get(key, default)

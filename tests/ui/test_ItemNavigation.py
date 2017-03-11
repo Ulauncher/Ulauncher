@@ -57,12 +57,12 @@ class TestItemNavigation(object):
     def test_enter_no_index(self, nav, items, mocker):
         nav.select(2)
         assert nav.enter('test') is items[2].on_enter.return_value.keep_app_open.return_value
-        items[2].on_enter.return_value.run_all.assert_called_with()
+        items[2].on_enter.return_value.run.assert_called_with()
 
     def test_enter__alternative(self, nav, items, mocker):
         nav.select(2)
         assert nav.enter('test', alt=True) is items[2].on_alt_enter.return_value.keep_app_open.return_value
-        items[2].on_alt_enter.return_value.run_all.assert_called_with()
+        items[2].on_alt_enter.return_value.run.assert_called_with()
 
     def test_select_default(self, nav, items, mocker):
         select = mocker.patch.object(nav, 'select')

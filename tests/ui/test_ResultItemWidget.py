@@ -2,7 +2,7 @@ import pytest
 import mock
 from gi.repository import Gtk, GdkPixbuf
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
-from ulauncher.ext.ResultItem import ResultItem
+from ulauncher.result_list.result_item.ResultItem import ResultItem
 
 
 class TestResultItemWidget(object):

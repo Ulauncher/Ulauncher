@@ -20,9 +20,11 @@ def get_app_icon_pixbuf(app, icon_size):
     if isinstance(icon, Gio.ThemedIcon):
         try:
             icon_name = icon.get_names()[0]
+            if not icon_name:
+                return None
             pixbuf_icon = get_themed_icon_by_name(icon_name, icon_size)
         except Exception as e:
-            logger.warn('Could not load icon for %s. E: %s' % (app.get_string('Icon'), e))
+            logger.info('Could not load icon for %s. E: %s' % (app.get_string('Icon'), e))
 
     elif isinstance(icon, Gio.FileIcon):
         pixbuf_icon = load_image(icon.get_file().get_path(), icon_size)

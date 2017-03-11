@@ -10,7 +10,7 @@ from ulauncher.helpers import parse_options, force_unicode
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
+from ulauncher.result_list.item_action.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_version
 from ulauncher.utils.Router import Router, get_url_params
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb

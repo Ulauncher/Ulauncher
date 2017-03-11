@@ -1,8 +1,8 @@
 from ulauncher.config import get_data_file
 from ulauncher.helpers import load_image
-from ulauncher.ext.ResultItem import ResultItem
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.result_list.result_item.ResultItem import ResultItem
+from ulauncher.result_list.item_action.ActionList import ActionList
+from ulauncher.result_list.item_action.CopyToClipboardAction import CopyToClipboardAction
 
 
 class CalcResultItem(ResultItem):

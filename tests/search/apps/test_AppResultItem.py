@@ -3,7 +3,7 @@ import pytest
 from ulauncher.search.apps.AppResultItem import AppResultItem
 from ulauncher.search.apps.AppQueryDb import AppQueryDb
 from ulauncher.search.apps.AppStatDb import AppStatDb
-from ulauncher.ext.Query import Query
+from ulauncher.search.Query import Query
 
 
 class TestAppResultItem:

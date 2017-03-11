@@ -30,6 +30,7 @@ RUN apt-get update && \
         python-dbus \
         python-pyinotify \
         python-levenshtein \
+        python-websocket \
         python-pip && \
     pip install --upgrade pip setuptools && \
     wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_6.x && \

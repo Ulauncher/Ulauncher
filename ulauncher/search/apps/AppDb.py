@@ -5,8 +5,8 @@ import logging
 from ulauncher.helpers import singleton, force_unicode
 from ulauncher.config import CACHE_DIR
 from ulauncher.utils.icon_loader import get_app_icon_pixbuf
+from ulauncher.result_list.SortedResultList import SortedResultList
 from .AppResultItem import AppResultItem
-from ulauncher.search.SortedResultList import SortedResultList
 
 logger = logging.getLogger(__name__)
 
