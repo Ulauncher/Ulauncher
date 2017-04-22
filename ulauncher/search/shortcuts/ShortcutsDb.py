@@ -1,11 +1,9 @@
 import os
 from uuid import uuid4
 from time import time
-from operator import itemgetter
-from ulauncher.helpers import singleton
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
-from ulauncher.utils.KeyValueJsonDb import KeyValueJsonDb
-from .ShortcutResultItem import ShortcutResultItem
+from ulauncher.util.db.KeyValueJsonDb import KeyValueJsonDb
+from ulauncher.util.decorator.singleton import singleton
 
 
 class ShortcutsDb(KeyValueJsonDb):
@@ -13,12 +11,12 @@ class ShortcutsDb(KeyValueJsonDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        dbPath = os.path.join(CONFIG_DIR, 'shortcuts.json')
-        isFirstRun = not os.path.exists(dbPath)
-        db = cls(dbPath)
+        db_path = os.path.join(CONFIG_DIR, 'shortcuts.json')
+        is_first_run = not os.path.exists(db_path)
+        db = cls(db_path)
         db.open()
 
-        if isFirstRun:
+        if is_first_run:
             db._records = get_default_shortcuts()
             db.commit()
 
@@ -27,8 +25,8 @@ class ShortcutsDb(KeyValueJsonDb):
     def get_sorted_records(self):
         return [rec for rec in sorted(self.get_records().itervalues(), key=lambda rec: rec['added'])]
 
-    def get_result_items(self):
-        return [ShortcutResultItem(**rec) for rec in self.get_records().itervalues()]
+    def get_shortcuts(self):
+        return self.get_records().itervalues()
 
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
         """

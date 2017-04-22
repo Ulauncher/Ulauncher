@@ -199,7 +199,7 @@ def make_pyname(name):
     ''' mangles non-pythonic names into pythonic ones'''
     pyname = ''
     for character in name:
-        if (character.isalpha() or character == '_' or (pyname and character.isdigit())):
+        if character.isalpha() or character == '_' or (pyname and character.isdigit()):
             pyname += character
         else:
             pyname += '_'

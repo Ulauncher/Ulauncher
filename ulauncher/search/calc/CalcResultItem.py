@@ -1,8 +1,8 @@
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
+from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.config import get_data_file
-from ulauncher.helpers import load_image
-from ulauncher.ext.ResultItem import ResultItem
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.util.image_loader import load_image
 
 
 class CalcResultItem(ResultItem):
@@ -25,6 +25,6 @@ class CalcResultItem(ResultItem):
 
     def on_enter(self, query):
         if self.result is not None:
-            return ActionList([CopyToClipboardAction(str(self.result))])
+            return CopyToClipboardAction(str(self.result))
         else:
-            return ActionList()
+            return DoNothingAction()

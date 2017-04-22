@@ -2,9 +2,9 @@ import os
 from operator import itemgetter
 from itertools import islice
 
-from ulauncher.helpers import singleton, force_unicode
-from ulauncher.utils.KeyValueDb import KeyValueDb
 from ulauncher.config import CACHE_DIR
+from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.util.decorator.singleton import singleton
 
 
 class AppStatDb(KeyValueDb):
@@ -28,7 +28,6 @@ class AppStatDb(KeyValueDb):
         TODO: rename to `get_most_recent` and update method to remove old apps
 
         :param int limit: limit
-        :param ResultList result_list:
         :return ResultList:
         """
         # import here to avoid circular deps.

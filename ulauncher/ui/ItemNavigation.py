@@ -1,7 +1,3 @@
-from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
-from ulauncher.ext.Query import Query
-
-
 class ItemNavigation(object):
     """
     Performs navigation through found results
@@ -56,8 +52,8 @@ class ItemNavigation(object):
             return self.enter(query)
         elif self.selected is not None:
             item = self.items[self.selected]
-            action_list = item.on_enter(query) if not alt else item.on_alt_enter(query)
-            if not action_list:
+            action = item.on_enter(query) if not alt else item.on_alt_enter(query)
+            if not action:
                 return True
-            action_list.run_all()
-            return action_list.keep_app_open()
+            action.run()
+            return action.keep_app_open()

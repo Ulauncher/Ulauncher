@@ -1,8 +1,9 @@
 import sys
 import os
+import signal
 import logging
 import time
-from locale import gettext as _
+from threading import Event
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -12,12 +13,12 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .helpers import set_up_logging, parse_options
-from .config import get_version, CACHE_DIR, CONFIG_DIR
+from .config import get_version, get_options, CACHE_DIR, CONFIG_DIR
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.utils.Settings import Settings
-from ulauncher.utils.run_async import run_async
+from ulauncher.util.Settings import Settings
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.setup_logging import setup_logging
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
@@ -44,11 +45,27 @@ class UlauncherDbusService(dbus.service.Object):
         self.window.show_window()
 
 
+class GracefulAppKiller(object):
+
+    _exit_event = None
+
+    def __init__(self):
+        self._exit_event = Event()
+        signal.signal(signal.SIGINT, self._exit_gracefully)
+        signal.signal(signal.SIGTERM, self._exit_gracefully)
+
+    def killed(self):
+        return self._exit_event.is_set()
+
+    def _exit_gracefully(self, signum, frame):
+        self._exit_event.set()
+
+
 def main():
     _create_dirs()
 
-    options = parse_options()
-    set_up_logging(options)
+    options = get_options()
+    setup_logging(options)
     logger = logging.getLogger('ulauncher')
     logger.info('Ulauncher version %s' % get_version())
     logger.info("GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
@@ -78,18 +95,13 @@ def main():
         if Settings.get_instance().get_property('show-indicator-icon'):
             AppIndicator.get_instance().show()
 
-        @run_async
-        def run_main():
-            Gtk.main()
-
-        main_thread = run_main()
-
         # workaround to make Ctrl+C quiting the app
+        app_killer = GracefulAppKiller()
+        gtk_thread = run_async(Gtk.main)()
         try:
-            while main_thread.is_alive():
+            while gtk_thread.is_alive() and not app_killer.killed():
                 time.sleep(0.5)
         except KeyboardInterrupt:
-            logger.info('On KeyboardInterrupt')
+            logger.warn('On KeyboardInterrupt')
+        finally:
             Gtk.main_quit()
-
-    sys.exit(0)

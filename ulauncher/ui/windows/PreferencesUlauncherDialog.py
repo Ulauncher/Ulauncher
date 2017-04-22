@@ -3,17 +3,16 @@ import logging
 import json
 
 from gi.repository import Gio, Gtk, WebKit2
-from locale import gettext as _
 from urllib import unquote
 
-from ulauncher.helpers import parse_options, force_unicode
-from ulauncher.utils.AutostartPreference import AutostartPreference
-from ulauncher.utils.Settings import Settings
-from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
-from ulauncher.config import get_data_file, get_version
-from ulauncher.utils.Router import Router, get_url_params
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.config import get_data_file, get_options, get_version
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.ui.AppIndicator import AppIndicator
+from ulauncher.util.AutostartPreference import AutostartPreference
+from ulauncher.util.Router import Router, get_url_params
+from ulauncher.util.Settings import Settings
+from ulauncher.util.string import force_unicode
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .HotkeyDialog import HotkeyDialog
@@ -80,7 +79,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         """
         self.webview = WebKit2.WebView()
         self.ui['scrolled_window'].add(self.webview)
-        opts = parse_options()
+        opts = get_options()
         self._load_prefs_html()
 
         web_settings = self.webview.get_settings()
@@ -124,19 +123,19 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         return False
 
     def webview_on_context_menu(self, *args):
-        return bool(not parse_options().dev)
+        return bool(not get_options().dev)
 
     ######################################
     # WebView communication methods
     ######################################
 
-    def on_scheme_callback(self, schemeRequest):
+    def on_scheme_callback(self, scheme_request):
         """
         Handles Javascript-to-Python calls
         """
 
         try:
-            params = get_url_params(schemeRequest.get_uri())
+            params = get_url_params(scheme_request.get_uri())
             callback_name = params['query']['callback']
             assert callback_name
         except Exception as e:
@@ -144,7 +143,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             return
 
         try:
-            resp = rt.dispatch(self, schemeRequest.get_uri())
+            resp = rt.dispatch(self, scheme_request.get_uri())
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except PrefsApiError as e:
             callback = '%s(null, %s);' % (callback_name, json.dumps(e))
@@ -156,7 +155,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             stream = Gio.MemoryInputStream.new_from_data(callback)
             # send response
-            schemeRequest.finish(stream, -1, 'text/javascript')
+            scheme_request.finish(stream, -1, 'text/javascript')
         except Exception as e:
             logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e.message))
 
@@ -299,7 +298,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         req_data = url_params['query']
         logger.info('Delete shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
-        id = shortcuts.remove(req_data['id'])
+        shortcuts.remove(req_data['id'])
         shortcuts.commit()
 
     ######################################

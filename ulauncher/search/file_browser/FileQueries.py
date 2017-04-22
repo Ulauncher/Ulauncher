@@ -1,9 +1,9 @@
 import os
 from time import time, sleep
-from ulauncher.helpers import singleton
 from ulauncher.config import CACHE_DIR
-from ulauncher.utils.KeyValueDb import KeyValueDb
-from ulauncher.utils.run_async import run_async
+from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.decorator.singleton import singleton
 
 
 class FileQueries(KeyValueDb):

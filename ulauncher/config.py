@@ -1,6 +1,8 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
 # Where your project will look for your data (for instance, images and ui
 # files). By default, this is ../data, relative your trunk layout
+import optparse
+
 __ulauncher_data_directory__ = '../data/'
 __license__ = 'GPL-3'
 __version__ = 'VERSION'
@@ -11,6 +13,7 @@ from time import time
 
 from locale import gettext as _
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs
+from ulauncher.util.decorator.lru_cache import lru_cache
 
 # Use ulauncher_cache dir because of the WebKit bug
 # https://bugs.webkit.org/show_bug.cgi?id=151646
@@ -18,6 +21,9 @@ CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
 CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
 DESKTOP_DIRS = filter(os.path.exists, xdg_data_dirs)
+EXTENSIONS_DIR = os.path.join(CACHE_DIR, 'extensions')
+EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
+ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 class ProjectPathNotFoundError(Exception):
@@ -53,6 +59,27 @@ def get_data_path():
     return abs_data_path
 
 
+@lru_cache()
+def get_options():
+    """Support for command line options"""
+    parser = optparse.OptionParser(version="%%prog %s" % get_version())
+    parser.add_option(
+        "-v", "--verbose", action="count", dest="verbose",
+        help=_("Show debug messages"))
+    parser.add_option(
+        "--hide-window", action="store_true",
+        help=_("Hide window upon application startup"))
+    parser.add_option(
+        "--no-extensions", action="store_true",
+        help=_("Do not run extensions"))
+    parser.add_option(
+        "--dev", action="store_true",
+        help=_("Development mode"))
+    (options, args) = parser.parse_args()
+
+    return options
+
+
 def get_default_shortcuts():
     google = {
         "id": str(uuid4()),
@@ -82,23 +109,10 @@ def get_default_shortcuts():
         "added": time()
     }
 
-    with open(get_data_file('timer-shortcut/timer.py.src'), 'r') as f:
-        timerPy = f.read()
-
-    timer = {
-        "id": str(uuid4()),
-        "name": "Timer",
-        "keyword": "timer",
-        "cmd": timerPy.replace('{ICON_PATH}', get_data_file('timer-shortcut/timer.png')),
-        "icon": get_data_file('timer-shortcut/timer.png'),
-        "is_default_search": False,
-        "added": time()
-    }
     return {
         google['id']: google,
         stackoverflow['id']: stackoverflow,
         wikipedia['id']: wikipedia,
-        timer['id']: timer,
     }
 
 

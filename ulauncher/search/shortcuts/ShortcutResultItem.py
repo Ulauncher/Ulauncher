@@ -1,26 +1,21 @@
 import re
-from ulauncher.ext.ResultItem import ResultItem
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.RunScriptAction import RunScriptAction
-from ulauncher.ext.actions.OpenUrlAction import OpenUrlAction
-from ulauncher.ext.actions.SetUserQueryAction import SetUserQueryAction
-from ulauncher.helpers import load_image
+
+from ulauncher.api.shared.action.ActionList import ActionList
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.api.shared.item.ResultItem import ResultItem
+from ulauncher.util.image_loader import load_image
 
 
 class ShortcutResultItem(ResultItem):
 
-    _default_search_active = False  # True when no results were found for user's query
-
-    def __init__(self, keyword, name, cmd, icon, is_default_search=False, **kw):
+    def __init__(self, keyword, name, cmd, icon, default_search=False, **kw):
         self.keyword = keyword
         self.name = name
         self.cmd = cmd
         self.icon = icon
-        self.is_default_search = is_default_search
-
-    def activate_default_search(self, value):
-        if self.is_default_search:
-            self._default_search_active = value
+        self.is_default_search = default_search
 
     def get_keyword(self):
         return self.keyword
@@ -42,7 +37,7 @@ class ShortcutResultItem(ResultItem):
         else:
             description = self.cmd
 
-        if self._default_search_active:
+        if self.is_default_search:
             return description.replace('%s', query)
         elif query.get_keyword() == self.keyword and query.get_argument():
             return description.replace('%s', query.get_argument())
@@ -58,7 +53,7 @@ class ShortcutResultItem(ResultItem):
         action_list = ActionList()
         if query.get_keyword() == self.keyword and query.get_argument():
             argument = query.get_argument()
-        elif self._default_search_active:
+        elif self.is_default_search:
             argument = query
         else:
             argument = None

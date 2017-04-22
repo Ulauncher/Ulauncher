@@ -1,6 +1,4 @@
-import os
 import pytest
-import mock
 from ulauncher.search.apps.AppStatDb import AppStatDb
 
 

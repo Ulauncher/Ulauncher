@@ -27,6 +27,7 @@ Depends: ${misc:Depends},
  python-levenshtein,
  python-pyinotify,
  python-pysqlite2,
+ python-websocket,
  python-xdg
 Description: Application launcher for Linux
  See http://ulauncher.io for more information

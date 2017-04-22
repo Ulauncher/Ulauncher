@@ -1,8 +1,9 @@
 import pytest
 import mock
 from gi.repository import Gtk, GdkPixbuf
+
+from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
-from ulauncher.ext.ResultItem import ResultItem
 
 
 class TestResultItemWidget(object):

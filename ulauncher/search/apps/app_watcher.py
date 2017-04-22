@@ -4,10 +4,10 @@ import pyinotify
 import logging
 from functools import wraps
 
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps
 from .AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
-from ulauncher.utils.desktop import find_apps, read_desktop_file, filter_app
-from ulauncher.utils.run_async import run_async
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 import pytest
 from ulauncher.search.shortcuts.ShortcutResultItem import ShortcutResultItem
-from ulauncher.ext.Query import Query
+from ulauncher.search.Query import Query
 
 
 class TestShortcutResultItem:
@@ -35,7 +35,6 @@ class TestShortcutResultItem:
         assert item.get_description(Query('kw test')) == 'http://site/?q=test'
         assert item.get_description(Query('keyword test')) == 'http://site/?q=...'
         assert item.get_description(Query('goo')) == 'http://site/?q=...'
-        item.activate_default_search(True)
 
     def test_get_icon(self, mocker, item):
         load_image = mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.load_image')
@@ -48,7 +47,7 @@ class TestShortcutResultItem:
         assert not SetUserQueryAction.called
 
     def test_on_enter__default_search(self, item, mocker, ActionList, OpenUrlAction, SetUserQueryAction):
-        item.activate_default_search(True)
+        item.is_default_search = True
         assert item.on_enter(Query('search query')) is ActionList.return_value
         OpenUrlAction.assert_called_once_with('http://site/?q=search query')
         assert not SetUserQueryAction.called

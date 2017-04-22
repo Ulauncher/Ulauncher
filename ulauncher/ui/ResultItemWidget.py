@@ -1,6 +1,6 @@
 import logging
 from gi.repository import Gtk
-from ulauncher.ui import get_theme_prop
+from ulauncher.ui.theme import get_theme_prop
 
 logger = logging.getLogger(__name__)
 

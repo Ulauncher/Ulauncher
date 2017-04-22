@@ -1,7 +1,6 @@
 import pytest
 import mock
 from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
-from gi.repository import Gtk
 
 
 class TestPreferencesUlauncherDialog:

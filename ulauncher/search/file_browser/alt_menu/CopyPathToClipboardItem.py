@@ -1,7 +1,6 @@
-from ulauncher.utils.icon_loader import get_themed_icon_by_name
-from ulauncher.ext.SmallResultItem import SmallResultItem
-from ulauncher.ext.actions.ActionList import ActionList
-from ulauncher.ext.actions.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
+from ulauncher.util.image_loader import get_themed_icon_by_name
 
 
 class CopyPathToClipboardItem(SmallResultItem):
@@ -22,4 +21,4 @@ class CopyPathToClipboardItem(SmallResultItem):
         return get_themed_icon_by_name('edit-copy', self.ICON_SIZE)
 
     def on_enter(self, query):
-        return ActionList([CopyToClipboardAction(self.path.get_abs_path())])
+        return CopyToClipboardAction(self.path.get_abs_path())

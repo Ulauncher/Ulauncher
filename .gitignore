@@ -6,6 +6,7 @@
 ulauncherc
 *.egg-info
 build
+_build
 .build-checksum
 po
 .coverage

@@ -1,5 +1,5 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-
+import os
 import time
 import logging
 import threading
@@ -12,22 +12,24 @@ gi.require_version('Keybinder', '3.0')
 
 from gi.repository import Gtk, Gdk, GLib, Keybinder
 
-from ulauncher.helpers import singleton, force_unicode, gtk_version_is_gte
-from ulauncher.utils.display import get_current_screen_geometry
-from ulauncher.config import get_data_file
-from ulauncher.ui import create_item_widgets, get_theme_name
-
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
+from ulauncher.config import get_data_file
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.search import Search
+from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.util.Settings import Settings
+from ulauncher.util.decorator.singleton import singleton
+from ulauncher.util.display import get_current_screen_geometry
+from ulauncher.util.string import force_unicode
+from ulauncher.util.version_cmp import gtk_version_is_gte
+from ulauncher.util.desktop.notification import show_notification
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
-from ulauncher.utils.Settings import Settings
-from ulauncher.ext.Query import Query
-from ulauncher.ext.notification import show_notification
+from ulauncher.search.Query import Query
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
@@ -96,6 +98,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
+        ExtensionServer.get_instance().start()
+        time.sleep(0.01)
+        ExtensionRunner.get_instance().run_all()
 
     ######################################
     # GTK Signal Handlers
@@ -142,13 +147,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         Triggered by user input
         """
-        Search.get_instance().start(self.get_user_query())
+        Search.get_instance().on_query_change(self._get_user_query())
 
     def on_input_key_press_event(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        Search.get_instance().on_key_press_event(widget, event, self.get_user_query())
+        Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
             if keyname == 'Up':
@@ -185,7 +190,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # workaround for issue with a caret-color
         # GTK+ < 3.20 doesn't support that prop
         css_file = 'theme-gtk-3.20.css' if gtk_version_is_gte(3, 20, 0) else 'theme.css'
-        self.init_styles(get_data_file('styles', 'themes', get_theme_name(), css_file))
+        self.init_styles(get_data_file('styles',
+                                       'themes',
+                                       Settings.get_instance().get_property('theme-name'),
+                                       css_file))
 
     def activate_preferences(self, page='general'):
         """
@@ -261,7 +269,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         display_name = Gtk.accelerator_get_label(key, mode)
         show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
 
-    def get_user_query(self):
+    def _get_user_query(self):
         # get_text() returns str, so we need to convert it to unicode
         return Query(force_unicode(self.input.get_text()))
 
@@ -271,10 +279,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav.select(index)
 
     def enter_result_item(self, index=None, alt=False):
-        if not self.results_nav.enter(self.get_user_query(), index, alt=alt):
-            # close the window if it has to be closed on enter
-            self.hide()
-            self.input.set_text('')
+        if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
+            # hide the window if it has to be closed on enter
+            self.hide_and_clear_input()
+
+    def hide_and_clear_input(self):
+        self.hide()
+        self.input.set_text('')
 
     def show_results(self, result_items):
         """
@@ -282,12 +293,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
-        results = list(create_item_widgets(result_items, self.get_user_query()))  # generator -> list
+        results = self.create_item_widgets(result_items, self._get_user_query())
         if results:
             self._resultsRenderTime = time.time()
             map(self.result_box.add, results)
             self.results_nav = ItemNavigation(self.result_box.get_children())
-            self.results_nav.select_default(self.get_user_query())
+            self.results_nav.select_default(self._get_user_query())
 
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
@@ -296,3 +307,23 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         else:
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
+        logger.debug('render %s results' % len(results))
+
+    @staticmethod
+    def create_item_widgets(items, query):
+        results = []
+        for index, result_item in enumerate(items):
+            glade_filename = get_data_file('ui', '%s.ui' % result_item.UI_FILE)
+            if not os.path.exists(glade_filename):
+                glade_filename = None
+
+            builder = Gtk.Builder()
+            builder.set_translation_domain('ulauncher')
+            builder.add_from_file(glade_filename)
+
+            item_frame = builder.get_object('item-frame')
+            item_frame.initialize(builder, result_item, index, query)
+
+            results.append(item_frame)
+
+        return results
