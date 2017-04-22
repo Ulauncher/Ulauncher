@@ -1,7 +1,6 @@
-from ulauncher.utils.icon_loader import get_themed_icon_by_name
-from ulauncher.result_list.result_item.SmallResultItem import SmallResultItem
-from ulauncher.result_list.item_action.ActionList import ActionList
-from ulauncher.result_list.item_action.OpenAction import OpenAction
+from ulauncher.api.shared.action.OpenAction import OpenAction
+from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
+from ulauncher.util.image_loader import get_themed_icon_by_name
 
 
 class OpenFolderItem(SmallResultItem):
@@ -16,7 +15,7 @@ class OpenFolderItem(SmallResultItem):
     def set_name(self, name):
         self._name = name
 
-    def get_name_highlighted(serlf, *args):
+    def get_name_highlighted(self, *args):
         pass
 
     def get_name(self):
@@ -26,4 +25,4 @@ class OpenFolderItem(SmallResultItem):
         return get_themed_icon_by_name('system-file-manager', self.ICON_SIZE)
 
     def on_enter(self, query):
-        return ActionList([OpenAction(self.path.get_abs_path())])
+        return OpenAction(self.path.get_abs_path())

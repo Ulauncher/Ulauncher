@@ -1,1 +1,0 @@
-`ulauncher.ext` package contains public interfaces that can be used to create Ulauncher plugins.

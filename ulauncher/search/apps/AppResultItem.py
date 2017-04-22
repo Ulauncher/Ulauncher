@@ -1,6 +1,5 @@
-from ulauncher.result_list.result_item.ResultItem import ResultItem
-from ulauncher.result_list.item_action.LaunchAppAction import LaunchAppAction
-from ulauncher.result_list.item_action.ActionList import ActionList
+from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
+from ulauncher.api.shared.item.ResultItem import ResultItem
 from .AppQueryDb import AppQueryDb
 from .AppStatDb import AppStatDb
 
@@ -34,10 +33,10 @@ class AppResultItem(ResultItem):
         if query:
             # don't record empty queries
             # they occur if a user selects item from a default list
-            self._app_queries.put(query, self.record.get('name'))
+            self._app_queries.put(unicode(query), self.record.get('name'))
             self._app_queries.commit()
 
         self._app_stat_db.inc_count(self.record.get('desktop_file'))
         self._app_stat_db.commit()
 
-        return ActionList((LaunchAppAction(self.record.get('desktop_file')),))
+        return LaunchAppAction(self.record.get('desktop_file'))

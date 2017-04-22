@@ -2,9 +2,8 @@ import mock
 import pytest
 from gi.repository import Gdk
 from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
-from ulauncher.utils.Path import Path, InvalidPathError
 from ulauncher.search.file_browser.FileQueries import FileQueries
-from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
+from ulauncher.util.Path import InvalidPathError
 
 
 class TestFileBrowserMode:
@@ -22,8 +21,8 @@ class TestFileBrowserMode:
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SetUserQueryAction')
 
     @pytest.fixture
-    def SortedResultList(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SortedResultList')
+    def SortedList(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SortedList')
 
     @pytest.fixture
     def RenderAction(self, mocker):
@@ -82,19 +81,19 @@ class TestFileBrowserMode:
         mode.handle_query('~~')
         RenderAction.assert_called_with([])
 
-    def test_handle_qury__path_from_doesnt_exist__SortedResultList_called(self, mode, path, mocker,
-                                                                          RenderAction, SortedResultList):
+    def test_handle_qury__path_from_doesnt_exist__SortedList_called(self, mode, path, mocker,
+                                                                    RenderAction, SortedList):
         path.get_existing_dir.return_value = '/tmp/dir'
         mocker.patch.object(mode, 'list_files', return_value=['a', 'd', 'b', 'c'])
         mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
 
         mode.handle_query('/tmp/dir')
 
-        SortedResultList.assert_called_with(path.get_search_part.return_value,
-                                            min_score=40,
-                                            limit=mode.RESULT_LIMIT)
+        SortedList.assert_called_with(path.get_search_part.return_value,
+                                      min_score=40,
+                                      limit=mode.RESULT_LIMIT)
 
-        SortedResultList.return_value.extend.assert_called_with(
+        SortedList.return_value.extend.assert_called_with(
             ['/tmp/dir/c', '/tmp/dir/b', '/tmp/dir/d', '/tmp/dir/a'])
 
     def test_handle_key_press_event(self, mode, mocker, SetUserQueryAction):

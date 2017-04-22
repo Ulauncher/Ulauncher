@@ -1,10 +1,11 @@
 import logging
-from ulauncher.helpers import singleton
+
+from ulauncher.api.server.ExtensionSearchMode import ExtensionSearchMode
 from ulauncher.search.apps.AppSearchMode import AppSearchMode
 from ulauncher.search.shortcuts.ShortcutSearchMode import ShortcutSearchMode
 from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.search.calc.CalcMode import CalcMode
-from ulauncher.extension.server.ExtensionSearchMode import ExtensionSearchMode
+from ulauncher.util.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +15,16 @@ class Search(object):
     @classmethod
     @singleton
     def get_instance(cls):
-        fileBrowserMode = FileBrowserMode()
-        calcMode = CalcMode()
-        shortcutSearchMode = ShortcutSearchMode()
-        extensionSearchMode = ExtensionSearchMode()
-        appSearchMode = AppSearchMode([shortcutSearchMode, extensionSearchMode])
-        return cls([fileBrowserMode,
-                    calcMode,
-                    shortcutSearchMode,
-                    extensionSearchMode,
-                    appSearchMode])
+        file_browser_mode = FileBrowserMode()
+        calc_mode = CalcMode()
+        shortcut_search_mode = ShortcutSearchMode()
+        extension_search_mode = ExtensionSearchMode()
+        app_search_mode = AppSearchMode([shortcut_search_mode, extension_search_mode])
+        return cls([file_browser_mode,
+                    calc_mode,
+                    shortcut_search_mode,
+                    extension_search_mode,
+                    app_search_mode])
 
     def __init__(self, search_modes):
         self.search_modes = search_modes

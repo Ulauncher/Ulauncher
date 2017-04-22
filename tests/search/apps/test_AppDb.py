@@ -1,4 +1,3 @@
-import os
 import pytest
 import mock
 from ulauncher.search.apps.AppDb import AppDb
@@ -76,13 +75,13 @@ class TestAppDb(object):
         }
 
     def test_find_returns_sorted_results(self, db_with_data, mocker):
-        SortedResultList = mocker.patch('ulauncher.search.apps.AppDb.SortedResultList')
-        result_list = SortedResultList.return_value
+        SortedList = mocker.patch('ulauncher.search.apps.AppDb.SortedList')
+        result_list = SortedList.return_value
         AppResultItem = mocker.patch('ulauncher.search.apps.AppDb.AppResultItem')
 
         assert db_with_data.find('bro') is result_list
         result_list.append.assert_called_with(AppResultItem.return_value)
-        SortedResultList.assert_called_with('bro', min_score=mock.ANY, limit=9)
+        SortedList.assert_called_with('bro', min_score=mock.ANY, limit=9)
 
         for rec in db_with_data.get_records():
             AppResultItem.assert_any_call(rec)

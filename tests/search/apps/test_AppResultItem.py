@@ -45,10 +45,8 @@ class TestAppResultItem:
 
     def test_on_enter(self, item, mocker, app_queries, app_stat_db):
         LaunchAppAction = mocker.patch('ulauncher.search.apps.AppResultItem.LaunchAppAction')
-        ActionList = mocker.patch('ulauncher.search.apps.AppResultItem.ActionList')
-        assert item.on_enter(Query('query')) is ActionList.return_value
+        assert item.on_enter(Query('query')) is LaunchAppAction.return_value
         LaunchAppAction.assert_called_with('path/to/desktop_file.desktop')
-        ActionList.assert_called_with((LaunchAppAction.return_value,))
         app_queries.put.assert_called_with('query', 'TestAppResultItem')
         app_queries.commit.assert_called_with()
         app_stat_db.inc_count.assert_called_with('path/to/desktop_file.desktop')

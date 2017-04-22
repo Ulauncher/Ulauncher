@@ -4,8 +4,7 @@ import gi
 gi.require_version('AppIndicator3', '0.1')
 
 from gi.repository import Gtk, AppIndicator3
-from ulauncher.config import get_data_file
-from ulauncher.helpers import singleton
+from ulauncher.util.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
 

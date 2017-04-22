@@ -1,14 +1,13 @@
 import pytest
 import mock
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.ui.ResultItemWidget import ResultItemWidget
 
 
 class TestItemNavigation(object):
 
     @pytest.fixture
     def items(self):
-        return map(lambda _: mock.create_autospec(ResultItemWidget), range(5))
+        return map(lambda _: mock.MagicMock(), range(5))
 
     @pytest.fixture
     def nav(self, items):

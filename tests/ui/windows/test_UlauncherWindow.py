@@ -1,5 +1,7 @@
 import pytest
 import mock
+
+from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
 
@@ -34,7 +36,23 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Keybinder')
 
     @pytest.fixture
-    def window(self, mocker):
+    def GtkBuilder(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk').Builder
+
+    @pytest.fixture
+    def result_item(self):
+        return mock.create_autospec(ResultItem)
+
+    @pytest.fixture(autouse=True)
+    def os_path_exists(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.os.path.exists')
+
+    @pytest.fixture(autouse=True)
+    def get_data_file(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_data_file')
+
+    @pytest.fixture
+    def window(self):
         return UlauncherWindow()
 
     @pytest.mark.with_display
@@ -50,3 +68,11 @@ class TestUlauncherWindow:
         Keybinder.unbind.assert_called_with(accel_name)
         Keybinder.bind.assert_called_with(new_accel_name, window.cb_toggle_visibility)
         show_notification.assert_called_with('Ulauncher', 'Hotkey is set to Ctrl+Alt+R')
+
+    def test_create_item_widgets(self, window, result_item, GtkBuilder, get_data_file):
+        assert window.create_item_widgets([result_item], 'test') == [GtkBuilder.return_value.get_object.return_value]
+        GtkBuilder.return_value.get_object.assert_called_with('item-frame')
+        GtkBuilder.return_value.get_object.return_value.initialize.assert_called_with(
+            GtkBuilder.return_value, result_item, 0, 'test')
+        GtkBuilder.return_value.add_from_file.assert_called_with(get_data_file.return_value)
+        get_data_file.assert_called_with('ui', '%s.ui' % result_item.UI_FILE)

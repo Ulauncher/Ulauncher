@@ -2,10 +2,10 @@ import os
 import sqlite3
 import logging
 
-from ulauncher.helpers import singleton, force_unicode
-from ulauncher.config import CACHE_DIR
-from ulauncher.utils.icon_loader import get_app_icon_pixbuf
-from ulauncher.result_list.SortedResultList import SortedResultList
+from ulauncher.search.SortedList import SortedList
+from ulauncher.util.decorator.singleton import singleton
+from ulauncher.util.image_loader import get_app_icon_pixbuf
+from ulauncher.util.string import force_unicode
 from .AppResultItem import AppResultItem
 
 logger = logging.getLogger(__name__)
@@ -23,10 +23,10 @@ class AppDb(object):
         self._icons = {}  # save icons to a local map
 
     def open(self):
-        createDbScheme = self._path == ':memory:' or not os.path.exists(self._path)
+        create_db_scheme = self._path == ':memory:' or not os.path.exists(self._path)
         self._conn = sqlite3.connect(self._path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
-        if createDbScheme:
+        if create_db_scheme:
             self._create_table()
         return self
 
@@ -67,31 +67,33 @@ class AppDb(object):
         }
         self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
 
+        query = '''INSERT OR IGNORE INTO app_db (name, desktop_file, description)
+                   VALUES (:name, :desktop_file, :description)'''
         try:
-            query = '''INSERT OR IGNORE INTO app_db (name, desktop_file, description)
-                       VALUES (:name, :desktop_file, :description)'''
             self._conn.execute(query, record)
             self.commit()
         except Exception as e:
             logger.exception('Exception %s for query: %s. Record: %s' % (e, query, record))
 
     def get_by_name(self, name):
+        query = 'SELECT * FROM app_db where name = ? COLLATE NOCASE'
         try:
-            query = 'SELECT * FROM app_db where name = ? COLLATE NOCASE'
             collection = self._conn.execute(query, (force_unicode(name),))
         except Exception as e:
             logger.exception('Exception %s for query: %s. Name: %s' % (e, query, name))
+            raise
 
         row = collection.fetchone()
         if row:
             return self._row_to_rec(row)
 
     def get_by_path(self, desktop_file):
+        query = 'SELECT * FROM app_db where desktop_file = ?'
         try:
-            query = 'SELECT * FROM app_db where desktop_file = ?'
             collection = self._conn.execute(query, (force_unicode(desktop_file),))
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
+            raise
 
         row = collection.fetchone()
         if row:
@@ -101,12 +103,13 @@ class AppDb(object):
         """
         :desktop_file str: path to a desktop file
         """
+        query = 'DELETE FROM app_db WHERE desktop_file = ?'
         try:
-            query = 'DELETE FROM app_db WHERE desktop_file = ?'
             self._conn.execute(query, (force_unicode(desktop_file),))
             self.commit()
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
+            raise
 
         del self._icons[desktop_file]
 
@@ -121,7 +124,7 @@ class AppDb(object):
         :return ResultList:
         """
 
-        result_list = result_list or SortedResultList(query, min_score=50, limit=9)
+        result_list = result_list or SortedList(query, min_score=50, limit=9)
 
         if not query:
             return result_list

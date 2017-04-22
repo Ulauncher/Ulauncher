@@ -1,10 +1,11 @@
 import re
-from ulauncher.result_list.result_item.ResultItem import ResultItem
-from ulauncher.result_list.item_action.ActionList import ActionList
-from ulauncher.result_list.item_action.RunScriptAction import RunScriptAction
-from ulauncher.result_list.item_action.OpenUrlAction import OpenUrlAction
-from ulauncher.result_list.item_action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.helpers import load_image
+
+from ulauncher.api.shared.action.ActionList import ActionList
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.api.shared.item.ResultItem import ResultItem
+from ulauncher.util.image_loader import load_image
 
 
 class ShortcutResultItem(ResultItem):

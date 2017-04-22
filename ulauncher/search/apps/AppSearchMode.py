@@ -1,4 +1,4 @@
-from ulauncher.result_list.item_action.RenderResultListAction import RenderResultListAction
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
 from ulauncher.search.apps.AppDb import AppDb
 

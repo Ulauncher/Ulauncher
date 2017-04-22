@@ -1,11 +1,12 @@
 import os
 from gi.repository import Gdk
+
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.result_list.item_action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.result_list.item_action.RenderResultListAction import RenderResultListAction
-from ulauncher.result_list.item_action.DoNothingAction import DoNothingAction
-from ulauncher.result_list.SortedResultList import SortedResultList
-from ulauncher.utils.Path import Path, InvalidPathError
+from ulauncher.search.SortedList import SortedList
+from ulauncher.util.Path import Path, InvalidPathError
 from .FileBrowserResultItem import FileBrowserResultItem
 from .FileQueries import FileQueries
 
@@ -65,7 +66,7 @@ class FileBrowserMode(BaseSearchMode):
                     file_names = self.filter_dot_files(file_names)
 
                 files = [os.path.join(existing_dir, name) for name in file_names]
-                result_items = SortedResultList(search_for, min_score=40, limit=self.RESULT_LIMIT)
+                result_items = SortedList(search_for, min_score=40, limit=self.RESULT_LIMIT)
                 result_items.extend([self.create_result_item(name) for name in reversed(files)])
 
         except (InvalidPathError, OSError):

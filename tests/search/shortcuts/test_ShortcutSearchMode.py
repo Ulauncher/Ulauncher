@@ -1,4 +1,3 @@
-import mock
 import pytest
 from ulauncher.search.shortcuts.ShortcutSearchMode import ShortcutSearchMode
 

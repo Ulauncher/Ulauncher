@@ -1,7 +1,3 @@
-from ulauncher.result_list.item_action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.search.Query import Query
-
-
 class ItemNavigation(object):
     """
     Performs navigation through found results

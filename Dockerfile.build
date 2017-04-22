@@ -40,9 +40,11 @@ RUN apt-get update && \
     apt-get clean
 
 COPY [ "requirements.txt", "data/preferences/package.json", "data/preferences/bower.json", "./" ]
+COPY [ "docs/requirements.txt", "./docs/" ]
 
 # Caching node_modules and bower_components to make builds faster
 RUN pip install -r requirements.txt && \
+    pip install -r docs/requirements.txt && \
     npm install && \
     ./node_modules/.bin/bower install -F --allow-root && \
     mv node_modules /var && \

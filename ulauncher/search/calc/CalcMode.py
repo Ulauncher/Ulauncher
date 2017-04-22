@@ -2,9 +2,9 @@ import re
 import ast
 import operator as op
 from gi.repository import Gdk
+
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.result_list.item_action.ActionList import ActionList
-from ulauncher.result_list.item_action.RenderResultListAction import RenderResultListAction
 from .CalcResultItem import CalcResultItem
 
 
@@ -64,4 +64,4 @@ class CalcMode(BaseSearchMode):
             result_item = CalcResultItem(result=result)
         except Exception as e:
             result_item = CalcResultItem(error=e.message or error_msg)
-        return ActionList((RenderResultListAction([result_item]),))
+        return RenderResultListAction([result_item])

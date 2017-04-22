@@ -1,8 +1,6 @@
 import logging
-from locale import gettext as _
 from gi.repository import Gtk, Gdk, GObject
 
-from ulauncher.config import get_data_file
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 

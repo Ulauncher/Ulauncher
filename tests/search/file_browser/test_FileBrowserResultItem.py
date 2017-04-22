@@ -1,8 +1,8 @@
 import mock
 import pytest
 from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
-from ulauncher.utils.Path import Path
 from ulauncher.search.file_browser.FileQueries import FileQueries
+from ulauncher.util.Path import Path
 
 
 class TestFileBrowserResultItem:
@@ -27,6 +27,22 @@ class TestFileBrowserResultItem:
     def OpenFolderItem(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.OpenFolderItem')
 
+    @pytest.fixture(autouse=True)
+    def SetUserQueryAction(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.SetUserQueryAction')
+
+    @pytest.fixture(autouse=True)
+    def OpenAction(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.OpenAction')
+
+    @pytest.fixture(autouse=True)
+    def RenderAction(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.RenderResultListAction')
+
+    @pytest.fixture(autouse=True)
+    def CopyPathToClipboardItem(self, mocker):
+        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.CopyPathToClipboardItem')
+
     @pytest.fixture
     def result_item(self, path, file_queries, mocker):
         FileQueries = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.FileQueries')
@@ -41,22 +57,21 @@ class TestFileBrowserResultItem:
         assert result_item.get_icon() == get_file_icon.return_value
         get_file_icon.assert_called_with(path, result_item.ICON_SIZE)
 
-    def test_on_enter(self, result_item, path, mocker, file_queries, ActionList):
-        SetUserQueryAction = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.SetUserQueryAction')
-        assert result_item.on_enter('query') == ActionList.return_value
-        assert SetUserQueryAction.called
+    def test_on_enter(self, result_item, path, file_queries, OpenAction, SetUserQueryAction):
+        assert result_item.on_enter('query') == SetUserQueryAction.return_value
         file_queries.put.assert_called_with(path.get_abs_path.return_value)
 
         # is not dir
         path.is_dir.return_value = False
-        assert result_item.on_enter('query') == ActionList.return_value
+        assert result_item.on_enter('query') == OpenAction.return_value
 
-    def test_on_alt_enter_dir(self, result_item, ActionList, path, OpenFolderItem):
-        assert result_item.on_alt_enter('query') == ActionList.return_value
-        OpenFolderItem.assert_called_with(path)
+    def test_on_alt_enter_dir(self, result_item, path, RenderAction, OpenFolderItem, CopyPathToClipboardItem):
+        assert result_item.on_alt_enter('query') == RenderAction.return_value
+        RenderAction.assert_called_with([OpenFolderItem.return_value, CopyPathToClipboardItem.return_value])
 
-    def test_on_alt_enter_file(self, result_item, ActionList, path, OpenFolderItem, Path):
+    def test_on_alt_enter_file(self, result_item, path, OpenFolderItem, Path, RenderAction, CopyPathToClipboardItem):
         path.is_dir.return_value = False
-        assert result_item.on_alt_enter('query') == ActionList.return_value
+        assert result_item.on_alt_enter('query') == RenderAction.return_value
         Path.assert_called_with(path.get_dirname.return_value)
         OpenFolderItem.assert_called_with(Path.return_value)
+        RenderAction.assert_called_with([OpenFolderItem.return_value, CopyPathToClipboardItem.return_value])

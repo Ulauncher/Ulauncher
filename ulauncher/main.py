@@ -3,7 +3,6 @@ import os
 import signal
 import logging
 import time
-from locale import gettext as _
 from threading import Event
 
 import gi
@@ -14,13 +13,12 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .helpers import parse_options
-from .config import get_version, CACHE_DIR, CONFIG_DIR
+from .config import get_version, get_options, CACHE_DIR, CONFIG_DIR
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.utils.Settings import Settings
-from ulauncher.utils.run_async import run_async
-from ulauncher.utils.setup_logging import setup_logging
+from ulauncher.util.Settings import Settings
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.setup_logging import setup_logging
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
@@ -66,7 +64,7 @@ class GracefulAppKiller(object):
 def main():
     _create_dirs()
 
-    options = parse_options()
+    options = get_options()
     setup_logging(options)
     logger = logging.getLogger('ulauncher')
     logger.info('Ulauncher version %s' % get_version())

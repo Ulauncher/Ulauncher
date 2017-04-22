@@ -1,4 +1,4 @@
-from ulauncher.result_list.item_action.DoNothingAction import DoNothingAction
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 
 class BaseSearchMode(object):

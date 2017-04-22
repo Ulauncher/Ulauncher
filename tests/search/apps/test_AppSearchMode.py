@@ -1,7 +1,6 @@
 import mock
 import pytest
 from ulauncher.search.apps.AppSearchMode import AppSearchMode
-from ulauncher.search.Query import Query
 
 
 class TestAppSearchMode:
