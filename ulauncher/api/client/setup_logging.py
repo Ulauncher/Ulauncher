@@ -8,11 +8,6 @@ COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 
 
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
-
-
 def setup_logging():
     root = logging.getLogger()
 

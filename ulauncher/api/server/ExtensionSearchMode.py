@@ -15,19 +15,23 @@ class ExtensionSearchMode(BaseSearchMode):
 
     def is_enabled(self, query):
         """
-        Return True if mode should be enabled for a query
+        :param ~ulauncher.search.Query.Query query:
+        :rtype: `True` if mode should be enabled for a query
         """
         return bool(self._get_controller_by_keyword(query.get_keyword())) and query.is_mode_active()
 
     def on_query_change(self, query):
         """
         Triggered when user changes a search query
+
+        :param ~ulauncher.search.Query.Query query:
         """
         self.deferredResultRenderer.on_query_change()
 
     def handle_query(self, query):
         """
-        @return Action object
+        :param ~ulauncher.search.Query.Query query:
+        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
         controller = self._get_controller_by_keyword(query.get_keyword())
 
@@ -37,9 +41,15 @@ class ExtensionSearchMode(BaseSearchMode):
         return controller.handle_query(query)
 
     def _get_controller_by_keyword(self, kw):
+        """
+        :param str kw: Keyword
+        """
         return self.extensionServer.get_controller_by_keyword(kw)
 
     def get_searchable_items(self):
+        """
+        :rtype: list of :class:`~ulauncher.api.shared.item.ResultItem.ResultItem`
+        """
         items = []
         for c in self.extensionServer.get_controllers():
             for pref in c.preferences.get_items(type='keyword'):
@@ -55,4 +65,8 @@ class ExtensionSearchMode(BaseSearchMode):
         return items
 
     def _on_item_enter(self, keyword, query):
+        """
+        :param str kw: Keyword
+        :param ~ulauncher.search.Query.Query query: query
+        """
         return SetUserQueryAction('%s ' % keyword)

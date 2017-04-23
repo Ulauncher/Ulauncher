@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def get_current_screen(window=None):
     """
-    Returns an integer
+    :rtype int:
     """
     default_screen = Gdk.Screen.get_default()
     try:
@@ -27,15 +27,15 @@ def get_current_screen(window=None):
 
 def get_current_screen_geometry(window=None):
     """
-    Returns dict with keys: x, y, width, height
+    :returns: dict with keys: x, y, width, height
     """
     return get_screens()[get_current_screen(window)]
 
 
 def get_screens():
     """
-    Returns a list of screen geometries
-    Raises RuntimeError
+    :returns: a list of screen geometries
+    :raises RuntimeError:
     """
 
     screens = []

@@ -13,17 +13,17 @@ from .alt_menu.OpenFolderItem import OpenFolderItem
 
 
 class FileBrowserResultItem(SmallResultItem):
+    """
+    :param Path path:
+    """
 
     def __init__(self, path):
-        """
-        :param Path path:
-        """
         self.path = path
         self._file_queries = FileQueries.get_instance()
 
     def get_name(self):
         """
-        Return name to show in the list
+        :return: name to show in the list
         """
         return self.path.get_basename()
 
@@ -46,13 +46,17 @@ class FileBrowserResultItem(SmallResultItem):
         return RenderResultListAction(menu_items)
 
     def _get_dir_alt_menu(self):
-        "Return list of ResultItems"
+        """
+        :rtype: list of ResultItems
+        """
         open_folder = OpenFolderItem(self.path)
         open_folder.set_name("Open Folder '%s'" % self.path.get_basename())
         return [open_folder, CopyPathToClipboardItem(self.path)]
 
     def _get_file_alt_menu(self):
-        "Return list of ResultItems"
+        """
+        :rtype: list of ResultItems
+        """
         open_folder = OpenFolderItem(Path(self.path.get_dirname()))
         open_folder.set_name('Open Containing Folder')
         return [open_folder, CopyPathToClipboardItem(self.path)]

@@ -5,11 +5,11 @@ from .AppStatDb import AppStatDb
 
 
 class AppResultItem(ResultItem):
+    """
+    :param dict record:
+    """
 
     def __init__(self, record):
-        """
-        :param dict record:
-        """
         self.record = record
         self._app_queries = AppQueryDb.get_instance()
         self._app_stat_db = AppStatDb.get_instance()

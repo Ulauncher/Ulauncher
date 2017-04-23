@@ -3,6 +3,9 @@ from .BaseAction import BaseAction
 
 
 class OpenUrlAction(BaseAction):
+    """
+    Opens URL in a default browser
+    """
 
     def __init__(self, url):
         self.url = url

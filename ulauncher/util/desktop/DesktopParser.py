@@ -70,8 +70,11 @@ class DesktopParser(object):
     def get_boolean(self, name):
         """
         Returns True if value is "1", "yes", "true", or "on"
+
         Returns False if value is "0", "no", "false", or "off"
+
         String values are checked in a case-insensitive manner.
+
         Any other value will cause it to raise ValueError.
         """
 

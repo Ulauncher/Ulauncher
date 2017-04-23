@@ -5,8 +5,10 @@ class ActionList(list, BaseAction):
 
     def keep_app_open(self):
         """
-        Retruns True if ulauncher window should remain open once all actions are done
+        :rtype: bool
+        :returns: True if Ulauncher window should remain open once all actions are done
         """
+
         # return true if there no actions in the list
         if not self:
             return True

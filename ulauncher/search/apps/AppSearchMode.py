@@ -4,11 +4,11 @@ from ulauncher.search.apps.AppDb import AppDb
 
 
 class AppSearchMode(BaseSearchMode):
+    """
+    :type list search_modes: a list of other :class:`SearchMode` objects that provide additional result items
+    """
 
     def __init__(self, search_modes):
-        """
-        search_modes is a list of other SearchModes that provide additional result items
-        """
         self.search_modes = search_modes
         self.app_db = AppDb.get_instance()
 

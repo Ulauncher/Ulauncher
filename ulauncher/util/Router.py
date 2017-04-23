@@ -21,17 +21,17 @@ class Router(object):
     """
     Usage:
 
-    rt = Router()
-    class App(object):
-
-        @rt.route('get/user')
-        def get_user(self, url_params):
-            ...
-            return userObject
-
-        def on_request(self, url):
-            result = rt.dispatch(self, url) // will return userObject for /get/user path
-
+    >>> rt = Router()
+    >>>
+    >>> class App(object):
+    >>>
+    >>>     @rt.route('get/user')
+    >>>     def get_user(self, url_params):
+    >>>         ...
+    >>>         return userObject
+    >>>
+    >>>     def on_request(self, url):
+    >>>         result = rt.dispatch(self, url) # will return userObject for /get/user path
     """
 
     _callbacks = None

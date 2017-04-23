@@ -6,6 +6,13 @@ from .BaseAction import BaseAction
 
 
 class ExtensionCustomAction(BaseAction):
+    """
+    If initiated with `data`, the same data will be returned
+    in :class:`~ulauncher.api.shared.event.ItemEnterEvent` object
+
+    :param data: any type that can be serialized with :func:`pickle.dumps`
+    :param bool keep_app_open:
+    """
 
     def __init__(self, data, keep_app_open=False):
         self._data = pickle.dumps(data)
@@ -15,6 +22,9 @@ class ExtensionCustomAction(BaseAction):
         return self._keep_app_open
 
     def run(self):
+        """
+        Runs :func:`controller.debounced_send_event` with :class:`ItemEnterEvent`
+        """
         # import here to avoid circular deps
         from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow

@@ -45,7 +45,8 @@ class KeyValueDb(object):
     def remove(self, key):
         """
         :param str key:
-        :return bool: True if record was removed
+        :type: bool
+        :return: True if record was removed
         """
         try:
             del self._records[key]

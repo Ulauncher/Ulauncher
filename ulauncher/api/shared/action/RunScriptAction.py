@@ -6,6 +6,12 @@ from .BaseAction import BaseAction
 
 
 class RunScriptAction(BaseAction):
+    """
+    Runs user script
+
+    :param str script: script content
+    :param list args: arguments
+    """
 
     def __init__(self, script, args):
         self.script = script

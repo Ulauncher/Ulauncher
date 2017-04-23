@@ -3,11 +3,13 @@ from .BaseAction import BaseAction
 
 
 class RenderResultListAction(BaseAction):
+    """
+    Renders list of result items
+
+    :param list result_list: list of :class:`~ulauncher.api.shared.item.ResultItem.ResultItem` objects
+    """
 
     def __init__(self, result_list):
-        """
-        :param list result_list: list of ResultItem objects
-        """
         self.result_list = result_list
 
     def keep_app_open(self):

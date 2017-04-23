@@ -11,12 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 class DeferredResultRenderer(object):
+    """
+    Handles asynchronous render for extensions
+    """
 
     LOADING_DELAY = 0.5  # delay in sec before Loading... is rendered
 
     @classmethod
     @singleton
     def get_instance(cls):
+        """
+        Returns singleton instance
+        """
         return cls()
 
     def __init__(self):
@@ -28,6 +34,9 @@ class DeferredResultRenderer(object):
         return self.active_controller
 
     def handle_event(self, event, controller):
+        """
+        Schedules "Loading..." message and returns :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
+        """
         self._cancel_loading()
         self.loading = Timer(self.LOADING_DELAY,
                              partial(self._render_loading,
@@ -39,6 +48,9 @@ class DeferredResultRenderer(object):
         return DoNothingAction()
 
     def handle_response(self, response, controller):
+        """
+        Calls `response.action.run()`
+        """
         if self.active_controller != controller or self.active_event != response.event:
             return
 
@@ -46,6 +58,9 @@ class DeferredResultRenderer(object):
         response.action.run()
 
     def on_query_change(self):
+        """
+        Cancels "Loading..."
+        """
         self._cancel_loading()
         self.active_event = None
         self.active_controller = None

@@ -5,6 +5,6 @@ Notify.init('ulauncher')
 
 def show_notification(summary, body, icon='ulauncher'):
     """
-    Returns Notification
+    :rtype: :class:`Notify.Notification`
     """
     Notify.Notification.new(summary, body, icon).show()

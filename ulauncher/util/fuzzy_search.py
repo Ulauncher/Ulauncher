@@ -8,9 +8,11 @@ from ulauncher.util.decorator.lru_cache import lru_cache
 @lru_cache(maxsize=150)
 def get_matching_indexes(query, text):
     """
-    Returns a list of positions of chars from query inside text
     Uses Longest Common Substring Algorithm to find the best match
+
     Runs in O(nm)
+
+    :returns: a list of positions of chars from query inside text
     """
     query = query.lower()
     text = text.lower()
@@ -49,7 +51,7 @@ def get_matching_indexes(query, text):
 def get_score(query, text):
     """
     Uses Levenshtein's algorithm + some improvements to the score
-    Returns number between 0 and 100
+    :returns: number between 0 and 100
     """
     if not query or not text:
         return 0

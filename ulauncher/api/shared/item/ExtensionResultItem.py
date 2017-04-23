@@ -7,6 +7,11 @@ from ulauncher.util.image_loader import load_image
 
 
 class ExtensionResultItem(ResultItem):
+    """
+    Should be used in extensions.
+
+    Cannot be subclassed there because :func:`pickle.loads` won't work in Ulauncher app
+    """
 
     def __init__(self, *args, **kw):
         super(ExtensionResultItem, self).__init__(*args, **kw)

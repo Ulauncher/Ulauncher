@@ -44,7 +44,7 @@ class AppDb(object):
 
     def _row_to_rec(self, row):
         """
-        :row sqlite3.Row:
+        :param sqlite3.Row row:
         """
         return {
             'desktop_file': row['desktop_file'],
@@ -101,7 +101,7 @@ class AppDb(object):
 
     def remove_by_path(self, desktop_file):
         """
-        :desktop_file str: path to a desktop file
+        :param str desktop_file: path to a desktop file
         """
         query = 'DELETE FROM app_db WHERE desktop_file = ?'
         try:
@@ -121,7 +121,7 @@ class AppDb(object):
         """
         :param str query: query to search for
         :param ResultList result_list:
-        :return ResultList:
+        :rtype: :class:`ResultList`
         """
 
         result_list = result_list or SortedList(query, min_score=50, limit=9)

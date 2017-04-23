@@ -55,6 +55,9 @@ class GracefulAppKiller(object):
         signal.signal(signal.SIGTERM, self._exit_gracefully)
 
     def killed(self):
+        """
+        :rtype: bool
+        """
         return self._exit_event.is_set()
 
     def _exit_gracefully(self, signum, frame):
@@ -62,6 +65,9 @@ class GracefulAppKiller(object):
 
 
 def main():
+    """
+    Main function that starts everything
+    """
     _create_dirs()
 
     options = get_options()

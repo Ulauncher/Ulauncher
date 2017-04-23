@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class ExtensionController(WebSocket):
+    """
+    Handles messages from Ulauncher app.
+
+    Implements `send_event()` to send events back to Ulauncher
+
+    :param list controllers: list of :class:`~ulauncher.api.server.ExtensionController`
+    """
 
     extension_id = None
     manifest = None
@@ -48,7 +55,9 @@ class ExtensionController(WebSocket):
 
     def handleMessage(self):
         """
-        Inbound response
+        Handles incoming message stored in `self.data` by invoking
+        :meth:`~ulauncher.api.server.DeferredResultRenderer.DeferredResultRenderer.handle_response`
+        of `DeferredResultRenderer`
         """
         response = pickle.loads(self.data)
 
@@ -59,6 +68,11 @@ class ExtensionController(WebSocket):
         self.resultRenderer.handle_response(response, self)
 
     def handleConnected(self):
+        """
+        * Appends `self` to `self.controllers`
+        * Validates manifest file.
+        * Sends :class:`PreferencesEvent` to extension
+        """
         self.extension_id = self.request.path[1:]
         if not self.extension_id:
             raise Exception('Incorrect path %s' % self.request.path)

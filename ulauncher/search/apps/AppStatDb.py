@@ -28,8 +28,9 @@ class AppStatDb(KeyValueDb):
         TODO: rename to `get_most_recent` and update method to remove old apps
 
         :param int limit: limit
-        :return ResultList:
+        :rtype: class:`ResultList`
         """
+
         # import here to avoid circular deps.
         from .AppResultItem import AppResultItem
         from .AppDb import AppDb

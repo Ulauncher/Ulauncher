@@ -16,16 +16,16 @@ class BaseSearchMode(object):
 
     def handle_key_press_event(self, widget, event, query):
         """
-        @param widget Gdk.Widget
-        @param event Gdk.EventKey
-        @param query Query
-        @return Action object
+        :param Gdk.Widget widget:
+        :param Gdk.EventKey event:
+        :param Query query:
+        :rtype: :class:`BaseAction`
         """
         return DoNothingAction()
 
     def handle_query(self, query):
         """
-        @return Action Object
+        :rtype: :class:`BaseAction`
         """
         return DoNothingAction()
 

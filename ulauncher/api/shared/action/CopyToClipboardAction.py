@@ -4,6 +4,9 @@ from .BaseAction import BaseAction
 
 
 class CopyToClipboardAction(BaseAction):
+    """
+    Copy text to the clipboard
+    """
 
     def __init__(self, text):
         self.text = text

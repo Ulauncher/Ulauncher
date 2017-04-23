@@ -48,6 +48,11 @@ class ResultItem(object):
         return self._name
 
     def get_name_highlighted(self, query, color):
+        """
+        :param ~ulauncher.search.Query.Query query:
+        :param str color:
+        :rtype: str
+        """
         if query and self._highlightable:
             return highlight_text(query,
                                   self.get_name(),
@@ -60,13 +65,16 @@ class ResultItem(object):
     def get_description(self, query):
         """
         optional
+
+        :param ~ulauncher.search.Query.Query query:
         """
         return self._description
 
     def get_icon(self):
         """
         optional
-        Gtk.PixBuf
+
+        :rtype: :class:`Gtk.PixBuf`
         """
         return self._icon
 
@@ -84,9 +92,9 @@ class ResultItem(object):
 
     def on_enter(self, query):
         """
-        :param str argument: it is passed only if get_keyword() is implemented
-        This allows you to create flows with a result item
-        Return ActionList()
+        :param ~ulauncher.search.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
+                                                    This allows you to create flows with a result item
+        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
         if callable(self._on_enter):
             return self._on_enter(query)
@@ -95,8 +103,9 @@ class ResultItem(object):
         """
         Optional alternative enter
 
-        :param str argument: it is passed only if get_keyword() is implemented
-        Return ActionList()
+        :param ~ulauncher.search.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
+                                                    This allows you to create flows with a result item
+        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
         if callable(self._on_alt_enter):
             return self._on_alt_enter(query)

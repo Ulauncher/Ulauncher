@@ -4,11 +4,11 @@ from ulauncher.util.image_loader import get_themed_icon_by_name
 
 
 class CopyPathToClipboardItem(SmallResultItem):
+    """
+    :param ~ulauncher.util.Path.Path path:
+    """
 
     def __init__(self, path):
-        """
-        :param Path path:
-        """
         self.path = path
 
     def get_name(self):

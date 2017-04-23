@@ -5,6 +5,9 @@ from ulauncher.util.image_loader import load_image
 
 
 class ExtensionManifest(object):
+    """
+    Reads `manifest.json`
+    """
 
     @classmethod
     def open(cls, extension_id, extensions_dir=EXTENSIONS_DIR):

@@ -23,12 +23,20 @@ class ExtensionServer(object):
         self.controllers = {}
 
     def generate_ws_url(self, extension_id):
+        """
+        Returns WebSocket URL for given `extension_id`
+
+        :rtype: str
+        """
         if not self.is_running():
             raise ServerIsNotRunningError()
 
         return 'ws://%s:%s/%s' % (self.hostname, self.port, extension_id)
 
     def start(self):
+        """
+        Starts WS server
+        """
         if self.ws_server:
             raise ServerIsRunningError()
 
@@ -46,21 +54,38 @@ class ExtensionServer(object):
         logger.warning('WS server exited')
 
     def stop(self):
+        """
+        Stops WS server
+        """
         if not self.is_running():
             raise ServerIsNotRunningError()
 
         self.ws_server.close()
 
     def is_running(self):
+        """
+        :rtype: bool
+        """
         return bool(self.ws_server)
 
     def get_controller(self, extension_id):
+        """
+        :param str extension_id:
+        :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
+        """
         return self.controllers[extension_id]
 
     def get_controllers(self):
+        """
+        :rtype: list of  :class:`~ulauncher.api.server.ExtensionController.ExtensionController`
+        """
         return self.controllers.values()
 
     def get_controller_by_keyword(self, keyword):
+        """
+        :param str keyword:
+        :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
+        """
         for ext_id, ctl in self.controllers.items():
             if keyword in ctl.preferences.get_active_keywords():
                 return ctl

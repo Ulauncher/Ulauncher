@@ -17,7 +17,8 @@ class AutostartPreference(object):
 
     def _get_app_desktop(self):
         """
-        Returns path to desktop file
+        :rtype: str
+        :returns: path to desktop file
         """
         record = AppDb.get_instance().get_by_name('Ulauncher')
         if record:
@@ -31,13 +32,13 @@ class AutostartPreference(object):
 
     def is_allowed(self):
         """
-        Returns True if autostart is allowed for Ulauncher
+        :returns: True if autostart is allowed for Ulauncher
         """
         return bool(self._ulauncher_desktop)
 
     def is_on(self):
         """
-        Returns True if Ulauncher starts automatically
+        :returns: True if Ulauncher starts automatically
         """
         try:
             return self._get_autostart_parser().get_boolean(self.AUTOSTART_FLAG)
@@ -46,11 +47,11 @@ class AutostartPreference(object):
 
     def switch(self, is_on):
         """
+        if `is_on` is True, set `X-GNOME-Autostart-enabled=true` and
+        write file to `~/.config/autostart/ulauncher.desktop`
+
         :param bool is_on:
-
-        if `is_on` is True, set X-GNOME-Autostart-enabled=true and write file to ~/.config/autostart/ulauncher.desktop
-
-        Raises SwitchError if something goes wrong
+        :raises SwitchError: if something goes wrong
         """
         if not self.is_allowed():
             raise SwitchError('Autostart is not allowed')

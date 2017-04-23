@@ -52,14 +52,6 @@ ulauncher\.api\.shared\.action\.ExtensionCustomAction module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.KeepAppOpenAction module
---------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.KeepAppOpenAction
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.LaunchAppAction module
 ------------------------------------------------------
 

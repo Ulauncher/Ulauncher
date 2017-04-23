@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=50)
 def load_image(path, size):
     """
-    Returns:
-        Pixbuf instance or None if new_from_file_at_size() raises
+    :rtype: :class:`GtkPixbuf` or :code:`None`
+    :returns: None if :func:`new_from_file_at_size` raises error
     """
     try:
         return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
@@ -24,7 +24,7 @@ def get_app_icon_pixbuf(app, icon_size):
     """
     :param Gio.DesktopAppInfo app:
     :param int icon_size:
-    return PixBuf
+    :rtype: :class:`GtkPixbuf`
     """
     icon = app.get_icon()
     pixbuf_icon = None
@@ -81,7 +81,7 @@ FREEDESKTOP_STANDARD = {
 
 def get_file_icon(path, icon_size):
     """
-    :param Path path:
+    :param ~ulauncher.util.Path.Path path:
     :param int icon_size:
     """
     try:

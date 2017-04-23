@@ -10,6 +10,9 @@ from .setup_logging import setup_logging
 
 
 class Extension(object):
+    """
+    Manages extension runtime
+    """
 
     def __init__(self):
         self._listeners = defaultdict(list)
@@ -19,12 +22,27 @@ class Extension(object):
         setup_logging()
 
     def subscribe(self, event_type, event_listener):
+        """
+        Example:
+
+            extension.subscribe(PreferencesEvent, PreferencesEventListener())
+
+        :param type event_type:
+        :param ~ulauncher.api.client.EventListener.EventListener event_listener:
+        """
         self._listeners[event_type].append(event_listener)
 
     def get_listeners_for_event(self, event):
+        """
+        :param ~ulauncher.api.shared.event.BaseEvent event:
+        :rtype: ~ulauncher.api.client.EventListener.EventListener
+        """
         return self._listeners[type(event)]
 
     def trigger_event(self, event):
+        """
+        :param ~ulauncher.api.shared.event.BaseEvent event:
+        """
         listeners = self.get_listeners_for_event(event)
         if not listeners:
             self.logger.debug('No listeners for event %s' % type(event).__name__)
@@ -37,6 +55,9 @@ class Extension(object):
                 self._client.send(Response(event, action))
 
     def run(self):
+        """
+        Subscribes to events and connects to Ulauncher WS server
+        """
         self.subscribe(PreferencesEvent, PreferencesEventListener())
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self._client.connect()

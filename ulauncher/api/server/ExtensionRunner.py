@@ -29,6 +29,9 @@ class ExtensionRunner(object):
         self.verbose = get_options().verbose
 
     def run_all(self):
+        """
+        Finds all extensions in `EXTENSIONS_DIR` and runs them
+        """
         for id, _ in find_extensions(self.extensions_dir):
             try:
                 self.run(id)
@@ -37,7 +40,10 @@ class ExtensionRunner(object):
 
     def run(self, extension_id):
         """
-        Returns a thread object
+        * Validates manifest
+        * Runs extension in a new process
+
+        :rtype: :class:`threading.Thread`
         """
         if self.is_running(extension_id):
             raise ExtensionIsRunningError('Extension ID: %s' % extension_id)
@@ -51,7 +57,7 @@ class ExtensionRunner(object):
 
     def _run_process(self, extension_id):
         """
-        (Blocks execution)
+        Blocking function
         """
         cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
         env = os.environ.copy()
@@ -95,6 +101,9 @@ class ExtensionRunner(object):
             logger.error('Extension "%s" exited with code %s. Restarting...' % (extension_id, code))
 
     def stop(self, extension_id):
+        """
+        Terminates extension
+        """
         if not self.is_running(extension_id):
             raise ExtensionIsNotRunningError('Extension ID: %s' % extension_id)
 

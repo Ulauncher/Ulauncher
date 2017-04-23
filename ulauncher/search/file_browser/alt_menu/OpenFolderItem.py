@@ -4,11 +4,11 @@ from ulauncher.util.image_loader import get_themed_icon_by_name
 
 
 class OpenFolderItem(SmallResultItem):
+    """
+    :param ~ulauncher.util.Path.Path path:
+    """
 
     def __init__(self, path):
-        """
-        :param Path path:
-        """
         self.path = path
         self._name = 'Open Folder'
 

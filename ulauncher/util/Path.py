@@ -40,11 +40,12 @@ class Path(object):
 
     def get_existing_dir(self):
         """
-        Returns path to the last dir that exists in the user's query
-        Example:
-            query = /home/aleksandr/projects/foo/bar
-            result = /home/aleksandr/projects
-            (assuming foo & bar do not exist)
+        Example (assuming foo & bar do not exist):
+
+        >>> p = Path('/home/aleksandr/projects/foo/bar')
+        >>> p.get_existing_dir() == '/home/aleksandr/projects'
+
+        :returns: path to the last dir that exists in the user's query
         """
         if self.__cached_existing_dir:
             return self.__cached_existing_dir
@@ -67,7 +68,7 @@ class Path(object):
 
     def get_search_part(self):
         """
-        Returns remaining part of the query that goes after get_existing_dir()
+        :returns: remaining part of the query that goes after :meth:`get_existing_dir`
         """
         return self._path[len(self.get_existing_dir()):].strip('/')
 

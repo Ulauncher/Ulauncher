@@ -32,17 +32,15 @@ GPROPERTIES = {
 
 class Settings(GObject.GObject):
     """
-    Get/Set properties using
-        settings.get_property('prop-name')
-    or
-        settings.set_property('prop-name', 'new value')
+    Get/Set properties using :code:`settings.get_property('prop-name')` or
+    :code:`settings.set_property('prop-name', 'new value')`
 
     Subscribe to property changes:
 
-        def on_notify(settings, prop):
-            print prop.name
-
-        settings.connect("notify::hotkey-show-app", on_notify)
+    >>> def on_notify(settings, prop):
+    ...     print prop.name
+    >>>
+    >>> settings.connect("notify::hotkey-show-app", on_notify)
     """
 
     # __gproperties__ is used only to register properties

@@ -11,6 +11,9 @@ class BaseEvent(object):
 
 
 class KeywordQueryEvent(BaseEvent):
+    """
+    :param ~ulauncher.search.Query.Query query:
+    """
 
     def __init__(self, query):
         self.query = query
@@ -45,6 +48,11 @@ class SystemExitEvent(BaseEvent):
 
 
 class PreferencesUpdateEvent(BaseEvent):
+    """
+    :param str key:
+    :param str old_value:
+    :param str new_value:
+    """
 
     key = None
     old_value = None
@@ -57,6 +65,9 @@ class PreferencesUpdateEvent(BaseEvent):
 
 
 class PreferencesEvent(BaseEvent):
+    """
+    :param dict preferences:
+    """
 
     preferences = None
 

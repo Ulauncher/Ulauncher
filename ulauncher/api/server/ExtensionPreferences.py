@@ -7,6 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class ExtensionPreferences(object):
+    """
+    Manages extension preferences. Stores them in pickled file in cache directory
+    """
 
     def __init__(self, extension_id, manifest, ext_preferences_dir=EXT_PREFERENCES_DIR):
         self.db_path = os.path.join(ext_preferences_dir, '%s.db' % extension_id)
@@ -16,7 +19,8 @@ class ExtensionPreferences(object):
 
     def get_items(self, type=None):
         """
-        Returns list of dicts: [{id: .., type: .., defalut_value: .., user_value: ..., value: ..., description}]
+        :param str type:
+        :rtype: list of dicts: [{id: .., type: .., defalut_value: .., user_value: ..., value: ..., description}, ...]
         """
         self._open_db()
 
@@ -40,7 +44,7 @@ class ExtensionPreferences(object):
 
     def get_dict(self):
         """
-        Returns dict(id=value, id2=value2, ...)
+        :rtype: dict(id=value, id2=value2, ...)
         """
         items = {}
         for i in self.get_items():
@@ -51,15 +55,25 @@ class ExtensionPreferences(object):
     def get(self, id):
         """
         Returns one item
+        :rtype: dict
         """
         for i in self.get_items():
             if i['id'] == id:
                 return i
 
     def get_active_keywords(self):
+        """
+        Filters items by type "keyword"
+        """
         return [p['value'] for p in self.get_items(type='keyword') if p['value']]
 
     def set(self, id, value):
+        """
+        Updates preference
+
+        :param str id: id as defined in manifest
+        :param str value:
+        """
         self.db.put(id, value)
         self.db.commit()
 

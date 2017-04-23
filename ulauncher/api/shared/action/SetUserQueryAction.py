@@ -5,6 +5,11 @@ from .BaseAction import BaseAction
 
 
 class SetUserQueryAction(BaseAction):
+    """
+    Changes query string to a new one
+
+    :param str new_query:
+    """
 
     def __init__(self, new_query):
         self.new_query = new_query

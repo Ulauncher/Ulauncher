@@ -4,7 +4,7 @@ from ulauncher.util.fuzzy_search import get_matching_indexes
 def highlight_text(query, text, open_tag='<span foreground="white">', close_tag='</span>'):
     """
     Highlights words from query in a given text string
-    Retuns string with Pango markup
+    :returns: string with Pango markup
     """
     positions = get_matching_indexes(query, text)
 

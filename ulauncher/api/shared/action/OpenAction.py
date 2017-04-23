@@ -11,7 +11,7 @@ class OpenAction(BaseAction):
 
     def __init__(self, filename):
         """
-        file name or path
+        :param str filename: file name or path
         """
         self.filename = filename
 
