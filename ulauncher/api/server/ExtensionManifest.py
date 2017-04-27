@@ -67,8 +67,8 @@ class ExtensionManifest(object):
                 assert p.get('type'), 'Preferences error. type cannot be empty'
                 assert p.get('type') in ["keyword", "input", "text"], \
                     'Preferences error. type be "keyword", "input", or "text"'
-                if p['type'] == 'keyword':
-                    assert p.get('name'), 'Preferences error. name cannot be empty for type "keyword"'
+                assert p.get('name'), 'Preferences error. name cannot be empty'
+                assert p.get('default_value'), 'Preferences error. default_value cannot be empty'
         except AssertionError as e:
             raise ManifestValidationError(e.message)
         except KeyError as e:

@@ -7,7 +7,7 @@ from .BaseAction import BaseAction
 
 class RunScriptAction(BaseAction):
     """
-    Runs user script
+    Runs a user script
 
     :param str script: script content
     :param list args: arguments

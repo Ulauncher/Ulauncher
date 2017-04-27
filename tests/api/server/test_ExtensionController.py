@@ -34,7 +34,7 @@ class TestExtensionController:
     def controller(self, controllers, mocker):
         server, sock, address = (None, None, None)
         controller = ExtensionController(controllers, server, sock, address)
-        controller.debounced_send_event = controller.send_event
+        controller._debounced_send_event = controller._send_event
 
         # patch WebSocket.sendMessage()
         mocker.patch.object(controller, 'sendMessage')
@@ -61,13 +61,13 @@ class TestExtensionController:
         PreferencesEvent = mocker.patch(
             'ulauncher.api.server.ExtensionController.PreferencesEvent')
         PreferencesEvent.return_value = object()
-        mocker.patch.object(controller, 'send_event')
+        mocker.patch.object(controller, '_send_event')
         controller.handleConnected()
-        controller.send_event.assert_called_with(PreferencesEvent.return_value)
+        controller._send_event.assert_called_with(PreferencesEvent.return_value)
 
-    def test_send_event__sendMessage__is_called_with_pickled_event(self, controller):
+    def test_trigger_event__sendMessage__is_called_with_pickled_event(self, controller):
         event = object()
-        controller.send_event(event)
+        controller.trigger_event(event)
         controller.sendMessage.assert_called_with(pickle.dumps(event))
 
     def test_handle_query__KeywordQueryEvent__is_sent_with_query(self, controller):

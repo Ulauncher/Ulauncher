@@ -10,6 +10,7 @@ ulauncher\.api\.shared\.action\.ActionList module
 .. automodule:: ulauncher.api.shared.action.ActionList
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.BaseAction module
@@ -26,6 +27,7 @@ ulauncher\.api\.shared\.action\.CloseAppAction module
 .. automodule:: ulauncher.api.shared.action.CloseAppAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.CopyToClipboardAction module
@@ -34,6 +36,7 @@ ulauncher\.api\.shared\.action\.CopyToClipboardAction module
 .. automodule:: ulauncher.api.shared.action.CopyToClipboardAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.DoNothingAction module
@@ -42,6 +45,7 @@ ulauncher\.api\.shared\.action\.DoNothingAction module
 .. automodule:: ulauncher.api.shared.action.DoNothingAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.ExtensionCustomAction module
@@ -50,6 +54,7 @@ ulauncher\.api\.shared\.action\.ExtensionCustomAction module
 .. automodule:: ulauncher.api.shared.action.ExtensionCustomAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.LaunchAppAction module
@@ -58,6 +63,7 @@ ulauncher\.api\.shared\.action\.LaunchAppAction module
 .. automodule:: ulauncher.api.shared.action.LaunchAppAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.OpenAction module
@@ -66,6 +72,7 @@ ulauncher\.api\.shared\.action\.OpenAction module
 .. automodule:: ulauncher.api.shared.action.OpenAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.OpenUrlAction module
@@ -74,6 +81,7 @@ ulauncher\.api\.shared\.action\.OpenUrlAction module
 .. automodule:: ulauncher.api.shared.action.OpenUrlAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.RenderResultListAction module
@@ -82,6 +90,7 @@ ulauncher\.api\.shared\.action\.RenderResultListAction module
 .. automodule:: ulauncher.api.shared.action.RenderResultListAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.RunScriptAction module
@@ -90,6 +99,7 @@ ulauncher\.api\.shared\.action\.RunScriptAction module
 .. automodule:: ulauncher.api.shared.action.RunScriptAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 ulauncher\.api\.shared\.action\.SetUserQueryAction module
@@ -98,6 +108,7 @@ ulauncher\.api\.shared\.action\.SetUserQueryAction module
 .. automodule:: ulauncher.api.shared.action.SetUserQueryAction
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 

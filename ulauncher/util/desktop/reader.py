@@ -35,7 +35,7 @@ def read_desktop_file(file):
     try:
         return Gio.DesktopAppInfo.new_from_filename(file)
     except Exception as e:
-        logger.warning('Could not read "%s": %s' % (file, e))
+        logger.info('Could not read "%s": %s' % (file, e))
         return None
 
 

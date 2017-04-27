@@ -5,6 +5,8 @@ from .BaseAction import BaseAction
 class OpenUrlAction(BaseAction):
     """
     Opens URL in a default browser
+
+    :param str url:
     """
 
     def __init__(self, url):

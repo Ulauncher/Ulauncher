@@ -26,6 +26,7 @@ ulauncher\.api\.shared\.event module
 .. automodule:: ulauncher.api.shared.event
     :members:
     :undoc-members:
+    :noindex:
     :show-inheritance:
 
 
