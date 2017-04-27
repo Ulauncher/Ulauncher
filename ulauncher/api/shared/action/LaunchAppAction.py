@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 class LaunchAppAction(BaseAction):
     """
-    Launches app with a given `.desktop` file path
+    Launches app by given `.desktop` file path
 
-    :param str filename: path to desktop file
+    :param str filename: path to .desktop file
     """
 
     def __init__(self, filename):

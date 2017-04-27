@@ -6,22 +6,21 @@ from .BaseAction import BaseAction
 
 class OpenAction(BaseAction):
     """
-    Run platform specific command to open either file, directory or URL
+    Run platform specific command to open either file or directory
+
+    :param str path: file or dir path
     """
 
-    def __init__(self, filename):
-        """
-        :param str filename: file name or path
-        """
-        self.filename = filename
+    def __init__(self, path):
+        self.path = path
 
     def keep_app_open(self):
         return False
 
     def run(self):
         if sys.platform.startswith('darwin'):
-            subprocess.call(('open', self.filename))
+            subprocess.call(('open', self.path))
         elif os.name == 'nt':
-            os.startfile(self.filename)
+            os.startfile(self.path)
         elif os.name == 'posix':
-            subprocess.call(('xdg-open', self.filename))
+            subprocess.call(('xdg-open', self.path))

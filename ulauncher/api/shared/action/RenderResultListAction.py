@@ -21,5 +21,4 @@ class RenderResultListAction(BaseAction):
         window = UlauncherWindow.get_instance()
         if window.is_visible():
             # update UI in the main thread to avoid race conditions
-            # window.show_results(self.result_list)
             GLib.idle_add(window.show_results, self.result_list)

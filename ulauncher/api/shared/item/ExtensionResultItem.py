@@ -29,9 +29,11 @@ class ExtensionResultItem(ResultItem):
 
             return load_image(icon_path, self.ICON_SIZE)
         else:
-            # assuming it's Pixbuf
+            # assuming it's GtkPixbuf
             return self._icon
 
     def on_enter(self, query):
-        if self._on_enter:
-            self._on_enter.run()
+        return self._on_enter
+
+    def on_alt_enter(self, query):
+        return self._on_alt_enter

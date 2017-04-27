@@ -68,9 +68,10 @@ class ExtensionRunner(object):
             env['VERBOSE'] = '1'
 
         if self.dont_run_extensions:
-            args = [env['ULAUNCHER_WS_API'], env['PYTHONPATH']]
+            args = [env.get('VERBOSE', ''), env['ULAUNCHER_WS_API'], env['PYTHONPATH']]
             args.extend(cmd)
-            logger.info('ULAUNCHER_WS_API=%s PYTHONPATH=%s %s %s' % tuple(args))
+            logger.warning('Copy and run the following command to start %s' % extension_id)
+            logger.warning('VERBOSE=%s ULAUNCHER_WS_API=%s PYTHONPATH=%s %s %s' % tuple(args))
             return
 
         while True:

@@ -124,7 +124,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         Gtk.main_quit()
 
     def on_preferences_dialog_destroyed(self, widget, data=None):
-        '''only affects gui
+        '''only affects GUI
 
         logically there is no difference between the user closing,
         minimizing or ignoring the preferences dialog'''

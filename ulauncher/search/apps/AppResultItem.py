@@ -22,7 +22,7 @@ class AppResultItem(ResultItem):
 
     def selected_by_default(self, query):
         """
-        :param Query query:
+        :param ~ulauncher.search.Query.Query query:
         """
         return self._app_queries.find(query) == self.record.get('name')
 

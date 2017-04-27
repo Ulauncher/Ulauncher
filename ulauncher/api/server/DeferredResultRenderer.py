@@ -1,13 +1,14 @@
 import logging
 from functools import partial
 from threading import Timer
+from gi.repository import GLib
 
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.util.decorator.singleton import singleton
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('DeferredResultRenderer')
 
 
 class DeferredResultRenderer(object):
@@ -15,7 +16,7 @@ class DeferredResultRenderer(object):
     Handles asynchronous render for extensions
     """
 
-    LOADING_DELAY = 0.5  # delay in sec before Loading... is rendered
+    LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
 
     @classmethod
     @singleton
@@ -35,7 +36,9 @@ class DeferredResultRenderer(object):
 
     def handle_event(self, event, controller):
         """
-        Schedules "Loading..." message and returns :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
+        Schedules "Loading..." message
+
+        :rtype: :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
         """
         self._cancel_loading()
         self.loading = Timer(self.LOADING_DELAY,
@@ -49,17 +52,19 @@ class DeferredResultRenderer(object):
 
     def handle_response(self, response, controller):
         """
-        Calls `response.action.run()`
+        Calls :func:`response.action.run`
         """
         if self.active_controller != controller or self.active_event != response.event:
             return
 
         self._cancel_loading()
         response.action.run()
+        if not response.action.keep_app_open():
+            self._hide_window()
 
     def on_query_change(self):
         """
-        Cancels "Loading..."
+        Cancel "Loading...", reset active_event and active_controller
         """
         self._cancel_loading()
         self.active_event = None
@@ -75,3 +80,11 @@ class DeferredResultRenderer(object):
                                   icon=icon,
                                   highlightable=False)
         RenderResultListAction([loading_item]).run()
+
+    def _hide_window(self):
+        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+
+        window = UlauncherWindow.get_instance()
+        if window.is_visible():
+            # update UI in the main thread to avoid race conditions
+            GLib.idle_add(window.hide_and_clear_input)

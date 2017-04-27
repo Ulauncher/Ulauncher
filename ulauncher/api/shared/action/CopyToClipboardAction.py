@@ -6,6 +6,8 @@ from .BaseAction import BaseAction
 class CopyToClipboardAction(BaseAction):
     """
     Copy text to the clipboard
+
+    :param str text: text to copy
     """
 
     def __init__(self, text):

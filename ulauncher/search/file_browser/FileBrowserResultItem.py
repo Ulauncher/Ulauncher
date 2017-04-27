@@ -14,7 +14,7 @@ from .alt_menu.OpenFolderItem import OpenFolderItem
 
 class FileBrowserResultItem(SmallResultItem):
     """
-    :param Path path:
+    :param ~ulauncher.util.Path.Path path:
     """
 
     def __init__(self, path):

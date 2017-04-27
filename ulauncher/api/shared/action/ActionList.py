@@ -2,14 +2,18 @@ from .BaseAction import BaseAction
 
 
 class ActionList(list, BaseAction):
+    """
+    Used to run multiple action at once
+
+    :param list actions: list of actions to run
+    """
 
     def keep_app_open(self):
         """
-        :rtype: bool
-        :returns: True if Ulauncher window should remain open once all actions are done
+        :rtype: boolean
+        :returns: return true if there are no actions in the list
+                  otherwise returns ``any(map(lambda i: i.keep_app_open(), self))``
         """
-
-        # return true if there no actions in the list
         if not self:
             return True
         else:

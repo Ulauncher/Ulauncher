@@ -1,5 +1,4 @@
 import pickle
-from gi.repository import GLib
 
 from ulauncher.api.shared.event import ItemEnterEvent
 from .BaseAction import BaseAction
@@ -7,11 +6,12 @@ from .BaseAction import BaseAction
 
 class ExtensionCustomAction(BaseAction):
     """
-    If initiated with `data`, the same data will be returned
+    If initiated with ``data``, the same data will be returned
     in :class:`~ulauncher.api.shared.event.ItemEnterEvent` object
 
-    :param data: any type that can be serialized with :func:`pickle.dumps`
-    :param bool keep_app_open:
+    :param any data: any type that can be serialized with :func:`pickle.dumps`
+    :param bool keep_app_open: pass ``True`` if you want to keep Ulauncher window open.
+                               ``False`` by default
     """
 
     def __init__(self, data, keep_app_open=False):
@@ -23,7 +23,8 @@ class ExtensionCustomAction(BaseAction):
 
     def run(self):
         """
-        Runs :func:`controller.debounced_send_event` with :class:`ItemEnterEvent`
+        Runs :meth:`~ulauncher.api.server.ExtensionController.ExtensionController.trigger_event`
+        with :class:`ItemEnterEvent`
         """
         # import here to avoid circular deps
         from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
@@ -36,6 +37,4 @@ class ExtensionCustomAction(BaseAction):
         renderer = DeferredResultRenderer.get_instance()
         controller = renderer.get_active_controller()
         if controller:
-            controller.debounced_send_event(ItemEnterEvent(self._data))
-            if not self.keep_app_open():
-                GLib.idle_add(window.hide_and_clear_input)
+            controller.trigger_event(ItemEnterEvent(self._data))

@@ -18,7 +18,7 @@ class BaseSearchMode(object):
         """
         :param Gdk.Widget widget:
         :param Gdk.EventKey event:
-        :param Query query:
+        :param ~ulauncher.search.Query.Query query:
         :rtype: :class:`BaseAction`
         """
         return DoNothingAction()

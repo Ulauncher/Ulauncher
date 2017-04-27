@@ -12,6 +12,8 @@ class BaseEvent(object):
 
 class KeywordQueryEvent(BaseEvent):
     """
+    Is triggered when user enters query that statrs with your keyword + Space
+
     :param ~ulauncher.search.Query.Query query:
     """
 
@@ -19,36 +21,57 @@ class KeywordQueryEvent(BaseEvent):
         self.query = query
 
     def get_keyword(self):
+        """
+        :rtype: str
+        """
         return self.query.get_keyword()
 
     def get_query(self):
+        """
+        :rtype: :class:`~ulauncher.search.Query.Query`
+        """
         return self.query
 
     def get_argument(self):
         """
-        Returns None if arguments were not specified
+        :rtype: str
+        :returns: None if arguments were not specified
         """
         return self.query.get_argument()
 
 
 class ItemEnterEvent(BaseEvent):
+    """
+    Is triggered when selected item has action of type :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
+    Whatever data you've passed to action will be available in in this class using method :meth:`get_data`
+
+    :param str data:
+    """
 
     def __init__(self, data):
-        """
-        data - string
-        """
         self._data = data
 
     def get_data(self):
+        """
+        :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
+        """
         return loads(self._data)
 
 
 class SystemExitEvent(BaseEvent):
+    """
+    Is triggered when extension is about to be terminated.
+
+    Your extension has 300ms to handle this event and shut down properly.
+    After that it will be terminated with SIGKILL
+    """
     pass
 
 
 class PreferencesUpdateEvent(BaseEvent):
     """
+    Is triggered when user updates preference through Preferences window
+
     :param str key:
     :param str old_value:
     :param str new_value:
@@ -66,6 +89,8 @@ class PreferencesUpdateEvent(BaseEvent):
 
 class PreferencesEvent(BaseEvent):
     """
+    Is triggered on start
+
     :param dict preferences:
     """
 
