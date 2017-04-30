@@ -20,7 +20,7 @@ If you just want to use the app see download instructions at [ulauncher.io](http
 
 * [Docker](https://docs.docker.com/engine/installation/)
 * [python-distutils-extra](https://launchpad.net/python-distutils-extra)
-* Application runtime dependencies. Listed in `install.sh`.  
+* Application runtime dependencies. Listed in `debian/control`.  
   You don't have to manually install those if you had already installed Ulauncher
 
 ### Build and Run

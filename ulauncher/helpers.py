@@ -61,7 +61,7 @@ def set_up_logging(opts):
     logger_sh = logging.StreamHandler()
     logger_sh.setFormatter(formatter)
     logger.addHandler(logger_sh)
-    logger.setLevel(logging.DEBUG)  # Temporarily set DEBUG by default
+    logger.setLevel(logging.ERROR)
 
     # Set the logging level to show debug messages.
     if opts.verbose:

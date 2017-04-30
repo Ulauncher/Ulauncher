@@ -112,11 +112,17 @@ gulp.task('inject-build',['copy-index-html', 'build-concat-css', 'build-concat-j
 
 gulp.task('build-copy-fonts', function() {
   return gulp.src(['bower_components/font-awesome/fonts/*',
-                   'bower_components/angular-ui-grid/*.ttf',
-                   'bower_components/angular-ui-grid/*.woff'])
+                   'bower_components/bootstrap/dist/fonts/*'])
     .pipe(gulp.dest('build/fonts'));
+});
+
+gulp.task('build-copy-fonts-to-css', function() {
+  return gulp.src(['bower_components/angular-ui-grid/*.ttf',
+                   'bower_components/angular-ui-grid/*.woff',
+                   'bower_components/angular-ui-grid/*.svg'])
+    .pipe(gulp.dest('build/css'));
 });
 
 
 gulp.task('default', ['serve', 'inject-dev']);
-gulp.task('build', ['clean-build', 'inject-build', 'build-copy-fonts']);
+gulp.task('build', ['clean-build', 'inject-build', 'build-copy-fonts', 'build-copy-fonts-to-css']);

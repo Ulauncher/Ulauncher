@@ -20,6 +20,7 @@ Depends: ${misc:Depends},
  gir1.2-keybinder-3.0 (>= 0.3),
  gir1.2-webkit2-4.0 | gir1.2-webkit2-3.0,
  gir1.2-glib-2.0,
+ gir1.2-notify-0.7,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-appindicator3-0.1,
  python-dbus,
@@ -27,5 +28,5 @@ Depends: ${misc:Depends},
  python-pyinotify,
  python-pysqlite2,
  python-xdg
-Description: Provides a convenient and fast way to launch your desktop applications
+Description: Application launcher for Linux
  See http://ulauncher.io for more information

@@ -10,18 +10,14 @@ from uuid import uuid4
 from time import time
 
 from locale import gettext as _
-from xdg.BaseDirectory import xdg_config_home, xdg_cache_home
+from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs
 
 # Use ulauncher_cache dir because of the WebKit bug
 # https://bugs.webkit.org/show_bug.cgi?id=151646
 CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
 CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
-DESKTOP_DIRS = filter(os.path.exists, map(os.path.expanduser, [
-    '/usr/local/share/applications',
-    '/usr/share/applications',
-    '~/.local/share/applications'
-]))
+DESKTOP_DIRS = filter(os.path.exists, xdg_data_dirs)
 
 
 class ProjectPathNotFoundError(Exception):

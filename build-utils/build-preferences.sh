@@ -10,5 +10,5 @@ cd `dirname $0`
 cd ../data/preferences
 
 npm install
-./node_modules/.bin/bower install -F --allow-root
+./node_modules/.bin/bower install -f --allow-root
 ./gulp build

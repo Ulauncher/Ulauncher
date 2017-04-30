@@ -21,5 +21,5 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, 'ulauncher')) and PROJEC
 if python_path:
     os.putenv('PYTHONPATH', "%s:%s" % (os.getenv('PYTHONPATH', ''), ':'.join(python_path)))  # for subprocesses
 
-import ulauncher
-ulauncher.main()
+from ulauncher.main import main
+main()
