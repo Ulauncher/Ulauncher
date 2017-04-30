@@ -2,17 +2,24 @@ Master: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=ma
 Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
 [Ulauncher](http://ulauncher.io)
-========
+================================
 
 **[Ulauncher](http://ulauncher.io)** Application launcher for Linux.  
 It's written in Python and uses GTK as a GUI toolkit.
 
-<img width="290" aligh="left" src="http://i.imgur.com/3owfsfV.png?1">
-<img width="290" aligh="left" src="http://i.imgur.com/W1rryU5.png?1">
-<img width="290" aligh="left" src="http://i.imgur.com/Axhqjp0.png?1">
+<img width="280" aligh="left" src="http://i.imgur.com/3owfsfV.png?1">
+<img width="280" aligh="left" src="http://i.imgur.com/W1rryU5.png?1">
+<img width="280" aligh="left" src="http://i.imgur.com/Axhqjp0.png?1">
+
+
+Extension API Documentation
+===========================
+
+http://docs.ulauncher.io/
+
 
 Install for Development
-===========
+=======================
 
 If you just want to use the app see download instructions at [ulauncher.io](http://ulauncher.io)
 
