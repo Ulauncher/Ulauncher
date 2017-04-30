@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=50)
 def load_image(path, size):
     """
+    :param str path:
+    :param int size:
+
     :rtype: :class:`GtkPixbuf` or :code:`None`
     :returns: None if :func:`new_from_file_at_size` raises error
     """
