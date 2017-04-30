@@ -38,8 +38,6 @@ Known Issues
 
 ***
 ### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
-
-### Reed [How to Report A New Bug](https://github.com/Ulauncher/Ulauncher/wiki/How-to-Report-A-New-Bug)
 ***
 
 License
