@@ -147,7 +147,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             resp = rt.dispatch(self, schemeRequest.get_uri())
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except PrefsApiError as e:
-            callback = '%s(null, %s);' % (callback_name, json.dumps(e))
+            callback = '%s(null, %s);' % (callback_name, json.dumps(e.message))
         except Exception as e:
             message = 'Unexpected API error. %s: %s' % (type(e).__name__, e.message)
             callback = '%s(null, %s);' % (callback_name, json.dumps(message))
