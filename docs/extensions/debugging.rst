@@ -56,3 +56,7 @@ Here's all you need to do to enable logging for your extension::
   logger.debug('...')
 
 
+
+
+.. NOTE::
+  Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation

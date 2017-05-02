@@ -289,3 +289,8 @@ Custom Action on Item Enter
   :align: center
 
   Now this will be rendered when you click on any item
+
+
+
+.. NOTE::
+  Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation
