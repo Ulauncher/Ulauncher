@@ -12,8 +12,7 @@ Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 [Ulauncher](http://ulauncher.io)
 ================================
 
-**[Ulauncher](http://ulauncher.io)** Fast application launcher for Linux.  
-It's written in Python and uses GTK as a GUI toolkit.
+It's a fast application launcher for Linux written in Python and uses GTK as a GUI toolkit.
 
 | App Search | File Browser | Light Theme |
 ---|---|---
