@@ -1,6 +1,14 @@
 Master: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=master)](https://travis-ci.org/Ulauncher/Ulauncher)
 Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
+[Create Your Ulauncher Extensions](http://docs.ulauncher.io/)
+==============================================================
+
+Since Ulauncher v3 (Dev release) you can create your own Ulauncher extensions. 
+
+Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
+
+
 [Ulauncher](http://ulauncher.io)
 ================================
 
@@ -10,12 +18,6 @@ It's written in Python and uses GTK as a GUI toolkit.
 | App Search | File Browser | Light Theme |
 ---|---|---
 |![screenshot](http://i.imgur.com/3owfsfV.png?1)|![screenshot](http://i.imgur.com/W1rryU5.png?1)|![screenshot](http://i.imgur.com/Axhqjp0.png?1)|
-
-
-Ulauncher Extensions
-====================
-
-From version 3 you can create your own Ulauncher extensions. [Read the docs](http://docs.ulauncher.io/).
 
 
 Install for Development
