@@ -43,6 +43,7 @@ Known Issues
 ============
 
 * [inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
+* [Can't add or change shortcuts on Ubuntu 14.04](https://github.com/Ulauncher/Ulauncher/issues/101)
 
 ***
 ### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
