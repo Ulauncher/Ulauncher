@@ -12,13 +12,14 @@ class TestSetUserQueryAction:
 
     @pytest.fixture
     def action(self, window):
-        return SetUserQueryAction('new_query')
+        return SetUserQueryAction('new query')
 
     def test_keep_app_open(self, action):
         assert action.keep_app_open()
 
-    def test_run(self, action, mocker, window):
-        mocker.patch.object(action, 'set_position')
-        action.run()
-        window.input.set_text.assert_called_with('new_query')
-        action.set_position.assert_called_with()
+    def test_update_query(self, action, mocker, window):
+        action._update_query()
+
+        input = window.get_input.return_value
+        input.set_text.assert_called_with('new query')
+        input.set_position.assert_called_with(len('new query'))

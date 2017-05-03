@@ -186,6 +186,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     # Helpers
     ######################################
 
+    def get_input(self):
+        return self.input
+
     def init_theme(self):
         # workaround for issue with a caret-color
         # GTK+ < 3.20 doesn't support that prop
