@@ -32,10 +32,10 @@ If you just want to use the app see download instructions at [ulauncher.io](http
   You don't have to manually install those if you had already installed Ulauncher
 
 ### Build and Run
-1. `./build-utils/dev-container.sh` will take you into a Docker container from which you can run build and test scripts
-2. `./build-utils/build-preferences.sh` build preferences UI in JS/HTML
-3. `./test tests` runs Python tests
-4. `./dev-run.sh` installs Ulauncher data to `~/.local/share/ulauncher/` and then runs the app
+1. `$ ./build-utils/dev-container.sh` will take you into a Docker container from which you can run build and test scripts
+2. `root@container: # ./build-utils/build-preferences.sh` build preferences UI in JS/HTML
+3. `root@container: # ./test tests` runs Python tests
+4. `$ ./dev-run.sh` installs Ulauncher data to `~/.local/share/ulauncher/` and then runs the app
 
 If you have any questions, join chat in [Gitter](https://gitter.im/Ulauncher/General)
 
