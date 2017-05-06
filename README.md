@@ -28,8 +28,28 @@ If you just want to use the app see download instructions at [ulauncher.io](http
 
 * [Docker](https://docs.docker.com/engine/installation/)
 * [python-distutils-extra](https://launchpad.net/python-distutils-extra)
-* Application runtime dependencies. Listed in `debian/control`.  
-  You don't have to manually install those if you had already installed Ulauncher
+* Application runtime dependencies.  
+  (You don't have to manually install those if you had already installed Ulauncher)  
+  
+  ```
+  sudo apt-get install \
+    libkeybinder-3.0-0 \
+    libgtk-3-0 \
+    gir1.2-gtk-3.0 \
+    gir1.2-keybinder-3.0 \
+    gir1.2-webkit2-4.0 \
+    gir1.2-glib-2.0 \
+    gir1.2-notify-0.7 \
+    gir1.2-gdkpixbuf-2.0 \
+    gir1.2-appindicator3-0.1 \
+    python-dbus \
+    python-levenshtein \
+    python-pyinotify \
+    python-pysqlite2 \
+    python-websocket \
+    python-xdg \
+    python-distutils-extra
+  ```
 
 ### Build and Run
 1. `$ ./build-utils/dev-container.sh` will take you into a Docker container from which you can run build and test scripts
