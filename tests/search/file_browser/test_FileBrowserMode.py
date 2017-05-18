@@ -117,6 +117,7 @@ class TestFileBrowserMode:
         event.state = 0
         query = '/usr/bin/'
         widget.get_position.return_value = len(query)
+        widget.get_selection_bounds.return_value = tuple()
         mode.handle_key_press_event(widget, event, query)
 
         assert not SetUserQueryAction.called

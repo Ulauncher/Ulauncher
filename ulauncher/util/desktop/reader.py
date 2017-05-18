@@ -14,8 +14,16 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     :param list dirs:
     :rtype: list
     """
-    return chain.from_iterable(
+    files = chain.from_iterable(
         map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
+
+    blacklisted = ['/usr/share/mimelnk/application', '/usr/share/locale', '/usr/share/app-install']
+
+    for file in files:
+        if any([file.startswith(dir) for dir in blacklisted]):
+            continue
+
+        yield file
 
 
 def filter_app(app):

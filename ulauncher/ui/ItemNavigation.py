@@ -44,8 +44,8 @@ class ItemNavigation(object):
         Enter into selected item, unless 'index' is passed
         Return boolean - True if Ulauncher window should be closed
         """
-        if index:
-            if not (0 < index < self.items_num):
+        if index is not None:
+            if not (0 <= index < self.items_num):
                 raise IndexError
 
             self.select(index)
