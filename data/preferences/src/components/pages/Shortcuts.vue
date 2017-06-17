@@ -1,0 +1,115 @@
+<template>
+  <div class="shortcuts-page">
+
+    <b-table striped small hover show-empty :items="items" :fields="fields">
+      <template slot="name" scope="item">
+        <div class="limited-width">{{ item.value }}</div>
+      </template>
+      <template slot="keyword" scope="item">
+        <div class="limited-width">{{ item.value }}</div>
+      </template>
+      <template slot="icon" scope="item">
+        <img class="icon" :src="item.value" />
+      </template>
+      <template slot="cmd" scope="item">
+        <div class="cmd">
+          <div class="text-wrapper">
+            <div class="text">{{ item.value }}</div>
+          </div>
+          <div class="actions">
+            <b-btn size="sm" @click="edit(item.item)"><i class="fa fa-pencil"></i></b-btn>
+            <b-btn size="sm" @click="del(item.item)"><i class="fa fa-trash"></i></b-btn>
+          </div>
+        </div>
+      </template>
+      <template slot="empty">
+        <td class="empty-text" colspan="4">There are not shortcuts</td>
+      </template>
+    </b-table>
+
+    <b-button variant="primary" href="" @click="add">
+      <i class="fa fa-plus"></i> Add
+    </b-button>
+  </div>
+</template>
+
+<script>
+import jsonp from '@/api'
+
+export default {
+  name: 'shortcuts',
+  created () {
+    this.fetchData()
+  },
+  data () {
+    return {
+      items: [],
+      fields: {
+        icon: {label: ''},
+        name: {label: 'Name'},
+        keyword: {label: 'Keyword'},
+        cmd: {label: 'Query or Script'}
+      }
+    }
+  },
+  methods: {
+    fetchData () {
+      jsonp('/shortcut/get-all').then((data) => {
+        this.items = data
+      })
+    },
+    edit (item) {
+      this.$router.push({path: 'edit-shortcut', query: item})
+    },
+    del (item) {
+      jsonp('/shortcut/delete', {id: item.id}).then(() => {
+        this.items = this.items.filter((i) => item.id === i.id ? null : i)
+      }, (error) => {
+        console.error(error)
+      })
+    },
+    add () {
+      this.$router.push({name: 'edit-shortcut'})
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.shortcuts-page { padding: 15px }
+button { cursor: pointer }
+.empty-text { text-align: center }
+.icon { width: 20px; height: 20px }
+.limited-width {
+  white-space: nowrap;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.cmd {
+  position: relative;
+
+  .text-wrapper {
+    display: table;
+    table-layout: fixed;
+    width:100%;
+
+    .text {
+      display: table-cell;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  }
+
+  .actions {
+    position: absolute;
+    display: none;
+    top: 0;
+    right: 0;
+  }
+}
+tr:hover .actions {
+  display: block;
+}
+</style>

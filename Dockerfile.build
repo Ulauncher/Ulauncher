@@ -37,15 +37,14 @@ RUN apt-get update && \
     bash /tmp/node-setup.sh && \
     apt-get install -y nodejs && \
     apt-get autoremove -y && \
-    apt-get clean
+    apt-get clean && \
+    npm install -g yarn
 
-COPY [ "requirements.txt", "data/preferences/package.json", "data/preferences/bower.json", "./" ]
+COPY [ "requirements.txt", "data/preferences/package.json", "./" ]
 COPY [ "docs/requirements.txt", "./docs/" ]
 
-# Caching node_modules and bower_components to make builds faster
+# Caching node_modules to make builds faster
 RUN pip install -r requirements.txt && \
     pip install -r docs/requirements.txt && \
-    npm install && \
-    ./node_modules/.bin/bower install -F --allow-root && \
-    mv node_modules /var && \
-    mv bower_components /var
+    yarn install && \
+    mv node_modules /var
