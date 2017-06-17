@@ -6,7 +6,7 @@
     <div class="form-group row">
       <label for="hotkey-show-app" class="col-4 col-form-label">Hotkey</label>
       <div class="col-4">
-        <b-form-input id="hotkey-show-app" @focus="showHotkeyDialog" v-model="hotkey_show_app"></b-form-input>
+        <b-form-input id="hotkey-show-app" @focus.native="showHotkeyDialog($event)" v-model="hotkey_show_app"></b-form-input>
       </div>
     </div>
 
@@ -90,21 +90,26 @@ export default {
 
   methods: {
     fetchData () {
-      jsonp('/get/all').then((data) => {
-        Object.keys(data).forEach((k) => {
-          this[k] = data[k]
-        })
+      jsonp('prefs:///get/all').then((data) => {
+        this.hotkey_show_app = data.hotkey_show_app
+        this.autostart_allowed = data.autostart_allowed
+        this.autostart_enabled = data.autostart_enabled
+        this.show_recent_apps = data.show_recent_apps
+        this.show_indicator_icon = data.show_indicator_icon
+        this.theme_name = data.theme_name
+        console.log(data)
       })
     },
 
-    showHotkeyDialog () {
+    showHotkeyDialog (e) {
       jsonp('prefs://show/hotkey-dialog', {name: hotkeyEventName})
+      e.target.blur()
     },
 
     onHotkeySet (e) {
       const previous = this.hotkey_show_app
-      this.hotkey_show_app = e.value
-      jsonp('prefs://set/hotkey-show-app', {value: e.value}).then(null, (err) => {
+      this.hotkey_show_app = e.displayValue
+      jsonp('prefs://set/hotkey-show-app', {value: e.displayValue}).then(null, (err) => {
         this.hotkey_show_app = previous
         console.error(err)
       })

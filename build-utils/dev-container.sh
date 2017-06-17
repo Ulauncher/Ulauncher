@@ -13,5 +13,6 @@ docker run \
     -it \
     -v $(pwd):/root/ulauncher \
     -v $HOME/.bash_history:/root/.bash_history \
+    -p 3002:3002 \
     $BUILD_IMAGE \
     bash

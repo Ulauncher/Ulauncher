@@ -113,11 +113,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def webview_on_button_press_event(self, widget, event):
         """
-        Makes preferences window draggable only by top block with a button bar
-        400x60 - size of the button bar
+        Makes preferences window draggable by empty navigation menu space
+        570x60 - size of the button bar
         """
         window_width = self.get_size()[0]
-        if event.button == 1 and 400 < event.x < window_width - 70 and 0 < event.y < 60:
+        if event.button == 1 and 570 < event.x < window_width - 70 and 0 < event.y < 60:
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
         return False
@@ -170,12 +170,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_get_all(self, url_params):
         logger.info('API call /get/all')
         return {
-            'show-indicator-icon': self.settings.get_property('show-indicator-icon'),
-            'hotkey-show-app': self.get_app_hotkey(),
-            'autostart-allowed': self.autostart_pref.is_allowed(),
-            'autostart-enabled': self.autostart_pref.is_on(),
-            'show-recent-apps': self.settings.get_property('show-recent-apps'),
-            'theme-name': self.settings.get_property('theme-name'),
+            'show_indicator_icon': self.settings.get_property('show-indicator-icon'),
+            'hotkey_show_app': self.get_app_hotkey(),
+            'autostart_allowed': self.autostart_pref.is_allowed(),
+            'autostart_enabled': self.autostart_pref.is_on(),
+            'show_recent_apps': self.settings.get_property('show-recent-apps'),
+            'theme_name': self.settings.get_property('theme-name'),
             'version': get_version()
         }
 
@@ -251,14 +251,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         response = dialog.run()
         data = {
-            'name': file_browser_name,
-            'path': None
+            'value': None
         }
         if response == Gtk.ResponseType.OK:
-            data['path'] = dialog.get_filename()
+            data['value'] = dialog.get_filename()
 
-        logger.debug('file-select %s' % data)
-        self.send_webview_notification('file-select', data)
+        logger.debug('%s %s' % (file_browser_name, data))
+        self.send_webview_notification(file_browser_name, data)
         dialog.destroy()
 
     @rt.route('/open/web-url')
@@ -306,7 +305,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
 
     def _load_prefs_html(self, page=''):
-        self.webview.load_uri("file://%s#/%s" % (get_data_file('preferences', 'index.html'), page))
+        uri = "file://%s#/%s" % (get_data_file('preferences', 'dist', 'index.html'), page)
+        self.webview.load_uri(uri)
 
     def _get_bool(self, str_val):
         return str(str_val).lower() in ('true', '1', 'on')
@@ -321,8 +321,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         return Gtk.accelerator_get_label(key, mode)
 
     def on_hotkey_set(self, widget, hotkey_val, hotkey_display_val):
-        self.send_webview_notification('hotkey-set', {
-            'name': self._hotkey_name,
+        self.send_webview_notification(self._hotkey_name, {
             'value': hotkey_val,
             'displayValue': hotkey_display_val
         })

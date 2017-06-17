@@ -80,7 +80,7 @@ console.log("Query is:", process.argv[1]);`
   },
   methods: {
     selectIcon () {
-      jsonp('/show/file-browser', {type: 'image', name: shortcutIconEventName}).then(null, (error) => {
+      jsonp('prefs://show/file-browser', {type: 'image', name: shortcutIconEventName}).then(null, (error) => {
         console.error(error)
       })
     },

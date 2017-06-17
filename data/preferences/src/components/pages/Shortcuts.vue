@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     fetchData () {
-      jsonp('/shortcut/get-all').then((data) => {
+      jsonp('prefs://shortcut/get-all').then((data) => {
         this.items = data
       })
     },
@@ -62,7 +62,7 @@ export default {
       this.$router.push({path: 'edit-shortcut', query: item})
     },
     del (item) {
-      jsonp('/shortcut/delete', {id: item.id}).then(() => {
+      jsonp('prefs://shortcut/delete', {id: item.id}).then(() => {
         this.items = this.items.filter((i) => item.id === i.id ? null : i)
       }, (error) => {
         console.error(error)
@@ -83,6 +83,7 @@ button { cursor: pointer }
 .limited-width {
   white-space: nowrap;
   max-width: 150px;
+  min-width: 100px;
   text-overflow: ellipsis;
   overflow: hidden;
 }

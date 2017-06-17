@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     fetchData () {
-      jsonp('/get/all').then((data) => {
+      jsonp('prefs://get/all').then((data) => {
         this.version = data.version
       })
     },
