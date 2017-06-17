@@ -6,6 +6,7 @@
 ulauncherc
 *.egg-info
 build
+!data/preferences/build
 _build
 .build-checksum
 po

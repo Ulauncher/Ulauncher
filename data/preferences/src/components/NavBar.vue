@@ -46,8 +46,7 @@ a {
   position: relative;
   display: inline-block;
   height: 100%;
-  padding-top: 20px;
-  padding-right: 25px;
+  padding: 20px 25px 20px 0;
   cursor: pointer;
   text-decoration: none !important;
   color: #6b6b6b;

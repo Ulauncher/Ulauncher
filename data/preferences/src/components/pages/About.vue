@@ -116,7 +116,7 @@ export default {
     border: 1px solid #7ec183;
     border-radius: 8px;
     font-size: 0.95em;
-    color: #aeaeae;
+    color: #858585;
   }
 
   .credits-text {

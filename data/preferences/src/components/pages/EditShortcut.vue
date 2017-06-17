@@ -23,8 +23,24 @@
         label="Query or Script"
         :state="cmdState"
         >
-        <b-form-input class="cmd" textarea :placeholder="cmdPlaceholder" :rows="7" v-model="localCmd"></b-form-input>
+        <b-form-input class="cmd" textarea :rows="3" v-model="localCmd"></b-form-input>
+        <small class="form-text text-muted">
+          <p>
+            Use <code>%s</code> as a placeholder for a query in URL or write a script in a language of your choice.
+            <a @click.prevent="cmdDescriptionExpanded = !cmdDescriptionExpanded"
+               href="">(toggle example)</a>
+          </p>
+          <div v-if="cmdDescriptionExpanded">
+            <pre class="selectable"><code>#!/usr/bin/env node
+// query is passed as a first argument
+console.log("Query is:", process.argv[1]);</code></pre>
+          </div>
+        </small>
       </b-form-fieldset>
+
+      <b-form-checkbox v-model="localIsDefaultSearch">
+        Default search (suggest this shortcut when no results found)
+      </b-form-checkbox>
 
       <b-button-toolbar>
         <b-button class="save" variant="primary" href="" @click="save">Save</b-button>
@@ -44,7 +60,7 @@ const shortcutIconEventName = 'shortcut-icon-event'
 
 export default {
   name: 'edit-shortcut',
-  props: ['id', 'icon', 'name', 'keyword', 'cmd'],
+  props: ['id', 'icon', 'name', 'keyword', 'cmd', 'is_default_search'],
   created () {
     bus.$on(shortcutIconEventName, this.onIconSelected)
   },
@@ -57,14 +73,9 @@ export default {
       localName: this.name,
       localKeyword: this.keyword,
       localCmd: this.cmd,
+      localIsDefaultSearch: !!this.is_default_search,
       validate: false,
-      cmdPlaceholder: `Use %s as a placeholder for a user query in URL.
-
-Or write a script in a language of your choise.
-In this case query will be passed as a first arg. Example:
-
-#!/usr/bin/env node
-console.log("Query is:", process.argv[1]);`
+      cmdDescriptionExpanded: false
     }
   },
   computed: {
@@ -98,10 +109,11 @@ console.log("Query is:", process.argv[1]);`
         icon: this.localIcon,
         name: this.localName,
         keyword: this.localKeyword,
-        cmd: this.localCmd
+        cmd: this.localCmd,
+        is_default_search: this.localIsDefaultSearch
       }
       let method = shortcut.id ? 'update' : 'add'
-      jsonp(`/shortcut/${method}`, shortcut).then(this.hide, (error) => {
+      jsonp('prefs://shortcut/' + method, shortcut).then(this.hide, (error) => {
         console.error(error)
       })
     },
@@ -117,7 +129,7 @@ console.log("Query is:", process.argv[1]);`
 .name, .keyword { width: 400px }
 .save, .cancel {
   margin-right: 20px;
-  margin-top: 40px;
+  margin-top: 20px;
   cursor: pointer
 }
 .icon-container {

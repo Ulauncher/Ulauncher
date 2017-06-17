@@ -35,7 +35,7 @@ export default {
         {
           icon: 'fa-envelope',
           label: 'Email Us',
-          text: "Email us if you didn't find answer to your question on Github",
+          text: 'Use Github to report an issue, or request a feature. Email is for everything else',
           url: 'mailto:ulauncher.app@gmail.com'
         },
         {

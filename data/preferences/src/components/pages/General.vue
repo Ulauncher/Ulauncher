@@ -46,7 +46,7 @@
       <div class="col-5 col-form-label">
         <b-form-radio
           id="theme-name"
-          :options="['dark', 'light']"
+          :options="theme_options"
           @change.native="updateTheme"
           v-model="theme_name"></b-form-radio>
       </div>
@@ -84,7 +84,11 @@ export default {
       show_recent_apps: false,
       show_indicator_icon: false,
       theme_name: null,
-      previous_theme_name: null
+      previous_theme_name: null,
+      theme_options: [
+        {text: 'Dark', value: 'dark'},
+        {text: 'Light', value: 'light'}
+      ]
     }
   },
 
@@ -109,7 +113,7 @@ export default {
     onHotkeySet (e) {
       const previous = this.hotkey_show_app
       this.hotkey_show_app = e.displayValue
-      jsonp('prefs://set/hotkey-show-app', {value: e.displayValue}).then(null, (err) => {
+      jsonp('prefs://set/hotkey-show-app', {value: e.value}).then(null, (err) => {
         this.hotkey_show_app = previous
         console.error(err)
       })
