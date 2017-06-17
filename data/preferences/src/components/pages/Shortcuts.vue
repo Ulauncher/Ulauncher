@@ -27,7 +27,7 @@
       </template>
     </b-table>
 
-    <b-button variant="primary" href="" @click="add">
+    <b-button size="sm" variant="primary" href="" @click="add">
       <i class="fa fa-plus"></i> Add
     </b-button>
   </div>
