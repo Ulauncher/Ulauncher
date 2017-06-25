@@ -53,6 +53,7 @@ header {
   max-height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 15px;
 }
 .noselect {
   -webkit-user-select: none;

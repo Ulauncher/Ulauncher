@@ -96,7 +96,7 @@ export default {
 <style lang="scss" scoped>
 .about-container {
   padding: 33px;
-  padding-top: 110px;
+  padding-top: 80px;
   padding-bottom: 0;
   text-align: center;
 

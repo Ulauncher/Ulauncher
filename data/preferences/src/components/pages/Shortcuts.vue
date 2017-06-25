@@ -76,7 +76,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.shortcuts-page { padding: 15px }
 button { cursor: pointer }
 .empty-text { text-align: center }
 .icon { width: 20px; height: 20px }

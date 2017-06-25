@@ -117,7 +117,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         570x60 - size of the button bar
         """
         window_width = self.get_size()[0]
-        if event.button == 1 and 570 < event.x < window_width - 70 and 0 < event.y < 60:
+        if event.button == 1 and 500 < event.x < window_width and 0 < event.y < 60:
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
         return False

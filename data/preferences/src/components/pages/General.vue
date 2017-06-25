@@ -1,61 +1,67 @@
 <template>
-<div class="page">
+  <table>
+    <tr>
+      <td>
+        <label for="hotkey-show-app">Hotkey</label>
+      </td>
+      <td>
+        <b-form-input
+          id="hotkey-show-app"
+          @focus.native="showHotkeyDialog($event)"
+          v-model="hotkey_show_app"></b-form-input>
+      </td>
+    </tr>
 
-  <div class="form-container">
-
-    <div class="form-group row">
-      <label for="hotkey-show-app" class="col-4 col-form-label">Hotkey</label>
-      <div class="col-4">
-        <b-form-input id="hotkey-show-app" @focus.native="showHotkeyDialog($event)" v-model="hotkey_show_app"></b-form-input>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="autostart" class="col-4 col-form-label">Launch at Login</label>
-      <div class="col-3 col-form-label">
+    <tr>
+      <td>
+        <label for="autostart">Launch at Login</label>
+      </td>
+      <td>
         <b-form-checkbox
           :disabled="!autostart_allowed"
           id="autostart"
           @change="updateLaunchAtLogin"
           v-model="autostart_enabled"></b-form-checkbox>
-      </div>
-    </div>
+      </td>
+    </tr>
 
-    <div class="form-group row">
-      <label for="show-indicator-icon" class="col-4 col-form-label">Show Indicator Icon</label>
-      <div class="col-3 col-form-label">
+    <tr>
+      <td>
+        <label for="show-indicator-icon">Show Indicator Icon</label>
+      </td>
+      <td>
         <b-form-checkbox
           id="show-indicator-icon"
           @change="updateShowIndicatorIcon"
           v-model="show_indicator_icon"></b-form-checkbox>
-      </div>
-    </div>
+      </td>
+    </tr>
 
-    <div class="form-group row">
-      <label for="show-recent-apps" class="col-4 col-form-label">Show Frequent Apps</label>
-      <div class="col-3 col-form-label">
+    <tr>
+      <td>
+        <label for="show-recent-apps">Show Frequent Apps</label>
+      </td>
+      <td>
         <b-form-checkbox
           id="show-recent-apps"
           @change="updateShowRecentApps"
           v-model="show_recent_apps"></b-form-checkbox>
-      </div>
-    </div>
+      </td>
+    </tr>
 
-    <div class="form-group row">
-      <label for="theme-name" class="col-4 col-form-label">Theme</label>
-      <div class="col-5 col-form-label">
+    <tr>
+      <td>
+        <label for="theme-name">Theme</label>
+      </td>
+      <td>
         <b-form-radio
           id="theme-name"
           :options="theme_options"
           @change.native="updateTheme"
           v-model="theme_name"></b-form-radio>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script>
@@ -151,16 +157,17 @@ export default {
 </script>
 
 <style scoped>
-.page {
-  box-sizing: border-box;
-  margin: 0 35px;
-  margin: 40px;
+/* use tables to support WebKit on Ubuntu 14.04 */
+table {
+  width: 100%;
+  margin: 10px 0 0 10px;
 }
-.form-container {
-  width: 600px;
-}
-label {
+td:first-child {width: 220px;}
+td {padding-bottom: 30px;}
+tr:last-child td {padding-bottom: 0;}
+label {cursor: pointer;}
+#hotkey-show-app {
   cursor: pointer;
+  width: 200px;
 }
-#hotkey-show-app {cursor: pointer;}
 </style>

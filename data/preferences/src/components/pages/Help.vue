@@ -68,7 +68,7 @@ $steelBlue: #4675ab;
 .help-page {
   box-sizing: border-box;
   padding: 40px;
-  padding-top: 180px;
+  padding-top: 160px;
 }
 
 .item {

@@ -125,7 +125,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.edit-shortcut-page { padding: 15px }
+.row {display: block;}
 .name, .keyword { width: 400px }
 .save, .cancel {
   margin-right: 20px;
