@@ -160,7 +160,7 @@ export default {
 /* use tables to support WebKit on Ubuntu 14.04 */
 table {
   width: 100%;
-  margin: 10px 0 0 10px;
+  margin: 25px 15px 15px 25px;
 }
 td:first-child {width: 220px;}
 td {padding-bottom: 30px;}

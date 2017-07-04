@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="noselect">
-    <header>
+    <header id="header">
       <NavBar />
     </header>
     <div class="page-content">
@@ -39,7 +39,10 @@ body {
   background: #f2f2f2;
   border: 1px solid #e4e4e4;
 }
-header {
+button {
+  cursor: pointer;
+}
+#header {
   width: 100%;
   height: 60px;
   position: fixed;
@@ -53,7 +56,6 @@ header {
   max-height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 15px;
 }
 .noselect {
   -webkit-user-select: none;

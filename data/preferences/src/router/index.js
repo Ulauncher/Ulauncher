@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import General from '@/components/pages/General'
 import Shortcuts from '@/components/pages/Shortcuts'
 import EditShortcut from '@/components/pages/EditShortcut'
+import Extensions from '@/components/pages/Extensions'
 import Help from '@/components/pages/Help'
 import About from '@/components/pages/About'
 
@@ -29,6 +30,11 @@ export default new Router({
       name: 'edit-shortcut',
       props: (route) => route.query,
       component: EditShortcut
+    },
+    {
+      path: '/extensions',
+      name: 'extensions',
+      component: Extensions
     },
     {
       path: '/help',

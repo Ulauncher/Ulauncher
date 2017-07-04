@@ -1,5 +1,5 @@
 <template>
-  <div class="shortcuts-page">
+  <div class="page">
 
     <b-table striped small hover show-empty :items="items" :fields="fields">
       <template slot="name" scope="item">
@@ -76,6 +76,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page { padding: 15px; }
 button { cursor: pointer }
 .empty-text { text-align: center }
 .icon { width: 20px; height: 20px }

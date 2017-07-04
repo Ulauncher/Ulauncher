@@ -60,10 +60,36 @@ export default function (url, params) {
       setTimeout(function () {
         resolve({...params, id: 'new-id-832923742'})
       }, 0)
+    } else if (isMatch(url, '/extension/get-all')) {
+      console.log('/extension/get-all', params)
+      setTimeout(function () {
+        resolve(_getExtensions())
+      }, 0)
     } else {
       reject('Unknown resource')
     }
   })
+}
+
+function _getExtensions () {
+  return [
+    {
+      url: 'https://github.com/ulauncher/ulauncher-timer',
+      name: 'Timer',
+      icon: 'https://assets-cdn.github.com/favicon.ico',
+      description: 'Countdown timer with notifications',
+      developer_name: 'Aleksandr Gornostal',
+      version: '1.2.3',
+      preferences: [
+        {
+          id: 'keyword',
+          type: 'keyword',
+          name: 'My Timer',
+          default_value: 'ti'
+        }
+      ]
+    }
+  ]
 }
 
 function _getShortcuts () {

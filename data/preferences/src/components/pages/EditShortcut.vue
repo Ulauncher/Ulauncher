@@ -1,5 +1,5 @@
 <template>
-  <div class="edit-shortcut-page">
+  <div class="page">
     <b-media>
       <div :class="{'icon-container': true, 'no-icon': !localIcon, validate}" slot="aside" @click="selectIcon">
         <img v-if="localIcon" :src="localIcon">
@@ -125,6 +125,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page { padding: 15px }
 .row {display: block;}
 .name, .keyword { width: 400px }
 .save, .cancel {
