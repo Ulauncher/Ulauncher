@@ -68,6 +68,7 @@
 
 <script>
 import jsonp from '@/api'
+import bus from '@/event-bus'
 
 export default {
   name: 'about',
@@ -84,7 +85,7 @@ export default {
     fetchData () {
       jsonp('prefs://get/all').then((data) => {
         this.version = data.version
-      })
+      }, (err) => bus.$emit('error', err))
     },
     toggleCredits () {
       this.isCreditsShown = !this.isCreditsShown

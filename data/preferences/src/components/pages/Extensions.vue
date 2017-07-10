@@ -4,14 +4,14 @@
     <div class="left-nav col-4">
 
       <ul class="ext-list">
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li class="active"><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
-        <li><i style="background-image: url('https://assets-cdn.github.com/favicon.ico')"></i> <span>Timer Extension</span></li>
+        <li
+          v-for="(ext, idx) in extensions"
+          :class="{active: ext.url == activeExt.url}"
+          @click="selectExtension(ext)"
+          >
+          <i :style="{'background-image': `url('${ext.icon}')`}"></i>
+          <span>{{ ext.name }}</span>
+        </li>
         <li class="add-link" @click="addExtDialog"><i class="fa fa-plus"></i> <span>Add extension</span></li>
       </ul>
 
@@ -21,7 +21,8 @@
         close-title="Cancel"
         hide-header-close
         no-auto-focus
-        @shown="focusGithubUrlInput">
+        @shown="onAddExtFormShown"
+        @ok="onAdd">
           <template slot="modal-title">
             Enter extension URL
           </template>
@@ -30,99 +31,103 @@
             class="github-url-input"
             ref="githubUrl"
             type="text"
-            placeholder="https://github.com/..."></b-form-input>
+            placeholder="https://github.com/org-name/project-name"></b-form-input>
+
+          <div v-if="addingExtension" class="adding-ext-msg">
+            <i class="fa fa-spinner fa-spin"></i> Downloading extension...
+          </div>
+
+          <div v-if="addingExtensionError" class="adding-ext-msg warning selectable">
+            <i class="fa fa-warning"></i> {{ addingExtensionError }}
+          </div>
       </b-modal>
 
     </div>
 
     <div class="col-8 ext-view">
+        <extension-config
+          v-if="activeExt"
+          @removed="onRemoved"
+          :extension="activeExt"></extension-config>
 
-      <div class="row">
-        <div class="col-6">
-          <h1>Timer Extension</h1>
+        <div v-if="!activeExt" class="no-extensions-msg">
+          No Extensions Installed
         </div>
-        <div class="col-6 pull-right">
-          <small>v1.2.4 - <a href="#">update to v2.0.1</a></small>
-        </div>
-      </div>
-
-
-      <div class="row">
-        <div class="col-6">
-          <small>by Aleksandr Gornostal</small>
-        </div>
-        <div class="col-6 pull-right">
-          <small><i class="fa fa-github"></i> <a href="https://github.com/ulauncher/ulauncher-timer">ulauncher/ulauncher-timer</a></small>
-        </div>
-      </div>
-
-
-      <div class="ext-form">
-        <b-form-fieldset
-          label="Name"
-          >
-          <b-form-input class="name" ></b-form-input>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="Keyword"
-          >
-          <b-form-input class="keyword" ></b-form-input>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="Query or Script"
-          >
-          <b-form-input class="cmd" textarea :rows="3"></b-form-input>
-        </b-form-fieldset>
-
-        <b-form-checkbox>
-          Default search (suggest this shortcut when no results found)
-        </b-form-checkbox>
-
-        <hr>
-
-        <b-button-toolbar>
-          <b-button class="save" variant="primary" href="" @click="save">Save</b-button>
-          <b-button class="remove" variant="secondary" href="" @click="remove">Remove</b-button>
-        </b-button-toolbar>
-
-      </div>
-
     </div>
   </div>
 </template>
 
 <script>
 import jsonp from '@/api'
+import bus from '@/event-bus'
+import ExtensionConfig from '@/components/pages/ExtensionConfig'
 
 export default {
   name: 'extensions',
   created () {
     this.fetchData()
   },
+  components: {
+    'extension-config': ExtensionConfig
+  },
   data () {
     return {
-      items: []
+      activeExt: null,
+      addingExtension: false,
+      addingExtensionError: '',
+      extensions: []
     }
   },
   methods: {
     fetchData () {
-      jsonp('prefs://shortcut/get-all').then((data) => {
-        this.items = data
-      })
+      jsonp('prefs://extension/get-all').then((data) => {
+        this.extensions = data
+        this.activeExt = data[0]
+      }, (err) => bus.$emit('error', err))
     },
-    focusGithubUrlInput () {
+    onAddExtFormShown () {
       this.$refs.githubUrl.focus()
+      this.addingExtensionError = ''
     },
     addExtDialog () {
       this.$refs.addExtForm.show()
     },
-    save () {
-
+    selectExtension (ext) {
+      this.activeExt = ext
     },
-    remove () {
+    onRemoved (url) {
+      for (let i = 0; i < this.extensions.length; i++) {
+        if (this.extensions[i].url === url) {
+          this.$delete(this.extensions, i)
+          this.activeExt = this.extensions.length ? this.extensions[0] : null
+          break
+        }
+      }
+    },
+    setActiveByUrl (url) {
+      for (let i = 0; i < this.extensions.length; i++) {
+        if (this.extensions[i].url === url) {
+          this.activeExt = this.extensions[i]
+          break
+        }
+      }
+    },
+    onAdd (e) {
+      let input = this.$refs.githubUrl.$el
+      this.addingExtension = true
+      this.addingExtensionError = ''
+      jsonp('prefs://extension/add', {url: input.value}).then((data) => {
+        this.extensions = data
+        this.addingExtension = false
+        this.setActiveByUrl(input.value)
+        input.value = ''
+        this.$refs.addExtForm.hide()
+      }, (err) => {
+        this.addingExtension = false
+        this.addingExtensionError = err
+      })
 
+      return e.cancel()
     }
   }
 }
@@ -132,16 +137,20 @@ export default {
 $darkBlue: #015aa7;
 $veryLightGrey: #c8c8c8;
 
-.pull-right { text-align: right }
-.ext-form {
-  padding-top: 30px;
-
-  .row { display: block; }
-}
 .page {
   padding: 15px;
   padding-left: 25px;
 }
+.no-extensions-msg {
+  text-align: center;
+  color: #555;
+  line-height: 40px;
+}
+.adding-ext-msg {
+  color: #555;
+  padding-top: 10px;
+}
+.warning {color: #b30000}
 .ext-list {
   $listIconSize: 15px;
 
@@ -183,17 +192,6 @@ $veryLightGrey: #c8c8c8;
     &:hover span {
       text-decoration: underline;
     }
-  }
-}
-.ext-view {
-  h1 {
-    font-size: 1.3em;
-  }
-  small {
-    font-style: italic
-  }
-  button {
-    margin-right: 10px;
   }
 }
 </style>

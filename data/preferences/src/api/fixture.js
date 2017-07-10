@@ -52,8 +52,8 @@ export default function (url, params) {
     } else if (isMatch(url, '/shortcut/update')) {
       console.log('/shortcut/update', params)
       setTimeout(resolve, 0)
-    } else if (isMatch(url, '/shortcut/delete')) {
-      console.log('/shortcut/delete', params)
+    } else if (isMatch(url, '/shortcut/remove')) {
+      console.log('/shortcut/remove', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/shortcut/add')) {
       console.log('/shortcut/add', params)
@@ -65,14 +65,63 @@ export default function (url, params) {
       setTimeout(function () {
         resolve(_getExtensions())
       }, 0)
+    } else if (isMatch(url, '/extension/update')) {
+      console.log('/extension/update', params)
+      setTimeout(resolve, 0)
+    } else if (isMatch(url, '/extension/add')) {
+      console.log('/extension/add', params)
+      setTimeout(() => {
+        if (params.url.includes('reject')) {
+          reject('Could not load extension')
+          return
+        }
+        resolve([
+          ..._getExtensions(),
+          {
+            url: params.url,
+            name: 'NewExt',
+            icon: 'https://assets-cdn.github.com/favicon.ico',
+            developer_name: 'Dan Falcon',
+            version: '2.0.0',
+            preferences: [
+              {
+                id: 'keyword',
+                type: 'keyword',
+                name: 'Activate',
+                default_value: 'n',
+                value: 'n'
+              },
+              {
+                id: 'default_msg',
+                type: 'text',
+                name: 'Default Message',
+                default_value: '',
+                user_value: 'Hello Steve!',
+                value: 'Hello Steve!'
+              }
+            ]
+          }
+        ])
+      }, 1e3)
+    } else if (isMatch(url, '/extension/remove')) {
+      console.log('/extension/remove', params)
+      setTimeout(resolve, 0)
     } else {
-      reject('Unknown resource')
+      reject(`Unknown URL "${url}"`)
     }
   })
 }
 
 function _getExtensions () {
   return [
+    {
+      url: 'https://github.com/ulauncher/ulauncher-test1',
+      name: 'Test ext',
+      icon: 'https://assets-cdn.github.com/favicon.ico',
+      developer_name: 'John Doe',
+      version: '1.2.3',
+      preferences: []
+    },
     {
       url: 'https://github.com/ulauncher/ulauncher-timer',
       name: 'Timer',
@@ -85,7 +134,25 @@ function _getExtensions () {
           id: 'keyword',
           type: 'keyword',
           name: 'My Timer',
-          default_value: 'ti'
+          default_value: 'ti',
+          user_value: 't',
+          value: 't'
+        },
+        {
+          id: 'max',
+          type: 'input',
+          name: 'Max Number of Posts',
+          default_value: '5',
+          user_value: null,
+          value: '5'
+        },
+        {
+          id: 'default_msg',
+          type: 'text',
+          name: 'Default Message',
+          default_value: '',
+          user_value: 'Hello Steve!',
+          value: 'Hello Steve!'
         }
       ]
     }

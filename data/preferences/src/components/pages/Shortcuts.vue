@@ -18,7 +18,7 @@
           </div>
           <div class="actions">
             <b-btn size="sm" @click="edit(item.item)"><i class="fa fa-pencil"></i></b-btn>
-            <b-btn size="sm" @click="del(item.item)"><i class="fa fa-trash"></i></b-btn>
+            <b-btn size="sm" @click="remove(item.item)"><i class="fa fa-trash"></i></b-btn>
           </div>
         </div>
       </template>
@@ -35,6 +35,7 @@
 
 <script>
 import jsonp from '@/api'
+import bus from '@/event-bus'
 
 export default {
   name: 'shortcuts',
@@ -61,12 +62,10 @@ export default {
     edit (item) {
       this.$router.push({path: 'edit-shortcut', query: item})
     },
-    del (item) {
-      jsonp('prefs://shortcut/delete', {id: item.id}).then(() => {
+    remove (item) {
+      jsonp('prefs://shortcut/remove', {id: item.id}).then(() => {
         this.items = this.items.filter((i) => item.id === i.id ? null : i)
-      }, (error) => {
-        console.error(error)
-      })
+      }, (err) => bus.$emit('error', err))
     },
     add () {
       this.$router.push({name: 'edit-shortcut'})

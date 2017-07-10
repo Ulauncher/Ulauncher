@@ -91,9 +91,8 @@ export default {
   },
   methods: {
     selectIcon () {
-      jsonp('prefs://show/file-browser', {type: 'image', name: shortcutIconEventName}).then(null, (error) => {
-        console.error(error)
-      })
+      jsonp('prefs://show/file-browser', {type: 'image', name: shortcutIconEventName})
+        .then(null, (err) => bus.$emit('error', err))
     },
     onIconSelected (data) {
       this.localIcon = data.value
@@ -113,9 +112,8 @@ export default {
         is_default_search: this.localIsDefaultSearch
       }
       let method = shortcut.id ? 'update' : 'add'
-      jsonp('prefs://shortcut/' + method, shortcut).then(this.hide, (error) => {
-        console.error(error)
-      })
+      jsonp('prefs://shortcut/' + method, shortcut)
+        .then(this.hide, (err) => bus.$emit('error', err))
     },
     hide () {
       this.$router.push({path: '/shortcuts'})

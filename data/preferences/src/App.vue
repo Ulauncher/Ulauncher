@@ -6,17 +6,50 @@
     <div class="page-content">
       <router-view></router-view>
     </div>
+
+    <b-modal
+        ref="errorModal"
+        ok-only
+        ok-title="Dismiss"
+        hide-header-close
+        @ok="onErrorDismiss">
+          <template slot="modal-title">
+            <i class="fa fa-warning"></i> Error
+          </template>
+
+          <div class="selectable">{{ error }}</div>
+      </b-modal>
   </div>
 </template>
 
 <script>
-
+import bus from '@/event-bus'
 import NavBar from '@/components/NavBar'
 
 export default {
   name: 'app',
   components: {
     NavBar
+  },
+  data () {
+    return {
+      error: ''
+    }
+  },
+  created () {
+    bus.$on('error', this.onError)
+  },
+  beforeDestroy () {
+    bus.$off('error', this.onError)
+  },
+  methods: {
+    onError (err) {
+      this.error = err
+      this.$refs.errorModal.show()
+    },
+    onErrorDismiss () {
+      this.error = ''
+    }
   }
 }
 </script>

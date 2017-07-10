@@ -107,8 +107,7 @@ export default {
         this.show_recent_apps = data.show_recent_apps
         this.show_indicator_icon = data.show_indicator_icon
         this.theme_name = data.theme_name
-        console.log(data)
-      })
+      }, (err) => bus.$emit('error', err))
     },
 
     showHotkeyDialog (e) {
@@ -121,34 +120,34 @@ export default {
       this.hotkey_show_app = e.displayValue
       jsonp('prefs://set/hotkey-show-app', {value: e.value}).then(null, (err) => {
         this.hotkey_show_app = previous
-        console.error(err)
+        bus.$emit('error', err)
       })
     },
 
     updateLaunchAtLogin () {
       jsonp('prefs://set/autostart-enabled', {value: this.autostart_enabled}).then(null, (err) => {
         this.autostart_enabled = !this.autostart_enabled
-        console.error(err)
+        bus.$emit('error', err)
       })
     },
 
     updateShowIndicatorIcon () {
       jsonp('prefs://set/show-indicator-icon', {value: this.show_indicator_icon}).then(null, (err) => {
         this.show_indicator_icon = !this.show_indicator_icon
-        console.error(err)
+        bus.$emit('error', err)
       })
     },
 
     updateShowRecentApps () {
       jsonp('prefs://set/show-recent-apps', {value: this.show_recent_apps}).then(null, (err) => {
         this.show_recent_apps = !this.show_recent_apps
-        console.error(err)
+        bus.$emit('error', err)
       })
     },
 
     updateTheme (e) {
       jsonp('prefs://set/theme-name', {value: this.theme_name}).then(null, (err) => {
-        console.error(err)
+        bus.$emit('error', err)
       })
     }
 
