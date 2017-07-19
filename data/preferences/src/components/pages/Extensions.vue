@@ -6,13 +6,15 @@
       <ul class="ext-list">
         <li
           v-for="(ext, idx) in extensions"
-          :class="{active: ext.url == activeExt.url}"
+          :class="{active: ext.id == activeExt.id, last: idx == extensions.length - 1}"
           @click="selectExtension(ext)"
           >
-          <i :style="{'background-image': `url('${ext.icon}')`}"></i>
+          <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
           <span>{{ ext.name }}</span>
         </li>
-        <li class="add-link" @click="addExtDialog"><i class="fa fa-plus"></i> <span>Add extension</span></li>
+        <li class="link" @click="addExtDialog"><i class="fa fa-plus"></i> <span>Add extension</span></li>
+        <li class="link" @click="openUrlInBrowser('http://ext.ulauncher.io')"><i class="fa fa-external-link"></i> <span>Discover extensions</span></li>
+        <li class="link" @click="openUrlInBrowser('http://docs.ulauncher.io')"><i class="fa fa-external-link"></i> <span>Create your own</span></li>
       </ul>
 
       <b-modal
@@ -49,10 +51,6 @@
           v-if="activeExt"
           @removed="onRemoved"
           :extension="activeExt"></extension-config>
-
-        <div v-if="!activeExt" class="no-extensions-msg">
-          No Extensions Installed
-        </div>
     </div>
   </div>
 </template>
@@ -92,12 +90,15 @@ export default {
     addExtDialog () {
       this.$refs.addExtForm.show()
     },
+    openUrlInBrowser (url) {
+      jsonp('prefs://open/web-url', {url: url})
+    },
     selectExtension (ext) {
       this.activeExt = ext
     },
-    onRemoved (url) {
+    onRemoved (id) {
       for (let i = 0; i < this.extensions.length; i++) {
-        if (this.extensions[i].url === url) {
+        if (this.extensions[i].id === id) {
           this.$delete(this.extensions, i)
           this.activeExt = this.extensions.length ? this.extensions[0] : null
           break
@@ -141,27 +142,19 @@ $veryLightGrey: #c8c8c8;
   padding: 15px;
   padding-left: 25px;
 }
-.no-extensions-msg {
-  text-align: center;
-  color: #555;
-  line-height: 40px;
-}
 .adding-ext-msg {
+  overflow: auto;
   color: #555;
   padding-top: 10px;
 }
 .warning {color: #b30000}
 .ext-list {
-  $listIconSize: 15px;
+  $listIconSize: 17px;
 
   list-style: none;
   padding: 0;
   margin: 0;
   margin-bottom: 10px;
-
-  .add-link {
-    font-style: italic;
-  }
 
   li {
     cursor: pointer;
@@ -176,11 +169,16 @@ $veryLightGrey: #c8c8c8;
 
     i {
       margin-right: 5px;
+      width: $listIconSize;
+      height: $listIconSize;
+    }
+
+    .ext-icon {
       display: inline-block;
       background-repeat: no-repeat;
       background-size: $listIconSize $listIconSize;
-      width: $listIconSize;
-      height: $listIconSize;
+      position: relative;
+      top: 3px;
     }
 
     &.active,
@@ -192,6 +190,15 @@ $veryLightGrey: #c8c8c8;
     &:hover span {
       text-decoration: underline;
     }
+
+    &.last {
+      margin-bottom: 15px;
+    }
   }
+
+  .link {
+    font-style: italic;
+  }
+
 }
 </style>

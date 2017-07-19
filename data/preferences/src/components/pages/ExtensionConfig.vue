@@ -5,8 +5,12 @@
         <img :src="extension.icon">
         <h1>{{ extension.name }}</h1>
       </div>
-      <div class="col-6 pull-right">
-        <small>{{ extension.version }}</small>
+      <div class="col-6 pull-right selectable">
+        <small v-if="extension.last_commit">
+          <i class="fa fa-code-fork"></i> {{ extension.last_commit.substring(0, 7) }}
+          &nbsp;&nbsp;&nbsp;
+          <i class="fa fa-calendar"></i> {{ lastCommitDate }}
+        </small>
       </div>
     </div>
 
@@ -15,7 +19,7 @@
         <small>by {{ extension.developer_name }}</small>
       </div>
       <div class="col-6 pull-right">
-        <small>
+        <small v-if="extension.url">
           <i class="fa fa-github"></i>
           <a @click.prevent="onLinkClick" :href="extension.url"> {{ githubProjectPath(extension.url) }}</a>
         </small>
@@ -50,8 +54,51 @@
       <hr>
 
       <b-button-toolbar>
-        <b-button class="save" v-if="extension.preferences.length" variant="primary" href="" @click="save">Save</b-button>
-        <b-button class="remove" variant="secondary" href="" @click="remove">Remove</b-button>
+        <div v-if="buttonRowState == 'remove'">
+          Are you sure?
+          <b-button variant="danger" href="" @click="remove">Yes</b-button>
+          <b-button variant="secondary" href="" @click="showActionButtons">No</b-button>
+        </div>
+
+        <div v-else-if="buttonRowState == 'update'">
+          <div v-if="updateState == 'checking-updates'">
+            <i class="fa fa-spinner fa-spin"></i> Checking for updates...
+          </div>
+          <div v-if="updateState == 'update-available'">
+            <p>
+              New version is available:
+              &nbsp;&nbsp;&nbsp;
+              <i class="fa fa-code-fork"></i> {{ newVersionInfo.last_commit.substring(0, 7) }}
+              &nbsp;&nbsp;&nbsp;
+              <i class="fa fa-calendar"></i> {{ isoDateToHumanDate(newVersionInfo.last_commit_time) }}
+            </p>
+
+            <b-button variant="primary" href="" @click="update">Update</b-button>
+            <b-button variant="secondary" href="" @click="showActionButtons">Cancel</b-button>
+          </div>
+          <div v-if="updateState == 'no-updates'">
+            <p>
+              No new updates are available
+            </p>
+            <b-button variant="secondary" href="" @click="showActionButtons">OK</b-button>
+          </div>
+          <div v-if="updateState == 'updating'">
+            <i class="fa fa-spinner fa-spin"></i> Updating...
+          </div>
+          <div v-if="updateState == 'updated'">
+            <p>
+              <i class="fa fa-check-circle"></i> Updated
+            </p>
+            <b-button variant="secondary" href="" @click="showActionButtons">OK</b-button>
+          </div>
+        </div>
+
+        <div v-else>
+          <b-button class="save" v-if="extension.preferences.length" variant="primary" href="" @click="save">Save</b-button>
+          <b-button class="remove" variant="secondary" href="" @click="askRemoveConfirmation">Remove</b-button>
+          <b-button variant="secondary" href="" @click="checkUpdates">Check Updates</b-button>
+        </div>
+
         <div class="saved-msg" v-if="showSavedMsg">
           <i class="fa fa-check-circle"></i> Saved
         </div>
@@ -70,34 +117,80 @@ export default {
   props: ['extension'],
   data () {
     return {
-      showSavedMsg: false
+      showSavedMsg: false,
+      buttonRowState: 'actions', // actions | remove | update
+      updateState: 'checking-updates', // checking-updates | update-available | no-updates | updating | updated
+      newVersionInfo: null
+    }
+  },
+  computed: {
+    lastCommitDate () {
+      let isoDate = this.$props.extension.last_commit_time
+      return isoDate ? this.isoDateToHumanDate(isoDate) : ''
     }
   },
   methods: {
+    isoDateToHumanDate (isoDate) {
+      let date = new Date(isoDate)
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+    },
     githubProjectPath (githubUrl) {
       return githubUrl.split('.com/')[1]
     },
     save () {
-      let prefs = {}
+      let updates = {
+        id: this.extension.id
+      }
       for (let i = 0; i < this.extension.preferences.length; i++) {
         let pref = this.extension.preferences[i]
-        prefs[pref.id] = this.$refs[pref.id][0].$el.value
+        updates[`pref.${pref.id}`] = this.$refs[pref.id][0].$el.value
       }
-      let updates = {
-        url: this.extension.url,
-        preferences: prefs
-      }
-      jsonp('prefs://extension/update', updates).then(() => {
+      jsonp('prefs://extension/update-prefs', updates).then(() => {
         this.showSavedMsg = true
         setTimeout(() => {
           this.showSavedMsg = false
         }, 1e3)
       }, (err) => bus.$emit('error', err))
     },
+    askRemoveConfirmation () {
+      this.buttonRowState = 'remove'
+    },
+    showActionButtons () {
+      this.buttonRowState = 'actions'
+    },
     remove () {
-      jsonp('prefs://extension/remove', {url: this.extension.url}).then(() => {
-        this.$emit('removed', this.extension.url)
-      }, (err) => bus.$emit('error', err))
+      jsonp('prefs://extension/remove', {id: this.extension.id}).then(() => {
+        this.$emit('removed', this.extension.id)
+        this.showActionButtons()
+      }, (err) => {
+        bus.$emit('error', err)
+        this.showActionButtons()
+      })
+    },
+    checkUpdates () {
+      this.newVersionInfo = null
+      this.buttonRowState = 'update'
+      this.updateState = 'checking-updates'
+      jsonp('prefs://extension/check-updates', {id: this.extension.id}).then((data) => {
+        if (data) {
+          this.newVersionInfo = data
+          this.updateState = 'update-available'
+        } else {
+          this.updateState = 'no-updates'
+        }
+      }, (err) => {
+        bus.$emit('error', err)
+        this.showActionButtons()
+      })
+    },
+    update () {
+      this.updateState = 'updating'
+      jsonp('prefs://extension/update-ext', {id: this.extension.id}).then(() => {
+        this.updateState = 'updated'
+      }, (err) => {
+        bus.$emit('error', err)
+        this.showActionButtons()
+      })
     },
     onLinkClick (el) {
       let url = el.target.href

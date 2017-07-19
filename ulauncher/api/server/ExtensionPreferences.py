@@ -2,6 +2,8 @@ import os
 import logging
 from ulauncher.config import EXT_PREFERENCES_DIR
 from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.util.decorator.lru_cache import lru_cache
+from .ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger(__name__)
 
@@ -11,8 +13,13 @@ class ExtensionPreferences(object):
     Manages extension preferences. Stores them in pickled file in cache directory
     """
 
-    def __init__(self, extension_id, manifest, ext_preferences_dir=EXT_PREFERENCES_DIR):
-        self.db_path = os.path.join(ext_preferences_dir, '%s.db' % extension_id)
+    @classmethod
+    @lru_cache(maxsize=1000)
+    def create_instance(cls, ext_id):
+        return cls(ext_id, ExtensionManifest.open(ext_id))
+
+    def __init__(self, ext_id, manifest, ext_preferences_dir=EXT_PREFERENCES_DIR):
+        self.db_path = os.path.join(ext_preferences_dir, '%s.db' % ext_id)
         self.db = KeyValueDb(self.db_path)
         self.manifest = manifest
         self._db_is_open = False

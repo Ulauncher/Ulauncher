@@ -30,6 +30,12 @@ class ExtensionManifest(object):
     def get_icon(self):
         return self.manifest['icon']
 
+    def get_icon_path(self):
+        return os.path.join(self.extensions_dir, self.extension_id, self.get_icon())
+
+    def load_icon(self, size):
+        return load_image(self.get_icon_path(), size)
+
     def get_manifest_version(self):
         return self.manifest['manifest_version']
 
@@ -68,15 +74,12 @@ class ExtensionManifest(object):
                 assert p.get('type') in ["keyword", "input", "text"], \
                     'Preferences error. type be "keyword", "input", or "text"'
                 assert p.get('name'), 'Preferences error. name cannot be empty'
-                assert p.get('default_value'), 'Preferences error. default_value cannot be empty'
+                if p['type'] == 'keyword':
+                    assert p.get('default_value'), 'Preferences error. default_value cannot be empty for keyword'
         except AssertionError as e:
             raise ManifestValidationError(e.message)
         except KeyError as e:
             raise ManifestValidationError('%s is not provided' % e.message)
-
-    def load_icon(self, size):
-        abs_path = os.path.join(self.extensions_dir, self.extension_id, self.get_icon())
-        return load_image(abs_path, size)
 
     def check_compatibility(self):
         app_version = get_version()

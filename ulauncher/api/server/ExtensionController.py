@@ -96,7 +96,7 @@ class ExtensionController(WebSocket):
             self.close()
             return
 
-        self.preferences = ExtensionPreferences(self.extension_id, self.manifest)
+        self.preferences = ExtensionPreferences.create_instance(self.extension_id)
         self.controllers[self.extension_id] = self
         self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
 

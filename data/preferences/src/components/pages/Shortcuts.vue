@@ -27,9 +27,9 @@
       </template>
     </b-table>
 
-    <b-button variant="primary" href="" @click="add">
-      <i class="fa fa-plus"></i> Add
-    </b-button>
+    <a class="add-link" href="" @click.prevent="add">
+      <i class="fa fa-plus"></i> Add shortcut
+    </a>
   </div>
 </template>
 
@@ -79,6 +79,22 @@ export default {
 button { cursor: pointer }
 .empty-text { text-align: center }
 .icon { width: 20px; height: 20px }
+.add-link {
+  color: #555;
+  font-style: italic;
+  display: inline-block;
+  padding-left: 8px;
+
+  i {
+    margin-right: 5px;
+    display: inline-block;
+  }
+
+  &:hover {
+    color: #015aa7;
+    text-decoration: underline;
+  }
+}
 .limited-width {
   white-space: nowrap;
   max-width: 150px;

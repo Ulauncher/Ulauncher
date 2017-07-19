@@ -23,7 +23,7 @@ class TestExtensionController:
     @pytest.fixture(autouse=True)
     def extPrefs(self, mocker):
         return mocker.patch(
-            'ulauncher.api.server.ExtensionController.ExtensionPreferences').return_value
+            'ulauncher.api.server.ExtensionController.ExtensionPreferences.create_instance').return_value
 
     @pytest.fixture(autouse=True)
     def manifest(self, mocker):

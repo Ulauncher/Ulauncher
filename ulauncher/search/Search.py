@@ -34,7 +34,6 @@ class Search(object):
         Iterate over all search modes and run first enabled.
         AppSearchMode is always enabled
         """
-        logger.info('query changed to "%s"' % query)
         for mode in self.search_modes:
             mode.on_query_change(query)
 

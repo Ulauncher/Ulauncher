@@ -25,55 +25,67 @@ export default function jsonp (url, params, options) {
   params = params || {}
   options = options || {}
 
-  var prefix = options.prefix || '__jp'
-  var param = options.param || 'callback'
-  var timeout = options.timeout ? options.timeout : 15000
-  var target = document.getElementsByTagName('script')[0] || document.head
   var script
   var timer
-  var cleanup
   var cancel
-  var promise
-  var noop = function () {}
 
   // Generate a unique id for the request.
+  var prefix = options.prefix || '__jp'
   var id = prefix + (count++)
 
-  cleanup = function () {
+  function cleanup () {
     // Remove the script tag.
     if (script && script.parentNode) {
       script.parentNode.removeChild(script)
     }
 
-    window[id] = noop
+    window[id] = () => {}
 
     if (timer) {
       clearTimeout(timer)
     }
   }
 
-  promise = new Promise(function (resolve, reject) {
-    if (timeout) {
-      timer = setTimeout(function () {
-        cleanup()
-        reject(new Error('Timeout'))
-      }, timeout)
-    }
+  function b64EncodeUnicode (str) {
+    // first we use encodeURIComponent to get percent-encoded UTF-8,
+    // then we convert the percent encodings into raw bytes which
+    // can be fed into btoa.
+    return btoa(encodeURIComponent(str).replace(
+      /%([0-9A-F]{2})/g,
+      (match, p1) => {
+        return String.fromCharCode('0x' + p1)
+      }
+    ))
+  }
+
+  let promise = new Promise(function (resolve, reject) {
+    let timeout = options.timeout || 15000
+    timer = setTimeout(function () {
+      cleanup()
+      reject('Request timeout')
+    }, timeout)
 
     window[id] = function (data, error) {
       cleanup()
       if (error) {
-        reject(new Error(error))
+        reject(error)
       } else {
         resolve(data)
       }
     }
 
     // Add querystring component
+    let param = options.param || 'callback'
     params[param] = id
-    var urlParams = []
-    for (var i in params) {
-      urlParams.push(i + '=' + encodeURIComponent(params[i]))
+    let urlParams = []
+    for (let i in params) {
+      if (params[i] instanceof Object) {
+        let key = `${i}_b64json`
+        let val = b64EncodeUnicode(JSON.stringify(params[i]))
+        urlParams.push(`${key}=${val}`)
+      } else {
+        urlParams.push(i + '=' + encodeURIComponent(params[i]))
+      }
     }
     url += (~url.indexOf('?') ? '&' : '?') + urlParams.join('&')
     url = url.replace('?&', '?')
@@ -81,12 +93,13 @@ export default function jsonp (url, params, options) {
     // Create script.
     script = document.createElement('script')
     script.src = url
+    let target = document.getElementsByTagName('script')[0] || document.head
     target.parentNode.insertBefore(script, target)
 
     cancel = function () {
       if (window[id]) {
         cleanup()
-        reject(new Error('Canceled'))
+        reject('Request canceled')
       }
     }
   })

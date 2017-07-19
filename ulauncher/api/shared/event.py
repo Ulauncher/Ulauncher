@@ -72,17 +72,17 @@ class PreferencesUpdateEvent(BaseEvent):
     """
     Is triggered when user updates preference through Preferences window
 
-    :param str key:
+    :param str id:
     :param str old_value:
     :param str new_value:
     """
 
-    key = None
+    id = None
     old_value = None
     new_value = None
 
-    def __init__(self, key, old_value, new_value):
-        self.key = key
+    def __init__(self, id, old_value, new_value):
+        self.id = id
         self.old_value = old_value
         self.new_value = new_value
 

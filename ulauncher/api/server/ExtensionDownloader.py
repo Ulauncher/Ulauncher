@@ -1,20 +1,22 @@
 import os
 import re
 import json
+import logging
 from urllib2 import urlopen
 from zipfile import ZipFile
 from urllib import urlretrieve
-from tempfile import mktemp
-from shutil import rmtree
-from time import time
+from tempfile import mktemp, mkdtemp
+from shutil import rmtree, move
+from datetime import datetime
 
 from ulauncher.config import CONFIG_DIR, EXTENSIONS_DIR
 from ulauncher.util.decorator.singleton import singleton
-from .ExtensionsDb import ExtensionsDb
+from .ExtensionDb import ExtensionDb
+from .GithubExtension import GithubExtension, InvalidGithubUrlError
 from .ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
 
 
-DEFAULT_GITHUB_BRANCH = 'master'
+logger = logging.getLogger(__name__)
 
 
 class ExtensionDownloader(object):
@@ -22,7 +24,7 @@ class ExtensionDownloader(object):
     @classmethod
     @singleton
     def get_instance(cls):
-        ext_db = ExtensionsDb.get_instance()
+        ext_db = ExtensionDb.get_instance()
         ext_runner = ExtensionRunner.get_instance()
         return cls(ext_db, ext_runner)
 
@@ -44,25 +46,29 @@ class ExtensionDownloader(object):
         :raises AlreadyDownloadedError:
         :raises InvalidGithubUrlError:
         """
-        ext_id = 'com.github.%s' % get_project_path(url).replace('/', '.').lower()
-        if self.ext_db.find(ext_id):
+        gh_ext = GithubExtension(url)
+        gh_ext.validate_url()
+
+        ext_id = gh_ext.get_ext_id()
+        ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
+        if os.path.exists(ext_path):
             raise AlreadyDownloadedError('Extension with given URL is already added')
 
         try:
-            ext_meta = get_ext_meta(url)
+            gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            raise InvalidGithubUrlError('Project not available on Github')
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e.message))
+            raise InvalidGithubUrlError('Project is not available on Github')
 
-        ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
-
-        filename = download_zip(url)
+        filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
         unzip(filename, ext_path)
+
         self.ext_db.put(ext_id, {
             'id': ext_id,
             'url': url,
-            'updated_at': time(),
-            'last_commit': ext_meta['last_commit'],
-            'last_commit_time_iso': ext_meta['last_commit_time_iso']
+            'updated_at': datetime.now().isoformat(),
+            'last_commit': gh_commit['last_commit'],
+            'last_commit_time': gh_commit['last_commit_time']
         })
         self.ext_db.commit()
 
@@ -73,6 +79,8 @@ class ExtensionDownloader(object):
             self.ext_runner.stop(ext_id)
         except ExtensionIsNotRunningError:
             pass
+
+        rmtree(os.path.join(EXTENSIONS_DIR, ext_id))
         self.ext_db.remove(ext_id)
         self.ext_db.commit()
 
@@ -82,18 +90,16 @@ class ExtensionDownloader(object):
         :rtype: boolean
         :returns: False if already up-to-date, True if was updated
         """
-        ext_info = self.ext_db.find(ext_id)
-        if not ext_info:
+        ext = self.ext_db.find(ext_id)
+        if not ext:
             raise ExtensionNotFound("Extension not found")
 
-        url = ext_info['url']
+        url = ext['url']
+        gh_ext = GithubExtension(url)
 
         try:
-            ext_meta = get_ext_meta(url)
-        except Exception as e:
-            raise InvalidGithubUrlError('Project not available on Github')
-
-        if ext_info['last_commit'] == ext_meta['last_commit']:
+            gh_commit = self.get_new_version(ext_id)
+        except ExtensionIsUpToDateError as e:
             return False
 
         need_restart = self.ext_runner.is_running(ext_id)
@@ -102,12 +108,12 @@ class ExtensionDownloader(object):
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        filename = download_zip(url)
+        filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
         unzip(filename, ext_path)
-        ext_info['updated_at'] = time()
-        ext_info['last_commit'] = ext_meta['last_commit']
-        ext_info['last_commit_time_iso'] = ext_meta['last_commit_time_iso']
-        self.ext_db.put(ext_id, ext_info)
+        ext['updated_at'] = datetime.now().isoformat()
+        ext['last_commit'] = gh_commit['last_commit']
+        ext['last_commit_time'] = gh_commit['last_commit_time']
+        self.ext_db.put(ext_id, ext)
         self.ext_db.commit()
 
         if need_restart:
@@ -115,54 +121,54 @@ class ExtensionDownloader(object):
 
         return True
 
+    def get_new_version(self, ext_id):
+        """
+        Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
+        """
+        ext = self.ext_db.find(ext_id)
+        if not ext:
+            raise ExtensionNotFound("Extension %s not found" % ext_id)
 
-def get_ext_meta(url):
-    """
-    :raises urllib2.HTTPError:
-    """
-    project_path = get_project_path(url)
-    branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)
-    branch_head = json.load(urlopen(branch_head_url))
-    branch_head_commit = json.load(urlopen(branch_head['object']['url']))
+        url = ext['url']
+        gh_ext = GithubExtension(url)
 
-    return {
-        'last_commit': branch_head_commit['sha'],
-        'last_commit_time_iso': branch_head_commit['committer']['date']
-    }
+        try:
+            gh_commit = gh_ext.get_last_commit()
+        except Exception as e:
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e.message))
+            raise InvalidGithubUrlError('Project is not available on Github')
+
+        if ext['last_commit'] == gh_commit['last_commit']:
+            raise ExtensionIsUpToDateError('Extension %s is up-to-date' % ext_id)
+
+        return gh_commit
 
 
 def unzip(filename, ext_path):
-    with ZipFile(filename) as zipfile:
-        zipfile.extractall(ext_path)
-
+    """
+    1. Remove ext_path
+    2. Extract zip into temp dir
+    3. Move contents of <temp_dir>/<project_name>-master/* to ext_path
+    """
     if os.path.exists(ext_path):
         rmtree(ext_path)
-    os.mkdir(ext_path)
+
+    temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
+
+    with ZipFile(filename) as zipfile:
+        zipfile.extractall(temp_ext_path)
+
+    for dir in os.listdir(temp_ext_path):
+        move(os.path.join(temp_ext_path, dir), ext_path)
+        # there is only one directory here, so return immediately
+        return
 
 
 def download_zip(url):
-    url = get_zip_url(url)
-    dest_zip = mktemp('.zip')
-    filename, _ = urllib.urlretrieve(url, dest_zip)
+    dest_zip = mktemp('.zip', prefix='ulauncher_dl_')
+    filename, _ = urlretrieve(url, dest_zip)
 
     return filename
-
-
-def get_zip_url(url):
-    """
-    >>> https://github.com/Ulauncher/ulauncher-timer
-    <<< https://github.com/Ulauncher/ulauncher-timer/archive/master.zip
-    """
-    return '%s/archive/%s.zip' % (url, DEFAULT_GITHUB_BRANCH)
-
-
-def get_project_path(github_url):
-    match = re.match(r'^http(s)?:\/\/github.com\/([\w-]+\/[\w-]+)(\/)?$',
-                     github_url, re.I)
-    if not match:
-        raise InvalidGithubUrlError('Invalid GithubUrl: %s' % github_url)
-
-    return match.group(2)
 
 
 class ExtensionDownloaderError(Exception):
@@ -177,5 +183,5 @@ class AlreadyDownloadedError(ExtensionDownloaderError):
     pass
 
 
-class InvalidGithubUrlError(ExtensionDownloaderError):
+class ExtensionIsUpToDateError(ExtensionDownloaderError):
     pass

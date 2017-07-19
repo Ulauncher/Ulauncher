@@ -76,6 +76,22 @@ class TestExtensionManifest:
         with pytest.raises(ManifestValidationError):
             manifest.validate()
 
+    def test_validate__raises_error_if_empty_default_value_for_keyword(self, ext_dir, valid_manifest):
+        valid_manifest['preferences'] = [
+            {'id': 'id', 'type': 'keyword', 'name': 'My Keyword'}
+        ]
+        manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
+        with pytest.raises(ManifestValidationError):
+            manifest.validate()
+
+    def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, ext_dir, valid_manifest):
+        valid_manifest['preferences'] = [
+            {'id': 'id', 'type': 'keyword', 'name': 'My Keyword', 'default_value': 'kw'},
+            {'id': 'city', 'type': 'input', 'name': 'City'},
+        ]
+        manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
+        manifest.validate()
+
     def test_check_compatibility__api_version_2__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'api_version': '2'}, ext_dir)
         with pytest.raises(VersionIncompatibilityError):

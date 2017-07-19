@@ -65,9 +65,20 @@ export default function (url, params) {
       setTimeout(function () {
         resolve(_getExtensions())
       }, 0)
-    } else if (isMatch(url, '/extension/update')) {
-      console.log('/extension/update', params)
+    } else if (isMatch(url, '/extension/update-prefs')) {
+      console.log('/extension/update-prefs', params)
       setTimeout(resolve, 0)
+    } else if (isMatch(url, '/extension/update-ext')) {
+      console.log('/extension/update-ext', params)
+      setTimeout(resolve, 1e3)
+    } else if (isMatch(url, '/extension/check-updates')) {
+      console.log('/extension/check-updates', params)
+      setTimeout(() => {
+        resolve(Math.random() > 0.5 ? {
+          last_commit: '64e106cawef23f2q332',
+          last_commit_time: '2017-05-01T07:30:39Z'
+        } : null)
+      }, 1e3)
     } else if (isMatch(url, '/extension/add')) {
       console.log('/extension/add', params)
       setTimeout(() => {
@@ -77,30 +88,7 @@ export default function (url, params) {
         }
         resolve([
           ..._getExtensions(),
-          {
-            url: params.url,
-            name: 'NewExt',
-            icon: 'https://assets-cdn.github.com/favicon.ico',
-            developer_name: 'Dan Falcon',
-            version: '2.0.0',
-            preferences: [
-              {
-                id: 'keyword',
-                type: 'keyword',
-                name: 'Activate',
-                default_value: 'n',
-                value: 'n'
-              },
-              {
-                id: 'default_msg',
-                type: 'text',
-                name: 'Default Message',
-                default_value: '',
-                user_value: 'Hello Steve!',
-                value: 'Hello Steve!'
-              }
-            ]
-          }
+          generateExtensionRecord('ext.newext', 'NewExt', 2, params.url)
         ])
       }, 1e3)
     } else if (isMatch(url, '/extension/remove')) {
@@ -114,49 +102,54 @@ export default function (url, params) {
 
 function _getExtensions () {
   return [
+    generateExtensionRecord('ext.timer', 'Timer'),
+    generateExtensionRecord('ext.custom', 'Custom ext', 2, null),
+    generateExtensionRecord('ext.dict', 'Dictionary', 0)
+  ]
+}
+
+function generateExtensionRecord (extId, name, numOfPrefs = 3, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
+  let prefs = [
     {
-      url: 'https://github.com/ulauncher/ulauncher-test1',
-      name: 'Test ext',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
-      developer_name: 'John Doe',
-      version: '1.2.3',
-      preferences: []
+      id: 'keyword',
+      type: 'keyword',
+      name: 'My Timer',
+      default_value: 'ti',
+      user_value: 't',
+      value: 't'
     },
     {
-      url: 'https://github.com/ulauncher/ulauncher-timer',
-      name: 'Timer',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
-      description: 'Countdown timer with notifications',
-      developer_name: 'Aleksandr Gornostal',
-      version: '1.2.3',
-      preferences: [
-        {
-          id: 'keyword',
-          type: 'keyword',
-          name: 'My Timer',
-          default_value: 'ti',
-          user_value: 't',
-          value: 't'
-        },
-        {
-          id: 'max',
-          type: 'input',
-          name: 'Max Number of Posts',
-          default_value: '5',
-          user_value: null,
-          value: '5'
-        },
-        {
-          id: 'default_msg',
-          type: 'text',
-          name: 'Default Message',
-          default_value: '',
-          user_value: 'Hello Steve!',
-          value: 'Hello Steve!'
-        }
-      ]
+      id: 'max',
+      type: 'input',
+      name: 'Max Number of Posts',
+      default_value: '5',
+      user_value: null,
+      value: '5'
+    },
+    {
+      id: 'default_msg',
+      type: 'text',
+      name: 'Default Message',
+      default_value: '',
+      user_value: 'Hello Steve!',
+      value: 'Hello Steve!'
     }
   ]
+  prefs.length = numOfPrefs
+
+  return {
+    id: extId,
+    url: url,
+    name: name,
+    updated_at: '2017-07-21T20:50:44.850738',
+    icon: 'https://assets-cdn.github.com/favicon.ico',
+    description: 'My extension description',
+    developer_name: 'John Doe',
+    version: '1.2.3',
+    last_commit: 'abc234fd23425234a2',
+    last_commit_time: '2017-07-21T20:50:44',
+    preferences: prefs
+  }
 }
 
 function _getShortcuts () {

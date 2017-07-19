@@ -15,6 +15,5 @@ htmlcov
 node_modules/
 bower_components/
 .tmp/
-index.html
 aur_key
 *.key

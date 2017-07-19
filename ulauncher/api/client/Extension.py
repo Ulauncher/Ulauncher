@@ -72,4 +72,4 @@ class PreferencesEventListener(EventListener):
 class PreferencesUpdateEventListener(EventListener):
 
     def on_event(self, event, extension):
-        extension.preferences[event.key] = event.new_value
+        extension.preferences[event.id] = event.new_value
