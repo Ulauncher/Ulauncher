@@ -6,7 +6,7 @@ from distutils.dir_util import mkpath
 
 class KeyValueJsonDb(KeyValueDb):
     """
-    Key-value in-memory database
+    Key-value JSON database
     Use open() method to load DB from a file and commit() to save it
     """
 

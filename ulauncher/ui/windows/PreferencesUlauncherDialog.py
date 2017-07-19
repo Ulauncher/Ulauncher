@@ -13,6 +13,9 @@ from ulauncher.util.AutostartPreference import AutostartPreference
 from ulauncher.util.Router import Router, get_url_params
 from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
+from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader, ExtensionDownloaderError
+from ulauncher.api.server.ExtensionDb import ExtensionDb
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .HotkeyDialog import HotkeyDialog
@@ -292,17 +295,62 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         shortcuts.commit()
         return {'id': id}
 
-    @rt.route('/shortcut/delete')
-    def prefs_shortcut_delete(self, url_params):
+    @rt.route('/shortcut/remove')
+    def prefs_shortcut_remove(self, url_params):
         req_data = url_params['query']
-        logger.info('Delete shortcut: %s' % json.dumps(req_data))
+        logger.info('Remove shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
         shortcuts.remove(req_data['id'])
         shortcuts.commit()
 
+    @rt.route('/extension/get-all')
+    def prefs_extension_get_all(self, url_params):
+        logger.info('Handling /extension/get-all')
+        extControllers = ExtensionServer.get_instance().get_controllers()
+        return [self._get_extension_info(c.get_extension_id()) for c in extControllers]
+
+    @rt.route('/extension/add')
+    def prefs_extension_add(self, url_params):
+        url = url_params['url']
+        logger.info('Add extension: %s' % url)
+        downloader = ExtensionDownloader.get_instance()
+        try:
+            ext_id = downloader.download(url)
+        except ExtensionDownloaderError as e:
+            raise PrefsApiError(e.message)
+
+        return self._get_extension_info(ext_id)
+
+    @rt.route('/extension/update')
+    def prefs_extension_add(self, url_params):
+        ext_id = url_params['id']
+        preferences = url_params['preferences']
+        logger.info('Update extension preferences: %s' % ext_id)
+        controller = ExtensionServer.get_instance().get_controller(ext_id)
+        for pref_id, value in preferences.items():
+            controller.preferences.set(pref_id, value)
+
+        return self._get_extension_info(ext_id)
+
+    @rt.route('/extension/remove')
+    def prefs_extension_remove(self, url_params):
+        ext_id = url_params['id']
+        logger.info('Remove extension: %s' % ext_id)
+        downloader = ExtensionDownloader.get_instance()
+        downloader.remove(ext_id)
+
     ######################################
     # Helpers
     ######################################
+
+    def _get_extension_info(self, ext_id):
+        extDb = ExtensionDb.get_instance()
+        return {
+            'id': ext_id,
+            'url': extDb.find(ext_id, {}).get('url'),
+            'preferences': c.preferences.get_items(),
+            'manifest': c.get_manifest()
+        }
 
     def _load_prefs_html(self, page=''):
         uri = "file://%s#/%s" % (get_data_file('preferences', 'dist', 'index.html'), page)
