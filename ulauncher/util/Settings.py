@@ -6,6 +6,8 @@ from distutils.dir_util import mkpath
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
 
+DEFAULT_BLACKLISTED_DIRS = ['/usr/share/mimelnk/application', '/usr/share/locale', '/usr/share/app-install']
+
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type
                         "Hotkey: Show ulauncher window",  # nick name
@@ -32,6 +34,11 @@ GPROPERTIES = {
                    None,
                    "dark",
                    GObject.PARAM_READWRITE),
+    "blacklisted-desktop-dirs": (str,
+                                 "Blacklisted desktop dirs",
+                                 None,
+                                 ':'.join(DEFAULT_BLACKLISTED_DIRS),
+                                 GObject.PARAM_READWRITE),
 }
 
 

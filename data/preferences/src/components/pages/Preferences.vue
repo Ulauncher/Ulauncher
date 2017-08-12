@@ -81,6 +81,27 @@
         </td>
       </tr>
 
+      <tr>
+        <td class="pull-top">
+          <label>Blacklisted app dirs</label>
+          <small>
+            <p>
+              Ulauncher won't search for .desktop files in these dirs
+            </p>
+            <p v-if="blacklistedDirsChanged">
+              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
+            </p>
+          </small>
+        </td>
+        <td class="pull-top">
+          <editable-text-list
+            width="450px"
+            v-model="blacklisted_desktop_dirs"
+            @input="updateBlacklistedDirs"
+            newItemPlaceholder="Type in an absolute path and press Enter"></editable-text-list>
+        </td>
+      </tr>
+
       </table>
   </div>
 </template>
@@ -88,11 +109,16 @@
 <script>
 import jsonp from '@/api'
 import bus from '@/event-bus'
+import EditableTextList from '@/components/widgets/EditableTextList'
 
 const hotkeyEventName = 'hotkey-show-app'
 
 export default {
   name: 'preferences',
+
+  components: {
+    'editable-text-list': EditableTextList
+  },
 
   created () {
     this.fetchData()
@@ -113,6 +139,8 @@ export default {
       theme_name: null,
       previous_theme_name: null,
       clear_previous_query: false,
+      blacklisted_desktop_dirs: [],
+      blacklistedDirsChanged: false,
       theme_options: [
         {text: 'Dark', value: 'dark'},
         {text: 'Light', value: 'light'}
@@ -130,6 +158,7 @@ export default {
         this.show_indicator_icon = data.show_indicator_icon
         this.theme_name = data.theme_name
         this.clear_previous_query = data.clear_previous_query
+        this.blacklisted_desktop_dirs = data.blacklisted_desktop_dirs ? data.blacklisted_desktop_dirs.split(':') : []
       }, (err) => bus.$emit('error', err))
     },
 
@@ -179,17 +208,29 @@ export default {
         this.clear_previous_query = !this.clear_previous_query
         bus.$emit('error', err)
       })
+    },
+
+    updateBlacklistedDirs () {
+      jsonp('prefs://set/blacklisted-desktop-dirs', {value: this.blacklisted_desktop_dirs.join(':')})
+        .then(() => {
+          this.blacklistedDirsChanged = true
+        }, (err) => {
+          bus.$emit('error', err)
+        })
     }
 
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 /* use tables to support WebKit on Ubuntu 14.04 */
 table {
   width: 100%;
   margin: 25px 15px 15px 40px;
+}
+.pull-top {
+  vertical-align: top;
 }
 h1 {
   margin: 30px 0 0 25px;
@@ -197,10 +238,24 @@ h1 {
   color: #aaa;
   text-shadow: 1px 1px 1px #fff;
 }
-td:first-child {width: 220px;}
+td:first-child {
+  box-sizing: border-box;
+  width: 220px;
+  padding-right: 20px;
+}
 td {padding-bottom: 20px;}
 tr:last-child td {padding-bottom: 0;}
-label {cursor: pointer;}
+label {
+  cursor: pointer;
+
+  &+small {
+    position: relative;
+    top: -5px;
+    line-height: 1.3em;
+    display: block;
+    color: #888;
+  }
+}
 #hotkey-show-app {
   cursor: pointer;
   width: 200px;

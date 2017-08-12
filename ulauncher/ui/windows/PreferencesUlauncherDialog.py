@@ -176,6 +176,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'autostart_enabled': self.autostart_pref.is_on(),
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
+            'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'theme_name': self.settings.get_property('theme-name'),
             'version': get_version()
         }
@@ -241,6 +242,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         is_on = self._get_bool(url_params['query']['value'])
         logger.info('Set clear-previous-query to %s' % is_on)
         self.settings.set_property('clear-previous-query', is_on)
+        self.settings.save_to_file()
+
+    @rt.route('/set/blacklisted-desktop-dirs')
+    def prefs_set_clear_previous_text(self, url_params):
+        dirs = url_params['query']['value']
+        logger.info('Set blacklisted-desktop-dirs to %s' % dirs)
+        self.settings.set_property('blacklisted-desktop-dirs', dirs)
         self.settings.save_to_file()
 
     @rt.route('/show/file-browser')
