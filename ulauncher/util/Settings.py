@@ -6,7 +6,16 @@ from distutils.dir_util import mkpath
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
 
-DEFAULT_BLACKLISTED_DIRS = ['/usr/share/mimelnk/application', '/usr/share/locale', '/usr/share/app-install']
+DEFAULT_BLACKLISTED_DIRS = [
+    '/usr/share/mimelnk/application',
+    '/usr/share/locale',
+    '/usr/share/app-install',
+    '/usr/share/kservices5',
+    '/usr/share/fk5',
+    '/usr/share/kservicetypes5',
+    '/usr/share/kde4',
+    '/usr/share/mimelnk'
+]
 
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type
