@@ -2,7 +2,7 @@
 import logging
 import json
 
-from gi.repository import Gio, Gtk, WebKit2
+from gi.repository import Gio, Gtk, GLib, WebKit2
 from urllib import unquote
 from base64 import b64decode
 
@@ -216,7 +216,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        UlauncherWindow.get_instance().bind_show_app_hotkey(hotkey)
+        ulauncher_window = UlauncherWindow.get_instance()
+        GLib.idle_add(ulauncher_window.bind_show_app_hotkey, hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
         self.settings.save_to_file()
 
@@ -235,7 +236,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_showhotkey_dialog(self, url_params):
         self._hotkey_name = url_params['query']['name']
         logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
-        self.hotkey_dialog.present()
+        GLib.idle_add(self.hotkey_dialog.present)
 
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, url_params):
