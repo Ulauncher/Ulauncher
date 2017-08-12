@@ -5,7 +5,7 @@
         size="sm"
         :readonly="true"
         :value="item"></b-form-input>
-      <i class="fa fa-remove" @click="remove(item)"></i>
+      <i class="delete fa fa-remove" @click="remove(item)"></i>
     </li>
     <li class="new-item">
       <b-form @submit.native.prevent="onSubmit">
@@ -86,5 +86,8 @@ li {
     right: 0;
     cursor: pointer;
   }
+}
+.delete {
+  color: #888;
 }
 </style>
