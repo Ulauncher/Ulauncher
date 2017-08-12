@@ -112,7 +112,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def on_mnu_preferences_activate(self, widget, data=None):
         """Display the preferences window for ulauncher."""
-        self.activate_preferences(page='general')
+        self.activate_preferences(page='preferences')
 
     def on_mnu_close_activate(self, widget, data=None):
         """Signal handler for closing the UlauncherWindow."""
@@ -137,7 +137,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
-        t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
+        t = threading.Timer(0.07, lambda: self.is_focused or self._on_user_hide())
         t.start()
 
     def on_focus_in_event(self, *args):
@@ -180,7 +180,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                     pass
 
         if keyname == 'Escape':
-            self.hide()
+            self._on_user_hide()
 
     ######################################
     # Helpers
@@ -198,7 +198,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                                        Settings.get_instance().get_property('theme-name'),
                                        css_file))
 
-    def activate_preferences(self, page='general'):
+    def activate_preferences(self, page='preferences'):
         """
         From the PyGTK Reference manual
         Say for example the preferences dialog is currently open,
@@ -289,6 +289,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def hide_and_clear_input(self):
         self.hide()
         self.input.set_text('')
+
+    def _on_user_hide(self):
+        self.hide()
+        clear_query = Settings.get_instance().get_property('clear-previous-query')
+        if clear_query:
+            self.input.set_text('')
 
     def show_results(self, result_items):
         """

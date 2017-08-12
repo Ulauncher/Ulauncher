@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import General from '@/components/pages/General'
+import Preferences from '@/components/pages/Preferences'
 import Shortcuts from '@/components/pages/Shortcuts'
 import EditShortcut from '@/components/pages/EditShortcut'
 import Extensions from '@/components/pages/Extensions'
@@ -13,12 +13,12 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: { name: 'general' }
+      redirect: { name: 'preferences' }
     },
     {
-      path: '/general',
-      name: 'general',
-      component: General
+      path: '/preferences',
+      name: 'preferences',
+      component: Preferences
     },
     {
       path: '/shortcuts',

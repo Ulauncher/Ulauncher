@@ -175,6 +175,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_on(),
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
+            'clear_previous_query': self.settings.get_property('clear-previous-query'),
             'theme_name': self.settings.get_property('theme-name'),
             'version': get_version()
         }
@@ -234,6 +235,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self._hotkey_name = url_params['query']['name']
         logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
         self.hotkey_dialog.present()
+
+    @rt.route('/set/clear-previous-query')
+    def prefs_set_clear_previous_text(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set clear-previous-query to %s' % is_on)
+        self.settings.set_property('clear-previous-query', is_on)
+        self.settings.save_to_file()
 
     @rt.route('/show/file-browser')
     def prefs_show_file_browser(self, url_params):
