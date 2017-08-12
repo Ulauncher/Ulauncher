@@ -29,6 +29,10 @@ class TestPreferencesUlauncherDialog:
     def hotkey_dialog(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.HotkeyDialog').return_value
 
+    @pytest.fixture(autouse=True)
+    def GLib(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.GLib')
+
     @pytest.fixture
     def builder(self):
         return mock.MagicMock()
@@ -55,10 +59,10 @@ class TestPreferencesUlauncherDialog:
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
-    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
+    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings, GLib):
         hotkey = '<Primary>space'
         dialog.prefs_set_hotkey_show_app({'query': {'value': hotkey}})
-        ulauncherWindow.bind_show_app_hotkey.assert_called_with(hotkey)
+        GLib.idle_add.assert_called_with(ulauncherWindow.bind_show_app_hotkey, hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
         settings.save_to_file.assert_called_with()
 
@@ -75,9 +79,9 @@ class TestPreferencesUlauncherDialog:
         settings.save_to_file.assert_called_with()
         ulauncherWindow.init_theme.assert_called_with()
 
-    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
+    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog, GLib):
         dialog.prefs_showhotkey_dialog({'query': {'name': 'hotkey-name'}})
-        hotkey_dialog.present.assert_called_with()
+        GLib.idle_add.assert_called_with(hotkey_dialog.present)
 
     @pytest.mark.with_display
     def test_get_app_hotkey(self, dialog, settings):
