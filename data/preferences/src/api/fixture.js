@@ -10,6 +10,7 @@ export default function (url, params) {
         'hotkey_show_app': 'Ctrl+Alt L',
         'autostart_allowed': true,
         'autostart_enabled': true,
+        'clear_previous_text': true,
         'theme_name': 'light',
         'version': '1.2.3'
       })
@@ -27,6 +28,9 @@ export default function (url, params) {
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/hotkey-show-app')) {
       console.log('/set/hotkey-show-app', params)
+      setTimeout(resolve, 0)
+    } else if (isMatch(url, '/set/clear-previous-query')) {
+      console.log('/set/clear-previous-query', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/open/web-url')) {
       console.log('/open/web-url', params)

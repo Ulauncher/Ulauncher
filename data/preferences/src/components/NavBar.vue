@@ -1,7 +1,7 @@
 <template>
   <div class="main-header">
     <ul>
-      <li><router-link to="/general"><i class="fa fa-cog"></i> General</router-link></li>
+      <li><router-link to="/preferences"><i class="fa fa-cog"></i> Preferences</router-link></li>
       <li><router-link to="/shortcuts"><i class="fa fa-external-link-square"></i>Shortcuts</router-link></li>
       <li><router-link to="/extensions"><i class="fa fa-cubes"></i>Extensions</router-link></li>
       <li><router-link to="/help"><i class="fa fa-support"></i>Help</router-link></li>

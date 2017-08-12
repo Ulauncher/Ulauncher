@@ -1,67 +1,88 @@
 <template>
-  <table>
-    <tr>
-      <td>
-        <label for="hotkey-show-app">Hotkey</label>
-      </td>
-      <td>
-        <b-form-input
-          id="hotkey-show-app"
-          @focus.native="showHotkeyDialog($event)"
-          v-model="hotkey_show_app"></b-form-input>
-      </td>
-    </tr>
+  <div>
+    <h1>General</h1>
 
-    <tr>
-      <td>
-        <label for="autostart">Launch at Login</label>
-      </td>
-      <td>
-        <b-form-checkbox
-          :disabled="!autostart_allowed"
-          id="autostart"
-          @change="updateLaunchAtLogin"
-          v-model="autostart_enabled"></b-form-checkbox>
-      </td>
-    </tr>
+    <table>
+      <tr>
+        <td>
+          <label for="hotkey-show-app">Hotkey</label>
+        </td>
+        <td>
+          <b-form-input
+            id="hotkey-show-app"
+            @focus.native="showHotkeyDialog($event)"
+            v-model="hotkey_show_app"></b-form-input>
+        </td>
+      </tr>
 
-    <tr>
-      <td>
-        <label for="show-indicator-icon">Show Indicator Icon</label>
-      </td>
-      <td>
-        <b-form-checkbox
-          id="show-indicator-icon"
-          @change="updateShowIndicatorIcon"
-          v-model="show_indicator_icon"></b-form-checkbox>
-      </td>
-    </tr>
+      <tr>
+        <td>
+          <label for="autostart">Launch at Login</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            :disabled="!autostart_allowed"
+            id="autostart"
+            @change="updateLaunchAtLogin"
+            v-model="autostart_enabled"></b-form-checkbox>
+        </td>
+      </tr>
 
-    <tr>
-      <td>
-        <label for="show-recent-apps">Show Frequent Apps</label>
-      </td>
-      <td>
-        <b-form-checkbox
-          id="show-recent-apps"
-          @change="updateShowRecentApps"
-          v-model="show_recent_apps"></b-form-checkbox>
-      </td>
-    </tr>
+      <tr>
+        <td>
+          <label for="show-indicator-icon">Show Indicator Icon</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            id="show-indicator-icon"
+            @change="updateShowIndicatorIcon"
+            v-model="show_indicator_icon"></b-form-checkbox>
+        </td>
+      </tr>
 
-    <tr>
-      <td>
-        <label for="theme-name">Theme</label>
-      </td>
-      <td>
-        <b-form-radio
-          id="theme-name"
-          :options="theme_options"
-          @change.native="updateTheme"
-          v-model="theme_name"></b-form-radio>
-      </td>
-    </tr>
-  </table>
+      <tr>
+        <td>
+          <label for="show-recent-apps">Show Frequent Apps</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            id="show-recent-apps"
+            @change="updateShowRecentApps"
+            v-model="show_recent_apps"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <label for="theme-name">Theme</label>
+        </td>
+        <td>
+          <b-form-radio
+            id="theme-name"
+            :options="theme_options"
+            @change.native="updateTheme"
+            v-model="theme_name"></b-form-radio>
+        </td>
+      </tr>
+    </table>
+
+    <h1>Advanced</h1>
+
+    <table>
+      <tr>
+        <td>
+          <label for="clear_previous_query">Clear Query <br> When App Looses Focus</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            id="clear_previous_query"
+            @change="updateClearPrevText"
+            v-model="clear_previous_query"></b-form-checkbox>
+        </td>
+      </tr>
+
+      </table>
+  </div>
 </template>
 
 <script>
@@ -71,7 +92,7 @@ import bus from '@/event-bus'
 const hotkeyEventName = 'hotkey-show-app'
 
 export default {
-  name: 'general',
+  name: 'preferences',
 
   created () {
     this.fetchData()
@@ -91,6 +112,7 @@ export default {
       show_indicator_icon: false,
       theme_name: null,
       previous_theme_name: null,
+      clear_previous_query: false,
       theme_options: [
         {text: 'Dark', value: 'dark'},
         {text: 'Light', value: 'light'}
@@ -107,6 +129,7 @@ export default {
         this.show_recent_apps = data.show_recent_apps
         this.show_indicator_icon = data.show_indicator_icon
         this.theme_name = data.theme_name
+        this.clear_previous_query = data.clear_previous_query
       }, (err) => bus.$emit('error', err))
     },
 
@@ -149,6 +172,13 @@ export default {
       jsonp('prefs://set/theme-name', {value: this.theme_name}).then(null, (err) => {
         bus.$emit('error', err)
       })
+    },
+
+    updateClearPrevText () {
+      jsonp('prefs://set/clear-previous-query', {value: this.clear_previous_query}).then(null, (err) => {
+        this.clear_previous_query = !this.clear_previous_query
+        bus.$emit('error', err)
+      })
     }
 
   }
@@ -159,10 +189,16 @@ export default {
 /* use tables to support WebKit on Ubuntu 14.04 */
 table {
   width: 100%;
-  margin: 25px 15px 15px 25px;
+  margin: 25px 15px 15px 40px;
+}
+h1 {
+  margin: 30px 0 0 25px;
+  font-size: 110%;
+  color: #aaa;
+  text-shadow: 1px 1px 1px #fff;
 }
 td:first-child {width: 220px;}
-td {padding-bottom: 30px;}
+td {padding-bottom: 20px;}
 tr:last-child td {padding-bottom: 0;}
 label {cursor: pointer;}
 #hotkey-show-app {
