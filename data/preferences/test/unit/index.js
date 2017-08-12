@@ -1,6 +1,8 @@
 import Vue from 'vue'
+import BootstrapVue from 'bootstrap-vue'
 
 Vue.config.productionTip = false
+Vue.use(BootstrapVue)
 
 // require all test files (files that ends with .spec.js)
 const testsContext = require.context('./specs', true, /\.spec$/)

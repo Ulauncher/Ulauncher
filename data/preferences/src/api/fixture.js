@@ -11,6 +11,7 @@ export default function (url, params) {
         'autostart_allowed': true,
         'autostart_enabled': true,
         'clear_previous_text': true,
+        'blacklisted_desktop_dirs': ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
         'theme_name': 'light',
         'version': '1.2.3'
       })
@@ -31,6 +32,9 @@ export default function (url, params) {
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/clear-previous-query')) {
       console.log('/set/clear-previous-query', params)
+      setTimeout(resolve, 0)
+    } else if (isMatch(url, '/set/blacklisted-desktop-dirs')) {
+      console.log('/set/blacklisted-desktop-dirs', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/open/web-url')) {
       console.log('/open/web-url', params)
