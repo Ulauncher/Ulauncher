@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #############################################
-# Builds Ulauncher Preferences UI witn nodejs
+# Builds Ulauncher Preferences UI with nodejs
 #############################################
 
 set -ex
@@ -9,6 +9,7 @@ set -ex
 cd `dirname $0`
 cd ../data/preferences
 
-npm install
-./node_modules/.bin/bower install -f --allow-root
-./gulp build
+yarn install
+yarn lint
+# yarn test
+yarn build

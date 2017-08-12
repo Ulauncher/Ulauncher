@@ -70,6 +70,10 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
             self.emit('hotkey-set', self._accel_name, self._display_name)
             self.hide()
 
+        if accel_name == 'Escape':
+            self.hide()
+            return
+
         # do nothing for invalid hotkeys
         if not self.is_valid_hotkey(display_name, accel_name):
             logger.debug("Invalid hotkey '%s', ('%s') is not allowed" % (display_name, accel_name))

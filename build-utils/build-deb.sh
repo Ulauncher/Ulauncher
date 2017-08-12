@@ -51,7 +51,7 @@ rsync -aq --progress \
     --exclude-from=.gitignore
 
 rm -rf $tmpsrc/data/preferences/*
-cp -r data/preferences/index.html data/preferences/build $tmpsrc/data/preferences
+cp -r data/preferences/dist $tmpsrc/data/preferences
 
 sed -i "s/%VERSION%/$1/g" $tmpsrc/setup.py
 

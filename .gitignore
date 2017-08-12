@@ -6,6 +6,7 @@
 ulauncherc
 *.egg-info
 build
+!data/preferences/build
 _build
 .build-checksum
 po
@@ -14,6 +15,5 @@ htmlcov
 node_modules/
 bower_components/
 .tmp/
-index.html
 aur_key
 *.key

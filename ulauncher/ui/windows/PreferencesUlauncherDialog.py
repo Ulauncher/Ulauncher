@@ -4,15 +4,26 @@ import json
 
 from gi.repository import Gio, Gtk, WebKit2
 from urllib import unquote
+from base64 import b64decode
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
-from ulauncher.config import get_data_file, get_options, get_version
+from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.util.AutostartPreference import AutostartPreference
 from ulauncher.util.Router import Router, get_url_params
 from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
+                                                      ExtensionIsUpToDateError)
+from ulauncher.api.server.ExtensionManifest import ManifestValidationError
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionDb import ExtensionDb
+from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
+from ulauncher.api.server.extension_finder import find_extensions
+from ulauncher.api.shared.event import PreferencesUpdateEvent
 from .Builder import Builder
 from .WindowHelper import WindowHelper
 from .HotkeyDialog import HotkeyDialog
@@ -89,7 +100,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
-        self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
         inspector = self.webview.get_inspector()
@@ -111,17 +121,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # GTK event handlers
     ######################################
 
-    def webview_on_button_press_event(self, widget, event):
-        """
-        Makes preferences window draggable only by top block with a button bar
-        400x60 - size of the button bar
-        """
-        window_width = self.get_size()[0]
-        if event.button == 1 and 400 < event.x < window_width - 70 and 0 < event.y < 60:
-            self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
-
-        return False
-
     def webview_on_context_menu(self, *args):
         return bool(not get_options().dev)
 
@@ -129,6 +128,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # WebView communication methods
     ######################################
 
+    @run_async
     def on_scheme_callback(self, scheme_request):
         """
         Handles Javascript-to-Python calls
@@ -170,12 +170,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_get_all(self, url_params):
         logger.info('API call /get/all')
         return {
-            'show-indicator-icon': self.settings.get_property('show-indicator-icon'),
-            'hotkey-show-app': self.get_app_hotkey(),
-            'autostart-allowed': self.autostart_pref.is_allowed(),
-            'autostart-enabled': self.autostart_pref.is_on(),
-            'show-recent-apps': self.settings.get_property('show-recent-apps'),
-            'theme-name': self.settings.get_property('theme-name'),
+            'show_indicator_icon': self.settings.get_property('show-indicator-icon'),
+            'hotkey_show_app': self.get_app_hotkey(),
+            'autostart_allowed': self.autostart_pref.is_allowed(),
+            'autostart_enabled': self.autostart_pref.is_on(),
+            'show_recent_apps': self.settings.get_property('show-recent-apps'),
+            'theme_name': self.settings.get_property('theme-name'),
             'version': get_version()
         }
 
@@ -251,14 +251,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         response = dialog.run()
         data = {
-            'name': file_browser_name,
-            'path': None
+            'value': None
         }
         if response == Gtk.ResponseType.OK:
-            data['path'] = dialog.get_filename()
+            data['value'] = dialog.get_filename()
 
-        logger.debug('file-select %s' % data)
-        self.send_webview_notification('file-select', data)
+        logger.debug('%s %s' % (file_browser_name, data))
+        self.send_webview_notification(file_browser_name, data)
         dialog.destroy()
 
     @rt.route('/open/web-url')
@@ -293,20 +292,100 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         shortcuts.commit()
         return {'id': id}
 
-    @rt.route('/shortcut/delete')
-    def prefs_shortcut_delete(self, url_params):
+    @rt.route('/shortcut/remove')
+    def prefs_shortcut_remove(self, url_params):
         req_data = url_params['query']
-        logger.info('Delete shortcut: %s' % json.dumps(req_data))
+        logger.info('Remove shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
         shortcuts.remove(req_data['id'])
         shortcuts.commit()
+
+    @rt.route('/extension/get-all')
+    def prefs_extension_get_all(self, url_params):
+        logger.info('Handling /extension/get-all')
+        return self._get_all_extensions()
+
+    @rt.route('/extension/add')
+    def prefs_extension_add(self, url_params):
+        url = url_params['query']['url']
+        logger.info('Add extension: %s' % url)
+        downloader = ExtensionDownloader.get_instance()
+        try:
+            ext_id = downloader.download(url)
+            ExtensionRunner.get_instance().run(ext_id)
+        except (ExtensionDownloaderError, ManifestValidationError) as e:
+            raise PrefsApiError(e.message)
+
+        return self._get_all_extensions()
+
+    @rt.route('/extension/update-prefs')
+    def prefs_extension_update_prefs(self, url_params):
+        query = url_params['query']
+        ext_id = query['id']
+        logger.info('Update extension preferences: %s' % query)
+        prefix = 'pref.'
+        controller = ExtensionServer.get_instance().get_controller(ext_id)
+        preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
+        for pref_id, value in preferences:
+            old_value = controller.preferences.get(pref_id)['value']
+            controller.preferences.set(pref_id, value)
+            if value != old_value:
+                controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
+
+    @rt.route('/extension/check-updates')
+    def prefs_extension_check_updates(self, url_params):
+        logger.info('Handling /extension/check-updates')
+        ext_id = url_params['query']['id']
+        try:
+            return ExtensionDownloader.get_instance().get_new_version(ext_id)
+        except ExtensionIsUpToDateError as e:
+            pass
+
+    @rt.route('/extension/update-ext')
+    def prefs_extension_update_ext(self, url_params):
+        ext_id = url_params['query']['id']
+        logger.info('Update extension: %s' % ext_id)
+        downloader = ExtensionDownloader.get_instance()
+        try:
+            downloader.update(ext_id)
+        except ManifestValidationError as e:
+            raise PrefsApiError(e.message)
+
+    @rt.route('/extension/remove')
+    def prefs_extension_remove(self, url_params):
+        ext_id = url_params['query']['id']
+        logger.info('Remove extension: %s' % ext_id)
+        downloader = ExtensionDownloader.get_instance()
+        downloader.remove(ext_id)
 
     ######################################
     # Helpers
     ######################################
 
+    def _get_all_extensions(self):
+        return [self._get_extension_info(ext_id) for ext_id, _ in find_extensions(EXTENSIONS_DIR)]
+
+    def _get_extension_info(self, ext_id):
+        ext_db = ExtensionDb.get_instance()
+        ext_db_record = ext_db.find(ext_id, {})
+        prefs = ExtensionPreferences.create_instance(ext_id)
+        prefs.manifest.refresh()
+        return {
+            'id': ext_id,
+            'url': ext_db_record.get('url'),
+            'updated_at': ext_db_record.get('updated_at'),
+            'last_commit': ext_db_record.get('last_commit'),
+            'last_commit_time': ext_db_record.get('last_commit_time'),
+            'name': prefs.manifest.get_name(),
+            'icon': prefs.manifest.get_icon_path(),
+            'description': prefs.manifest.get_description(),
+            'developer_name': prefs.manifest.get_developer_name(),
+            'preferences': prefs.get_items()
+        }
+
     def _load_prefs_html(self, page=''):
-        self.webview.load_uri("file://%s#/%s" % (get_data_file('preferences', 'index.html'), page))
+        uri = "file://%s#/%s" % (get_data_file('preferences', 'dist', 'index.html'), page)
+        self.webview.load_uri(uri)
 
     def _get_bool(self, str_val):
         return str(str_val).lower() in ('true', '1', 'on')
@@ -321,8 +400,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         return Gtk.accelerator_get_label(key, mode)
 
     def on_hotkey_set(self, widget, hotkey_val, hotkey_display_val):
-        self.send_webview_notification('hotkey-set', {
-            'name': self._hotkey_name,
+        self.send_webview_notification(self._hotkey_name, {
             'value': hotkey_val,
             'displayValue': hotkey_display_val
         })
