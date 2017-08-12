@@ -22,6 +22,7 @@ from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.util.AppCacheDb import AppCacheDb
 from ulauncher.util.Settings import Settings
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.util.display import get_current_screen_geometry
@@ -270,7 +271,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def notify_hotkey_change(self, accel_name):
         (key, mode) = Gtk.accelerator_parse(accel_name)
         display_name = Gtk.accelerator_get_label(key, mode)
-        show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
+        app_cache_db = AppCacheDb.get_instance()
+        if not app_cache_db.find('startup_hotkey_notification'):
+            show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
+            app_cache_db.put('startup_hotkey_notification', True)
+            app_cache_db.commit()
 
     def _get_user_query(self):
         # get_text() returns str, so we need to convert it to unicode

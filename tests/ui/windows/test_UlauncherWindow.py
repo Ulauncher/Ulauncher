@@ -20,6 +20,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
 
     @pytest.fixture(autouse=True)
+    def app_cache_db(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppCacheDb.get_instance').return_value
+
+    @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
 
@@ -56,7 +60,8 @@ class TestUlauncherWindow:
         return UlauncherWindow()
 
     @pytest.mark.with_display
-    def test_bind_show_app_hotkey(self, window, Keybinder, show_notification):
+    def test_bind_show_app_hotkey(self, window, Keybinder, show_notification, app_cache_db):
+        app_cache_db.find.return_value = False
         accel_name = '<Primary><Alt>f'
         window.bind_show_app_hotkey(accel_name)
         Keybinder.bind.assert_called_with(accel_name, window.cb_toggle_visibility)
