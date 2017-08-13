@@ -38,17 +38,13 @@ class ColoredFormatter(logging.Formatter):
 
 def setup_logging(opts):
     root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
     format = "%(asctime)s | %(levelname)s | %(name)s: %(funcName)s() | %(message)s"
 
     stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG if opts.verbose else logging.WARNING)
     stream_handler.setFormatter(ColoredFormatter(format))
-
     root.addHandler(stream_handler)
-    root.setLevel(logging.WARNING)
-
-    # Set the logging level to show debug messages.
-    if opts.verbose:
-        root.setLevel(logging.DEBUG)
 
     # set up login to a file
     log_file = os.path.join(CACHE_DIR, 'last.log')

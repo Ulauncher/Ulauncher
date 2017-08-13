@@ -68,6 +68,18 @@ def main():
     """
     Main function that starts everything
     """
+
+    # start DBus loop
+    DBusGMainLoop(set_as_default=True)
+    bus = dbus.SessionBus()
+    instance = bus.request_name(DBUS_SERVICE)
+
+    if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print("Ulauncher is already running")
+        show_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("show_window")
+        show_window()
+        return
+
     _create_dirs()
 
     options = get_options()
@@ -82,32 +94,21 @@ def main():
 
     sys.excepthook = except_hook
 
-    # start DBus loop
-    DBusGMainLoop(set_as_default=True)
-    bus = dbus.SessionBus()
-    instance = bus.request_name(DBUS_SERVICE)
+    window = UlauncherWindow.get_instance()
+    UlauncherDbusService(window)
+    if not options.hide_window:
+        window.show()
 
-    if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        logger.debug("Getting the existing instance...")
-        show_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("show_window")
-        show_window()
-    else:
-        logger.debug("Starting a new instance...")
-        window = UlauncherWindow.get_instance()
-        UlauncherDbusService(window)
-        if not options.hide_window:
-            window.show()
+    if Settings.get_instance().get_property('show-indicator-icon'):
+        AppIndicator.get_instance().show()
 
-        if Settings.get_instance().get_property('show-indicator-icon'):
-            AppIndicator.get_instance().show()
-
-        # workaround to make Ctrl+C quiting the app
-        app_killer = GracefulAppKiller()
-        gtk_thread = run_async(Gtk.main)()
-        try:
-            while gtk_thread.is_alive() and not app_killer.killed():
-                time.sleep(0.5)
-        except KeyboardInterrupt:
-            logger.warn('On KeyboardInterrupt')
-        finally:
-            Gtk.main_quit()
+    # workaround to make Ctrl+C quiting the app
+    app_killer = GracefulAppKiller()
+    gtk_thread = run_async(Gtk.main)()
+    try:
+        while gtk_thread.is_alive() and not app_killer.killed():
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        logger.warn('On KeyboardInterrupt')
+    finally:
+        Gtk.main_quit()
