@@ -24,16 +24,18 @@
         hide-header-close
         no-auto-focus
         @shown="onAddExtFormShown"
-        @ok="onAdd">
+        @ok="onModalOk">
           <template slot="modal-title">
             Enter extension URL
           </template>
 
-          <b-form-input
-            class="github-url-input"
-            ref="githubUrl"
-            type="text"
-            placeholder="https://github.com/org-name/project-name"></b-form-input>
+          <b-form @submit.native.prevent="onUrlSubmit">
+            <b-form-input
+              class="github-url-input"
+              ref="githubUrl"
+              type="text"
+              placeholder="https://github.com/org-name/project-name"></b-form-input>
+          </b-form>
 
           <div v-if="addingExtension" class="adding-ext-msg">
             <i class="fa fa-spinner fa-spin"></i> Downloading extension...
@@ -113,8 +115,23 @@ export default {
         }
       }
     },
-    onAdd (e) {
+    onModalOk (e) {
       let input = this.$refs.githubUrl.$el
+      if (!input.value) {
+        return e.cancel()
+      }
+
+      this.addExtension(input)
+
+      return e.cancel()
+    },
+    onUrlSubmit () {
+      let input = this.$refs.githubUrl.$el
+      if (input.value) {
+        this.addExtension(input)
+      }
+    },
+    addExtension (input) {
       this.addingExtension = true
       this.addingExtensionError = ''
       jsonp('prefs://extension/add', {url: input.value}).then((data) => {
@@ -127,8 +144,6 @@ export default {
         this.addingExtension = false
         this.addingExtensionError = err
       })
-
-      return e.cancel()
     }
   }
 }
