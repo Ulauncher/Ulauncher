@@ -2,7 +2,7 @@
 import logging
 import json
 
-from gi.repository import Gio, Gtk, GLib, WebKit2
+from gi.repository import Gio, Gtk, WebKit2
 from urllib import unquote
 from base64 import b64decode
 
@@ -15,6 +15,7 @@ from ulauncher.util.Router import Router, get_url_params
 from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.decorator.glib_idle_add import glib_idle_add
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
                                                       ExtensionIsUpToDateError)
@@ -210,6 +211,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.settings.save_to_file()
 
     @rt.route('/set/hotkey-show-app')
+    @glib_idle_add
     def prefs_set_hotkey_show_app(self, url_params):
         hotkey = url_params['query']['value']
         logger.info('Set hotkey-show-app to %s' % hotkey)
@@ -217,11 +219,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
-        GLib.idle_add(ulauncher_window.bind_show_app_hotkey, hotkey)
+        ulauncher_window.bind_show_app_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
         self.settings.save_to_file()
 
     @rt.route('/set/theme-name')
+    @glib_idle_add
     def prefs_set_theme_name(self, url_params):
         name = url_params['query']['value']
         logger.info('Set theme-name to %s' % name)
@@ -230,13 +233,15 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.settings.save_to_file()
 
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        UlauncherWindow.get_instance().init_theme()
+        ulauncher_window = UlauncherWindow.get_instance()
+        ulauncher_window.init_theme()
 
     @rt.route('/show/hotkey-dialog')
+    @glib_idle_add
     def prefs_showhotkey_dialog(self, url_params):
         self._hotkey_name = url_params['query']['name']
         logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
-        GLib.idle_add(self.hotkey_dialog.present)
+        self.hotkey_dialog.present()
 
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, url_params):
@@ -246,13 +251,14 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.settings.save_to_file()
 
     @rt.route('/set/blacklisted-desktop-dirs')
-    def prefs_set_clear_previous_text(self, url_params):
+    def prefs_set_blacklisted_desktop_dirs(self, url_params):
         dirs = url_params['query']['value']
         logger.info('Set blacklisted-desktop-dirs to %s' % dirs)
         self.settings.set_property('blacklisted-desktop-dirs', dirs)
         self.settings.save_to_file()
 
     @rt.route('/show/file-browser')
+    @glib_idle_add
     def prefs_show_file_browser(self, url_params):
         """
         Request params: type=(image|all), name=(str)

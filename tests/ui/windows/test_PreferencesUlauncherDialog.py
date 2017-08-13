@@ -29,10 +29,6 @@ class TestPreferencesUlauncherDialog:
     def hotkey_dialog(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.HotkeyDialog').return_value
 
-    @pytest.fixture(autouse=True)
-    def GLib(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.GLib')
-
     @pytest.fixture
     def builder(self):
         return mock.MagicMock()
@@ -59,10 +55,10 @@ class TestPreferencesUlauncherDialog:
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
-    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings, GLib):
+    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
         hotkey = '<Primary>space'
-        dialog.prefs_set_hotkey_show_app({'query': {'value': hotkey}})
-        GLib.idle_add.assert_called_with(ulauncherWindow.bind_show_app_hotkey, hotkey)
+        dialog.prefs_set_hotkey_show_app.original(dialog, {'query': {'value': hotkey}})
+        ulauncherWindow.bind_show_app_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
         settings.save_to_file.assert_called_with()
 
@@ -74,14 +70,14 @@ class TestPreferencesUlauncherDialog:
         autostart_pref.switch.assert_called_with(False)
 
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
-        dialog.prefs_set_theme_name({'query': {'value': 'light'}})
+        dialog.prefs_set_theme_name.original(dialog, {'query': {'value': 'light'}})
         settings.set_property.assert_called_with('theme-name', 'light')
         settings.save_to_file.assert_called_with()
         ulauncherWindow.init_theme.assert_called_with()
 
-    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog, GLib):
-        dialog.prefs_showhotkey_dialog({'query': {'name': 'hotkey-name'}})
-        GLib.idle_add.assert_called_with(hotkey_dialog.present)
+    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
+        dialog.prefs_showhotkey_dialog.original(dialog, {'query': {'name': 'hotkey-name'}})
+        hotkey_dialog.present.assert_called_with()
 
     @pytest.mark.with_display
     def test_get_app_hotkey(self, dialog, settings):
