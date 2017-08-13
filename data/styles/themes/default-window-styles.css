@@ -61,9 +61,11 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
     font-size: 80%;
 }
 
+.prefs-btn {
+    background-repeat: no-repeat;
+}
 .prefs-btn:hover {
     background-position: 0 -27px;
-    background-repeat: no-repeat; /* Fixes artifacts with gnome (Fedora) */
 }
 
 
