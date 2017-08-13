@@ -17,6 +17,9 @@ class AppResultItem(ResultItem):
     def get_name(self):
         return self.record.get('name')
 
+    def get_search_name(self):
+        return self.record.get('search_name')
+
     def get_description(self, query):
         return self.record.get('description')
 

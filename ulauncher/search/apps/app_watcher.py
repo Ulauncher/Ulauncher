@@ -1,7 +1,7 @@
 import os
-import time
 import pyinotify
 import logging
+from time import time, sleep
 from functools import wraps
 
 from ulauncher.util.decorator.run_async import run_async
@@ -49,7 +49,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
         """
         while True:
             for pathname, start_time in self._deferred_files.items():
-                time_passed = time.time() - start_time
+                time_passed = time() - start_time
                 if time_passed < self.RETRY_TIME_SPAN[0]:
                     # skip this file for now
                     continue
@@ -71,13 +71,13 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
                     # success
                     del self._deferred_files[pathname]
 
-            time.sleep(self.RETRY_INTERVAL)
+            sleep(self.RETRY_INTERVAL)
 
     def add_file_deffered(self, pathname):
         """
         Add .desktop file to DB a little bit later
         """
-        self._deferred_files[pathname] = time.time()
+        self._deferred_files[pathname] = time()
 
     def _add_file_sync(self, pathname):
         """
@@ -132,8 +132,9 @@ def start():
     """
 
     db = AppDb.get_instance()
+    t0 = time()
     added_apps = map(lambda app: db.put_app(app), find_apps())
-    logger.info('Finished scanning directories for desktop files. Indexed %s applications' % len(added_apps))
+    logger.info('Scanned desktop dirs in %.2f seconds. Indexed %s applications' % ((time() - t0), len(added_apps)))
 
     wm = pyinotify.WatchManager()
     handler = AppNotifyEventHandler(db)

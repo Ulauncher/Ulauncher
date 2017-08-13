@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 import logging
 
@@ -39,7 +40,7 @@ class AppDb(object):
     def _create_table(self):
         self._conn.executescript('''
             CREATE TABLE app_db (name VARCHAR PRIMARY KEY, desktop_file VARCHAR,
-            description VARCHAR);
+            description VARCHAR, search_name VARCHAR);
             CREATE INDEX desktop_file_idx ON app_db (desktop_file);''')
 
     def _row_to_rec(self, row):
@@ -50,6 +51,7 @@ class AppDb(object):
             'desktop_file': row['desktop_file'],
             'name': row['name'],
             'description': row['description'],
+            'search_name': row['search_name'],
             'icon': self._icons[row['desktop_file']],
         }
 
@@ -60,15 +62,18 @@ class AppDb(object):
         """
         :param Gio.DesktopAppInfo app:
         """
+        name = force_unicode(app.get_string('X-GNOME-FullName') or app.get_name())
+        exec_name = force_unicode(app.get_string('Exec') or '')
         record = {
             "desktop_file": force_unicode(app.get_filename()),
-            "name": force_unicode(app.get_string('X-GNOME-FullName') or app.get_name()),
             "description": force_unicode(app.get_description() or ''),
+            "name": name,
+            "search_name": search_name(name, exec_name)
         }
         self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
 
-        query = '''INSERT OR IGNORE INTO app_db (name, desktop_file, description)
-                   VALUES (:name, :desktop_file, :description)'''
+        query = '''INSERT OR IGNORE INTO app_db (name, desktop_file, description, search_name)
+                   VALUES (:name, :desktop_file, :description, :search_name)'''
         try:
             self._conn.execute(query, record)
             self.commit()
@@ -133,3 +138,26 @@ class AppDb(object):
             result_list.append(AppResultItem(rec))
 
         return result_list
+
+
+def search_name(name, exec_name):
+    """
+    Returns string that will be used for search
+    We want to make sure app can be searchable by its exec_name
+    """
+    if not exec_name:
+        return name
+
+    match = re.match(r'^(\/.+\/)?([-\w\.]+)([^\w\/]|$)', exec_name.lower(), re.I)
+    if not match:
+        return name
+
+    exec_name = match.group(2)
+    exec_name_split = set(exec_name.split('-'))
+    name_split = set(name.lower().split(' '))
+    common_words = exec_name_split & name_split
+
+    if common_words:
+        return name
+
+    return '%s %s' % (name, exec_name)

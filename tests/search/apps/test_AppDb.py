@@ -1,6 +1,6 @@
 import pytest
 import mock
-from ulauncher.search.apps.AppDb import AppDb
+from ulauncher.search.apps.AppDb import AppDb, search_name
 from collections import Iterable
 
 
@@ -13,27 +13,27 @@ class TestAppDb(object):
     @pytest.fixture
     def db_with_data(self, app_db):
         values = [
-            {'name': 'john', 'description': 'test',
+            {'name': 'john', 'description': 'test', 'search_name': 'john',
                 'desktop_file': 'john.desktop', 'icon': 'icon'},
-            {'name': 'james', 'description': 'test',
+            {'name': 'james', 'description': 'test', 'search_name': 'james',
                 'desktop_file': 'james.desktop', 'icon': 'icon'},
-            {'name': 'o.jody', 'description': 'test',
+            {'name': 'o.jody', 'description': 'test', 'search_name': 'o.jody',
                 'desktop_file': 'o.jdy.desktop', 'icon': 'icon'},
-            {'name': 'sandy', 'description': 'test',
+            {'name': 'sandy', 'description': 'test', 'search_name': 'sandy',
                 'desktop_file': 'sandy.desktop', 'icon': 'icon'},
-            {'name': 'jane', 'description': 'test',
+            {'name': 'jane', 'description': 'test', 'search_name': 'jane',
                 'desktop_file': 'jane.desktop', 'icon': 'icon'},
-            {'name': 'LibreOffice Calc', 'description': 'test',
+            {'name': 'LibreOffice Calc', 'description': 'test', 'search_name': 'LibreOffice Calc',
                 'desktop_file': 'libre.calc', 'icon': 'icon'},
-            {'name': 'Calc', 'description': 'test',
+            {'name': 'Calc', 'description': 'test', 'search_name': 'Calc',
                 'desktop_file': 'calc', 'icon': 'icon'},
-            {'name': 'Guake Terminal', 'description': 'test',
+            {'name': 'Guake Terminal', 'description': 'test', 'search_name': 'Guake Terminal',
                 'desktop_file': 'Guake Terminal', 'icon': 'icon'},
-            {'name': 'Keyboard', 'description': 'test',
+            {'name': 'Keyboard', 'description': 'test', 'search_name': 'Keyboard',
                 'desktop_file': 'Keyboard', 'icon': 'icon'}
         ]
-        app_db.get_cursor().executemany("""INSERT INTO app_db (name, desktop_file, description)
-            VAlUES (:name, :desktop_file, :description)""", values)
+        app_db.get_cursor().executemany("""INSERT INTO app_db (name, desktop_file, description, search_name)
+            VAlUES (:name, :desktop_file, :description, :search_name)""", values)
         for rec in values:
             app_db.get_icons()[rec['desktop_file']] = rec['icon']
         return app_db
@@ -53,12 +53,6 @@ class TestAppDb(object):
         assert not db_with_data.get_by_path('jane.desktop')
 
     def test_put_app(self, app_db, get_app_icon_pixbuf, mocker):
-        app = {
-            'desktop_file': 'test_put_app_desktop',
-            'name': 'test_put_app_name',
-            'description': 'test_put_app_desktop',
-            'desktop_file': 'test_put_app_desktop',
-        }
         app = mock.MagicMock()
         app.get_filename.return_value = 'file_name_test1'
         app.get_string.return_value = None
@@ -71,6 +65,7 @@ class TestAppDb(object):
             'desktop_file': 'file_name_test1',
             'name': 'name_test1',
             'description': 'description_test1',
+            'search_name': 'name_test1',
             'icon': get_app_icon_pixbuf.return_value
         }
 
@@ -95,7 +90,8 @@ class TestAppDb(object):
             'name': 'john',
             'description': 'test',
             'desktop_file': 'john.desktop',
-            'icon': 'icon'
+            'icon': 'icon',
+            'search_name': 'john'
         }
 
     def test_get_by_path(self, db_with_data):
@@ -104,5 +100,17 @@ class TestAppDb(object):
             'name': 'LibreOffice Calc',
             'description': 'test',
             'desktop_file': 'libre.calc',
-            'icon': 'icon'
+            'icon': 'icon',
+            'search_name': 'LibreOffice Calc'
         }
+
+
+def test_search_name():
+    assert search_name('GNU Image Manipulation Program', r'gimp-2.8 %U') == 'GNU Image Manipulation Program gimp-2.8'
+    assert search_name('Content Hub Clipboard', r'content-hub-clipboard %U') == 'Content Hub Clipboard'
+    assert search_name('Scopes', r'/usr/bin/unity8-dash') == 'Scopes unity8-dash'
+    assert search_name('Mouse & Touchpad', r'unity-control-center mouse') == 'Mouse & Touchpad unity-control-center'
+    assert search_name('Back Up', r'deja-dup --backup') == 'Back Up deja-dup'
+    assert search_name('Calendar', r'gnome-calendar') == 'Calendar'
+    assert search_name('Amazon', r'unity-webapps-runner --amazon --app-id=ubuntu-amazon-default') == \
+        'Amazon unity-webapps-runner'
