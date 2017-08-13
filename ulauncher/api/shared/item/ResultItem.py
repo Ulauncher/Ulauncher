@@ -16,7 +16,7 @@ class ResultItem(object):
     _selected_by_default = False
     _on_enter = None
     _on_alt_enter = None
-    _highlightable = None
+    _highlightable = True
 
     def __init__(self,
                  name=None,

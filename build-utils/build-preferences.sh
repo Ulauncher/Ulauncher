@@ -11,5 +11,5 @@ cd ../data/preferences
 
 yarn install
 yarn lint
-# yarn test
+yarn unit
 yarn build
