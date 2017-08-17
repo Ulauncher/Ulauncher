@@ -13,7 +13,14 @@ class FileQueries(KeyValueDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        db = cls(os.path.join(CACHE_DIR, 'file_borwser_queries.db'))
+        """
+        Migrates the old cache file into one with a corrected filename.
+        """
+        old_browser_cache = os.path.join(CACHE_DIR, 'file_borwser_queries.db')
+        browser_cache = os.path.join(CACHE_DIR, 'file_browser_queries.db')
+        if os.path.isfile(old_browser_cache):
+            os.rename(old_browser_cache, new_browser_cache)
+        db = cls(new_browser_cache)
         db.open()
         return db
 
