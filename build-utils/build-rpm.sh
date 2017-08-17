@@ -16,7 +16,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-if [ ! -f data/preferences/index.html ]; then
+if [ ! -f data/preferences/dist/index.html ]; then
     echo "Preferences are not built"
     exit 1
 fi
@@ -42,7 +42,7 @@ rsync -aq --progress \
     --exclude-from=.gitignore
 
 rm -rf $tmpdir/data/preferences/*
-cp -r data/preferences/index.html data/preferences/build $tmpdir/data/preferences
+cp -r data/preferences/dist $tmpdir/data/preferences
 
 # set version to a tag name ($1)
 sed -i "s/%VERSION%/$1/g" $tmpdir/setup.py

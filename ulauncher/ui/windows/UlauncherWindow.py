@@ -138,7 +138,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
-        t = threading.Timer(0.07, lambda: self.is_focused or self._on_user_hide())
+        t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
         t.start()
 
     def on_focus_in_event(self, *args):
@@ -181,7 +181,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                     pass
 
         if keyname == 'Escape':
-            self._on_user_hide()
+            self.hide()
 
     ######################################
     # Helpers
@@ -240,6 +240,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self._show_initial_results()
 
     def _show_initial_results(self):
+        if Settings.get_instance().get_property('clear-previous-query'):
+            self.input.set_text('')
+
         if not Settings.get_instance().get_property('show-recent-apps'):
             # clear result list if setting was changed
             if self._recent_apps_were_shown:
@@ -292,14 +295,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.hide_and_clear_input()
 
     def hide_and_clear_input(self):
-        self.hide()
         self.input.set_text('')
-
-    def _on_user_hide(self):
         self.hide()
-        clear_query = Settings.get_instance().get_property('clear-previous-query')
-        if clear_query:
-            self.input.set_text('')
 
     def show_results(self, result_items):
         """

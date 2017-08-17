@@ -36,7 +36,7 @@ GPROPERTIES = {
     "clear-previous-query": (bool,
                              "Clear query when app looses focus",
                              None,
-                             False,
+                             True,
                              GObject.PARAM_READWRITE),
     "theme-name": (str,
                    "Current theme",
