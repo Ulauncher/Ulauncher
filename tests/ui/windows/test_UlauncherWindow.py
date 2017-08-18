@@ -24,6 +24,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppCacheDb.get_instance').return_value
 
     @pytest.fixture(autouse=True)
+    def app_stat_db(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppStatDb.get_instance').return_value
+
+    @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
 

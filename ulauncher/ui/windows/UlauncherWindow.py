@@ -42,10 +42,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     __gtype_name__ = "UlauncherWindow"
 
     _current_accel_name = None
-    _recent_apps_were_shown = False
-    _resultsRenderTime = 0
-    _prefsWereActivated = False
-    _mainWindowWasActivated = False
+    _results_render_time = 0
 
     @classmethod
     @singleton
@@ -88,13 +85,17 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.set_keep_above(True)
 
         self.PreferencesDialog = PreferencesUlauncherDialog
+        self.settings = Settings.get_instance()
 
         self.position_window()
         self.init_theme()
 
+        # this will trigger to show frequent apps if necessary
+        self.show_results([])
+
         # bind hotkey
         Keybinder.init()
-        accel_name = Settings.get_instance().get_property('hotkey-show-app')
+        accel_name = self.settings.get_property('hotkey-show-app')
         # bind in the main thread
         GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
@@ -196,7 +197,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         css_file = 'theme-gtk-3.20.css' if gtk_version_is_gte(3, 20, 0) else 'theme.css'
         self.init_styles(get_data_file('styles',
                                        'themes',
-                                       Settings.get_instance().get_property('theme-name'),
+                                       self.settings.get_property('theme-name'),
                                        css_file))
 
     def activate_preferences(self, page='preferences'):
@@ -209,7 +210,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         self.hide()
 
-        self._prefsWereActivated = True
         if self.preferences_dialog is not None:
             logger.debug('show existing preferences_dialog')
             self.preferences_dialog.present(page=page)
@@ -231,29 +231,17 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                   current_screen['height'] / 5 + current_screen['y'])
 
     def show_window(self):
-        self._mainWindowWasActivated = True
         # works only when the following methods are called in that exact order
         self.window.set_sensitive(True)
         self.window.present()
         self.position_window()
         self.present_with_time(Keybinder.get_current_event_time())
-        self._show_initial_results()
 
-    def _show_initial_results(self):
-        if Settings.get_instance().get_property('clear-previous-query'):
+        if not self.input.get_text():
+            # make sure frequent apps are shown if necessary
+            self.show_results([])
+        elif self.settings.get_property('clear-previous-query'):
             self.input.set_text('')
-
-        if not Settings.get_instance().get_property('show-recent-apps'):
-            # clear result list if setting was changed
-            if self._recent_apps_were_shown:
-                self._recent_apps_were_shown = False
-                self.show_results([])
-            return
-
-        items = AppStatDb.get_instance().get_most_frequent(3)
-        if not self.input.get_text() and items:
-            self._recent_apps_were_shown = True
-            self.show_results(items)
 
     def cb_toggle_visibility(self, key):
         self.hide() if self.is_visible() else self.show_window()
@@ -285,7 +273,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         return Query(force_unicode(self.input.get_text()))
 
     def select_result_item(self, index, onHover=False):
-        if time.time() - self._resultsRenderTime > 0.1:
+        if time.time() - self._results_render_time > 0.1:
             # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
             self.results_nav.select(index)
 
@@ -304,9 +292,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
+
+        if not result_items and not self.input.get_text() and self.settings.get_property('show-recent-apps'):
+            result_items = AppStatDb.get_instance().get_most_frequent(3)
+
         results = self.create_item_widgets(result_items, self._get_user_query())
+
         if results:
-            self._resultsRenderTime = time.time()
+            self._results_render_time = time.time()
             map(self.result_box.add, results)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())
