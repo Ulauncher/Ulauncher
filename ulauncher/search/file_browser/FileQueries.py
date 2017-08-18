@@ -14,13 +14,15 @@ class FileQueries(KeyValueDb):
     @singleton
     def get_instance(cls):
         """
-        Migrates the old cache file into one with a corrected filename.
+        Issue #151: Migrates the old cache file into one with a corrected filename.
+        TODO: Remove once enough users are migrated
         """
         old_browser_cache = os.path.join(CACHE_DIR, 'file_borwser_queries.db')
         browser_cache = os.path.join(CACHE_DIR, 'file_browser_queries.db')
         if os.path.isfile(old_browser_cache):
-            os.rename(old_browser_cache, new_browser_cache)
-        db = cls(new_browser_cache)
+            os.rename(old_browser_cache, browser_cache)
+
+        db = cls(browser_cache)
         db.open()
         return db
 
