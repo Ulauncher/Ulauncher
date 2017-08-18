@@ -310,7 +310,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
                                     force_unicode(req_data['keyword']),
                                     force_unicode(req_data['cmd']),
                                     req_data['icon'],
-                                    req_data['is_default_search'],
+                                    str_to_bool(req_data['is_default_search']),
                                     req_data.get('id'))
         shortcuts.commit()
         return {'id': id}
@@ -427,3 +427,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'value': hotkey_val,
             'displayValue': hotkey_display_val
         })
+
+
+def str_to_bool(value):
+    return value in [1, 'true', 'True']
