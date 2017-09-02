@@ -32,6 +32,7 @@
           v-if="pref.type == 'keyword'"
           :label="`${pref.name} Keyword`"
           class="keyword-input"
+          :description="pref.description"
           >
           <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
         </b-form-fieldset>
@@ -39,6 +40,7 @@
         <b-form-fieldset
           v-if="pref.type == 'input'"
           :label="pref.name"
+          :description="pref.description"
           >
           <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
         </b-form-fieldset>
@@ -46,6 +48,7 @@
         <b-form-fieldset
           v-if="pref.type == 'text'"
           :label="pref.name"
+          :description="pref.description"
           >
           <b-form-input textarea :ref="pref.id" :value="pref.value" :rows="3"></b-form-input>
         </b-form-fieldset>

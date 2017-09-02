@@ -131,6 +131,7 @@ function generateExtensionRecord (extId, name, numOfPrefs = 3, url = 'https://gi
       type: 'input',
       name: 'Max Number of Posts',
       default_value: '5',
+      description: 'This is description',
       user_value: null,
       value: '5'
     },
@@ -139,6 +140,7 @@ function generateExtensionRecord (extId, name, numOfPrefs = 3, url = 'https://gi
       type: 'text',
       name: 'Default Message',
       default_value: '',
+      description: 'This is description',
       user_value: 'Hello Steve!',
       value: 'Hello Steve!'
     }
