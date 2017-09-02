@@ -36,7 +36,7 @@ rsync -aq --progress \
     --exclude-from=.gitignore
 
 rm -rf $tmpdir/data/preferences/*
-cp -r data/preferences/index.html data/preferences/build $tmpdir/data/preferences
+cp -r data/preferences/dist $tmpdir/data/preferences
 
 # set version to a tag name ($1)
 sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py
