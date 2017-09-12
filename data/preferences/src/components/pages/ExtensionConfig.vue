@@ -89,7 +89,7 @@
           </div>
           <div v-if="updateState == 'no-updates'">
             <p>
-              No new updates are available
+              Extension is up-to-date
             </p>
             <b-button variant="secondary" href="" @click="showActionButtons">OK</b-button>
           </div>

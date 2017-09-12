@@ -17,6 +17,7 @@ DEFAULT_BLACKLISTED_DIRS = [
     '/usr/share/mimelnk'
 ]
 
+dayInSec = 24 * 60 * 60
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type
                         "Hotkey: Show ulauncher window",  # nick name
@@ -48,6 +49,13 @@ GPROPERTIES = {
                                  None,
                                  ':'.join(DEFAULT_BLACKLISTED_DIRS),
                                  GObject.PARAM_READWRITE),
+    "extension-update-interval": (int,
+                                  "Extension update interval in seconds",
+                                  None,
+                                  0,
+                                  dayInSec * 300,
+                                  dayInSec,
+                                  GObject.PARAM_READWRITE),
 }
 
 
