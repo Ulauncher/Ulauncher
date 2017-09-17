@@ -104,7 +104,7 @@ export default {
       }
 
       let shortcut = {
-        id: this.id,
+        id: this.id || '',
         icon: this.localIcon,
         name: this.localName,
         keyword: this.localKeyword,
