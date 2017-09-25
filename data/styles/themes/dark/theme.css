@@ -1,7 +1,7 @@
-@define-color bg_color #3b3b3b;
+@define-color bg_color rgba(0,0,0,0.6);
 @define-color fg_color #ddd;
-@define-color selected_bg_color #4675ab;
-@define-color selected_fg_color #d5eaff;
+@define-color selected_bg_color rgba(0,0,0,0.7);
+@define-color selected_fg_color #ddeeff;
 @define-color backdrop_selected_bg_color shade (@bg_color, 0.92);
 @define-color backdrop_selected_fg_color @fg_color;
 
@@ -15,8 +15,8 @@
  * Input
  */
 @define-color input_color #ddd;
-@define-color input_bg #595959;
-@define-color input_shadow rgba(0,0,0, 0.3);
+@define-color input_bg rgba(0,0,0, 0.6);
+@define-color input_shadow rgba(0,0,0, 0.0);
 @define-color caret_color darker(@input_color);
 
 /**
@@ -24,12 +24,8 @@
  */
 @define-color item_text #999;
 @define-color item_name #bbb;
-@define-color item_box_selected #4675ab;
+@define-color item_box_selected #4477aa;
 @define-color item_text_selected #99ccff;
 @define-color item_name_selected #fff;
 
 @import url("../default-window-styles.css");
-
-.prefs-btn {
-    background-image: url('prefs.png');
-}
