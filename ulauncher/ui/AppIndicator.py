@@ -32,6 +32,9 @@ class AppIndicator(object):
     def set_icon(self, path):
         self.__indicator.set_icon(path)
 
+    def switch(self, on=False):
+        self.show() if on else self.hide()
+
     def add_menu_item(self, command, title):
         menu_item = Gtk.MenuItem()
         menu_item.set_label(title)

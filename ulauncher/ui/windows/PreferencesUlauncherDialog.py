@@ -3,7 +3,7 @@ import os
 import logging
 import json
 
-from gi.repository import Gio, Gtk, WebKit2
+from gi.repository import Gio, Gtk, WebKit2, GLib
 from urllib import unquote
 from base64 import b64decode
 
@@ -191,9 +191,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         show_indicator = self._get_bool(url_params['query']['value'])
         logger.info('Set show-indicator-icon to %s' % show_indicator)
         self.settings.set_property('show-indicator-icon', show_indicator)
-        indicator = AppIndicator.get_instance()
-        indicator.show() if show_indicator else indicator.hide()
         self.settings.save_to_file()
+        indicator = AppIndicator.get_instance()
+        GLib.idle_add(indicator.switch, show_indicator)
 
     @rt.route('/set/autostart-enabled')
     def prefs_set_autostart(self, url_params):

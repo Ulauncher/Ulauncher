@@ -29,6 +29,10 @@ class TestPreferencesUlauncherDialog:
     def hotkey_dialog(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.HotkeyDialog').return_value
 
+    @pytest.fixture(autouse=True)
+    def idle_add(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.GLib.idle_add')
+
     @pytest.fixture
     def builder(self):
         return mock.MagicMock()
@@ -45,13 +49,13 @@ class TestPreferencesUlauncherDialog:
         dialog.builder = builder
         return dialog
 
-    def test_prefs_set_show_indicator_icon(self, dialog, builder, settings, indicator):
+    def test_prefs_set_show_indicator_icon(self, dialog, builder, settings, indicator, idle_add):
         dialog.prefs_set_show_indicator_icon({'query': {'value': 'true'}})
-        indicator.show.assert_called_with()
+        idle_add.assert_called_with(indicator.switch, True)
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
         dialog.prefs_set_show_indicator_icon({'query': {'value': '0'}})
-        indicator.hide.assert_called_with()
+        idle_add.assert_called_with(indicator.switch, False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
