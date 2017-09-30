@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" v-if="prefsLoaded">
 
     <b-table striped small hover show-empty :items="items" :fields="fields">
       <template slot="name" scope="item">
@@ -9,7 +9,7 @@
         <div class="limited-width">{{ item.value }}</div>
       </template>
       <template slot="icon" scope="item">
-        <img class="icon" :src="item.value" />
+        <img class="icon" :src="expandUserPath(item.value)" />
       </template>
       <template slot="cmd" scope="item">
         <div class="cmd">
@@ -36,6 +36,7 @@
 <script>
 import jsonp from '@/api'
 import bus from '@/event-bus'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'shortcuts',
@@ -53,11 +54,18 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapState(['prefs']),
+    ...mapGetters(['prefsLoaded'])
+  },
   methods: {
     fetchData () {
       jsonp('prefs://shortcut/get-all').then((data) => {
         this.items = data
       })
+    },
+    expandUserPath (path) {
+      return path.startsWith('~') ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     edit (item) {
       this.$router.push({path: 'edit-shortcut', query: item})

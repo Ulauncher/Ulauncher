@@ -18,9 +18,14 @@ class ShortcutsDb(KeyValueJsonDb):
 
         if is_first_run:
             db._records = get_default_shortcuts()
-            db.commit()
+
+        db.commit()
 
         return db
+
+    def commit(self):
+        self.ensure_user_paths()
+        super(ShortcutsDb, self).commit()
 
     def get_sorted_records(self):
         return [rec for rec in sorted(self.get_records().itervalues(), key=lambda rec: rec['added'])]
@@ -44,3 +49,15 @@ class ShortcutsDb(KeyValueJsonDb):
             "added": self._records.get(id, {"added": time()})["added"]
         }
         return id
+
+    def ensure_user_paths(self):
+        for s in self.get_shortcuts():
+            s['icon'] = get_user_path(s['icon'])
+
+
+def get_user_path(path):
+    user_home = os.path.expanduser('~')
+    if path and path.startswith(user_home):
+        return path.replace(user_home, '~', 1)
+
+    return path

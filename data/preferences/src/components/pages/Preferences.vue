@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="prefsLoaded">
     <h1>General</h1>
 
     <table>
@@ -11,7 +11,7 @@
           <b-form-input
             id="hotkey-show-app"
             @focus.native="showHotkeyDialog($event)"
-            v-model="hotkey_show_app"></b-form-input>
+            :value="prefs.hotkey_show_app"></b-form-input>
         </td>
       </tr>
 
@@ -21,9 +21,8 @@
         </td>
         <td>
           <b-form-checkbox
-            :disabled="!autostart_allowed"
+            :disabled="!prefs.autostart_allowed"
             id="autostart"
-            @change="updateLaunchAtLogin"
             v-model="autostart_enabled"></b-form-checkbox>
         </td>
       </tr>
@@ -35,7 +34,6 @@
         <td>
           <b-form-checkbox
             id="show-indicator-icon"
-            @change="updateShowIndicatorIcon"
             v-model="show_indicator_icon"></b-form-checkbox>
         </td>
       </tr>
@@ -47,7 +45,6 @@
         <td>
           <b-form-checkbox
             id="show-recent-apps"
-            @change="updateShowRecentApps"
             v-model="show_recent_apps"></b-form-checkbox>
         </td>
       </tr>
@@ -60,7 +57,6 @@
           <b-form-radio
             id="theme-name"
             :options="theme_options"
-            @change.native="updateTheme"
             v-model="theme_name"></b-form-radio>
         </td>
       </tr>
@@ -76,7 +72,6 @@
         <td>
           <b-form-checkbox
             id="clear_previous_query"
-            @change="updateClearPrevText"
             v-model="clear_previous_query"></b-form-checkbox>
         </td>
       </tr>
@@ -97,7 +92,6 @@
           <editable-text-list
             width="450px"
             v-model="blacklisted_desktop_dirs"
-            @input="updateBlacklistedDirs"
             newItemPlaceholder="Type in an absolute path and press Enter"></editable-text-list>
         </td>
       </tr>
@@ -107,6 +101,8 @@
 </template>
 
 <script>
+import { mapState, mapMutations, mapGetters } from 'vuex'
+
 import jsonp from '@/api'
 import bus from '@/event-bus'
 import EditableTextList from '@/components/widgets/EditableTextList'
@@ -120,105 +116,118 @@ export default {
     'editable-text-list': EditableTextList
   },
 
-  created () {
-    this.fetchData()
+  created() {
     bus.$on(hotkeyEventName, this.onHotkeySet)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     bus.$off(hotkeyEventName, this.onHotkeySet)
   },
 
-  data () {
+  data() {
     return {
-      hotkey_show_app: '',
-      autostart_allowed: false,
-      autostart_enabled: false,
-      show_recent_apps: false,
-      show_indicator_icon: false,
-      theme_name: null,
       previous_theme_name: null,
-      clear_previous_query: false,
-      blacklisted_desktop_dirs: [],
       blacklistedDirsChanged: false,
-      theme_options: [
-        {text: 'Dark', value: 'dark'},
-        {text: 'Light', value: 'light'}
-      ]
+      theme_options: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }]
     }
   },
 
-  methods: {
-    fetchData () {
-      jsonp('prefs:///get/all').then((data) => {
-        this.hotkey_show_app = data.hotkey_show_app
-        this.autostart_allowed = data.autostart_allowed
-        this.autostart_enabled = data.autostart_enabled
-        this.show_recent_apps = data.show_recent_apps
-        this.show_indicator_icon = data.show_indicator_icon
-        this.theme_name = data.theme_name
-        this.clear_previous_query = data.clear_previous_query
-        this.blacklisted_desktop_dirs = data.blacklisted_desktop_dirs ? data.blacklisted_desktop_dirs.split(':') : []
-      }, (err) => bus.$emit('error', err))
+  computed: {
+    ...mapState(['prefs']),
+
+    ...mapGetters(['prefsLoaded']),
+
+    autostart_enabled: {
+      get() {
+        return this.prefs.autostart_enabled
+      },
+      set(value) {
+        return jsonp('prefs://set/autostart-enabled', { value: value }).then(
+          () => this.setPrefs({ autostart_enabled: value }),
+          err => bus.$emit('error', err)
+        )
+      }
     },
 
-    showHotkeyDialog (e) {
-      jsonp('prefs://show/hotkey-dialog', {name: hotkeyEventName})
+    show_indicator_icon: {
+      get() {
+        return this.prefs.show_indicator_icon
+      },
+      set(value) {
+        return jsonp('prefs://set/show-indicator-icon', { value: value }).then(
+          () => this.setPrefs({ show_indicator_icon: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    show_recent_apps: {
+      get() {
+        return this.prefs.show_recent_apps
+      },
+      set(value) {
+        return jsonp('prefs://set/show-recent-apps', { value: value }).then(
+          () => this.setPrefs({ show_recent_apps: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    theme_name: {
+      get() {
+        return this.prefs.theme_name
+      },
+      set(value) {
+        return jsonp('prefs://set/theme-name', { value: value }).then(
+          () => this.setPrefs({ theme_name: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    clear_previous_query: {
+      get() {
+        return this.prefs.clear_previous_query
+      },
+      set(value) {
+        return jsonp('prefs://set/clear-previous-query', { value: value }).then(
+          () => this.setPrefs({ clear_previous_query: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    blacklisted_desktop_dirs: {
+      get() {
+        return this.prefs.blacklisted_desktop_dirs
+      },
+      set(value) {
+        return jsonp('prefs://set/blacklisted-desktop-dirs', { value: value.join(':') }).then(
+          () => {
+            this.setPrefs({ blacklisted_desktop_dirs: value })
+            this.blacklistedDirsChanged = true
+          },
+          err => bus.$emit('error', err)
+        )
+      }
+    }
+
+  },
+
+  methods: {
+    ...mapMutations(['setPrefs']),
+
+    showHotkeyDialog(e) {
+      jsonp('prefs://show/hotkey-dialog', { name: hotkeyEventName })
       e.target.blur()
     },
 
-    onHotkeySet (e) {
-      const previous = this.hotkey_show_app
-      this.hotkey_show_app = e.displayValue
-      jsonp('prefs://set/hotkey-show-app', {value: e.value}).then(null, (err) => {
-        this.hotkey_show_app = previous
-        bus.$emit('error', err)
-      })
-    },
-
-    updateLaunchAtLogin () {
-      jsonp('prefs://set/autostart-enabled', {value: this.autostart_enabled}).then(null, (err) => {
-        this.autostart_enabled = !this.autostart_enabled
-        bus.$emit('error', err)
-      })
-    },
-
-    updateShowIndicatorIcon () {
-      jsonp('prefs://set/show-indicator-icon', {value: this.show_indicator_icon}).then(null, (err) => {
-        this.show_indicator_icon = !this.show_indicator_icon
-        bus.$emit('error', err)
-      })
-    },
-
-    updateShowRecentApps () {
-      jsonp('prefs://set/show-recent-apps', {value: this.show_recent_apps}).then(null, (err) => {
-        this.show_recent_apps = !this.show_recent_apps
-        bus.$emit('error', err)
-      })
-    },
-
-    updateTheme (e) {
-      jsonp('prefs://set/theme-name', {value: this.theme_name}).then(null, (err) => {
-        bus.$emit('error', err)
-      })
-    },
-
-    updateClearPrevText () {
-      jsonp('prefs://set/clear-previous-query', {value: this.clear_previous_query}).then(null, (err) => {
-        this.clear_previous_query = !this.clear_previous_query
-        bus.$emit('error', err)
-      })
-    },
-
-    updateBlacklistedDirs () {
-      jsonp('prefs://set/blacklisted-desktop-dirs', {value: this.blacklisted_desktop_dirs.join(':')})
-        .then(() => {
-          this.blacklistedDirsChanged = true
-        }, (err) => {
-          bus.$emit('error', err)
-        })
+    onHotkeySet(e) {
+      jsonp('prefs://set/hotkey-show-app', { value: e.value }).then(
+        () => this.setPrefs({ hotkey_show_app: e.displayValue }),
+        err => bus.$emit('error', err)
+      )
     }
-
   }
 }
 </script>

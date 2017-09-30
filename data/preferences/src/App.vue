@@ -37,6 +37,7 @@ export default {
     }
   },
   created () {
+    this.$store.dispatch('getAllPrefs')
     bus.$on('error', this.onError)
   },
   beforeDestroy () {

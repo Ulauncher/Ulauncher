@@ -1,19 +1,23 @@
-export default function (url, params) {
-  function isMatch (url, resource) {
+export default function(url, params) {
+  function isMatch(url, resource) {
     return url.indexOf(resource) !== -1
   }
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     if (isMatch(url, '/get/all')) {
+      console.log('/get/all')
       resolve({
-        'show_indicator_icon': true,
-        'hotkey_show_app': 'Ctrl+Alt L',
-        'autostart_allowed': true,
-        'autostart_enabled': true,
-        'clear_previous_text': true,
-        'blacklisted_desktop_dirs': ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
-        'theme_name': 'light',
-        'version': '1.2.3'
+        show_indicator_icon: true,
+        hotkey_show_app: 'Ctrl+Alt L',
+        autostart_allowed: true,
+        autostart_enabled: true,
+        clear_previous_text: true,
+        blacklisted_desktop_dirs: ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
+        theme_name: 'light',
+        env: {
+          version: '1.2.3',
+          user_home: '/home/username'
+        }
       })
     } else if (isMatch(url, '/set/show-indicator-icon')) {
       console.log('/set/show-indicator-icon', params)
@@ -42,19 +46,18 @@ export default function (url, params) {
     } else if (isMatch(url, '/show/hotkey-dialog')) {
       console.log('/show/hotkey-dialog', params)
       setTimeout(resolve, 0)
-      setTimeout(function () {
-        window.onNotification(params.name, {displayValue: 'Ctrl+Alt+Space'})
+      setTimeout(function() {
+        window.onNotification(params.name, { displayValue: 'Ctrl+Alt+Space', value: '<Ctrl>+<Alt>+<Space>' })
       }, 300)
     } else if (isMatch(url, '/show/file-browser')) {
       console.log('/show/file-browser', params)
       setTimeout(resolve, 0)
-      setTimeout(function () {
-        window.onNotification(params.name,
-          {value: `https://placeholdit.imgix.net/~text?txt=Icon&w=80&h=80`})
+      setTimeout(function() {
+        window.onNotification(params.name, { value: `https://placeholdit.imgix.net/~text?txt=Icon&w=80&h=80` })
       }, 500)
     } else if (isMatch(url, '/shortcut/get-all')) {
       console.log('/shortcut/get-all', params)
-      setTimeout(function () {
+      setTimeout(function() {
         resolve(_getShortcuts())
       }, 0)
     } else if (isMatch(url, '/shortcut/update')) {
@@ -65,12 +68,12 @@ export default function (url, params) {
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/shortcut/add')) {
       console.log('/shortcut/add', params)
-      setTimeout(function () {
-        resolve({...params, id: 'new-id-832923742'})
+      setTimeout(function() {
+        resolve({ ...params, id: 'new-id-832923742' })
       }, 0)
     } else if (isMatch(url, '/extension/get-all')) {
       console.log('/extension/get-all', params)
-      setTimeout(function () {
+      setTimeout(function() {
         resolve(_getExtensions())
       }, 0)
     } else if (isMatch(url, '/extension/update-prefs')) {
@@ -94,10 +97,7 @@ export default function (url, params) {
           reject('Could not load extension')
           return
         }
-        resolve([
-          ..._getExtensions(),
-          generateExtensionRecord('ext.newext', 'NewExt', 2, params.url)
-        ])
+        resolve([..._getExtensions(), generateExtensionRecord('ext.newext', 'NewExt', 2, params.url)])
       }, 1e3)
     } else if (isMatch(url, '/extension/remove')) {
       console.log('/extension/remove', params)
@@ -108,7 +108,7 @@ export default function (url, params) {
   })
 }
 
-function _getExtensions () {
+function _getExtensions() {
   return [
     generateExtensionRecord('ext.timer', 'Timer'),
     generateExtensionRecord('ext.custom', 'Custom ext', 2, null),
@@ -116,7 +116,7 @@ function _getExtensions () {
   ]
 }
 
-function generateExtensionRecord (extId, name, numOfPrefs = 3, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
+function generateExtensionRecord(extId, name, numOfPrefs = 3, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
   let prefs = [
     {
       id: 'keyword',
@@ -162,7 +162,7 @@ function generateExtensionRecord (extId, name, numOfPrefs = 3, url = 'https://gi
   }
 }
 
-function _getShortcuts () {
+function _getShortcuts() {
   return [
     {
       id: '1ad51010-04ee-44fc-81c4-ed6fb72cbf19',
@@ -174,7 +174,7 @@ function _getShortcuts () {
     },
     {
       id: '2ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: '~/Downloads/favicon.ico',
       name: 'gismeteo.ua',
       keyword: 'gismeteo.ua',
       cmd: 'http://www.gismeteo.ua/city/?gis20141120102952990=%s&sedddddddddddddddddddarchQueryData=%2758175%27'

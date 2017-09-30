@@ -1,8 +1,8 @@
 <template>
-  <div class="page">
+  <div class="page" v-if="prefsLoaded">
     <b-media>
       <div :class="{'icon-container': true, 'no-icon': !localIcon, validate}" slot="aside" @click="selectIcon">
-        <img v-if="localIcon" :src="localIcon">
+        <img v-if="localIcon" :src="expandUserPath(localIcon)">
       </div>
 
       <b-form-fieldset
@@ -55,6 +55,7 @@ console.log("Query is:", process.argv[1]);</code></pre>
 <script>
 import jsonp from '@/api'
 import bus from '@/event-bus'
+import { mapState, mapGetters } from 'vuex'
 
 const shortcutIconEventName = 'shortcut-icon-event'
 
@@ -79,6 +80,8 @@ export default {
     }
   },
   computed: {
+    ...mapState(['prefs']),
+    ...mapGetters(['prefsLoaded']),
     nameState () {
       return this.validate && !this.localName ? 'danger' : ''
     },
@@ -90,6 +93,9 @@ export default {
     }
   },
   methods: {
+    expandUserPath (path) {
+      return path.startsWith('~') ? path.replace('~', this.prefs.env.user_home, 1) : path
+    },
     selectIcon () {
       jsonp('prefs://show/file-browser', {type: 'image', name: shortcutIconEventName})
         .then(null, (err) => bus.$emit('error', err))
