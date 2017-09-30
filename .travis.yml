@@ -3,18 +3,20 @@ language: python
 services:
 - docker
 before_install:
-- openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv
-  -in build-utils/launchpad-secret.key.enc -out build-utils/launchpad-secret.key -d
-- openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv
-  -in build-utils/launchpad-public.key.enc -out build-utils/launchpad-public.key -d
-- openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv
-  -in build-utils/aur_key.enc -out build-utils/aur_key -d
+- |
+  if [ ! -z "$encrypted_103700d0e85f_key" ]; then
+    openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/launchpad-secret.key.enc -out build-utils/launchpad-secret.key -d
+    openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/launchpad-public.key.enc -out build-utils/launchpad-public.key -d
+    openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/aur_key.enc -out build-utils/aur_key -d
+  fi
 - source ./build-utils/functions.sh
 - docker pull $BUILD_IMAGE
+install:
+# this is to skip default "pip install -r requirements.txt" on travis
+- true
 script:
-- if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" ]; then bash ./build-utils/travis-test.sh;
-  fi
-- if [ ! -z "$TRAVIS_TAG" ]; then bash ./build-utils/release.sh $TRAVIS_TAG; fi
+- if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" ]; then bash ./build-utils/travis-test.sh; fi
+- if [ ! -z "$TRAVIS_TAG" ] && [ ! -z "$encrypted_103700d0e85f_key" ]; then bash ./build-utils/release.sh $TRAVIS_TAG; fi
 branches:
   only:
   - master

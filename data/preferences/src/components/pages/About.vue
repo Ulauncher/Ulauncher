@@ -1,5 +1,5 @@
 <template>
-  <div class="about-container row">
+  <div class="about-container row" v-if="prefsLoaded">
     <div class="col-4">
       <div class="logo">
         <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -30,7 +30,7 @@
         </svg>
       </div>
       <p class="logo-label">Ulauncher</p>
-      <p class="version">v{{ version }}</p>
+      <p class="version">v{{ this.prefs.env.version }}</p>
     </div>
     <div class="col-8">
       <section class="text-container copyright-text" v-if="!isCreditsShown">
@@ -67,26 +67,20 @@
 </template>
 
 <script>
-import jsonp from '@/api'
-import bus from '@/event-bus'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'about',
-  created () {
-    this.fetchData()
-  },
   data () {
     return {
-      version: '',
       isCreditsShown: false
     }
   },
+  computed: {
+    ...mapState(['prefs']),
+    ...mapGetters(['prefsLoaded'])
+  },
   methods: {
-    fetchData () {
-      jsonp('prefs://get/all').then((data) => {
-        this.version = data.version
-      }, (err) => bus.$emit('error', err))
-    },
     toggleCredits () {
       this.isCreditsShown = !this.isCreditsShown
     }

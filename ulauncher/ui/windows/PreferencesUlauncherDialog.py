@@ -1,4 +1,5 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
+import os
 import logging
 import json
 
@@ -179,7 +180,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'theme_name': self.settings.get_property('theme-name'),
-            'version': get_version()
+            'env': {
+                'version': get_version(),
+                'user_home': os.path.expanduser('~')
+            }
         }
 
     @rt.route('/set/show-indicator-icon')

@@ -17,6 +17,7 @@ def load_image(path, size):
     :rtype: :class:`GtkPixbuf` or :code:`None`
     :returns: None if :func:`new_from_file_at_size` raises error
     """
+    path = os.path.expanduser(path)
     try:
         return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
     except Exception as e:
