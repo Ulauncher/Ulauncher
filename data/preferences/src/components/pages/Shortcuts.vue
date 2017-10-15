@@ -65,7 +65,7 @@ export default {
       })
     },
     expandUserPath (path) {
-      return path.startsWith('~') ? path.replace('~', this.prefs.env.user_home, 1) : path
+      return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     edit (item) {
       this.$router.push({path: 'edit-shortcut', query: item})

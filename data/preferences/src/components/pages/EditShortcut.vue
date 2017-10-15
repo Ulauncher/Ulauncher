@@ -94,7 +94,7 @@ export default {
   },
   methods: {
     expandUserPath (path) {
-      return path.startsWith('~') ? path.replace('~', this.prefs.env.user_home, 1) : path
+      return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     selectIcon () {
       jsonp('prefs://show/file-browser', {type: 'image', name: shortcutIconEventName})
