@@ -13,7 +13,7 @@
           <span>{{ ext.name }}</span>
         </li>
         <li class="link" @click="addExtDialog"><i class="fa fa-plus"></i> <span>Add extension</span></li>
-        <!-- <li class="link" @click="openUrlInBrowser('http://ext.ulauncher.io')"><i class="fa fa-external-link"></i> <span>Discover extensions</span></li> -->
+        <li class="link" @click="openUrlInBrowser('https://ext.ulauncher.io')"><i class="fa fa-external-link"></i> <span>Discover extensions</span></li>
         <li class="link" @click="openUrlInBrowser('http://docs.ulauncher.io')"><i class="fa fa-external-link"></i> <span>Create your own</span></li>
       </ul>
 
