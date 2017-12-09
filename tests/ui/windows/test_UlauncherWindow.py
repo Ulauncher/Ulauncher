@@ -32,6 +32,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
 
     @pytest.fixture(autouse=True)
+    def extDownloader(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionDownloader.get_instance').return_value
+
+    @pytest.fixture(autouse=True)
     def extRunner(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionRunner.get_instance').return_value
 

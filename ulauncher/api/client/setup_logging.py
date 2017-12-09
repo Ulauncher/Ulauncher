@@ -23,7 +23,6 @@ def setup_logging():
 
     if os.getenv('VERBOSE'):
         root.setLevel(logging.DEBUG)
-        root.debug('test')
 
 
 def get_extension_name():

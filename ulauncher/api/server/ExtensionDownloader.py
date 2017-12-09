@@ -1,19 +1,18 @@
 import os
-import re
-import json
 import logging
-from urllib2 import urlopen
 from zipfile import ZipFile
 from urllib import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
 
-from ulauncher.config import CONFIG_DIR, EXTENSIONS_DIR
+from ulauncher.config import EXTENSIONS_DIR
+from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
 from .ExtensionDb import ExtensionDb
 from .GithubExtension import GithubExtension, InvalidGithubUrlError
 from .ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
+from .extension_finder import find_extensions
 
 
 logger = logging.getLogger(__name__)
@@ -74,6 +73,20 @@ class ExtensionDownloader(object):
 
         return ext_id
 
+    @run_async(daemon=True)
+    def download_missing(self):
+        already_downloaded = {id for id, _ in find_extensions(EXTENSIONS_DIR)}
+        for id, ext in self.ext_db.get_records().items():
+            if id in already_downloaded:
+                continue
+
+            logger.info('Downloading missing extension %s' % id)
+            try:
+                ext_id = self.download(ext['url'])
+                self.ext_runner.run(ext_id)
+            except Exception as e:
+                logger.error('%s: %s' % (type(e).__name__, e.message))
+
     def remove(self, ext_id):
         try:
             self.ext_runner.stop(ext_id)
@@ -99,7 +112,7 @@ class ExtensionDownloader(object):
 
         try:
             gh_commit = self.get_new_version(ext_id)
-        except ExtensionIsUpToDateError as e:
+        except ExtensionIsUpToDateError:
             return False
 
         need_restart = self.ext_runner.is_running(ext_id)

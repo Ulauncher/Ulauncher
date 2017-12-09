@@ -19,12 +19,12 @@ class ExtensionRunner(object):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls()
+        return cls(ExtensionServer.get_instance())
 
-    def __init__(self):
+    def __init__(self, extension_server):
         self.extensions_dir = EXTENSIONS_DIR
         self.extension_procs = {}
-        self.extensionServer = ExtensionServer.get_instance()
+        self.extension_server = extension_server
         self.dont_run_extensions = get_options().no_extensions
         self.verbose = get_options().verbose
 
@@ -61,7 +61,7 @@ class ExtensionRunner(object):
         """
         cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
         env = os.environ.copy()
-        env['ULAUNCHER_WS_API'] = self.extensionServer.generate_ws_url(extension_id)
+        env['ULAUNCHER_WS_API'] = self.extension_server.generate_ws_url(extension_id)
         env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
 
         if self.verbose:
@@ -114,8 +114,10 @@ class ExtensionRunner(object):
             del self.extension_procs[extension_id]
         except KeyError:
             pass
+
         terminate = run_async(proc.terminate)
-        thread = terminate()
+        terminate()
+
         sleep(0.5)
         if proc.poll() is None:
             logger.warn("Kill extension \"%s\" since it doesn't react to SIGTERM" % extension_id)
@@ -131,6 +133,7 @@ class ExtensionIsRunningError(RuntimeError):
 
 class ExtensionIsNotRunningError(RuntimeError):
     pass
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

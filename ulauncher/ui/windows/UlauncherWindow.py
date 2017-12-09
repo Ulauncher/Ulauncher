@@ -22,6 +22,7 @@ from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
 from ulauncher.util.AppCacheDb import AppCacheDb
 from ulauncher.util.Settings import Settings
 from ulauncher.util.decorator.singleton import singleton
@@ -103,6 +104,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
+        ExtensionDownloader.get_instance().download_missing()
 
     ######################################
     # GTK Signal Handlers

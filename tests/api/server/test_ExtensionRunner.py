@@ -1,9 +1,19 @@
+import mock
 import pytest
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionManifest import VersionIncompatibilityError
 
 
 class TestExtensionRunner:
+
+    @pytest.fixture
+    def runner(ext_server):
+        return ExtensionRunner(ext_server)
+
+    @pytest.fixture
+    def ext_server(self):
+        return mock.create_autospec(ExtensionServer)
 
     @pytest.fixture(autouse=True)
     def find_extensions(self, mocker):
@@ -25,19 +35,16 @@ class TestExtensionRunner:
     def run_async(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionRunner.run_async')
 
-    def test_run__incompatible_version__exception_is_raised(self, manifest):
+    def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
         manifest.check_compatibility.side_effect = VersionIncompatibilityError()
-        runner = ExtensionRunner()
         with pytest.raises(VersionIncompatibilityError):
             runner.run('id')
 
-    def test_run__ExtensionManifest_open__is_called(self, ExtensionManifest):
-        runner = ExtensionRunner()
+    def test_run__ExtensionManifest_open__is_called(self, runner, ExtensionManifest):
         runner.run('id')
         ExtensionManifest.open.assert_called_with('id')
 
-    def test_run_all__run__called_with_extension_ids(self, mocker, find_extensions):
-        runner = ExtensionRunner()
+    def test_run_all__run__called_with_extension_ids(self, runner, mocker, find_extensions):
         mocker.patch.object(runner, 'run')
         find_extensions.return_value = [('id_1', 'path_1'), ('id_2', 'path_2'), ('id_3', 'path_3')]
         runner.run_all()
