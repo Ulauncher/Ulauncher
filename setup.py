@@ -3,6 +3,7 @@
 
 import os
 import sys
+from itertools import takewhile, dropwhile
 
 try:
     import DistUtilsExtra.auto
@@ -73,8 +74,17 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
 
         for line in fin:
             if 'Exec=' in line:
-                cmd = line.split("=")[1].split(None, 1)
-                line = "Exec=%s" % (target_scripts + 'ulauncher')
+                cmd = line.split("=", 1)[1]
+
+                # persist env vars
+                env_vars = ''
+                if cmd.startswith('env '):
+                    is_env = lambda p: p == 'env' or '=' in p
+                    env_vars = ' '.join(list(takewhile(is_env, cmd.split()))) + ' '
+                    cmd = ' '.join(list(dropwhile(is_env, cmd.split())))
+
+                cmd = cmd.split(None, 1)
+                line = "Exec=%s%s%s" % (env_vars, target_scripts, 'ulauncher')
                 if len(cmd) > 1:
                     line += " %s" % cmd[1].strip()  # Add script arguments back
                 line += "\n"
