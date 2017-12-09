@@ -6,6 +6,7 @@ from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.util.image_loader import load_image
+from ulauncher.config import get_data_file
 
 
 class ShortcutResultItem(ResultItem):
@@ -47,7 +48,10 @@ class ShortcutResultItem(ResultItem):
             return description.replace('%s', '...')
 
     def get_icon(self):
-        return load_image(self.icon, self.ICON_SIZE)
+        if self.icon:
+            return load_image(self.icon, self.ICON_SIZE)
+
+        return load_image(get_data_file('media', 'executable-icon.png'), self.ICON_SIZE)
 
     def on_enter(self, query):
         action_list = ActionList()

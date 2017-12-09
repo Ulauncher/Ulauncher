@@ -166,7 +166,7 @@ function _getShortcuts() {
   return [
     {
       id: '1ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: null,
       name: 'Looooooong naaaaaaaaaaaaaaame',
       keyword: 'g',
       cmd: 'http://github.com/search?q=%s',

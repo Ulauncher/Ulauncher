@@ -1,7 +1,7 @@
 <template>
   <div class="page" v-if="prefsLoaded">
     <b-media>
-      <div :class="{'icon-container': true, 'no-icon': !localIcon, validate}" slot="aside" @click="selectIcon">
+      <div :class="{'icon-container': true, 'no-icon': !localIcon}" slot="aside" @click="selectIcon">
         <img v-if="localIcon" :src="expandUserPath(localIcon)">
       </div>
 
@@ -105,13 +105,13 @@ export default {
     },
     save () {
       this.validate = true
-      if (!this.localName || !this.localKeyword || !this.localCmd || !this.localIcon) {
+      if (!this.localName || !this.localKeyword || !this.localCmd) {
         return
       }
 
       let shortcut = {
         id: this.id || '',
-        icon: this.localIcon,
+        icon: this.localIcon || '',
         name: this.localName,
         keyword: this.localKeyword,
         cmd: this.localCmd,
@@ -181,5 +181,10 @@ export default {
   &.no-icon.validate:before {
     color: #d9534f;
   }
+  &.no-icon.validate:after {
+    content: "Please select an icon";
+    font-weight: bold;
+  }
+
 }
 </style>

@@ -9,7 +9,7 @@
         <div class="limited-width">{{ item.value }}</div>
       </template>
       <template slot="icon" scope="item">
-        <img class="icon" :src="expandUserPath(item.value)" />
+        <img class="icon" :src="item.value ? expandUserPath(item.value) : defaultIcon" />
       </template>
       <template slot="cmd" scope="item">
         <div class="cmd">
@@ -37,6 +37,7 @@
 import jsonp from '@/api'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
+import defaultIcon from '../../assets/executable-icon.png'
 
 export default {
   name: 'shortcuts',
@@ -46,6 +47,7 @@ export default {
   data () {
     return {
       items: [],
+      defaultIcon: defaultIcon,
       fields: {
         icon: {label: ''},
         name: {label: 'Name'},

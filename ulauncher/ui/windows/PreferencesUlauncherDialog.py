@@ -313,7 +313,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         id = shortcuts.put_shortcut(force_unicode(req_data['name']),
                                     force_unicode(req_data['keyword']),
                                     force_unicode(req_data['cmd']),
-                                    req_data['icon'],
+                                    req_data.get('icon') or None,
                                     str_to_bool(req_data['is_default_search']),
                                     req_data.get('id'))
         shortcuts.commit()
