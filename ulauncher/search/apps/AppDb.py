@@ -148,6 +148,10 @@ def search_name(name, exec_name):
     if not exec_name:
         return name
 
+    # drop env vars
+    exec_name = ' '.join([p for p in exec_name.split(' ') if p != 'env' and '=' not in p])
+
+    # drop "/usr/bin/"
     match = re.match(r'^(\/.+\/)?([-\w\.]+)([^\w\/]|$)', exec_name.lower(), re.I)
     if not match:
         return name
