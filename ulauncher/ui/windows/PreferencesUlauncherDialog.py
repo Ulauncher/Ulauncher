@@ -20,7 +20,7 @@ from ulauncher.util.decorator.glib_idle_add import glib_idle_add
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
                                                       ExtensionIsUpToDateError)
-from ulauncher.api.server.ExtensionManifest import ManifestValidationError
+from ulauncher.api.server.ExtensionManifest import ManifestValidationError, VersionIncompatibilityError
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
@@ -390,13 +390,22 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
 
     def _get_all_extensions(self):
-        return [self._get_extension_info(ext_id) for ext_id, _ in find_extensions(EXTENSIONS_DIR)]
+        extensions = []
+        for ext_id, _ in find_extensions(EXTENSIONS_DIR):
+            prefs = ExtensionPreferences.create_instance(ext_id)
+            prefs.manifest.refresh()
+            try:
+                prefs.manifest.validate()
+                prefs.manifest.check_compatibility()
+            except (ManifestValidationError, VersionIncompatibilityError):
+                continue
+            extensions.append(self._get_extension_info(ext_id, prefs))
 
-    def _get_extension_info(self, ext_id):
+        return extensions
+
+    def _get_extension_info(self, ext_id, prefs):
         ext_db = ExtensionDb.get_instance()
         ext_db_record = ext_db.find(ext_id, {})
-        prefs = ExtensionPreferences.create_instance(ext_id)
-        prefs.manifest.refresh()
         return {
             'id': ext_id,
             'url': ext_db_record.get('url'),

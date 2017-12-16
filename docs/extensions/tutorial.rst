@@ -25,7 +25,7 @@ manifest.json
 Create :file:`manifest.json` using the following template::
 
   {
-    "manifest_version": "1",
+    "manifest_version": "2",
     "api_version": "1",
     "name": "Demo extension",
     "description": "Extension Description",
@@ -45,7 +45,7 @@ Create :file:`manifest.json` using the following template::
     ]
   }
 
-* ``manifest_version`` - version of ``manifest.json`` file. Currently only version "1" is supported
+* ``manifest_version`` - version of ``manifest.json`` file. Current version is "2"
 * ``api_version`` - version of Ulauncher API. Currently only version "1" is supported.
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon
@@ -79,11 +79,12 @@ Preference Object Fields
   Key that is used to retrieve value for a certain preference
 
 ``type``
-  Can be "keyword", "input", or "text"
+  Can be "keyword", "input", "text", or "select"
 
   * keyword - define keyword that user has to type in in order to use your extension
   * input - rendered as ``<input>``
   * text - rendered as ``<textarea>``
+  * select - rendered as ``<select>`` with a list of options
 
   .. NOTE:: At least one preference with type "keyword" must be defined.
 
@@ -95,6 +96,9 @@ Preference Object Fields
 
 ``description``
   Optional description
+
+``options``
+  Required for type "select". Must be a list of strings or objects like: ``{"value": "...", "text": "..."}``
 
 .. NOTE:: All fields except ``description`` are required and cannot be empty.
 
@@ -197,6 +201,9 @@ Basic API Concepts
 
   Return :class:`~ulauncher.api.shared.action.RenderResultListAction.RenderResultListAction` in order to render results.
   :class:`~ulauncher.api.shared.item.ExtensionResultItem.ExtensionResultItem` describes a single result item.
+
+  You can also use :class:`~ulauncher.api.shared.item.ExtensionSmallResultItem.ExtensionSmallResultItem` if you want
+  to render more items. You won't have item description with this type.
   ::
 
     class KeywordQueryEventListener(EventListener):

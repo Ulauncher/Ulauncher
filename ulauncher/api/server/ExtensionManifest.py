@@ -61,7 +61,7 @@ class ExtensionManifest(object):
 
     def validate(self):
         try:
-            assert self.get_manifest_version() == '1', "manifest_version should be 1"
+            assert self.get_manifest_version() in ['1', '2'], "Supported manifest versions are '1' and '2'"
             assert self.get_api_version() == '1', "api_version should be 1"
             assert self.get_name(), 'name is not provided'
             assert self.get_description(), 'description is not provided'
@@ -69,13 +69,16 @@ class ExtensionManifest(object):
             assert self.get_icon(), 'icon is not provided'
 
             for p in self.get_preferences():
-                assert p.get('id'), 'Preferences error. id cannot be empty'
-                assert p.get('type'), 'Preferences error. type cannot be empty'
-                assert p.get('type') in ["keyword", "input", "text"], \
-                    'Preferences error. type be "keyword", "input", or "text"'
-                assert p.get('name'), 'Preferences error. name cannot be empty'
+                assert p.get('id'), 'Preferences error. Id cannot be empty'
+                assert p.get('type'), 'Preferences error. Type cannot be empty'
+                assert p.get('type') in ["keyword", "input", "text", "select"], \
+                    'Preferences error. Type can be "keyword", "input", "text", or "select"'
+                assert p.get('name'), 'Preferences error. Name cannot be empty'
                 if p['type'] == 'keyword':
-                    assert p.get('default_value'), 'Preferences error. default_value cannot be empty for keyword'
+                    assert p.get('default_value'), 'Preferences error. Default value cannot be empty for keyword'
+                if p['type'] == 'select':
+                    assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
+                    assert p.get('options'), 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
             raise ManifestValidationError(e.message)
         except KeyError as e:
@@ -86,6 +89,9 @@ class ExtensionManifest(object):
         # only API version 1 is supported for now
         if self.get_api_version() != '1':
             raise VersionIncompatibilityError('Extension "%s" is not compatible with Ulauncher v%s' %
+                                              (self.extension_id, app_version))
+        if self.get_manifest_version() not in ['1', '2']:
+            raise VersionIncompatibilityError('Manifest version of "%s" is not compatible with Ulauncher v%s' %
                                               (self.extension_id, app_version))
 
 

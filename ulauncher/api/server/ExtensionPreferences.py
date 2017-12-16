@@ -42,6 +42,7 @@ class ExtensionPreferences(object):
                 'type': p['type'],
                 'name': p.get('name'),
                 'description': p.get('description', ''),
+                'options': p.get('options', []),
                 'default_value': default_value,
                 'user_value': self.db.find(p['id']),
                 'value': self.db.find(p['id'], default_value)

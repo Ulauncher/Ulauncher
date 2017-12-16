@@ -52,6 +52,14 @@
           >
           <b-form-input textarea :ref="pref.id" :value="pref.value" :rows="3"></b-form-input>
         </b-form-fieldset>
+
+        <b-form-fieldset
+          v-if="pref.type == 'select'"
+          :label="pref.name"
+          :description="pref.description"
+          >
+          <b-form-select :ref="pref.id" :value="pref.value" :options="pref.options"></b-form-select>
+        </b-form-fieldset>
       </template>
 
       <hr>

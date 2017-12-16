@@ -116,7 +116,7 @@ function _getExtensions() {
   ]
 }
 
-function generateExtensionRecord(extId, name, numOfPrefs = 3, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
+function generateExtensionRecord(extId, name, numOfPrefs = 4, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
   let prefs = [
     {
       id: 'keyword',
@@ -134,6 +134,16 @@ function generateExtensionRecord(extId, name, numOfPrefs = 3, url = 'https://git
       description: 'This is description',
       user_value: null,
       value: '5'
+    },
+    {
+      id: 'size',
+      type: 'select',
+      name: 'Size',
+      default_value: 'M',
+      description: 'This is description',
+      user_value: null,
+      options: ['S', 'M', 'L', 'XL'],
+      value: 'M'
     },
     {
       id: 'default_msg',

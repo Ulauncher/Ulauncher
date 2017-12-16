@@ -93,12 +93,17 @@ class TestExtensionManifest:
         manifest.validate()
 
     def test_check_compatibility__api_version_2__exception_raised(self, ext_dir):
-        manifest = ExtensionManifest('test_extension', {'api_version': '2'}, ext_dir)
+        manifest = ExtensionManifest('test_extension', {'api_version': '2', 'manifest_version': '1'}, ext_dir)
+        with pytest.raises(VersionIncompatibilityError):
+            manifest.check_compatibility()
+
+    def test_check_compatibility__manifest_version_12__exception_raised(self, ext_dir):
+        manifest = ExtensionManifest('test_extension', {'api_version': '0', 'manifest_version': '12'}, ext_dir)
         with pytest.raises(VersionIncompatibilityError):
             manifest.check_compatibility()
 
     def test_check_compatibility__api_version_1__no_exceptions(self, ext_dir):
-        manifest = ExtensionManifest('test_extension', {'api_version': '1'}, ext_dir)
+        manifest = ExtensionManifest('test_extension', {'api_version': '1', 'manifest_version': '1'}, ext_dir)
         manifest.check_compatibility()
 
     def test_get_preference(self, ext_dir):
