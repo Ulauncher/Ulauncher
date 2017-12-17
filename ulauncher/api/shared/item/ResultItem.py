@@ -17,6 +17,7 @@ class ResultItem(object):
     _on_enter = None
     _on_alt_enter = None
     _highlightable = True
+    _is_extension = False
 
     def __init__(self,
                  name=None,
@@ -61,7 +62,7 @@ class ResultItem(object):
         :rtype: str
         """
         if query and self._highlightable:
-            return highlight_text(query,
+            return highlight_text(query if not self._is_extension else query.get_argument(''),
                                   self.get_name(),
                                   open_tag='<span foreground="%s">' % color,
                                   close_tag='</span>')

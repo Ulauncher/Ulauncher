@@ -13,8 +13,8 @@ class Query(unicode):
         kw = self.get_keyword()
         return kw and self.startswith('%s ' % kw)
 
-    def get_argument(self):
+    def get_argument(self, default=None):
         try:
             return self.strip().split(' ', 1)[1].strip()
         except IndexError:
-            return None
+            return default
