@@ -154,8 +154,7 @@ $darkBlue: #015aa7;
 $veryLightGrey: #c8c8c8;
 
 .page {
-  padding: 15px;
-  padding-left: 25px;
+  padding: 20px 15px 15px 25px;
 }
 .adding-ext-msg {
   overflow: auto;
@@ -207,7 +206,7 @@ $veryLightGrey: #c8c8c8;
     }
 
     &.last {
-      margin-bottom: 15px;
+      margin-bottom: 25px;
     }
   }
 

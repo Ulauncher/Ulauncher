@@ -66,7 +66,7 @@
 
       <b-button-toolbar>
         <div v-if="buttonRowState == 'remove'">
-          Are you sure?
+          Are you sure? &nbsp;
           <b-button variant="danger" href="" @click="remove">Yes</b-button>
           <b-button variant="secondary" href="" @click="showActionButtons">No</b-button>
         </div>
@@ -215,15 +215,20 @@ export default {
 .pull-right { text-align: right }
 .ext-header {
   $iconSize: 30px;
+  position: relative;
+  min-height: $iconSize + 5px;
 
   img {
     width: $iconSize;
     height: $iconSize;
-    margin-right: 10px;
+    position: absolute;
+    left: 15px;
+    top: 0;
   }
-  img, h1 {
+  h1 {
     display: inline-block;
-    margin-bottom: 5px
+    margin-bottom: 5px;
+    padding-left: $iconSize + 10px;
   }
 }
 .ext-form {
@@ -244,9 +249,6 @@ export default {
   }
   button {
     margin-right: 10px;
-  }
-  .keyword-input {
-    width: 300px;
   }
 }
 </style>

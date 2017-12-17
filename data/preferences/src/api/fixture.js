@@ -110,8 +110,8 @@ export default function(url, params) {
 
 function _getExtensions() {
   return [
+    generateExtensionRecord('ext.custom', 'Very Very Very Very Long Extension Name', 2, null),
     generateExtensionRecord('ext.timer', 'Timer'),
-    generateExtensionRecord('ext.custom', 'Custom ext', 2, null),
     generateExtensionRecord('ext.dict', 'Dictionary', 0)
   ]
 }
