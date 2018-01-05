@@ -1,0 +1,107 @@
+@import url("./reset.css");
+
+/**
+ * App Window
+ */
+@define-color bg_color #F2F2F2;
+@define-color window_shadow rgba(0, 0, 0, 0.3);
+@define-color window_bg @bg_color;
+@define-color window_border_color #b1b1b1;
+@define-color prefs_backgroud #ccc;
+
+/**
+ * Input
+ */
+@define-color selected_bg_color #999;
+@define-color selected_fg_color #fafafa;
+@define-color input_color #555;
+@define-color caret_color lighter(@input_color);
+
+/**
+ * Result items
+ */
+@define-color item_name #333;
+@define-color item_text lighter(@item_name);
+@define-color item_box_selected #D6D6D6;
+@define-color item_text_selected darker(@item_text);
+@define-color item_name_selected @item_name;
+@define-color item_shortcut_color #777;
+@define-color item_shortcut_shadow #fff;
+@define-color item_shortcut_color_sel #444;
+@define-color item_shortcut_shadow_sel lighter(@item_box_selected);
+
+.app {
+    box-shadow: 0 0 5px @window_shadow;
+    background-color: @window_bg;
+    border: 1px solid @window_border_color;
+    border-radius: 4px;
+}
+
+.input {
+    color: @input_color;
+    font-size: 15px;
+    padding: 5px 10px;
+    padding-right: 0px;
+}
+
+/**
+ * Selected text in input
+ */
+.input *:selected,
+.input *:focus,
+*:selected:focus {
+    background-color: alpha (@selected_bg_color, 0.9);
+    color: @selected_fg_color;
+}
+
+.item-text {
+    color: @item_text;
+}
+.item-name {
+    color: @item_name;
+    font-size: 120%;
+}
+
+.selected.item-box {
+    border-left: 1px solid @window_border_color;
+    border-right: 1px solid @window_border_color;
+    background-color: @item_box_selected;
+}
+.selected.item-box .item-text {
+    color: @item_text_selected;
+}
+.selected.item-box .item-name {
+    color: @item_name_selected;
+}
+.item-shortcut {
+    color: @item_shortcut_color;
+    text-shadow: 1px 1px 1px @item_shortcut_shadow;
+}
+.selected.item-box .item-shortcut {
+    color: @item_shortcut_color_sel;
+    text-shadow: 1px 1px 1px @item_shortcut_shadow_sel;
+}
+
+.item-descr {
+    font-size: 80%;
+}
+
+.item-box {
+    margin: 20px;
+}
+
+/**
+ * Small result item
+ */
+.small-result-item .item-name {
+    font-size: 100%;
+}
+
+.prefs-btn {
+    border-radius: 12px;
+    opacity: 0.8;
+    background: url("./prefs.svg") center no-repeat;
+}
+.prefs-btn:hover {
+    background-color: @prefs_backgroud;
+}

@@ -78,11 +78,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.results_nav = None
         self.window = self.ui['ulauncher_window']
         self.input = self.ui['input']
-        # self.prefs_btn = self.ui['prefs_btn']
+        self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
 
         self.input.connect('changed', self.on_input_changed)
-        # self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
+        self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
 
         self.set_keep_above(True)
 

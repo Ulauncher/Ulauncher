@@ -51,13 +51,13 @@
 
       <tr>
         <td>
-          <label for="theme-name">Theme</label>
+          <label for="theme-name">Color Theme</label>
         </td>
         <td>
-          <b-form-radio
+          <b-form-select
             id="theme-name"
             :options="prefs.available_themes"
-            v-model="theme_name"></b-form-radio>
+            v-model="theme_name"></b-form-select>
         </td>
       </tr>
     </table>

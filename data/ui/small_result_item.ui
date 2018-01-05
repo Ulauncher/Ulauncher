@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.8"/>
-  <!-- interface-requires small_result_item 1.0 -->
+  <requires lib="small_result_item" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
   <object class="SmallResultItemWidget" id="item-frame">
     <property name="name">item_frame</property>
@@ -12,14 +12,12 @@
       <object class="GtkEventBox" id="item-box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">15</property>
-        <property name="margin_right">15</property>
         <child>
           <object class="GtkBox" id="item-container">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">7</property>
-            <property name="margin_right">7</property>
+            <property name="margin_left">23</property>
+            <property name="margin_right">23</property>
             <property name="margin_top">2</property>
             <property name="margin_bottom">2</property>
             <child>
@@ -41,14 +39,14 @@
             </child>
             <child>
               <object class="GtkLabel" id="item-name">
-                <property name="width_request">465</property>
+                <property name="width_request">469</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
-                <property name="xalign">0</property>
                 <property name="use_markup">True</property>
                 <property name="ellipsize">start</property>
                 <property name="max_width_chars">1</property>
+                <property name="xalign">0</property>
                 <style>
                   <class name="item-name"/>
                   <class name="item-text"/>

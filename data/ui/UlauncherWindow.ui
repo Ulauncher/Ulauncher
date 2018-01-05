@@ -5,7 +5,7 @@
   <requires lib="ulauncher_window" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
   <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="width_request">600</property>
+    <property name="width_request">631</property>
     <property name="can_focus">False</property>
     <property name="has_focus">True</property>
     <property name="title">Ulauncher</property>
@@ -28,21 +28,52 @@
         <property name="margin_bottom">20</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkEntry" id="input">
-            <property name="height_request">30</property>
+          <object class="GtkBox" id="input-box">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="has_focus">True</property>
-            <property name="is_focus">True</property>
-            <property name="can_default">True</property>
-            <property name="receives_default">True</property>
-            <property name="margin_left">20</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">15</property>
-            <property name="margin_bottom">15</property>
-            <style>
-              <class name="input"/>
-            </style>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkEntry" id="input">
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="is_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="margin_left">20</property>
+                <property name="margin_right">20</property>
+                <property name="margin_top">15</property>
+                <property name="margin_bottom">15</property>
+                <style>
+                  <class name="input"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="prefs_btn">
+                <property name="name">prefs_btn</property>
+                <property name="height_request">24</property>
+                <property name="width_request">24</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="margin_right">15</property>
+                <style>
+                  <class name="prefs-btn"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -54,8 +85,6 @@
           <object class="GtkBox" id="result_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">1</property>
-            <property name="margin_right">1</property>
             <property name="orientation">vertical</property>
             <child>
               <placeholder/>
@@ -77,7 +106,7 @@
           </packing>
         </child>
         <style>
-          <class name="wrapper"/>
+          <class name="app"/>
         </style>
       </object>
     </child>

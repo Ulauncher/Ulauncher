@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_available_themes():
-    ulauncher_theme_dir = os.path.join(get_data_path(), 'styles', 'themes')
+    ulauncher_theme_dir = os.path.join(get_data_path(), 'themes')
     theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
     user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
     if os.path.exists(user_theme_dir):
@@ -110,7 +110,7 @@ class Theme(object):
 
             generated_css = os.path.join(self.path, 'generated.css')
             with open(generated_css, 'w') as new_css_file:
-                new_css_file.write('@import url("%s");\n' % extend_theme.compile_css())
+                new_css_file.write('@import url("%s");\n\n' % extend_theme.compile_css())
                 with open(css_file, 'r') as theme_css_file:
                     new_css_file.write(theme_css_file.read())
 
