@@ -28,7 +28,6 @@
 @define-color item_text_selected #99ccff;
 @define-color item_name_selected #fff;
 
-@import url("../default-window-styles.css");
 
 .prefs-btn {
     background-image: url('prefs.png');

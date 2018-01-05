@@ -17,3 +17,4 @@ bower_components/
 .tmp/
 aur_key
 *.key
+generated.css

@@ -30,6 +30,7 @@ from ulauncher.util.display import get_current_screen_geometry
 from ulauncher.util.string import force_unicode
 from ulauncher.util.version_cmp import gtk_version_is_gte
 from ulauncher.util.desktop.notification import show_notification
+from ulauncher.util.Theme import Theme, load_available_themes
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
 from .Builder import Builder
@@ -77,11 +78,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.results_nav = None
         self.window = self.ui['ulauncher_window']
         self.input = self.ui['input']
-        self.prefs_btn = self.ui['prefs_btn']
+        # self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
 
         self.input.connect('changed', self.on_input_changed)
-        self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
+        # self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
 
         self.set_keep_above(True)
 
@@ -141,8 +142,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
-        t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
-        t.start()
+        # t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
+        # t.start()
 
     def on_focus_in_event(self, *args):
         self.is_focused = True
@@ -194,13 +195,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         return self.input
 
     def init_theme(self):
-        # workaround for issue with a caret-color
-        # GTK+ < 3.20 doesn't support that prop
-        css_file = 'theme-gtk-3.20.css' if gtk_version_is_gte(3, 20, 0) else 'theme.css'
-        self.init_styles(get_data_file('styles',
-                                       'themes',
-                                       self.settings.get_property('theme-name'),
-                                       css_file))
+        load_available_themes()
+        theme = Theme.get_current()
+        theme.clear_cache()
+        self.init_styles(theme.compile_css())
 
     def activate_preferences(self, page='preferences'):
         """
@@ -309,7 +307,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
-            self.apply_css(self.result_box, self.provider)
+            self.apply_css(self.result_box)
         else:
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)

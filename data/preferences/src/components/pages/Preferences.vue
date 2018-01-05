@@ -56,7 +56,7 @@
         <td>
           <b-form-radio
             id="theme-name"
-            :options="theme_options"
+            :options="prefs.available_themes"
             v-model="theme_name"></b-form-radio>
         </td>
       </tr>
@@ -127,8 +127,7 @@ export default {
   data() {
     return {
       previous_theme_name: null,
-      blacklistedDirsChanged: false,
-      theme_options: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }]
+      blacklistedDirsChanged: false
     }
   },
 

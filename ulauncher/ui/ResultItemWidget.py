@@ -1,6 +1,6 @@
 import logging
 from gi.repository import Gtk
-from ulauncher.ui.theme import get_theme_prop
+from ulauncher.util.Theme import Theme
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,8 @@ class ResultItemWidget(Gtk.EventBox):
             iconWgt.set_from_pixbuf(icon)
 
     def set_name_highlighted(self, is_selected=False):
-        color = get_theme_prop('match_hl_color_selected') if is_selected else get_theme_prop('match_hl_color_default')
+        colors = Theme.get_current().get_matched_text_hl_colors()
+        color = colors['when_selected'] if is_selected else colors['when_not_selected']
         self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
 
     def set_name(self, name):

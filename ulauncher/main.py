@@ -45,14 +45,23 @@ class UlauncherDbusService(dbus.service.Object):
         self.window.show_window()
 
 
-class GracefulAppKiller(object):
+class SignalHandler(object):
 
     _exit_event = None
+    _app_window = None
+    _logger = None
 
-    def __init__(self):
+    def __init__(self, app_window):
         self._exit_event = Event()
+        self._app_window = app_window
+        self._logger = logging.getLogger('ulauncher')
         signal.signal(signal.SIGINT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
+        signal.signal(signal.SIGHUP, self._reload_configs)
+
+    def _reload_configs(self, *args):
+        self._logger.info('Received SIGHUP. Reloading configs')
+        self._app_window.init_theme()
 
     def killed(self):
         """
@@ -103,10 +112,10 @@ def main():
         AppIndicator.get_instance().show()
 
     # workaround to make Ctrl+C quiting the app
-    app_killer = GracefulAppKiller()
+    signal_handler = SignalHandler(window)
     gtk_thread = run_async(Gtk.main)()
     try:
-        while gtk_thread.is_alive() and not app_killer.killed():
+        while gtk_thread.is_alive() and not signal_handler.killed():
             time.sleep(0.5)
     except KeyboardInterrupt:
         logger.warn('On KeyboardInterrupt')

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.8"/>
-  <!-- interface-requires result_item 1.0 -->
+  <requires lib="result_item" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
   <object class="ResultItemWidget" id="item-frame">
     <property name="name">item_frame</property>
@@ -12,14 +12,12 @@
       <object class="GtkEventBox" id="item-box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">12</property>
-        <property name="margin_right">12</property>
         <child>
           <object class="GtkBox" id="item-container">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">7</property>
-            <property name="margin_right">7</property>
+            <property name="margin_left">30</property>
+            <property name="margin_right">30</property>
             <property name="margin_top">3</property>
             <property name="margin_bottom">3</property>
             <child>
@@ -51,9 +49,9 @@
                     <property name="width_request">400</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
                     <property name="ellipsize">middle</property>
                     <property name="max_width_chars">1</property>
+                    <property name="xalign">0</property>
                     <style>
                       <class name="item-name"/>
                       <class name="item-text"/>
@@ -65,12 +63,12 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="item-descr">
-                    <property name="width_request">400</property>
+                    <property name="width_request">450</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
                     <property name="ellipsize">middle</property>
                     <property name="max_width_chars">1</property>
+                    <property name="xalign">0</property>
                     <style>
                       <class name="item-descr"/>
                       <class name="item-text"/>

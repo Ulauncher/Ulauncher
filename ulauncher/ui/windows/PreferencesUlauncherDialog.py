@@ -5,7 +5,6 @@ import json
 
 from gi.repository import Gio, Gtk, WebKit2, GLib
 from urllib import unquote
-from base64 import b64decode
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
@@ -17,6 +16,7 @@ from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.glib_idle_add import glib_idle_add
+from ulauncher.util.Theme import themes, Theme
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
                                                       ExtensionIsUpToDateError)
@@ -178,7 +178,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
-            'theme_name': self.settings.get_property('theme-name'),
+            'available_themes': self._get_available_themes(),
+            'theme_name': Theme.get_current().get_name(),
             'env': {
                 'version': get_version(),
                 'user_home': os.path.expanduser('~')
@@ -424,6 +425,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_bool(self, str_val):
         return str(str_val).lower() in ('true', '1', 'on')
+
+    def _get_available_themes(self):
+        return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
 
     def get_app_hotkey(self):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')

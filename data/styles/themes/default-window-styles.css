@@ -1,23 +1,16 @@
 @import url("../reset.css");
 
-
-window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
-    border-radius: 10px;
-    background-color: @window_shadow;
-}
-
 .wrapper {
+    box-shadow: 0 0 5px #444;
     background-color: @window_bg;
-    border-radius: 10px;
+    border: 1px solid #b1b1b1;
+    border-radius: 4px;
 }
 
 .input {
     color: @input_color;
-    border-radius: 4px;
-    font-size: 28px;
-    padding: 10px;
-    background-color: @input_bg;
-    box-shadow: inset 0 1px 9px 3px @input_shadow;
+    font-size: 15px;
+    padding: 5px 10px;
 }
 
 /**
@@ -27,7 +20,6 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
 .input *:focus,
 *:selected:focus {
     background-color: alpha (@selected_bg_color, 0.9);
-    border-radius: 4px;
     color: @selected_fg_color;
 }
 
@@ -35,7 +27,6 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
 .input *:focus:backdrop,
 *:focus:backdrop {
     background-color: alpha (@backdrop_selected_bg_color, 0.9);
-    border-radius: 4px;
     color: @backdrop_selected_fg_color;
 }
 
@@ -48,7 +39,6 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
 }
 
 .selected.item-box {
-    border-radius: 10px;
     background-color: @item_box_selected;
 }
 .selected.item-box .item-text {
@@ -59,6 +49,10 @@ window, GtkWindow { /* GtkWindow is used for compatibility with old GTK+ */
 }
 .item-descr {
     font-size: 80%;
+}
+
+.item-box {
+    margin: 20px;
 }
 
 .prefs-btn {

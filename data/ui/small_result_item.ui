@@ -41,7 +41,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="item-name">
-                <property name="width_request">415</property>
+                <property name="width_request">465</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>

@@ -1,9 +1,8 @@
 @define-color bg_color #F2F2F2;
-@define-color fg_color #4675AB;
-@define-color selected_bg_color @fg_color;
+@define-color selected_bg_color #515161;
 @define-color selected_fg_color #fff;
 @define-color backdrop_selected_bg_color shade (@bg_color, 0.92);
-@define-color backdrop_selected_fg_color @fg_color;
+@define-color backdrop_selected_fg_color @selected_bg_color;
 
 /**
  * Window
@@ -14,24 +13,25 @@
 /**
  * Input
  */
-@define-color input_color @fg_color;
-@define-color input_bg #fff;
-@define-color input_shadow rgba(0,0,0, 0.2);
+@define-color input_color #555;
+@define-color input_bg #F2F2F2;
+@define-color input_border_color #5e9ae0;
+@define-color input_shadow rgba(94, 154, 224, 0.2);
 @define-color caret_color lighter(@input_color);
 
 /**
  * Result items
  */
-@define-color item_text #888;
-@define-color item_name #666;
-@define-color item_box_selected @fg_color;
-@define-color item_text_selected #99ccff;
-@define-color item_name_selected white;
+@define-color item_text #333;
+@define-color item_name #333;
+@define-color item_box_selected #D6D6D6;
+@define-color item_text_selected darker(@item_text);
+@define-color item_name_selected @item_name;
 
 @import url("../default-window-styles.css");
 
 .input {
-    border: 1px solid @fg_color;
+    /*border: 1px solid @input_border_color;*/
 }
 
 .prefs-btn {

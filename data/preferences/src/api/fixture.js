@@ -13,6 +13,7 @@ export default function(url, params) {
         autostart_enabled: true,
         clear_previous_text: true,
         blacklisted_desktop_dirs: ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
+        available_themes: [{text: 'Dark', 'value': 'dark'}, {text: 'Light', value: 'light'}],
         theme_name: 'light',
         env: {
           version: '1.2.3',
