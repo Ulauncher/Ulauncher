@@ -4,7 +4,7 @@
  * App Window
  */
 @define-color bg_color #F2F2F2;
-@define-color window_shadow rgba(0, 0, 0, 0.3);
+@define-color window_shadow rgba(0, 0, 0, 0.5);
 @define-color window_bg @bg_color;
 @define-color window_border_color #b1b1b1;
 @define-color prefs_backgroud #ccc;
@@ -40,8 +40,7 @@
 .input {
     color: @input_color;
     font-size: 15px;
-    padding: 5px 10px;
-    padding-right: 0px;
+    padding: 5px 0 5px 7px;
 }
 
 /**

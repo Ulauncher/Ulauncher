@@ -1,12 +1,12 @@
 {
     "manifest_version": "1",
-    "name": "dark",
-    "display_name": "Elementary Dark",
+    "name": "ubuntu",
+    "display_name": "Ubuntu",
     "extend_theme": "light",
     "css_file": "theme.css",
     "css_file_gtk_3.20+": "theme-gtk-3.20.css",
     "matched_text_hl_colors": {
-        "when_selected": "#fff",
-        "when_not_selected": "#fff"
+        "when_selected": "#ffcbbd",
+        "when_not_selected": "#ff7b57"
     }
 }

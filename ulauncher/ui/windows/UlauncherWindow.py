@@ -142,8 +142,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
-        # t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
-        # t.start()
+        t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
+        t.start()
 
     def on_focus_in_event(self, *args):
         self.is_focused = True

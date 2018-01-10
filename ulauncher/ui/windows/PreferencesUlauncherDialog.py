@@ -16,7 +16,7 @@ from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.glib_idle_add import glib_idle_add
-from ulauncher.util.Theme import themes, Theme
+from ulauncher.util.Theme import themes, Theme, load_available_themes
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
                                                       ExtensionIsUpToDateError)
@@ -427,6 +427,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         return str(str_val).lower() in ('true', '1', 'on')
 
     def _get_available_themes(self):
+        load_available_themes()
         return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
 
     def get_app_hotkey(self):
