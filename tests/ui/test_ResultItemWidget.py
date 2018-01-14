@@ -12,6 +12,10 @@ class TestResultItemWidget(object):
     def item_obj(self):
         return mock.create_autospec(ResultItem)
 
+    @pytest.fixture(autouse=True)
+    def Theme(self, mocker):
+        return mocker.patch('ulauncher.ui.ResultItemWidget.Theme')
+
     @pytest.fixture
     def result_item_wgt(self, builder, item_obj):
         result_item_wgt = ResultItemWidget()

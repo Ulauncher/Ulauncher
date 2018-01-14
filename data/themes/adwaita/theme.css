@@ -3,7 +3,7 @@
  */
 @define-color bg_color #303131;
 @define-color window_bg @bg_color;
-@define-color window_border_color #232525;
+@define-color window_border_color #2a2c2c;
 @define-color prefs_backgroud #999;
 
 /**
@@ -74,7 +74,6 @@
 
 .prefs-btn {
     opacity: 0.8;
-    background: url("./prefs.svg") center no-repeat;
 }
 .prefs-btn:hover {
     background-color: @prefs_backgroud;

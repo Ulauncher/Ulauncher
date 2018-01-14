@@ -5,7 +5,7 @@
   <requires lib="ulauncher_window" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
   <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="width_request">631</property>
+    <property name="width_request">604</property>
     <property name="can_focus">False</property>
     <property name="has_focus">True</property>
     <property name="title">Ulauncher</property>

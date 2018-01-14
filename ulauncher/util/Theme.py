@@ -1,19 +1,20 @@
 import os
 import logging
 from json import load
-from ulauncher.config import get_data_path, CONFIG_DIR
+from shutil import copytree, rmtree
+from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
 from ulauncher.util.Settings import Settings
 from ulauncher.util.version_cmp import gtk_version_is_gte
 
 themes = {}
 logger = logging.getLogger(__name__)
+user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
 
 
 def load_available_themes():
     themes.clear()
     ulauncher_theme_dir = os.path.join(get_data_path(), 'themes')
     theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
-    user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
     if os.path.exists(user_theme_dir):
         theme_dirs.extend([os.path.join(user_theme_dir, d) for d in os.listdir(user_theme_dir)])
     theme_dirs = filter(os.path.isdir, theme_dirs)
@@ -102,6 +103,8 @@ class Theme(object):
         css_file = os.path.join(self.path, css_file_name)
 
         if self.get_extend_theme():
+            # if theme extends another one, we must import it in css
+            # therefore a new css file (generated.css) is created here
             extend_theme_name = self.get_extend_theme()
             try:
                 extend_theme = themes[extend_theme_name]
@@ -109,7 +112,7 @@ class Theme(object):
                 logger.error('Cannot extend theme "%s". It does not exist' % extend_theme_name)
                 return css_file
 
-            generated_css = os.path.join(self.path, 'generated.css')
+            generated_css = self._get_path_for_generated_css()
             with open(generated_css, 'w') as new_css_file:
                 new_css_file.write('@import url("%s");\n\n' % extend_theme.compile_css())
                 with open(css_file, 'r') as theme_css_file:
@@ -118,6 +121,22 @@ class Theme(object):
             return generated_css
         else:
             return css_file
+
+    def _get_path_for_generated_css(self):
+        if user_theme_dir in self.path:
+            return os.path.join(self.path, 'generated.css')
+        else:
+            # for ulauncher themes we must save generated.css elsewhere
+            # because we don't have write permissions for /usr/share/ulauncher/themes/...
+            new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get_name())
+            if not os.path.exists(new_theme_dir):
+                os.makedirs(new_theme_dir)
+
+            # copy current theme files to this new dir
+            rmtree(new_theme_dir)
+            copytree(self.path, new_theme_dir)
+
+            return os.path.join(new_theme_dir, 'generated.css')
 
 
 class ThemeManifestError(Exception):

@@ -46,7 +46,7 @@
                 <property name="vexpand">False</property>
                 <child>
                   <object class="GtkLabel" id="item-name">
-                    <property name="width_request">450</property>
+                    <property name="width_request">410</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="ellipsize">middle</property>
@@ -63,7 +63,7 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="item-descr">
-                    <property name="width_request">450</property>
+                    <property name="width_request">410</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="ellipsize">middle</property>
@@ -88,10 +88,12 @@
             <child>
               <object class="GtkLabel" id="item-shortcut">
                 <property name="name">item-shortcut</property>
+                <property name="width_request">44</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">15</property>
                 <property name="label">Alt+1</property>
+                <property name="justify">right</property>
                 <style>
                   <class name="item-shortcut"/>
                   <class name="item-text"/>

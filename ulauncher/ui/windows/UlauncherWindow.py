@@ -89,6 +89,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.PreferencesDialog = PreferencesUlauncherDialog
         self.settings = Settings.get_instance()
 
+        self.fix_window_width()
         self.position_window()
         self.init_theme()
 
@@ -193,6 +194,15 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def get_input(self):
         return self.input
+
+    def fix_window_width(self):
+        """
+        Add 2px to the window width if GTK+ >= 3.20
+        Because of the bug in <3.20 that doesn't add css borders to the width
+        """
+        if gtk_version_is_gte(3, 20, 0):
+            width, height = self.get_size_request()
+            self.set_size_request(width + 2, height)
 
     def init_theme(self):
         load_available_themes()

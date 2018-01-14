@@ -39,7 +39,7 @@
             </child>
             <child>
               <object class="GtkLabel" id="item-name">
-                <property name="width_request">469</property>
+                <property name="width_request">429</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
@@ -63,6 +63,8 @@
                 <property name="name">item-shortcut</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="width_request">44</property>
+                <property name="justify">right</property>
                 <property name="margin_left">15</property>
                 <property name="label" translatable="yes">Alt+1</property>
                 <style>

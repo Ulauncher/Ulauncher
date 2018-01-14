@@ -39,7 +39,7 @@
 
 .input {
     color: @input_color;
-    font-size: 15px;
+    font-size: 170%;
     padding: 5px 0 5px 7px;
 }
 
@@ -62,9 +62,10 @@
 }
 
 .selected.item-box {
+    background-color: @item_box_selected;
+    /* set border size to 1px because of a bug in 3.20 */
     border-left: 1px solid @window_border_color;
     border-right: 1px solid @window_border_color;
-    background-color: @item_box_selected;
 }
 .selected.item-box .item-text {
     color: @item_text_selected;
@@ -85,9 +86,6 @@
     font-size: 80%;
 }
 
-.item-box {
-    margin: 20px;
-}
 
 /**
  * Small result item
