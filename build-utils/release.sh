@@ -79,16 +79,14 @@ launchpad_upload() {
         PPA="agornostal/ulauncher"
     fi
     GPGKEY="6BD735B0"
-    trusty="PPA=$PPA GPGKEY=$GPGKEY RELEASE=trusty ./build-utils/build-deb.sh $VERSION --upload"
     xenial="PPA=$PPA GPGKEY=$GPGKEY RELEASE=xenial ./build-utils/build-deb.sh $VERSION --upload"
-    zesty="PPA=$PPA GPGKEY=$GPGKEY RELEASE=zesty ./build-utils/build-deb.sh $VERSION --upload"
     artful="PPA=$PPA GPGKEY=$GPGKEY RELEASE=artful ./build-utils/build-deb.sh $VERSION --upload"
 
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$trusty && $xenial && $zesty && $artful"
+        bash -c "$xenial && $artful"
 }
 
 main
