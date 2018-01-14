@@ -21,15 +21,6 @@ ulauncher\.api\.shared\.action\.BaseAction module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.CloseAppAction module
------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.CloseAppAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.CopyToClipboardAction module
 ------------------------------------------------------------
 
