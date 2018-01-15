@@ -1,9 +1,9 @@
 /**
  * App Window
  */
-@define-color bg_color #303131;
+@define-color bg_color #3C4141;
 @define-color window_bg @bg_color;
-@define-color window_border_color #2a2c2c;
+@define-color window_border_color #3A3A3A;
 @define-color prefs_backgroud #999;
 
 /**
@@ -54,8 +54,9 @@
 }
 
 .selected.item-box {
-    border: none;
     background-color: @item_box_selected;
+    border-left: 1px solid @window_border_color;
+    border-right: 1px solid @window_border_color;
 }
 .selected.item-box .item-text {
     color: @item_text_selected;

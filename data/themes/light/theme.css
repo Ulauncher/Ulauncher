@@ -63,7 +63,6 @@
 
 .selected.item-box {
     background-color: @item_box_selected;
-    /* set border size to 1px because of a bug in 3.20 */
     border-left: 1px solid @window_border_color;
     border-right: 1px solid @window_border_color;
 }
