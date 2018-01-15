@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import os
 import signal
@@ -13,7 +14,7 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .config import get_version, get_options, CACHE_DIR, CONFIG_DIR
+from .config import get_version, get_options, is_wayland, gdk_backend, CACHE_DIR, CONFIG_DIR
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.util.Settings import Settings
@@ -78,6 +79,16 @@ def main():
     Main function that starts everything
     """
 
+    if is_wayland() and gdk_backend() != 'x11':
+        warn = """
+                                    [!]
+        Looks like you are in Wayland session, but GDK_BACKEND is not X11
+        Please run ulauncher with env var GDK_BACKEND set to 'x11', like this:
+        GDK_BACKEND=x11 ulauncher -v
+        """
+        print(warn, file=sys.stderr)
+        sys.exit(1)
+
     # start DBus loop
     DBusGMainLoop(set_as_default=True)
     bus = dbus.SessionBus()
@@ -96,6 +107,7 @@ def main():
     logger = logging.getLogger('ulauncher')
     logger.info('Ulauncher version %s' % get_version())
     logger.info("GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
+    logger.info("Is Wayland: %s" % is_wayland())
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):

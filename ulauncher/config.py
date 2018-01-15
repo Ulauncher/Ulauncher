@@ -59,6 +59,14 @@ def get_data_path():
     return abs_data_path
 
 
+def is_wayland():
+    return os.environ['XDG_SESSION_TYPE'].lower() == 'wayland'
+
+
+def gdk_backend():
+    return os.environ.get('GDK_BACKEND', '')
+
+
 @lru_cache()
 def get_options():
     """Support for command line options"""
