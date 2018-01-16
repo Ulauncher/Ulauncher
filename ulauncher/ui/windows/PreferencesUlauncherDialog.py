@@ -130,7 +130,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         also by the color stripe
         """
         window_width = self.get_size()[0]
-        if event.button == 1 and (670 < event.x < window_width - 100 and 0 < event.y < 69) or event.y <= 11:
+        if event.button == 1 and (690 < event.x < window_width - 100 and 0 < event.y < 69) or event.y <= 11:
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
         return False
