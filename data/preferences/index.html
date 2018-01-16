@@ -4,9 +4,29 @@
     <meta charset="utf-8">
     <title>Ulauncher Preferences</title>
     <link rel="stylesheet" href="static/font-awesome.min.css">
+    <style>
+        html {
+          font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          background: #f2f2f2;
+        }
+        .init-loading {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            top: 50%;
+            left: 50%;
+            margin-left: -50px;
+            margin-top: -25px;
+            font-size: 1.3em;
+            color: #adadad;
+            text-shadow: 1px 1px 1px #fff;
+        }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app"><div class="init-loading">Loading...</div></div>
     <!-- built files will be auto injected -->
   </body>
 </html>

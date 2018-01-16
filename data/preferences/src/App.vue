@@ -62,12 +62,6 @@ html, body {
   padding: 0;
   overflow: hidden;
 }
-html {
-  font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #f2f2f2;
-}
 body {
   color: #3d3d3d;
   background: #f2f2f2;
