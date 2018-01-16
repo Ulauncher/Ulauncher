@@ -10,9 +10,11 @@
     <property name="window_position">center</property>
     <property name="icon_name">ulauncher</property>
     <property name="type_hint">normal</property>
+    <property name="decorated">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox1">
         <property name="visible">True</property>
+        <property name="app_paintable">True</property>
         <property name="can_focus">True</property>
         <property name="is_focus">True</property>
         <property name="orientation">vertical</property>
@@ -53,6 +55,9 @@
                 <property name="position">1</property>
               </packing>
             </child>
+            <style>
+              <class name="dialog-area"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -62,15 +67,38 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="scrolled_window">
-            <property name="width_request">800</property>
-            <property name="height_request">600</property>
+          <object class="GtkBox" id="window_wrapper">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">20</property>
+            <property name="margin_bottom">20</property>
+            <property name="orientation">vertical</property>
             <child>
-              <placeholder/>
+              <object class="GtkScrolledWindow" id="scrolled_window">
+                <property name="width_request">996</property>
+                <property name="height_request">599</property>
+                <property name="visible">True</property>
+                <property name="app_paintable">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <style>
+                  <class name="scrolled-window"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
             </child>
+            <style>
+              <class name="app-box"/>
+            </style>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -78,6 +106,9 @@
             <property name="position">1</property>
           </packing>
         </child>
+        <style>
+          <class name="outer-box"/>
+        </style>
       </object>
     </child>
     <action-widgets>

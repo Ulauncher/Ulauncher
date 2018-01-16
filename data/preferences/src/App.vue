@@ -71,22 +71,53 @@ html {
 body {
   color: #3d3d3d;
   background: #f2f2f2;
-  border: 1px solid #e4e4e4;
+  border: 1px solid #c7c7c7;
 }
+
+/* custom scrollbar */
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  margin-right: 3px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 9px;
+  background-clip: padding-box;
+  border: 3px solid rgba(0, 0, 0, 0);
+}
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+}
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
 button {
   cursor: pointer;
 }
 #header {
-  width: 100%;
-  height: 60px;
+  height: 69px;
   position: fixed;
   top: 0;
+  left: 1px;
+  right: 1px;
 }
 #app {
   height: 100%;
 }
 .page-content {
-  margin-top: 60px;
+  margin-top: 69px;
   max-height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;

@@ -56,6 +56,7 @@
           <p>
             <ul>
               <li>Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;</li>
+              <li>Eugene Chulkov &lt;genechulkov@gmail.com&gt;</li>
             </ul>
           </p>
         </div>

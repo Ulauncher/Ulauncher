@@ -17,6 +17,18 @@
 
       <tr>
         <td>
+          <label for="theme-name">Color Theme</label>
+        </td>
+        <td>
+          <b-form-select
+            id="theme-name"
+            :options="prefs.available_themes"
+            v-model="theme_name"></b-form-select>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="autostart">Launch at Login</label>
         </td>
         <td>
@@ -51,23 +63,7 @@
 
       <tr>
         <td>
-          <label for="theme-name">Color Theme</label>
-        </td>
-        <td>
-          <b-form-select
-            id="theme-name"
-            :options="prefs.available_themes"
-            v-model="theme_name"></b-form-select>
-        </td>
-      </tr>
-    </table>
-
-    <h1>Advanced</h1>
-
-    <table>
-      <tr>
-        <td>
-          <label for="clear_previous_query">Clear Query <br> When App Looses Focus</label>
+          <label for="clear_previous_query">Clear Input on Hide</label>
         </td>
         <td>
           <b-form-checkbox
@@ -76,6 +72,11 @@
         </td>
       </tr>
 
+    </table>
+
+    <h1>Advanced</h1>
+
+    <table>
       <tr>
         <td class="pull-top">
           <label>Blacklisted app dirs</label>

@@ -79,6 +79,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.settings = Settings.get_instance()
         self._init_webview()
+        self.init_styles(get_data_file('styles', 'preferences.css'))
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
@@ -101,6 +102,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
+        self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
         inspector = self.webview.get_inspector()
@@ -121,6 +123,17 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
     # GTK event handlers
     ######################################
+    #
+    def webview_on_button_press_event(self, widget, event):
+        """
+        Makes preferences window draggable by empty an empty space between navigation and close button
+        also by the color stripe
+        """
+        window_width = self.get_size()[0]
+        if event.button == 1 and (670 < event.x < window_width - 100 and 0 < event.y < 69) or event.y <= 11:
+            self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
+
+        return False
 
     def webview_on_context_menu(self, *args):
         return bool(not get_options().dev)

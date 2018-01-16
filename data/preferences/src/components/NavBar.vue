@@ -1,26 +1,43 @@
 <template>
-  <div class="main-header">
-    <ul>
-      <li><router-link to="/preferences"><i class="fa fa-cog"></i> Preferences</router-link></li>
-      <li><router-link to="/shortcuts"><i class="fa fa-external-link-square"></i>Shortcuts</router-link></li>
-      <li><router-link to="/extensions"><i class="fa fa-cubes"></i>Extensions</router-link></li>
-      <li><router-link to="/help"><i class="fa fa-support"></i>Help</router-link></li>
-      <li><router-link to="/about"><i class="fa fa-info-circle"></i>About</router-link></li>
-    </ul>
+  <div>
+    <div class="stripe"></div>
+    <div class="main-header">
+      <ul>
+        <li><router-link to="/preferences"><i class="fa fa-cog"></i> Preferences</router-link></li>
+        <li><router-link to="/shortcuts"><i class="fa fa-external-link-square"></i>Shortcuts</router-link></li>
+        <li><router-link to="/extensions"><i class="fa fa-cubes"></i>Extensions</router-link></li>
+        <li><router-link to="/help"><i class="fa fa-support"></i>Help</router-link></li>
+        <li><router-link to="/about"><i class="fa fa-info-circle"></i>About</router-link></li>
+      </ul>
+      <div class="close-btn" @click="closeWindow"></div>
+    </div>
   </div>
 </template>
 
 <script>
+import jsonp from '@/api'
+import bus from '@/event-bus'
+
 export default {
-  name: 'navbar'
+  name: 'navbar',
+  methods: {
+    closeWindow () {
+      jsonp('prefs://close').then(null, (err) => bus.$emit('error', err))
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 $headerHeight: 60px;
 $underlineHeight: 4px;
-$darkBlue: #015aa7;
+$darkBlue: #006890;
 $veryLightGrey: #c8c8c8;
+
+.stripe {
+  background: #4B71A5 url('../assets/stripe.png') no-repeat;
+  height: 9px;
+}
 
 .main-header {
   box-sizing: border-box;
@@ -30,6 +47,17 @@ $veryLightGrey: #c8c8c8;
   background: #e4e4e4;
   font-size: 0.95em;
   letter-spacing: 0.04px;
+  position: relative;
+
+  .close-btn {
+    position: absolute;
+    top: 18px;
+    right: 25px;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    background: url('../assets/big-plus-sign.png') no-repeat;
+  }
 }
 
 ul, li {
