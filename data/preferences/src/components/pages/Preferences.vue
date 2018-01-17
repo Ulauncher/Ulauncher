@@ -79,7 +79,7 @@
     <table>
       <tr>
         <td class="pull-top">
-          <label>Blacklisted app dirs</label>
+          <label>Blacklisted App Dirs</label>
           <small>
             <p>
               Ulauncher won't search for .desktop files in these dirs

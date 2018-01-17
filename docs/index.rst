@@ -11,6 +11,19 @@ Everything else is on
 `Github Wiki <https://github.com/Ulauncher/Ulauncher/wiki/>`_.
 
 
+Custom Color Themes
+===================
+
+.. toctree::
+   :caption: Custom Color Themes
+   :hidden:
+
+   themes/themes
+
+:doc:`themes/themes`
+    Create your own color themes
+
+
 Extension Development Guide
 ===========================
 
