@@ -1,22 +1,36 @@
 Master: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=master)](https://travis-ci.org/Ulauncher/Ulauncher)
 Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
+
+[Application Launcher](http://ulauncher.io)
+================================
+
+Ulauncher s a fast application launcher for Linux written in Python and uses GTK+ as a GUI toolkit.
+
+| App Search | File Browser | Custom Themes |
+---|---|---
+|![screenshot](http://i.imgur.com/8FpJLGG.png?1)|![screenshot](http://i.imgur.com/wJvXSmP.png?1)|![screenshot](http://i.imgur.com/2a4GCW7.png?1)|
+
+
 [Create Your Ulauncher Extensions](http://docs.ulauncher.io/)
 ==============================================================
 
-Since Ulauncher v3 (Dev release) you can create your own Ulauncher extensions. 
-
+Since Ulauncher v3 you can create your own Ulauncher extensions  
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 
+[Create Your Ulauncher Color themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
+==============================================================
 
-[Ulauncher](http://ulauncher.io)
-================================
+Since Ulauncher v4 you can create your own color Themes  
+Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
 
-It's a fast application launcher for Linux written in Python and uses GTK as a GUI toolkit.
 
-| App Search | File Browser | Light Theme |
----|---|---
-|![screenshot](http://i.imgur.com/3owfsfV.png?1)|![screenshot](http://i.imgur.com/W1rryU5.png?1)|![screenshot](http://i.imgur.com/Axhqjp0.png?1)|
+Known Issues
+============
+
+* Ubuntu 14.04 is not supported since v4.0
+* [inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
+* [Hotkey doesn't work in Wayland when is triggered from certain apps](https://github.com/Ulauncher/Ulauncher/issues/183)
 
 
 Install for Development
@@ -58,12 +72,6 @@ If you just want to use the app see download instructions at [ulauncher.io](http
 4. `$ ./dev-run.sh` installs Ulauncher data to `~/.local/share/ulauncher/` and then runs the app
 
 If you have any questions, join chat in [Gitter](https://gitter.im/Ulauncher/General)
-
-Known Issues
-============
-
-* [inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
-* [Can't add or change shortcuts on Ubuntu 14.04](https://github.com/Ulauncher/Ulauncher/issues/101)
 
 ***
 ### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
