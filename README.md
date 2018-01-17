@@ -2,7 +2,7 @@ Master: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=ma
 Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
 
-[Application launcher for Linux 🐧](http://ulauncher.io)
+[Application Launcher for Linux 🐧](http://ulauncher.io)
 ================================
 
 Ulauncher s a fast application launcher for Linux written in Python and uses GTK+ as a GUI toolkit.
