@@ -87,7 +87,7 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$trusty && $xenial && $zesty && $artful"
+        bash -c "$trusty && $xenial && $artful"
 }
 
 main
