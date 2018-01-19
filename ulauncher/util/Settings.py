@@ -12,6 +12,7 @@ DEFAULT_BLACKLISTED_DIRS = [
     '/usr/share/kservices5',
     '/usr/share/fk5',
     '/usr/share/kservicetypes5',
+    '/usr/share/applications/screensavers',
     '/usr/share/kde4',
     '/usr/share/mimelnk'
 ]
