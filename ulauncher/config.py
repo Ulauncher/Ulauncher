@@ -60,7 +60,7 @@ def get_data_path():
 
 
 def is_wayland():
-    return os.environ['XDG_SESSION_TYPE'].lower() == 'wayland'
+    return os.environ.get('XDG_SESSION_TYPE', '').lower() == 'wayland'
 
 
 def gdk_backend():
