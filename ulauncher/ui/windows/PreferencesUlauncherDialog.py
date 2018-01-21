@@ -7,7 +7,7 @@ from gi.repository import Gio, Gtk, WebKit2, GLib
 from urllib import unquote
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
-from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
+from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.util.AutostartPreference import AutostartPreference
@@ -193,6 +193,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
+            'is_wayland': is_wayland(),
             'env': {
                 'version': get_version(),
                 'user_home': os.path.expanduser('~')

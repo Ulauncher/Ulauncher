@@ -12,9 +12,9 @@
             id="hotkey-show-app"
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"></b-form-input>
-            <div class="hotkey-warning">
+            <div v-if="prefs.is_wayland" class="hotkey-warning">
               <b-alert show variant="warning">
-                <small>It appears your are in Wayland session.
+                <small>It appears that your are in Wayland session.
                   This hotkey may not work all the time.<br />
                   Check <a href="" @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')">this</a>
                   to get better user experience</small>
@@ -282,7 +282,7 @@ label {
   width: 200px;
 }
 .hotkey-warning {
-  width: 500px;
+  width: 550px;
 }
 .hotkey-warning .alert {
   margin: 10px 0 0 0;

@@ -15,6 +15,7 @@ export default function(url, params) {
         blacklisted_desktop_dirs: ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
         available_themes: [{text: 'Dark', 'value': 'dark'}, {text: 'Light', value: 'light'}],
         theme_name: 'light',
+        is_wayland: true,
         env: {
           version: '1.2.3',
           user_home: '/home/username'
