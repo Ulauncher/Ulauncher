@@ -113,7 +113,7 @@ export default {
         id: this.id || '',
         icon: this.localIcon || '',
         name: this.localName,
-        keyword: this.localKeyword,
+        keyword: this.localKeyword.trim(),
         cmd: this.localCmd,
         is_default_search: this.localIsDefaultSearch
       }

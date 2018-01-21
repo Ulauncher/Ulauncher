@@ -153,8 +153,12 @@ export default {
         id: this.extension.id
       }
       for (let i = 0; i < this.extension.preferences.length; i++) {
+        let value = this.$refs[pref.id][0].$el.value
         let pref = this.extension.preferences[i]
-        updates[`pref.${pref.id}`] = this.$refs[pref.id][0].$el.value
+        if (pref.type === 'keyword') {
+          value = value.trim()
+        }
+        updates[`pref.${pref.id}`] = value
       }
       jsonp('prefs://extension/update-prefs', updates).then(() => {
         this.showSavedMsg = true
