@@ -16,7 +16,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
 
-from ulauncher.config import get_data_file
+from ulauncher.config import get_data_file, is_wayland_compatibility_on
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
@@ -96,11 +96,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this will trigger to show frequent apps if necessary
         self.show_results([])
 
-        # bind hotkey
-        Keybinder.init()
-        accel_name = self.settings.get_property('hotkey-show-app')
-        # bind in the main thread
-        GLib.idle_add(self.bind_show_app_hotkey, accel_name)
+        if not is_wayland_compatibility_on():
+            # bind hotkey
+            Keybinder.init()
+            accel_name = self.settings.get_property('hotkey-show-app')
+            # bind in the main thread
+            GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
         ExtensionServer.get_instance().start()
@@ -245,7 +246,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.position_window()
         self.window.set_sensitive(True)
         self.window.present()
-        self.present_with_time(Keybinder.get_current_event_time())
+        if not is_wayland_compatibility_on():
+            self.present_with_time(Keybinder.get_current_event_time())
 
         if not self.input.get_text():
             # make sure frequent apps are shown if necessary
@@ -253,10 +255,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         elif self.settings.get_property('clear-previous-query'):
             self.input.set_text('')
 
-    def cb_toggle_visibility(self, key):
+    def toggle_window(self, key=None):
         self.hide() if self.is_visible() else self.show_window()
 
     def bind_show_app_hotkey(self, accel_name):
+        if is_wayland_compatibility_on():
+            return
+
         if self._current_accel_name == accel_name:
             return
 
@@ -265,7 +270,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s" % accel_name)
-        Keybinder.bind(accel_name, self.cb_toggle_visibility)
+        Keybinder.bind(accel_name, self.toggle_window)
         self._current_accel_name = accel_name
         self.notify_hotkey_change(accel_name)
 

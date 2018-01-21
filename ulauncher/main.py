@@ -14,11 +14,12 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .config import get_version, get_options, is_wayland, gdk_backend, CACHE_DIR, CONFIG_DIR
+from .config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
+                     gdk_backend, CACHE_DIR, CONFIG_DIR)
+from ulauncher.util.decorator.run_async import run_async
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.util.Settings import Settings
-from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.setup_logging import setup_logging
 
 
@@ -42,8 +43,8 @@ class UlauncherDbusService(dbus.service.Object):
         super(UlauncherDbusService, self).__init__(bus_name, DBUS_PATH)
 
     @dbus.service.method(DBUS_SERVICE)
-    def show_window(self):
-        self.window.show_window()
+    def toggle_window(self):
+        self.window.toggle_window()
 
 
 class SignalHandler(object):
@@ -78,13 +79,14 @@ def main():
     """
     Main function that starts everything
     """
-
-    if is_wayland() and gdk_backend() != 'x11':
+    if is_wayland() and gdk_backend().lower() != 'x11' and not is_wayland_compatibility_on():
         warn = """
-                                    [!]
-        Looks like you are in Wayland session, but GDK_BACKEND is not X11
-        Please run ulauncher with env var GDK_BACKEND set to 'x11', like this:
-        GDK_BACKEND=x11 ulauncher -v
+                    [!]
+        Looks like you are in Wayland session
+        Please run Ulauncher with env var
+        GDK_BACKEND set to 'x11' like this:
+
+        GDK_BACKEND=x11 ulauncher
         """
         print(warn, file=sys.stderr)
         sys.exit(1)
@@ -95,9 +97,8 @@ def main():
     instance = bus.request_name(DBUS_SERVICE)
 
     if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        print("Ulauncher is already running")
-        show_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("show_window")
-        show_window()
+        toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
+        toggle_window()
         return
 
     _create_dirs()
@@ -108,6 +109,7 @@ def main():
     logger.info('Ulauncher version %s' % get_version())
     logger.info("GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
     logger.info("Is Wayland: %s" % is_wayland())
+    logger.info("Wayland compatibility: %s" % ('on' if is_wayland_compatibility_on() else 'off'))
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):

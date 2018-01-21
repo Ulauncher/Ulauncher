@@ -80,14 +80,14 @@ class TestUlauncherWindow:
         app_cache_db.find.return_value = False
         accel_name = '<Primary><Alt>f'
         window.bind_show_app_hotkey(accel_name)
-        Keybinder.bind.assert_called_with(accel_name, window.cb_toggle_visibility)
+        Keybinder.bind.assert_called_with(accel_name, window.toggle_window)
 
         # bind another one
         # this time Ulauncher should unbind previous key
         new_accel_name = '<Primary><Alt>r'
         window.bind_show_app_hotkey(new_accel_name)
         Keybinder.unbind.assert_called_with(accel_name)
-        Keybinder.bind.assert_called_with(new_accel_name, window.cb_toggle_visibility)
+        Keybinder.bind.assert_called_with(new_accel_name, window.toggle_window)
         show_notification.assert_called_with('Ulauncher', 'Hotkey is set to Ctrl+Alt+R')
 
     def test_create_item_widgets(self, window, result_item, GtkBuilder, get_data_file):

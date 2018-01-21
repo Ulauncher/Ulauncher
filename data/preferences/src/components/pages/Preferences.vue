@@ -12,6 +12,14 @@
             id="hotkey-show-app"
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"></b-form-input>
+            <div class="hotkey-warning">
+              <b-alert show variant="warning">
+                <small>It appears your are in Wayland session.
+                  This hotkey may not work all the time.<br />
+                  Check <a href="" @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')">this</a>
+                  to get better user experience</small>
+              </b-alert>
+            </div>
         </td>
       </tr>
 
@@ -217,6 +225,10 @@ export default {
   methods: {
     ...mapMutations(['setPrefs']),
 
+    openUrlInBrowser (url) {
+      jsonp('prefs://open/web-url', {url: url})
+    },
+
     showHotkeyDialog(e) {
       jsonp('prefs://show/hotkey-dialog', { name: hotkeyEventName })
       e.target.blur()
@@ -268,5 +280,13 @@ label {
 #hotkey-show-app {
   cursor: pointer;
   width: 200px;
+}
+.hotkey-warning {
+  width: 500px;
+}
+.hotkey-warning .alert {
+  margin: 10px 0 0 0;
+  padding: 0.4em 0.7em;
+  line-height: 95%;
 }
 </style>

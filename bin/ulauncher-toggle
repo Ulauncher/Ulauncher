@@ -1,0 +1,10 @@
+#!/bin/sh
+
+dbus-send \
+    --session \
+    --print-reply \
+    --dest=net.launchpad.ulauncher \
+    /net/launchpad/ulauncher \
+    net.launchpad.ulauncher.toggle_window
+
+wmctrl -a "Ulauncher window title"
