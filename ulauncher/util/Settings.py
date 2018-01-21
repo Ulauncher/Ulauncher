@@ -41,7 +41,7 @@ GPROPERTIES = {
     "theme-name": (str,
                    "Current theme",
                    None,
-                   "dark",
+                   "light",
                    GObject.PARAM_READWRITE),
     "blacklisted-desktop-dirs": (str,
                                  "Blacklisted desktop dirs",
