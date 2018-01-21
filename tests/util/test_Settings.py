@@ -42,4 +42,4 @@ class TestSettings:
         with open(filename, 'w') as f:
             f.write("{}")
         settings.load_from_file(filename)
-        assert settings.get_property('theme-name') == 'dark'
+        assert settings.get_property('theme-name') == 'light'
