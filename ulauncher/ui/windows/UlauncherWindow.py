@@ -254,6 +254,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.show_results([])
         elif self.settings.get_property('clear-previous-query'):
             self.input.set_text('')
+        else:
+            self.input.grab_focus()
 
     def toggle_window(self, key=None):
         self.hide() if self.is_visible() else self.show_window()
