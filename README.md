@@ -18,6 +18,7 @@ Ulauncher s a fast application launcher for Linux written in Python and uses GTK
 Since Ulauncher v3 you can create your own Ulauncher extensions  
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 
+
 [Create Your Ulauncher Color themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
 ==============================================================
 
