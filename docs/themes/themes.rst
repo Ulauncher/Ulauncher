@@ -9,7 +9,7 @@ Steps
 -----
 
 #. Take a look at how `built-in themes <https://github.com/Ulauncher/Ulauncher/tree/dev/data/themes>`_ are written
-#. Create a new theme dir in ``~/.config/ulauncher/user-themes/<you_theme_name>``
+#. Create a new theme dir in ``~/.config/ulauncher/user-themes/<your_theme_name>``
 #. Copy files from existing theme in there
 #. Change name and display_name in ``manifest.json``
 #. Open Ulauncher Preferences and select your theme
