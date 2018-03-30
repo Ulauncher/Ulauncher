@@ -153,8 +153,8 @@ export default {
         id: this.extension.id
       }
       for (let i = 0; i < this.extension.preferences.length; i++) {
-        let value = this.$refs[pref.id][0].$el.value
         let pref = this.extension.preferences[i]
+        let value = this.$refs[pref.id][0].$el.value
         if (pref.type === 'keyword') {
           value = value.trim()
         }
