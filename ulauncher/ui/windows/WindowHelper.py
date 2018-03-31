@@ -10,9 +10,8 @@ class WindowHelper(object):
             self.css_provider = Gtk.CssProvider()
         self.css_provider.load_from_path(path)
         self.apply_css(self)
-        screen = self.get_screen()
-        visual = screen.get_rgba_visual()
-        if visual is not None and screen.is_composited():
+        visual = self.get_screen().get_rgba_visual()
+        if visual:
             self.set_visual(visual)
 
     def apply_css(self, widget):
