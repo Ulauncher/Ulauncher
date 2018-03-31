@@ -44,7 +44,7 @@ class ExtensionServer(object):
 
     @run_async(daemon=True)
     def _start_thread(self):
-        self.port = self.port or find_unused_port(5050)
+        self.port = self.port or find_unused_port(5054)
         logger.info('Starting WS server on port %s' % self.port)
         self.ws_server = SimpleWebSocketServer(self.hostname,
                                                self.port,
