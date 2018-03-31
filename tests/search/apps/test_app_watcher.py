@@ -46,7 +46,7 @@ class TestAppNotifyEventHandler:
         sleep(.07)
         assert not db.put_app.called
         filter_app.return_value = True  # now file should be added successfully
-        sleep(.14)
+        sleep(.2)
         db.put_app.assert_called_with(app)
 
     def test_on_created_add_app(self, event_handler, event, db, app):
