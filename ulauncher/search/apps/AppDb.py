@@ -116,7 +116,10 @@ class AppDb(object):
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
             raise
 
-        del self._icons[desktop_file]
+        try:
+            del self._icons[desktop_file]
+        except KeyError:
+            pass
 
     def get_records(self):
         for row in self._conn.execute('SELECT * FROM app_db'):

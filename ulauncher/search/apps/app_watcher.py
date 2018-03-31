@@ -6,6 +6,7 @@ from functools import wraps
 
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps
+from ulauncher.util.string import force_unicode
 from .AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
 
@@ -77,6 +78,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
         """
         Add .desktop file to DB a little bit later
         """
+        pathname = force_unicode(pathname)
         self._deferred_files[pathname] = time()
 
     def _add_file_sync(self, pathname):
@@ -101,6 +103,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
         Remove .desktop file from DB
         :param str pathname:
         """
+        pathname = force_unicode(pathname)
         self.__db.remove_by_path(pathname)
         logger.info('App was removed (%s)' % pathname)
 
