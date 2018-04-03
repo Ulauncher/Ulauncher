@@ -27,7 +27,7 @@ set -ex
 buildUtils=`dirname $0`
 buildUtils=`realpath $buildUtils`
 
-bash "$buildUtils/build-preferences.sh"
+# bash "$buildUtils/build-preferences.sh"
 
 name="ulauncher"
 tmpdir="/tmp"
@@ -90,7 +90,7 @@ elif [ "$2" = "--upload" ]; then
 
     # build and upload
     dpkg-buildpackage -tc -S -sa -k$GPGKEY
-    dput ppa:$PPA /tmp/*.changes
+    dput -d ppa:$PPA /tmp/*.changes
 else
     echo
     echo "ERROR: Invalid arguments supplied"
