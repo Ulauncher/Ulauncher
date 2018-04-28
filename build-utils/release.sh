@@ -85,8 +85,6 @@ launchpad_upload() {
 
     docker run \
         --rm \
-        -e HTTP_PROXY \
-        -e HTTPS_PROXY \
         -e FTP_PROXY \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
