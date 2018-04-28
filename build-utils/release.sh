@@ -81,12 +81,14 @@ launchpad_upload() {
     GPGKEY="6BD735B0"
     xenial="PPA=$PPA GPGKEY=$GPGKEY RELEASE=xenial ./build-utils/build-deb.sh $VERSION --upload"
     artful="PPA=$PPA GPGKEY=$GPGKEY RELEASE=artful ./build-utils/build-deb.sh $VERSION --upload"
+    bionic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=bionic ./build-utils/build-deb.sh $VERSION --upload"
 
     docker run \
         --rm \
+        -e HTTP_PROXY \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$xenial && $artful"
+        bash -c "$xenial && $artful && $bionic"
 }
 
 main
