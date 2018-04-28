@@ -90,7 +90,7 @@ elif [ "$2" = "--upload" ]; then
 
     # build and upload
     dpkg-buildpackage -tc -S -sa -k$GPGKEY
-    dput -d ppa:$PPA /tmp/*.changes
+    dput ppa:$PPA /tmp/*.changes
 else
     echo
     echo "ERROR: Invalid arguments supplied"
