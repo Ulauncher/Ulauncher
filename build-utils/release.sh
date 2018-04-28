@@ -86,9 +86,10 @@ launchpad_upload() {
     docker run \
         --rm \
         -e FTP_PROXY \
+        -e HTTP_PROXY \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$xenial && $artful && $bionic"
+        bash -c "echo $HTTP_PROXY && $xenial && $artful && $bionic"
 }
 
 main
