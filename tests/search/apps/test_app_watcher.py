@@ -43,7 +43,7 @@ class TestAppNotifyEventHandler:
         AppNotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
         event_handler = AppNotifyEventHandler(db)
         event_handler.add_file_deffered('mypath')
-        sleep(.07)
+        sleep(.1)
         assert not db.put_app.called
         filter_app.return_value = True  # now file should be added successfully
         sleep(.2)
