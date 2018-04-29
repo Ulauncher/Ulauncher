@@ -6,6 +6,7 @@ before_install:
   if [ ! -z "$encrypted_103700d0e85f_key" ]; then
     openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/launchpad-secret.key.enc -out build-utils/launchpad-secret.key -d
     openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/launchpad-public.key.enc -out build-utils/launchpad-public.key -d
+    openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/launchpad.ssh.tar.enc -out build-utils/launchpad.ssh.tar -d
     openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in build-utils/aur_key.enc -out build-utils/aur_key -d
   fi
 - source ./build-utils/functions.sh

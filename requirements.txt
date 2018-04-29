@@ -2,3 +2,4 @@ mock
 pytest
 pytest-pep8
 pytest-mock
+paramiko

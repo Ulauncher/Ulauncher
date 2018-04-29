@@ -87,7 +87,7 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$xenial && $artful && $bionic"
+        bash -c "./build-utils/extract-launchpad-ssh.sh && $xenial && $artful && $bionic"
 }
 
 main

@@ -31,6 +31,7 @@ RUN apt-get update && \
         python-pyinotify \
         python-levenshtein \
         python-websocket \
+        python-bzrlib \
         python-pip && \
     pip install --upgrade pip setuptools && \
     wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_6.x && \
@@ -44,7 +45,9 @@ COPY [ "requirements.txt", "data/preferences/package.json", "./" ]
 COPY [ "docs/requirements.txt", "./docs/" ]
 
 # Caching node_modules to make builds faster
+# update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 RUN pip install -r requirements.txt && \
     pip install -r docs/requirements.txt && \
     yarn install && \
-    mv node_modules /var
+    mv node_modules /var && \
+    printf "\n[ppa]\nmethod = sftp\nlogin = agornostal" >> /etc/dput.cf
