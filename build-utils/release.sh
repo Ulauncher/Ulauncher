@@ -59,6 +59,7 @@ create_rpms() {
 
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_suse.rpm .
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_centos7.rpm .
     docker rm ulauncher-rpm
 }
 
