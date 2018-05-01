@@ -31,6 +31,7 @@ deploy:
   - ulauncher_${TRAVIS_TAG}_all.deb
   - ulauncher_${TRAVIS_TAG}_fedora.rpm
   - ulauncher_${TRAVIS_TAG}_suse.rpm
+  - ulauncher_${TRAVIS_TAG}_centos7.rpm
   skip_cleanup: true
   on:
     repo: Ulauncher/Ulauncher
