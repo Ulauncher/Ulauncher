@@ -2,7 +2,7 @@ import logging
 import pickle
 
 from ulauncher.api.shared.Response import Response
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.util.SimpleWebSocketServer import WebSocket
 from ulauncher.util.decorator.debounce import debounce
 from .DeferredResultRenderer import DeferredResultRenderer
@@ -46,7 +46,11 @@ class ExtensionController(WebSocket):
         """
         Triggers event for an extension
         """
-        self._debounced_send_event(event)
+        # don't debounce events that are triggered by updates in preferences
+        if type(event) in [PreferencesUpdateEvent]:
+            self._send_event(event)
+        else:
+            self._debounced_send_event(event)
         return self.resultRenderer.handle_event(event, self)
 
     def get_manifest(self):
