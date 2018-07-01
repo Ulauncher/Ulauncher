@@ -5,7 +5,7 @@ from time import time, sleep
 from functools import wraps
 
 from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps
+from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps_cached
 from ulauncher.util.string import force_unicode
 from .AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
@@ -136,8 +136,10 @@ def start():
 
     db = AppDb.get_instance()
     t0 = time()
-    added_apps = map(lambda app: db.put_app(app), find_apps())
-    logger.info('Scanned desktop dirs in %.2f seconds. Indexed %s applications' % ((time() - t0), len(added_apps)))
+    logger.info('Started scanning desktop dirs')
+    for app in find_apps_cached():
+        db.put_app(app)
+    logger.info('Scanned desktop dirs in %.2f seconds' % (time() - t0))
 
     wm = pyinotify.WatchManager()
     handler = AppNotifyEventHandler(db)

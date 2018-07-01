@@ -72,7 +72,7 @@ class AppDb(object):
         }
         self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
 
-        query = '''INSERT OR IGNORE INTO app_db (name, desktop_file, description, search_name)
+        query = '''INSERT OR REPLACE INTO app_db (name, desktop_file, description, search_name)
                    VALUES (:name, :desktop_file, :description, :search_name)'''
         try:
             self._conn.execute(query, record)
