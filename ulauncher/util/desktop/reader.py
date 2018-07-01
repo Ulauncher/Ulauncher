@@ -4,9 +4,10 @@ from itertools import chain
 from gi.repository import Gio
 
 from ulauncher.util.file_finder import find_files
-from ulauncher.config import DESKTOP_DIRS
+from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
 from ulauncher.util.Settings import Settings
 from ulauncher.util.string import force_unicode
+from ulauncher.util.db.KeyValueDb import KeyValueDb
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +56,33 @@ def find_apps(dirs=DESKTOP_DIRS):
     :returns: list of :class:`Gio.DesktopAppInfo` objects
     """
     return filter(filter_app, map(read_desktop_file, find_desktop_files(dirs)))
+
+
+def find_apps_cached(dirs=DESKTOP_DIRS):
+    """
+    :param list dirs: list of paths to `*.desktop` files
+    :returns: list of :class:`Gio.DesktopAppInfo` objects
+
+    Pseudo code:
+    >>> if cache hit:
+    >>>     take list of paths from cache
+    >>>     yield from filter(filter_app, map(read_desktop_file, cached_paths))
+    >>> yield from find_apps()
+    >>> save new paths to the cache
+    """
+    desktop_file_cache_dir = os.path.join(CACHE_DIR, 'desktop_dirs.db')
+    cache = KeyValueDb(desktop_file_cache_dir).open()
+    desktop_dirs = cache.find('desktop_dirs')
+    if desktop_dirs:
+        for dir in desktop_dirs:
+            app_info = read_desktop_file(dir)
+            if filter_app(app_info):
+                yield app_info
+        logger.info('Found %s apps in cache', len(desktop_dirs))
+    new_desktop_dirs = []
+    for app_info in find_apps(DESKTOP_DIRS):
+        yield app_info
+        new_desktop_dirs.append(app_info.get_filename())
+    cache.put('desktop_dirs', new_desktop_dirs)
+    cache.commit()
+    logger.info('Found %s apps in the system', len(new_desktop_dirs))
