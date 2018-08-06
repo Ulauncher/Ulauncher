@@ -23,7 +23,10 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     blacklisted_dirs_srt = Settings.get_instance().get_property('blacklisted-desktop-dirs')
     blacklisted_dirs = blacklisted_dirs_srt.split(':') if blacklisted_dirs_srt else []
     for file in files:
-        if any([force_unicode(file).startswith(dir) for dir in blacklisted_dirs]):
+        try:
+            if any([force_unicode(file).startswith(dir) for dir in blacklisted_dirs]):
+                continue
+        except UnicodeDecodeError:
             continue
 
         yield file
