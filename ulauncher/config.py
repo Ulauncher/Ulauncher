@@ -20,7 +20,7 @@ from ulauncher.util.decorator.lru_cache import lru_cache
 CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
 CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
-DESKTOP_DIRS = filter(os.path.exists, xdg_data_dirs)
+DESKTOP_DIRS = list(filter(os.path.exists, xdg_data_dirs))
 EXTENSIONS_DIR = os.path.join(CACHE_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

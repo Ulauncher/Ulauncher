@@ -8,7 +8,7 @@ def get_url_params(url):
     params = re.search(RE_URL, url)
     query = params.group('query')
     if query:
-        pairs = map(lambda kv: kv.split('='), query.split('&'))
+        pairs = list(map(lambda kv: kv.split('='), query.split('&')))
         query = dict([(k, unquote(v)) for k, v in pairs])
     return {
         'scheme': params.group('scheme'),

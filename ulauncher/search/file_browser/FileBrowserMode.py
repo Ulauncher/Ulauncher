@@ -40,7 +40,7 @@ class FileBrowserMode(BaseSearchMode):
         return FileBrowserResultItem(Path(path_srt))
 
     def filter_dot_files(self, file_list):
-        return filter(lambda f: not f.startswith('.'), file_list)
+        return list(filter(lambda f: not f.startswith('.'), file_list))
 
     def handle_query(self, query):
         if query == '~':

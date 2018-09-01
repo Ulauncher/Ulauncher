@@ -39,7 +39,8 @@ class SortedList:
         return item in self._items
 
     def extend(self, items):
-        map(lambda i: self.append(i), items)
+        for item in items:
+            self.append(item)
 
     def append(self, result_item):
         score = get_score(self._query, result_item.get_search_name())

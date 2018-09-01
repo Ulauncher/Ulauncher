@@ -39,7 +39,8 @@ def get_matching_indexes(query, text):
     while i > 0:
         j, c = max(enumerate(counter[i]), key=operator.itemgetter(1))
         if c:
-            map(positions.add, range(j - c, j))
+            for item in range(j - c, j):
+                positions.add(item)
             i -= c
         else:
             i -= 1

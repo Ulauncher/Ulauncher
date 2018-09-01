@@ -58,7 +58,7 @@ def find_apps(dirs=DESKTOP_DIRS):
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
     """
-    return filter(filter_app, map(read_desktop_file, find_desktop_files(dirs)))
+    return list(filter(filter_app, map(read_desktop_file, find_desktop_files(dirs))))
 
 
 def find_apps_cached(dirs=DESKTOP_DIRS):

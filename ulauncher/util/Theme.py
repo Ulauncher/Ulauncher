@@ -17,7 +17,7 @@ def load_available_themes():
     theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
     if os.path.exists(user_theme_dir):
         theme_dirs.extend([os.path.join(user_theme_dir, d) for d in os.listdir(user_theme_dir)])
-    theme_dirs = filter(os.path.isdir, theme_dirs)
+    theme_dirs = list(filter(os.path.isdir, theme_dirs))
 
     for dir in theme_dirs:
         if os.path.isfile(os.path.join(dir, 'manifest.json')):

@@ -317,7 +317,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         if results:
             self._results_render_time = time.time()
-            map(self.result_box.add, results)
+            for item in results:
+                self.result_box.add(item)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())
 

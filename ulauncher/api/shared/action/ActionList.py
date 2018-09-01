@@ -20,4 +20,5 @@ class ActionList(list, BaseAction):
             return any(map(lambda i: i.keep_app_open(), self))
 
     def run(self):
-        map(lambda i: i.run(), self)
+        for item in self:
+            item.run()
