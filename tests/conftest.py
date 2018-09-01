@@ -1,5 +1,6 @@
 import pytest
 from gi.repository import GdkX11
+from functools import reduce
 
 is_display_enabled = bool(GdkX11.X11Display.get_default())
 
