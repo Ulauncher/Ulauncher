@@ -60,7 +60,7 @@ def fetch_release():
     response = urlopen('https://api.github.com/repos/ulauncher/ulauncher/releases')
     releases = json.load(response)
     try:
-        return (r for r in releases if r['tag_name'] == version).next()
+        return next(r for r in releases if r['tag_name'] == version)
     except StopIteration:
         print("ERROR: Satisfiable release version %s not found" % version)
         sys.exit(1)
