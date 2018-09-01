@@ -3,7 +3,7 @@
 
 import os
 import sys
-from itertools import takewhile, dropwhile
+from itertools import dropwhile, takewhile
 
 try:
     import DistUtilsExtra.auto
@@ -18,8 +18,8 @@ def update_config(libdir, values={}):
     filename = os.path.join(libdir, 'ulauncher/config.py')
     oldvalues = {}
     try:
-        fin = file(filename, 'r')
-        fout = file(filename + '.new', 'w')
+        fin = open(filename, 'r')
+        fout = open(filename + '.new', 'w')
 
         for line in fin:
             fields = line.split(' = ')  # Separate variable from value
@@ -32,7 +32,7 @@ def update_config(libdir, values={}):
         fout.close()
         fin.close()
         os.rename(fout.name, fin.name)
-    except (OSError, IOError), e:
+    except (OSError, IOError):
         print ("ERROR: Can't find %s" % filename)
         sys.exit(1)
     return oldvalues
@@ -69,8 +69,8 @@ def move_desktop_file(root, target_data, prefix):
 def update_desktop_file(filename, target_pkgdata, target_scripts):
 
     try:
-        fin = file(filename, 'r')
-        fout = file(filename + '.new', 'w')
+        fin = open(filename, 'r')
+        fout = open(filename + '.new', 'w')
 
         for line in fin:
             if 'Exec=' in line:
@@ -79,7 +79,8 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
                 # persist env vars
                 env_vars = ''
                 if cmd.startswith('env '):
-                    is_env = lambda p: p == 'env' or '=' in p
+                    def is_env(p):
+                        return p == 'env' or '=' in p
                     env_vars = ' '.join(list(takewhile(is_env, cmd.split()))) + ' '
                     cmd = ' '.join(list(dropwhile(is_env, cmd.split())))
 
@@ -93,7 +94,7 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
         fout.close()
         fin.close()
         os.rename(fout.name, fin.name)
-    except (OSError, IOError), e:
+    except (OSError, IOError):
         print ("ERROR: Can't find %s" % filename)
         sys.exit(1)
 
@@ -123,6 +124,7 @@ class DataFileList(list):
             return
         else:
             return super(DataFileList, self).append(item)
+
 
 DistUtilsExtra.auto.setup(
     name='ulauncher',
