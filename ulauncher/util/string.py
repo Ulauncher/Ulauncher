@@ -5,7 +5,7 @@ _all_cap_re = re.compile('([a-z0-9])([A-Z])')
 
 
 def force_unicode(text):
-    return text if isinstance(text, unicode) else text.decode('utf8')
+    return text if isinstance(text, str) else text.decode('utf8')
 
 
 def split_camel_case(text, sep='_'):

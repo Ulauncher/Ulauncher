@@ -36,7 +36,7 @@ class AppResultItem(ResultItem):
         if query:
             # don't record empty queries
             # they occur if a user selects item from a default list
-            self._app_queries.put(unicode(query), self.record.get('name'))
+            self._app_queries.put(str(query), self.record.get('name'))
             self._app_queries.commit()
 
         self._app_stat_db.inc_count(self.record.get('desktop_file'))

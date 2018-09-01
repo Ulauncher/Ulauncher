@@ -43,7 +43,7 @@ class DesktopParser:
             os.makedirs(dir)
 
         with open(self._filename, 'w') as f:
-            f.write(os.linesep.join((self.DESKTOP_SECTION, os.linesep.join(['='.join((unicode(k), unicode(v).strip()))
+            f.write(os.linesep.join((self.DESKTOP_SECTION, os.linesep.join(['='.join((str(k), str(v).strip()))
                                                                             for k, v in self.__property_list]))))
 
     def get(self, name):
