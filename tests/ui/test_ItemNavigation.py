@@ -7,7 +7,7 @@ class TestItemNavigation:
 
     @pytest.fixture
     def items(self):
-        return map(lambda _: mock.MagicMock(), range(5))
+        return [mock.MagicMock() for _ in range(5)]
 
     @pytest.fixture
     def nav(self, items):
