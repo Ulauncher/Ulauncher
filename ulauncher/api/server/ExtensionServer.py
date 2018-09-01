@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from port_finder import find_unused_port
+from .port_finder import find_unused_port
 from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.util.SimpleWebSocketServer import SimpleWebSocketServer
 from ulauncher.util.decorator.run_async import run_async
@@ -86,7 +86,7 @@ class ExtensionServer:
         :param str keyword:
         :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
         """
-        for ext_id, ctl in self.controllers.items():
+        for _, ctl in self.controllers.items():
             if keyword in ctl.preferences.get_active_keywords():
                 return ctl
 
