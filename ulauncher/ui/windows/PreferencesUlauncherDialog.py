@@ -169,7 +169,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             logger.exception(message)
 
         try:
-            stream = Gio.MemoryInputStream.new_from_data(callback)
+            stream = Gio.MemoryInputStream.new_from_data(callback.encode())
             # send response
             scheme_request.finish(stream, -1, 'text/javascript')
         except Exception as e:
