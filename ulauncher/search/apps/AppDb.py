@@ -6,7 +6,6 @@ import logging
 from ulauncher.search.SortedList import SortedList
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.util.image_loader import get_app_icon_pixbuf
-from ulauncher.util.string import force_unicode
 from .AppResultItem import AppResultItem
 
 logger = logging.getLogger(__name__)
@@ -62,11 +61,11 @@ class AppDb:
         """
         :param Gio.DesktopAppInfo app:
         """
-        name = force_unicode(app.get_string('X-GNOME-FullName') or app.get_name())
-        exec_name = force_unicode(app.get_string('Exec') or '')
+        name = app.get_string('X-GNOME-FullName') or app.get_name()
+        exec_name = app.get_string('Exec') or ''
         record = {
-            "desktop_file": force_unicode(app.get_filename()),
-            "description": force_unicode(app.get_description() or ''),
+            "desktop_file": app.get_filename(),
+            "description": app.get_description() or '',
             "name": name,
             "search_name": search_name(name, exec_name)
         }
@@ -83,7 +82,7 @@ class AppDb:
     def get_by_name(self, name):
         query = 'SELECT * FROM app_db where name = ? COLLATE NOCASE'
         try:
-            collection = self._conn.execute(query, (force_unicode(name),))
+            collection = self._conn.execute(query, (name,))
         except Exception as e:
             logger.exception('Exception %s for query: %s. Name: %s' % (e, query, name))
             raise
@@ -95,7 +94,7 @@ class AppDb:
     def get_by_path(self, desktop_file):
         query = 'SELECT * FROM app_db where desktop_file = ?'
         try:
-            collection = self._conn.execute(query, (force_unicode(desktop_file),))
+            collection = self._conn.execute(query, (desktop_file,))
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
             raise
@@ -110,7 +109,7 @@ class AppDb:
         """
         query = 'DELETE FROM app_db WHERE desktop_file = ?'
         try:
-            self._conn.execute(query, (force_unicode(desktop_file),))
+            self._conn.execute(query, (desktop_file),)
             self.commit()
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))

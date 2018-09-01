@@ -15,7 +15,6 @@ from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.util.AutostartPreference import AutostartPreference
 from ulauncher.util.Router import Router, get_url_params
 from ulauncher.util.Settings import Settings
-from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.glib_idle_add import glib_idle_add
 from ulauncher.util.Theme import themes, Theme, load_available_themes
@@ -326,9 +325,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         req_data = url_params['query']
         logger.info('Add/Update shortcut: %s' % json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
-        id = shortcuts.put_shortcut(force_unicode(req_data['name']),
-                                    force_unicode(req_data['keyword']),
-                                    force_unicode(req_data['cmd']),
+        id = shortcuts.put_shortcut(req_data['name'],
+                                    req_data['keyword'],
+                                    req_data['cmd'],
                                     req_data.get('icon') or None,
                                     str_to_bool(req_data['is_default_search']),
                                     req_data.get('id'))

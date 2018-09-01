@@ -42,11 +42,6 @@ class TestAppDb:
     def get_app_icon_pixbuf(self, mocker):
         return mocker.patch('ulauncher.search.apps.AppDb.get_app_icon_pixbuf')
 
-    @pytest.fixture(autouse=True)
-    def force_unicode(self, mocker):
-        force_unicode = mocker.patch('ulauncher.search.apps.AppDb.force_unicode')
-        force_unicode.side_effect = lambda x: x
-
     def test_remove_by_path(self, db_with_data):
         assert db_with_data.get_by_path('jane.desktop')
         db_with_data.remove_by_path('jane.desktop')

@@ -1,5 +1,4 @@
 from ulauncher.util.fuzzy_search import get_matching_indexes
-from ulauncher.util.string import force_unicode
 
 
 def highlight_text(query, text, open_tag='<span foreground="white">', close_tag='</span>'):
@@ -8,8 +7,6 @@ def highlight_text(query, text, open_tag='<span foreground="white">', close_tag=
     :returns: string with Pango markup
     """
     positions = get_matching_indexes(query, text)
-    query = force_unicode(query)
-    text = force_unicode(text)
 
     # use positions to highlight text with tags
     hl_started = False

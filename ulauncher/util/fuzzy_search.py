@@ -1,6 +1,5 @@
 import operator
 from Levenshtein import ratio
-from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.lru_cache import lru_cache
 
 
@@ -58,7 +57,7 @@ def get_score(query, text):
 
     query = query.lower()
     text = text.lower()
-    score = ratio(force_unicode(query), force_unicode(text)) * 100
+    score = ratio(query, text) * 100
 
     # increase score if a word from text starts with a query
     for text_part in text.split(' '):

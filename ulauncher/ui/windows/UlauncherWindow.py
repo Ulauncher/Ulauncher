@@ -27,7 +27,6 @@ from ulauncher.util.AppCacheDb import AppCacheDb
 from ulauncher.util.Settings import Settings
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.util.display import get_current_screen_geometry
-from ulauncher.util.string import force_unicode
 from ulauncher.util.version_cmp import gtk_version_is_gte
 from ulauncher.util.desktop.notification import show_notification
 from ulauncher.util.Theme import Theme, load_available_themes
@@ -286,8 +285,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             app_cache_db.commit()
 
     def _get_user_query(self):
-        # get_text() returns str, so we need to convert it to unicode
-        return Query(force_unicode(self.input.get_text()))
+        return Query(self.input.get_text())
 
     def select_result_item(self, index, onHover=False):
         if time.time() - self._results_render_time > 0.1:

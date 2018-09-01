@@ -6,7 +6,6 @@ from gi.repository import Gio
 from ulauncher.util.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
 from ulauncher.util.Settings import Settings
-from ulauncher.util.string import force_unicode
 from ulauncher.util.db.KeyValueDb import KeyValueDb
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     blacklisted_dirs = blacklisted_dirs_srt.split(':') if blacklisted_dirs_srt else []
     for file in files:
         try:
-            if any([force_unicode(file).startswith(dir) for dir in blacklisted_dirs]):
+            if any([file.startswith(dir) for dir in blacklisted_dirs]):
                 continue
         except UnicodeDecodeError:
             continue
