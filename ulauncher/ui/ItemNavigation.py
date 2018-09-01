@@ -19,7 +19,9 @@ class ItemNavigation:
         Selects item that should be selected by default
         If no such items found, select the first one in the list
         """
-        self.select(next((index for index, item in enumerate(self.items) if item.selected_by_default(query)), 0))
+        indices = (index for index, item in enumerate(self.items) if item.selected_by_default(query))
+        index = next(indices, 0)
+        self.select(index)
 
     def select(self, index):
         if not (0 < index < self.items_num):
