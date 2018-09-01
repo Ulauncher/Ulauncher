@@ -14,4 +14,4 @@ fi
 
 args=$(echo $@ | sed 's|/.*tests|tests|g') # make a relative path
 
-eval "PYTHONPATH=`pwd` py.test --pep8 $args"
+eval "PYTHONPATH=`pwd` pytest --pep8 $args"
