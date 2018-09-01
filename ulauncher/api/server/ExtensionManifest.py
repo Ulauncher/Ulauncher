@@ -80,9 +80,9 @@ class ExtensionManifest:
                     assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
                     assert p.get('options'), 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
-            raise ManifestValidationError(e.message)
+            raise ManifestValidationError(e)
         except KeyError as e:
-            raise ManifestValidationError('%s is not provided' % e.message)
+            raise ManifestValidationError('%s is not provided' % e)
 
     def check_compatibility(self):
         app_version = get_version()

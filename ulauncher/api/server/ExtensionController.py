@@ -96,7 +96,7 @@ class ExtensionController(WebSocket):
         try:
             self.manifest.validate()
         except ManifestValidationError as e:
-            logger.warning("Couldn't connect '%s'. %s: %s" % (self.extension_id, type(e).__name__, e.message))
+            logger.warning("Couldn't connect '%s'. %s: %s" % (self.extension_id, type(e).__name__, e))
             self.close()
             return
 

@@ -106,6 +106,6 @@ def get_file_icon(path, icon_size):
         if path.is_exe():
             return load_image(get_data_file('media', 'executable-icon.png'), icon_size)
     except Exception as e:
-        logger.warning('Icon not found %s. %s: %s' % (path, type(e).__name__, e.message))
+        logger.warning('Icon not found %s. %s: %s' % (path, type(e).__name__, e))
 
     return load_image(get_data_file('media', 'unknown-file-icon.png'), icon_size)

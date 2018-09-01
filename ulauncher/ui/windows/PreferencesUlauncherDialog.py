@@ -153,16 +153,16 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             callback_name = params['query']['callback']
             assert callback_name
         except Exception as e:
-            logger.exception('API call failed. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('API call failed. %s: %s' % (type(e).__name__, e))
             return
 
         try:
             resp = rt.dispatch(self, scheme_request.get_uri())
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except PrefsApiError as e:
-            callback = '%s(null, %s);' % (callback_name, json.dumps(e.message))
+            callback = '%s(null, %s);' % (callback_name, json.dumps(e))
         except Exception as e:
-            message = 'Unexpected API error. %s: %s' % (type(e).__name__, e.message)
+            message = 'Unexpected API error. %s: %s' % (type(e).__name__, e)
             callback = '%s(null, %s);' % (callback_name, json.dumps(message))
             logger.exception(message)
 
@@ -171,7 +171,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             # send response
             scheme_request.finish(stream, -1, 'text/javascript')
         except Exception as e:
-            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e))
 
     def send_webview_notification(self, name, data):
         self.webview.run_javascript('onNotification("%s", %s)' % (name, json.dumps(data)))
@@ -355,7 +355,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             ext_id = downloader.download(url)
             ExtensionRunner.get_instance().run(ext_id)
         except (ExtensionDownloaderError, ManifestValidationError) as e:
-            raise PrefsApiError(e.message)
+            raise PrefsApiError(e)
 
         return self._get_all_extensions()
 
@@ -390,7 +390,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             downloader.update(ext_id)
         except ManifestValidationError as e:
-            raise PrefsApiError(e.message)
+            raise PrefsApiError(e)
 
     @rt.route('/extension/remove')
     def prefs_extension_remove(self, url_params):

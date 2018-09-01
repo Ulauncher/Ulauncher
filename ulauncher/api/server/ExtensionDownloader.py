@@ -56,7 +56,7 @@ class ExtensionDownloader:
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e.message))
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e))
             raise InvalidGithubUrlError('Project is not available on Github')
 
         filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
@@ -85,7 +85,7 @@ class ExtensionDownloader:
                 ext_id = self.download(ext['url'])
                 self.ext_runner.run(ext_id)
             except Exception as e:
-                logger.error('%s: %s' % (type(e).__name__, e.message))
+                logger.error('%s: %s' % (type(e).__name__, e))
 
     def remove(self, ext_id):
         try:
@@ -148,7 +148,7 @@ class ExtensionDownloader:
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e.message))
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e))
             raise InvalidGithubUrlError('Project is not available on Github')
 
         if ext['last_commit'] == gh_commit['last_commit']:

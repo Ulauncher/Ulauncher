@@ -25,7 +25,7 @@ def load_available_themes():
             try:
                 theme.validate()
             except ThemeManifestError as e:
-                logger.error('%s: %s' % (type(e).__name__, e.message))
+                logger.error('%s: %s' % (type(e).__name__, e))
                 continue
             themes[theme.get_name()] = theme
 
@@ -94,7 +94,7 @@ class Theme:
             assert os.path.exists(os.path.join(self.path, self.get_css_file_gtk_3_20())), \
                 '"css_file_gtk_3.20+" does not exist'
         except AssertionError as e:
-            raise ThemeManifestError(e.message)
+            raise ThemeManifestError(e)
 
     def compile_css(self):
         # workaround for issue with a caret-color

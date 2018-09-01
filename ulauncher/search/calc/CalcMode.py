@@ -63,5 +63,5 @@ class CalcMode(BaseSearchMode):
 
             result_item = CalcResultItem(result=result)
         except Exception as e:
-            result_item = CalcResultItem(error=e.message or error_msg)
+            result_item = CalcResultItem(error=e or error_msg)
         return RenderResultListAction([result_item])

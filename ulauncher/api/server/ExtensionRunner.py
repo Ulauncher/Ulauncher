@@ -36,7 +36,7 @@ class ExtensionRunner:
             try:
                 self.run(id)
             except Exception as e:
-                logger.error("Couldn't run '%s'. %s: %s" % (id, type(e).__name__, e.message))
+                logger.error("Couldn't run '%s'. %s: %s" % (id, type(e).__name__, e))
 
     def run(self, extension_id):
         """
