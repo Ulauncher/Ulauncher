@@ -37,9 +37,10 @@ class Client:
                                          on_error=self.on_error,
                                          on_open=self.on_open,
                                          on_close=self.on_close)
-        self.ws.run_forever()
+        # https://github.com/websocket-client/websocket-client/issues/466
+        self.ws.run_forever(ping_timeout=1)
 
-    def on_message(self, ws, message):
+    def on_message(self, message):
         """
         Parses message from Ulauncher and triggers extension event
 
@@ -53,10 +54,10 @@ class Client:
         except Exception as e:
             traceback.print_exc(file=sys.stderr)
 
-    def on_error(self, ws, error):
+    def on_error(self, error):
         logger.error('WS Client error %s' % error)
 
-    def on_close(self, ws):
+    def on_close(self):
         """
         Terminates extension process on WS disconnect.
 
@@ -69,8 +70,8 @@ class Client:
         # extension has 0.5 sec to save it's state, after that it will be terminated
         Timer(0.5, os._exit, args=[0]).start()
 
-    def on_open(self, ws):
-        self.ws = ws
+    def on_open(self):
+        pass
 
     def send(self, response):
         """

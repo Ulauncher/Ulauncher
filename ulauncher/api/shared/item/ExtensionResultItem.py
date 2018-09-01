@@ -21,7 +21,7 @@ class ExtensionResultItem(ResultItem):
             raise Exception("Incorrect type of on_enter argument")
 
     def get_icon(self):
-        if isinstance(self._icon, basestring):
+        if isinstance(self._icon, str):
             icon_path = self._icon
 
             if not icon_path.startswith('/'):

@@ -221,12 +221,6 @@ class WebSocket:
                 if self.frag_start is True:
                     raise Exception('fragmentation protocol error')
 
-                if self.opcode == TEXT:
-                    try:
-                        self.data = self.data.decode('utf8', errors='strict')
-                    except Exception:
-                        raise Exception('invalid utf-8 payload')
-
                 self.handleMessage()
 
     def _handleData(self):
