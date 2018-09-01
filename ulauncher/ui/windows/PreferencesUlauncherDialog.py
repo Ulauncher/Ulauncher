@@ -4,7 +4,7 @@ import logging
 import json
 
 from gi.repository import Gio, Gtk, WebKit2, GLib
-from urllib import unquote
+from urllib.parse import unquote
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR

@@ -1,5 +1,5 @@
 import re
-from urllib import unquote
+from urllib.parse import unquote
 
 RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
 

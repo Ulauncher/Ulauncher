@@ -1,6 +1,6 @@
 import re
 import json
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 DEFAULT_GITHUB_BRANCH = 'master'
 
@@ -19,7 +19,7 @@ class GithubExtension:
     def get_last_commit(self):
         """
         :rtype dict: {'last_commit': str, 'last_commit_time': str}
-        :raises urllib2.HTTPError:
+        :raises urllib.error.HTTPError:
         """
         project_path = self._get_project_path()
         branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)

@@ -5,7 +5,7 @@
 import os
 import sys
 import re
-import urllib2
+from urllib.request import urlopen
 import json
 from tempfile import mkdtemp
 from subprocess import call
@@ -57,7 +57,7 @@ def main():
 
 def fetch_release():
     print("Fetching releases from Github...")
-    response = urllib2.urlopen('https://api.github.com/repos/ulauncher/ulauncher/releases')
+    response = urlopen('https://api.github.com/repos/ulauncher/ulauncher/releases')
     releases = json.load(response)
     try:
         return (r for r in releases if r['tag_name'] == version).next()

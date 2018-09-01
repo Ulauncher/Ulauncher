@@ -1,7 +1,7 @@
 import os
 import logging
 from zipfile import ZipFile
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime

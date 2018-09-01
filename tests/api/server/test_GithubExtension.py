@@ -3,7 +3,7 @@ import mock
 import pytest
 
 from json import dumps
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 
 from ulauncher.api.server.GithubExtension import GithubExtension, InvalidGithubUrlError
 

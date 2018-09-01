@@ -1,6 +1,6 @@
 import mock
 import pytest
-from urllib import quote
+from urllib.parse import quote
 from ulauncher.util.Router import Router, RoutePathEmpty, RouteNotFound, get_url_params
 
 
