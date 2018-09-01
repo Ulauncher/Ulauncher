@@ -32,8 +32,8 @@ class TestGithubExtension:
     def test_get_last_commit(self, gh_ext, mocker):
         urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
         urlopen.side_effect = [
-            io.StringIO(dumps({'object': {'url': 'url123'}}).decode('utf-8')),
-            io.StringIO(dumps({'sha': '64e106c', 'committer': {'date': '2017-05-01T07:30:39Z'}}).decode('utf-8'))
+            io.StringIO(dumps({'object': {'url': 'url123'}})),
+            io.StringIO(dumps({'sha': '64e106c', 'committer': {'date': '2017-05-01T07:30:39Z'}}))
         ]
         info = gh_ext.get_last_commit()
         assert info['last_commit'] == '64e106c'

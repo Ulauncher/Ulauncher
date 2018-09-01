@@ -150,7 +150,7 @@ class WebSocket(object):
 
       if self.opcode == CLOSE:
          status = 1000
-         reason = u''
+         reason = ''
          length = len(self.data)
 
          if length == 0:
@@ -210,7 +210,7 @@ class WebSocket(object):
               if self.frag_type == TEXT:
                   utf_str = self.frag_decoder.decode(self.data, final = True)
                   self.frag_buffer.append(utf_str)
-                  self.data = u''.join(self.frag_buffer)
+                  self.data = ''.join(self.frag_buffer)
               else:
                   self.frag_buffer.extend(self.data)
                   self.data = self.frag_buffer
@@ -285,7 +285,7 @@ class WebSocket(object):
              for d in data:
                  self._parseMessage(ord(d))
 
-   def close(self, status = 1000, reason = u''):
+   def close(self, status = 1000, reason = ''):
        """
           Send Close frame to the client. The underlying socket is only closed
           when the client acknowledges the Close frame.
