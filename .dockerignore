@@ -18,3 +18,7 @@ index.html
 .travis.yml
 aur_key
 *.key
+.mypy_cache/
+.vscode/
+.pytest_cache/
+.venv/
