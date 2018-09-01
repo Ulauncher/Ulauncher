@@ -1,9 +1,5 @@
-import io
 import mock
 import pytest
-
-from json import dumps
-from urllib.error import HTTPError
 
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
