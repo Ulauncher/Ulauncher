@@ -11,7 +11,7 @@ import os
 from uuid import uuid4
 from time import time
 
-from locale import gettext as _
+from gettext import gettext
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs
 from ulauncher.util.decorator.lru_cache import lru_cache
 
@@ -81,17 +81,17 @@ def get_options():
     parser = optparse.OptionParser(version="%%prog %s" % get_version())
     parser.add_option(
         "-v", "--verbose", action="count", dest="verbose",
-        help=_("Show debug messages"))
+        help=gettext("Show debug messages"))
     parser.add_option(
         "--hide-window", action="store_true",
-        help=_("Hide window upon application startup"))
+        help=gettext("Hide window upon application startup"))
     parser.add_option(
         "--no-extensions", action="store_true",
-        help=_("Do not run extensions"))
+        help=gettext("Do not run extensions"))
     parser.add_option(
         "--dev", action="store_true",
-        help=_("Development mode"))
-    (options, args) = parser.parse_args()
+        help=gettext("Development mode"))
+    (options, _) = parser.parse_args()
 
     return options
 
