@@ -1,7 +1,7 @@
 import os
 
 
-class DesktopParser(object):
+class DesktopParser:
     DESKTOP_SECTION = '[Desktop Entry]'
 
     __property_list = None

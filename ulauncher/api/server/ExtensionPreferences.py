@@ -8,7 +8,7 @@ from .ExtensionManifest import ExtensionManifest
 logger = logging.getLogger(__name__)
 
 
-class ExtensionPreferences(object):
+class ExtensionPreferences:
     """
     Manages extension preferences. Stores them in pickled file in cache directory
     """

@@ -1,4 +1,4 @@
-class ItemNavigation(object):
+class ItemNavigation:
     """
     Performs navigation through found results
     """

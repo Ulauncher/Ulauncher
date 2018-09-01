@@ -4,7 +4,7 @@ from ulauncher.config import get_version, EXTENSIONS_DIR
 from ulauncher.util.image_loader import load_image
 
 
-class ExtensionManifest(object):
+class ExtensionManifest:
     """
     Reads `manifest.json`
     """

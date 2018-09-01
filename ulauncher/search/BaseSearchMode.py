@@ -1,7 +1,7 @@
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 
-class BaseSearchMode(object):
+class BaseSearchMode:
 
     def is_enabled(self, query):
         """

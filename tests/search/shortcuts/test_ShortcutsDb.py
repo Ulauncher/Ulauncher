@@ -3,7 +3,7 @@ import pytest
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 
 
-class TestShortcutsDb(object):
+class TestShortcutsDb:
 
     @pytest.fixture(autouse=True)
     def get_default_shortcuts(self, mocker):

@@ -9,7 +9,7 @@ from ulauncher.util.decorator.singleton import singleton
 logger = logging.getLogger(__name__)
 
 
-class AppIndicator(object):
+class AppIndicator:
 
     @classmethod
     @singleton

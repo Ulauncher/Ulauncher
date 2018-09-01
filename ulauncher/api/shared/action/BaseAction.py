@@ -1,4 +1,4 @@
-class BaseAction(object):
+class BaseAction:
 
     def keep_app_open(self):
         """

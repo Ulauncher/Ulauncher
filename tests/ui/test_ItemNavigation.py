@@ -3,7 +3,7 @@ import mock
 from ulauncher.ui.ItemNavigation import ItemNavigation
 
 
-class TestItemNavigation(object):
+class TestItemNavigation:
 
     @pytest.fixture
     def items(self):

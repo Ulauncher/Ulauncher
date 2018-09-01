@@ -1,7 +1,7 @@
 from ulauncher.util.text_highlighter import highlight_text
 
 
-class ResultItem(object):
+class ResultItem:
 
     ICON_SIZE = 40
     UI_FILE = 'result_item'

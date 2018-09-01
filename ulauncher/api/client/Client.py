@@ -11,7 +11,7 @@ from ulauncher.api.shared.event import SystemExitEvent
 logger = logging.getLogger(__name__)
 
 
-class Client(object):
+class Client:
     """
     Instantiated in extension code and manages data transfer from/to Ulauncher app
 

@@ -5,7 +5,7 @@ from urllib2 import urlopen
 DEFAULT_GITHUB_BRANCH = 'master'
 
 
-class GithubExtension(object):
+class GithubExtension:
 
     url_match_pattern = r'^https:\/\/github.com\/([\w-]+\/[\w-]+)$'
 

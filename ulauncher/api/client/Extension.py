@@ -9,7 +9,7 @@ from .Client import Client
 from .setup_logging import setup_logging
 
 
-class Extension(object):
+class Extension:
     """
     Manages extension runtime
     """

@@ -12,7 +12,7 @@ from .AppResultItem import AppResultItem
 logger = logging.getLogger(__name__)
 
 
-class AppDb(object):
+class AppDb:
 
     @classmethod
     @singleton

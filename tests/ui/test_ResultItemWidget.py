@@ -6,7 +6,7 @@ from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
 
 
-class TestResultItemWidget(object):
+class TestResultItemWidget:
 
     @pytest.fixture
     def item_obj(self):

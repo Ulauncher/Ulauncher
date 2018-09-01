@@ -162,7 +162,7 @@ class Builder(Gtk.Builder):
 # pylint: disable=R0903
 # this class deliberately does not provide any public interfaces
 # apart from the glade widgets
-class UiFactory():
+class UiFactory:
     ''' provides an object with attributes as glade widgets'''
     def __init__(self, widget_dict):
         self._widget_dict = widget_dict

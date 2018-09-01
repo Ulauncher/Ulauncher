@@ -5,7 +5,7 @@ from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.util.desktop.DesktopParser import DesktopParser
 
 
-class AutostartPreference(object):
+class AutostartPreference:
     AUTOSTART_FLAG = 'X-GNOME-Autostart-enabled'
 
     _ulauncher_desktop = None  # path to ulauncher.desktop

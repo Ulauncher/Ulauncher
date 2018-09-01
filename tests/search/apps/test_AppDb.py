@@ -4,7 +4,7 @@ from ulauncher.search.apps.AppDb import AppDb, search_name
 from collections import Iterable
 
 
-class TestAppDb(object):
+class TestAppDb:
 
     @pytest.fixture
     def app_db(self):

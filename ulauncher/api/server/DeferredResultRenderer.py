@@ -11,7 +11,7 @@ from ulauncher.util.decorator.singleton import singleton
 logger = logging.getLogger('DeferredResultRenderer')
 
 
-class DeferredResultRenderer(object):
+class DeferredResultRenderer:
     """
     Handles asynchronous render for extensions
     """

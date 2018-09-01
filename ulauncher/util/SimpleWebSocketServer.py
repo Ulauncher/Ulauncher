@@ -75,7 +75,7 @@ PAYLOAD = 7
 MAXHEADER = 65536
 MAXPAYLOAD = 33554432
 
-class WebSocket(object):
+class WebSocket:
 
    def __init__(self, server, sock, address):
       self.server = server
@@ -585,7 +585,7 @@ class WebSocket(object):
             self.index += 1
 
 
-class SimpleWebSocketServer(object):
+class SimpleWebSocketServer:
    def __init__(self, host, port, websocketclass, selectInterval = 0.1):
       self.websocketclass = websocketclass
       self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

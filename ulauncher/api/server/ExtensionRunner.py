@@ -14,7 +14,7 @@ from .extension_finder import find_extensions
 logger = logging.getLogger(__name__)
 
 
-class ExtensionRunner(object):
+class ExtensionRunner:
 
     @classmethod
     @singleton

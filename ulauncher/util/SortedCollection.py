@@ -1,7 +1,7 @@
 from bisect import bisect_left, bisect_right
 
 
-class SortedCollection(object):
+class SortedCollection:
     '''Sequence sorted by a key function.
 
     SortedCollection() is much easier to work with than using bisect() directly.

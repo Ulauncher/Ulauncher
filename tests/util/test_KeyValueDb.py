@@ -3,7 +3,7 @@ import pytest
 from ulauncher.util.db.KeyValueDb import KeyValueDb
 
 
-class TestKeyValueDb(object):
+class TestKeyValueDb:
 
     @pytest.fixture
     def db_name(self, tmpdir):

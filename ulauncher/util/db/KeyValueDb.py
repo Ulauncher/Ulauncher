@@ -3,7 +3,7 @@ import pickle
 from distutils.dir_util import mkpath
 
 
-class KeyValueDb(object):
+class KeyValueDb:
     """
     Key-value in-memory database
     Use open() method to load DB from a file and commit() to save it

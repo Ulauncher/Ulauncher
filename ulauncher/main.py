@@ -47,7 +47,7 @@ class UlauncherDbusService(dbus.service.Object):
         self.window.toggle_window()
 
 
-class SignalHandler(object):
+class SignalHandler:
 
     _exit_event = None
     _app_window = None

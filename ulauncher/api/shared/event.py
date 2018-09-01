@@ -1,7 +1,7 @@
 from pickle import loads, dumps
 
 
-class BaseEvent(object):
+class BaseEvent:
 
     def __eq__(self, other):
         return dumps(self) == dumps(other)

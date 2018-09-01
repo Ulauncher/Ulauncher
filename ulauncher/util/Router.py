@@ -17,13 +17,13 @@ def get_url_params(url):
     }
 
 
-class Router(object):
+class Router:
     """
     Usage:
 
     >>> rt = Router()
     >>>
-    >>> class App(object):
+    >>> class App:
     >>>
     >>>     @rt.route('get/user')
     >>>     def get_user(self, url_params):

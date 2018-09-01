@@ -1,7 +1,7 @@
 from gi.repository import Gtk
 
 
-class WindowHelper(object):
+class WindowHelper:
 
     css_provider = None
 

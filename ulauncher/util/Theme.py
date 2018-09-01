@@ -30,7 +30,7 @@ def load_available_themes():
             themes[theme.get_name()] = theme
 
 
-class Theme(object):
+class Theme:
 
     @classmethod
     def get_current(cls):

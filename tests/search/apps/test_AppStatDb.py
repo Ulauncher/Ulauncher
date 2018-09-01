@@ -2,7 +2,7 @@ import pytest
 from ulauncher.search.apps.AppStatDb import AppStatDb
 
 
-class TestAppStatDb(object):
+class TestAppStatDb:
 
     @pytest.fixture
     def db(self):

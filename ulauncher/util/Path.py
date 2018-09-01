@@ -1,7 +1,7 @@
 import os
 
 
-class Path(object):
+class Path:
     # cache for better performance
     __cached_existing_dir = None
 

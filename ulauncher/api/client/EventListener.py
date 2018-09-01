@@ -1,5 +1,5 @@
 
-class EventListener(object):
+class EventListener:
     """
     Base event listener class
     """

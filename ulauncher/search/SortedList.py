@@ -2,7 +2,7 @@ from ulauncher.util.SortedCollection import SortedCollection
 from ulauncher.util.fuzzy_search import get_score
 
 
-class SortedList(object):
+class SortedList:
     """
     List maintains result items in a sorted order
     (sorted by a score, which is a similarity between item's name and a query)

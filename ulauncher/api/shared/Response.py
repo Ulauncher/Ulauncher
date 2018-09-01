@@ -1,4 +1,4 @@
-class Response(object):
+class Response:
     """
     :param ~ulauncher.api.shared.event.BaseEvent event:
     :param ~ulauncher.api.shared.action.BaseAction.BaseAction action:
