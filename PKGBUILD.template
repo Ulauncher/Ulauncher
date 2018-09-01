@@ -10,26 +10,21 @@ arch=('any')
 url="http://ulauncher.io"
 license=('GPL3')
 depends=('gobject-introspection-runtime' 'libappindicator-gtk3' 'libkeybinder3' 'webkit2gtk'
-         "python2-"{dbus,gobject,pyinotify,pysqlite,levenshtein,xdg,websocket-client})
-makedepends=('python2-distutils-extra')
+         "python-"{dbus,gobject,pyinotify,levenshtein,xdg,websocket-client})
+makedepends=('python-distutils-extra')
 provides=("${pkgname%-*}")
 conflicts=("${pkgname%-*}")
 source=("%SOURCE%")
 sha256sums=('SKIP')
 
-prepare() {
-  cd ulauncher
-  find -iname "*.py" | xargs sed -i 's=\(^#! */usr/bin.*\)python *$=\1python2='
-}
-
 build() {
   cd ulauncher
-  python2 setup.py build
+  python setup.py build
 }
 
 package() {
   cd ulauncher
   install -Dm644 build/share/applications/ulauncher.desktop "$pkgdir/usr/share/applications/ulauncher.desktop"
-  python2 setup.py install --root="$pkgdir" --optimize=1 --skip-build
+  python setup.py install --root="$pkgdir" --optimize=1 --skip-build
   rm -rf "$pkgdir"/usr/share/ulauncher/preferences/{no*,src,bow*,gul*,pack*}
 }
