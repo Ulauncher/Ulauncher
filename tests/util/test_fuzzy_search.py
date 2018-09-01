@@ -20,5 +20,5 @@ def xtest_speed():
     t0 = time.time()
     for _ in range(1000):
         get_score('fiwebro', 'Firefox Web Browser')
-    print 'time for get_score:', (time.time() - t0)
+    print('time for get_score:', (time.time() - t0))
     assert 0

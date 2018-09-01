@@ -59,7 +59,7 @@ class Settings(GObject.GObject):
     Subscribe to property changes:
 
     >>> def on_notify(settings, prop):
-    ...     print prop.name
+    ...     print(prop.name)
     >>>
     >>> settings.connect("notify::hotkey-show-app", on_notify)
     """

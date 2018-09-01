@@ -164,6 +164,7 @@ class Builder(Gtk.Builder):
 # apart from the glade widgets
 class UiFactory:
     ''' provides an object with attributes as glade widgets'''
+
     def __init__(self, widget_dict):
         self._widget_dict = widget_dict
         for (widget_name, widget) in widget_dict.items():
@@ -279,7 +280,7 @@ def auto_connect_by_name(callback_obj, builder):
 
             # log all possible event handler names
             # if widget_name == 'notebook':
-            #     print widget_name, handler_names
+            #     print(widget_name, handler_names)
 
             # Using the convention that the top level window is not
             # specified in the handler name. That is use
