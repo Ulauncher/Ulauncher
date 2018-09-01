@@ -6,6 +6,8 @@ import inspect
 import functools
 import logging
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, Gtk
 from ulauncher.config import get_data_file
 from xml.etree.cElementTree import ElementTree

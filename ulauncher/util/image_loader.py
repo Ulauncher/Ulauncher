@@ -1,5 +1,7 @@
 import os
 import logging
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio, GLib, GdkPixbuf
 from ulauncher.config import get_data_file
 from ulauncher.util.decorator.lru_cache import lru_cache
