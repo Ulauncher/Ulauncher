@@ -1,4 +1,3 @@
-from __future__ import division
 import operator
 from Levenshtein import ratio
 from ulauncher.util.string import force_unicode

@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 from time import sleep
 import signal
@@ -7,6 +6,7 @@ import signal
 def exit_gracefully(signum, frame):
     print('On SIGTERM')
     sleep(3)
+
 
 signal.signal(signal.SIGTERM, exit_gracefully)
 
