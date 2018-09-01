@@ -28,10 +28,10 @@ class ShortcutsDb(KeyValueJsonDb):
         super(ShortcutsDb, self).commit()
 
     def get_sorted_records(self):
-        return [rec for rec in sorted(self.get_records().itervalues(), key=lambda rec: rec['added'])]
+        return [rec for rec in sorted(self.get_records().values(), key=lambda rec: rec['added'])]
 
     def get_shortcuts(self):
-        return self.get_records().itervalues()
+        return self.get_records().values()
 
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
         """
