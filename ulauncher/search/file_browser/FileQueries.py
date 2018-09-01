@@ -37,7 +37,8 @@ class FileQueries(KeyValueDb):
         so we will commit changes asynchronously every 20 sec
         """
         while True:
-            if self.__last_save_time < self.__last_put_time:
+            if self.__last_save_time is None or self.__last_put_time is None or \
+                    self.__last_save_time < self.__last_put_time:
                 self.commit()
                 self.__last_save_time = time()
             sleep(20)
