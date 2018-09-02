@@ -21,7 +21,7 @@ class RunScriptAction(BaseAction):
         file = tempfile.NamedTemporaryFile(prefix='ulauncher_RunScript_', delete=False)
 
         try:
-            file.write(self.script)
+            file.write(self.script.encode())
         except Exception:
             file.close()
             raise
