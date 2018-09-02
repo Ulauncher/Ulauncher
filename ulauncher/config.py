@@ -54,7 +54,7 @@ def get_data_path():
 
     abs_data_path = os.path.abspath(path)
     if not os.path.exists(abs_data_path):
-        raise ProjectPathNotFoundError
+        raise ProjectPathNotFoundError(abs_data_path)
 
     return abs_data_path
 
