@@ -40,7 +40,7 @@ class AppDb(object):
     def _create_table(self):
         self._conn.executescript('''
             CREATE TABLE app_db (
-              name VARCHAR, 
+              name VARCHAR,
               desktop_file VARCHAR,
               desktop_file_short VARCHAR,
               description VARCHAR,
