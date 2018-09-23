@@ -32,4 +32,5 @@ package() {
   install -Dm644 build/share/applications/ulauncher.desktop "$pkgdir/usr/share/applications/ulauncher.desktop"
   python2 setup.py install --root="$pkgdir" --optimize=1 --skip-build
   rm -rf "$pkgdir"/usr/share/ulauncher/preferences/{no*,src,bow*,gul*,pack*}
+  find . -name "*.pyc" | xargs rm
 }
