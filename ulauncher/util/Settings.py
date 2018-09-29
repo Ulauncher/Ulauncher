@@ -48,6 +48,11 @@ GPROPERTIES = {
                                  None,
                                  ':'.join(DEFAULT_BLACKLISTED_DIRS),
                                  GObject.PARAM_READWRITE),
+    "terminal-exec": (str,
+                   "Terminal command",
+                   None,
+                   "",
+                   GObject.PARAM_READWRITE),
 }
 
 
