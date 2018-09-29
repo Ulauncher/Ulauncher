@@ -80,6 +80,17 @@
         </td>
       </tr>
 
+      <tr>
+        <td>
+          <label for="enable-shortcut-keys">Enable Shortcut Keys</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            id="enable-shortcut-keys"
+            v-model="enable_shortcut_keys"></b-form-checkbox>
+        </td>
+      </tr>
+
     </table>
 
     <h1>Advanced</h1>
@@ -152,6 +163,18 @@ export default {
       set(value) {
         return jsonp('prefs://set/autostart-enabled', { value: value }).then(
           () => this.setPrefs({ autostart_enabled: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    enable_shortcut_keys: {
+      get() {
+        return this.prefs.enable_shortcut_keys
+      },
+      set(value) {
+        return jsonp('prefs://set/enable-shortcut-keys', { value: value }).then(
+          () => this.setPrefs({ enable_shortcut_keys: value }),
           err => bus.$emit('error', err)
         )
       }

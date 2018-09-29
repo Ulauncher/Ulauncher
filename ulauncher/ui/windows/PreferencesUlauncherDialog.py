@@ -190,6 +190,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'autostart_enabled': self.autostart_pref.is_on(),
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
+            'enable_shortcut_keys': self.settings.get_property('enable-shortcut-keys'),
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
@@ -220,6 +221,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             self.autostart_pref.switch(is_on)
         except Exception as e:
             raise PrefsApiError('Caught an error while switching "autostart": %s' % e)
+
+    @rt.route('/set/enable-shortcut-keys')
+    def prefs_set_enable_shortcut_keys(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set enable-shortcut-keys to %s' % is_on)
+        self.settings.set_property('enable-shortcut-keys', is_on)
+        self.settings.save_to_file()
 
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):

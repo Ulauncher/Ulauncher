@@ -1,6 +1,8 @@
 import logging
 from gi.repository import Gtk
+
 from ulauncher.util.Theme import Theme
+from ulauncher.util.Settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,11 @@ class ResultItemWidget(Gtk.EventBox):
         self.item_box = builder.get_object('item-box')
         self.item_object = item_object
         self.query = query
-        self.set_index(index)
+
+        if Settings.get_instance().get_property('enable-shortcut-keys'):
+            self.set_index(index)
+        else:
+            self.hide_shortcut()
 
         self.set_icon(item_object.get_icon())
         self.set_description(item_object.get_description(query))
@@ -39,6 +45,41 @@ class ResultItemWidget(Gtk.EventBox):
         index_text = index + 1 if index < 9 else chr(97 + index - 9)
         self.shortcut = 'Alt+%s' % index_text
         self.set_shortcut(self.shortcut)
+
+    def hide_shortcut(self):
+
+        # get the shortcut widget object
+        shortcut_object = self.builder.get_object('item-shortcut')
+
+        # do not show shortcut widget when parent show_all() is called
+        shortcut_object.set_no_show_all(True)
+        # hide the shortcut object
+        shortcut_object.hide()
+        # set shortcut text to empty string
+        self.set_shortcut('')
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # because widths are hardcoded, get the width of shortcut and add
+        # it to the width of description.
+        # get description and shortcut objects
+
+        # get the description widget
+        descr_object = self.builder.get_object('item-descr')
+        # get description width and height
+        descr_size = descr_object.get_size_request()
+
+        # calculate new description width by adding shoortcut width, left and
+        # right margins to the existing description width
+        new_descr_width = descr_size.width + \
+            shortcut_object.get_size_request().width + \
+            shortcut_object.get_margin_left() + \
+            shortcut_object.get_margin_right()
+
+        # set the new description width
+        descr_object.set_size_request(
+            width=new_descr_width,
+            height=descr_size.height
+        )
 
     def select(self):
         self.set_name_highlighted(True)
@@ -89,7 +130,8 @@ class ResultItemWidget(Gtk.EventBox):
             description_obj.set_text(description)
         else:
             description_obj.destroy()  # remove description label
-            self.builder.get_object('item-name').set_margin_top(8)  # shift name label down to the center
+            # shift name label down to the center
+            self.builder.get_object('item-name').set_margin_top(8)
 
     def set_shortcut(self, text):
         self.builder.get_object('item-shortcut').set_text(text)

@@ -27,6 +27,9 @@ export default function(url, params) {
     } else if (isMatch(url, '/set/autostart-enabled')) {
       console.log('/set/autostart-enabled', params)
       setTimeout(resolve, 0)
+    } else if (isMatch(url, '/set/enable-shortcut-keys')) {
+      console.log('/set/enable-shortcut-keys', params)
+      setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/show-recent-apps')) {
       console.log('/set/show-recent-apps', params)
       setTimeout(resolve, 0)
