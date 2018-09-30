@@ -87,7 +87,7 @@
     <table>
       <tr>
         <td>
-          <label for="terminal-exec">Terminal launch command</label>
+          <label for="terminal-exec">Terminal Launch Command</label>
         </td>
         <td>
           <b-form-input
