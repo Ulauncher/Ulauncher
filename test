@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Some tests will fail in Docker unless virtual frame buffer is running
 if [ -f /.dockerenv ]; then

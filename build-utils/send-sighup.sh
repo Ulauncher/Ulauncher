@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 kill -HUP $(ps aux | grep '[u]launcher' | awk '{print $2}')
 
