@@ -10,6 +10,9 @@ class SortedList(object):
     """
 
     def __init__(self, query, min_score=30, limit=9):
+        print ""
+        print ""
+        print "=> => => =>"
         self._query = query.lower().strip()
         self._min_score = min_score
         self._limit = limit
@@ -42,9 +45,48 @@ class SortedList(object):
         map(lambda i: self.append(i), items)
 
     def append(self, result_item):
-        score = get_score(self._query, result_item.get_search_name())
-        if score >= self._min_score:
-            result_item.score = -score  # use negative to sort by score in desc. order
+        search_name = result_item.get_search_name()
+
+        score = 0
+        words = search_name.split(' ')
+        matchy_word_count = 0
+        full_already_word_found = False
+
+        for word in words:
+            # if found a full word, score VERY high, but only do so once
+            # to avoid repetative word scenario
+            if self._query == word:
+                if full_already_word_found is False:
+                    score += 100000
+                    matchy_word_count += 1
+                    full_already_word_found = True
+                else:
+                    continue
+            # if found a partial, give it a nice boost
+            elif self._query in word:
+                score += 1000
+                matchy_word_count += 1
+            else:
+                word_score = int(round(get_score(self._query, word), 0))
+                if word_score > self._min_score:
+                    score += word_score
+                    matchy_word_count += 1
+
+        # get a ration of score to words found. this helps mitigate the
+        # situation where some application have a lot of keywords and long
+        # descriptions and get ranked higher
+        if matchy_word_count > 0:
+            matchy_score = score / matchy_word_count
+        else:
+            matchy_score = 0
+
+        print matchy_score, matchy_word_count, score, len(words), search_name
+
+        if matchy_word_count > 0:
+            # use negative to sort by score in desc. order
+            result_item.score = -matchy_score
             self._items.insert(result_item)
+            # remove items with the lowest score to maintain limited number of
+            # items
             while len(self._items) > self._limit:
-                self._items.pop()  # remove items with the lowest score to maintain limited number of items
+                self._items.pop()

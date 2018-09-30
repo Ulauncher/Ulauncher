@@ -1,7 +1,9 @@
+import logging
 import os
 import re
+import string
+
 import sqlite3
-import logging
 
 from ulauncher.search.SortedList import SortedList
 from ulauncher.util.decorator.singleton import singleton
@@ -17,7 +19,8 @@ class AppDb(object):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(':memory:').open()  # in-memory SqLite DB
+         # in-memory SqLite DB
+        return cls(':memory:').open()
 
     def __init__(self, path):
         self._path = path
@@ -70,19 +73,25 @@ class AppDb(object):
         """
         :param Gio.DesktopAppInfo app:
         """
-        name = force_unicode(app.get_string('X-GNOME-FullName') or app.get_name())
+        name = force_unicode(app.get_string('X-GNOME-FullName') \
+                             or app.get_name() or app.get_generic_name())
         exec_name = force_unicode(app.get_string('Exec') or '')
+        keywords = ' '.join([force_unicode(word) for word in app.get_keywords()])
+        description = app.get_description() or ''
         record = {
             "desktop_file": force_unicode(app.get_filename()),
             "desktop_file_short": force_unicode(os.path.basename(app.get_filename())),
             "description": force_unicode(app.get_description() or ''),
             "name": name,
-            "search_name": search_name(name, exec_name)
+            "search_name": search_name(name, exec_name, keywords, description)
         }
         self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
 
-        query = '''INSERT OR REPLACE INTO app_db (name, desktop_file, desktop_file_short, description, search_name)
-                   VALUES (:name, :desktop_file, :desktop_file_short, :description, :search_name)'''
+        query = '''
+            INSERT OR REPLACE INTO app_db (name, desktop_file, desktop_file_short, description, search_name)
+                   VALUES (:name, :desktop_file, :desktop_file_short, :description, :search_name)
+        '''
+
         try:
             self._conn.execute(query, record)
             self.commit()
@@ -152,28 +161,55 @@ class AppDb(object):
         return result_list
 
 
-def search_name(name, exec_name):
-    """
-    Returns string that will be used for search
-    We want to make sure app can be searchable by its exec_name
-    """
-    if not exec_name:
-        return name
+def search_name(name, exec_name, keywords, description):
 
-    # drop env vars
-    exec_name = ' '.join([p for p in exec_name.split(' ') if p != 'env' and '=' not in p])
+    #   name_words
+    # + additional from exec name split
+    # + additional from keywords
 
-    # drop "/usr/bin/"
-    match = re.match(r'^(\/.+\/)?([-\w\.]+)([^\w\/]|$)', exec_name.lower(), re.I)
-    if not match:
-        return name
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+    name_words = spaceless_split(name.lower())
+    keywords_words = spaceless_split(keywords.lower())
 
-    exec_name = match.group(2)
-    exec_name_split = set(exec_name.split('-'))
-    name_split = set(name.lower().split(' '))
-    common_words = exec_name_split & name_split
+    # strip punctuation
+    clean_description = description.translate(None, string.punctuation)
+    description_words = [clean_description.lower()]
 
-    if common_words:
-        return name
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+    # remove env vars from exec_name
+    clean_exec_name = ' '.join([p for p in spaceless_split(exec_name)
+                         if p != 'env' and '=' not in p])
+    # remove "/usr/bin/"
+    match = re.match(
+        r'^(\/.+\/)?([-\w\.]+)([^\w\/]|$)',
+        clean_exec_name.lower(),
+        re.I
+    )
+    if match:
+        clean_exec_name = match.group(2)
+        exec_name_parts = set(clean_exec_name.split('-'))
 
-    return '%s %s' % (name, exec_name)
+        # check to see if name words are in exec_name parts
+        common_words = exec_name_parts & set(name_words)
+        # if there are common words then we do not need the exec_name
+        if common_words:
+            exec_name_words = []
+        else:
+            exec_name_words = [clean_exec_name]
+    else:
+        exec_name_words = []
+
+    # keywords are more precise so attach them first
+    search_words = name_words + exec_name_words + keywords_words \
+                   + description_words
+    search_string = ' '.join(search_words)
+
+    #print ">>>>>"
+    #print "  name         :", name
+    #print "  search_string:", search_string
+
+    return search_string
+
+
+def spaceless_split(string):
+    return [part for part in string.split(' ') if part != '']
