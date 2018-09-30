@@ -3,14 +3,18 @@
 
 import os
 import sys
+
 from itertools import takewhile, dropwhile
 
 try:
     import DistUtilsExtra.auto
 except ImportError:
-    print >> sys.stderr, 'To build ulauncher you need https://launchpad.net/python-distutils-extra'
+    print >> sys.stderr, "To build ulauncher you need"\
+        "https://launchpad.net/python-distutils-extra"
     sys.exit(1)
-assert DistUtilsExtra.auto.__version__ >= '2.18', 'needs DistUtilsExtra.auto >= 2.18'
+
+assert DistUtilsExtra.auto.__version__ >= '2.18', \
+    'needs DistUtilsExtra.auto >= 2.18'
 
 
 def update_config(libdir, values={}):
@@ -32,9 +36,10 @@ def update_config(libdir, values={}):
         fout.close()
         fin.close()
         os.rename(fout.name, fin.name)
-    except (OSError, IOError), e:
+    except (OSError, IOError):
         print ("ERROR: Can't find %s" % filename)
         sys.exit(1)
+
     return oldvalues
 
 
@@ -44,7 +49,8 @@ def move_desktop_file(root, target_data, prefix):
     # normal data files anywhere we want, the desktop file needs to exist in
     # the main system to be found.  Only actually useful for /opt installs.
 
-    old_desktop_path = os.path.normpath(root + target_data + '/share/applications')
+    old_desktop_path = os.path.normpath(root + target_data +
+                                        '/share/applications')
     old_desktop_file = old_desktop_path + '/ulauncher.desktop'
     desktop_path = os.path.normpath(root + prefix + '/share/applications')
     desktop_file = desktop_path + '/ulauncher.desktop'
@@ -68,6 +74,9 @@ def move_desktop_file(root, target_data, prefix):
 
 def update_desktop_file(filename, target_pkgdata, target_scripts):
 
+    def is_env(p):
+        return p == 'env' or '=' in p
+
     try:
         fin = file(filename, 'r')
         fout = file(filename + '.new', 'w')
@@ -79,8 +88,8 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
                 # persist env vars
                 env_vars = ''
                 if cmd.startswith('env '):
-                    is_env = lambda p: p == 'env' or '=' in p
-                    env_vars = ' '.join(list(takewhile(is_env, cmd.split()))) + ' '
+                    env_vars = ' '.join(list(takewhile(is_env, cmd.split()))) \
+                               + ' '
                     cmd = ' '.join(list(dropwhile(is_env, cmd.split())))
 
                 cmd = cmd.split(None, 1)
@@ -93,7 +102,7 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
         fout.close()
         fin.close()
         os.rename(fout.name, fin.name)
-    except (OSError, IOError), e:
+    except (OSError, IOError):
         print ("ERROR: Can't find %s" % filename)
         sys.exit(1)
 
@@ -104,7 +113,8 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
 
         target_data = '/' + os.path.relpath(self.install_data, self.root) + '/'
         target_pkgdata = target_data + 'share/ulauncher/'
-        target_scripts = '/' + os.path.relpath(self.install_scripts, self.root) + '/'
+        target_scripts = '/' + os.path.relpath(self.install_scripts,
+                                               self.root) + '/'
 
         values = {'__ulauncher_data_directory__': "'%s'" % (target_pkgdata),
                   '__version__': "'%s'" % self.distribution.get_version()}
@@ -117,9 +127,11 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
 class DataFileList(list):
 
     def append(self, item):
-        # don't add node_modules to data_files that DistUtilsExtra tries to add automatically
+        # don't add node_modules to data_files that DistUtilsExtra tries to
+        # add automatically
         filename = item[1][0]
-        if 'node_modules' in filename or 'bower_components' in filename or '.tmp' in filename:
+        if 'node_modules' in filename \
+           or 'bower_components' in filename or '.tmp' in filename:
             return
         else:
             return super(DataFileList, self).append(item)
@@ -187,19 +199,38 @@ def main():
         description='Application launcher for Linux',
         url='http://ulauncher.io',
         data_files=DataFileList([
-            ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-            ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
-            ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-            ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
-
-            # these two are fore Fedora+gnome
-            ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-            ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
-
-            ('share/icons/breeze/apps/48', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
-            ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
-            ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
-            ('share/icons/elementary/scalable/apps', ['data/media/icons/elementary/ulauncher-indicator.svg']),
+            ('share/icons/hicolor/48x48/apps', [
+                'data/media/icons/hicolor/ulauncher.svg'
+            ]),
+            ('share/icons/hicolor/48x48/apps', [
+                'data/media/icons/hicolor/ulauncher-indicator.svg'
+            ]),
+            ('share/icons/hicolor/scalable/apps', [
+                'data/media/icons/hicolor/ulauncher.svg'
+            ]),
+            ('share/icons/hicolor/scalable/apps', [
+                'data/media/icons/hicolor/ulauncher-indicator.svg'
+            ]),
+            # for fedora + GNOME
+            ('share/icons/gnome/scalable/apps', [
+                'data/media/icons/hicolor/ulauncher.svg'
+            ]),
+            ('share/icons/gnome/scalable/apps', [
+                'data/media/icons/hicolor/ulauncher-indicator.svg'
+            ]),
+            # for ubuntu
+            ('share/icons/breeze/apps/48', [
+                'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
+            ]),
+            ('share/icons/ubuntu-mono-dark/scalable/apps', [
+                'data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg'
+            ]),
+            ('share/icons/ubuntu-mono-light/scalable/apps', [
+                'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
+            ]),
+            ('share/icons/elementary/scalable/apps', [
+                'data/media/icons/elementary/ulauncher-indicator.svg'
+            ]),
         ]),
         cmdclass={'install': InstallAndUpdateDataDirectory}
     )
