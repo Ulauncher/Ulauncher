@@ -86,6 +86,17 @@
 
     <table>
       <tr>
+        <td>
+          <label for="terminal-exec">Terminal launch command</label>
+        </td>
+        <td>
+          <b-form-input
+            style="width:250px"
+            id="terminal-exec"
+            v-model="terminal_exec"></b-form-input>
+        </td>
+      </tr>
+      <tr>
         <td class="pull-top">
           <label>Blacklisted App Dirs</label>
           <small>
@@ -176,6 +187,18 @@ export default {
       set(value) {
         return jsonp('prefs://set/show-recent-apps', { value: value }).then(
           () => this.setPrefs({ show_recent_apps: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    terminal_exec: {
+      get() {
+        return this.prefs.terminal_exec
+      },
+      set(value) {
+        return jsonp('prefs://set/terminal-exec', { value: value }).then(
+          () => this.setPrefs({ terminal_exec: value }),
           err => bus.$emit('error', err)
         )
       }
