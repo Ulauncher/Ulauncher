@@ -124,28 +124,89 @@ class DataFileList(list):
         else:
             return super(DataFileList, self).append(item)
 
-DistUtilsExtra.auto.setup(
-    name='ulauncher',
-    version='%VERSION%',
-    license='GPL-3',
-    author='Aleksandr Gornostal',
-    author_email='ulauncher.app@gmail.com',
-    description='Application launcher for Linux',
-    url='http://ulauncher.io',
-    data_files=DataFileList([
-        ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-        ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
-        ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-        ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
 
-        # these two are fore Fedora+gnome
-        ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
-        ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+def exclude_files(patterns=[]):
+    """
+    Suppress completely useless warning about files DistUtilsExta.aut does
+    recognize because require developer to scroll past them to get to useful
+    output.
 
-        ('share/icons/breeze/apps/48', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
-        ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
-        ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
-        ('share/icons/elementary/scalable/apps', ['data/media/icons/elementary/ulauncher-indicator.svg']),
-    ]),
-    cmdclass={'install': InstallAndUpdateDataDirectory}
-)
+    Example of the useless warnings:
+
+    WARNING: the following files are not recognized by DistUtilsExtra.auto:
+    Dockerfile.build
+    Dockerfile.build-arch
+    Dockerfile.build-rpm
+    PKGBUILD.template
+    build-utils/aur-update.py
+    """
+
+    # it's maddening the DistUtilsExtra does not offer a way to exclude globs
+    # from it's scans and just using "print" to print the warning instead of
+    # using warning module which has a mechanism for suppressions
+    # it forces us to take the approach of monkeypatching their src_find
+    # function.
+    original_src_find = DistUtilsExtra.auto.src_find
+
+    def src_find_with_excludes(attrs):
+        src = original_src_find(attrs)
+
+        for pattern in patterns:
+            DistUtilsExtra.auto.src_markglob(src, pattern)
+
+        return src
+
+    DistUtilsExtra.auto.src_find = src_find_with_excludes
+
+    return original_src_find
+
+
+def main():
+
+    # exclude files/folder patterns from being considered by distutils-extra
+    # this returns the original DistUtilsExtra.auto.src_find function
+    # so we can patch bit back in later
+    original_find_src = exclude_files([
+        "*.sh",
+        "Dockerfile.build*",
+        "PKGBUILD.template",
+        "build-utils/*",
+        "docs/*",
+        "glade",
+        "test",
+        "ulauncher.desktop.*",
+        "requirements.txt",
+    ])
+
+    DistUtilsExtra.auto.setup(
+        name='ulauncher',
+        version='%VERSION%',
+        license='GPL-3',
+        author='Aleksandr Gornostal',
+        author_email='ulauncher.app@gmail.com',
+        description='Application launcher for Linux',
+        url='http://ulauncher.io',
+        data_files=DataFileList([
+            ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher.svg']),
+            ('share/icons/hicolor/48x48/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+            ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
+            ('share/icons/hicolor/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+
+            # these two are fore Fedora+gnome
+            ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher.svg']),
+            ('share/icons/gnome/scalable/apps', ['data/media/icons/hicolor/ulauncher-indicator.svg']),
+
+            ('share/icons/breeze/apps/48', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
+            ('share/icons/ubuntu-mono-dark/scalable/apps', ['data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg']),
+            ('share/icons/ubuntu-mono-light/scalable/apps', ['data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg']),
+            ('share/icons/elementary/scalable/apps', ['data/media/icons/elementary/ulauncher-indicator.svg']),
+        ]),
+        cmdclass={'install': InstallAndUpdateDataDirectory}
+    )
+
+    # unpatch distutils-extra src_find
+    DistUtilsExtra.auto.src_find = original_find_src
+
+
+if __name__ == '__main__':
+    main()
