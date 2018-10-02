@@ -56,14 +56,10 @@ def main():
 
 
 def fetch_release():
-    print "Fetching releases from Github..."
-    response = urllib2.urlopen('https://api.github.com/repos/ulauncher/ulauncher/releases')
-    releases = json.load(response)
-    try:
-        return (r for r in releases if r['tag_name'] == version).next()
-    except StopIteration:
-        print "ERROR: Satisfiable release version %s not found" % version
-        sys.exit(1)
+    url = 'https://ext-api.ulauncher.io/misc/ulauncher-releases/%s' % version
+    print "Fetching release info from '%s'..." % url
+    response = urllib2.urlopen(url)
+    return json.load(response)
 
 
 def get_targz_link():
