@@ -186,7 +186,7 @@ def main():
         "docs/*",
         "glade",
         "test",
-        "ulauncher.desktop.*",
+        "ulauncher.desktop.dev",
         "requirements.txt",
     ])
 
