@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # To encrypt AUR key:
 # $ cd ulauncher

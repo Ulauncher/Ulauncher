@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
 

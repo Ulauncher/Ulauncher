@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##############################################################
 # Builds tar.gz file with (un)install script and Ulauncher src
