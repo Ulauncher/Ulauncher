@@ -235,8 +235,10 @@ class WebSocket(object):
               if self.opcode == TEXT:
                   try:
                       self.data = self.data.decode('utf8', errors='strict')
-                  except Exception as exp:
-                      raise Exception('invalid utf-8 payload')
+                  except Exception:
+                      # this may not be a utf8 string, so return it as is
+                      # this fixes https://github.com/Ulauncher/Ulauncher/issues/294
+                      pass
 
               self.handleMessage()
 
