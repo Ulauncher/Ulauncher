@@ -1,6 +1,9 @@
 import pytest
 import mock
-from gi.repository import Gtk, GdkPixbuf
+
+from collections import namedtuple
+
+from gi.repository import GdkPixbuf
 
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
@@ -15,6 +18,11 @@ class TestResultItemWidget(object):
     @pytest.fixture(autouse=True)
     def Theme(self, mocker):
         return mocker.patch('ulauncher.ui.ResultItemWidget.Theme')
+
+    @pytest.fixture(autouse=True)
+    def settings(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog'
+                            '.Settings.get_instance').return_value
 
     @pytest.fixture
     def result_item_wgt(self, builder, item_obj):
@@ -34,7 +42,16 @@ class TestResultItemWidget(object):
     def pixbuf(self):
         return mock.Mock(spec=GdkPixbuf.Pixbuf)
 
-    def test_initialize(self, builder, item_obj, mocker):
+    def test_initialize_enabled_shortcut_keys(self, builder, item_obj, mocker,
+                                              settings):
+
+        def enable_short_key_is_true(key):
+            if key == 'enable-shortcut-keys':
+                return True
+            else:
+                raise AssertionError("wrong keys is being looked up: %s" % key)
+        settings.get_property.side_effect = enable_short_key_is_true
+
         result_item_wgt = ResultItemWidget()
         set_index = mocker.patch.object(result_item_wgt, 'set_index')
         set_icon = mocker.patch.object(result_item_wgt, 'set_icon')
@@ -50,11 +67,95 @@ class TestResultItemWidget(object):
         set_description.assert_called_with(item_obj.get_description.return_value)
         item_obj.get_description.assert_called_with('query')
 
+    def test_initialize_disabled_shortcut_keys(self, builder, item_obj, mocker, settings):
+
+        def enable_short_key_is_false(key):
+            if key == 'enable-shortcut-keys':
+                return False
+            else:
+                raise AssertionError("wrong keys is being looked up: %s" % key)
+        settings.get_property.side_effect = enable_short_key_is_false
+
+        result_item_wgt = ResultItemWidget()
+        hide_shortcut = mocker.patch.object(result_item_wgt, 'hide_shortcut')
+        set_icon = mocker.patch.object(result_item_wgt, 'set_icon')
+        set_name = mocker.patch.object(result_item_wgt, 'set_name')
+        set_description = mocker.patch.object(result_item_wgt, 'set_description')
+
+        result_item_wgt.initialize(builder, item_obj, 3, 'query')
+
+        builder.get_object.return_value.connect.assert_any_call("button-release-event", result_item_wgt.on_click)
+        builder.get_object.return_value.connect.assert_any_call("enter_notify_event", result_item_wgt.on_mouse_hover)
+        hide_shortcut.assert_called_once()
+        set_name.assert_called_with(item_obj.get_name_highlighted.return_value)
+        set_description.assert_called_with(item_obj.get_description.return_value)
+        item_obj.get_description.assert_called_with('query')
+
     def test_set_index(self, result_item_wgt, mocker):
         mock_set_shortcut = mocker.patch.object(result_item_wgt, 'set_shortcut')
 
         result_item_wgt.set_index(2)
         mock_set_shortcut.assert_called_once_with('Alt+3')
+
+    def test_hide_shortcut(self, result_item_wgt, mocker, builder):
+
+        # namedtuple to be returned by get_size_request
+        Size = namedtuple("Size", "width height")
+
+        # test values
+        shortcut_width = 10
+        shortcut_margin_left = 2
+        shortcut_margin_right = 4
+        descr_width = 20
+        descr_height = 30
+        expected_new_descr_width = \
+            descr_width + \
+            shortcut_width + \
+            shortcut_margin_left + \
+            shortcut_margin_right
+
+        # patch for set_shortut
+        mock_set_shortcut = mocker.patch.object(result_item_wgt,
+                                                'set_shortcut')
+
+        # mock for shortcut widget
+        shortcut_object = mock.MagicMock()
+        shortcut_object.get_size_request.return_value = \
+            Size(width=shortcut_width, height=None)
+        shortcut_object.get_margin_left.return_value = shortcut_margin_left
+        shortcut_object.get_margin_right.return_value = shortcut_margin_right
+
+        # mock for descriptions widget
+        descr_object = mock.MagicMock()
+        descr_object.get_size_request.return_value = \
+            Size(width=descr_width, height=descr_height)
+
+        # mock for builder get_object that returns correct object based on
+        # the requested id
+        def get_object(item_id):
+            if item_id == "item-shortcut":
+                return shortcut_object
+            elif item_id == "item-descr":
+                return descr_object
+            else:
+                raise AssertionError("wrong items is being looked up: %s"
+                                     % item_id)
+        builder.get_object.side_effect = get_object
+
+        # callFUT
+        result_item_wgt.hide_shortcut()
+
+        # assert that we set shortcut widget to not show on show_all
+        shortcut_object.set_no_show_all.assert_called_once_with(True)
+        # assert that we hide shortcut widget
+        shortcut_object.hide.assert_called_once()
+        # assert set_shortcut was called with empty string
+        mock_set_shortcut.assert_called_once_with('')
+        # assert that we set new size
+        descr_object.set_size_request.assert_called_once_with(
+            width=expected_new_descr_width,
+            height=descr_height,
+        )
 
     def test_select(self, result_item_wgt, item_box, mocker, builder):
         mock_get_style_context = mocker.patch.object(item_box, 'get_style_context')

@@ -73,6 +73,11 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_set_autostart({'query': {'value': 'false'}})
         autostart_pref.switch.assert_called_with(False)
 
+    def test_prefs_set_enable_shortcut_keys(self, dialog, settings, ulauncherWindow):
+        dialog.prefs_set_enable_shortcut_keys({'query': {'value': True}})
+        settings.set_property.assert_called_with('enable-shortcut-keys', True)
+        settings.save_to_file.assert_called_with()
+
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
         dialog.prefs_set_theme_name.original(dialog, {'query': {'value': 'light'}})
         settings.set_property.assert_called_with('theme-name', 'light')

@@ -28,6 +28,11 @@ GPROPERTIES = {
                             None,
                             True,
                             GObject.PARAM_READWRITE),
+    "enable-shortcut-keys": (bool,
+                             "Show shortcut keys (Alt+<number/letter>)",
+                             None,
+                             True,
+                             GObject.PARAM_READWRITE),
     "show-recent-apps": (bool,
                          "Show list of recent apps",
                          None,
@@ -83,7 +88,8 @@ class Settings(GObject.GObject):
     def __init__(self):
         GObject.GObject.__init__(self)
         self._filename = None
-        self._properties = dict((name, opts[-2]) for name, opts in GPROPERTIES.items())
+        self._properties = dict((name, opts[-2])
+                                for name, opts in GPROPERTIES.items())
 
     def load_from_file(self, filename):
         self._filename = filename
