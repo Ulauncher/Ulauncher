@@ -11,6 +11,30 @@ Everything else is on
 `Github Wiki <https://github.com/Ulauncher/Ulauncher/wiki/>`_.
 
 
+Launch-Targets
+==============
+
+Additionally to launching Applications, Ulauncher can launch the following targets:
+
+Desktop-Entries
+---------------
+
+Ulauncher indexes desktop-entries in ``~/.local/share/applications`` the same as applications.
+Using desktop-entries, launchers that require no query (no space or arguments other than the name/keyword) can be created easily.
+
+
+Shortcuts
+---------
+
+Shortcuts configure Web-URLs using a Query-String or Script, to be opened in the default browser.
+
+
+Extensions
+----------
+
+Extensions are custom scripts, that extend Ulauncher with arbitrary features, such as displaying options generated from the extension in Ulauncher, and evaluating (launching) these options via Ulauncher or the extension.
+
+
 Custom Color Themes
 ===================
 
