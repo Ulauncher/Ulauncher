@@ -23,3 +23,19 @@ rm \
 rm \
  -v \
  "${HOME}/.local/share/applications/ulauncher.desktop";
+
+
+# remove ulaucher webkit cache
+rm \
+ -rv \
+ "${HOME}/.cache/ulauncher";
+
+# remove ulaucher dbs
+rm \
+ -rv \
+ "${HOME}/.cache/ulauncher_cache/"*.db;
+
+# remove ulaucher log
+rm \
+ -rv \
+ "${HOME}/.cache/ulauncher_cache/last.log";
