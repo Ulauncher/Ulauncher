@@ -1,38 +1,38 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Run in ArchLinux container
 
 import os
 import sys
 import re
-from urllib.request import urlopen
+import urllib2
 import json
 from tempfile import mkdtemp
 from subprocess import call
 
-print("##################################")
-print("# Updating AUR with a new PKGBUILD")
-print("##################################")
+print "##################################"
+print "# Updating AUR with a new PKGBUILD"
+print "##################################"
 
 try:
     version = sys.argv[1]
 except IndexError:
-    print("ERROR: First argument should be version")
+    print "ERROR: First argument should be version"
     sys.exit(1)
 
 try:
     update_stable = os.environ['UPDATE_STABLE'] in ('1', 'true')
 except KeyError:
-    print("ERROR: UPDATE_STABLE is not defined")
+    print "ERROR: UPDATE_STABLE is not defined"
     sys.exit(1)
-print('UPDATE_STABLE=%s' % update_stable)
+print 'UPDATE_STABLE=%s' % update_stable
 
 try:
     allow_prerelease = os.environ['ALLOW_PRERELEASE'] in ('1', 'true')
 except KeyError:
-    print("Optional ALLOW_PRERELEASE is not set. Default to False")
+    print "Optional ALLOW_PRERELEASE is not set. Default to False"
     allow_prerelease = False
-print('ALLOW_PRERELEASE=%s' % allow_prerelease)
+print 'ALLOW_PRERELEASE=%s' % allow_prerelease
 
 
 if update_stable:
@@ -51,19 +51,15 @@ def main():
         pkgbuild = pkgbuild_from_template(targz)
         push_update(pkgbuild)
     else:
-        print("Don't update AUR")
+        print "Don't update AUR"
         sys.exit(0)
 
 
 def fetch_release():
-    print("Fetching releases from Github...")
-    response = urlopen('https://api.github.com/repos/ulauncher/ulauncher/releases')
-    releases = json.load(response)
-    try:
-        return next(r for r in releases if r['tag_name'] == version)
-    except StopIteration:
-        print("ERROR: Satisfiable release version %s not found" % version)
-        sys.exit(1)
+    url = 'https://ext-api.ulauncher.io/misc/ulauncher-releases/%s' % version
+    print "Fetching release info from '%s'..." % url
+    response = urllib2.urlopen(url)
+    return json.load(response)
 
 
 def get_targz_link():
@@ -88,7 +84,7 @@ def push_update(pkgbuild):
     ssh_enabled_env = dict(os.environ, GIT_SSH_COMMAND=git_ssh_command)
 
     temp_dir = mkdtemp()
-    print("Temp dir: %s" % temp_dir)
+    print "Temp dir: %s" % temp_dir
     run_shell(('git', 'clone', aur_repo, temp_dir), env=ssh_enabled_env)
     os.chdir(temp_dir)
     run_shell(('git', 'config', 'user.email', 'ulauncher.app@gmail.com'))
@@ -104,8 +100,7 @@ def push_update(pkgbuild):
 def run_shell(command, **kw):
     code = call(command, **kw)
     if code:
-        print("ERROR: command %s exited with code %s" % (command, code))
+        print "ERROR: command %s exited with code %s" % (command, code)
         sys.exit(1)
-
 
 main()

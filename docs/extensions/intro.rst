@@ -31,8 +31,6 @@ and then render any results bellow the input box.
 Extensions can define preferences in ``manifest.json`` that can be overridden by a user
 from Ulauncher Preferences window.
 
-.. NOTE:: Preferences UI is not implemented yet
-
 It is also possible to capture item click (enter) event and run a custom function to respond to that event.
 
 

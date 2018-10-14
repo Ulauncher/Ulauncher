@@ -19,7 +19,4 @@ aur_key
 *.key
 generated.css
 launchpad.ssh.tar
-.mypy_cache/
-.vscode/
 .pytest_cache/
-.venv/

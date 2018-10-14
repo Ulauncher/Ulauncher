@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Some tests will fail in Docker unless virtual frame buffer is running
 if [ -f /.dockerenv ]; then
@@ -14,4 +14,4 @@ fi
 
 args=$(echo $@ | sed 's|/.*tests|tests|g') # make a relative path
 
-eval "PYTHONPATH=`pwd` pytest --pep8 $args"
+eval "PYTHONPATH=`pwd` py.test --pep8 $args"

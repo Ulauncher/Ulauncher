@@ -30,7 +30,7 @@
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
           v-if="pref.type == 'keyword'"
-          :label="`${pref.name} Keyword`"
+          :label="`${pref.name} keyword`"
           class="keyword-input"
           :description="pref.description"
           >
