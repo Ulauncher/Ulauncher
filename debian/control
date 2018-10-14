@@ -2,13 +2,13 @@ Source: ulauncher
 Section: python
 Priority: extra
 Build-Depends: debhelper (>= 8),
- python-all (>= 2.7~),
+ python-all (>= 3.6~),
  dh-python,
  gobject-introspection,
  python-distutils-extra (>= 2.10)
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 3.9.5
-X-Python-Version: >= 2.7
+X-Python-Version: >= 3.6
 
 Package: ulauncher
 Architecture: all
@@ -23,12 +23,11 @@ Depends: ${misc:Depends},
  gir1.2-notify-0.7,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-appindicator3-0.1,
- python-gi,
- python-dbus,
- python-levenshtein,
- python-pyinotify,
- python-pysqlite2,
- python-websocket,
- python-xdg
+ python3-gi,
+ python3-dbus,
+ python3-levenshtein,
+ python3-pyinotify,
+ python3-websocket,
+ python3-xdg
 Description: Application launcher for Linux
  See http://ulauncher.io for more information
