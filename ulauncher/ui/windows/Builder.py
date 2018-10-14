@@ -279,7 +279,7 @@ def auto_connect_by_name(callback_obj, builder):
 
             # log all possible event handler names
             # if widget_name == 'notebook':
-            #     print widget_name, handler_names
+            #     print(widget_name, handler_names)
 
             # Using the convention that the top level window is not
             # specified in the handler name. That is use

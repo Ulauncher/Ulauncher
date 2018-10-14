@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import division
 import operator
+
 from Levenshtein import ratio
+
+from ulauncher.util.compat import map_
+
 from ulauncher.util.string import force_unicode
 from ulauncher.util.decorator.lru_cache import lru_cache
 
@@ -40,7 +46,7 @@ def get_matching_indexes(query, text):
     while i > 0:
         j, c = max(enumerate(counter[i]), key=operator.itemgetter(1))
         if c:
-            map(positions.add, range(j - c, j))
+            map_(positions.add, range(j - c, j))
             i -= c
         else:
             i -= 1

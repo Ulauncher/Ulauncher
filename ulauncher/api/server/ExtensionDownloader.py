@@ -1,10 +1,13 @@
+# -*- coding: utf-8 -*-
+
 import os
 import logging
 from zipfile import ZipFile
-from urllib import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
+
+from ulauncher.util.compat import urlretrieve
 
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
@@ -148,7 +151,7 @@ class ExtensionDownloader(object):
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e.message))
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, str(e)))
             raise InvalidGithubUrlError('Project is not available on Github')
 
         if ext['last_commit'] == gh_commit['last_commit']:

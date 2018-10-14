@@ -1,8 +1,10 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+# -*- coding: utf-8 -*-
 import os
 import time
 import logging
 import threading
+
+from ulauncher.util.compat import map_
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -317,7 +319,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         if results:
             self._results_render_time = time.time()
-            map(self.result_box.add, results)
+            map_(self.result_box.add, results)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())
 

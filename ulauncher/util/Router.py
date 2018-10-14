@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import re
-from urllib import unquote
+
+from ulauncher.util.compat import map_
+from ulauncher.util.compat import unquote
+
 
 RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
 
@@ -8,7 +13,7 @@ def get_url_params(url):
     params = re.search(RE_URL, url)
     query = params.group('query')
     if query:
-        pairs = map(lambda kv: kv.split('='), query.split('&'))
+        pairs = map_(lambda kv: kv.split('='), query.split('&'))
         query = dict([(k, unquote(v)) for k, v in pairs])
     return {
         'scheme': params.group('scheme'),

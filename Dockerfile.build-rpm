@@ -12,5 +12,5 @@ RUN dnf install -y \
         rsync \
         intltool \
         python-distutils-extra && \
-    curl https://bootstrap.pypa.io/ez_setup.py | python2.7
+    curl https://bootstrap.pypa.io/ez_setup.py | python
 

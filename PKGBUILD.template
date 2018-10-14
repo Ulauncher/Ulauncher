@@ -24,7 +24,7 @@ prepare() {
 
 build() {
   cd ulauncher
-  python2 setup.py build
+  python setup.py build
 }
 
 package() {

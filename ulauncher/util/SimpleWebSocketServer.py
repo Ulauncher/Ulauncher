@@ -1,18 +1,11 @@
+# -*- coding: utf-8 -*-
+
 '''
 The MIT License (MIT)
 Copyright (c) 2013 Dave P.
 '''
-import sys
-VER = sys.version_info[0]
-if VER >= 3:
-    import socketserver
-    from http.server import BaseHTTPRequestHandler
-    from io import StringIO, BytesIO
-else:
-    import SocketServer
-    from BaseHTTPServer import BaseHTTPRequestHandler
-    from StringIO import StringIO
 
+import sys
 import hashlib
 import base64
 import socket
@@ -24,36 +17,40 @@ import traceback
 from collections import deque
 from select import select
 
-__all__ = ['WebSocket',
-            'SimpleWebSocketServer',
-            'SimpleSSLWebSocketServer']
+from ulauncher.util.compat import byte2int
+from ulauncher.util.compat import text_type
+from ulauncher.util.compat import BaseHTTPRequestHandler
+from ulauncher.util.compat import NativeIO
+
+
+__all__ = [
+    'WebSocket',
+    'SimpleWebSocketServer',
+    'SimpleSSLWebSocketServer'
+]
 
 
 def _check_unicode(val):
-    if VER >= 3:
-        return isinstance(val, str)
-    else:
-        return isinstance(val, unicode)
+    return isinstance(val, text_type)
 
 
 class HTTPRequest(BaseHTTPRequestHandler):
     def __init__(self, request_text):
-        if VER >= 3:
-            self.rfile = BytesIO(request_text)
-        else:
-            self.rfile = StringIO(request_text)
+        self.rfile = NativeIO(request_text)
         self.raw_requestline = self.rfile.readline()
         self.error_code = self.error_message = None
         self.parse_request()
 
+
 _VALID_STATUS_CODES = [1000, 1001, 1002, 1003, 1007, 1008,
-                        1009, 1010, 1011, 3000, 3999, 4000, 4999]
+                       1009, 1010, 1011, 3000, 3999, 4000, 4999]
+
 
 HANDSHAKE_STR = (
-   "HTTP/1.1 101 Switching Protocols\r\n"
-   "Upgrade: WebSocket\r\n"
-   "Connection: Upgrade\r\n"
-   "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
+    "HTTP/1.1 101 Switching Protocols\r\n"
+    "Upgrade: WebSocket\r\n"
+    "Connection: Upgrade\r\n"
+    "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
 )
 
 GUID_STR = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
@@ -280,12 +277,8 @@ class WebSocket(object):
             if not data:
                 raise Exception("remote socket closed")
 
-            if VER >= 3:
-                for d in data:
-                    self._parseMessage(d)
-            else:
-                for d in data:
-                    self._parseMessage(ord(d))
+            for d in data:
+                self._parseMessage(byte2int(d))
 
     def close(self, status = 1000, reason = u''):
         """

@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+
 import os
 import logging
 from itertools import chain
 from gi.repository import Gio
 
 from collections import OrderedDict
+
+from ulauncher.util.compat import itervalues_
+from ulauncher.util.compat import map_
 
 from ulauncher.util.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
@@ -21,7 +26,7 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     """
 
     all_files = chain.from_iterable(
-        map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
+        map_(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
 
     # dedup desktop file according to folow XDG data dir order
     # specifically the first file name (i.e. firefox.desktop) take precedence
@@ -31,7 +36,7 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
         file_name = os.path.basename(file_path)
         if file_name not in deduped_file_dict:
             deduped_file_dict[file_name] = file_path
-    deduped_files = deduped_file_dict.itervalues()
+    deduped_files = itervalues_(deduped_file_dict)
 
     blacklisted_dirs_srt = Settings.get_instance().get_property('blacklisted-desktop-dirs')
     blacklisted_dirs = blacklisted_dirs_srt.split(':') if blacklisted_dirs_srt else []
@@ -71,7 +76,7 @@ def find_apps(dirs=DESKTOP_DIRS):
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
     """
-    return filter(filter_app, map(read_desktop_file, find_desktop_files(dirs)))
+    return filter(filter_app, map_(read_desktop_file, find_desktop_files(dirs)))
 
 
 def find_apps_cached(dirs=DESKTOP_DIRS):
@@ -82,7 +87,7 @@ def find_apps_cached(dirs=DESKTOP_DIRS):
     Pseudo code:
     >>> if cache hit:
     >>>     take list of paths from cache
-    >>>     yield from filter(filter_app, map(read_desktop_file, cached_paths))
+    >>>     yield from filter(filter_app, map_(read_desktop_file, cached_paths))
     >>> yield from find_apps()
     >>> save new paths to the cache
     """

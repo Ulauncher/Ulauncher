@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import re
 import json
-from urllib2 import urlopen
+
+from ulauncher.util.compat import urlopen
 
 DEFAULT_GITHUB_BRANCH = 'master'
 

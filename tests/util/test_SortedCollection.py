@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from ulauncher.util.compat import map_
+
 from ulauncher.util.SortedCollection import SortedCollection
 
 
@@ -77,7 +81,7 @@ def test_SortedCollection():
                 assert item in sc                       # test __contains__ and __iter__
                 assert s.count(item) == sc.count(item)  # test count()
             assert len(sc) == n                         # test __len__
-            assert list(map(repr, reversed(sc))) == list(map(repr, reversed(s)))    # test __reversed__
+            assert list(map_(repr, reversed(sc))) == list(map_(repr, reversed(s)))    # test __reversed__
             assert list(sc.copy()) == list(sc)          # test copy()
             sc.clear()                                  # test clear()
             assert len(sc) == 0

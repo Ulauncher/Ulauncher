@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
+from ulauncher.util.compat import text_type
+
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
+
 from .AppQueryDb import AppQueryDb
 from .AppStatDb import AppStatDb
 
@@ -36,7 +41,7 @@ class AppResultItem(ResultItem):
         if query:
             # don't record empty queries
             # they occur if a user selects item from a default list
-            self._app_queries.put(unicode(query), self.record.get('name'))
+            self._app_queries.put(text_type(query), self.record.get('name'))
             self._app_queries.commit()
 
         self._app_stat_db.inc_count(self.record.get('desktop_file'))

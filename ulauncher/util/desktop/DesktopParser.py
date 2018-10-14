@@ -1,4 +1,8 @@
+# -*- coding: utf-8 -*-
+
 import os
+
+from ulauncher.util.compat import text_type
 
 
 class DesktopParser(object):
@@ -43,7 +47,7 @@ class DesktopParser(object):
             os.makedirs(dir)
 
         with open(self._filename, 'w') as f:
-            f.write(os.linesep.join((self.DESKTOP_SECTION, os.linesep.join(['='.join((unicode(k), unicode(v).strip()))
+            f.write(os.linesep.join((self.DESKTOP_SECTION, os.linesep.join(['='.join((text_type(k), text_type(v).strip()))
                                                                             for k, v in self.__property_list]))))
 
     def get(self, name):

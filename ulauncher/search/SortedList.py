@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from ulauncher.util.compat import map_
+
 from ulauncher.util.SortedCollection import SortedCollection
 from ulauncher.util.fuzzy_search import get_score
 
@@ -39,7 +43,7 @@ class SortedList(object):
         return item in self._items
 
     def extend(self, items):
-        map(lambda i: self.append(i), items)
+        map_(lambda i: self.append(i), items)
 
     def append(self, result_item):
         score = get_score(self._query, result_item.get_search_name())

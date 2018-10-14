@@ -1,22 +1,41 @@
-.idea
-**/*.pyc
-**/*~
-**/*#
-.cache
-ulauncherc
+# python cruft
+*.pyc
+*.pyo
 *.egg-info
+__pycache__
+
+# virtualenv cruft
+/_env*
+
+# editor cruft
+.idea
+*.sublime-*
+
+# build cruft
 build
 !data/preferences/build
 _build
 .build-checksum
-po
-.coverage
-htmlcov
 node_modules/
 bower_components/
+po
+generated.css
+
+
+# testing cruft
+ulauncherc
+.coverage
+htmlcov
+.pytest_cache/
+
+# misc cruft
+.cache
 .tmp/
+
+# deployment cruft
 aur_key
 *.key
-generated.css
 launchpad.ssh.tar
-.pytest_cache/
+
+# misc
+notes.txt

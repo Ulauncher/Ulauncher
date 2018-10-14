@@ -1,4 +1,9 @@
-class Query(unicode):
+# -*- coding: utf-8 -*-
+
+from ulauncher.util.compat import text_type
+
+
+class Query(text_type):
     """
     Parses user's query
     """

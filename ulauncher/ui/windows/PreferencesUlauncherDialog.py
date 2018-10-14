@@ -1,10 +1,12 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
+# -*- coding: utf-8 -*-
+
 import os
 import logging
 import json
 
 from gi.repository import Gio, Gtk, WebKit2, GLib
-from urllib import unquote
+
+from ulauncher.util.compat import unquote
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
@@ -153,25 +155,25 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             callback_name = params['query']['callback']
             assert callback_name
         except Exception as e:
-            logger.exception('API call failed. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('API call failed. %s: %s' % (type(e).__name__, str(e)))
             return
 
         try:
             resp = rt.dispatch(self, scheme_request.get_uri())
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except PrefsApiError as e:
-            callback = '%s(null, %s);' % (callback_name, json.dumps(e.message))
+            callback = '%s(null, %s);' % (callback_name, json.dumps(str(e)))
         except Exception as e:
-            message = 'Unexpected API error. %s: %s' % (type(e).__name__, e.message)
+            message = 'Unexpected API error. %s: %s' % (type(e).__name__, str(e))
             callback = '%s(null, %s);' % (callback_name, json.dumps(message))
             logger.exception(message)
 
         try:
-            stream = Gio.MemoryInputStream.new_from_data(callback)
+            stream = Gio.MemoryInputStream.new_from_data(callback.encode())
             # send response
             scheme_request.finish(stream, -1, 'text/javascript')
         except Exception as e:
-            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e.message))
+            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, str(e)))
 
     def send_webview_notification(self, name, data):
         self.webview.run_javascript('onNotification("%s", %s)' % (name, json.dumps(data)))
@@ -355,7 +357,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             ext_id = downloader.download(url)
             ExtensionRunner.get_instance().run(ext_id)
         except (ExtensionDownloaderError, ManifestValidationError) as e:
-            raise PrefsApiError(e.message)
+            raise PrefsApiError(str(e))
 
         return self._get_all_extensions()
 
@@ -390,7 +392,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             downloader.update(ext_id)
         except ManifestValidationError as e:
-            raise PrefsApiError(e.message)
+            raise PrefsApiError(str(e))
 
     @rt.route('/extension/remove')
     def prefs_extension_remove(self, url_params):

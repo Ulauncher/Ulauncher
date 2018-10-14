@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import os
 from operator import itemgetter
 from itertools import islice
+
+from ulauncher.util.compat import map_
+from ulauncher.util.compat import iteritems_
+
 
 from ulauncher.config import CACHE_DIR
 from ulauncher.util.db.KeyValueDb import KeyValueDb
@@ -38,8 +44,8 @@ class AppStatDb(KeyValueDb):
 
         return [AppResultItem(i) for i in islice(
                 filter(None,
-                       map(lambda r: app_db.get_by_path(r[0]),
-                           sorted(self._records.iteritems(),
+                       map_(lambda r: app_db.get_by_path(r[0]),
+                           sorted(iteritems_(self._records),
                                   key=itemgetter(1),
                                   reverse=True))),
                 0, limit)]

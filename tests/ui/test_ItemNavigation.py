@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 import mock
+
+from ulauncher.util.compat import map_
+
 from ulauncher.ui.ItemNavigation import ItemNavigation
 
 
@@ -7,7 +12,7 @@ class TestItemNavigation(object):
 
     @pytest.fixture
     def items(self):
-        return map(lambda _: mock.MagicMock(), range(5))
+        return map_(lambda _: mock.MagicMock(), range(5))
 
     @pytest.fixture
     def nav(self, items):
@@ -65,7 +70,7 @@ class TestItemNavigation(object):
 
     def test_select_default(self, nav, items, mocker):
         select = mocker.patch.object(nav, 'select')
-        map(lambda i: setattr(i.selected_by_default, 'return_value', False), items)
+        map_(lambda i: setattr(i.selected_by_default, 'return_value', False), items)
         items[3].selected_by_default.return_value = True
         nav.select_default('q')
         select.assert_called_with(3)

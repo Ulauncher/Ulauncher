@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import os
 from uuid import uuid4
 from time import time
+
+from ulauncher.util.compat import itervalues_
+
+
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
 from ulauncher.util.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.util.decorator.singleton import singleton
@@ -28,10 +34,10 @@ class ShortcutsDb(KeyValueJsonDb):
         super(ShortcutsDb, self).commit()
 
     def get_sorted_records(self):
-        return [rec for rec in sorted(self.get_records().itervalues(), key=lambda rec: rec['added'])]
+        return [rec for rec in sorted(itervalues_(self.get_records()), key=lambda rec: rec['added'])]
 
     def get_shortcuts(self):
-        return self.get_records().itervalues()
+        return itervalues_(self.get_records())
 
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
         """
