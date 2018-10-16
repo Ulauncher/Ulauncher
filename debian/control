@@ -1,14 +1,13 @@
 Source: ulauncher
 Section: python
 Priority: extra
-Build-Depends: debhelper (>= 8),
- python-all (>= 3.6~),
+Build-Depends: debhelper (>= 11),
  dh-python,
  gobject-introspection,
  python3-distutils-extra (>= 2.10)
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 3.9.5
-X-Python-Version: >= 3.6
+X-Python3-Version: >= 3.6
 
 Package: ulauncher
 Architecture: all

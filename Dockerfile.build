@@ -1,43 +1,41 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 MAINTAINER ulauncher.app@gmail.com
 
 WORKDIR /root/ulauncher
 
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt install -y \
         git \
         vim \
         wget \
         xvfb \
         dput \
         debhelper \
+        rsync \
         gobject-introspection \
         libgtk-3-0 \
         libkeybinder-3.0-0 \
         gir1.2-gtk-3.0 \
         gir1.2-keybinder-3.0 \
-        gir1.2-webkit2-3.0 \
+        gir1.2-webkit2-4.0 \
         gir1.2-glib-2.0 \
         gir1.2-gdkpixbuf-2.0 \
         gir1.2-appindicator3-0.1 \
         gir1.2-notify-0.7 \
         python3-gi \
-        python3-gobject \
         python3-distutils-extra \
         python3-xdg \
         python3-dbus \
         python3-pyinotify \
         python3-levenshtein \
         python3-websocket \
-        python3-bzrlib \
         python3-pip && \
-    pip3 install --upgrade pip3 setuptools && \
-    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_6.x && \
+    pip3 install --upgrade pip setuptools && \
+    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_8.x && \
     bash /tmp/node-setup.sh && \
-    apt-get install -y nodejs && \
-    apt-get autoremove -y && \
-    apt-get clean && \
+    apt install -y nodejs && \
+    apt autoremove -y && \
+    apt clean && \
     npm install -g yarn
 
 COPY [ "requirements.txt", "data/preferences/package.json", "./" ]
@@ -47,6 +45,6 @@ COPY [ "docs/requirements.txt", "./docs/" ]
 # update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 RUN pip3 install -r requirements.txt && \
     pip3 install -r docs/requirements.txt && \
-    yarn install && \
+    yarn && \
     mv node_modules /var && \
     printf "\n[ppa]\nmethod = sftp\nlogin = agornostal" >> /etc/dput.cf

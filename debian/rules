@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 %:
 ifneq ($(shell dh -l | grep -xF translations),)
-	dh $@ --with python2,translations
+	dh $@ --with python3,translations
 else
-	dh $@ --with python2
+	dh $@ --with python3
 endif
 
 

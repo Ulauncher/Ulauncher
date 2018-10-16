@@ -27,7 +27,7 @@ set -ex
 buildUtils=`dirname $0`
 buildUtils=`realpath $buildUtils`
 
-bash "$buildUtils/build-preferences.sh"
+# bash "$buildUtils/build-preferences.sh"
 
 name="ulauncher"
 tmpdir="/tmp"
