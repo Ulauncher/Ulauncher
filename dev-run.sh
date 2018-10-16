@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "installing media files to ~/.local to be able to load icons by name"
-python setup.py install_data --install-dir="$HOME/.local" || exit 1
+python3 setup.py install_data --install-dir="$HOME/.local" || exit 1
 
 echo "adding .desktop file"
 mkdir -p ~/.local/share/applications/

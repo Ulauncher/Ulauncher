@@ -43,7 +43,7 @@ If you just want to use the app see download instructions at [ulauncher.io](http
 ### Dev Requirements
 
 * [Docker](https://docs.docker.com/engine/installation/)
-* [python-distutils-extra](https://launchpad.net/python-distutils-extra)
+* python3-distutils-extra
 * Application runtime dependencies.  
   (You don't have to manually install those if you had already installed Ulauncher)  
   
@@ -58,13 +58,11 @@ If you just want to use the app see download instructions at [ulauncher.io](http
     gir1.2-notify-0.7 \
     gir1.2-gdkpixbuf-2.0 \
     gir1.2-appindicator3-0.1 \
-    python-dbus \
-    python-levenshtein \
-    python-pyinotify \
-    python-pysqlite2 \
-    python-websocket \
-    python-xdg \
-    python-distutils-extra
+    python3-dbus \
+    python3-levenshtein \
+    python3-pyinotify \
+    python3-websocket \
+    python3-xdg
   ```
 
 ### Build and Run

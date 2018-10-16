@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
 import os
@@ -9,7 +9,7 @@ from itertools import takewhile, dropwhile
 try:
     import DistUtilsExtra.auto
 except ImportError:
-    print('To build ulauncher you need https://launchpad.net/python-distutils-extra', file=sys.stderr)
+    print('To build ulauncher you need "python3-distutils-extra"', file=sys.stderr)
     sys.exit(1)
 
 assert DistUtilsExtra.auto.__version__ >= '2.18', \
