@@ -5,7 +5,7 @@ Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)]
 [Application Launcher for Linux 🐧](http://ulauncher.io)
 ================================
 
-Ulauncher s a fast application launcher for Linux written in Python and uses GTK+ as a GUI toolkit.
+Ulauncher is a fast application launcher for Linux written. It's is written in Python, using GTK+.
 
 | App Search | File Browser | Custom Themes |
 ---|---|---
@@ -15,14 +15,14 @@ Ulauncher s a fast application launcher for Linux written in Python and uses GTK
 [Create Your Ulauncher Extensions](http://docs.ulauncher.io/)
 ==============================================================
 
-Since Ulauncher v3 you can create your own Ulauncher extensions  
+As of Ulauncher v3, you can create your own Ulauncher extensions  
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 
 
 [Create Your Ulauncher Color themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
 ==============================================================
 
-Since Ulauncher v4 you can create your own color Themes  
+As of Ulauncher v4, you can create your own color themes  
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
 
 
@@ -38,14 +38,14 @@ Known Issues
 Install for Development
 =======================
 
-If you just want to use the app see download instructions at [ulauncher.io](http://ulauncher.io)
+If you just want to use the app, see download instructions at [ulauncher.io](http://ulauncher.io)
 
 ### Dev Requirements
 
 * [Docker](https://docs.docker.com/engine/installation/)
 * [python-distutils-extra](https://launchpad.net/python-distutils-extra)
 * Application runtime dependencies.  
-  (You don't have to manually install those if you had already installed Ulauncher)  
+  (You don't have to manually install these if you have already installed Ulauncher)  
   
   ```
   sudo apt-get install \
@@ -76,7 +76,7 @@ If you just want to use the app see download instructions at [ulauncher.io](http
 If you have any questions, join chat in [Gitter](https://gitter.im/Ulauncher/General)
 
 ***
-### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki)
+### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki/Code-Contribution)
 ***
 
 License
