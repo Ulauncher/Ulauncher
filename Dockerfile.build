@@ -30,7 +30,7 @@ RUN apt install -y \
         python3-levenshtein \
         python3-websocket \
         python3-pip && \
-    pip3 install --upgrade pip setuptools && \
+    pip3 install --upgrade pip pybuild setuptools && \
     wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_8.x && \
     bash /tmp/node-setup.sh && \
     apt install -y nodejs && \

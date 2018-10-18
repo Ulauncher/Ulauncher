@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 %:
 ifneq ($(shell dh -l | grep -xF translations),)
-	dh $@ --with python3,translations
+	dh $@ --with python3,translations --buildsystem=pybuild
 else
-	dh $@ --with python3
+	dh $@ --with python3 --buildsystem=pybuild
 endif
 
 

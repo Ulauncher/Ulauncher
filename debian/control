@@ -3,16 +3,17 @@ Section: python
 Priority: extra
 Build-Depends: debhelper (>= 11),
  dh-python,
+ python3-all,
  gobject-introspection,
  python3-distutils-extra (>= 2.10)
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
-Standards-Version: 3.9.5
+Standards-Version: 4.1.4
 X-Python3-Version: >= 3.6
 
 Package: ulauncher
 Architecture: all
 Depends: ${misc:Depends},
- ${python:Depends},
+ ${python3:Depends},
  libkeybinder-3.0-0,
  libgtk-3-0 (>= 3.10),
  gir1.2-gtk-3.0,
@@ -23,6 +24,7 @@ Depends: ${misc:Depends},
  gir1.2-gdkpixbuf-2.0,
  gir1.2-appindicator3-0.1,
  python3-gi,
+ python3-distutils,
  python3-dbus,
  python3-levenshtein,
  python3-pyinotify,
