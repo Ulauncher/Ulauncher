@@ -5,7 +5,7 @@ Dev: [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)]
 [Application Launcher for Linux 🐧](http://ulauncher.io)
 ================================
 
-Ulauncher is a fast application launcher for Linux written. It's is written in Python, using GTK+.
+Ulauncher is a fast application launcher for Linux. It's is written in Python, using GTK+.
 
 | App Search | File Browser | Custom Themes |
 ---|---|---
