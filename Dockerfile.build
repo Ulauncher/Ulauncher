@@ -4,7 +4,8 @@ MAINTAINER ulauncher.app@gmail.com
 
 WORKDIR /root/ulauncher
 
-RUN apt install -y \
+RUN apt-get update && \
+    apt install -y \
         git \
         vim \
         wget \
@@ -22,6 +23,7 @@ RUN apt install -y \
         gir1.2-gdkpixbuf-2.0 \
         gir1.2-appindicator3-0.1 \
         gir1.2-notify-0.7 \
+        python3-all \
         python3-gi \
         python3-distutils-extra \
         python3-xdg \
