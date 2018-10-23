@@ -140,8 +140,7 @@ class AppDb(object):
         :param ResultList result_list:
         :rtype: :class:`ResultList`
         """
-
-        result_list = result_list or SortedList(query, min_score=50, limit=9)
+        result_list = result_list or SortedList(query)
 
         if not query:
             return result_list

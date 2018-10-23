@@ -1,5 +1,5 @@
 from ulauncher.util.SortedCollection import SortedCollection
-from ulauncher.util.fuzzy_search import get_score
+from fuzzywuzzy import fuzz
 
 
 class SortedList(object):
@@ -42,7 +42,10 @@ class SortedList(object):
         map(lambda i: self.append(i), items)
 
     def append(self, result_item):
-        score = get_score(self._query, result_item.get_search_name())
+        score = fuzz.ratio(
+            self._query.lower(),
+            result_item.get_search_name().lower(),
+        )
         if score >= self._min_score:
             result_item.score = -score  # use negative to sort by score in desc. order
             self._items.insert(result_item)
