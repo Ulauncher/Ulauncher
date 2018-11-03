@@ -8,8 +8,8 @@ RUN dnf install -y \
         gcc \
         make \
         rpm-build \
-        python-devel \
+        python3-devel \
         rsync \
         intltool \
-        python-distutils-extra && \
+        python3-distutils-extra && \
     curl https://bootstrap.pypa.io/ez_setup.py | python
