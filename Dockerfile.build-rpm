@@ -1,4 +1,4 @@
-FROM fedora:25
+FROM fedora:29
 
 MAINTAINER ulauncher.app@gmail.com
 
@@ -11,5 +11,5 @@ RUN dnf install -y \
         python3-devel \
         rsync \
         intltool \
-        python3-distutils-extra && \
-    curl https://bootstrap.pypa.io/ez_setup.py | python
+        python3-distutils-extra \
+        python3-setuptools
