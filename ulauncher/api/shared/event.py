@@ -12,7 +12,7 @@ class BaseEvent:
 
 class KeywordQueryEvent(BaseEvent):
     """
-    Is triggered when user enters query that statrs with your keyword + Space
+    Is triggered when user enters query that starts with your keyword + Space
 
     :param ~ulauncher.search.Query.Query query:
     """

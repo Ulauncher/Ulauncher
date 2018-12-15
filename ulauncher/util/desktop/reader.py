@@ -3,6 +3,8 @@ import logging
 from itertools import chain
 from gi.repository import Gio
 
+from collections import OrderedDict
+
 from ulauncher.util.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
 from ulauncher.util.Settings import Settings
@@ -16,12 +18,23 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
     :param list dirs:
     :rtype: list
     """
-    files = chain.from_iterable(
+
+    all_files = chain.from_iterable(
         map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
+
+    # dedup desktop file according to folow XDG data dir order
+    # specifically the first file name (i.e. firefox.desktop) take precedence
+    # and other files with the same name shoudl be ignored
+    deduped_file_dict = OrderedDict()
+    for file_path in all_files:
+        file_name = os.path.basename(file_path)
+        if file_name not in deduped_file_dict:
+            deduped_file_dict[file_name] = file_path
+    deduped_files = deduped_file_dict.itervalues()
 
     blacklisted_dirs_srt = Settings.get_instance().get_property('blacklisted-desktop-dirs')
     blacklisted_dirs = blacklisted_dirs_srt.split(':') if blacklisted_dirs_srt else []
-    for file in files:
+    for file in deduped_files:
         try:
             if any([file.startswith(dir) for dir in blacklisted_dirs]):
                 continue

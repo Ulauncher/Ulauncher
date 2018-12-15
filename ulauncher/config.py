@@ -20,7 +20,8 @@ from ulauncher.util.decorator.lru_cache import lru_cache
 CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
 CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
-DESKTOP_DIRS = list(filter(os.path.exists, xdg_data_dirs))
+# spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
+DESKTOP_DIRS = list(filter(os.path.exists, [os.path.join(dir, "applications") for dir in xdg_data_dirs]))
 EXTENSIONS_DIR = os.path.join(CACHE_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -54,7 +55,7 @@ def get_data_path():
 
     abs_data_path = os.path.abspath(path)
     if not os.path.exists(abs_data_path):
-        raise ProjectPathNotFoundError
+        raise ProjectPathNotFoundError(abs_data_path)
 
     return abs_data_path
 

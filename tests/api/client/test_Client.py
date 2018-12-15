@@ -30,10 +30,10 @@ class TestClient:
     def test_connect__WebSocketApp__is_called(self, client, websocket):
         client.connect()
         websocket.WebSocketApp.assert_called_with('ws://localhost:5000/test_extension',
-                                                  on_message=client.on_message,
-                                                  on_error=client.on_error,
-                                                  on_open=client.on_open,
-                                                  on_close=client.on_close)
+                                                  on_message=mock.ANY,
+                                                  on_error=mock.ANY,
+                                                  on_open=mock.ANY,
+                                                  on_close=mock.ANY)
 
     def test_connect__run_forever__is_called(self, client, websocket):
         client.connect()

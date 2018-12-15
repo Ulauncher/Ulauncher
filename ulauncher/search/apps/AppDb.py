@@ -38,9 +38,16 @@ class AppDb:
 
     def _create_table(self):
         self._conn.executescript('''
-            CREATE TABLE app_db (name VARCHAR PRIMARY KEY, desktop_file VARCHAR,
-            description VARCHAR, search_name VARCHAR);
-            CREATE INDEX desktop_file_idx ON app_db (desktop_file);''')
+            CREATE TABLE app_db (
+              name VARCHAR,
+              desktop_file VARCHAR,
+              desktop_file_short VARCHAR,
+              description VARCHAR,
+              search_name VARCHAR,
+              PRIMARY KEY (desktop_file_short)
+            );
+            CREATE INDEX desktop_file_idx ON app_db (desktop_file);
+        ''')
 
     def _row_to_rec(self, row):
         """
@@ -48,6 +55,7 @@ class AppDb:
         """
         return {
             'desktop_file': row['desktop_file'],
+            'desktop_file_short': row['desktop_file_short'],
             'name': row['name'],
             'description': row['description'],
             'search_name': row['search_name'],
@@ -65,14 +73,15 @@ class AppDb:
         exec_name = app.get_string('Exec') or ''
         record = {
             "desktop_file": app.get_filename(),
+            "desktop_file_short": os.path.basename(app.get_filename()),
             "description": app.get_description() or '',
             "name": name,
             "search_name": search_name(name, exec_name)
         }
         self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
 
-        query = '''INSERT OR REPLACE INTO app_db (name, desktop_file, description, search_name)
-                   VALUES (:name, :desktop_file, :description, :search_name)'''
+        query = '''INSERT OR REPLACE INTO app_db (name, desktop_file, desktop_file_short, description, search_name)
+                   VALUES (:name, :desktop_file, :desktop_file_short, :description, :search_name)'''
         try:
             self._conn.execute(query, record)
             self.commit()

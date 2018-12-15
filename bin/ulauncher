@@ -10,6 +10,9 @@ import os
 import locale
 locale.textdomain('ulauncher')
 
+if sys.version_info.major < 3:
+    raise Exception("Ulauncher should be run with Python 3")
+
 # Add project root directory (enable symlink and trunk execution)
 PROJECT_ROOT_DIRECTORY = os.path.abspath(
     os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))

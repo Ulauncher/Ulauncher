@@ -33,12 +33,11 @@ class Client:
         """
         websocket.enableTrace(False)
         self.ws = websocket.WebSocketApp(self.ws_api_url,
-                                         on_message=self.on_message,
-                                         on_error=self.on_error,
-                                         on_open=self.on_open,
-                                         on_close=self.on_close)
-        # https://github.com/websocket-client/websocket-client/issues/466
-        self.ws.run_forever(ping_timeout=1)
+                                         on_message=lambda ws, msg: self.on_message(ws, msg),
+                                         on_error=lambda ws, error: self.on_error(ws, error),
+                                         on_open=lambda ws: self.on_open(ws),
+                                         on_close=lambda ws: self.on_close(ws))
+        self.ws.run_forever()
 
     def on_message(self, message):
         """

@@ -3,8 +3,15 @@ The MIT License (MIT)
 Copyright (c) 2013 Dave P.
 '''
 import sys
-from http.server import BaseHTTPRequestHandler
-from io import BytesIO
+VER = sys.version_info[0]
+if VER >= 3:
+    import socketserver
+    from http.server import BaseHTTPRequestHandler
+    from io import StringIO, BytesIO
+else:
+    import socketserver
+    from http.server import BaseHTTPRequestHandler
+    from io import StringIO
 
 import hashlib
 import base64
@@ -23,12 +30,18 @@ __all__ = ['WebSocket',
 
 
 def _check_unicode(val):
-    return isinstance(val, str)
+    if VER >= 3:
+        return isinstance(val, str)
+    else:
+        return isinstance(val, str)
 
 
 class HTTPRequest(BaseHTTPRequestHandler):
     def __init__(self, request_text):
-        self.rfile = BytesIO(request_text)
+        if VER >= 3:
+            self.rfile = BytesIO(request_text)
+        else:
+            self.rfile = StringIO(request_text)
         self.raw_requestline = self.rfile.readline()
         self.error_code = self.error_message = None
         self.parse_request()
@@ -38,10 +51,10 @@ _VALID_STATUS_CODES = [1000, 1001, 1002, 1003, 1007, 1008,
                        1009, 1010, 1011, 3000, 3999, 4000, 4999]
 
 HANDSHAKE_STR = (
-    "HTTP/1.1 101 Switching Protocols\r\n"
-    "Upgrade: WebSocket\r\n"
-    "Connection: Upgrade\r\n"
-    "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
+   "HTTP/1.1 101 Switching Protocols\r\n"
+   "Upgrade: WebSocket\r\n"
+   "Connection: Upgrade\r\n"
+   "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
 )
 
 GUID_STR = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
@@ -64,7 +77,7 @@ MAXHEADER = 65536
 MAXPAYLOAD = 33554432
 
 
-class WebSocket:
+class WebSocket(object):
 
     def __init__(self, server, sock, address):
         self.server = server
@@ -101,23 +114,23 @@ class WebSocket:
 
     def handleMessage(self):
         """
-        Called when websocket frame is received.
-        To access the frame data call self.data.
+            Called when websocket frame is received.
+            To access the frame data call self.data.
 
-        If the frame is Text then self.data is a unicode object.
-        If the frame is Binary then self.data is a bytearray object.
+            If the frame is Text then self.data is a unicode object.
+            If the frame is Binary then self.data is a bytearray object.
         """
         pass
 
     def handleConnected(self):
         """
-        Called when a websocket client connects to the server.
+            Called when a websocket client connects to the server.
         """
         pass
 
     def handleClose(self):
         """
-        Called when a websocket server gets a Close frame from a client.
+            Called when a websocket server gets a Close frame from a client.
         """
         pass
 
@@ -154,7 +167,7 @@ class WebSocket:
                 if len(reason) > 0:
                     try:
                         reason = reason.decode('utf8', errors='strict')
-                    except:
+                    except Exception:
                         status = 1002
             else:
                 status = 1002
@@ -173,7 +186,7 @@ class WebSocket:
 
                 if self.frag_type == TEXT:
                     self.frag_buffer = []
-                    utf_str = self.frag_decoder.decode(self.data, final=False)
+                    utf_str = self.frag_decoder.decode(self.data, final = False)
                     if utf_str:
                         self.frag_buffer.append(utf_str)
                 else:
@@ -185,7 +198,7 @@ class WebSocket:
                     raise Exception('fragmentation protocol error')
 
                 if self.frag_type == TEXT:
-                    utf_str = self.frag_decoder.decode(self.data, final=False)
+                    utf_str = self.frag_decoder.decode(self.data, final = False)
                     if utf_str:
                         self.frag_buffer.append(utf_str)
                 else:
@@ -220,6 +233,14 @@ class WebSocket:
             else:
                 if self.frag_start is True:
                     raise Exception('fragmentation protocol error')
+
+                if self.opcode == TEXT:
+                    try:
+                        self.data = self.data.decode('utf8', errors='strict')
+                    except Exception:
+                        # this may not be a utf8 string, so return it as is
+                        # this fixes https://github.com/Ulauncher/Ulauncher/issues/294
+                        pass
 
                 self.handleMessage()
 
@@ -260,17 +281,21 @@ class WebSocket:
             if not data:
                 raise Exception("remote socket closed")
 
-            for d in data:
-                self._parseMessage(d)
+            if VER >= 3:
+                for d in data:
+                    self._parseMessage(d)
+            else:
+                for d in data:
+                    self._parseMessage(ord(d))
 
     def close(self, status=1000, reason=''):
         """
-        Send Close frame to the client. The underlying socket is only closed
-        when the client acknowledges the Close frame.
+           Send Close frame to the client. The underlying socket is only closed
+           when the client acknowledges the Close frame.
 
-        status is the closing identifier.
-        reason is the reason for the close.
-        """
+           status is the closing identifier.
+           reason is the reason for the close.
+         """
         try:
             if self.closed is False:
                 close_msg = bytearray()
@@ -313,12 +338,12 @@ class WebSocket:
 
     def sendFragmentStart(self, data):
         """
-        Send the start of a data fragment stream to a websocket client.
-        Subsequent data should be sent using sendFragment().
-        A fragment stream is completed when sendFragmentEnd() is called.
+            Send the start of a data fragment stream to a websocket client.
+            Subsequent data should be sent using sendFragment().
+            A fragment stream is completed when sendFragmentEnd() is called.
 
-        If data is a unicode object then the frame is sent as Text.
-        If the data is a bytearray object then the frame is sent as Binary.
+            If data is a unicode object then the frame is sent as Text.
+            If the data is a bytearray object then the frame is sent as Binary.
         """
         opcode = BINARY
         if _check_unicode(data):
@@ -327,28 +352,28 @@ class WebSocket:
 
     def sendFragment(self, data):
         """
-        see sendFragmentStart()
+            see sendFragmentStart()
 
-        If data is a unicode object then the frame is sent as Text.
-        If the data is a bytearray object then the frame is sent as Binary.
+            If data is a unicode object then the frame is sent as Text.
+            If the data is a bytearray object then the frame is sent as Binary.
         """
         self._sendMessage(True, STREAM, data)
 
     def sendFragmentEnd(self, data):
         """
-        see sendFragmentEnd()
+            see sendFragmentEnd()
 
-        If data is a unicode object then the frame is sent as Text.
-        If the data is a bytearray object then the frame is sent as Binary.
+            If data is a unicode object then the frame is sent as Text.
+            If the data is a bytearray object then the frame is sent as Binary.
         """
         self._sendMessage(False, STREAM, data)
 
     def sendMessage(self, data):
         """
-        Send websocket data frame to the client.
+            Send websocket data frame to the client.
 
-        If data is a unicode object then the frame is sent as Text.
-        If the data is a bytearray object then the frame is sent as Binary.
+            If data is a unicode object then the frame is sent as Text.
+            If the data is a bytearray object then the frame is sent as Binary.
         """
         opcode = BINARY
         if _check_unicode(data):
@@ -431,10 +456,10 @@ class WebSocket:
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception:
+                        except Exception as e:
                             traceback.print_exc(file=sys.stderr)
                         finally:
-                            self.state = HEADERB1
+                            self.state = self.HEADERB1
                             self.data = bytearray()
 
                     # we have no mask and some payload
@@ -468,7 +493,7 @@ class WebSocket:
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception:
+                        except Exception as e:
                             traceback.print_exc(file=sys.stderr)
                         finally:
                             self.state = HEADERB1
@@ -498,7 +523,7 @@ class WebSocket:
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception:
+                        except Exception as e:
                             traceback.print_exc(file=sys.stderr)
                         finally:
                             self.state = HEADERB1
@@ -522,7 +547,7 @@ class WebSocket:
                 if self.length <= 0:
                     try:
                         self._handlePacket()
-                    except Exception:
+                    except Exception as e:
                         traceback.print_exc(file=sys.stderr)
                     finally:
                         self.state = HEADERB1
@@ -546,7 +571,7 @@ class WebSocket:
                 raise Exception('payload exceeded allowable size')
 
             # check if we have processed length bytes; if so we are done
-            if (self.index + 1) == self.length:
+            if (self.index+1) == self.length:
                 try:
                     self._handlePacket()
                 except Exception:
@@ -559,7 +584,7 @@ class WebSocket:
                 self.index += 1
 
 
-class SimpleWebSocketServer:
+class SimpleWebSocketServer(object):
     def __init__(self, host, port, websocketclass, selectInterval=0.1):
         self.websocketclass = websocketclass
         self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -579,7 +604,7 @@ class SimpleWebSocketServer:
     def close(self):
         self.serversocket.close()
 
-        for _, conn in self.connections.items():
+        for desc, conn in list(self.connections.items()):
             conn.close()
             conn.handleClose()
 
@@ -661,8 +686,7 @@ class SimpleSSLWebSocketServer(SimpleWebSocketServer):
     def __init__(self, host, port, websocketclass, certfile,
                  keyfile, version=ssl.PROTOCOL_TLSv1, selectInterval=0.1):
 
-        SimpleWebSocketServer.__init__(self, host, port,
-                                       websocketclass, selectInterval)
+        SimpleWebSocketServer.__init__(self, host, port, websocketclass, selectInterval)
 
         self.context = ssl.SSLContext(version)
         self.context.load_cert_chain(certfile, keyfile)
