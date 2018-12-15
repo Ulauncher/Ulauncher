@@ -5,7 +5,7 @@
 #####################################
 
 cd `dirname $0`
-source functions.sh
+source env.sh
 cd ..
 
 set -ex

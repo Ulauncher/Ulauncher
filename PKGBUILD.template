@@ -7,7 +7,7 @@ pkgver=%VERSION%
 pkgrel=1
 pkgdesc='Application launcher for Linux'
 arch=('any')
-url="http://ulauncher.io"
+url="https://ulauncher.io"
 license=('GPL3')
 depends=('gobject-introspection-runtime' 'libappindicator-gtk3' 'libkeybinder3' 'webkit2gtk'
          "python-"{dbus,gobject,pyinotify,levenshtein,xdg,websocket-client})

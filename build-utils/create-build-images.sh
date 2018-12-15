@@ -7,7 +7,7 @@
 set -ex
 
 cd `dirname $0`
-source functions.sh
+source env.sh
 cd ..
 
 docker build -f Dockerfile.build -t $BUILD_IMAGE .

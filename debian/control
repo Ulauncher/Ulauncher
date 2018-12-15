@@ -31,4 +31,4 @@ Depends: ${misc:Depends},
  python3-websocket,
  python3-xdg
 Description: Application launcher for Linux
- See http://ulauncher.io for more information
+ See https://ulauncher.io for more information

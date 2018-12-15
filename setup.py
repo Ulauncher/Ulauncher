@@ -196,7 +196,7 @@ def main():
         author='Aleksandr Gornostal',
         author_email='ulauncher.app@gmail.com',
         description='Application launcher for Linux',
-        url='http://ulauncher.io',
+        url='https://ulauncher.io',
         data_files=DataFileList([
             ('share/icons/hicolor/48x48/apps', [
                 'data/media/icons/hicolor/ulauncher.svg'

@@ -50,9 +50,10 @@ sed -i "s/%VERSION%/$1/g" $tmpdir/setup.py
 cd $tmpdir
 
 # build for Fedora
-python3 setup.py bdist_rpm
+python3 setup.py bdist_rpm # --no-autoreq --fix-python
 find . -name "*noarch.rpm" -print0 | xargs -0 -I file cp file /tmp/ulauncher_$1_fedora.rpm
-exit 0
+
+exit 0 # TODO: remove
 
 # build for OpenSUSE
 sed -i "s/\[bdist_rpm\]/[bdist_rpm_fedora]/g" setup.cfg

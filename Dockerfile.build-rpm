@@ -1,4 +1,4 @@
-FROM fedora:29
+FROM fedora:28
 
 MAINTAINER ulauncher.app@gmail.com
 

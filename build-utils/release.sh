@@ -20,7 +20,7 @@ echo "###########################"
 set -ex
 
 cd `dirname $0`
-source functions.sh
+source env.sh
 cd ..
 
 buildUtils=`dirname $0`
