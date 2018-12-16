@@ -27,9 +27,9 @@ def find_desktop_files(dirs: List[str] = None) -> Generator[str, None, None]:
     all_files = chain.from_iterable(
         map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
 
-    # dedup desktop file according to folow XDG data dir order
+    # dedup desktop file according to follow XDG data dir order
     # specifically the first file name (i.e. firefox.desktop) take precedence
-    # and other files with the same name shoudl be ignored
+    # and other files with the same name should be ignored
     deduped_file_dict = OrderedDict()  # type: OrderedDict
     for file_path in all_files:
         file_name = os.path.basename(file_path)

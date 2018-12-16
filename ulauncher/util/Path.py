@@ -4,32 +4,33 @@ import os
 class Path:
     # cache for better performance
     __cached_existing_dir = None
+    _path = None  # type: str
 
     def __init__(self, path):
         self._path = os.path.expandvars(os.path.expanduser(path.lstrip()))
 
-    def get_abs_path(self):
+    def get_abs_path(self) -> str:
         return self._path
 
-    def exists(self):
+    def exists(self) -> bool:
         return os.path.exists(self._path)
 
-    def get_basename(self):
+    def get_basename(self) -> str:
         return os.path.basename(self._path.rstrip('/'))
 
-    def get_dirname(self):
+    def get_dirname(self) -> str:
         return os.path.dirname(self.get_user_path())
 
-    def is_dir(self):
+    def is_dir(self) -> bool:
         return os.path.isdir(self._path)
 
-    def is_exe(self):
+    def is_exe(self) -> bool:
         return os.access(self._path, os.X_OK)
 
-    def get_ext(self):
+    def get_ext(self) -> str:
         return os.path.splitext(self._path)[1].lower()[1:]
 
-    def get_user_path(self):
+    def get_user_path(self) -> str:
         result = self._path.rstrip('/')
 
         user_dir = os.path.expanduser('~')
@@ -38,7 +39,7 @@ class Path:
 
         return result
 
-    def get_existing_dir(self):
+    def get_existing_dir(self) -> str:
         """
         Example (assuming foo & bar do not exist):
 
@@ -66,7 +67,7 @@ class Path:
         self.__cached_existing_dir = result
         return result
 
-    def get_search_part(self):
+    def get_search_part(self) -> str:
         """
         :returns: remaining part of the query that goes after :meth:`get_existing_dir`
         """

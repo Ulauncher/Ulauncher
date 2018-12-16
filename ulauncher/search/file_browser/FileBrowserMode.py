@@ -1,23 +1,25 @@
 import os
+from typing import List, Union
 from gi.repository import Gdk
 
+from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.util.Path import Path, InvalidPathError
 from ulauncher.search.BaseSearchMode import BaseSearchMode
 from ulauncher.search.SortedList import SortedList
-from ulauncher.util.Path import Path, InvalidPathError
-from .FileBrowserResultItem import FileBrowserResultItem
-from .FileQueries import FileQueries
+from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
+from ulauncher.search.file_browser.FileQueries import FileQueries
 
 
 class FileBrowserMode(BaseSearchMode):
     RESULT_LIMIT = 17
 
     def __init__(self):
-        self._file_queries = FileQueries.get_instance()
+        self._file_queries = FileQueries.get_instance()  # type: FileQueries
 
-    def is_enabled(self, query):
+    def is_enabled(self, query: str) -> bool:
         """
         Enabled for queries like:
         ~/Downloads
@@ -29,25 +31,27 @@ class FileBrowserMode(BaseSearchMode):
         except IndexError:
             return False
 
-    def list_files(self, path_str, sort_by_usage=False):
+    def list_files(self, path_str: str, sort_by_usage: bool = False) -> List[str]:
         files = os.listdir(path_str)
         if sort_by_usage:
-            return sorted(files, reverse=True, key=lambda f: self._file_queries.find(os.path.join(path_str, f)))
+            return sorted(files,
+                          reverse=True,
+                          key=lambda f: self._file_queries.find(os.path.join(path_str, f)) or '')
 
         return sorted(files)
 
-    def create_result_item(self, path_srt):
+    def create_result_item(self, path_srt: str) -> FileBrowserResultItem:
         return FileBrowserResultItem(Path(path_srt))
 
-    def filter_dot_files(self, file_list):
+    def filter_dot_files(self, file_list: List[str]) -> List[str]:
         return list(filter(lambda f: not f.startswith('.'), file_list))
 
-    def handle_query(self, query):
+    def handle_query(self, query: str) -> BaseAction:
         if query == '~':
             return SetUserQueryAction('~/')
 
-        path = Path(query)
-        result_items = []
+        path = Path(query)  # type: Path
+        result_items = []  # type: Union[List, SortedList]
 
         try:
             existing_dir = path.get_existing_dir()

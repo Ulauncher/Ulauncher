@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from distutils.dir_util import mkpath
 
@@ -64,5 +64,5 @@ class KeyValueDb:
     def put(self, key: str, value: Any) -> None:
         self._records[key] = value
 
-    def find(self, key: str, default: Any = None) -> Any:
+    def find(self, key: str, default: Any = None) -> Union[object, None]:
         return self._records.get(key, default)
