@@ -1,11 +1,12 @@
 import pytest
 import mock
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import GdkPixbuf
 
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
 
 
+# pylint: disable=too-many-public-methods
 class TestResultItemWidget:
 
     @pytest.fixture
@@ -26,7 +27,7 @@ class TestResultItemWidget:
     def item_box(self, result_item_wgt):
         return result_item_wgt.item_box
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def builder(self):
         return mock.MagicMock()
 
@@ -37,7 +38,6 @@ class TestResultItemWidget:
     def test_initialize(self, builder, item_obj, mocker):
         result_item_wgt = ResultItemWidget()
         set_index = mocker.patch.object(result_item_wgt, 'set_index')
-        set_icon = mocker.patch.object(result_item_wgt, 'set_icon')
         set_name = mocker.patch.object(result_item_wgt, 'set_name')
         set_description = mocker.patch.object(result_item_wgt, 'set_description')
 
@@ -56,12 +56,12 @@ class TestResultItemWidget:
         result_item_wgt.set_index(2)
         mock_set_shortcut.assert_called_once_with('Alt+3')
 
-    def test_select(self, result_item_wgt, item_box, mocker, builder):
+    def test_select(self, result_item_wgt, item_box, mocker):
         mock_get_style_context = mocker.patch.object(item_box, 'get_style_context')
         result_item_wgt.select()
         mock_get_style_context.return_value.add_class.assert_called_once_with('selected')
 
-    def test_deselect(self, result_item_wgt, item_box, mocker, builder):
+    def test_deselect(self, result_item_wgt, item_box, mocker):
         mock_get_style_context = mocker.patch.object(item_box, 'get_style_context')
         result_item_wgt.deselect()
         mock_get_style_context.return_value.remove_class.assert_called_once_with('selected')

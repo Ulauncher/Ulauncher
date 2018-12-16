@@ -45,6 +45,7 @@ class TestExtensionDownloader:
     def datetime(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.datetime')
 
+    # pylint: disable=too-many-arguments, unused-argument
     def test_download(self, downloader, ext_db, ext_runner, unzip, download_zip, datetime):
         ext_db.find.return_value = None
 
@@ -60,6 +61,7 @@ class TestExtensionDownloader:
             'last_commit_time': '2017-05-01T07:30:39Z'
         })
 
+    # pylint: disable=unused-argument
     def test_download_raises_AlreadyDownloadedError(self, downloader, ext_db, ext_runner, mocker):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.find.return_value = {

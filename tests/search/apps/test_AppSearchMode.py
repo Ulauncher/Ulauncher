@@ -21,7 +21,7 @@ class TestAppSearchMode:
     def mode(self, search_modes):
         return AppSearchMode(search_modes)
 
-    def test_handle_query__result__is_Render_result_value(self, mode, app_db, Render):
+    def test_handle_query__result__is_Render_result_value(self, mode, Render):
         query = mock.Mock()
         assert mode.handle_query(query) == Render.return_value
 

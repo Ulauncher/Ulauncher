@@ -8,10 +8,10 @@ Test=123
 
 [Desktop Entry]
 Name=Ulauncher
-Comment=Provides a convenient and fast way to launch your desktop applications
+Comment=Ulauncher comment
 Categories=GNOME;Utility;
-Exec=/usr/bin/ulauncher
-Icon=/usr/share/ulauncher/media/ulauncher.svg
+Exec=/usr/bin/ul
+Icon=app.svg
 Terminal=false
 Type=Application
 

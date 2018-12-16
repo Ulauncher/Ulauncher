@@ -1,7 +1,7 @@
+from collections import Iterable
 import pytest
 import mock
 from ulauncher.search.apps.AppDb import AppDb, search_name
-from collections import Iterable
 
 
 class TestAppDb:
@@ -114,7 +114,7 @@ class TestAppDb:
         db_with_data.remove_by_path('/foo/jane.desktop')
         assert not db_with_data.get_by_path('/foo/jane.desktop')
 
-    def test_put_app(self, app_db, get_app_icon_pixbuf, mocker):
+    def test_put_app(self, app_db, get_app_icon_pixbuf):
         app = mock.MagicMock()
         app.get_filename.return_value = '/foo/file_name_test1'
         app.get_string.return_value = None
@@ -144,7 +144,7 @@ class TestAppDb:
         for rec in db_with_data.get_records():
             AppResultItem.assert_any_call(rec)
 
-    def test_find_empty_query(self, db_with_data, mocker):
+    def test_find_empty_query(self, db_with_data):
         assert isinstance(db_with_data.find(''), Iterable)
 
     def test_get_by_name(self, db_with_data):

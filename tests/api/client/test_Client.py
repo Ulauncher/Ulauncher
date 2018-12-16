@@ -1,6 +1,7 @@
+import pickle
 import mock
 import pytest
-import pickle
+
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.Extension import Extension
 

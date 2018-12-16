@@ -28,8 +28,8 @@ class TestAutostartPreference:
             f.write(desktop_content)
         return pathname
 
-    @pytest.fixture
-    def xdg_config_home(self, mocker, tmpdir):
+    @pytest.fixture(autouse=True)
+    def xdg_config_home(self, tmpdir):
         ap.xdg_config_home = os.path.join(str(tmpdir), 'xdg_config_home')
         return ap.xdg_config_home
 
@@ -40,14 +40,14 @@ class TestAutostartPreference:
             os.makedirs(path)
         return path
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def db(self, mocker, desktop_file):
         db = mocker.patch('ulauncher.util.AutostartPreference.AppDb.get_instance').return_value
         db.get_by_name.return_value = {'name': 'Ulauncher', 'desktop_file': desktop_file}
         return db
 
     @pytest.fixture
-    def autostart(self, db, xdg_config_home):
+    def autostart(self):
         return AutostartPreference()
 
     def get_lines(self, desktop_file):

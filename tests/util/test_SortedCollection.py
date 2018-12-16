@@ -57,6 +57,7 @@ def slow_find_gt(seq, k):
     return -1
 
 
+# pylint: disable=too-many-statements
 def test_SortedCollection():
     from random import choice
     pool = [1.5, 2, 2.0, 3, 3.0, 3.5, 4, 4.0, 4.5]
@@ -72,15 +73,15 @@ def test_SortedCollection():
                 assert repr(ve2no(sc.find_lt, probe)) == repr(slow_find_lt(s, probe))
                 assert repr(ve2no(sc.find_ge, probe)) == repr(slow_find_ge(s, probe))
                 assert repr(ve2no(sc.find_gt, probe)) == repr(slow_find_gt(s, probe))
-            for i, item in enumerate(s):
-                assert repr(item) == repr(sc[i])        # test __getitem__
+            for j, item in enumerate(s):
+                assert repr(item) == repr(sc[j])        # test __getitem__
                 assert item in sc                       # test __contains__ and __iter__
                 assert s.count(item) == sc.count(item)  # test count()
             assert len(sc) == n                         # test __len__
             assert list(map(repr, reversed(sc))) == list(map(repr, reversed(s)))    # test __reversed__
             assert list(sc.copy()) == list(sc)          # test copy()
             sc.clear()                                  # test clear()
-            assert len(sc) == 0
+            assert not sc
 
     sd = SortedCollection('The quick Brown Fox jumped'.split(), key=str.lower)
     assert sd._keys == ['brown', 'fox', 'jumped', 'quick', 'the']

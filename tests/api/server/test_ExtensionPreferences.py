@@ -13,7 +13,7 @@ class TestExtensionPreferences:
         Db = mocker.patch('ulauncher.api.server.ExtensionPreferences.KeyValueDb')
         Db.return_value = mock.create_autospec(KeyValueDb)
 
-        def find(id, default=None):
+        def find(_, default=None):
             return default
 
         Db.return_value.find.side_effect = find
@@ -60,7 +60,7 @@ class TestExtensionPreferences:
         assert item['value'] == 'def'
 
     def test_get__user_value_not_empty__value_is_user_value(self, prefs, db):
-        def find(id, default=None):
+        def find(*args, **kw):
             return 'user-value'
 
         db.find.side_effect = find

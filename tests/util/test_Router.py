@@ -1,6 +1,6 @@
+from urllib.parse import quote
 import mock
 import pytest
-from urllib.parse import quote
 from ulauncher.util.Router import Router, RoutePathEmpty, RouteNotFound, get_url_params
 
 
@@ -38,6 +38,7 @@ class TestRouter:
         m = mock.Mock()
         ctx = mock.Mock()
 
+        # pylint: disable=unused-variable
         @router.route('/get/all')
         def get_all(ctx, url_params):
             m(ctx, url_params)

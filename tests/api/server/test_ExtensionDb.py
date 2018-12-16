@@ -1,5 +1,4 @@
 import os
-import mock
 import pytest
 
 from ulauncher.api.server.ExtensionDb import ExtensionDb

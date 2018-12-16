@@ -1,6 +1,7 @@
-import pytest
-from gi.repository import GdkX11
 from functools import reduce
+from gi.repository import GdkX11
+
+import pytest
 
 is_display_enabled = bool(GdkX11.X11Display.get_default())
 
@@ -23,7 +24,7 @@ class DictHasValus(dict):
             return False
 
     def find(self, keys, other):
-        if type(keys) != tuple:
+        if not isinstance(keys, tuple):
             keys = (keys,)
         return reduce(lambda d, key: d[key], keys, other)
 

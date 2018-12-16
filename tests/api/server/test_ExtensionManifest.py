@@ -121,11 +121,11 @@ class TestExtensionManifest:
             'options': {'query_debounce': 0.5}
         }
         manifest = ExtensionManifest('test_extension', manifest_dict, ext_dir)
-        manifest.get_option('query_debounce') == 0.5
+        assert manifest.get_option('query_debounce') == 0.5
 
     def test_get_option__option_doesnt_exist__default_returned(self, ext_dir):
         manifest_dict = {
             'options': {}
         }
         manifest = ExtensionManifest('test_extension', manifest_dict, ext_dir)
-        manifest.get_option('query_debounce', 0.4) == 0.4
+        assert manifest.get_option('query_debounce', 0.4) == 0.4

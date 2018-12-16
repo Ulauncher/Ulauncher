@@ -1,6 +1,6 @@
+import pickle
 import mock
 import pytest
-import pickle
 
 from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.api.shared.Response import Response
@@ -74,7 +74,7 @@ class TestExtensionController:
         query = Query('def ulauncher')
         controller.handle_query(query)
         keywordEvent = pickle.loads(controller.sendMessage.call_args_list[0][0][0])
-        assert type(keywordEvent) is KeywordQueryEvent
+        assert isinstance(keywordEvent, KeywordQueryEvent)
         assert keywordEvent.get_query() == 'def ulauncher'
 
     def test_handle_query__handle_query__is_called(self, controller, resultRenderer):

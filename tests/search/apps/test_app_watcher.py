@@ -1,7 +1,7 @@
+from time import sleep
 import pytest
 import mock
 import pyinotify
-from time import sleep
 from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.search.apps.app_watcher import AppNotifyEventHandler
 
@@ -54,7 +54,7 @@ class TestAppNotifyEventHandler:
         sleep(.06)
         db.put_app.assert_called_with(app)
 
-    def test_on_created_dont_add(self, event_handler, event, db, app):
+    def test_on_created_dont_add(self, event_handler, event, db):
         """
         Don't add file if it's not a desktop file
         """
@@ -62,11 +62,11 @@ class TestAppNotifyEventHandler:
         event_handler.process_IN_CREATE(event)
         assert not db.put_app.called
 
-    def test_on_deleted(self, event_handler, event, db, app):
+    def test_on_deleted(self, event_handler, event, db):
         event_handler.process_IN_DELETE(event)
         db.remove_by_path.assert_called_with('file.desktop')
 
-    def test_on_deleted_dont_delete(self, event_handler, event, db, app):
+    def test_on_deleted_dont_delete(self, event_handler, event, db):
         event.pathname = 'file.desk'
         event_handler.process_IN_DELETE(event)
         assert not db.remove_by_path.called
@@ -76,12 +76,12 @@ class TestAppNotifyEventHandler:
         sleep(.06)
         db.put_app.assert_called_with(app)
 
-    def test_on_modified_dont_modify(self, event_handler, event, db, app):
+    def test_on_modified_dont_modify(self, event_handler, event, db):
         event.pathname = 'file.desk'
         event_handler.process_IN_MODIFY(event)
         assert not db.put_app.called
 
-    def test_on_moved_from(self, event_handler, event, db, app):
+    def test_on_moved_from(self, event_handler, event, db):
         event_handler.process_IN_MOVED_FROM(event)
         db.remove_by_path.assert_called_with('file.desktop')
 

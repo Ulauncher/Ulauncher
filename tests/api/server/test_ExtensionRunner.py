@@ -8,7 +8,7 @@ from ulauncher.api.server.ExtensionManifest import VersionIncompatibilityError
 class TestExtensionRunner:
 
     @pytest.fixture
-    def runner(ext_server):
+    def runner(self, ext_server):
         return ExtensionRunner(ext_server)
 
     @pytest.fixture

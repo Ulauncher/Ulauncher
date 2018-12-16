@@ -9,7 +9,7 @@ from ulauncher.search.Query import Query
 class TestAppResultItem:
 
     @pytest.fixture
-    def item(self, app_queries):
+    def item(self):
         return AppResultItem({
             'name': 'TestAppResultItem',
             'description': 'Description of TestAppResultItem',
@@ -17,7 +17,7 @@ class TestAppResultItem:
             'desktop_file': 'path/to/desktop_file.desktop'
         })
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def app_queries(self, mocker):
         get_instance = mocker.patch('ulauncher.search.apps.AppResultItem.AppQueryDb.get_instance')
         get_instance.return_value = mock.create_autospec(AppQueryDb)

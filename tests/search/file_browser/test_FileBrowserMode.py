@@ -24,14 +24,14 @@ class TestFileBrowserMode:
     def SortedList(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SortedList')
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def RenderAction(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.RenderResultListAction')
 
     @pytest.fixture
     def mode(self, file_queries, mocker):
-        FileQueries = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.FileQueries')
-        FileQueries.get_instance.return_value = file_queries
+        FileQueriesMock = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.FileQueries')
+        FileQueriesMock.get_instance.return_value = file_queries
         return FileBrowserMode()
 
     def test_is_enabled(self, mode):
@@ -76,13 +76,12 @@ class TestFileBrowserMode:
 
         RenderAction.assert_called_with(['/tmp/dir/a', '/tmp/dir/d', '/tmp/dir/b', '/tmp/dir/c'])
 
-    def test_handle_qury__InvalidPathError__empty_list_rendered(self, mode, path, mocker, RenderAction):
+    def test_handle_qury__InvalidPathError__empty_list_rendered(self, mode, path, RenderAction):
         path.get_existing_dir.side_effect = InvalidPathError()
         mode.handle_query('~~')
         RenderAction.assert_called_with([])
 
-    def test_handle_qury__path_from_doesnt_exist__SortedList_called(self, mode, path, mocker,
-                                                                    RenderAction, SortedList):
+    def test_handle_qury__path_from_doesnt_exist__SortedList_called(self, mode, path, mocker, SortedList):
         path.get_existing_dir.return_value = '/tmp/dir'
         mocker.patch.object(mode, 'list_files', return_value=['a', 'd', 'b', 'c'])
         mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
@@ -97,8 +96,7 @@ class TestFileBrowserMode:
             ['/tmp/dir/c', '/tmp/dir/b', '/tmp/dir/d', '/tmp/dir/a'])
 
     def test_handle_key_press_event(self, mode, mocker, SetUserQueryAction):
-        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
-                                   return_value='BackSpace')
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')
         widget = mock.MagicMock()
         event = mock.MagicMock()
         event.state = 0
@@ -111,8 +109,7 @@ class TestFileBrowserMode:
         widget.emit_stop_by_name.assert_called_with('key-press-event')
 
     def test_handle_key_press_event__not_backspace(self, mode, mocker, SetUserQueryAction):
-        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
-                                   return_value='Enter')
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='Enter')
         widget = mock.MagicMock()
         event = mock.MagicMock()
         event.state = 0
@@ -124,8 +121,7 @@ class TestFileBrowserMode:
         assert not widget.emit_stop_by_name.called
 
     def test_handle_key_press_event__ctrl_pressed(self, mode, mocker, SetUserQueryAction):
-        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
-                                   return_value='BackSpace')
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')
         widget = mock.MagicMock()
         event = mock.MagicMock()
         event.state = Gdk.ModifierType.MOD2_MASK | Gdk.ModifierType.CONTROL_MASK
@@ -137,8 +133,7 @@ class TestFileBrowserMode:
         assert not widget.emit_stop_by_name.called
 
     def test_handle_key_press_event__wrong_cursor_position(self, mode, mocker, SetUserQueryAction):
-        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
-                                   return_value='BackSpace')
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')
         widget = mock.MagicMock()
         event = mock.MagicMock()
         event.state = 0
@@ -150,8 +145,7 @@ class TestFileBrowserMode:
         assert not widget.emit_stop_by_name.called
 
     def test_handle_key_press_event__not_dir(self, mode, mocker, SetUserQueryAction):
-        keyval_name = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name',
-                                   return_value='BackSpace')
+        mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')
         widget = mock.MagicMock()
         event = mock.MagicMock()
         event.state = 0

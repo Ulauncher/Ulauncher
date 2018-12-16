@@ -67,7 +67,6 @@ class TestShortcutSearchMode:
         RenderAction.assert_called_once_with([ShortcutResultItem.return_value])
 
     def test_get_default_items__ShortcutResultItems__returned(self, mode, shortcuts_db, ShortcutResultItem):
-        query = 'kw something'
         shortcut = {'keyword': 'kw', 'is_default_search': True}
         shortcuts_db.get_shortcuts.return_value = [shortcut]
 

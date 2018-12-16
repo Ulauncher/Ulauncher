@@ -41,7 +41,7 @@ class TestAppStatDb:
         db.inc_count('file4.desktop')
         assert db.find('file4.desktop') == 7
 
-    def test_get_most_frequent(self, db, app_db, AppResultItem):
+    def test_get_most_frequent(self, db, AppResultItem):
         assert len(db.get_most_frequent(limit=3)) == 3
         for i, file_id in enumerate([4, 3, 6]):
             arg0 = AppResultItem.call_args_list[i][0][0]

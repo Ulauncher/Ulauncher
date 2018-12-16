@@ -37,6 +37,7 @@ class TestPreferencesUlauncherDialog:
     def builder(self):
         return mock.MagicMock()
 
+    # pylint: disable=too-many-arguments
     @pytest.fixture
     def dialog(self, builder, mocker, settings, webview, autostart_pref, hotkey_dialog):
         mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.PreferencesUlauncherDialog.finish_initializing')
@@ -49,7 +50,8 @@ class TestPreferencesUlauncherDialog:
         dialog.builder = builder
         return dialog
 
-    def test_prefs_set_show_indicator_icon(self, dialog, builder, settings, indicator, idle_add):
+    # pylint: disable=too-many-arguments
+    def test_prefs_set_show_indicator_icon(self, dialog, settings, indicator, idle_add):
         dialog.prefs_set_show_indicator_icon({'query': {'value': 'true'}})
         idle_add.assert_called_with(indicator.switch, True)
         settings.set_property.assert_called_with('show-indicator-icon', True)

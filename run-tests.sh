@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo
+echo "[ Running tests ]"
+
 # Some tests will fail in Docker unless virtual frame buffer is running
 if [ -f /.dockerenv ]; then
     export DISPLAY=:1
@@ -12,6 +15,17 @@ if [ -f /.dockerenv ]; then
     fi
 fi
 
-args=$(echo $@ | sed 's|/.*tests|tests|g') # make a relative path
+export PYTHONPATH=`pwd`
 
-eval "PYTHONPATH=`pwd` py.test --pep8 $args"
+abs-to-rel-path() {
+    sed 's|/.*tests|tests|g' | sed 's|/.*ulauncher|ulauncher|g'
+}
+
+set -e
+
+if [[ -z "$@" ]]; then
+    py.test --pep8 tests
+else
+    args=$(echo $@ | abs-to-rel-path) # make a relative path
+    eval "py.test --pep8 $args"
+fi

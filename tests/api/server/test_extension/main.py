@@ -3,6 +3,7 @@ from time import sleep
 import signal
 
 
+# pylint: disable=unused-argument
 def exit_gracefully(signum, frame):
     print('On SIGTERM')
     sleep(3)

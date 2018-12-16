@@ -1,7 +1,7 @@
 import io
-import pytest
-
 from json import dumps
+
+import pytest
 
 from ulauncher.api.server.GithubExtension import GithubExtension, InvalidGithubUrlError
 

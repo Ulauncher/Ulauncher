@@ -1,6 +1,8 @@
+from time import sleep
+
 import mock
 import pytest
-from time import sleep
+
 from ulauncher.api.server.ExtensionServer import ExtensionServer, ServerIsRunningError
 
 
@@ -27,7 +29,7 @@ class TestExtensionServer:
         sleep(0.02)
         SWS.assert_called_with('127.0.0.1', find_unused_port.return_value, mock.ANY)
 
-    def test_start__serveforever__is_called(self, server, SWS, find_unused_port):
+    def test_start__serveforever__is_called(self, server, SWS):
         server.start()
         sleep(0.02)
         SWS.return_value.serveforever.assert_called_with()

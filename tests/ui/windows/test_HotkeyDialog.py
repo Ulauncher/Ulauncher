@@ -1,7 +1,7 @@
 import pytest
 import mock
-from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from gi.repository import Gtk
+from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 
 
 class TestHotkeyDialog:

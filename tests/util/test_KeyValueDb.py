@@ -27,7 +27,7 @@ class TestKeyValueDb:
         db.commit()
 
         db = KeyValueDb(db_name).open()
-        db.find('hello') == 123
+        assert db.find('hello') == 123
 
     def test_remove(self, db):
         db.put('john', {'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})

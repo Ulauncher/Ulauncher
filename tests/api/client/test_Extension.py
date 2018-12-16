@@ -15,7 +15,7 @@ class TestExtension:
         return mocker.patch('ulauncher.api.client.Extension.Response').return_value
 
     @pytest.fixture
-    def extension(self, client):
+    def extension(self):
         return Extension()
 
     @pytest.fixture

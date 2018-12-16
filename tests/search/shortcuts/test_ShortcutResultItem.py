@@ -41,18 +41,18 @@ class TestShortcutResultItem:
         assert item.get_icon() is load_image.return_value
         load_image.assert_called_once_with('icon_path', 40)
 
-    def test_on_enter(self, item, mocker, ActionList, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         assert item.on_enter(Query('kw test')) is ActionList.return_value
         OpenUrlAction.assert_called_once_with('http://site/?q=test')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__default_search(self, item, mocker, ActionList, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__default_search(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         item.is_default_search = True
         assert item.on_enter(Query('search query')) is ActionList.return_value
         OpenUrlAction.assert_called_once_with('http://site/?q=search query')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__misspelled_kw(self, item, mocker, ActionList, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__misspelled_kw(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         assert item.on_enter(Query('keyword query')) is ActionList.return_value
         assert not OpenUrlAction.called
         SetUserQueryAction.assert_called_once_with('kw ')

@@ -1,6 +1,7 @@
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 
 
+# pylint: disable=too-few-public-methods
 class TestOpenUrlAction:
 
     def test_run(self, mocker):
