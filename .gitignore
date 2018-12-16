@@ -20,3 +20,4 @@ aur_key
 generated.css
 launchpad.ssh.tar
 .pytest_cache/
+.mypy_cache/

@@ -1,6 +1,10 @@
 import os
 import pickle
+from typing import Dict, Any
+
 from distutils.dir_util import mkpath
+
+Records = Dict[str, Any]
 
 
 class KeyValueDb:
@@ -9,17 +13,17 @@ class KeyValueDb:
     Use open() method to load DB from a file and commit() to save it
     """
 
-    _name = None
-    _records = None
+    _name = None  # type: str
+    _records = None  # type: Records
 
-    def __init__(self, basename):
+    def __init__(self, basename: str):
         """
         :param str basename: path to db file
         """
         self._name = basename
         self._records = {}
 
-    def open(self):
+    def open(self) -> 'KeyValueDb':
         """Create a new data base or open existing one"""
         if os.path.exists(self._name):
             if not os.path.isfile(self._name):
@@ -34,7 +38,7 @@ class KeyValueDb:
 
         return self
 
-    def commit(self):
+    def commit(self) -> 'KeyValueDb':
         """Write the database to a file"""
         with open(self._name, 'wb') as out:
             pickle.dump(self._records, out, pickle.HIGHEST_PROTOCOL)
@@ -42,7 +46,7 @@ class KeyValueDb:
 
         return self
 
-    def remove(self, key):
+    def remove(self, key: str) -> bool:
         """
         :param str key:
         :type: bool
@@ -54,11 +58,11 @@ class KeyValueDb:
         except KeyError:
             return False
 
-    def get_records(self):
+    def get_records(self) -> Records:
         return self._records
 
-    def put(self, key, value):
+    def put(self, key: str, value: Any) -> None:
         self._records[key] = value
 
-    def find(self, key, default=None):
+    def find(self, key: str, default: Any = None) -> Any:
         return self._records.get(key, default)

@@ -2,6 +2,7 @@ import os
 import logging
 from collections import OrderedDict
 from itertools import chain
+from typing import Generator, List
 
 from gi.repository import Gio
 
@@ -13,7 +14,7 @@ from ulauncher.util.db.KeyValueDb import KeyValueDb
 logger = logging.getLogger(__name__)
 
 
-def find_desktop_files(dirs=None):
+def find_desktop_files(dirs: List[str] = None) -> Generator[str, None, None]:
     """
     :param list dirs:
     :rtype: list
@@ -29,7 +30,7 @@ def find_desktop_files(dirs=None):
     # dedup desktop file according to folow XDG data dir order
     # specifically the first file name (i.e. firefox.desktop) take precedence
     # and other files with the same name shoudl be ignored
-    deduped_file_dict = OrderedDict()
+    deduped_file_dict = OrderedDict()  # type: OrderedDict
     for file_path in all_files:
         file_name = os.path.basename(file_path)
         if file_name not in deduped_file_dict:

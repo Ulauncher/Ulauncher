@@ -1,12 +1,14 @@
 import os
 import logging
 from json import load
+from typing import Dict, Any
 from shutil import copytree, rmtree
+
 from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
 from ulauncher.util.Settings import Settings
 from ulauncher.util.version_cmp import gtk_version_is_gte
 
-themes = {}
+themes = {}  # type: Dict[str, Any]
 logger = logging.getLogger(__name__)
 user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
 
@@ -96,7 +98,7 @@ class Theme:
         except AssertionError as e:
             raise ThemeManifestError(e)
 
-    def compile_css(self):
+    def compile_css(self) -> None:
         # workaround for issue with a caret-color
         # GTK+ < 3.20 doesn't support that prop
         css_file_name = self.get_css_file_gtk_3_20() if gtk_version_is_gte(3, 20, 0) else self.get_css_file()

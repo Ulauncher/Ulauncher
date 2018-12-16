@@ -1,7 +1,10 @@
-objects = {}
+from typing import Dict, Any, Callable
+
+CachedInstances = Dict[Any, Any]
+objects = {}  # type: CachedInstances
 
 
-def singleton(fn):
+def singleton(fn: Callable) -> Callable:
     """
     Decorator function.
     Call to a decorated function always returns the same instance
