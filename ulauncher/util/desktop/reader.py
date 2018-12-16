@@ -30,7 +30,7 @@ def find_desktop_files(dirs=DESKTOP_DIRS):
         file_name = os.path.basename(file_path)
         if file_name not in deduped_file_dict:
             deduped_file_dict[file_name] = file_path
-    deduped_files = deduped_file_dict.itervalues()
+    deduped_files = deduped_file_dict.values()
 
     blacklisted_dirs_srt = Settings.get_instance().get_property('blacklisted-desktop-dirs')
     blacklisted_dirs = blacklisted_dirs_srt.split(':') if blacklisted_dirs_srt else []

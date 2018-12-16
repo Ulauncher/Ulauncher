@@ -40,7 +40,7 @@ def get_screens():
 
     screens = []
     try:
-        default_screen = Gdk.Display.get_default()
+        default_screen = Gdk.Screen.get_default()
         logger.debug("Found {0} monitor(s).".format(default_screen.get_n_monitors()))
 
         for i in range(default_screen.get_n_monitors()):
