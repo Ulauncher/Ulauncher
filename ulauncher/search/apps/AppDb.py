@@ -118,7 +118,7 @@ class AppDb:
         """
         query = 'DELETE FROM app_db WHERE desktop_file = ?'
         try:
-            self._conn.execute(query, (desktop_file),)
+            self._conn.execute(query, (desktop_file,))
             self.commit()
         except Exception as e:
             logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))

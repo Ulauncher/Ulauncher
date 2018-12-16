@@ -118,7 +118,3 @@ def test_SortedCollection():
         assert 0, 'Oops, failed to notify of missing value'
     sd.remove('jumped')
     assert list(sd) == ['Brown', 'Fox', 'jUmPeD', 'quick', 'QuIcK', 'The']
-
-    import doctest
-    from operator import itemgetter
-    print(doctest.testmod())

@@ -1,5 +1,4 @@
-mock
-pytest
-pytest-pep8
-pytest-mock
-paramiko
+mock==2.0.0
+pytest==4.0.2
+pytest-mock==1.10.0
+pytest-pep8==1.0.6

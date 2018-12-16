@@ -52,6 +52,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionServer.get_instance').return_value
 
     @pytest.fixture(autouse=True)
+    def get_scr_geometry(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_current_screen_geometry')
+
+    @pytest.fixture(autouse=True)
     def Keybinder(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Keybinder')
 

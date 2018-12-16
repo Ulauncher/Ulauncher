@@ -22,32 +22,32 @@ GPROPERTIES = {
                         "Hotkey: Show ulauncher window",  # nick name
                         None,  # description
                         "<Primary>space",  # default
-                        GObject.PARAM_READWRITE),  # flags
+                        GObject.ParamFlags.READWRITE),  # flags
     "show-indicator-icon": (bool,
                             "Show app indicator",
                             None,
                             True,
-                            GObject.PARAM_READWRITE),
+                            GObject.ParamFlags.READWRITE),
     "show-recent-apps": (bool,
                          "Show list of recent apps",
                          None,
                          False,
-                         GObject.PARAM_READWRITE),
+                         GObject.ParamFlags.READWRITE),
     "clear-previous-query": (bool,
                              "Clear query when app looses focus",
                              None,
                              True,
-                             GObject.PARAM_READWRITE),
+                             GObject.ParamFlags.READWRITE),
     "theme-name": (str,
                    "Current theme",
                    None,
                    "light",
-                   GObject.PARAM_READWRITE),
+                   GObject.ParamFlags.READWRITE),
     "blacklisted-desktop-dirs": (str,
                                  "Blacklisted desktop dirs",
                                  None,
                                  ':'.join(DEFAULT_BLACKLISTED_DIRS),
-                                 GObject.PARAM_READWRITE),
+                                 GObject.ParamFlags.READWRITE),
 }
 
 

@@ -18,7 +18,9 @@ class TestSortedList:
         return SortedList('bro', min_score=40, limit=3)
 
     def result_item(self):
-        return mock.create_autospec(ResultItem)
+        item = mock.create_autospec(ResultItem)
+        item.score = 0
+        return item
 
     def test_append_uses_get_score(self, res_list, get_score):
         ri1 = self.result_item()

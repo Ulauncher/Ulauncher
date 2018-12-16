@@ -17,7 +17,7 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
 
     __gsignals__ = {
         # parameters: <hotkey-value (str)>, <hotkey-display-value (str)>
-        'hotkey-set': (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
+        'hotkey-set': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
     }
 
     _accel_name = None

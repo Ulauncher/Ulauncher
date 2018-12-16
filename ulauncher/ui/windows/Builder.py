@@ -89,7 +89,7 @@ class Builder(Gtk.Builder):
         tree = ElementTree()
         tree.parse(filename)
 
-        ele_widgets = tree.getiterator("object")
+        ele_widgets = tree.iter("object")
         for ele_widget in ele_widgets:
             name = ele_widget.attrib['id']
             widget = self.get_object(name)
@@ -109,7 +109,7 @@ class Builder(Gtk.Builder):
             if connections:
                 self.connections.extend(connections)
 
-        ele_signals = tree.getiterator("signal")
+        ele_signals = tree.iter("signal")
         for ele_signal in ele_signals:
             self.glade_handler_dict.update({ele_signal.attrib["handler"]: None})
 

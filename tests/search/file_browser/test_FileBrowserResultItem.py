@@ -9,7 +9,9 @@ class TestFileBrowserResultItem:
 
     @pytest.fixture
     def path(self):
-        return mock.create_autospec(Path)
+        path = mock.create_autospec(Path)
+        path.get_user_path.return_value = '/test/path'
+        return path
 
     @pytest.fixture
     def file_queries(self):

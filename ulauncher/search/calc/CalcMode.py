@@ -1,7 +1,6 @@
 import re
 import ast
 import operator as op
-from gi.repository import Gdk
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
@@ -50,11 +49,10 @@ class CalcMode(BaseSearchMode):
         return re.match(self.RE_CALC, query)
 
     def handle_query(self, query):
-        error_msg = 'Invalid expression'
         try:
             result = eval_expr(query)
             if result is None:
-                raise ValueError(error_msg)
+                raise ValueError()
 
             # fixes issue with division where result is represented as a float (e.g., 1.0)
             # although it is an integer (1)
@@ -62,6 +60,6 @@ class CalcMode(BaseSearchMode):
                 result = int(result)
 
             result_item = CalcResultItem(result=result)
-        except Exception as e:
-            result_item = CalcResultItem(error=e or error_msg)
+        except Exception:
+            result_item = CalcResultItem(error='Invalid expression')
         return RenderResultListAction([result_item])
