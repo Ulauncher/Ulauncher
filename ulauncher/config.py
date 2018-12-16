@@ -10,10 +10,10 @@ __version__ = 'VERSION'
 import os
 from uuid import uuid4
 from time import time
+from functools import lru_cache
 
 from gettext import gettext
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs
-from ulauncher.util.decorator.lru_cache import lru_cache
 
 # Use ulauncher_cache dir because of the WebKit bug
 # https://bugs.webkit.org/show_bug.cgi?id=151646

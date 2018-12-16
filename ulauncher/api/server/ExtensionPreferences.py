@@ -1,8 +1,8 @@
 import os
 import logging
+from functools import lru_cache
 from ulauncher.config import EXT_PREFERENCES_DIR
 from ulauncher.util.db.KeyValueDb import KeyValueDb
-from ulauncher.util.decorator.lru_cache import lru_cache
 from .ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger(__name__)

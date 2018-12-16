@@ -26,10 +26,7 @@ class KeyValueDb:
                 raise IOError("%s exists and is not a file" % self._name)
 
             with open(self._name, 'rb') as _in:  # binary mode
-                try:
-                    self._records = pickle.load(_in)
-                except EOFError:
-                    pass
+                self._records = pickle.load(_in)
         else:
             # make sure path exists
             mkpath(os.path.dirname(self._name))

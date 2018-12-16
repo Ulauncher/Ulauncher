@@ -1,6 +1,6 @@
 import operator
 from Levenshtein import ratio
-from ulauncher.util.decorator.lru_cache import lru_cache
+from functools import lru_cache
 
 
 @lru_cache(maxsize=150)

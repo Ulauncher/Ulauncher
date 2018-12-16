@@ -1,10 +1,13 @@
 import os
 import logging
 import gi
+
 gi.require_version('Gtk', '3.0')
+
+from functools import lru_cache
 from gi.repository import Gtk, Gio, GLib, GdkPixbuf
 from ulauncher.config import get_data_file
-from ulauncher.util.decorator.lru_cache import lru_cache
+
 
 icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger(__name__)
