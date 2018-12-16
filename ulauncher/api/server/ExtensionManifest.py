@@ -53,6 +53,8 @@ class ExtensionManifest:
             if p['id'] == id:
                 return p
 
+        return None
+
     def get_option(self, name, default=None):
         try:
             return self.manifest['options'][name]

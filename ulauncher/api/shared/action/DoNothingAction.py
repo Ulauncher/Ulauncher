@@ -1,4 +1,4 @@
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class DoNothingAction(BaseAction):

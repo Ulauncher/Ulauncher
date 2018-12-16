@@ -64,6 +64,7 @@ class ExtensionSearchMode(BaseSearchMode):
 
         return items
 
+    # pylint: disable=unused-argument
     def _on_item_enter(self, keyword, query):
         """
         :param str kw: Keyword

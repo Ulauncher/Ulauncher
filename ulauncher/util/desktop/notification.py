@@ -1,5 +1,6 @@
 import gi
 gi.require_version('Notify', '0.7')
+# pylint: disable=wrong-import-position
 from gi.repository import Notify
 
 Notify.init('ulauncher')

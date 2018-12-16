@@ -1,12 +1,13 @@
 import os
-import pyinotify
 import logging
 from time import time, sleep
 from functools import wraps
 
+import pyinotify
+
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps_cached
-from .AppDb import AppDb
+from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ def _only_desktop_files(func):
     def decorator_func(self, event, *args, **kwargs):
         if os.path.splitext(event.pathname)[1] == '.desktop':
             return func(self, event, *args, **kwargs)
+        return None
 
     return decorator_func
 
@@ -63,9 +65,10 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
                 except self.InvalidDesktopFile:
                     # retry
                     pass
+                # pylint: disable=broad-except
                 except Exception as e:
                     # give up on unexpected exception
-                    logger.warning("Unexpected exception: %s" % e)
+                    logger.warning("Unexpected exception: %s", e)
                     del self._deferred_files[pathname]
                 else:
                     # success
@@ -89,11 +92,11 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
             app = read_desktop_file(pathname)
             if filter_app(app):
                 self.__db.put_app(app)
-                logger.info('New app was added "%s" (%s)' % (app.get_name(), app.get_filename()))
+                logger.info('New app was added "%s" (%s)', app.get_name(), app.get_filename())
             else:
                 raise self.InvalidDesktopFile(pathname)
         except Exception as e:
-            logger.warning('Cannot add %s to DB -> %s' % (pathname, e))
+            logger.warning('Cannot add %s to DB -> %s', pathname, e)
             raise self.InvalidDesktopFile(pathname)
 
     def _remove_file(self, pathname):
@@ -102,7 +105,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
         :param str pathname:
         """
         self.__db.remove_by_path(pathname)
-        logger.info('App was removed (%s)' % pathname)
+        logger.info('App was removed (%s)', pathname)
 
     @_only_desktop_files
     def process_IN_CREATE(self, event):
@@ -136,7 +139,7 @@ def start():
     logger.info('Started scanning desktop dirs')
     for app in find_apps_cached():
         db.put_app(app)
-    logger.info('Scanned desktop dirs in %.2f seconds' % (time() - t0))
+    logger.info('Scanned desktop dirs in %.2f seconds', (time() - t0))
 
     wm = pyinotify.WatchManager()
     handler = AppNotifyEventHandler(db)
@@ -144,6 +147,7 @@ def start():
     notifier.setDaemon(True)
     logger.debug('Start watching desktop files...')
     notifier.start()
+    # pylint: disable=no-member
     mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MODIFY | \
         pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
     wm.add_watch(DESKTOP_DIRS, mask, rec=True, auto_add=True)

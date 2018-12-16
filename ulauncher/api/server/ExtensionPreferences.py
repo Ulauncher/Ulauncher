@@ -3,7 +3,7 @@ import logging
 from functools import lru_cache
 from ulauncher.config import EXT_PREFERENCES_DIR
 from ulauncher.util.db.KeyValueDb import KeyValueDb
-from .ExtensionManifest import ExtensionManifest
+from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,8 @@ class ExtensionPreferences:
         for i in self.get_items():
             if i['id'] == id:
                 return i
+
+        return None
 
     def get_active_keywords(self):
         """

@@ -1,4 +1,4 @@
-
+# pylint: disable=too-few-public-methods
 class EventListener:
     """
     Base event listener class
@@ -12,4 +12,3 @@ class EventListener:
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction` or None
         :return: Instance of :class:`BaseAction` or :code:`None`
         """
-        pass

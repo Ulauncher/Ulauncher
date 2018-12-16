@@ -43,6 +43,7 @@ class FileQueries(KeyValueDb):
                 self.__last_save_time = time()
             sleep(20)
 
+    # pylint: disable=arguments-differ
     def put(self, path):
         self.__last_put_time = time()
         super(FileQueries, self).put(path, self.__last_put_time)

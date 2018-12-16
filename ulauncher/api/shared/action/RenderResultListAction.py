@@ -1,5 +1,5 @@
 from gi.repository import GLib
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class RenderResultListAction(BaseAction):

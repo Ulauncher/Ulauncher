@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from .port_finder import find_unused_port
+from ulauncher.api.server.port_finder import find_unused_port
 from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.util.SimpleWebSocketServer import SimpleWebSocketServer
 from ulauncher.util.decorator.run_async import run_async
@@ -45,7 +45,7 @@ class ExtensionServer:
     @run_async(daemon=True)
     def _start_thread(self):
         self.port = self.port or find_unused_port(5054)
-        logger.info('Starting WS server on port %s' % self.port)
+        logger.info('Starting WS server on port %s', self.port)
         self.ws_server = SimpleWebSocketServer(self.hostname,
                                                self.port,
                                                partial(ExtensionController, self.controllers))
@@ -89,6 +89,8 @@ class ExtensionServer:
         for _, ctl in self.controllers.items():
             if keyword in ctl.preferences.get_active_keywords():
                 return ctl
+
+        return None
 
 
 class ServerIsRunningError(RuntimeError):

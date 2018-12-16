@@ -1,10 +1,11 @@
 import os
 import logging
-import gi
+from functools import lru_cache
 
+import gi
 gi.require_version('Gtk', '3.0')
 
-from functools import lru_cache
+# pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gio, GLib, GdkPixbuf
 from ulauncher.config import get_data_file
 
@@ -23,10 +24,11 @@ def load_image(path, size):
     :returns: None if :func:`new_from_file_at_size` raises error
     """
     path = os.path.expanduser(path)
+    # pylint: disable=broad-except
     try:
         return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
     except Exception as e:
-        logger.warn('Could not load image %s. E: %s' % (path, e))
+        logger.warning('Could not load image %s. E: %s', path, e)
 
 
 def get_app_icon_pixbuf(app, icon_size):
@@ -37,6 +39,7 @@ def get_app_icon_pixbuf(app, icon_size):
     """
     icon = app.get_icon()
     pixbuf_icon = None
+    # pylint: disable=broad-except
 
     if isinstance(icon, Gio.ThemedIcon):
         try:
@@ -45,7 +48,7 @@ def get_app_icon_pixbuf(app, icon_size):
                 return None
             pixbuf_icon = get_themed_icon_by_name(icon_name, icon_size)
         except Exception as e:
-            logger.info('Could not load icon for %s. E: %s' % (app.get_string('Icon'), e))
+            logger.info('Could not load icon for %s. E: %s', app.get_string('Icon'), e)
 
     elif isinstance(icon, Gio.FileIcon):
         pixbuf_icon = load_image(icon.get_file().get_path(), icon_size)
@@ -93,6 +96,7 @@ def get_file_icon(path, icon_size):
     :param ~ulauncher.util.Path.Path path:
     :param int icon_size:
     """
+    # pylint: disable=broad-except
     try:
         if path.is_dir():
             special_dir = SPECIAL_DIRS.get(str(path))
@@ -111,6 +115,6 @@ def get_file_icon(path, icon_size):
         if path.is_exe():
             return load_image(get_data_file('media', 'executable-icon.png'), icon_size)
     except Exception as e:
-        logger.warning('Icon not found %s. %s: %s' % (path, type(e).__name__, e))
+        logger.warning('Icon not found %s. %s: %s', path, type(e).__name__, e)
 
     return load_image(get_data_file('media', 'unknown-file-icon.png'), icon_size)

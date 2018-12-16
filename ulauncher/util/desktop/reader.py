@@ -1,9 +1,9 @@
 import os
 import logging
-from itertools import chain
-from gi.repository import Gio
-
 from collections import OrderedDict
+from itertools import chain
+
+from gi.repository import Gio
 
 from ulauncher.util.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
@@ -13,12 +13,16 @@ from ulauncher.util.db.KeyValueDb import KeyValueDb
 logger = logging.getLogger(__name__)
 
 
-def find_desktop_files(dirs=DESKTOP_DIRS):
+def find_desktop_files(dirs=None):
     """
     :param list dirs:
     :rtype: list
     """
 
+    if dirs is None:
+        dirs = DESKTOP_DIRS
+
+    # pylint: disable=cell-var-from-loop
     all_files = chain.from_iterable(
         map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
 
@@ -60,20 +64,24 @@ def read_desktop_file(file):
     """
     try:
         return Gio.DesktopAppInfo.new_from_filename(file)
+    # pylint: disable=broad-except
     except Exception as e:
-        logger.info('Could not read "%s": %s' % (file, e))
+        logger.info('Could not read "%s": %s', file, e)
         return None
 
 
-def find_apps(dirs=DESKTOP_DIRS):
+def find_apps(dirs=None):
     """
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
     """
+    if dirs is None:
+        dirs = DESKTOP_DIRS
+
     return list(filter(filter_app, map(read_desktop_file, find_desktop_files(dirs))))
 
 
-def find_apps_cached(dirs=DESKTOP_DIRS):
+def find_apps_cached(dirs=None):
     """
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
@@ -85,6 +93,9 @@ def find_apps_cached(dirs=DESKTOP_DIRS):
     >>> yield from find_apps()
     >>> save new paths to the cache
     """
+    if dirs is None:
+        dirs = DESKTOP_DIRS
+
     desktop_file_cache_dir = os.path.join(CACHE_DIR, 'desktop_dirs.db')
     cache = KeyValueDb(desktop_file_cache_dir).open()
     desktop_dirs = cache.find('desktop_dirs')

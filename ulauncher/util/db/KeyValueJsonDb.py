@@ -1,7 +1,8 @@
 import os
 import json
-from .KeyValueDb import KeyValueDb
 from distutils.dir_util import mkpath
+
+from ulauncher.util.db.KeyValueDb import KeyValueDb
 
 
 class KeyValueJsonDb(KeyValueDb):

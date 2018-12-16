@@ -1,6 +1,7 @@
 from ulauncher.util.text_highlighter import highlight_text
 
 
+# pylint: disable=too-many-instance-attributes
 class ResultItem:
 
     ICON_SIZE = 40
@@ -19,6 +20,7 @@ class ResultItem:
     _highlightable = True
     _is_extension = False
 
+    # pylint: disable=too-many-arguments
     def __init__(self,
                  name=None,
                  description=None,
@@ -66,10 +68,10 @@ class ResultItem:
                                   self.get_name(),
                                   open_tag='<span foreground="%s">' % color,
                                   close_tag='</span>')
-        else:
-            # don't highlight if query is empty
-            return self.get_name()
+        # don't highlight if query is empty
+        return self.get_name()
 
+    # pylint: disable=unused-argument
     def get_description(self, query):
         """
         optional
@@ -104,8 +106,7 @@ class ResultItem:
                                                     This allows you to create flows with a result item
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
-        if callable(self._on_enter):
-            return self._on_enter(query)
+        return self._on_enter(query) if callable(self._on_enter) else None
 
     def on_alt_enter(self, query):
         """
@@ -115,5 +116,4 @@ class ResultItem:
                                                     This allows you to create flows with a result item
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
-        if callable(self._on_alt_enter):
-            return self._on_alt_enter(query)
+        return self._on_alt_enter(query) if callable(self._on_alt_enter) else None

@@ -1,6 +1,7 @@
 import operator
-from Levenshtein import ratio
 from functools import lru_cache
+# pylint: disable=no-name-in-module
+from Levenshtein import ratio
 
 
 @lru_cache(maxsize=150)

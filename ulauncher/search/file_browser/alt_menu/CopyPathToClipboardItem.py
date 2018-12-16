@@ -8,13 +8,15 @@ class CopyPathToClipboardItem(SmallResultItem):
     :param ~ulauncher.util.Path.Path path:
     """
 
+    # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
 
     def get_name(self):
         return 'Copy Path to Clipboard'
 
-    def get_name_highlighted(serlf, *args):
+    # pylint: disable=super-init-not-called, arguments-differ
+    def get_name_highlighted(self, *args):
         pass
 
     def get_icon(self):

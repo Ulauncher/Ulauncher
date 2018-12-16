@@ -23,7 +23,7 @@ class AppSearchMode(BaseSearchMode):
         for mode in self.search_modes:
             result_list.extend(mode.get_searchable_items())
 
-        if not len(result_list) and query:
+        if not result_list and query:
             # default search
             result_list = []
             for mode in self.search_modes:

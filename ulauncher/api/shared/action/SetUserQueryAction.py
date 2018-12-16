@@ -1,8 +1,7 @@
 from time import sleep
 from gi.repository import GLib
 
-from ulauncher.util.decorator.run_async import run_async
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class SetUserQueryAction(BaseAction):

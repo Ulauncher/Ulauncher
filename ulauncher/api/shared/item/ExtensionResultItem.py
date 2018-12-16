@@ -28,9 +28,9 @@ class ExtensionResultItem(ResultItem):
                 icon_path = os.path.join(self.extension_path, icon_path)
 
             return load_image(icon_path, self.ICON_SIZE)
-        else:
-            # assuming it's GtkPixbuf
-            return self._icon
+
+        # assuming it's GtkPixbuf
+        return self._icon
 
     def on_enter(self, query):
         return self._on_enter

@@ -1,4 +1,4 @@
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class ActionList(list, BaseAction):
@@ -16,8 +16,8 @@ class ActionList(list, BaseAction):
         """
         if not self:
             return True
-        else:
-            return any(map(lambda i: i.keep_app_open(), self))
+
+        return any(map(lambda i: i.keep_app_open(), self))
 
     def run(self):
         for item in self:

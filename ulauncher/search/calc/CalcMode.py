@@ -4,7 +4,7 @@ import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
-from .CalcResultItem import CalcResultItem
+from ulauncher.search.calc.CalcResultItem import CalcResultItem
 
 
 # supported operators
@@ -26,6 +26,7 @@ def eval_expr(expr):
     """
     try:
         return _eval(ast.parse(expr, mode='eval').body)
+    # pylint: disable=broad-except
     except Exception:
         # if failed, try without the last symbol
         return _eval(ast.parse(expr[:-1], mode='eval').body)
@@ -34,12 +35,12 @@ def eval_expr(expr):
 def _eval(node):
     if isinstance(node, ast.Num):  # <number>
         return node.n
-    elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
+    if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
-    elif isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
+    if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return operators[type(node.op)](_eval(node.operand))
-    else:
-        raise TypeError(node)
+
+    raise TypeError(node)
 
 
 class CalcMode(BaseSearchMode):
@@ -60,6 +61,7 @@ class CalcMode(BaseSearchMode):
                 result = int(result)
 
             result_item = CalcResultItem(result=result)
+        # pylint: disable=broad-except
         except Exception:
             result_item = CalcResultItem(error='Invalid expression')
         return RenderResultListAction([result_item])

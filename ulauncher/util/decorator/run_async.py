@@ -41,6 +41,6 @@ def run_async(*args, **kwargs):
         # No arguments, this is the decorator
         # Set default values for the arguments
         return _run_async(args[0])
-    else:
-        # This is just returning the decorator
-        return _run_async
+
+    # This is just returning the decorator
+    return _run_async

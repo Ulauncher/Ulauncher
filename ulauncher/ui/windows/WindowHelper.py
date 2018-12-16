@@ -10,6 +10,7 @@ class WindowHelper:
             self.css_provider = Gtk.CssProvider()
         self.css_provider.load_from_path(path)
         self.apply_css(self)
+        # pylint: disable=no-member
         visual = self.get_screen().get_rgba_visual()
         if visual:
             self.set_visual(visual)

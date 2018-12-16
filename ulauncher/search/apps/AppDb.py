@@ -6,7 +6,7 @@ import logging
 from ulauncher.search.SortedList import SortedList
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.util.image_loader import get_app_icon_pixbuf
-from .AppResultItem import AppResultItem
+from ulauncher.search.apps.AppResultItem import AppResultItem
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ class AppDb:
     def __init__(self, path):
         self._path = path
         self._icons = {}  # save icons to a local map
+        self._conn = None
 
     def open(self):
         create_db_scheme = self._path == ':memory:' or not os.path.exists(self._path)
@@ -33,6 +34,7 @@ class AppDb:
     def get_cursor(self):
         return self._conn.cursor()
 
+    # pylint: disable=unused-argument
     def commit(self, force=False):
         self._conn.commit()
 
@@ -85,32 +87,37 @@ class AppDb:
         try:
             self._conn.execute(query, record)
             self.commit()
+        # pylint: disable=broad-except
         except Exception as e:
-            logger.exception('Exception %s for query: %s. Record: %s' % (e, query, record))
+            logger.exception('Exception %s for query: %s. Record: %s', e, query, record)
 
     def get_by_name(self, name):
         query = 'SELECT * FROM app_db where name = ? COLLATE NOCASE'
         try:
             collection = self._conn.execute(query, (name,))
         except Exception as e:
-            logger.exception('Exception %s for query: %s. Name: %s' % (e, query, name))
+            logger.exception('Exception %s for query: %s. Name: %s', e, query, name)
             raise
 
         row = collection.fetchone()
         if row:
             return self._row_to_rec(row)
+
+        return None
 
     def get_by_path(self, desktop_file):
         query = 'SELECT * FROM app_db where desktop_file = ?'
         try:
             collection = self._conn.execute(query, (desktop_file,))
         except Exception as e:
-            logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
+            logger.exception('Exception %s for query: %s. Path: %s', e, query, desktop_file)
             raise
 
         row = collection.fetchone()
         if row:
             return self._row_to_rec(row)
+
+        return None
 
     def remove_by_path(self, desktop_file):
         """
@@ -121,7 +128,7 @@ class AppDb:
             self._conn.execute(query, (desktop_file,))
             self.commit()
         except Exception as e:
-            logger.exception('Exception %s for query: %s. Path: %s' % (e, query, desktop_file))
+            logger.exception('Exception %s for query: %s. Path: %s', e, query, desktop_file)
             raise
 
         try:

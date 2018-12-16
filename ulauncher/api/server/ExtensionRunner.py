@@ -7,9 +7,9 @@ from time import time, sleep
 from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
-from .ExtensionManifest import ExtensionManifest
-from .ExtensionServer import ExtensionServer
-from .extension_finder import find_extensions
+from ulauncher.api.server.ExtensionManifest import ExtensionManifest
+from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.api.server.extension_finder import find_extensions
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,9 @@ class ExtensionRunner:
         for id, _ in find_extensions(self.extensions_dir):
             try:
                 self.run(id)
+            # pylint: disable=broad-except
             except Exception as e:
-                logger.error("Couldn't run '%s'. %s: %s" % (id, type(e).__name__, e))
+                logger.error("Couldn't run '%s'. %s: %s", id, type(e).__name__, e)
 
     def run(self, extension_id):
         """
@@ -70,19 +71,19 @@ class ExtensionRunner:
         if self.dont_run_extensions:
             args = [env.get('VERBOSE', ''), env['ULAUNCHER_WS_API'], env['PYTHONPATH']]
             args.extend(cmd)
-            logger.warning('Copy and run the following command to start %s' % extension_id)
-            logger.warning('VERBOSE=%s ULAUNCHER_WS_API=%s PYTHONPATH=%s %s %s' % tuple(args))
+            logger.warning('Copy and run the following command to start %s', extension_id)
+            logger.warning('VERBOSE=%s ULAUNCHER_WS_API=%s PYTHONPATH=%s %s %s', *args)
             return
 
         while True:
             t_start = time()
             proc = Popen(cmd, env=env)
-            logger.info('Extension "%s" started. PID %s' % (extension_id, proc.pid))
+            logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
             self.extension_procs[extension_id] = proc
             code = proc.wait()
 
             if code <= 0:
-                logger.error('Extension "%s" was terminated with code %s' % (extension_id, code))
+                logger.error('Extension "%s" was terminated with code %s', extension_id, code)
                 try:
                     del self.extension_procs[extension_id]
                 except KeyError:
@@ -91,7 +92,7 @@ class ExtensionRunner:
                 break
 
             if time() - t_start < 1:
-                logger.error('Extension "%s" exited instantly with code %s' % (extension_id, code))
+                logger.error('Extension "%s" exited instantly with code %s', extension_id, code)
                 try:
                     del self.extension_procs[extension_id]
                 except KeyError:
@@ -99,7 +100,7 @@ class ExtensionRunner:
 
                 break
 
-            logger.error('Extension "%s" exited with code %s. Restarting...' % (extension_id, code))
+            logger.error('Extension "%s" exited with code %s. Restarting...', extension_id, code)
 
     def stop(self, extension_id):
         """
@@ -108,7 +109,7 @@ class ExtensionRunner:
         if not self.is_running(extension_id):
             raise ExtensionIsNotRunningError('Extension ID: %s' % extension_id)
 
-        logger.info('Terminating extension "%s"' % extension_id)
+        logger.info('Terminating extension "%s"', extension_id)
         proc = self.extension_procs[extension_id]
         try:
             del self.extension_procs[extension_id]
@@ -120,7 +121,7 @@ class ExtensionRunner:
 
         sleep(0.5)
         if proc.poll() is None:
-            logger.warn("Kill extension \"%s\" since it doesn't react to SIGTERM" % extension_id)
+            logger.warning("Kill extension \"%s\" since it doesn't react to SIGTERM", extension_id)
             proc.kill()
 
     def is_running(self, extension_id):
@@ -133,14 +134,3 @@ class ExtensionIsRunningError(RuntimeError):
 
 class ExtensionIsNotRunningError(RuntimeError):
     pass
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-
-    runner = ExtensionRunner()
-    runner.extensions_dir = '/home/agornostal/projects/ulauncher/tests/extension/server'
-    runner.run('test_extension')
-    sleep(1.5)
-    runner.stop('test_extension')
-    print(runner.is_running('test_extension'))

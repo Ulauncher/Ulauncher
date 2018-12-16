@@ -10,8 +10,10 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
+# pylint: disable=wrong-import-position, unused-argument
 from gi.repository import Gtk, Gdk, GLib, Keybinder
 
+# pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
@@ -32,13 +34,14 @@ from ulauncher.util.desktop.notification import show_notification
 from ulauncher.util.Theme import Theme, load_available_themes
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
-from .Builder import Builder
-from .WindowHelper import WindowHelper
-from .PreferencesUlauncherDialog import PreferencesUlauncherDialog
+from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.WindowHelper import WindowHelper
+from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 
 logger = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
 class UlauncherWindow(Gtk.Window, WindowHelper):
     __gtype_name__ = "UlauncherWindow"
 
@@ -112,6 +115,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     # GTK Signal Handlers
     ######################################
 
+    # pylint: disable=unused-argument
     def on_mnu_about_activate(self, widget, data=None):
         """Display the about page for ulauncher."""
         self.activate_preferences(page='about')
@@ -257,7 +261,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.input.grab_focus()
 
     def toggle_window(self, key=None):
-        self.hide() if self.is_visible() else self.show_window()
+        if self.is_visible():
+            self.hide()
+        else:
+            self.show_window()
 
     def bind_show_app_hotkey(self, accel_name):
         if is_wayland_compatibility_on():
@@ -270,7 +277,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             Keybinder.unbind(self._current_accel_name)
             self._current_accel_name = None
 
-        logger.info("Trying to bind app hotkey: %s" % accel_name)
+        logger.info("Trying to bind app hotkey: %s", accel_name)
         Keybinder.bind(accel_name, self.toggle_window)
         self._current_accel_name = accel_name
         self.notify_hotkey_change(accel_name)
@@ -327,7 +334,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         else:
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
-        logger.debug('render %s results' % len(results))
+        logger.debug('render %s results', len(results))
 
     @staticmethod
     def create_item_widgets(items, query):

@@ -1,7 +1,7 @@
 import logging
 
 from ulauncher.util.desktop.reader import read_desktop_file
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger(__name__)
 
@@ -21,5 +21,5 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        logger.info('Run application %s (%s)' % (app.get_name(), self.filename))
+        logger.info('Run application %s (%s)', app.get_name(), self.filename)
         app.launch()

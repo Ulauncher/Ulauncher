@@ -1,7 +1,5 @@
-import sys
-import os
 import subprocess
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class OpenAction(BaseAction):
@@ -18,9 +16,4 @@ class OpenAction(BaseAction):
         return False
 
     def run(self):
-        if sys.platform.startswith('darwin'):
-            subprocess.call(('open', self.path))
-        elif os.name == 'nt':
-            os.startfile(self.path)
-        elif os.name == 'posix':
-            subprocess.call(('xdg-open', self.path))
+        subprocess.call(('xdg-open', self.path))

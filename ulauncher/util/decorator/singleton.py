@@ -12,9 +12,9 @@ def singleton(fn):
     def wrapper(*args, **kwargs):
         if not kwargs.get('spawn') and objects.get(fn):
             return objects[fn]
-        else:
-            instance = fn(*args, **kwargs)
-            objects[fn] = instance
-            return instance
+
+        instance = fn(*args, **kwargs)
+        objects[fn] = instance
+        return instance
 
     return wrapper

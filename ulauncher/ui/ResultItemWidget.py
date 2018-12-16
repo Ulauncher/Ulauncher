@@ -14,6 +14,7 @@ class ResultItemWidget(Gtk.EventBox):
     name = None
     query = None
     item_object = None
+    item_box = None
 
     def initialize(self, builder, item_object, index, query):
         self.builder = builder
@@ -61,6 +62,7 @@ class ResultItemWidget(Gtk.EventBox):
         color = colors['when_selected'] if is_selected else colors['when_not_selected']
         self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
 
+    # pylint: disable=arguments-differ
     def set_name(self, name):
         item = self.builder.get_object('item-name')
         if '<span' in name:  # dealing with markup
@@ -72,6 +74,7 @@ class ResultItemWidget(Gtk.EventBox):
     def get_name(self):
         return self.name
 
+    # pylint: disable=unused-argument
     def on_click(self, widget, event=None):
         self.get_toplevel().select_result_item(self.index)
         alt_enter = bool(event and event.button != 1)

@@ -25,7 +25,7 @@ def load_available_themes():
             try:
                 theme.validate()
             except ThemeManifestError as e:
-                logger.error('%s: %s' % (type(e).__name__, e))
+                logger.error('%s: %s', type(e).__name__, e)
                 continue
             themes[theme.get_name()] = theme
 
@@ -39,7 +39,7 @@ class Theme:
         try:
             current = themes[current_name]
         except KeyError:
-            logger.warning('No theme with name %s' % current_name)
+            logger.warning('No theme with name %s', current_name)
             current = themes[default]
 
         return current
@@ -102,41 +102,41 @@ class Theme:
         css_file_name = self.get_css_file_gtk_3_20() if gtk_version_is_gte(3, 20, 0) else self.get_css_file()
         css_file = os.path.join(self.path, css_file_name)
 
-        if self.get_extend_theme():
-            # if theme extends another one, we must import it in css
-            # therefore a new css file (generated.css) is created here
-            extend_theme_name = self.get_extend_theme()
-            try:
-                extend_theme = themes[extend_theme_name]
-            except KeyError:
-                logger.error('Cannot extend theme "%s". It does not exist' % extend_theme_name)
-                return css_file
-
-            generated_css = self._get_path_for_generated_css()
-            with open(generated_css, 'w') as new_css_file:
-                new_css_file.write('@import url("%s");\n\n' % extend_theme.compile_css())
-                with open(css_file, 'r') as theme_css_file:
-                    new_css_file.write(theme_css_file.read())
-
-            return generated_css
-        else:
+        if not self.get_extend_theme():
             return css_file
+
+        # if theme extends another one, we must import it in css
+        # therefore a new css file (generated.css) is created here
+        extend_theme_name = self.get_extend_theme()
+        try:
+            extend_theme = themes[extend_theme_name]
+        except KeyError:
+            logger.error('Cannot extend theme "%s". It does not exist', extend_theme_name)
+            return css_file
+
+        generated_css = self._get_path_for_generated_css()
+        with open(generated_css, 'w') as new_css_file:
+            new_css_file.write('@import url("%s");\n\n' % extend_theme.compile_css())
+            with open(css_file, 'r') as theme_css_file:
+                new_css_file.write(theme_css_file.read())
+
+        return generated_css
 
     def _get_path_for_generated_css(self):
         if user_theme_dir in self.path:
             return os.path.join(self.path, 'generated.css')
-        else:
-            # for ulauncher themes we must save generated.css elsewhere
-            # because we don't have write permissions for /usr/share/ulauncher/themes/...
-            new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get_name())
-            if not os.path.exists(new_theme_dir):
-                os.makedirs(new_theme_dir)
 
-            # copy current theme files to this new dir
-            rmtree(new_theme_dir)
-            copytree(self.path, new_theme_dir)
+        # for ulauncher themes we must save generated.css elsewhere
+        # because we don't have write permissions for /usr/share/ulauncher/themes/...
+        new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get_name())
+        if not os.path.exists(new_theme_dir):
+            os.makedirs(new_theme_dir)
 
-            return os.path.join(new_theme_dir, 'generated.css')
+        # copy current theme files to this new dir
+        rmtree(new_theme_dir)
+        copytree(self.path, new_theme_dir)
+
+        return os.path.join(new_theme_dir, 'generated.css')
 
 
 class ThemeManifestError(Exception):

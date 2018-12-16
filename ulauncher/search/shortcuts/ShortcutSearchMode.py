@@ -1,7 +1,7 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
-from .ShortcutResultItem import ShortcutResultItem
+from ulauncher.search.shortcuts.ShortcutResultItem import ShortcutResultItem
 
 
 class ShortcutSearchMode(BaseSearchMode):
@@ -19,6 +19,8 @@ class ShortcutSearchMode(BaseSearchMode):
         for s in self.shortcutsDb.get_shortcuts():
             if query.startswith('%s ' % s.get('keyword')):
                 return s
+
+        return None
 
     def _create_items(self, shortcuts, default_search=False):
         return [ShortcutResultItem(default_search=default_search, **s) for s in shortcuts]

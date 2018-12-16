@@ -40,6 +40,7 @@ class KeywordQueryEvent(BaseEvent):
         return self.query.get_argument()
 
 
+# pylint: disable=too-few-public-methods
 class ItemEnterEvent(BaseEvent):
     """
     Is triggered when selected item has action of type :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
@@ -65,7 +66,6 @@ class SystemExitEvent(BaseEvent):
     Your extension has 300ms to handle this event and shut down properly.
     After that it will be terminated with SIGKILL
     """
-    pass
 
 
 class PreferencesUpdateEvent(BaseEvent):

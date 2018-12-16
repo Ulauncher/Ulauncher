@@ -7,6 +7,7 @@ from ulauncher.util.image_loader import load_image
 
 class CalcResultItem(ResultItem):
 
+    # pylint: disable=super-init-not-called
     def __init__(self, result=None, error=None):
         self.result = result
         self.error = error
@@ -14,7 +15,8 @@ class CalcResultItem(ResultItem):
     def get_name(self):
         return str(self.result) if self.result is not None else 'Error!'
 
-    def get_name_highlighted(serlf, *args):
+    # pylint: disable=super-init-not-called, arguments-differ
+    def get_name_highlighted(self, *args):
         pass
 
     def get_description(self, query):
@@ -26,5 +28,5 @@ class CalcResultItem(ResultItem):
     def on_enter(self, query):
         if self.result is not None:
             return CopyToClipboardAction(str(self.result))
-        else:
-            return DoNothingAction()
+
+        return DoNothingAction()

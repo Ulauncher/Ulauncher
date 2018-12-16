@@ -1,7 +1,7 @@
 import pickle
 
 from ulauncher.api.shared.event import ItemEnterEvent
-from .BaseAction import BaseAction
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class ExtensionCustomAction(BaseAction):

@@ -9,10 +9,10 @@ from datetime import datetime
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
-from .ExtensionDb import ExtensionDb
-from .GithubExtension import GithubExtension, InvalidGithubUrlError
-from .ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
-from .extension_finder import find_extensions
+from ulauncher.api.server.ExtensionDb import ExtensionDb
+from ulauncher.api.server.GithubExtension import GithubExtension, InvalidGithubUrlError
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
+from ulauncher.api.server.extension_finder import find_extensions
 
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class ExtensionDownloader:
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e))
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s', type(e).__name__, e)
             raise InvalidGithubUrlError('Project is not available on Github')
 
         filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
@@ -80,12 +80,13 @@ class ExtensionDownloader:
             if id in already_downloaded:
                 continue
 
-            logger.info('Downloading missing extension %s' % id)
+            logger.info('Downloading missing extension %s', id)
             try:
                 ext_id = self.download(ext['url'])
                 self.ext_runner.run(ext_id)
+            # pylint: disable=broad-except
             except Exception as e:
-                logger.error('%s: %s' % (type(e).__name__, e))
+                logger.error('%s: %s', type(e).__name__, e)
 
     def remove(self, ext_id):
         try:
@@ -148,7 +149,7 @@ class ExtensionDownloader:
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s' % (type(e).__name__, e))
+            logger.error('gh_ext.get_ext_meta() failed. %s: %s', type(e).__name__, e)
             raise InvalidGithubUrlError('Project is not available on Github')
 
         if ext['last_commit'] == gh_commit['last_commit']:

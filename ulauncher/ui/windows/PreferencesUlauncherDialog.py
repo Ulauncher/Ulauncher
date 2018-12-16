@@ -2,11 +2,12 @@
 import os
 import logging
 import json
+from urllib.parse import unquote
 
 import gi
 gi.require_version('WebKit2', '4.0')
+# pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gio, Gtk, WebKit2, GLib
-from urllib.parse import unquote
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
@@ -27,9 +28,9 @@ from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
 from ulauncher.api.server.extension_finder import find_extensions
 from ulauncher.api.shared.event import PreferencesUpdateEvent
-from .Builder import Builder
-from .WindowHelper import WindowHelper
-from .HotkeyDialog import HotkeyDialog
+from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.WindowHelper import WindowHelper
+from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ class PrefsApiError(RuntimeError):
     pass
 
 
+# pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
 class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     __gtype_name__ = "PreferencesUlauncherDialog"
 
@@ -113,6 +115,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # Overrides
     ######################################
 
+    # pylint: disable=arguments-differ
     def present(self, page):
         self._load_prefs_html(page)
         super(PreferencesUlauncherDialog, self).present()
@@ -149,12 +152,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         Handles Javascript-to-Python calls
         """
 
+        # pylint: disable=broad-except
         try:
             params = get_url_params(scheme_request.get_uri())
             callback_name = params['query']['callback']
             assert callback_name
         except Exception as e:
-            logger.exception('API call failed. %s: %s' % (type(e).__name__, e))
+            logger.exception('API call failed. %s: %s', type(e).__name__, e)
             return
 
         try:
@@ -172,7 +176,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             # send response
             scheme_request.finish(stream, -1, 'text/javascript')
         except Exception as e:
-            logger.exception('Unexpected API error. %s: %s' % (type(e).__name__, e))
+            logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
 
     def send_webview_notification(self, name, data):
         self.webview.run_javascript('onNotification("%s", %s)' % (name, json.dumps(data)))
@@ -204,7 +208,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/show-indicator-icon')
     def prefs_set_show_indicator_icon(self, url_params):
         show_indicator = self._get_bool(url_params['query']['value'])
-        logger.info('Set show-indicator-icon to %s' % show_indicator)
+        logger.info('Set show-indicator-icon to %s', show_indicator)
         self.settings.set_property('show-indicator-icon', show_indicator)
         self.settings.save_to_file()
         indicator = AppIndicator.get_instance()
@@ -213,7 +217,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/autostart-enabled')
     def prefs_set_autostart(self, url_params):
         is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set autostart-enabled to %s' % is_on)
+        logger.info('Set autostart-enabled to %s', is_on)
         if is_on and not self.autostart_pref.is_allowed():
             raise PrefsApiError("Unable to turn on autostart preference")
 
@@ -225,7 +229,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):
         is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set show-recent-apps to %s' % is_on)
+        logger.info('Set show-recent-apps to %s', is_on)
         self.settings.set_property('show-recent-apps', is_on)
         self.settings.save_to_file()
 
@@ -233,7 +237,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @glib_idle_add
     def prefs_set_hotkey_show_app(self, url_params):
         hotkey = url_params['query']['value']
-        logger.info('Set hotkey-show-app to %s' % hotkey)
+        logger.info('Set hotkey-show-app to %s', hotkey)
 
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
@@ -246,7 +250,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @glib_idle_add
     def prefs_set_theme_name(self, url_params):
         name = url_params['query']['value']
-        logger.info('Set theme-name to %s' % name)
+        logger.info('Set theme-name to %s', name)
 
         self.settings.set_property('theme-name', name)
         self.settings.save_to_file()
@@ -259,20 +263,20 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @glib_idle_add
     def prefs_showhotkey_dialog(self, url_params):
         self._hotkey_name = url_params['query']['name']
-        logger.info('Show hotkey-dialog for %s' % self._hotkey_name)
+        logger.info('Show hotkey-dialog for %s', self._hotkey_name)
         self.hotkey_dialog.present()
 
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, url_params):
         is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set clear-previous-query to %s' % is_on)
+        logger.info('Set clear-previous-query to %s', is_on)
         self.settings.set_property('clear-previous-query', is_on)
         self.settings.save_to_file()
 
     @rt.route('/set/blacklisted-desktop-dirs')
     def prefs_set_blacklisted_desktop_dirs(self, url_params):
         dirs = url_params['query']['value']
-        logger.info('Set blacklisted-desktop-dirs to %s' % dirs)
+        logger.info('Set blacklisted-desktop-dirs to %s', dirs)
         self.settings.set_property('blacklisted-desktop-dirs', dirs)
         self.settings.save_to_file()
 
@@ -283,7 +287,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         Request params: type=(image|all), name=(str)
         """
         file_browser_name = url_params['query']['name']
-        logger.info('Show file browser dialog for %s' % file_browser_name)
+        logger.info('Show file browser dialog for %s', file_browser_name)
         dialog = Gtk.FileChooserDialog("Please choose a file", self, Gtk.FileChooserAction.OPEN,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         filter_images = Gtk.FileFilter()
@@ -298,14 +302,14 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         if response == Gtk.ResponseType.OK:
             data['value'] = dialog.get_filename()
 
-        logger.debug('%s %s' % (file_browser_name, data))
+        logger.debug('%s %s', file_browser_name, data)
         self.send_webview_notification(file_browser_name, data)
         dialog.destroy()
 
     @rt.route('/open/web-url')
     def prefs_open_url(self, url_params):
         url = unquote(url_params['query']['url'])
-        logger.info('Open Web URL %s' % url)
+        logger.info('Open Web URL %s', url)
         OpenUrlAction(url).run()
 
     @rt.route('/close')
@@ -323,7 +327,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/shortcut/add')
     def prefs_shortcut_update(self, url_params):
         req_data = url_params['query']
-        logger.info('Add/Update shortcut: %s' % json.dumps(req_data))
+        logger.info('Add/Update shortcut: %s', json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
         id = shortcuts.put_shortcut(req_data['name'],
                                     req_data['keyword'],
@@ -337,7 +341,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/shortcut/remove')
     def prefs_shortcut_remove(self, url_params):
         req_data = url_params['query']
-        logger.info('Remove shortcut: %s' % json.dumps(req_data))
+        logger.info('Remove shortcut: %s', json.dumps(req_data))
         shortcuts = ShortcutsDb.get_instance()
         shortcuts.remove(req_data['id'])
         shortcuts.commit()
@@ -350,7 +354,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/extension/add')
     def prefs_extension_add(self, url_params):
         url = url_params['query']['url']
-        logger.info('Add extension: %s' % url)
+        logger.info('Add extension: %s', url)
         downloader = ExtensionDownloader.get_instance()
         try:
             ext_id = downloader.download(url)
@@ -364,7 +368,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_extension_update_prefs(self, url_params):
         query = url_params['query']
         ext_id = query['id']
-        logger.info('Update extension preferences: %s' % query)
+        logger.info('Update extension preferences: %s', query)
         prefix = 'pref.'
         controller = ExtensionServer.get_instance().get_controller(ext_id)
         preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
@@ -380,13 +384,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         ext_id = url_params['query']['id']
         try:
             return ExtensionDownloader.get_instance().get_new_version(ext_id)
-        except ExtensionIsUpToDateError as e:
-            pass
+        except ExtensionIsUpToDateError:
+            return None
 
     @rt.route('/extension/update-ext')
     def prefs_extension_update_ext(self, url_params):
         ext_id = url_params['query']['id']
-        logger.info('Update extension: %s' % ext_id)
+        logger.info('Update extension: %s', ext_id)
         downloader = ExtensionDownloader.get_instance()
         try:
             downloader.update(ext_id)
@@ -396,7 +400,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/extension/remove')
     def prefs_extension_remove(self, url_params):
         ext_id = url_params['query']['id']
-        logger.info('Remove extension: %s' % ext_id)
+        logger.info('Remove extension: %s', ext_id)
         downloader = ExtensionDownloader.get_instance()
         downloader.remove(ext_id)
 
@@ -449,8 +453,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')
         try:
             (key, mode) = Gtk.accelerator_parse(app_hotkey_current_accel_name)
+        # pylint: disable=broad-except
         except Exception:
-            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space' % app_hotkey_current_accel_name)
+            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', app_hotkey_current_accel_name)
             (key, mode) = Gtk.accelerator_parse("<Primary>space")
         return Gtk.accelerator_get_label(key, mode)
 

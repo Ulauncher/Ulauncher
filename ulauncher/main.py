@@ -4,17 +4,17 @@ import signal
 import logging
 import time
 from threading import Event
-
 import gi
-gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-
 import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from .config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
-                     gdk_backend, CACHE_DIR, CONFIG_DIR)
+gi.require_version('Gtk', '3.0')
+
+# pylint: disable=wrong-import-position
+from ulauncher.config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
+                              gdk_backend, CACHE_DIR, CONFIG_DIR)
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -46,6 +46,7 @@ class UlauncherDbusService(dbus.service.Object):
         self.window.toggle_window()
 
 
+# pylint: disable=too-few-public-methods
 class SignalHandler:
 
     _exit_event = None
@@ -70,7 +71,7 @@ class SignalHandler:
         """
         return self._exit_event.is_set()
 
-    def _exit_gracefully(self, signum, frame):
+    def _exit_gracefully(self, *args):
         self._exit_event.set()
 
 
@@ -105,10 +106,10 @@ def main():
     options = get_options()
     setup_logging(options)
     logger = logging.getLogger('ulauncher')
-    logger.info('Ulauncher version %s' % get_version())
-    logger.info("GTK+ %s.%s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()))
-    logger.info("Is Wayland: %s" % is_wayland())
-    logger.info("Wayland compatibility: %s" % ('on' if is_wayland_compatibility_on() else 'off'))
+    logger.info('Ulauncher version %s', get_version())
+    logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
+    logger.info("Is Wayland: %s", is_wayland())
+    logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
@@ -131,6 +132,6 @@ def main():
         while gtk_thread.is_alive() and not signal_handler.killed():
             time.sleep(0.5)
     except KeyboardInterrupt:
-        logger.warn('On KeyboardInterrupt')
+        logger.warning('On KeyboardInterrupt')
     finally:
         Gtk.main_quit()

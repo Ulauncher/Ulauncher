@@ -3,9 +3,9 @@ import sys
 import pickle
 import logging
 import traceback
-import websocket
 from threading import Timer
 
+import websocket
 from ulauncher.api.shared.event import SystemExitEvent
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ class Client:
         Connects to WS server and blocks thread
         """
         websocket.enableTrace(False)
+        # pylint: disable=unnecessary-lambda
         self.ws = websocket.WebSocketApp(self.ws_api_url,
                                          on_message=lambda ws, msg: self.on_message(ws, msg),
                                          on_error=lambda ws, error: self.on_error(ws, error),
@@ -39,6 +40,7 @@ class Client:
                                          on_close=lambda ws: self.on_close(ws))
         self.ws.run_forever()
 
+    # pylint: disable=unused-argument
     def on_message(self, ws, message):
         """
         Parses message from Ulauncher and triggers extension event
@@ -47,14 +49,15 @@ class Client:
         :param str message:
         """
         event = pickle.loads(message)
-        logger.debug('Incoming event %s' % type(event).__name__)
+        logger.debug('Incoming event %s', type(event).__name__)
         try:
             self.extension.trigger_event(event)
-        except Exception as e:
+        # pylint: disable=broad-except
+        except Exception:
             traceback.print_exc(file=sys.stderr)
 
     def on_error(self, ws, error):
-        logger.error('WS Client error %s' % error)
+        logger.error('WS Client error %s', error)
 
     def on_close(self, ws):
         """

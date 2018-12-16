@@ -1,12 +1,12 @@
 import logging
 from collections import defaultdict
 
-from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import PreferencesEvent, PreferencesUpdateEvent
-from .Client import Client
-from .setup_logging import setup_logging
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.client.Client import Client
+from ulauncher.api.client.setup_logging import setup_logging
 
 
 class Extension:
@@ -45,7 +45,7 @@ class Extension:
         """
         listeners = self.get_listeners_for_event(event)
         if not listeners:
-            self.logger.debug('No listeners for event %s' % type(event).__name__)
+            self.logger.debug('No listeners for event %s', type(event).__name__)
             return
 
         for listener in listeners:
@@ -63,6 +63,7 @@ class Extension:
         self._client.connect()
 
 
+# pylint: disable=too-few-public-methods
 class PreferencesEventListener(EventListener):
 
     def on_event(self, event, extension):

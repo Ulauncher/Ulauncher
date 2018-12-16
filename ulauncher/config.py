@@ -1,6 +1,7 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
 # Where your project will look for your data (for instance, images and ui
 # files). By default, this is ../data, relative your trunk layout
+# pylint: disable=deprecated-module
 import optparse
 
 __ulauncher_data_directory__ = '../data/'
@@ -29,7 +30,6 @@ ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'
 
 class ProjectPathNotFoundError(Exception):
     """Raised when we can't find the project directory."""
-    pass
 
 
 def get_data_file(*path_segments):

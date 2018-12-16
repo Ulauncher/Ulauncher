@@ -33,6 +33,7 @@ class ShortcutsDb(KeyValueJsonDb):
     def get_shortcuts(self):
         return self.get_records().values()
 
+    # pylint: disable=too-many-arguments
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
         """
         If id is not provided it will be generated using uuid4() function

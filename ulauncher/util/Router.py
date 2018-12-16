@@ -9,7 +9,7 @@ def get_url_params(url):
     query = params.group('query')
     if query:
         pairs = list(map(lambda kv: kv.split('='), query.split('&')))
-        query = dict([(k, unquote(v)) for k, v in pairs])
+        query = {k: unquote(v) for k, v in pairs}
     return {
         'scheme': params.group('scheme'),
         'path': params.group('path'),

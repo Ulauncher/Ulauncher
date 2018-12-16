@@ -1,8 +1,8 @@
 import logging
 from gi.repository import Gtk, Gdk, GObject
 
-from .Builder import Builder
-from .WindowHelper import WindowHelper
+from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.WindowHelper import WindowHelper
 
 
 logger = logging.getLogger('ulauncher')
@@ -44,6 +44,7 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
 
         Put your initialization code in here and leave __init__ undefined.
         """
+        # pylint: disable=attribute-defined-outside-init
         # Get a reference to the builder and set up the signals.
         self.builder = builder
         self.ui = builder.get_ui(self)
@@ -54,7 +55,7 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
         self.hide()
         return True
 
-    def on_hotkey_input_key_press_event(self, widget, event):
+    def on_hotkey_input_key_press_event(self, _, event):
         # remove GDK_MOD2_MASK, because it seems unnecessary
         mask = event.state
         if mask & Gdk.ModifierType.MOD2_MASK:
@@ -76,7 +77,7 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
 
         # do nothing for invalid hotkeys
         if not self.is_valid_hotkey(display_name, accel_name):
-            logger.debug("Invalid hotkey '%s', ('%s') is not allowed" % (display_name, accel_name))
+            logger.debug("Invalid hotkey '%s', ('%s') is not allowed", display_name, accel_name)
             return
 
         self._accel_name = accel_name

@@ -2,6 +2,9 @@
 The MIT License (MIT)
 Copyright (c) 2013 Dave P.
 '''
+# pylint: disable=wrong-import-position, super-init-not-called, too-many-instance-attributes, too-many-statements,
+# pylint: disable=too-many-branches, too-many-locals, broad-except, too-many-arguments, no-member
+# pylint: disable=too-many-nested-blocks, unused-import, ungrouped-imports
 import sys
 VER = sys.version_info[0]
 if VER >= 3:
@@ -32,8 +35,8 @@ __all__ = ['WebSocket',
 def _check_unicode(val):
     if VER >= 3:
         return isinstance(val, str)
-    else:
-        return isinstance(val, str)
+
+    return isinstance(val, str)
 
 
 class HTTPRequest(BaseHTTPRequestHandler):
@@ -51,10 +54,10 @@ _VALID_STATUS_CODES = [1000, 1001, 1002, 1003, 1007, 1008,
                        1009, 1010, 1011, 3000, 3999, 4000, 4999]
 
 HANDSHAKE_STR = (
-   "HTTP/1.1 101 Switching Protocols\r\n"
-   "Upgrade: WebSocket\r\n"
-   "Connection: Upgrade\r\n"
-   "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
+    "HTTP/1.1 101 Switching Protocols\r\n"
+    "Upgrade: WebSocket\r\n"
+    "Connection: Upgrade\r\n"
+    "Sec-WebSocket-Accept: %(acceptstr)s\r\n\r\n"
 )
 
 GUID_STR = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
@@ -77,7 +80,7 @@ MAXHEADER = 65536
 MAXPAYLOAD = 33554432
 
 
-class WebSocket(object):
+class WebSocket:
 
     def __init__(self, server, sock, address):
         self.server = server
@@ -120,19 +123,16 @@ class WebSocket(object):
             If the frame is Text then self.data is a unicode object.
             If the frame is Binary then self.data is a bytearray object.
         """
-        pass
 
     def handleConnected(self):
         """
             Called when a websocket client connects to the server.
         """
-        pass
 
     def handleClose(self):
         """
             Called when a websocket server gets a Close frame from a client.
         """
-        pass
 
     def _handlePacket(self):
         if self.opcode == CLOSE:
@@ -164,7 +164,7 @@ class WebSocket(object):
                 if status not in _VALID_STATUS_CODES:
                     status = 1002
 
-                if len(reason) > 0:
+                if reason:
                     try:
                         reason = reason.decode('utf8', errors='strict')
                     except Exception:
@@ -186,7 +186,7 @@ class WebSocket(object):
 
                 if self.frag_type == TEXT:
                     self.frag_buffer = []
-                    utf_str = self.frag_decoder.decode(self.data, final = False)
+                    utf_str = self.frag_decoder.decode(self.data, final=False)
                     if utf_str:
                         self.frag_buffer.append(utf_str)
                 else:
@@ -198,7 +198,7 @@ class WebSocket(object):
                     raise Exception('fragmentation protocol error')
 
                 if self.frag_type == TEXT:
-                    utf_str = self.frag_decoder.decode(self.data, final = False)
+                    utf_str = self.frag_decoder.decode(self.data, final=False)
                     if utf_str:
                         self.frag_buffer.append(utf_str)
                 else:
@@ -273,7 +273,7 @@ class WebSocket(object):
                         self.handshaked = True
                         self.handleConnected()
                     except Exception as e:
-                        raise Exception('handshake failed: %s', str(e))
+                        raise Exception('handshake failed: %s' % e)
 
         # else do normal data
         else:
@@ -331,8 +331,7 @@ class WebSocket(object):
                     if send_all:
                         continue
                     return buff[already_sent:]
-                else:
-                    raise e
+                raise e
 
         return None
 
@@ -400,7 +399,7 @@ class WebSocket(object):
             b2 |= length
             payload.append(b2)
 
-        elif length >= 126 and length <= 65535:
+        elif 126 <= length <= 65535:
             b2 |= 126
             payload.append(b2)
             payload.extend(struct.pack("!H", length))
@@ -456,7 +455,7 @@ class WebSocket(object):
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception as e:
+                        except Exception:
                             traceback.print_exc(file=sys.stderr)
                         finally:
                             self.state = self.HEADERB1
@@ -493,7 +492,7 @@ class WebSocket(object):
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception as e:
+                        except Exception:
                             traceback.print_exc(file=sys.stderr)
                         finally:
                             self.state = HEADERB1
@@ -523,7 +522,7 @@ class WebSocket(object):
                     if self.length <= 0:
                         try:
                             self._handlePacket()
-                        except Exception as e:
+                        except Exception:
                             traceback.print_exc(file=sys.stderr)
                         finally:
                             self.state = HEADERB1
@@ -547,7 +546,7 @@ class WebSocket(object):
                 if self.length <= 0:
                     try:
                         self._handlePacket()
-                    except Exception as e:
+                    except Exception:
                         traceback.print_exc(file=sys.stderr)
                     finally:
                         self.state = HEADERB1
@@ -584,7 +583,7 @@ class WebSocket(object):
                 self.index += 1
 
 
-class SimpleWebSocketServer(object):
+class SimpleWebSocketServer:
     def __init__(self, host, port, websocketclass, selectInterval=0.1):
         self.websocketclass = websocketclass
         self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -604,7 +603,7 @@ class SimpleWebSocketServer(object):
     def close(self):
         self.serversocket.close()
 
-        for desc, conn in list(self.connections.items()):
+        for _, conn in list(self.connections.items()):
             conn.close()
             conn.handleClose()
 
@@ -691,9 +690,6 @@ class SimpleSSLWebSocketServer(SimpleWebSocketServer):
         self.context = ssl.SSLContext(version)
         self.context.load_cert_chain(certfile, keyfile)
 
-    def close(self):
-        super(SimpleSSLWebSocketServer, self).close()
-
     def _decorateSocket(self, sock):
         sslsock = self.context.wrap_socket(sock, server_side=True)
         return sslsock
@@ -702,6 +698,3 @@ class SimpleSSLWebSocketServer(SimpleWebSocketServer):
         ws = self.websocketclass(self, sock, address)
         ws.usingssl = True
         return ws
-
-    def serveforever(self):
-        super(SimpleSSLWebSocketServer, self).serveforever()

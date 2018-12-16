@@ -1,13 +1,13 @@
 import logging
 import pickle
 
-from ulauncher.api.shared.Response import Response
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.util.SimpleWebSocketServer import WebSocket
 from ulauncher.util.decorator.debounce import debounce
-from .DeferredResultRenderer import DeferredResultRenderer
-from .ExtensionPreferences import ExtensionPreferences
-from .ExtensionManifest import ExtensionManifest, ManifestValidationError
+from ulauncher.api.shared.Response import Response
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
+from ulauncher.api.server.ExtensionManifest import ExtensionManifest, ManifestValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class ExtensionController(WebSocket):
         super(ExtensionController, self).__init__(*args, **kw)
 
     def _send_event(self, event):
-        logger.debug('Send event %s to "%s"' % (type(event).__name__, self.extension_id))
+        logger.debug('Send event %s to "%s"', type(event).__name__, self.extension_id)
         self.sendMessage(pickle.dumps(event))
 
     def handle_query(self, query):
@@ -47,7 +47,7 @@ class ExtensionController(WebSocket):
         Triggers event for an extension
         """
         # don't debounce events that are triggered by updates in preferences
-        if type(event) in [PreferencesUpdateEvent]:
+        if isinstance(event, PreferencesUpdateEvent):
             self._send_event(event)
         else:
             self._debounced_send_event(event)
@@ -72,10 +72,9 @@ class ExtensionController(WebSocket):
         if not isinstance(response, Response):
             raise Exception("Unsupported type %s" % type(response).__name__)
 
-        logger.debug('Incoming response (%s, %s) from "%s"' %
-                     (type(response.event).__name__,
-                      type(response.action).__name__,
-                      self.extension_id))
+        logger.debug('Incoming response (%s, %s) from "%s"', type(response.event).__name__,
+                     type(response.action).__name__,
+                     self.extension_id)
         self.resultRenderer.handle_response(response, self)
 
     def handleConnected(self):
@@ -90,13 +89,13 @@ class ExtensionController(WebSocket):
         if not self.extension_id:
             raise Exception('Incorrect path %s' % self.request.path)
 
-        logger.info('Extension "%s" connected' % self.extension_id)
+        logger.info('Extension "%s" connected', self.extension_id)
 
         self.manifest = ExtensionManifest.open(self.extension_id)
         try:
             self.manifest.validate()
         except ManifestValidationError as e:
-            logger.warning("Couldn't connect '%s'. %s: %s" % (self.extension_id, type(e).__name__, e))
+            logger.warning("Couldn't connect '%s'. %s: %s", self.extension_id, type(e).__name__, e)
             self.close()
             return
 
@@ -110,8 +109,9 @@ class ExtensionController(WebSocket):
         """
         Implements abstract method of :class:`WebSocket`
         """
-        logger.info('Extension "%s" disconnected' % self.extension_id)
+        logger.info('Extension "%s" disconnected', self.extension_id)
         try:
             del self.controllers[self.extension_id]
+        # pylint: disable=broad-except
         except Exception:
             pass

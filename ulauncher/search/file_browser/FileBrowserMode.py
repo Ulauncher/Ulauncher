@@ -33,8 +33,8 @@ class FileBrowserMode(BaseSearchMode):
         files = os.listdir(path_str)
         if sort_by_usage:
             return sorted(files, reverse=True, key=lambda f: self._file_queries.find(os.path.join(path_str, f)))
-        else:
-            return sorted(files)
+
+        return sorted(files)
 
     def create_result_item(self, path_srt):
         return FileBrowserResultItem(Path(path_srt))

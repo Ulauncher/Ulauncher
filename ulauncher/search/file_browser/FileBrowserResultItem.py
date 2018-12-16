@@ -6,10 +6,10 @@ from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 from ulauncher.util.Path import Path
 from ulauncher.util.image_loader import get_file_icon
-from .FileQueries import FileQueries
 
-from .alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
-from .alt_menu.OpenFolderItem import OpenFolderItem
+from ulauncher.search.file_browser.FileQueries import FileQueries
+from ulauncher.search.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
+from ulauncher.search.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
 
 
 class FileBrowserResultItem(SmallResultItem):
@@ -17,6 +17,7 @@ class FileBrowserResultItem(SmallResultItem):
     :param ~ulauncher.util.Path.Path path:
     """
 
+    # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
         self._file_queries = FileQueries.get_instance()
@@ -38,8 +39,8 @@ class FileBrowserResultItem(SmallResultItem):
         self._file_queries.put(self.path.get_abs_path())
         if self.path.is_dir():
             return SetUserQueryAction(os.path.join(self.path.get_user_path(), ''))
-        else:
-            return OpenAction(self.path.get_abs_path())
+
+        return OpenAction(self.path.get_abs_path())
 
     def on_alt_enter(self, query):
         menu_items = self._get_dir_alt_menu() if self.path.is_dir() else self._get_file_alt_menu()

@@ -1,5 +1,5 @@
-from gi.repository import GLib
 from functools import wraps
+from gi.repository import GLib
 
 
 def glib_idle_add(fn):

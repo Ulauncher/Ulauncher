@@ -19,3 +19,5 @@ class ExtensionDb(KeyValueJsonDb):
         for ext in self.get_records().values():
             if ext['url'] == url:
                 return ext
+
+        return None

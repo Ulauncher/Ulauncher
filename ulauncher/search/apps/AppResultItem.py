@@ -1,7 +1,7 @@
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from .AppQueryDb import AppQueryDb
-from .AppStatDb import AppStatDb
+from ulauncher.search.apps.AppQueryDb import AppQueryDb
+from ulauncher.search.apps.AppStatDb import AppStatDb
 
 
 class AppResultItem(ResultItem):
@@ -9,6 +9,7 @@ class AppResultItem(ResultItem):
     :param dict record:
     """
 
+    # pylint: disable=super-init-not-called
     def __init__(self, record):
         self.record = record
         self._app_queries = AppQueryDb.get_instance()

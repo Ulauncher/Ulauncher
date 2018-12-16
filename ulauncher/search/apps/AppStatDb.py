@@ -31,15 +31,16 @@ class AppStatDb(KeyValueDb):
         :rtype: class:`ResultList`
         """
 
+        # pylint: disable=relative-beyond-top-level
         # import here to avoid circular deps.
-        from .AppResultItem import AppResultItem
-        from .AppDb import AppDb
+        from ulauncher.search.apps.AppResultItem import AppResultItem
+        from ulauncher.search.apps.AppDb import AppDb
         app_db = AppDb.get_instance()
 
         return [AppResultItem(i) for i in islice(
-                filter(None,
-                       map(lambda r: app_db.get_by_path(r[0]),
-                           sorted(self._records.items(),
-                                  key=itemgetter(1),
-                                  reverse=True))),
-                0, limit)]
+            filter(None,
+                   map(lambda r: app_db.get_by_path(r[0]),
+                       sorted(self._records.items(),
+                              key=itemgetter(1),
+                              reverse=True))),
+            0, limit)]

@@ -3,6 +3,7 @@ import logging
 import gi
 gi.require_version('AppIndicator3', '0.1')
 
+# pylint: disable=wrong-import-position
 from gi.repository import Gtk, AppIndicator3
 from ulauncher.util.decorator.singleton import singleton
 
@@ -33,7 +34,10 @@ class AppIndicator:
         self.__indicator.set_icon(path)
 
     def switch(self, on=False):
-        self.show() if on else self.hide()
+        if on:
+            self.show()
+        else:
+            self.hide()
 
     def add_menu_item(self, command, title):
         menu_item = Gtk.MenuItem()

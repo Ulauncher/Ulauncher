@@ -11,6 +11,7 @@ from ulauncher.config import get_data_file
 
 class ShortcutResultItem(ResultItem):
 
+    # pylint: disable=super-init-not-called, too-many-arguments
     def __init__(self, keyword, name, cmd, icon, default_search=False, **kw):
         self.keyword = keyword
         self.name = name
@@ -27,9 +28,9 @@ class ShortcutResultItem(ResultItem):
     def get_name_highlighted(self, query, color):
         # highlight only if we did not enter Web search item keyword
         if query.get_keyword() == self.keyword and query.get_argument():
-            return
-        else:
-            return super(ShortcutResultItem, self).get_name_highlighted(query, color)
+            return None
+
+        return super(ShortcutResultItem, self).get_name_highlighted(query, color)
 
     def get_description(self, query):
         if self.cmd.startswith('#!'):
@@ -40,12 +41,14 @@ class ShortcutResultItem(ResultItem):
 
         if self.is_default_search:
             return description.replace('%s', query)
-        elif query.get_keyword() == self.keyword and query.get_argument():
+
+        if query.get_keyword() == self.keyword and query.get_argument():
             return description.replace('%s', query.get_argument())
-        elif query.get_keyword() == self.keyword and not query.get_argument():
+
+        if query.get_keyword() == self.keyword and not query.get_argument():
             return 'Type in your query and press Enter...'
-        else:
-            return description.replace('%s', '...')
+
+        return description.replace('%s', '...')
 
     def get_icon(self):
         if self.icon:

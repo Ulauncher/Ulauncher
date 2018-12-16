@@ -8,6 +8,7 @@ class OpenFolderItem(SmallResultItem):
     :param ~ulauncher.util.Path.Path path:
     """
 
+    # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
         self._name = 'Open Folder'
@@ -15,6 +16,7 @@ class OpenFolderItem(SmallResultItem):
     def set_name(self, name):
         self._name = name
 
+    # pylint: disable=arguments-differ
     def get_name_highlighted(self, *args):
         pass
 

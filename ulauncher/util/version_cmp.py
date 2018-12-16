@@ -1,5 +1,5 @@
-from gi.repository import Gtk
 from distutils.version import StrictVersion
+from gi.repository import Gtk
 
 
 def gtk_version_is_gte(major, minor, micro):

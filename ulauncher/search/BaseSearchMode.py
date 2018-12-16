@@ -3,6 +3,7 @@ from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 class BaseSearchMode:
 
+    # pylint: disable=unused-argument
     def is_enabled(self, query):
         """
         Return True if mode should be enabled for a query

@@ -5,12 +5,13 @@ import os
 import inspect
 import functools
 import logging
+from xml.etree.cElementTree import ElementTree
 
 import gi
 gi.require_version('Gtk', '3.0')
+# pylint: disable=wrong-import-position, wrong-import-order
 from gi.repository import GObject, Gtk
 from ulauncher.config import get_data_file
-from xml.etree.cElementTree import ElementTree
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class Builder(Gtk.Builder):
     logs every connection made, and any on_* not made
     '''
 
+    # pylint: disable=arguments-differ
     @classmethod
     def new_from_file(cls, builder_file_name):
         """Return a fully-instantiated Gtk.Builder instance from specified ui
@@ -132,7 +134,7 @@ class Builder(Gtk.Builder):
                 connection_dict[item[0]] = handler
 
                 # replace the run time warning
-                logger.warn("expected handler '%s' in %s", item[0], filename)
+                logger.warning("expected handler '%s' in %s", item[0], filename)
 
         # connect glade define handlers
         Gtk.Builder.connect_signals(self, connection_dict)
@@ -217,7 +219,8 @@ def getmembers(obj, check):
     for k in dir(obj):
         try:
             attr = getattr(obj, k)
-        except:
+        # pylint: disable=broad-except
+        except Exception:
             continue
         if check(attr):
             members.append((k, attr))

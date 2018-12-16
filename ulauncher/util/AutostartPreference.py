@@ -24,6 +24,8 @@ class AutostartPreference:
         if record:
             return record['desktop_file']
 
+        return None
+
     def _get_autostart_parser(self):
         """
         Read ulauncher.desktop
@@ -42,6 +44,7 @@ class AutostartPreference:
         """
         try:
             return self._get_autostart_parser().get_boolean(self.AUTOSTART_FLAG)
+        # pylint: disable=broad-except
         except Exception:
             return False
 
