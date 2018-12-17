@@ -20,7 +20,7 @@ class DeferredResultRenderer:
 
     @classmethod
     @singleton
-    def get_instance(cls):
+    def get_instance(cls) -> 'DeferredResultRenderer':
         """
         Returns singleton instance
         """

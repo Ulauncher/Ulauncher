@@ -38,6 +38,10 @@ class TestExtensionDownloader:
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.download_zip')
 
     @pytest.fixture(autouse=True)
+    def GithubExtension(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionDownloader.GithubExtension')
+
+    @pytest.fixture(autouse=True)
     def unzip(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.unzip')
 
@@ -45,10 +49,10 @@ class TestExtensionDownloader:
     def datetime(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.datetime')
 
-    # pylint: disable=too-many-arguments, unused-argument
-    def test_download(self, downloader, ext_db, ext_runner, unzip, download_zip, datetime):
-        ext_db.find.return_value = None
-
+    # pylint: disable=unused-argument,too-many-arguments
+    def test_download(self, downloader, mocker, unzip, ext_db, download_zip, datetime):
+        os = mocker.patch('ulauncher.api.server.ExtensionDownloader.os')
+        os.path.exists.return_value = False
         assert downloader.download('https://github.com/Ulauncher/ulauncher-timer') == \
             'com.github.ulauncher.ulauncher-timer'
 

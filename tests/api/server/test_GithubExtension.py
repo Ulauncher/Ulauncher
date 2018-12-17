@@ -25,13 +25,13 @@ class TestGithubExtension:
             GithubExtension('https://github.com/Ulauncher/ulauncher-timer/').validate_url()
 
     def test_get_download_url(self, gh_ext):
-        assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/archive/master.zip'
+        assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/archive/python3.zip'
 
     def test_get_last_commit(self, gh_ext, mocker):
         urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
         urlopen.side_effect = [
-            io.StringIO(dumps({'object': {'url': 'url123'}})),
-            io.StringIO(dumps({'sha': '64e106c', 'committer': {'date': '2017-05-01T07:30:39Z'}}))
+            io.BytesIO(dumps({'object': {'url': 'url123'}}).encode('utf-8')),
+            io.BytesIO(dumps({'sha': '64e106c', 'committer': {'date': '2017-05-01T07:30:39Z'}}).encode('utf-8'))
         ]
         info = gh_ext.get_last_commit()
         assert info['last_commit'] == '64e106c'

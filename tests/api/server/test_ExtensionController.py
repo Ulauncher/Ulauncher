@@ -16,7 +16,7 @@ class TestExtensionController:
         return {}
 
     @pytest.fixture(autouse=True)
-    def resultRenderer(self, mocker):
+    def result_renderer(self, mocker):
         return mocker.patch(
             'ulauncher.api.server.ExtensionController.DeferredResultRenderer.get_instance').return_value
 
@@ -77,19 +77,19 @@ class TestExtensionController:
         assert isinstance(keywordEvent, KeywordQueryEvent)
         assert keywordEvent.get_query() == 'def ulauncher'
 
-    def test_handle_query__handle_query__is_called(self, controller, resultRenderer):
+    def test_handle_query__handle_query__is_called(self, controller, result_renderer):
         query = Query('def ulauncher')
         controller.extension_id = 'test_extension'
         controller.manifest = mock.Mock()
-        assert controller.handle_query(query) == resultRenderer.handle_event.return_value
-        resultRenderer.handle_event.assert_called_with(mock.ANY, controller)
+        assert controller.handle_query(query) == result_renderer.handle_event.return_value
+        result_renderer.handle_event.assert_called_with(mock.ANY, controller)
 
     def test_handleMessage__unsupported_data_type__exception_raised(self, controller):
         controller.data = dict()
         with pytest.raises(Exception):
             controller.handleMessage()
 
-    def test_handleMessage__handle_response__is_called(self, controller, resultRenderer, mocker):
+    def test_handleMessage__handle_response__is_called(self, controller, result_renderer, mocker):
         action = TestAction()
         event = mock.Mock()
         controller.extension_id = 'test_extension'
@@ -99,7 +99,7 @@ class TestExtensionController:
 
         controller.handleMessage()
 
-        resultRenderer.handle_response.assert_called_with(loads.return_value, controller)
+        result_renderer.handle_response.assert_called_with(loads.return_value, controller)
 
 
 class TestAction(BaseAction):

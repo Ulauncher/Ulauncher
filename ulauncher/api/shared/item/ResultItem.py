@@ -1,5 +1,10 @@
+from typing import Any, Callable, Optional
+
+from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.search.Query import Query
 from ulauncher.util.text_highlighter import highlight_text
 
+OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
 # pylint: disable=too-many-instance-attributes
 class ResultItem:
@@ -9,28 +14,28 @@ class ResultItem:
 
     score = None  # used by SortedResultList class to maintain sorted by score order of items
 
-    _name = None
-    _description = None
-    _keyword = None
-    _icon = None
-    _include_in_results = True
-    _selected_by_default = False
-    _on_enter = None
-    _on_alt_enter = None
-    _highlightable = True
-    _is_extension = False
+    _name = None  # type: str
+    _description = None  # type: str
+    _keyword = None  # type: str
+    _icon = None  # type: Any
+    _include_in_results = True  # type: bool
+    _selected_by_default = False  # type: bool
+    _on_enter = None  # type: OnEnterCallback
+    _on_alt_enter = None  # type: OnEnterCallback
+    _highlightable = True  # type: bool
+    _is_extension = False  # type: bool
 
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 name=None,
-                 description=None,
-                 keyword=None,
-                 icon=None,
-                 include_in_results=True,
-                 selected_by_default=False,
-                 highlightable=True,
-                 on_enter=None,
-                 on_alt_enter=None):
+                 name: str = '',
+                 description: str = '',
+                 keyword: str = '',
+                 icon: Any = None,
+                 include_in_results: bool = True,
+                 selected_by_default: bool = False,
+                 highlightable: bool = True,
+                 on_enter: OnEnterCallback = None,
+                 on_alt_enter: OnEnterCallback = None):
         self._name = name
         self._description = description
         self._keyword = keyword
@@ -41,23 +46,23 @@ class ResultItem:
         self._on_alt_enter = on_alt_enter
         self._highlightable = highlightable
 
-    def get_keyword(self):
+    def get_keyword(self) -> str:
         """
         If keyword is defined, search will be performed by keyword, otherwise by name.
         """
         return self._keyword
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self._name
 
-    def get_search_name(self):
+    def get_search_name(self) -> str:
         """
         Returns string that will be used for search
         :rtype: str
         """
         return self.get_name()
 
-    def get_name_highlighted(self, query, color):
+    def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
         """
         :param ~ulauncher.search.Query.Query query:
         :param str color:
@@ -72,7 +77,7 @@ class ResultItem:
         return self.get_name()
 
     # pylint: disable=unused-argument
-    def get_description(self, query):
+    def get_description(self, query: Query) -> str:
         """
         optional
 
@@ -100,7 +105,7 @@ class ResultItem:
         """
         return self._selected_by_default
 
-    def on_enter(self, query):
+    def on_enter(self, query: Query) -> Optional[BaseAction]:
         """
         :param ~ulauncher.search.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
                                                     This allows you to create flows with a result item
@@ -108,7 +113,7 @@ class ResultItem:
         """
         return self._on_enter(query) if callable(self._on_enter) else None
 
-    def on_alt_enter(self, query):
+    def on_alt_enter(self, query: Query) -> Optional[BaseAction]:
         """
         Optional alternative enter
 

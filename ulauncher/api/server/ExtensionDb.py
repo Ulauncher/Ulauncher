@@ -8,7 +8,7 @@ class ExtensionDb(KeyValueJsonDb):
 
     @classmethod
     @singleton
-    def get_instance(cls):
+    def get_instance(cls) -> 'ExtensionDb':
         db_path = os.path.join(CONFIG_DIR, 'extensions.json')
         db = cls(db_path)
         db.open()

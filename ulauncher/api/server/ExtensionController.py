@@ -26,7 +26,7 @@ class ExtensionController(WebSocket):
 
     def __init__(self, controllers, *args, **kw):
         self.controllers = controllers
-        self.resultRenderer = DeferredResultRenderer.get_instance()
+        self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
         super(ExtensionController, self).__init__(*args, **kw)
 
     def _send_event(self, event):
@@ -51,7 +51,7 @@ class ExtensionController(WebSocket):
             self._send_event(event)
         else:
             self._debounced_send_event(event)
-        return self.resultRenderer.handle_event(event, self)
+        return self.result_renderer.handle_event(event, self)
 
     def get_manifest(self):
         return self.manifest
@@ -75,7 +75,7 @@ class ExtensionController(WebSocket):
         logger.debug('Incoming response (%s, %s) from "%s"', type(response.event).__name__,
                      type(response.action).__name__,
                      self.extension_id)
-        self.resultRenderer.handle_response(response, self)
+        self.result_renderer.handle_response(response, self)
 
     def handleConnected(self):
         """

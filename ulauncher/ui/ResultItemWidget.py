@@ -1,6 +1,9 @@
 import logging
+from typing import Any
 from gi.repository import Gtk
+
 from ulauncher.util.Theme import Theme
+from ulauncher.search.Query import Query
 
 logger = logging.getLogger(__name__)
 
@@ -8,15 +11,15 @@ logger = logging.getLogger(__name__)
 class ResultItemWidget(Gtk.EventBox):
     __gtype_name__ = "ResultItemWidget"
 
-    shortcut = None
-    index = None
-    builder = None
-    name = None
-    query = None
-    item_object = None
-    item_box = None
+    shortcut = ''  # type: str
+    index = 0  # type: int
+    builder = None  # type: Any
+    name = ''  # type: str
+    query = Query('')  # type: Query
+    item_object = None  # type: Any
+    item_box = None  # type: Any
 
-    def initialize(self, builder, item_object, index, query):
+    def initialize(self, builder: Any, item_object: Any, index: int, query: Query) -> None:
         self.builder = builder
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-release-event", self.on_click)
@@ -57,13 +60,13 @@ class ResultItemWidget(Gtk.EventBox):
             iconWgt = self.builder.get_object('item-icon')
             iconWgt.set_from_pixbuf(icon)
 
-    def set_name_highlighted(self, is_selected=False):
+    def set_name_highlighted(self, is_selected: bool = False) -> None:
         colors = Theme.get_current().get_matched_text_hl_colors()
         color = colors['when_selected'] if is_selected else colors['when_not_selected']
         self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
 
     # pylint: disable=arguments-differ
-    def set_name(self, name):
+    def set_name(self, name: str) -> None:
         item = self.builder.get_object('item-name')
         if '<span' in name:  # dealing with markup
             item.set_markup(name)

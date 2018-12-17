@@ -22,17 +22,17 @@ class ExtensionDownloader:
 
     @classmethod
     @singleton
-    def get_instance(cls):
+    def get_instance(cls) -> 'ExtensionDownloader':
         ext_db = ExtensionDb.get_instance()
         ext_runner = ExtensionRunner.get_instance()
         return cls(ext_db, ext_runner)
 
-    def __init__(self, ext_db, ext_runner):
+    def __init__(self, ext_db: ExtensionDb, ext_runner: ExtensionRunner):
         super(ExtensionDownloader, self).__init__()
         self.ext_db = ext_db
         self.ext_runner = ext_runner
 
-    def download(self, url):
+    def download(self, url: str) -> str:
         """
         1. check if ext already exists
         2. get last commit info
@@ -56,7 +56,7 @@ class ExtensionDownloader:
         try:
             gh_commit = gh_ext.get_last_commit()
         except Exception as e:
-            logger.error('gh_ext.get_ext_meta() failed. %s: %s', type(e).__name__, e)
+            logger.exception('ext_downloader.download() failed. %s: %s', type(e).__name__, e)
             raise InvalidGithubUrlError('Project is not available on Github')
 
         filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
@@ -74,7 +74,7 @@ class ExtensionDownloader:
         return ext_id
 
     @run_async(daemon=True)
-    def download_missing(self):
+    def download_missing(self) -> None:
         already_downloaded = {id for id, _ in find_extensions(EXTENSIONS_DIR)}
         for id, ext in self.ext_db.get_records().items():
             if id in already_downloaded:
@@ -88,7 +88,7 @@ class ExtensionDownloader:
             except Exception as e:
                 logger.error('%s: %s', type(e).__name__, e)
 
-    def remove(self, ext_id):
+    def remove(self, ext_id: str) -> None:
         try:
             self.ext_runner.stop(ext_id)
         except ExtensionIsNotRunningError:
@@ -98,7 +98,7 @@ class ExtensionDownloader:
         self.ext_db.remove(ext_id)
         self.ext_db.commit()
 
-    def update(self, ext_id):
+    def update(self, ext_id: str) -> bool:
         """
         :raises ExtensionNotFound:
         :rtype: boolean
@@ -135,7 +135,7 @@ class ExtensionDownloader:
 
         return True
 
-    def get_new_version(self, ext_id):
+    def get_new_version(self, ext_id: str) -> dict:
         """
         Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
         """
@@ -158,7 +158,7 @@ class ExtensionDownloader:
         return gh_commit
 
 
-def unzip(filename, ext_path):
+def unzip(filename: str, ext_path: str) -> None:
     """
     1. Remove ext_path
     2. Extract zip into temp dir
@@ -178,7 +178,7 @@ def unzip(filename, ext_path):
         return
 
 
-def download_zip(url):
+def download_zip(url: str) -> str:
     dest_zip = mktemp('.zip', prefix='ulauncher_dl_')
     filename, _ = urlretrieve(url, dest_zip)
 

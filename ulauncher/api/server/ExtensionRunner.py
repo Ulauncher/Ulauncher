@@ -18,7 +18,7 @@ class ExtensionRunner:
 
     @classmethod
     @singleton
-    def get_instance(cls):
+    def get_instance(cls) -> 'ExtensionRunner':
         return cls(ExtensionServer.get_instance())
 
     def __init__(self, extension_server):

@@ -1,8 +1,9 @@
 import re
 import json
+from typing import Dict
 from urllib.request import urlopen
 
-DEFAULT_GITHUB_BRANCH = 'master'
+DEFAULT_GITHUB_BRANCH = 'python3'
 
 
 class GithubExtension:
@@ -16,15 +17,15 @@ class GithubExtension:
         if not re.match(self.url_match_pattern, self.url, re.I):
             raise InvalidGithubUrlError('Invalid GithubUrl: %s' % self.url)
 
-    def get_last_commit(self):
+    def get_last_commit(self) -> Dict[str, str]:
         """
         :rtype dict: {'last_commit': str, 'last_commit_time': str}
         :raises urllib.error.HTTPError:
         """
         project_path = self._get_project_path()
         branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)
-        branch_head = json.load(urlopen(branch_head_url))
-        branch_head_commit = json.load(urlopen(branch_head['object']['url']))
+        branch_head = json.loads(urlopen(branch_head_url).read().decode('utf-8'))
+        branch_head_commit = json.loads(urlopen(branch_head['object']['url']).read().decode('utf-8'))
 
         return {
             'last_commit': branch_head_commit['sha'],
