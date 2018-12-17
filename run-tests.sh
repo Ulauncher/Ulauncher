@@ -17,15 +17,10 @@ fi
 
 export PYTHONPATH=`pwd`
 
-abs-to-rel-path() {
-    sed 's|/.*tests|tests|g' | sed 's|/.*ulauncher|ulauncher|g'
-}
-
 set -e
 
 if [[ -z "$@" ]]; then
     py.test --pep8 tests
 else
-    args=$(echo $@ | abs-to-rel-path) # make a relative path
-    eval "py.test --pep8 $args"
+    eval "py.test --pep8 $@"
 fi
