@@ -2,6 +2,7 @@ import os
 import logging
 from time import time, sleep
 from functools import wraps
+from typing import Dict
 
 import pyinotify
 
@@ -36,21 +37,24 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
     class InvalidDesktopFile(IOError):
         pass
 
+    DeferredFiles = Dict[str, int]
+
     def __init__(self, db):
         super(AppNotifyEventHandler, self).__init__()
-        self.__db = db
+        self.__db = db  # type: AppDb
 
-        self._deferred_files = {}  # key is a file path, value is an addition time
+        # key is a file path, value is an addition time
+        self._deferred_files = {}  # type: DeferredFiles
         self._init_worker()
 
     @run_async(daemon=True)
-    def _init_worker(self):
+    def _init_worker(self) -> None:
         """
         Add files to the DB with some delay,
         otherwise .desktop file may not be ready while application is being installed
         """
         while True:
-            for pathname, start_time in self._deferred_files.items():
+            for pathname, start_time in list(self._deferred_files.items()):
                 time_passed = time() - start_time
                 if time_passed < self.RETRY_TIME_SPAN[0]:
                     # skip this file for now
@@ -58,7 +62,8 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
                 if time_passed > self.RETRY_TIME_SPAN[1]:
                     # give up on file after time limit
-                    del self._deferred_files[pathname]
+                    if pathname in self._deferred_files:
+                        del self._deferred_files[pathname]
 
                 try:
                     self._add_file_sync(pathname)
@@ -69,20 +74,22 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
                 except Exception as e:
                     # give up on unexpected exception
                     logger.warning("Unexpected exception: %s", e)
-                    del self._deferred_files[pathname]
+                    if pathname in self._deferred_files:
+                        del self._deferred_files[pathname]
                 else:
                     # success
-                    del self._deferred_files[pathname]
+                    if pathname in self._deferred_files:
+                        del self._deferred_files[pathname]
 
             sleep(self.RETRY_INTERVAL)
 
-    def add_file_deffered(self, pathname):
+    def add_file_deffered(self, pathname: str) -> None:
         """
         Add .desktop file to DB a little bit later
         """
         self._deferred_files[pathname] = time()
 
-    def _add_file_sync(self, pathname):
+    def _add_file_sync(self, pathname: str) -> None:
         """
         Add .desktop file to DB
 
@@ -99,7 +106,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
             logger.warning('Cannot add %s to DB -> %s', pathname, e)
             raise self.InvalidDesktopFile(pathname)
 
-    def _remove_file(self, pathname):
+    def _remove_file(self, pathname: str) -> None:
         """
         Remove .desktop file from DB
         :param str pathname:
