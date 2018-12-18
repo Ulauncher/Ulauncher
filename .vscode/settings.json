@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/node_modules": true,
+        ".idea": true,
+        ".mypy_cache": true,
+        ".pytest_cache": true,
+        ".vscode": true,
+        "**/dist": true,
+        "**/build": true
+    },
+    "python.pythonPath": "python3",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true
+}
