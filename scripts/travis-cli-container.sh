@@ -17,8 +17,9 @@
 # K=$(ruby -rsecurerandom -e 'puts SecureRandom.hex(32).chomp')
 # IV=$(ruby -rsecurerandom -e 'puts SecureRandom.hex(16).chomp')
 
-
-docker run -it --rm \
-    -v $(pwd):/home/travis/ulauncher \
-    -v $HOME/.bash_history:/root/.bash_history \
-    mgruener/travis-cli
+travis-cli-container () {
+    exec docker run -it --rm \
+        -v $(pwd):/home/travis/ulauncher \
+        -v $HOME/.bash_history:/root/.bash_history \
+        mgruener/travis-cli
+}

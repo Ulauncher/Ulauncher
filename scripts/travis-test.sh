@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+#####################################
+# Runs pytests and builds preferences
+#####################################
+travis-test () {
+    set -e
+
+    step1="ln -s /var/node_modules data/preferences" # take node modules from cache
+    step2="cd docs && sphinx-apidoc -d 5 -o source ../ulauncher && make html && cd .."
+    step3="./ul test"
+    step4="./ul build-preferences"
+
+    exec docker run \
+        --rm \
+        -v $(pwd):/root/ulauncher \
+        $BUILD_IMAGE \
+        bash -c "$step1 && $step2 && $step3 && $step4"
+}

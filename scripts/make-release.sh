@@ -3,29 +3,22 @@
 #############################
 # Build tar.gz in a container
 #############################
+make-release() {
+    # Args:
+    # $1 version
 
-# Args:
-# $1 version
+    VERSION=$1
+    if [ -z "$VERSION" ]; then
+        echo "First argument should be version"
+        exit 1
+    fi
 
-VERSION=$1
-if [ -z "$VERSION" ]; then
-    echo "First argument should be version"
-    exit 1
-fi
+    echo "###########################"
+    echo "# Building ulauncher-$VERSION"
+    echo "###########################"
 
-echo "###########################"
-echo "# Building ulauncher-$VERSION"
-echo "###########################"
+    set -ex
 
-set -ex
-
-cd `dirname $0`
-source env.sh
-cd ..
-
-buildUtils=`dirname $0`
-
-main() {
     create_deb
     create_rpms
     launchpad_upload
@@ -35,9 +28,9 @@ main() {
 create_deb() {
     step1="ln -s /var/node_modules data/preferences" # take node modules from cache
     step2="ln -s /var/bower_components data/preferences"
-    step3="./test tests"
-    step4="./build-utils/build-deb.sh $VERSION --deb"
-    step5="./build-utils/build-targz.sh $VERSION"
+    step3="./ul test"
+    step4="./ul build-deb $VERSION --deb"
+    step5="./ul build-targz $VERSION"
 
     docker run \
         -v $(pwd):/root/ulauncher \
@@ -55,7 +48,7 @@ create_rpms() {
         -v $(pwd):/root/ulauncher \
         --name ulauncher-rpm \
         $RPM_BUILD_IMAGE \
-        bash -c "./build-utils/build-rpm.sh $VERSION"
+        bash -c "./ul build-rpm $VERSION"
 
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_suse.rpm .
@@ -69,7 +62,7 @@ aur_update() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $ARCH_BUILD_IMAGE \
-        bash -c "UPDATE_STABLE=1 ./build-utils/aur-update.py $VERSION"
+        bash -c "UPDATE_STABLE=1 ./ul aur-update $VERSION"
 }
 
 launchpad_upload() {
@@ -80,15 +73,13 @@ launchpad_upload() {
         PPA="agornostal/ulauncher"
     fi
     GPGKEY="6BD735B0"
-    xenial="PPA=$PPA GPGKEY=$GPGKEY RELEASE=xenial ./build-utils/build-deb.sh $VERSION --upload"
-    bionic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=bionic ./build-utils/build-deb.sh $VERSION --upload"
-    cosmic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=cosmic ./build-utils/build-deb.sh $VERSION --upload"
+    xenial="PPA=$PPA GPGKEY=$GPGKEY RELEASE=xenial ./ul build-deb $VERSION --upload"
+    bionic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=bionic ./ul build-deb $VERSION --upload"
+    cosmic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=cosmic ./ul build-deb $VERSION --upload"
 
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "./build-utils/extract-launchpad-ssh.sh && $xenial && $bionic && $cosmic"
+        bash -c "./ul extract-launchpad-ssh && $xenial && $bionic && $cosmic"
 }
-
-main

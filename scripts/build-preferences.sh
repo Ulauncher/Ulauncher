@@ -3,13 +3,13 @@
 #############################################
 # Builds Ulauncher Preferences UI with nodejs
 #############################################
+build-preferences () {
+    set -ex
 
-set -ex
+    cd data/preferences
 
-cd `dirname $0`
-cd ../data/preferences
-
-yarn install
-yarn lint
-yarn unit
-yarn build
+    yarn install
+    yarn lint
+    yarn unit
+    yarn build
+}

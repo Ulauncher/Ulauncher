@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
 # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
-
-tar -xvf build-utils/launchpad.ssh.tar -C /
+extract-launchpad-ssh () {
+    tar -xvf scripts/launchpad.ssh.tar -C /
+}
