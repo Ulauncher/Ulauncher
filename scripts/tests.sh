@@ -13,6 +13,7 @@ test-pylint () {
 }
 
 test-pytest () {
+    set +e
     echo '[ test: pytest ]'
     # Some tests will fail in Docker unless virtual frame buffer is running
     if [ -f /.dockerenv ]; then
