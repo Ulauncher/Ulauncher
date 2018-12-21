@@ -15,14 +15,14 @@ Ulauncher is a fast application launcher for Linux. It's is written in Python, u
 [Create Your Ulauncher Extensions](http://docs.ulauncher.io/)
 ==============================================================
 
-As of Ulauncher v3, you can create your own Ulauncher extensions  
+As of Ulauncher v3, you can create your own Ulauncher extensions
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 
 
 [Create Your Ulauncher Color themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
 ==============================================================
 
-As of Ulauncher v4, you can create your own color themes  
+As of Ulauncher v4, you can create your own color themes
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
 
 
@@ -44,9 +44,9 @@ If you just want to use the app, see download instructions at [ulauncher.io](htt
 
 * [Docker](https://docs.docker.com/engine/installation/)
 * python3-distutils-extra
-* Application runtime dependencies.  
-  (You don't have to manually install these if you have already installed Ulauncher)  
-  
+* Application runtime dependencies.
+  (You don't have to manually install these if you have already installed Ulauncher)
+
   ```
   sudo apt-get install \
     libkeybinder-3.0-0 \
@@ -66,12 +66,11 @@ If you just want to use the app, see download instructions at [ulauncher.io](htt
   ```
 
 ### Build and Run
-1. `$ ./build-utils/dev-container.sh` will take you into a Docker container from which you can run build and test scripts
-2. `root@container: # ./build-utils/build-preferences.sh` build preferences UI in JS/HTML
-3. `root@container: # ./test tests` runs Python tests
-4. `$ ./dev-run.sh` installs Ulauncher data to `~/.local/share/ulauncher/` and then runs the app
-
-If you have any questions, join chat in [Gitter](https://gitter.im/Ulauncher/General)
+1. `$ ./ul dev-container` will take you into a Docker container from which you can run build and test scripts
+2. `root@container: # ./ul build-preferences` build preferences UI in JS/HTML
+3. `root@container: # ./test` runs linter, type checker, and unit tests
+4. `$ ./ul init-dev-env` installs Ulauncher data to `~/.local/share/ulauncher/`
+5. `$ ./ul run` runs the app
 
 ***
 ### Want to contribute? [See How!](https://github.com/Ulauncher/Ulauncher/wiki/Code-Contribution)

@@ -77,9 +77,11 @@ launchpad_upload() {
     bionic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=bionic ./ul build-deb $VERSION --upload"
     cosmic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=cosmic ./ul build-deb $VERSION --upload"
 
+    # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
+    # then uploads each realease
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "./ul extract-launchpad-ssh && $xenial && $bionic && $cosmic"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $cosmic"
 }

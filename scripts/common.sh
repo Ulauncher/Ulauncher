@@ -11,3 +11,11 @@ red=$'\e[1;31m'
 BUILD_IMAGE=ulauncher/build-image:5.0
 RPM_BUILD_IMAGE=ulauncher/rpm-build-image:5.0
 ARCH_BUILD_IMAGE=ulauncher/arch-build-image:5.0
+
+warn-if-not-in-docker () {
+    if [ ! -f /.dockerenv ]; then
+        echo
+        echo "${yellow}WARNING: It's recommended to run tests in a docker container to be sure they will also pass in CI${normal}"
+        echo
+    fi
+}

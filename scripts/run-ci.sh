@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-#####################################
-# Runs pytests and builds preferences
-#####################################
-travis-test () {
+run-ci () {
     set -e
 
     step1="ln -s /var/node_modules data/preferences" # take node modules from cache

@@ -149,7 +149,7 @@ def exclude_files(patterns=[]):
     Dockerfile.build-arch
     Dockerfile.build-rpm
     PKGBUILD.template
-    build-utils/aur-update.py
+    scripts/aur-update.py
     """
 
     # it's maddening the DistUtilsExtra does not offer a way to exclude globs
@@ -179,9 +179,10 @@ def main():
     # so we can patch bit back in later
     original_find_src = exclude_files([
         "*.sh",
+        "ul",
         "Dockerfile.build*",
         "PKGBUILD.template",
-        "build-utils/*",
+        "scripts/*",
         "docs/*",
         "glade",
         "test",

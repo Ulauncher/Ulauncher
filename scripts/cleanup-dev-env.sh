@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-dev-cleanup () {
+cleanup-dev-env () {
   # remove icons
   rm \
     -v \

@@ -5,7 +5,7 @@
 # $ travis login
 # $ export K=...
 # $ export IV=...
-# $ travis encrypt-file build-utils/aur_key build-utils/aur_key.enc --add -K $K --iv $IV
+# $ travis encrypt-file scripts/aur_key scripts/aur_key.enc --add -K $K --iv $IV
 #
 # Note:
 # travis cli generates random encryption keys and uploads them to the server

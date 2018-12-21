@@ -24,10 +24,7 @@ build-deb () {
 
     set -ex
 
-    buildUtils=`dirname $0`
-    buildUtils=`realpath $buildUtils`
-
-    # bash "$buildUtils/build-preferences.sh"
+    ./ul build-preferences
 
     name="ulauncher"
     tmpdir="/tmp"
@@ -84,8 +81,8 @@ build-deb () {
             echo "GPG key is already imported"
         else
             echo "Importing GPG key"
-            gpg --import $buildUtils/launchpad-public.key
-            gpg --import $buildUtils/launchpad-secret.key
+            gpg --import scripts/launchpad-public.key
+            gpg --import scripts/launchpad-secret.key
         fi
 
         # build and upload

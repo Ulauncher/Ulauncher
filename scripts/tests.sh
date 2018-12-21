@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-warn-if-not-in-docker () {
-    if [ ! -f /.dockerenv ]; then
-        echo
-        echo "${yellow}WARNING: It's recommended to run tests in a docker container to be sure they will also pass in CI${normal}"
-        echo
-    fi
-}
-
-
 test-mypy () {
     echo '[ test: mypy ]'
     set -e

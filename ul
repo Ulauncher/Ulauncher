@@ -3,8 +3,8 @@
 . scripts/common.sh
 . scripts/help.sh
 . scripts/init-dev-env.sh
+. scripts/cleanup-dev-env.sh
 . scripts/rm-python-cache.sh
-. scripts/dev-cleanup.sh
 . scripts/tests.sh
 . scripts/dev-container.sh
 . scripts/build-deb.sh
@@ -13,11 +13,10 @@
 . scripts/create-build-images.sh
 . scripts/build-doc.sh
 . scripts/build-preferences.sh
-. scripts/extract-launchpad-ssh.sh
 . scripts/make-release.sh
 . scripts/send-signal.sh
 . scripts/travis-cli-container.sh
-. scripts/travis-test.sh
+. scripts/run-ci.sh
 . scripts/watch-doc.sh
 . scripts/edit-ui.sh
 
@@ -25,9 +24,9 @@
 main () {
   case "$1" in
     init-dev-env) init-dev-env ;;
+    cleanup-dev-env) cleanup-dev-env ;;
     run) exec ./bin/ulauncher -v --dev $2 ;;
     rm-python-cache) rm-python-cache ;;
-    dev-cleanup) dev-cleanup ;;
     test-mypy) warn-if-not-in-docker && test-mypy ;;
     test-pylint) warn-if-not-in-docker && test-pylint ;;
     test-pytest) warn-if-not-in-docker && test-pytest ;;
@@ -35,18 +34,15 @@ main () {
     dev-container) dev-container ;;
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
-
-    # commands below won't be used by contributors, so they won't be listed in the 'help' output
     build-deb) build-deb $2 $3 ;;
     build-rpm) build-rpm $2 ;;
     build-targz) build-targz $2 ;;
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
     build-preferences) build-preferences ;;
-    extract-launchpad-ssh) extract-launchpad-ssh ;;
     make-release) make-release $2 ;;
     travis-cli-container) travis-cli-container ;;
-    travis-test) travis-test ;;
+    run-ci) run-ci ;;
     watch-doc) watch-doc ;;
 
     *)
