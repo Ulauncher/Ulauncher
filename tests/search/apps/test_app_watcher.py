@@ -35,14 +35,14 @@ class TestAppNotifyEventHandler:
         filter_app.return_value = True
         return filter_app
 
-    def test_add_file_deffered_retries_several_times(self, db, app, mocker):
+    def test_add_file_deferred_retries_several_times(self, db, app, mocker):
         filter_app = mocker.patch('ulauncher.search.apps.app_watcher.filter_app')
         filter_app.return_value = False  # this will make _add_file_sync fail at first
 
         AppNotifyEventHandler.RETRY_INTERVAL = 0.05
         AppNotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
         event_handler = AppNotifyEventHandler(db)
-        event_handler.add_file_deffered('mypath')
+        event_handler.add_file_deferred('mypath')
         sleep(.1)
         assert not db.put_app.called
         filter_app.return_value = True  # now file should be added successfully

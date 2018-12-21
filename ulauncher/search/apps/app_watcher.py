@@ -83,7 +83,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
             sleep(self.RETRY_INTERVAL)
 
-    def add_file_deffered(self, pathname: str) -> None:
+    def add_file_deferred(self, pathname: str) -> None:
         """
         Add .desktop file to DB a little bit later
         """
@@ -116,7 +116,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
     @_only_desktop_files
     def process_IN_CREATE(self, event):
-        self.add_file_deffered(event.pathname)
+        self.add_file_deferred(event.pathname)
 
     @_only_desktop_files
     def process_IN_DELETE(self, event):
@@ -124,7 +124,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
     @_only_desktop_files
     def process_IN_MODIFY(self, event):
-        self.add_file_deffered(event.pathname)
+        self.add_file_deferred(event.pathname)
 
     @_only_desktop_files
     def process_IN_MOVED_FROM(self, event):
@@ -132,7 +132,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
     @_only_desktop_files
     def process_IN_MOVED_TO(self, event):
-        self.add_file_deffered(event.pathname)
+        self.add_file_deferred(event.pathname)
 
 
 @run_async(daemon=True)
