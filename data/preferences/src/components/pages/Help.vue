@@ -1,7 +1,7 @@
 <template>
   <div class="row help-page">
 
-    <div class="col-3 item" v-for="item in items">
+    <div class="col-4 item" v-for="item in items">
 
       <div @click="openUrlInBrowser(item.url)">
         <div class="outer-circle">
@@ -37,12 +37,6 @@ export default {
           label: 'Email Us',
           text: 'Use Github to report an issue, or request a feature. Email is for everything else',
           url: 'mailto:ulauncher.app@gmail.com'
-        },
-        {
-          icon: 'fa-github-alt',
-          label: 'Chat on Gitter',
-          text: 'Chat with us on Gitter',
-          url: 'https://gitter.im/Ulauncher/General'
         },
         {
           icon: 'fa-twitter',
