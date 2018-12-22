@@ -2,16 +2,16 @@
   <div class="page" v-if="prefsLoaded">
 
     <b-table striped small hover show-empty :items="items" :fields="fields">
-      <template slot="name" scope="item">
+      <template slot="name" slot-scope="item">
         <div class="limited-width">{{ item.value }}</div>
       </template>
-      <template slot="keyword" scope="item">
+      <template slot="keyword" slot-scope="item">
         <div class="limited-width">{{ item.value }}</div>
       </template>
-      <template slot="icon" scope="item">
+      <template slot="icon" slot-scope="item">
         <img class="icon" :src="item.value ? expandUserPath(item.value) : defaultIcon" />
       </template>
-      <template slot="cmd" scope="item">
+      <template slot="cmd" slot-scope="item">
         <div class="cmd">
           <div class="text-wrapper">
             <div class="text">{{ item.value }}</div>

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import EditableTextList from '@/components/widgets/EditableTextList'
 
 describe('widget/EditableTextList.vue', () => {
-  function construct (config) {
+  function construct(config) {
     const Constructor = Vue.extend(EditableTextList)
     return new Constructor(config).$mount()
   }

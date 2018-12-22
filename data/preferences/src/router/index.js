@@ -28,7 +28,7 @@ export default new Router({
     {
       path: '/edit-shortcut',
       name: 'edit-shortcut',
-      props: (route) => route.query,
+      props: route => route.query,
       component: EditShortcut
     },
     {

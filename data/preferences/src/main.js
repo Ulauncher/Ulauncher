@@ -24,7 +24,7 @@ new Vue({
   components: { App }
 })
 
-window.onNotification = function (eventName, data) {
+window.onNotification = function(eventName, data) {
   console.info('onNotification', eventName, JSON.stringify(data))
   bus.$emit(eventName, data)
 }

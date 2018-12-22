@@ -30,6 +30,7 @@
         <td>
           <b-form-select
             id="theme-name"
+            class="theme-select"
             :options="prefs.available_themes"
             v-model="theme_name"></b-form-select>
         </td>
@@ -264,7 +265,9 @@ td:first-child {
   width: 220px;
   padding-right: 20px;
 }
-td {padding-bottom: 20px;}
+td {
+  padding-bottom: 20px;
+}
 tr:last-child td {padding-bottom: 0;}
 label {
   cursor: pointer;
@@ -288,5 +291,8 @@ label {
   margin: 10px 0 0 0;
   padding: 0.4em 0.7em;
   line-height: 95%;
+}
+.theme-select {
+  width: auto;
 }
 </style>
