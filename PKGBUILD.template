@@ -11,7 +11,7 @@ url="https://ulauncher.io"
 license=('GPL3')
 depends=('gobject-introspection-runtime' 'libappindicator-gtk3' 'libkeybinder3' 'webkit2gtk'
          "python-"{dbus,gobject,pyinotify,levenshtein,xdg,websocket-client})
-makedepends=('python2-distutils-extra')
+makedepends=('python-distutils-extra')
 provides=("${pkgname%-*}")
 conflicts=("${pkgname%-*}")
 source=("%SOURCE%")

@@ -66,7 +66,7 @@ If you just want to use the app, see download instructions at [ulauncher.io](htt
   ```
 
 ### Build and Run
-1. `$ ./ul dev-container` will take you into a Docker container from which you can run build and test scripts
+1. `$ ./ul dev-container` will take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
 2. `root@container: # ./ul build-preferences` build preferences UI in JS/HTML
 3. `root@container: # ./test` runs linter, type checker, and unit tests
 4. `$ ./ul init-dev-env` installs Ulauncher data to `~/.local/share/ulauncher/`
