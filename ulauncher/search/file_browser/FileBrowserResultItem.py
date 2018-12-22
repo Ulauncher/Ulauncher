@@ -36,7 +36,7 @@ class FileBrowserResultItem(SmallResultItem):
         return get_file_icon(self.path, self.ICON_SIZE)
 
     def on_enter(self, query):
-        self._file_queries.put(self.path.get_abs_path())
+        self._file_queries.save_query(self.path.get_abs_path())
         if self.path.is_dir():
             return SetUserQueryAction(os.path.join(self.path.get_user_path(), ''))
 

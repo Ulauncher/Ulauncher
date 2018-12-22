@@ -33,10 +33,12 @@ class FileBrowserMode(BaseSearchMode):
 
     def list_files(self, path_str: str, sort_by_usage: bool = False) -> List[str]:
         files = os.listdir(path_str)
+
+        def get_last_used_time(file: str) -> float:
+            return self._file_queries.find(os.path.join(path_str, file)) or 0
+
         if sort_by_usage:
-            return sorted(files,
-                          reverse=True,
-                          key=lambda f: self._file_queries.find(os.path.join(path_str, f)) or '')
+            return sorted(files, reverse=True, key=get_last_used_time)
 
         return sorted(files)
 

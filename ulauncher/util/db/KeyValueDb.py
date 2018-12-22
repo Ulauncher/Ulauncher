@@ -1,27 +1,25 @@
 import os
 import pickle
-from typing import Dict, Any
+from typing import Dict, TypeVar, Generic, Optional
 
 from distutils.dir_util import mkpath
 
-Records = Dict[str, Any]
+Key = TypeVar('Key')
+Value = TypeVar('Value')
+Records = Dict[Key, Value]
 
-
-class KeyValueDb:
+class KeyValueDb(Generic[Key, Value]):
     """
     Key-value in-memory database
     Use open() method to load DB from a file and commit() to save it
     """
 
-    _name = None  # type: str
-    _records = None  # type: Records
-
     def __init__(self, basename: str):
         """
         :param str basename: path to db file
         """
-        self._name = basename
-        self._records = {}
+        self._name = basename # type: str
+        self._records = {}  # type: Records
 
     def open(self) -> 'KeyValueDb':
         """Create a new data base or open existing one"""
@@ -46,7 +44,7 @@ class KeyValueDb:
 
         return self
 
-    def remove(self, key: str) -> bool:
+    def remove(self, key: Key) -> bool:
         """
         :param str key:
         :type: bool
@@ -61,8 +59,8 @@ class KeyValueDb:
     def get_records(self) -> Records:
         return self._records
 
-    def put(self, key: str, value: Any) -> None:
+    def put(self, key: Key, value: Value) -> None:
         self._records[key] = value
 
-    def find(self, key: str, default: Any = None) -> Dict[Any, Any]:
+    def find(self, key: Key, default: Value = None) -> Optional[Value]:
         return self._records.get(key, default)

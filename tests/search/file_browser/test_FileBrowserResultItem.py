@@ -62,7 +62,7 @@ class TestFileBrowserResultItem:
     # pylint: disable=too-many-arguments
     def test_on_enter(self, result_item, path, file_queries, OpenAction, SetUserQueryAction):
         assert result_item.on_enter('query') == SetUserQueryAction.return_value
-        file_queries.put.assert_called_with(path.get_abs_path.return_value)
+        file_queries.save_query.assert_called_with(path.get_abs_path.return_value)
 
         # is not dir
         path.is_dir.return_value = False
