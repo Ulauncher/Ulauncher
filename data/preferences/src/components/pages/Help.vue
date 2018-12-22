@@ -29,19 +29,19 @@ export default {
         {
           icon: 'fa-github',
           label: 'Troubleshooting',
-          text: 'Find or report your issue on Github',
+          text: 'Report a bug or ask a question on Github',
           url: 'https://github.com/Ulauncher/Ulauncher/issues'
         },
         {
           icon: 'fa-envelope',
           label: 'Email Us',
-          text: 'Use Github to report an issue, or request a feature. Email is for everything else',
+          text: "Just in case you don't want to open a Github issue for some reason, you can always email us",
           url: 'mailto:ulauncher.app@gmail.com'
         },
         {
           icon: 'fa-twitter',
           label: 'Follow on Twitter',
-          text: 'Follow us to get the latest updates and news about Ulauncher',
+          text: 'Follow UlauncherApp on Twitter to get the latest updates and news',
           url: 'https://twitter.com/UlauncherApp'
         }
       ]
