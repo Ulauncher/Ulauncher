@@ -20,14 +20,6 @@ ulauncher\.util\.decorator\.debounce module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.util\.decorator\.lru\_cache module
----------------------------------------------
-
-.. automodule:: ulauncher.util.decorator.lru_cache
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.util\.decorator\.run\_async module
 ---------------------------------------------
 

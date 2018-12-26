@@ -43,15 +43,6 @@ ulauncher\.ui\.SmallResultItemWidget module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.theme module
----------------------------
-
-.. automodule:: ulauncher.ui.theme
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 

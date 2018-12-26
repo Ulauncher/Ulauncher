@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 `Ulauncher <https://ulauncher.io>`_ |version| documentation
-==========================================================
+===========================================================
 
 Currently only docs about extensions are available here.
 Everything else is on
@@ -38,6 +38,7 @@ Extension Development Guide
    extensions/libs
    extensions/examples
    extensions/debugging
+   extensions/migration
 
 :doc:`extensions/intro`
     Understand what Ulauncher extensions are and how they work.
@@ -59,6 +60,9 @@ Extension Development Guide
 
 :doc:`extensions/debugging`
     Debugging tips.
+
+:doc:`extensions/migration`
+    How to migrate from one version of Extension API to a new one.
 
 
 Indexes and tables
