@@ -42,7 +42,7 @@ Let's take this example::
 
 ``^1.0.0`` means that the Ulauncher will install extension from branch ``release-for-api-v1`` if Ulauncher Extension API >= 1.0.0 and < 2.0.0
 
-If for example the API version is ``2.5.0`` then Ulauncher will install extension from ``master`` branch because it chooses the maximum API version that matches the current version.
+If for example the current API version is ``2.5.0``, which matches both ``^2.0.0`` and ``^2.3.1`` requirements, then Ulauncher will install extension from ``master`` branch because it chooses the maximum API version that matches the current version.
 
 You can find the current version on the About page of Ulauncher preferences.
 
@@ -50,7 +50,7 @@ You can find the current version on the About page of Ulauncher preferences.
 
 **What problem does versions.json solve?**
 
-Ulauncher maintainers want to minimize amount of code and infrastructure components that are needed to have a flexible extension ecosystem. For that reason we want to rely on Github as much as possible as a storage of extensions. We also want to allow extension developers to release extensions for previous versions of Ulauncher. That's why ``versions.json`` will be used to track all releases of a certain extension.
+We want to minimize the amount of code and infrastructure components that are needed to have a flexible extension ecosystem. For that reason we want to rely on Github as much as possible as a storage of extensions. We also want to allow extension developers to release extensions for previous versions of Ulauncher (for bug fixes for example). That's why ``versions.json`` will be used to track all releases of a certain extension.
 
 **How does Ulauncher use this file?**
 
