@@ -3,6 +3,9 @@ import os
 import time
 import logging
 import threading
+import subprocess
+import mimetypes
+
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -10,7 +13,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
-from gi.repository import Gtk, Gdk, GLib, Keybinder
+from gi.repository import Gtk, Gdk, GLib, Gio, Keybinder
 
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
@@ -80,6 +83,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
+
+        self.result_box_parent = self.result_box.get_parent()
+
+        self.result_box_parent = self.result_box.get_parent()
 
         self.input.connect('changed', self.on_input_changed)
         self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
@@ -307,6 +314,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         :param list result_items: list of ResultItem instances
         """
+        try: self.appchooser
+        except: self.appchooser = None
+
+        # first time appchooser does not yet exist 
+        if self.appchooser is not None:
+            self.result_box_parent.remove(self.appchooser)
+
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
@@ -329,6 +343,30 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
         logger.debug('render %s results' % len(results))
+
+    def show_appchooser(self, filepath):
+        """
+        :param str filepath: list of application
+        """
+
+        self.results_nav = None
+        self.result_box.foreach(lambda w: w.destroy())
+
+        def app_activated(self, widget):
+            # need to get instance to be able to hide window later (is this okay?)
+            window = UlauncherWindow.get_instance()
+            exe = widget.get_executable()
+            subprocess.Popen([exe, filepath])
+            self.destroy()
+            if window.is_visible():
+                window.hide()
+
+        mime = mimetypes.guess_type(filepath)[0]
+        appchooser = Gtk.AppChooserWidget.new(mime)
+        self.result_box_parent.add(appchooser)
+        appchooser.connect("application-activated", app_activated)
+        self.show_all()
+
 
     @staticmethod
     def create_item_widgets(items, query):
