@@ -13,7 +13,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
-from gi.repository import Gtk, Gdk, GLib, Gio, Keybinder
+from gi.repository import Gtk, Gdk, GLib, Keybinder
 
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultItemWidget import ResultItemWidget
@@ -83,8 +83,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
-
-        self.result_box_parent = self.result_box.get_parent()
 
         self.result_box_parent = self.result_box.get_parent()
 
