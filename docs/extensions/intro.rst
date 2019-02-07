@@ -5,7 +5,7 @@ Overview
 What is an Extension
 --------------------
 
-Ulauncher extensions are **Python 2** programs that run as separate processes along with the app.
+Ulauncher extensions are **Python 3** programs that run as separate processes along with the app.
 
 When you run Ulauncher it starts all available extensions so they are ready to react to user events.
 All extensions are terminated when Ulauncher app is closed or crashed.
@@ -18,7 +18,7 @@ Extensions have the same capabilities as any other program --
 they can access your directories, make network requests, etc.
 Basically they get the same rights as a user that runs Ulauncher.
 
-Extension API v1 (current) enables extension developers to write **custom handlers for keywords**.
+Extension API v2 (current) enables extension developers to write **custom handlers for keywords**.
 
 .. figure:: http://i.imgur.com/bc2bzZ8.png
   :align: center

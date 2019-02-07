@@ -18,10 +18,12 @@ API version 2 was introduced along with Ulauncher v5 after migrating from Python
 
   ::
 
-    {
-      "^1.0.0": "api-v1.0.0",
-      "^2.0.0": "api-v2.0.0",
-    }
+    [
+      {"required_api_version": "^1.0.0", "commit": "abcd1234"},
+      {"required_api_version": "^2.0.0", "commit": "my-branch-with-api-v2-support"}
+    ]
+
+  For more details about ``version.json``, see `tutorial <tutorial.html#versions-json>`__.
 
 ----
 

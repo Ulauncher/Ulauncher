@@ -10,7 +10,7 @@ from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.api.server.ExtensionDb import ExtensionDb
-from ulauncher.api.server.GithubExtension import GithubExtension, InvalidGithubUrlError
+from ulauncher.api.server.GithubExtension import GithubExtension, InvalidGithubUrlError, ICommit
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
 from ulauncher.api.server.extension_finder import find_extensions
 
@@ -59,15 +59,15 @@ class ExtensionDownloader:
             logger.exception('ext_downloader.download() failed. %s: %s', type(e).__name__, e)
             raise InvalidGithubUrlError('Project is not available on Github')
 
-        filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
+        filename = download_zip(gh_ext.get_download_url(gh_commit.last_commit))
         unzip(filename, ext_path)
 
         self.ext_db.put(ext_id, {
             'id': ext_id,
             'url': url,
             'updated_at': datetime.now().isoformat(),
-            'last_commit': gh_commit['last_commit'],
-            'last_commit_time': gh_commit['last_commit_time']
+            'last_commit': gh_commit.last_commit,
+            'last_commit_time': gh_commit.last_commit_time
         })
         self.ext_db.commit()
 
@@ -122,11 +122,11 @@ class ExtensionDownloader:
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        filename = download_zip(gh_ext.get_download_url(gh_commit['last_commit']))
+        filename = download_zip(gh_ext.get_download_url(gh_commit.last_commit))
         unzip(filename, ext_path)
         ext['updated_at'] = datetime.now().isoformat()
-        ext['last_commit'] = gh_commit['last_commit']
-        ext['last_commit_time'] = gh_commit['last_commit_time']
+        ext['last_commit'] = gh_commit.last_commit
+        ext['last_commit_time'] = gh_commit.last_commit_time
         self.ext_db.put(ext_id, ext)
         self.ext_db.commit()
 
@@ -135,7 +135,7 @@ class ExtensionDownloader:
 
         return True
 
-    def get_new_version(self, ext_id: str) -> dict:
+    def get_new_version(self, ext_id: str) -> ICommit:
         """
         Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
         """
@@ -152,7 +152,7 @@ class ExtensionDownloader:
             logger.error('gh_ext.get_ext_meta() failed. %s: %s', type(e).__name__, e)
             raise InvalidGithubUrlError('Project is not available on Github')
 
-        if ext['last_commit'] == gh_commit['last_commit']:
+        if ext['last_commit'] == gh_commit.last_commit:
             raise ExtensionIsUpToDateError('Extension %s is up-to-date' % ext_id)
 
         return gh_commit

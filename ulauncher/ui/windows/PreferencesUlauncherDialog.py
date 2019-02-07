@@ -3,34 +3,35 @@ import os
 import logging
 import json
 from urllib.parse import unquote
-
 import gi
 gi.require_version('WebKit2', '4.0')
+
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gio, Gtk, WebKit2, GLib
 
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
-from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
-from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.util.AutostartPreference import AutostartPreference
-from ulauncher.util.Router import Router, get_url_params
-from ulauncher.util.Settings import Settings
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.decorator.glib_idle_add import glib_idle_add
-from ulauncher.util.Theme import themes, Theme, load_available_themes
-from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
+from ulauncher.ui.windows.WindowHelper import WindowHelper
+from ulauncher.ui.windows.Builder import Builder
+from ulauncher.api.shared.event import PreferencesUpdateEvent
+from ulauncher.api.server.extension_finder import find_extensions
+from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
+from ulauncher.api.server.ExtensionDb import ExtensionDb
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionManifest import ManifestValidationError, VersionIncompatibilityError
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
                                                       ExtensionIsUpToDateError)
-from ulauncher.api.server.ExtensionManifest import ManifestValidationError, VersionIncompatibilityError
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner
-from ulauncher.api.server.ExtensionDb import ExtensionDb
-from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
-from ulauncher.api.server.extension_finder import find_extensions
-from ulauncher.api.shared.event import PreferencesUpdateEvent
-from ulauncher.ui.windows.Builder import Builder
-from ulauncher.ui.windows.WindowHelper import WindowHelper
-from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
+from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.util.Theme import themes, Theme, load_available_themes
+from ulauncher.util.decorator.glib_idle_add import glib_idle_add
+from ulauncher.util.decorator.run_async import run_async
+from ulauncher.util.Settings import Settings
+from ulauncher.util.Router import Router, get_url_params
+from ulauncher.util.AutostartPreference import AutostartPreference
+from ulauncher.ui.AppIndicator import AppIndicator
+from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
+
 
 
 logger = logging.getLogger(__name__)
@@ -383,7 +384,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Handling /extension/check-updates')
         ext_id = url_params['query']['id']
         try:
-            return ExtensionDownloader.get_instance().get_new_version(ext_id)
+            version = ExtensionDownloader.get_instance().get_new_version(ext_id)
+            return {'last_commit': version.last_commit,
+                    'last_commit_time': version.last_commit_time}
         except ExtensionIsUpToDateError:
             return None
 

@@ -24,25 +24,26 @@ Create a new directory there (name it as you wish) with the following structure:
 versions.json
 -------------
 
-The file contains a key-value map where a key is a required version of Ulauncher Extension API and a value is a branch name or commit or git tag where the code for that required version is located
+The file contains a list with supported versions of Ulauncher API. ``commit`` field may be either a commit id, branch name, or git tag where the code for that required version is located
 
-It must be checked in to the **root** dir of **master** branch.
+``versions.json`` must be checked in to the **root** dir of **master** branch.
 
-Key in the JSON file must contain a specific version or a range of versions defined using `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format.
+``required_api_version`` must contain a specific version or a range of versions defined using `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format.
 
 Let's take this example::
 
-  {
-    "^1.0.0": "release-for-api-v1",
-    "^2.0.0": "release-for-api-v2",
-    "^2.3.1": "master"
-  }
+
+  [
+    {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
+    {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
+    {"required_api_version": "^2.3.1", "commit": "master"}
+  ]
 
 ``release-for-api-v1`` is a branch name (or may be a git tag in this case too). You can choose branch/tag names whatever you like.
 
 ``^1.0.0`` means that the Ulauncher will install extension from branch ``release-for-api-v1`` if Ulauncher Extension API >= 1.0.0 and < 2.0.0
 
-If for example the current API version is ``2.5.0``, which matches both ``^2.0.0`` and ``^2.3.1`` requirements, then Ulauncher will install extension from ``master`` branch because it chooses the maximum API version that matches the current version.
+If for example the current API version is ``2.5.0``, which matches both ``^2.0.0`` and ``^2.3.1`` requirements, then Ulauncher will install extension from ``master`` branch because it chooses the last matched item.
 
 You can find the current version on the About page of Ulauncher preferences.
 
