@@ -86,7 +86,7 @@ export default {
       }, (err) => bus.$emit('error', err))
     },
     onAddExtFormShown () {
-      this.$refs.githubUrl.focus()
+      this.$nextTick(() => this.$refs.githubUrl.focus())
       this.addingExtensionError = ''
     },
     addExtDialog () {

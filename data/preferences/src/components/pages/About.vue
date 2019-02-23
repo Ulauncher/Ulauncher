@@ -37,7 +37,7 @@
         <div class="selectable">
           <p>Copyright (C) Aleksandr Gornostal &lt;ulauncher.app@gmail.com&gt;</p>
           <p>Ulauncher is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3, as published by the Free Software Foundation.</p>
-          <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See the GNU General Public License for more derails.</p>
+          <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See the GNU General Public License for more details.</p>
         </div>
 
         <a href="#" class="toggle" @click.prevent="toggleCredits">Credits</a>
