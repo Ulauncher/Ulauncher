@@ -18,10 +18,14 @@
       <div class="col-6 selectable">
         <small>by {{ extension.developer_name }}</small>
       </div>
-      <div class="col-6 pull-right">
+      <div class="col-6 pull-right github-links">
+        <small v-if="extension.url">
+          <i class="fa fa-bug"></i>
+          <a @click.prevent="onLinkClick" :href="`${extension.url}/issues`"> Report Issue </a>
+        </small>
         <small v-if="extension.url">
           <i class="fa fa-github"></i>
-          <a @click.prevent="onLinkClick" :href="extension.url"> {{ githubProjectPath(extension.url) }}</a>
+          <a @click.prevent="onLinkClick" :href="extension.url" :title="extension.url"> Github</a>
         </small>
       </div>
     </div>
@@ -254,5 +258,9 @@ export default {
   button {
     margin-right: 10px;
   }
+}
+.github-links small {
+  display: inline-block;
+  margin-left: 10px;
 }
 </style>
