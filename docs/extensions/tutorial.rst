@@ -74,6 +74,8 @@ Available Options
 
 Preference Object Fields
 ^^^^^^^^^^^^^^^^^^^^^^^^
+The values of the preferences are forwarded to the on_event method of the KeywordQueryEventListener class as an attribute of extension. For example the value of the keyword with id = 'id' and value = 'val' is obtained with the line value = extension.preferences['id'] which  assigns the string 'val' to value. An example of the use of preferences can be found in the [ulauncher demo extension](https://github.com/Ulauncher/ulauncher-demo-ext)
+
 
 ``id``
   Key that is used to retrieve value for a certain preference
