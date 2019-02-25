@@ -19,11 +19,13 @@ As of Ulauncher v3, you can create your own Ulauncher extensions
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 
 
-[Create Your Ulauncher Color themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
+[Create Your Ulauncher Color Themes](http://docs.ulauncher.io/en/latest/themes/themes.html)
 ==============================================================
 
-As of Ulauncher v4, you can create your own color themes  
-Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
+As of Ulauncher v4, you can create your own color themes.
+
+Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how,
+or go to [here](https://gist.github.com/gornostal/02a232e6e560da7946c053555ced6cce) to see themes contributed by other users.
 
 
 Known Issues
