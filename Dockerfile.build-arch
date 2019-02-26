@@ -1,13 +1,10 @@
-FROM base/archlinux
+FROM archlinux/base
 
 MAINTAINER ulauncher.app@gmail.com
 
-WORKDIR /root/ulauncher
+RUN useradd -ms /bin/sh kenny && \
+    pacman --noconfirm -Syu && \
+    pacman --noconfirm -S binutils python2 git grep openssh
 
-RUN pacman --noconfirm -Syu && \
-    pacman --noconfirm -S \
-    python2 \
-    pkgbuild-introspection \
-    git \
-    grep \
-    openssh
+WORKDIR /home/kenny
+USER kenny

@@ -91,7 +91,8 @@ def push_update(pkgbuild):
     run_shell(('git', 'config', 'user.name', 'Aleksandr Gornostal'))
     with open('PKGBUILD', 'w') as f:
         f.write(pkgbuild)
-    run_shell(('mksrcinfo'))
+    with open('.SRCINFO', 'wb') as f:
+        run_shell(('makepkg', '--printsrcinfo'), stdout=f)
     run_shell(('git', 'add', 'PKGBUILD', '.SRCINFO'))
     run_shell(('git', 'commit', '-m', 'Version update %s' % version))
     run_shell(('git', 'push', 'origin', 'master'), env=ssh_enabled_env)
