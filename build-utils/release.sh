@@ -64,7 +64,6 @@ create_rpms() {
 }
 
 aur_update() {
-    chmod 660 ./build-utils/aur_key
     # Push new PKGBUILD to AUR stable channel
     docker run \
         --rm \
