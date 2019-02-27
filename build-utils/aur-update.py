@@ -92,7 +92,8 @@ def push_update(pkgbuild):
     with open('PKGBUILD', 'w') as f:
         f.write(pkgbuild)
     with open('.SRCINFO', 'wb') as f:
-        run_shell(('makepkg', '--printsrcinfo'), stdout=f)
+        # we cannot run makepkg from root, that's why we run it from user 'kenny'
+        run_shell(('su', '-c', 'makepkg --printsrcinfo', 'kenny'), stdout=f)
     run_shell(('git', 'add', 'PKGBUILD', '.SRCINFO'))
     run_shell(('git', 'commit', '-m', 'Version update %s' % version))
     run_shell(('git', 'push', 'origin', 'master'), env=ssh_enabled_env)

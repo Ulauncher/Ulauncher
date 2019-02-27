@@ -7,4 +7,3 @@ RUN useradd -ms /bin/sh kenny && \
     pacman --noconfirm -S binutils python2 git grep openssh
 
 WORKDIR /home/kenny/ulauncher
-USER kenny
