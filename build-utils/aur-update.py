@@ -79,7 +79,6 @@ def pkgbuild_from_template(targz):
 
 def push_update(pkgbuild):
     ssh_key = os.sep.join((project_path, 'build-utils', 'aur_key'))
-    run_shell(('chmod', '600', ssh_key))
     git_ssh_command = 'ssh -oStrictHostKeyChecking=no -i %s' % ssh_key
     ssh_enabled_env = dict(os.environ, GIT_SSH_COMMAND=git_ssh_command)
 
