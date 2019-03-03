@@ -85,8 +85,8 @@ def push_update(pkgbuild):
 
     temp_dir = mkdtemp()
     print "Temp dir: %s" % temp_dir
-    run_shell(('chown', '-R', 'kenny:kenny', temp_dir))
     run_shell(('git', 'clone', aur_repo, temp_dir), env=ssh_enabled_env)
+    run_shell(('chown', '-R', 'kenny:kenny', temp_dir))
     os.chdir(temp_dir)
     run_shell(('git', 'config', 'user.email', 'ulauncher.app@gmail.com'))
     run_shell(('git', 'config', 'user.name', 'Aleksandr Gornostal'))
