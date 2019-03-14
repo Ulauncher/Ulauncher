@@ -19,8 +19,8 @@ class OpenAction(BaseAction):
 
     def run(self):
         if sys.platform.startswith('darwin'):
-            subprocess.call(('open', self.path))
+            subprocess.Popen(['open', self.path])
         elif os.name == 'nt':
             os.startfile(self.path)
         elif os.name == 'posix':
-            subprocess.call(('xdg-open', self.path))
+            subprocess.Popen(['xdg-open', self.path])
