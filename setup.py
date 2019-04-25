@@ -48,8 +48,7 @@ def move_desktop_file(root, target_data, prefix):
     # normal data files anywhere we want, the desktop file needs to exist in
     # the main system to be found.  Only actually useful for /opt installs.
 
-    old_desktop_path = os.path.normpath(root + target_data +
-                                        '/share/applications')
+    old_desktop_path = os.path.normpath(root + target_data + '/share/applications')
     old_desktop_file = old_desktop_path + '/ulauncher.desktop'
     desktop_path = os.path.normpath(root + prefix + '/share/applications')
     desktop_file = desktop_path + '/ulauncher.desktop'

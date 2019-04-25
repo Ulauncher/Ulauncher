@@ -12,7 +12,7 @@ if VER >= 3:
     from http.server import BaseHTTPRequestHandler
     from io import StringIO, BytesIO
 else:
-    import socketserver
+    import socketserver  # noqa: F401
     from http.server import BaseHTTPRequestHandler
     from io import StringIO
 
@@ -570,7 +570,7 @@ class WebSocket:
                 raise Exception('payload exceeded allowable size')
 
             # check if we have processed length bytes; if so we are done
-            if (self.index+1) == self.length:
+            if (self.index + 1) == self.length:
                 try:
                     self._handlePacket()
                 except Exception:

@@ -6,6 +6,7 @@ from ulauncher.util.text_highlighter import highlight_text
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
+
 # pylint: disable=too-many-instance-attributes
 class ResultItem:
 

@@ -2,10 +2,10 @@ import os
 import json
 from distutils.dir_util import mkpath
 
-from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.util.db.KeyValueDb import KeyValueDb, Key, Value
 
 
-class KeyValueJsonDb(KeyValueDb):
+class KeyValueJsonDb(KeyValueDb[Key, Value]):
     """
     Key-value JSON database
     Use open() method to load DB from a file and commit() to save it
@@ -18,7 +18,7 @@ class KeyValueJsonDb(KeyValueDb):
                 raise IOError("%s exists and is not a file" % self._name)
 
             with open(self._name, 'r') as _in:
-                self._records = json.load(_in)
+                self.set_records(json.load(_in))
         else:
             # make sure path exists
             mkpath(os.path.dirname(self._name))

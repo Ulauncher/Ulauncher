@@ -5,6 +5,8 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Clipboard from 'vue-clipboard2'
+
 import App from './App'
 import router from './router'
 import BootstrapVue from 'bootstrap-vue'
@@ -12,8 +14,10 @@ import bus from './event-bus'
 import createStore from './store'
 
 Vue.config.productionTip = false
+Clipboard.config.autoSetContainer = true
 Vue.use(BootstrapVue)
 Vue.use(Vuex)
+Vue.use(Clipboard)
 
 /* eslint-disable no-new */
 new Vue({

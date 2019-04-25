@@ -29,6 +29,9 @@ def _only_desktop_files(func):
     return decorator_func
 
 
+DeferredFiles = Dict[str, float]
+
+
 class AppNotifyEventHandler(pyinotify.ProcessEvent):
     RETRY_INTERVAL = 2  # seconds
     RETRY_TIME_SPAN = (5, 30)  # make an attempt to process desktop file within 5 to 30 seconds after event came in
@@ -36,8 +39,6 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
     class InvalidDesktopFile(IOError):
         pass
-
-    DeferredFiles = Dict[str, int]
 
     def __init__(self, db):
         super(AppNotifyEventHandler, self).__init__()

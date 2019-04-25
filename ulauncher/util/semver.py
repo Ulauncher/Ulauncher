@@ -305,6 +305,8 @@ def semver(version, loose):
 make_semver = semver
 
 # pylint: disable=too-many-instance-attributes
+
+
 class SemVer:
     # major, minor, patch, prerelease, build, micro_version
 

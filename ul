@@ -29,8 +29,9 @@ main () {
     rm-python-cache) rm-python-cache ;;
     test-mypy) warn-if-not-in-docker && test-mypy ;;
     test-pylint) warn-if-not-in-docker && test-pylint ;;
+    test-flake8) warn-if-not-in-docker && test-flake8 ;;
     test-pytest) warn-if-not-in-docker && test-pytest ;;
-    test) warn-if-not-in-docker && test-mypy && test-pylint && test-pytest ;;
+    test) warn-if-not-in-docker && test-mypy && test-flake8 && test-pylint && test-pytest ;;
     dev-container) dev-container ;;
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;

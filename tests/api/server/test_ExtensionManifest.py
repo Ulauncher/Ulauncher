@@ -1,8 +1,7 @@
 import os
 import pytest
-from ulauncher.api.server.ExtensionManifest import (ExtensionManifest,
-                                                    ManifestValidationError,
-                                                    VersionIncompatibilityError)
+from ulauncher.api.server.errors import ErrorName
+from ulauncher.api.server.ExtensionManifest import (ExtensionManifest, ExtensionManifestError)
 
 
 class TestExtensionManifest:
@@ -40,13 +39,15 @@ class TestExtensionManifest:
 
     def test_validate__manifest_version_is_2__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'manifest_version': '2'}, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__name_empty__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'manifest_version': '1', 'api_version': '1'}, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__valid_manifest__no_exceptions_raised(self, ext_dir, valid_manifest):
         manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
@@ -57,32 +58,36 @@ class TestExtensionManifest:
             {}
         ]
         manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__prefs_incorrect_type__exception_raised(self, ext_dir, valid_manifest):
         valid_manifest['preferences'] = [
             {'id': 'id', 'type': 'incorrect'}
         ]
         manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__type_kw_empty_name__exception_raised(self, ext_dir, valid_manifest):
         valid_manifest['preferences'] = [
             {'id': 'id', 'type': 'incorrect', 'keyword': 'kw'}
         ]
         manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__raises_error_if_empty_default_value_for_keyword(self, ext_dir, valid_manifest):
         valid_manifest['preferences'] = [
             {'id': 'id', 'type': 'keyword', 'name': 'My Keyword'}
         ]
         manifest = ExtensionManifest('test_extension', valid_manifest, ext_dir)
-        with pytest.raises(ManifestValidationError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
+        assert e.value.error_name == ErrorName.InvalidManifestJson.value
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, ext_dir, valid_manifest):
         valid_manifest['preferences'] = [
@@ -94,13 +99,15 @@ class TestExtensionManifest:
 
     def test_check_compatibility__api_version_2__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'api_version': '2', 'manifest_version': '1'}, ext_dir)
-        with pytest.raises(VersionIncompatibilityError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
+        assert e.value.error_name == ErrorName.ExtensionCompatibilityError.value
 
     def test_check_compatibility__manifest_version_12__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'api_version': '0', 'manifest_version': '12'}, ext_dir)
-        with pytest.raises(VersionIncompatibilityError):
+        with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
+        assert e.value.error_name == ErrorName.ExtensionCompatibilityError.value
 
     def test_check_compatibility__api_version_1__no_exceptions(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'api_version': '1', 'manifest_version': '1'}, ext_dir)

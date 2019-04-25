@@ -1,85 +1,125 @@
 import re
 import json
-from typing import Dict, List
+import logging
+from datetime import datetime
 from urllib.request import urlopen
+from urllib.error import HTTPError
+from typing import Dict, List, cast
+from mypy_extensions import TypedDict
 
+from ulauncher.util.date import iso_to_datetime
 from ulauncher.api.version import api_version
+from ulauncher.api.server.errors import ErrorName, UlauncherServerError
 from ulauncher.util.semver import satisfies, valid_range
-from ulauncher.util.named_tuple_from_dict import namedtuple_from_dict
 
 DEFAULT_GITHUB_BRANCH = 'master'
 
-# pylint: disable=too-few-public-methods
-class IPreference:
-    default_value = None  # type: str
-    id = None  # type: str
-    name = None  # type: str
-    type = None  # type: str
+logger = logging.getLogger(__name__)
+
+ManifestPreference = TypedDict('ManifestPreference', {
+    'default_value': str,
+    'id': str,
+    'name': str,
+    'type': str
+})
+
+ManifestOptions = TypedDict('ManifestOptions', {
+    'query_debounce': float
+})
+
+Manifest = TypedDict('Manifest', {
+    'required_api_version': str,
+    'description': str,
+    'developer_name': str,
+    'icon': str,
+    'name': str,
+    'options': ManifestOptions,
+    'preferences': List[ManifestPreference]
+})
+
+Commit = TypedDict('Commit', {
+    'sha': str,
+    'time': datetime
+})
 
 
-class IOptions:
-    query_debounce = None  # type: float
-
-
-class IManifest:
-    required_api_version = None  # type: str
-    description = None  # type: str
-    developer_name = None  # type: str
-    icon = None  # type: str
-    name = None  # type: str
-    options = None  # type: IOptions
-    preferences = None  # type: List[IPreference]
-
-
-class ICommit:
-    last_commit = None  # type: str
-    last_commit_time = None  # type: str
+class GithubExtensionError(UlauncherServerError):
+    pass
 
 
 class GithubExtension:
 
     url_match_pattern = r'^https:\/\/github.com\/([\w-]+\/[\w-]+)$'
     url_file_template = 'https://raw.githubusercontent.com/{project_path}/{branch}/{file_path}'
+    url_commit_template = 'https://api.github.com/repos/{project_path}/commits/{commit}'
 
     def __init__(self, url):
         self.url = url
 
     def validate_url(self):
         if not re.match(self.url_match_pattern, self.url, re.I):
-            raise InvalidGithubUrlError('Invalid GithubUrl: %s' % self.url)
+            raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
 
-    def find_compatible_version(self) -> str:
+    def find_compatible_version(self) -> Commit:
         """
         Finds maximum version that is compatible with current version of Ulauncher
         and returns a commit or branch/tag name
+
+        :raises ulauncher.api.server.GithubExtension.InvalidVersionsFileError:
         """
-        commit = ""
+        sha_or_branch = ""
         for ver in self.read_versions():
             if satisfies(api_version, ver['required_api_version']):
-                commit = ver['commit']
+                sha_or_branch = ver['commit']
 
-        if not commit:
-            raise InvalidVersionsFileError(
-                "This extension is not compatible with current version Ulauncher extension API (v%s)" % api_version)
+        if not sha_or_branch:
+            raise GithubExtensionError(
+                "This extension is not compatible with current version Ulauncher extension API (v%s)" % api_version,
+                ErrorName.IncompatibleVersion)
 
-        return commit
+        return self.get_commit(sha_or_branch)
+
+    def get_commit(self, sha_or_branch) -> Commit:
+        """
+        Github response example: https://api.github.com/repos/Ulauncher/Ulauncher/commits/a1304f5a
+        """
+
+        project_path = self._get_project_path()
+        url = self.url_commit_template.format(project_path=project_path, commit=sha_or_branch)
+        resp = json.loads(urlopen(url).read().decode('utf-8'))
+
+        return {
+            'sha': resp['sha'],
+            'time': iso_to_datetime(resp['commit']['committer']['date'])
+        }
 
     def _read_json(self, commit, file_path) -> Dict:
         project_path = self._get_project_path()
         url = self.url_file_template.format(project_path=project_path, branch=commit, file_path=file_path)
-        return json.loads(urlopen(url).read().decode('utf-8'))
+
+        try:
+            return json.loads(urlopen(url).read().decode('utf-8'))
+        except HTTPError as e:
+            logger.exception('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
+            if e.code == 404:
+                raise GithubExtensionError('Could not find versions.json file using URL "%s"' %
+                                           url, ErrorName.VersionsJsonNotFound)
+            raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError)
 
     def read_versions(self) -> List[Dict[str, str]]:
         versions = self._read_json('master', 'versions.json')
+
         if not isinstance(versions, list):
-            raise InvalidVersionsFileError('versions.json should contain a list')
+            raise GithubExtensionError('versions.json should contain a list', ErrorName.InvalidVersionsJson)
         for ver in versions:
             if not isinstance(ver, dict):
-                raise InvalidVersionsFileError('versions.json should contain a list of objects')
+                raise GithubExtensionError('versions.json should contain a list of objects',
+                                           ErrorName.InvalidVersionsJson)
             if not isinstance(ver.get('required_api_version'), str):
-                raise InvalidVersionsFileError('versions.json: required_api_version should be a string')
+                raise GithubExtensionError(
+                    'versions.json: required_api_version should be a string', ErrorName.InvalidVersionsJson)
             if not isinstance(ver.get('commit'), str):
-                raise InvalidVersionsFileError('versions.json: commit should be a string')
+                raise GithubExtensionError('versions.json: commit should be a string', ErrorName.InvalidVersionsJson)
 
             valid = False
             try:
@@ -88,29 +128,30 @@ class GithubExtension:
             except Exception:
                 pass
             if not valid:
-                raise InvalidVersionsFileError("versions.json: invalid range '%s'" % ver['required_api_version'])
+                raise GithubExtensionError("versions.json: invalid range '%s'" % ver['required_api_version'],
+                                           ErrorName.InvalidVersionsJson)
 
         return versions
 
-    def read_manifest(self, commit) -> IManifest:
-        return namedtuple_from_dict(self._read_json(commit, 'manifest.json'))
+    def read_manifest(self, commit) -> Manifest:
+        return cast(Manifest, self._read_json(commit, 'manifest.json'))
 
-    def get_last_commit(self) -> ICommit:
-        """
-        :rtype dict: {'last_commit': str, 'last_commit_time': str}
-        :raises urllib.error.HTTPError:
-        """
-        project_path = self._get_project_path()
-        branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)
-        branch_head = json.loads(urlopen(branch_head_url).read().decode('utf-8'))
-        branch_head_commit = json.loads(urlopen(branch_head['object']['url']).read().decode('utf-8'))
+    # def get_last_commit(self) -> Commit:
+    #     """
+    #     :rtype dict: {'last_commit': str, 'last_commit_time': str}
+    #     :raises urllib.error.HTTPError:
+    #     """
+    #     project_path = self._get_project_path()
+    #     branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)
+    #     branch_head = json.loads(urlopen(branch_head_url).read().decode('utf-8'))
+    #     branch_head_commit = json.loads(urlopen(branch_head['object']['url']).read().decode('utf-8'))
 
-        return namedtuple_from_dict({
-            'last_commit': branch_head_commit['sha'],
-            'last_commit_time': branch_head_commit['committer']['date']  # ISO date
-        })
+    #     return {
+    #         'last_commit': branch_head_commit['sha'],
+    #         'last_commit_time': branch_head_commit['committer']['date']  # ISO date
+    #     }
 
-    def get_download_url(self, commit=DEFAULT_GITHUB_BRANCH) -> str:
+    def get_download_url(self, commit: str = DEFAULT_GITHUB_BRANCH) -> str:
         """
         >>> https://github.com/Ulauncher/ulauncher-timer
         <<< https://github.com/Ulauncher/ulauncher-timer/archive/master.zip
@@ -131,14 +172,6 @@ class GithubExtension:
         """
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise InvalidGithubUrlError('Invalid GithubUrl: %s' % self.url)
+            raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
 
         return match.group(1)
-
-
-class InvalidGithubUrlError(Exception):
-    pass
-
-
-class InvalidVersionsFileError(Exception):
-    pass

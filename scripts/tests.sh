@@ -9,7 +9,13 @@ test-mypy () {
 test-pylint () {
     echo '[ test: pylint ]'
     set -e
-    pylint --output-format=colorized tests ulauncher $@
+    pylint --output-format=colorized ulauncher
+}
+
+test-flake8 () {
+    echo '[ test: flake8 ]'
+    set -e
+    flake8 $@
 }
 
 test-pytest () {
@@ -30,6 +36,6 @@ test-pytest () {
     export PYTHONPATH=`pwd`
 
     set -e
-    py.test --pep8 $@ tests
+    py.test $@ tests
 }
 

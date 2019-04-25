@@ -3,6 +3,8 @@ import os
 import logging
 import json
 from urllib.parse import unquote
+import traceback
+
 import gi
 gi.require_version('WebKit2', '4.0')
 
@@ -18,9 +20,9 @@ from ulauncher.api.server.extension_finder import find_extensions
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
-from ulauncher.api.server.ExtensionManifest import ManifestValidationError, VersionIncompatibilityError
-from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError,
-                                                      ExtensionIsUpToDateError)
+from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
+from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
+from ulauncher.api.server.errors import UlauncherServerError
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.util.Theme import themes, Theme, load_available_themes
 from ulauncher.util.decorator.glib_idle_add import glib_idle_add
@@ -31,7 +33,6 @@ from ulauncher.util.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR
-
 
 
 logger = logging.getLogger(__name__)
@@ -167,6 +168,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except PrefsApiError as e:
             callback = '%s(null, %s);' % (callback_name, json.dumps(e))
+        except UlauncherServerError as e:
+            callback = '%s(null, %s);' % (callback_name, json.dumps({
+                'message': str(e),
+                'type': type(e).__name__,
+                'errorName': e.error_name,
+                'stacktrace': traceback.format_exc()
+            }))
         except Exception as e:
             message = 'Unexpected API error. %s: %s' % (type(e).__name__, e)
             callback = '%s(null, %s);' % (callback_name, json.dumps(message))
@@ -357,11 +365,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         url = url_params['query']['url']
         logger.info('Add extension: %s', url)
         downloader = ExtensionDownloader.get_instance()
-        try:
-            ext_id = downloader.download(url)
-            ExtensionRunner.get_instance().run(ext_id)
-        except (ExtensionDownloaderError, ManifestValidationError) as e:
-            raise PrefsApiError(e)
+        ext_id = downloader.download(url)
+        ExtensionRunner.get_instance().run(ext_id)
 
         return self._get_all_extensions()
 
@@ -397,7 +402,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         downloader = ExtensionDownloader.get_instance()
         try:
             downloader.update(ext_id)
-        except ManifestValidationError as e:
+        except ExtensionManifestError as e:
             raise PrefsApiError(e)
 
     @rt.route('/extension/remove')
@@ -419,7 +424,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             try:
                 prefs.manifest.validate()
                 prefs.manifest.check_compatibility()
-            except (ManifestValidationError, VersionIncompatibilityError):
+            except ExtensionManifestError:
                 continue
             extensions.append(self._get_extension_info(ext_id, prefs))
 

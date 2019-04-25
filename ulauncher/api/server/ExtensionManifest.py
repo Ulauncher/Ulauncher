@@ -2,6 +2,11 @@ import os
 from json import load
 from ulauncher.config import get_version, EXTENSIONS_DIR
 from ulauncher.util.image_loader import load_image
+from ulauncher.api.server.errors import UlauncherServerError, ErrorName
+
+
+class ExtensionManifestError(UlauncherServerError):
+    pass
 
 
 class ExtensionManifest:
@@ -82,27 +87,19 @@ class ExtensionManifest:
                     assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
                     assert p.get('options'), 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
-            raise ManifestValidationError(e)
+            raise ExtensionManifestError(str(e), ErrorName.InvalidManifestJson)
         except KeyError as e:
-            raise ManifestValidationError('%s is not provided' % e)
+            raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson)
 
     def check_compatibility(self):
         app_version = get_version()
         # only API version 1 is supported for now
         if self.get_api_version() != '1':
-            raise VersionIncompatibilityError('Extension "%s" is not compatible with Ulauncher v%s' %
-                                              (self.extension_id, app_version))
+            raise ExtensionManifestError('Extension "%s" is not compatible with Ulauncher v%s' %
+                                         (self.extension_id, app_version), ErrorName.ExtensionCompatibilityError)
         if self.get_manifest_version() not in ['1', '2']:
-            raise VersionIncompatibilityError('Manifest version of "%s" is not compatible with Ulauncher v%s' %
-                                              (self.extension_id, app_version))
-
-
-class VersionIncompatibilityError(RuntimeError):
-    pass
-
-
-class ManifestValidationError(Exception):
-    pass
+            raise ExtensionManifestError('Manifest version of "%s" is not compatible with Ulauncher v%s' %
+                                         (self.extension_id, app_version), ErrorName.ExtensionCompatibilityError)
 
 
 def read_manifest(extension_id, extensions_dir):

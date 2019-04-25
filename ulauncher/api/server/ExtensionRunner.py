@@ -50,8 +50,8 @@ class ExtensionRunner:
             raise ExtensionIsRunningError('Extension ID: %s' % extension_id)
 
         manifest = ExtensionManifest.open(extension_id)
-        manifest.check_compatibility()
         manifest.validate()
+        manifest.check_compatibility()
 
         run_process = run_async(daemon=True)(self._run_process)
         run_process(extension_id)

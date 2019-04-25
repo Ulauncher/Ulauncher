@@ -7,7 +7,7 @@ from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
-from ulauncher.api.server.ExtensionManifest import ExtensionManifest, ManifestValidationError
+from ulauncher.api.server.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class ExtensionController(WebSocket):
         self.manifest = ExtensionManifest.open(self.extension_id)
         try:
             self.manifest.validate()
-        except ManifestValidationError as e:
+        except ExtensionManifestError as e:
             logger.warning("Couldn't connect '%s'. %s: %s", self.extension_id, type(e).__name__, e)
             self.close()
             return

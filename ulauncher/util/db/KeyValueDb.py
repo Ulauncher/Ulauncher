@@ -8,18 +8,22 @@ Key = TypeVar('Key')
 Value = TypeVar('Value')
 Records = Dict[Key, Value]
 
+
 class KeyValueDb(Generic[Key, Value]):
     """
     Key-value in-memory database
     Use open() method to load DB from a file and commit() to save it
     """
 
+    _name = None  # type: str
+    _records = None  # type: Records
+
     def __init__(self, basename: str):
         """
         :param str basename: path to db file
         """
-        self._name = basename # type: str
-        self._records = {}  # type: Records
+        self._name = basename
+        self.set_records({})
 
     def open(self) -> 'KeyValueDb':
         """Create a new data base or open existing one"""
@@ -28,7 +32,7 @@ class KeyValueDb(Generic[Key, Value]):
                 raise IOError("%s exists and is not a file" % self._name)
 
             with open(self._name, 'rb') as _in:  # binary mode
-                self._records = pickle.load(_in)
+                self.set_records(pickle.load(_in))
         else:
             # make sure path exists
             mkpath(os.path.dirname(self._name))
@@ -55,6 +59,9 @@ class KeyValueDb(Generic[Key, Value]):
             return True
         except KeyError:
             return False
+
+    def set_records(self, records: Records):
+        self._records = records
 
     def get_records(self) -> Records:
         return self._records

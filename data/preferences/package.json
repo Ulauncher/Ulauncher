@@ -16,6 +16,7 @@
   "dependencies": {
     "bootstrap-vue": "^2.0.0-rc.11",
     "vue": "^2.5.21",
+    "vue-clipboard2": "^0.3.0",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1"
   },

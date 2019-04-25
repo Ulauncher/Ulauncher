@@ -2,7 +2,8 @@ import mock
 import pytest
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.api.server.ExtensionManifest import VersionIncompatibilityError
+from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
+from ulauncher.api.server.errors import ErrorName
 
 
 class TestExtensionRunner:
@@ -36,8 +37,9 @@ class TestExtensionRunner:
         return mocker.patch('ulauncher.api.server.ExtensionRunner.run_async')
 
     def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
-        manifest.check_compatibility.side_effect = VersionIncompatibilityError()
-        with pytest.raises(VersionIncompatibilityError):
+        manifest.check_compatibility.side_effect = ExtensionManifestError(
+            'message', ErrorName.ExtensionCompatibilityError)
+        with pytest.raises(ExtensionManifestError):
             runner.run('id')
 
     def test_run__ExtensionManifest_open__is_called(self, runner, ExtensionManifest):

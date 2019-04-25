@@ -15,10 +15,10 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
-from ulauncher.ui.ResultItemWidget import ResultItemWidget
-from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget
+from ulauncher.ui.ResultItemWidget import ResultItemWidget  # noqa: F401
+from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F401
 
-from ulauncher.config import get_data_file, is_wayland_compatibility_on
+from ulauncher.config import get_data_file, is_wayland_compatibility_on, get_options
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
@@ -109,7 +109,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
-        ExtensionDownloader.get_instance().download_missing()
+        if not get_options().no_extensions:
+            ExtensionDownloader.get_instance().download_missing()
 
     ######################################
     # GTK Signal Handlers
@@ -287,9 +288,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         display_name = Gtk.accelerator_get_label(key, mode)
         app_cache_db = AppCacheDb.get_instance()
         if not app_cache_db.find('startup_hotkey_notification'):
-            show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
             app_cache_db.put('startup_hotkey_notification', True)
             app_cache_db.commit()
+            show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
 
     def _get_user_query(self):
         return Query(self.input.get_text())

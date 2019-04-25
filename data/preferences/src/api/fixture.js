@@ -13,7 +13,7 @@ export default function(url, params) {
         autostart_enabled: true,
         clear_previous_text: true,
         blacklisted_desktop_dirs: ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
-        available_themes: [{text: 'Dark', 'value': 'dark'}, {text: 'Light', value: 'light'}],
+        available_themes: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }],
         theme_name: 'light',
         is_wayland: true,
         env: {
@@ -96,11 +96,16 @@ export default function(url, params) {
       console.log('/extension/add', params)
       setTimeout(() => {
         if (params.url.includes('reject')) {
-          reject('Could not load extension')
+          reject({
+            message: 'Could not load extension',
+            errorName: 'UnexpectedError',
+            stacktrace: 'stacktrace\nabc\nxyz',
+            type: 'ClassName'
+          })
           return
         }
         resolve([..._getExtensions(), generateExtensionRecord('ext.newext', 'NewExt', 2, params.url)])
-      }, 1e3)
+      }, 300)
     } else if (isMatch(url, '/extension/remove')) {
       console.log('/extension/remove', params)
       setTimeout(resolve, 0)
