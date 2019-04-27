@@ -22,7 +22,7 @@ from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
-from ulauncher.api.server.errors import UlauncherServerError
+from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.util.Theme import themes, Theme, load_available_themes
 from ulauncher.util.decorator.glib_idle_add import glib_idle_add
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 rt = Router()
 
 
-class PrefsApiError(RuntimeError):
+class PrefsApiError(UlauncherAPIError):
     pass
 
 
@@ -166,19 +166,24 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             resp = rt.dispatch(self, scheme_request.get_uri())
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
-        except PrefsApiError as e:
-            callback = '%s(null, %s);' % (callback_name, json.dumps(e))
-        except UlauncherServerError as e:
+        except UlauncherAPIError as e:
+            error_type = type(e).__name__
+            logger.error('%s: %s' % error_type, e)
             callback = '%s(null, %s);' % (callback_name, json.dumps({
                 'message': str(e),
-                'type': type(e).__name__,
+                'type': error_type,
                 'errorName': e.error_name,
                 'stacktrace': traceback.format_exc()
             }))
         except Exception as e:
             message = 'Unexpected API error. %s: %s' % (type(e).__name__, e)
-            callback = '%s(null, %s);' % (callback_name, json.dumps(message))
             logger.exception(message)
+            callback = '%s(null, %s);' % (callback_name, json.dumps({
+                'message': str(e),
+                'type': type(e).__name__,
+                'errorName': ErrorName.UnhandledError.value,
+                'stacktrace': traceback.format_exc()
+            }))
 
         try:
             stream = Gio.MemoryInputStream.new_from_data(callback.encode())

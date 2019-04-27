@@ -9,7 +9,7 @@ from datetime import datetime
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
-from ulauncher.api.server.errors import UlauncherServerError, ErrorName
+from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.GithubExtension import GithubExtension
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
@@ -19,7 +19,7 @@ from ulauncher.api.server.extension_finder import find_extensions
 logger = logging.getLogger(__name__)
 
 
-class ExtensionDownloaderError(UlauncherServerError):
+class ExtensionDownloaderError(UlauncherAPIError):
     pass
 
 

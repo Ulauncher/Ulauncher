@@ -3,7 +3,7 @@ import pytest
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
-from ulauncher.api.server.errors import ErrorName
+from ulauncher.api.shared.errors import ErrorName
 
 
 class TestExtensionRunner:

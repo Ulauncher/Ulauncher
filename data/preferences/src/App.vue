@@ -17,7 +17,7 @@
             <i class="fa fa-warning"></i> Error
           </template>
 
-          <div class="selectable">{{ error }}</div>
+          <div class="selectable">{{ error && error.message }}</div>
       </b-modal>
   </div>
 </template>
@@ -33,7 +33,7 @@ export default {
   },
   data () {
     return {
-      error: ''
+      error: null
     }
   },
   created () {
@@ -49,7 +49,7 @@ export default {
       this.$refs.errorModal.show()
     },
     onErrorDismiss () {
-      this.error = ''
+      this.error = null
     }
   }
 }

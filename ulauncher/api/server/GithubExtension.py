@@ -9,7 +9,7 @@ from mypy_extensions import TypedDict
 
 from ulauncher.util.date import iso_to_datetime
 from ulauncher.api.version import api_version
-from ulauncher.api.server.errors import ErrorName, UlauncherServerError
+from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
 from ulauncher.util.semver import satisfies, valid_range
 
 DEFAULT_GITHUB_BRANCH = 'master'
@@ -43,7 +43,7 @@ Commit = TypedDict('Commit', {
 })
 
 
-class GithubExtensionError(UlauncherServerError):
+class GithubExtensionError(UlauncherAPIError):
     pass
 
 

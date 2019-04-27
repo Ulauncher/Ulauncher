@@ -112,7 +112,7 @@ export default function(url, params) {
     } else if (isMatch(url, '/close')) {
       console.log('/close')
     } else {
-      reject(`Unknown URL "${url}"`)
+      reject({ message: `Unknown URL "${url}"` })
     }
   })
 }

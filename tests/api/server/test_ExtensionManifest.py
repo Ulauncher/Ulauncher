@@ -1,6 +1,6 @@
 import os
 import pytest
-from ulauncher.api.server.errors import ErrorName
+from ulauncher.api.shared.errors import ErrorName
 from ulauncher.api.server.ExtensionManifest import (ExtensionManifest, ExtensionManifestError)
 
 

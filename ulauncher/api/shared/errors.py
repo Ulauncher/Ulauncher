@@ -9,13 +9,14 @@ class ErrorName(Enum):
     GithubApiError = 'GithubApiError'
     ExtensionAlreadyAdded = 'ExtensionAlreadyAdded'
     UnexpectedError = 'UnexpectedError'
+    UnhandledError = 'UnhandledError'
     InvalidManifestJson = 'InvalidManifestJson'
     ExtensionCompatibilityError = 'ExtensionCompatibilityError'
 
 
-class UlauncherServerError(Exception):
+class UlauncherAPIError(Exception):
     error_name = None  # type: str
 
-    def __init__(self, message: str, error_name: ErrorName):
-        super(UlauncherServerError, self).__init__(message)
+    def __init__(self, message: str, error_name: ErrorName = ErrorName.UnexpectedError):
+        super(UlauncherAPIError, self).__init__(message)
         self.error_name = error_name.value
