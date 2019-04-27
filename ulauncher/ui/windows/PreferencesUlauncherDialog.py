@@ -168,7 +168,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             callback = '%s(%s);' % (callback_name, json.dumps(resp))
         except UlauncherAPIError as e:
             error_type = type(e).__name__
-            logger.error('%s: %s' % error_type, e)
+            logger.error('%s: %s', error_type, e)
             callback = '%s(null, %s);' % (callback_name, json.dumps({
                 'message': str(e),
                 'type': error_type,

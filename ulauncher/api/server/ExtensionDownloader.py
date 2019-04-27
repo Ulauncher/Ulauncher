@@ -59,7 +59,9 @@ class ExtensionDownloader:
         # 1. check if ext already exists
         ext_id = gh_ext.get_ext_id()
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
-        if os.path.exists(ext_path):
+        # allow user to re-download an extension if it's not running
+        # most likely it has some problems with manifest file if it's not running
+        if os.path.exists(ext_path) and self.ext_runner.is_running(ext_id):
             raise ExtensionDownloaderError('Extension with URL "%s" is already added' % url,
                                            ErrorName.ExtensionAlreadyAdded)
 

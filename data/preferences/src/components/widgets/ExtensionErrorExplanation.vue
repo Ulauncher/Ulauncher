@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper selectable">
     <b-alert show :variant="alertVariant()">
       <small>
         <p
@@ -10,8 +10,12 @@
         >The author of this extension does not provide a version compatible with your Ulauncher version.</p>
         <p
           v-else-if="errorName === 'VersionsJsonNotFound'"
-        >It looks like this extension wasn't updated for the new version of Ulauncher or an author missed to check in versions.json file in git.</p>
-        <p v-else-if="errorName === 'InvalidVersionsJson'">There's an error in version.json</p>
+        >It looks like this extension is not compatible with the new version of Ulauncher.</p>
+        <p v-else-if="errorName === 'InvalidVersionsJson'">
+          There's an error in versions.json:
+          <br>
+          <b>{{ errorMessage }}</b>
+        </p>
         <p v-else-if="errorName === 'InvalidManifestJson'">
           There's an error in manifest.json:
           <br>
@@ -47,7 +51,7 @@
           >Github issues</a>.
         </p>
         <p v-if="reportableErrors.indexOf(errorName) > -1">
-          You can let the author know about this problem via
+          Let the author know about this problem via
           <a
             href
             @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
@@ -87,7 +91,7 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
-  margin: 10px 0;
+  margin: 20px 0 5px 0;
 }
 p:last-of-type {
   margin-bottom: 0;

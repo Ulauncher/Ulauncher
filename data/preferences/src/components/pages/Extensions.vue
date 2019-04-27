@@ -35,7 +35,7 @@
       >
         <template slot="modal-title">Enter extension URL</template>
 
-        <b-form @submit.native.prevent="onUrlSubmit">
+        <b-form @submit.prevent="onUrlSubmit">
           <b-form-input
             class="github-url-input"
             ref="githubUrl"
@@ -48,23 +48,23 @@
           <i class="fa fa-spinner fa-spin"></i> Downloading extension...
         </div>
 
-        <div v-if="addingExtensionError" class="adding-ext-msg selectable">
-          <ext-error-explanation
-            v-if="addingExtensionError.errorName"
-            :extUrl="extUrlToDownload"
-            :errorMessage="addingExtensionError.message"
-            :errorName="addingExtensionError.errorName"
-          />
-        </div>
+        <ext-error-explanation
+          v-if="addingExtensionError && addingExtensionError.errorName"
+          :extUrl="extUrlToDownload"
+          :errorMessage="addingExtensionError.message"
+          :errorName="addingExtensionError.errorName"
+        />
 
-        <small v-if="addingExtensionError">
+        <small
+          v-if="addingExtensionError && hideCopyErrorDetails.indexOf(addingExtensionError.errorName) === -1"
+        >
           <i class="fa fa-copy"></i>
           <a
             class="text-muted"
             href
             @click.prevent
             v-clipboard:copy="errorDetails"
-          >Copy technical details to clipboard</a>
+          >Copy error details to clipboard</a>
         </small>
       </b-modal>
     </div>
@@ -105,7 +105,14 @@ export default {
       activeExt: null,
       addingExtension: false,
       addingExtensionError: null,
-      extensions: []
+      extensions: [],
+      hideCopyErrorDetails: [
+        'InvalidGithubUrl',
+        'IncompatibleVersion',
+        'VersionsJsonNotFound',
+        'InvalidVersionsJson',
+        'InvalidManifestJson'
+      ]
     }
   },
   methods: {
@@ -196,7 +203,7 @@ $veryLightGrey: #c8c8c8;
 .adding-ext-msg {
   overflow: auto;
   color: #555;
-  padding-top: 10px;
+  padding-top: 15px;
 }
 .warning {
   color: #b30000;

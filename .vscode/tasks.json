@@ -6,8 +6,11 @@
     {
       "label": "pylint",
       "type": "shell",
-      "command": "docker exec ulauncher bash -c 'PYTHONPATH=/root/ulauncher py.test --pep8 -x \"$(echo ${file} | sed \"s|/.*tests|tests|g\")\"'",
-      "group": "ulauncher",
+      "command": "docker exec ulauncher bash -c 'PYTHONPATH=/root/ulauncher py.test -x \"$(echo ${file} | sed \"s|/.*tests|tests|g\")\"'",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",

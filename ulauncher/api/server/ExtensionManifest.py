@@ -1,8 +1,10 @@
 import os
 from json import load
-from ulauncher.config import get_version, EXTENSIONS_DIR
+from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.image_loader import load_image
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
+from ulauncher.api.version import api_version
+from ulauncher.util.semver import satisfies
 
 
 class ExtensionManifestError(UlauncherAPIError):
@@ -41,11 +43,8 @@ class ExtensionManifest:
     def load_icon(self, size):
         return load_image(self.get_icon_path(), size)
 
-    def get_manifest_version(self):
-        return self.manifest['manifest_version']
-
-    def get_api_version(self):
-        return self.manifest['api_version']
+    def get_required_api_version(self):
+        return self.manifest['required_api_version']
 
     def get_developer_name(self):
         return self.manifest['developer_name']
@@ -68,8 +67,7 @@ class ExtensionManifest:
 
     def validate(self):
         try:
-            assert self.get_manifest_version() in ['1', '2'], "Supported manifest versions are '1' and '2'"
-            assert self.get_api_version() == '1', "api_version should be 1"
+            assert self.get_required_api_version(), "required_api_version is not provided"
             assert self.get_name(), 'name is not provided'
             assert self.get_description(), 'description is not provided'
             assert self.get_developer_name(), 'developer_name is not provided'
@@ -92,14 +90,10 @@ class ExtensionManifest:
             raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson)
 
     def check_compatibility(self):
-        app_version = get_version()
-        # only API version 1 is supported for now
-        if self.get_api_version() != '1':
-            raise ExtensionManifestError('Extension "%s" is not compatible with Ulauncher v%s' %
-                                         (self.extension_id, app_version), ErrorName.ExtensionCompatibilityError)
-        if self.get_manifest_version() not in ['1', '2']:
-            raise ExtensionManifestError('Manifest version of "%s" is not compatible with Ulauncher v%s' %
-                                         (self.extension_id, app_version), ErrorName.ExtensionCompatibilityError)
+        if not satisfies(api_version, self.get_required_api_version()):
+            raise ExtensionManifestError('Extension "%s" requires Ulauncher API %s, but current API version is %s' %
+                                         (self.extension_id, self.get_required_api_version(), api_version),
+                                         ErrorName.ExtensionCompatibilityError)
 
 
 def read_manifest(extension_id, extensions_dir):

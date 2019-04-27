@@ -43,7 +43,8 @@ class KeyValueDb(Generic[Key, Value]):
     def commit(self) -> 'KeyValueDb':
         """Write the database to a file"""
         with open(self._name, 'wb') as out:
-            pickle.dump(self._records, out, pickle.HIGHEST_PROTOCOL)
+            pickle_protocol = 2  # use 2 for BC with Ulauncher 4
+            pickle.dump(self._records, out, pickle_protocol)
             out.close()
 
         return self
