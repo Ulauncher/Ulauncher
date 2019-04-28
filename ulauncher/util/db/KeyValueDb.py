@@ -37,7 +37,8 @@ class KeyValueDb(object):
     def commit(self):
         """Write the database to a file"""
         with open(self._name, 'wb') as out:
-            pickle.dump(self._records, out, pickle.HIGHEST_PROTOCOL)
+            # use protocol 2 for compatibility with future versions
+            pickle.dump(self._records, out, 2)
             out.close()
 
         return self

@@ -83,12 +83,13 @@ launchpad_upload() {
     xenial="PPA=$PPA GPGKEY=$GPGKEY RELEASE=xenial ./build-utils/build-deb.sh $VERSION --upload"
     bionic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=bionic ./build-utils/build-deb.sh $VERSION --upload"
     cosmic="PPA=$PPA GPGKEY=$GPGKEY RELEASE=cosmic ./build-utils/build-deb.sh $VERSION --upload"
+    disco="PPA=$PPA GPGKEY=$GPGKEY RELEASE=disco ./build-utils/build-deb.sh $VERSION --upload"
 
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "./build-utils/extract-launchpad-ssh.sh && $xenial && $bionic && $cosmic"
+        bash -c "./build-utils/extract-launchpad-ssh.sh && $xenial && $bionic && $cosmic && $disco"
 }
 
 main
