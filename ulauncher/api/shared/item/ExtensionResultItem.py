@@ -3,7 +3,7 @@ import sys
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.util.image_loader import load_image
+from ulauncher.utils.image_loader import load_image
 
 
 class ExtensionResultItem(ResultItem):

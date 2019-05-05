@@ -1,6 +1,6 @@
 import os
 import pytest
-from ulauncher.util.Path import Path, InvalidPathError
+from ulauncher.utils.Path import Path, InvalidPathError
 
 
 class TestPath:
@@ -16,7 +16,7 @@ class TestPath:
     def test_get_existing_dir__caches(self, mocker):
         path = Path('/usr/bin/foo')
         assert path.get_existing_dir() == '/usr/bin'
-        os_path_exitst = mocker.patch('ulauncher.util.Path.os.path.exists')
+        os_path_exitst = mocker.patch('ulauncher.utils.Path.os.path.exists')
         assert path.get_existing_dir() == '/usr/bin'
         assert path.get_existing_dir() == '/usr/bin'
         assert not os_path_exitst.called

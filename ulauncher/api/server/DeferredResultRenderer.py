@@ -6,7 +6,7 @@ from gi.repository import GLib
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger('DeferredResultRenderer')
 

@@ -4,8 +4,8 @@ from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.util.Path import Path
-from ulauncher.util.image_loader import get_file_icon
+from ulauncher.utils.Path import Path
+from ulauncher.utils.image_loader import get_file_icon
 
 from ulauncher.search.file_browser.FileQueries import FileQueries
 from ulauncher.search.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
@@ -14,7 +14,7 @@ from ulauncher.search.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
 
 class FileBrowserResultItem(SmallResultItem):
     """
-    :param ~ulauncher.util.Path.Path path:
+    :param ~ulauncher.utils.Path.Path path:
     """
 
     # pylint: disable=super-init-not-called

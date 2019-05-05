@@ -2,9 +2,9 @@ import os
 from time import time, sleep
 from typing import Optional
 from ulauncher.config import CACHE_DIR
-from ulauncher.util.db.KeyValueDb import KeyValueDb
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.decorator.singleton import singleton
 
 
 class FileQueries(KeyValueDb[str, float]):

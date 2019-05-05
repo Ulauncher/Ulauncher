@@ -15,11 +15,11 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from ulauncher.config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
                               gdk_backend, CACHE_DIR, CONFIG_DIR)
-from ulauncher.util.decorator.run_async import run_async
+from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.util.Settings import Settings
-from ulauncher.util.setup_logging import setup_logging
+from ulauncher.utils.Settings import Settings
+from ulauncher.utils.setup_logging import setup_logging
 
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'

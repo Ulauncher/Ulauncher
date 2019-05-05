@@ -1,6 +1,6 @@
 import os
 import pytest
-from ulauncher.util.Theme import Theme, ThemeManifestError
+from ulauncher.utils.Theme import Theme, ThemeManifestError
 
 
 class TestTheme:

@@ -2,7 +2,7 @@ import mock
 import pytest
 from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
 from ulauncher.search.file_browser.FileQueries import FileQueries
-from ulauncher.util.Path import Path
+from ulauncher.utils.Path import Path
 
 
 class TestFileBrowserResultItem:

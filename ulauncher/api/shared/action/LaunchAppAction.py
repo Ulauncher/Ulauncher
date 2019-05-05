@@ -1,6 +1,6 @@
 import logging
 
-from ulauncher.util.desktop.reader import read_desktop_file
+from ulauncher.utils.desktop.reader import read_desktop_file
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger(__name__)

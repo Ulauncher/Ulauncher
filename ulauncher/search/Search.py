@@ -5,7 +5,7 @@ from ulauncher.search.apps.AppSearchMode import AppSearchMode
 from ulauncher.search.shortcuts.ShortcutSearchMode import ShortcutSearchMode
 from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.search.calc.CalcMode import CalcMode
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
 

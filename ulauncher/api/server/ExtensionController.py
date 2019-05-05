@@ -1,8 +1,8 @@
 import logging
 import pickle
 
-from ulauncher.util.SimpleWebSocketServer import WebSocket
-from ulauncher.util.decorator.debounce import debounce
+from ulauncher.utils.SimpleWebSocketServer import WebSocket
+from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer

@@ -1,6 +1,6 @@
 import os
 import pytest
-from ulauncher.util.desktop.DesktopParser import DesktopParser
+from ulauncher.utils.desktop.DesktopParser import DesktopParser
 
 desktop_content = """
 [Section Name]

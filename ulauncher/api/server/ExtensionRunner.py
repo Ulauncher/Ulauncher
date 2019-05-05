@@ -5,8 +5,8 @@ from subprocess import Popen
 from time import time, sleep
 
 from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.extension_finder import find_extensions

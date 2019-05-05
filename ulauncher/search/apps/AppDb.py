@@ -4,8 +4,8 @@ import sqlite3
 import logging
 
 from ulauncher.search.SortedList import SortedList
-from ulauncher.util.decorator.singleton import singleton
-from ulauncher.util.image_loader import get_app_icon_pixbuf
+from ulauncher.utils.decorator.singleton import singleton
+from ulauncher.utils.image_loader import get_app_icon_pixbuf
 from ulauncher.search.apps.AppResultItem import AppResultItem
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,10 @@
 import os
 from typing import Type, Optional
-from ulauncher.util.mypy_extensions import TypedDict
+from ulauncher.utils.mypy_extensions import TypedDict
 
 from ulauncher.config import CONFIG_DIR
-from ulauncher.util.db.KeyValueJsonDb import KeyValueJsonDb
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
+from ulauncher.utils.decorator.singleton import singleton
 
 ExtensionRecord = TypedDict('ExtensionRecord', {
     'id': str,

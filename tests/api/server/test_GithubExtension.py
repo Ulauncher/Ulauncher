@@ -4,7 +4,7 @@ from json import dumps
 import pytest
 from urllib.error import HTTPError
 
-from ulauncher.util.date import iso_to_datetime
+from ulauncher.utils.date import iso_to_datetime
 from ulauncher.api.server.GithubExtension import GithubExtension, GithubExtensionError
 
 

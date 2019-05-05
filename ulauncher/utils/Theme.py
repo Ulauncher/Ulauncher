@@ -5,8 +5,8 @@ from typing import Dict, Any
 from shutil import copytree, rmtree
 
 from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
-from ulauncher.util.Settings import Settings
-from ulauncher.util.version_cmp import gtk_version_is_gte
+from ulauncher.utils.Settings import Settings
+from ulauncher.utils.version_cmp import gtk_version_is_gte
 
 themes = {}  # type: Dict[str, Any]
 logger = logging.getLogger(__name__)

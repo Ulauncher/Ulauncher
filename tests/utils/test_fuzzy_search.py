@@ -1,5 +1,5 @@
 import time
-from ulauncher.util.fuzzy_search import get_matching_indexes, get_score
+from ulauncher.utils.fuzzy_search import get_matching_indexes, get_score
 
 
 def test_get_matching_indexes():

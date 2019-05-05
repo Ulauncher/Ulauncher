@@ -5,12 +5,12 @@ from datetime import datetime
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from typing import Dict, List, cast
-from ulauncher.util.mypy_extensions import TypedDict
+from ulauncher.utils.mypy_extensions import TypedDict
 
-from ulauncher.util.date import iso_to_datetime
+from ulauncher.utils.date import iso_to_datetime
 from ulauncher.api.version import api_version
 from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
-from ulauncher.util.semver import satisfies, valid_range
+from ulauncher.utils.semver import satisfies, valid_range
 
 DEFAULT_GITHUB_BRANCH = 'master'
 

@@ -2,9 +2,9 @@ import logging
 from functools import partial
 from ulauncher.api.server.port_finder import find_unused_port
 from ulauncher.api.server.ExtensionController import ExtensionController
-from ulauncher.util.SimpleWebSocketServer import SimpleWebSocketServer
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.SimpleWebSocketServer import SimpleWebSocketServer
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
 

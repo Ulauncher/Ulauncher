@@ -2,7 +2,7 @@ import os
 import json
 from distutils.dir_util import mkpath
 
-from ulauncher.util.db.KeyValueDb import KeyValueDb, Key, Value
+from ulauncher.utils.db.KeyValueDb import KeyValueDb, Key, Value
 
 
 class KeyValueJsonDb(KeyValueDb[Key, Value]):

@@ -1,7 +1,7 @@
 import mock
 import pytest
 
-from ulauncher.util.date import iso_to_datetime
+from ulauncher.utils.date import iso_to_datetime
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionDownloader import (

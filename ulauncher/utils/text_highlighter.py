@@ -1,4 +1,4 @@
-from ulauncher.util.fuzzy_search import get_matching_indexes
+from ulauncher.utils.fuzzy_search import get_matching_indexes
 
 
 def highlight_text(query, text: str, open_tag='<span foreground="white">', close_tag='</span>') -> str:

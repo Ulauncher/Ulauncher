@@ -24,12 +24,12 @@ from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.util.Theme import themes, Theme, load_available_themes
-from ulauncher.util.decorator.glib_idle_add import glib_idle_add
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.Settings import Settings
-from ulauncher.util.Router import Router, get_url_params
-from ulauncher.util.AutostartPreference import AutostartPreference
+from ulauncher.utils.Theme import themes, Theme, load_available_themes
+from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.Settings import Settings
+from ulauncher.utils.Router import Router, get_url_params
+from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_data_file, get_options, get_version, is_wayland, EXTENSIONS_DIR

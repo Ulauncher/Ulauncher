@@ -1,4 +1,4 @@
-from ulauncher.util.SortedCollection import SortedCollection
+from ulauncher.utils.SortedCollection import SortedCollection
 
 
 def ve2no(f, *args):

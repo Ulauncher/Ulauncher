@@ -1,10 +1,10 @@
 import os
 from json import load
 from ulauncher.config import EXTENSIONS_DIR
-from ulauncher.util.image_loader import load_image
+from ulauncher.utils.image_loader import load_image
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.version import api_version
-from ulauncher.util.semver import satisfies
+from ulauncher.utils.semver import satisfies
 
 
 class ExtensionManifestError(UlauncherAPIError):

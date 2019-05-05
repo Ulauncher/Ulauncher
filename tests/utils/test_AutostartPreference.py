@@ -1,7 +1,7 @@
 import os
 import pytest
-from ulauncher.util.AutostartPreference import AutostartPreference, SwitchError
-import ulauncher.util.AutostartPreference as ap
+from ulauncher.utils.AutostartPreference import AutostartPreference, SwitchError
+import ulauncher.utils.AutostartPreference as ap
 
 
 desktop_content = """
@@ -42,7 +42,7 @@ class TestAutostartPreference:
 
     @pytest.fixture(autouse=True)
     def db(self, mocker, desktop_file):
-        db = mocker.patch('ulauncher.util.AutostartPreference.AppDb.get_instance').return_value
+        db = mocker.patch('ulauncher.utils.AutostartPreference.AppDb.get_instance').return_value
         db.get_by_name.return_value = {'name': 'Ulauncher', 'desktop_file': desktop_file}
         return db
 
@@ -98,7 +98,7 @@ class TestAutostartPreference:
         assert 'X-GNOME-Autostart-enabled=false' in self.get_lines(ul_autostart_path)
 
     def test_switch__raises_SwitchError(self, autostart, mocker):
-        desktop_parser = mocker.patch('ulauncher.util.AutostartPreference.DesktopParser').return_value
+        desktop_parser = mocker.patch('ulauncher.utils.AutostartPreference.DesktopParser').return_value
         desktop_parser.write.side_effect = IOError
         with pytest.raises(SwitchError):
             autostart.switch(True)

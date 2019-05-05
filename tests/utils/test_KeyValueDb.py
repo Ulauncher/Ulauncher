@@ -1,6 +1,6 @@
 import os
 import pytest
-from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
 
 
 class TestKeyValueDb:

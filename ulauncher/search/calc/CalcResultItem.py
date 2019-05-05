@@ -2,7 +2,7 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.config import get_data_file
-from ulauncher.util.image_loader import load_image
+from ulauncher.utils.image_loader import load_image
 
 
 class CalcResultItem(ResultItem):

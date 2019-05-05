@@ -6,8 +6,8 @@ from typing import Dict
 
 import pyinotify
 
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.desktop.reader import read_desktop_file, filter_app, find_apps_cached
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.desktop.reader import read_desktop_file, filter_app, find_apps_cached
 from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
 

@@ -1,6 +1,6 @@
 from functools import partial
 
-from ulauncher.util.text_highlighter import highlight_text
+from ulauncher.utils.text_highlighter import highlight_text
 
 
 def test_highlight_text():

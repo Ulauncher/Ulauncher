@@ -1,4 +1,4 @@
-from ulauncher.util.date import iso_to_datetime
+from ulauncher.utils.date import iso_to_datetime
 
 
 def test_iso_to_datetime():

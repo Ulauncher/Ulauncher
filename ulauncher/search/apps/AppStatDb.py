@@ -3,8 +3,8 @@ from operator import itemgetter
 from itertools import islice
 
 from ulauncher.config import CACHE_DIR
-from ulauncher.util.db.KeyValueDb import KeyValueDb
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.decorator.singleton import singleton
 
 
 class AppStatDb(KeyValueDb):

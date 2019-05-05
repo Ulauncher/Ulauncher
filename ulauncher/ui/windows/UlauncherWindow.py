@@ -25,13 +25,13 @@ from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
-from ulauncher.util.AppCacheDb import AppCacheDb
-from ulauncher.util.Settings import Settings
-from ulauncher.util.decorator.singleton import singleton
-from ulauncher.util.display import get_current_screen_geometry
-from ulauncher.util.version_cmp import gtk_version_is_gte
-from ulauncher.util.desktop.notification import show_notification
-from ulauncher.util.Theme import Theme, load_available_themes
+from ulauncher.utils.AppCacheDb import AppCacheDb
+from ulauncher.utils.Settings import Settings
+from ulauncher.utils.decorator.singleton import singleton
+from ulauncher.utils.display import get_current_screen_geometry
+from ulauncher.utils.version_cmp import gtk_version_is_gte
+from ulauncher.utils.desktop.notification import show_notification
+from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
 from ulauncher.ui.windows.Builder import Builder

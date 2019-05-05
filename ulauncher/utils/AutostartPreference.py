@@ -2,7 +2,7 @@ import os
 from xdg.BaseDirectory import xdg_config_home
 
 from ulauncher.search.apps.AppDb import AppDb
-from ulauncher.util.desktop.DesktopParser import DesktopParser
+from ulauncher.utils.desktop.DesktopParser import DesktopParser
 
 
 class AutostartPreference:

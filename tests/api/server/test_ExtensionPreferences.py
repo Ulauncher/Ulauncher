@@ -3,7 +3,7 @@ import pytest
 
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
-from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
 
 
 class TestExtensionPreferences:

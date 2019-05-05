@@ -6,10 +6,10 @@ from typing import Generator, List
 
 from gi.repository import Gio
 
-from ulauncher.util.file_finder import find_files
+from ulauncher.utils.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
-from ulauncher.util.Settings import Settings
-from ulauncher.util.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.Settings import Settings
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
 
 logger = logging.getLogger(__name__)
 

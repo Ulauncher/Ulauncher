@@ -1,7 +1,7 @@
 from urllib.parse import quote
 import mock
 import pytest
-from ulauncher.util.Router import Router, RoutePathEmpty, RouteNotFound, get_url_params
+from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound, get_url_params
 
 
 def test_get_url_params():

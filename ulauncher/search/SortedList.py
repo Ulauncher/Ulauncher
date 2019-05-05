@@ -1,5 +1,5 @@
-from ulauncher.util.SortedCollection import SortedCollection
-from ulauncher.util.fuzzy_search import get_score
+from ulauncher.utils.SortedCollection import SortedCollection
+from ulauncher.utils.fuzzy_search import get_score
 
 
 class SortedList:

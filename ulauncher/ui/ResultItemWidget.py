@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from gi.repository import Gtk
 
-from ulauncher.util.Theme import Theme
+from ulauncher.utils.Theme import Theme
 from ulauncher.search.Query import Query
 
 logger = logging.getLogger(__name__)

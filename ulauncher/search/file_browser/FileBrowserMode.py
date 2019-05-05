@@ -6,7 +6,7 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.util.Path import Path, InvalidPathError
+from ulauncher.utils.Path import Path, InvalidPathError
 from ulauncher.search.BaseSearchMode import BaseSearchMode
 from ulauncher.search.SortedList import SortedList
 from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem

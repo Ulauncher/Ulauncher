@@ -1,7 +1,7 @@
 import os
 import pytest
 import mock
-from ulauncher.util.Settings import Settings
+from ulauncher.utils.Settings import Settings
 
 
 class TestSettings:

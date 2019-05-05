@@ -3,7 +3,7 @@ import pytest
 from gi.repository import Gdk
 from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.search.file_browser.FileQueries import FileQueries
-from ulauncher.util.Path import InvalidPathError
+from ulauncher.utils.Path import InvalidPathError
 
 
 class TestFileBrowserMode:

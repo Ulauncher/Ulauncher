@@ -3,7 +3,7 @@ import json
 from distutils.dir_util import mkpath
 from gi.repository import GObject
 
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
 
 DEFAULT_BLACKLISTED_DIRS = [

@@ -93,7 +93,7 @@ FREEDESKTOP_STANDARD = {
 
 def get_file_icon(path, icon_size):
     """
-    :param ~ulauncher.util.Path.Path path:
+    :param ~ulauncher.utils.Path.Path path:
     :param int icon_size:
     """
     # pylint: disable=broad-except

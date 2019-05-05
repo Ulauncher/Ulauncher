@@ -5,11 +5,11 @@ from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
-from ulauncher.util.mypy_extensions import TypedDict
+from ulauncher.utils.mypy_extensions import TypedDict
 
 from ulauncher.config import EXTENSIONS_DIR
-from ulauncher.util.decorator.run_async import run_async
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.server.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.api.server.GithubExtension import GithubExtension

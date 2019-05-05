@@ -5,7 +5,7 @@ gi.require_version('AppIndicator3', '0.1')
 
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, AppIndicator3
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
 

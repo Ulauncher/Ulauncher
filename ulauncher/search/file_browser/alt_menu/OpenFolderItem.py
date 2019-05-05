@@ -1,11 +1,11 @@
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.util.image_loader import get_themed_icon_by_name
+from ulauncher.utils.image_loader import get_themed_icon_by_name
 
 
 class OpenFolderItem(SmallResultItem):
     """
-    :param ~ulauncher.util.Path.Path path:
+    :param ~ulauncher.utils.Path.Path path:
     """
 
     # pylint: disable=super-init-not-called

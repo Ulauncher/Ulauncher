@@ -2,8 +2,8 @@ import os
 from uuid import uuid4
 from time import time
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
-from ulauncher.util.db.KeyValueJsonDb import KeyValueJsonDb
-from ulauncher.util.decorator.singleton import singleton
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
+from ulauncher.utils.decorator.singleton import singleton
 
 
 class ShortcutsDb(KeyValueJsonDb):
