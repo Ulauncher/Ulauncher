@@ -43,10 +43,11 @@ RUN apt-get update && \
 COPY [ "requirements.txt", "data/preferences/package.json", "./" ]
 COPY [ "docs/requirements.txt", "./docs/" ]
 
-# Caching node_modules to make builds faster
 # update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
+COPY [ "scripts/dput.cf", "/etc" ]
+
+# Caching node_modules to make builds faster
 RUN pip3 install -r requirements.txt && \
     pip3 install -r docs/requirements.txt && \
     yarn && \
-    mv node_modules /var && \
-    printf "\n[ppa]\nmethod = sftp\nlogin = agornostal" >> /etc/dput.cf
+    mv node_modules /var
