@@ -4,7 +4,8 @@ import pytest
 from ulauncher.util.date import iso_to_datetime
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
-from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionDownloaderError)
+from ulauncher.api.server.ExtensionDownloader import (
+    ExtensionDownloader, ExtensionDownloaderError, ExtensionIsUpToDateError)
 
 
 class TestExtensionDownloader:
@@ -28,7 +29,7 @@ class TestExtensionDownloader:
         gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.zip'
         gh_ext.get_last_commit.return_value = {
             'last_commit': '64e106c',
-            'last_commit_time': '2017-05-01T07:30:39Z'
+            'last_commit_time': '2017-05-01T07:30:39'
         }
         gh_ext.find_compatible_version.return_value = {
             'sha': '64e106c',
@@ -85,52 +86,52 @@ class TestExtensionDownloader:
         with pytest.raises(ExtensionDownloaderError):
             assert downloader.download('https://github.com/Ulauncher/ulauncher-timer')
 
-    # def test_update(self, downloader, ext_db, ext_runner, gh_ext, download_zip, unzip, datetime):
-    #     ext_id = 'com.github.ulauncher.ulauncher-timer'
-    #     ext_db.find.return_value = {
-    #         'id': ext_id,
-    #         'url': 'https://github.com/Ulauncher/ulauncher-timer',
-    #         'updated_at': '2017-01-01',
-    #         'last_commit': 'aDbc',
-    #         'last_commit_time': '2017-01-01'
-    #     }
-    #     ext_runner.is_running.return_value = True
+    def test_update(self, downloader, ext_db, ext_runner, gh_ext, download_zip, unzip, datetime):
+        ext_id = 'com.github.ulauncher.ulauncher-timer'
+        ext_db.find.return_value = {
+            'id': ext_id,
+            'url': 'https://github.com/Ulauncher/ulauncher-timer',
+            'updated_at': '2017-01-01',
+            'last_commit': 'aDbc',
+            'last_commit_time': '2017-01-01'
+        }
+        ext_runner.is_running.return_value = True
 
-    #     assert downloader.update(ext_id)
+        assert downloader.update(ext_id)
 
-    #     download_zip.assert_called_with(gh_ext.get_download_url.return_value)
-    #     unzip.assert_called_with(download_zip.return_value, mock.ANY)
-    #     ext_runner.stop.assert_called_with(ext_id)
-    #     ext_runner.run.assert_called_with(ext_id)
-    #     ext_db.put.assert_called_with(ext_id, {
-    #         'id': ext_id,
-    #         'url': 'https://github.com/Ulauncher/ulauncher-timer',
-    #         'updated_at': datetime.now.return_value.isoformat.return_value,
-    #         'last_commit': '64e106c',
-    #         'last_commit_time': '2017-05-01T07:30:39Z'
-    #     })
+        download_zip.assert_called_with(gh_ext.get_download_url.return_value)
+        unzip.assert_called_with(download_zip.return_value, mock.ANY)
+        ext_runner.stop.assert_called_with(ext_id)
+        ext_runner.run.assert_called_with(ext_id)
+        ext_db.put.assert_called_with(ext_id, {
+            'id': ext_id,
+            'url': 'https://github.com/Ulauncher/ulauncher-timer',
+            'updated_at': datetime.now.return_value.isoformat.return_value,
+            'last_commit': '64e106c',
+            'last_commit_time': '2017-05-01T07:30:39'
+        })
 
-    # def test_get_new_version_raises_ExtensionIsUpToDateError(self, downloader, ext_db):
-    #     ext_id = 'com.github.ulauncher.ulauncher-timer'
-    #     ext_db.find.return_value = {
-    #         'id': ext_id,
-    #         'url': 'https://github.com/Ulauncher/ulauncher-timer',
-    #         'updated_at': '2017-01-01',
-    #         'last_commit': '64e106c',
-    #         'last_commit_time': '2017-05-01T07:30:39Z'
-    #     }
+    def test_get_new_version_raises_ExtensionIsUpToDateError(self, downloader, ext_db):
+        ext_id = 'com.github.ulauncher.ulauncher-timer'
+        ext_db.find.return_value = {
+            'id': ext_id,
+            'url': 'https://github.com/Ulauncher/ulauncher-timer',
+            'updated_at': '2017-01-01',
+            'last_commit': '64e106c',
+            'last_commit_time': '2017-05-01T07:30:39Z'
+        }
 
-    #     with pytest.raises(ExtensionIsUpToDateError):
-    #         downloader.get_new_version(ext_id)
+        with pytest.raises(ExtensionIsUpToDateError):
+            downloader.get_new_version(ext_id)
 
-    # def test_get_new_version_returns_new_version(self, downloader, ext_db, ext_runner, gh_ext):
-    #     ext_id = 'com.github.ulauncher.ulauncher-timer'
-    #     ext_db.find.return_value = {
-    #         'id': ext_id,
-    #         'url': 'https://github.com/Ulauncher/ulauncher-timer',
-    #         'updated_at': '2017-01-01',
-    #         'last_commit': 'a8827b723',
-    #         'last_commit_time': '2017-01-01'
-    #     }
+    def test_get_new_version__returns_new_version(self, downloader, ext_db, ext_runner, gh_ext):
+        ext_id = 'com.github.ulauncher.ulauncher-timer'
+        ext_db.find.return_value = {
+            'id': ext_id,
+            'url': 'https://github.com/Ulauncher/ulauncher-timer',
+            'updated_at': '2017-01-01',
+            'last_commit': 'a8827b723',
+            'last_commit_time': '2017-01-01'
+        }
 
-    #     assert downloader.get_new_version(ext_id) == gh_ext.get_last_commit.return_value
+        assert downloader.get_new_version(ext_id) == gh_ext.get_last_commit.return_value

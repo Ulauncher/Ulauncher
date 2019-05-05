@@ -5,12 +5,13 @@ from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
+from mypy_extensions import TypedDict
 
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
 from ulauncher.util.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
-from ulauncher.api.server.ExtensionDb import ExtensionDb
+from ulauncher.api.server.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.api.server.GithubExtension import GithubExtension
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
 from ulauncher.api.server.extension_finder import find_extensions
@@ -25,6 +26,12 @@ class ExtensionDownloaderError(UlauncherAPIError):
 
 class ExtensionIsUpToDateError(Exception):
     pass
+
+
+LastCommit = TypedDict('LastCommit', {
+    'last_commit': str,
+    'last_commit_time': str
+})
 
 
 class ExtensionDownloader:
@@ -51,7 +58,6 @@ class ExtensionDownloader:
         :rtype: str
         :returns: Extension ID
         :raises AlreadyDownloadedError:
-        :raises InvalidGithubUrlError:
         """
         gh_ext = GithubExtension(url)
         gh_ext.validate_url()
@@ -115,59 +121,53 @@ class ExtensionDownloader:
         :rtype: boolean
         :returns: False if already up-to-date, True if was updated
         """
-        ext = self.ext_db.find(ext_id)
-        if not ext:
-            raise ExtensionDownloaderError("Extension not found", ErrorName.UnexpectedError)
+        commit = self.get_new_version(ext_id)
+        ext = self._find_extension(ext_id)
 
-        url = ext['url']
-        gh_ext = GithubExtension(url)
+        logger.info('Updating extension "%s" from commit %s to %s', ext_id,
+                    ext['last_commit'][:8], commit['last_commit'][:8])
 
-        try:
-            gh_commit = self.get_new_version(ext_id)
-        except ExtensionIsUpToDateError:
-            return False
-
-        need_restart = self.ext_runner.is_running(ext_id)
-        if need_restart:
+        if self.ext_runner.is_running(ext_id):
             self.ext_runner.stop(ext_id)
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        filename = download_zip(gh_ext.get_download_url(gh_commit.last_commit))
+        gh_ext = GithubExtension(ext['url'])
+        filename = download_zip(gh_ext.get_download_url(commit['last_commit']))
         unzip(filename, ext_path)
+
         ext['updated_at'] = datetime.now().isoformat()
-        ext['last_commit'] = gh_commit.last_commit
-        ext['last_commit_time'] = gh_commit.last_commit_time.isoformat()
+        ext['last_commit'] = commit['last_commit']
+        ext['last_commit_time'] = commit['last_commit_time']
         self.ext_db.put(ext_id, ext)
         self.ext_db.commit()
 
-        if need_restart:
-            self.ext_runner.run(ext_id)
+        self.ext_runner.run(ext_id)
 
         return True
 
-    def get_new_version(self, ext_id: str):
+    def get_new_version(self, ext_id: str) -> LastCommit:
         """
         Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
         """
-        raise ExtensionIsUpToDateError('Extension %s is up-to-date' % ext_id)
-        # ext = self.ext_db.find(ext_id)
-        # if not ext:
-        #     raise ExtensionNotFound("Extension %s not found" % ext_id)
+        ext = self._find_extension(ext_id)
+        url = ext['url']
+        gh_ext = GithubExtension(url)
+        commit = gh_ext.find_compatible_version()
+        need_update = ext['last_commit'] != commit['sha']
+        if not need_update:
+            raise ExtensionIsUpToDateError('Extension is up to date')
 
-        # url = ext['url']
-        # gh_ext = GithubExtension(url)
+        return {
+            'last_commit': commit['sha'],
+            'last_commit_time': commit['time'].isoformat()
+        }
 
-        # try:
-        #     gh_commit = gh_ext.get_last_commit()
-        # except Exception as e:
-        #     logger.error('gh_ext.get_ext_meta() failed. %s: %s', type(e).__name__, e)
-        #     raise InvalidGithubUrlError('Project is not available on Github')
-
-        # if ext['last_commit'] == gh_commit.last_commit:
-        #     raise ExtensionIsUpToDateError('Extension %s is up-to-date' % ext_id)
-
-        # return gh_commit
+    def _find_extension(self, ext_id: str) -> ExtensionRecord:
+        ext = self.ext_db.find(ext_id)
+        if not ext:
+            raise ExtensionDownloaderError("Extension not found", ErrorName.UnexpectedError)
+        return ext
 
 
 def unzip(filename: str, ext_path: str) -> None:

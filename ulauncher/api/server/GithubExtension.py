@@ -136,21 +136,6 @@ class GithubExtension:
     def read_manifest(self, commit) -> Manifest:
         return cast(Manifest, self._read_json(commit, 'manifest.json'))
 
-    # def get_last_commit(self) -> Commit:
-    #     """
-    #     :rtype dict: {'last_commit': str, 'last_commit_time': str}
-    #     :raises urllib.error.HTTPError:
-    #     """
-    #     project_path = self._get_project_path()
-    #     branch_head_url = 'https://api.github.com/repos/%s/git/refs/heads/%s' % (project_path, DEFAULT_GITHUB_BRANCH)
-    #     branch_head = json.loads(urlopen(branch_head_url).read().decode('utf-8'))
-    #     branch_head_commit = json.loads(urlopen(branch_head['object']['url']).read().decode('utf-8'))
-
-    #     return {
-    #         'last_commit': branch_head_commit['sha'],
-    #         'last_commit_time': branch_head_commit['committer']['date']  # ISO date
-    #     }
-
     def get_download_url(self, commit: str = DEFAULT_GITHUB_BRANCH) -> str:
         """
         >>> https://github.com/Ulauncher/ulauncher-timer

@@ -394,9 +394,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Handling /extension/check-updates')
         ext_id = url_params['query']['id']
         try:
-            version = ExtensionDownloader.get_instance().get_new_version(ext_id)
-            return {'last_commit': version.last_commit,
-                    'last_commit_time': version.last_commit_time}
+            return ExtensionDownloader.get_instance().get_new_version(ext_id)
         except ExtensionIsUpToDateError:
             return None
 
