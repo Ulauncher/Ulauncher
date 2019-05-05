@@ -38,6 +38,7 @@ main () {
     build-deb) build-deb $2 $3 ;;
     build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
+    aur-update) ./scripts/aur-update.py $2 ;;
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
     build-preferences) build-preferences ;;
