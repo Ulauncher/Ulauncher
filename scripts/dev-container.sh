@@ -13,6 +13,6 @@ dev-container () {
         -v $HOME/.bash_history:/root/.bash_history \
         -p 3002:3002 \
         --name ulauncher \
-        $BUILD_IMAGE \
+        $SUSE_423_BUILD_IMAGE \
         bash
 }

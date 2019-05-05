@@ -9,8 +9,10 @@ yellow=$'\e[33m'
 red=$'\e[1;31m'
 
 BUILD_IMAGE=ulauncher/build-image:5.0
-RPM_BUILD_IMAGE=ulauncher/rpm-build-image:5.0
-ARCH_BUILD_IMAGE=ulauncher/arch-build-image:5.0
+FEDORA_28_BUILD_IMAGE=ulauncher/fedora:5.0-28
+FEDORA_29_BUILD_IMAGE=ulauncher/fedora:5.0-29
+SUSE_423_BUILD_IMAGE=ulauncher/opensuse:5.0-42.3
+ARCH_BUILD_IMAGE=ulauncher/arch:5.0
 
 warn-if-not-in-docker () {
     if [ ! -f /.dockerenv ]; then

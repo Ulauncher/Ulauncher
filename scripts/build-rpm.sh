@@ -6,7 +6,9 @@
 build-rpm () {
 
     # Args:
-    # $1 version
+    # required: $1 version
+    # required: $2 distro name (feodra, suse, centos7). It should match with a suffix in setup.cfg
+    # optional: $3 file suffix
 
     echo "##################################"
     echo "# Building ulauncher-$1.noarch.rpm"
@@ -17,6 +19,11 @@ build-rpm () {
         exit 1
     fi
 
+    if [ -z "$2" ]; then
+        echo "Second argument should a distro name"
+        exit 1
+    fi
+
     if [ ! -f data/preferences/dist/index.html ]; then
         echo "Preferences are not built"
         exit 1
@@ -24,6 +31,9 @@ build-rpm () {
 
     set -ex
 
+    version=$1
+    distro_name=$2
+    file_suffix=${3:-$distro_name}
     name="ulauncher"
     tmpdir="/tmp/$name"
 
@@ -45,29 +55,12 @@ build-rpm () {
     rm -rf $tmpdir/data/preferences/*
     cp -r data/preferences/dist $tmpdir/data/preferences
 
-    # set version to a tag name ($1)
-    sed -i "s/%VERSION%/$1/g" $tmpdir/setup.py
+    # set version to a tag name
+    sed -i "s/%VERSION%/$version/g" $tmpdir/setup.py
 
     cd $tmpdir
 
-    # build for Fedora
-    python3 setup.py bdist_rpm # --no-autoreq --fix-python
-    find . -name "*noarch.rpm" -print0 | xargs -0 -I file cp file /tmp/ulauncher_$1_fedora.rpm
-
-    echo
-    echo "TODO: Remove this"
-    echo
-    exit 0
-
-    # build for OpenSUSE
-    sed -i "s/\[bdist_rpm\]/[bdist_rpm_fedora]/g" setup.cfg
-    sed -i "s/\[bdist_rpm_suse\]/[bdist_rpm]/g" setup.cfg
+    sed -i "s/\[bdist_rpm_$distro_name\]/[bdist_rpm]/g" setup.cfg
     python3 setup.py bdist_rpm
-    find . -name "*noarch.rpm" -print0 | xargs -0 -I file cp file /tmp/ulauncher_$1_suse.rpm
-
-    # build for CentOS 7
-    sed -i "s/\[bdist_rpm\]/[bdist_rpm_suse]/g" setup.cfg
-    sed -i "s/\[bdist_rpm_centos7\]/[bdist_rpm]/g" setup.cfg
-    python3 setup.py bdist_rpm
-    find . -name "*noarch.rpm" -print0 | xargs -0 -I file cp file /tmp/ulauncher_$1_centos7.rpm
+    find . -name "*noarch.rpm" -print0 | xargs -0 -I file cp file /tmp/ulauncher_$1_$file_suffix.rpm
 }

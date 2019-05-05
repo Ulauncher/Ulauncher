@@ -36,7 +36,7 @@ main () {
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
-    build-rpm) build-rpm $2 ;;
+    build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;

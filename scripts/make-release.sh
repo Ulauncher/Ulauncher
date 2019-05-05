@@ -19,10 +19,10 @@ make-release() {
 
     set -ex
 
-    create_deb
+    # create_deb
     create_rpms
-    launchpad_upload
-    aur_update
+    # launchpad_upload
+    # aur_update
 }
 
 create_deb() {
@@ -43,16 +43,31 @@ create_deb() {
 }
 
 create_rpms() {
-    # RPM build should go second, so preferences are build into JS/HTML files
-    docker run \
-        -v $(pwd):/root/ulauncher \
-        --name ulauncher-rpm \
-        $RPM_BUILD_IMAGE \
-        bash -c "./ul build-rpm $VERSION"
+    # RPMs are tricky because different distros have different Python3 versions
+    # We know that
+    #   Fedora 28 has Python 3.6
+    #   Fedora 29 and 30 has Python 3.7
+    #   Opensuse 42.3 has Python 3.4
+    #   Centos7 has Python 3.6
+    # This means that we should use separate docker images to build different RPM packages
+    # However we can build RPM for Fedora 28 and Centos7 using the same image
 
-    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
-    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_suse.rpm .
+    set -ex
+
+    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_28_BUILD_IMAGE \
+        bash -c "./ul build-rpm $VERSION fedora fedora28 && ./ul build-rpm $VERSION centos7"
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora28.rpm .
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_centos7.rpm .
+    docker rm ulauncher-rpm
+
+    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_29_BUILD_IMAGE \
+        bash -c "./ul build-rpm $VERSION fedora fedora29"
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora29.rpm .
+    docker rm ulauncher-rpm
+
+    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $SUSE_423_BUILD_IMAGE \
+        bash -c "./ul build-rpm $VERSION suse"
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_suse.rpm .
     docker rm ulauncher-rpm
 }
 

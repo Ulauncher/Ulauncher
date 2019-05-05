@@ -4,6 +4,7 @@ MAINTAINER ulauncher.app@gmail.com
 
 WORKDIR /root/ulauncher
 
+# Python 3.6.7
 RUN dnf install -y \
         gcc \
         make \
