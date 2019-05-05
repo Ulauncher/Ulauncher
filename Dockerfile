@@ -31,6 +31,7 @@ RUN apt-get update && \
         python3-pyinotify \
         python3-levenshtein \
         python3-websocket \
+        python3-paramiko \
         python3-pip && \
     pip3 install --upgrade pip pybuild setuptools && \
     wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_8.x && \
