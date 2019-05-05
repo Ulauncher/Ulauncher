@@ -7,7 +7,7 @@ build-rpm () {
 
     # Args:
     # required: $1 version
-    # required: $2 distro name (feodra, suse, centos7). It should match with a suffix in setup.cfg
+    # required: $2 distro name (feodra, centos7). It should match with a suffix in setup.cfg
     # optional: $3 file suffix
 
     echo "##################################"

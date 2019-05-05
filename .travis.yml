@@ -30,7 +30,8 @@ deploy:
   file:
     - ulauncher_${TRAVIS_TAG}.tar.gz
     - ulauncher_${TRAVIS_TAG}_all.deb
-    - ulauncher_${TRAVIS_TAG}_fedora.rpm
+    - ulauncher_${TRAVIS_TAG}_fedora28.rpm
+    - ulauncher_${TRAVIS_TAG}_fedora29.rpm
     - ulauncher_${TRAVIS_TAG}_centos7.rpm
   skip_cleanup: true
   on:

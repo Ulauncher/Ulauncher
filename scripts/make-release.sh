@@ -19,10 +19,10 @@ make-release() {
 
     set -ex
 
-    # create_deb
+    create_deb
     create_rpms
-    # launchpad_upload
-    # aur_update
+    launchpad_upload
+    aur_update
 }
 
 create_deb() {
