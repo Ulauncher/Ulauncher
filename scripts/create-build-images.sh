@@ -19,7 +19,4 @@ create-build-images () {
 
     docker build -f Dockerfile.fedora-29 -t $FEDORA_29_BUILD_IMAGE .
     docker push $FEDORA_29_BUILD_IMAGE
-
-    docker build -f Dockerfile.suse-42.3 -t $SUSE_423_BUILD_IMAGE .
-    docker push $SUSE_423_BUILD_IMAGE
 }
