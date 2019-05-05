@@ -112,13 +112,13 @@ Available Options
 
 Preference Object Fields
 ^^^^^^^^^^^^^^^^^^^^^^^^
-The values of the preferences are forwarded to the on_event method of the KeywordQueryEventListener class as an attribute of extension. For example the value of the keyword with id = 'id' and value = 'val' is obtained with the line value = extension.preferences['id'] which  assigns the string 'val' to value. An example of the use of preferences can be found in the [ulauncher demo extension](https://github.com/Ulauncher/ulauncher-demo-ext)
+The values of the preferences are forwarded to the ``on_event`` method of the ``KeywordQueryEventListener`` class as an attribute of extension. For example the value of the keyword with ``id = 'id'`` and ``value = 'val'`` is obtained with the line ``value = extension.preferences['id']`` which  assigns the string ``'val'`` to value. An example of the use of preferences can be found in the `ulauncher demo extension <https://github.com/Ulauncher/ulauncher-demo-ext>`_
 
 
-``id``
+``id`` (required)
   Key that is used to retrieve value for a certain preference
 
-``type``
+``type`` (required)
   Can be "keyword", "input", "text", or "select"
 
   * keyword - define keyword that user has to type in in order to use your extension
@@ -128,7 +128,7 @@ The values of the preferences are forwarded to the on_event method of the Keywor
 
   .. NOTE:: At least one preference with type "keyword" must be defined.
 
-``name``
+``name`` (required)
   Name of your preference. If type is "keyword" name will show up as a name of item in a list of results
 
 ``default_value``
@@ -202,6 +202,13 @@ This is all your extension can do now -- show a list of 5 items.
 
 Basic API Concepts
 ------------------
+
+
+.. figure:: https://imgur.com/Wzb6KUz.png
+  :align: center
+
+  Message flow
+
 
 **1. Define extension class and subscribe to an event**
 

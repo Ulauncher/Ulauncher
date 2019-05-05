@@ -33,6 +33,11 @@ from Ulauncher Preferences window.
 
 It is also possible to capture item click (enter) event and run a custom function to respond to that event.
 
+What Extensions Cannot Do
+-------------------------
+
+They cannot modify behaviour or look of Ulauncher app.
+They can only be used to handle an input that starts with a keyword, which extension developers define in a manifest file.
 
 Ulauncher ⇄ Extension Communication Layer
 -----------------------------------------
@@ -41,3 +46,9 @@ Ulauncher communicates to extensions using WebSockets.
 
 For developer convenience there is an abstraction layer over WebSockets
 that reduces amount of boilerplate code in extensions.
+
+
+.. figure:: https://imgur.com/Wzb6KUz.png
+  :align: center
+
+  Message flow
