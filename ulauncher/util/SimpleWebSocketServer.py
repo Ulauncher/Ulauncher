@@ -175,7 +175,7 @@ class WebSocket:
             self.close(status, reason)
             return
 
-        elif self.fin == 0:
+        if self.fin == 0:
             if self.opcode != STREAM:
                 if self.opcode == PING or self.opcode == PONG:
                     raise Exception('control messages can not be fragmented')
@@ -252,28 +252,27 @@ class WebSocket:
             if not data:
                 raise Exception('remote socket closed')
 
-            else:
-                # accumulate
-                self.headerbuffer.extend(data)
+            # accumulate
+            self.headerbuffer.extend(data)
 
-                if len(self.headerbuffer) >= self.maxheader:
-                    raise Exception('header exceeded allowable size')
+            if len(self.headerbuffer) >= self.maxheader:
+                raise Exception('header exceeded allowable size')
 
-                # indicates end of HTTP header
-                if b'\r\n\r\n' in self.headerbuffer:
-                    self.request = HTTPRequest(self.headerbuffer)
+            # indicates end of HTTP header
+            if b'\r\n\r\n' in self.headerbuffer:
+                self.request = HTTPRequest(self.headerbuffer)
 
-                    # handshake rfc 6455
-                    try:
-                        key = self.request.headers['Sec-WebSocket-Key']
-                        k = key.encode('ascii') + GUID_STR.encode('ascii')
-                        k_s = base64.b64encode(hashlib.sha1(k).digest()).decode('ascii')
-                        hStr = HANDSHAKE_STR % {'acceptstr': k_s}
-                        self.sendq.append((BINARY, hStr.encode('ascii')))
-                        self.handshaked = True
-                        self.handleConnected()
-                    except Exception as e:
-                        raise Exception('handshake failed: %s' % e)
+                # handshake rfc 6455
+                try:
+                    key = self.request.headers['Sec-WebSocket-Key']
+                    k = key.encode('ascii') + GUID_STR.encode('ascii')
+                    k_s = base64.b64encode(hashlib.sha1(k).digest()).decode('ascii')
+                    hStr = HANDSHAKE_STR % {'acceptstr': k_s}
+                    self.sendq.append((BINARY, hStr.encode('ascii')))
+                    self.handshaked = True
+                    self.handleConnected()
+                except Exception as e:
+                    raise Exception('handshake failed: %s' % e)
 
         # else do normal data
         else:
@@ -670,14 +669,14 @@ class SimpleWebSocketServer:
                 if failed == self.serversocket:
                     self.close()
                     raise Exception('server socket failed')
-                else:
-                    if failed not in self.connections:
-                        continue
-                    client = self.connections[failed]
-                    client.client.close()
-                    client.handleClose()
-                    del self.connections[failed]
-                    self.listeners.remove(failed)
+
+                if failed not in self.connections:
+                    continue
+                client = self.connections[failed]
+                client.client.close()
+                client.handleClose()
+                del self.connections[failed]
+                self.listeners.remove(failed)
 
 
 class SimpleSSLWebSocketServer(SimpleWebSocketServer):
