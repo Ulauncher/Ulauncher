@@ -1,6 +1,6 @@
 import os
 from typing import Type, Optional
-from mypy_extensions import TypedDict
+from ulauncher.util.mypy_extensions import TypedDict
 
 from ulauncher.config import CONFIG_DIR
 from ulauncher.util.db.KeyValueJsonDb import KeyValueJsonDb

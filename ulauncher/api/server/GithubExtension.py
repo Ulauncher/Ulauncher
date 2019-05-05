@@ -5,7 +5,7 @@ from datetime import datetime
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from typing import Dict, List, cast
-from mypy_extensions import TypedDict
+from ulauncher.util.mypy_extensions import TypedDict
 
 from ulauncher.util.date import iso_to_datetime
 from ulauncher.api.version import api_version

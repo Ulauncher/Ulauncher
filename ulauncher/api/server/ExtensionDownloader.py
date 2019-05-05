@@ -5,7 +5,7 @@ from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
-from mypy_extensions import TypedDict
+from ulauncher.util.mypy_extensions import TypedDict
 
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.util.decorator.run_async import run_async
