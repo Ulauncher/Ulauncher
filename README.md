@@ -40,7 +40,7 @@ Known Issues
 Code Contribution
 =================
 
-Any code contributions are welcomed as long as they are discussed in [Github Issues](https://github.com/Ulauncher/ext.ulauncher.io/issues) with maintainers.
+Any code contributions are welcomed as long as they are discussed in [Github Issues](https://github.com/Ulauncher/Ulauncher/issues) with maintainers.
 Be aware that if you decide to change something and submit a PR on your own, it may not be accepted.
 
 Checkout [Code Contribution Guidelines](https://github.com/Ulauncher/Ulauncher/wiki/Code-Contribution) for more info.
