@@ -13,9 +13,7 @@ build-targz () {
 
     set -ex
 
-    buildUtils=`dirname $0`
-
-    bash "$buildUtils/build-preferences.sh"
+    ./ul build-preferences
 
     name="ulauncher"
     tmpdir="/tmp/$name"
