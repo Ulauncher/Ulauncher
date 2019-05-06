@@ -83,7 +83,7 @@ You must have the following things installed:
 1. `$ ./ul init-dev-env` installs Ulauncher data to `~/.local/share/ulauncher/`
 1. `$ ./ul dev-container` will take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
 1. `root@container: # ./ul build-preferences` build preferences UI in JS/HTML
-1. `root@container: # ./test` runs linter, type checker, and unit tests
+1. `root@container: # ./ul test` runs linter, type checker, and unit tests
 1. `$ ./ul run` runs the app
 
 Check out output of `./ul` to find more useful commands.
