@@ -3,6 +3,7 @@ import os
 import logging
 import json
 from urllib.parse import unquote
+from typing import List
 import traceback
 
 import gi
@@ -17,7 +18,7 @@ from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.api.server.extension_finder import find_extensions
-from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
+from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences, PreferenceItems
 from ulauncher.api.server.ExtensionDb import ExtensionDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
@@ -26,6 +27,7 @@ from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import themes, Theme, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
+from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router, get_url_params
@@ -41,6 +43,20 @@ rt = Router()
 
 class PrefsApiError(UlauncherAPIError):
     pass
+
+
+ExtensionInfo = TypedDict('ExtensionInfo', {
+    'id': str,
+    'url': str,
+    'updated_at': str,
+    'last_commit': str,
+    'last_commit_time': str,
+    'name': str,
+    'icon': str,
+    'description': str,
+    'developer_name': str,
+    'preferences': PreferenceItems
+})
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
@@ -419,7 +435,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # Helpers
     ######################################
 
-    def _get_all_extensions(self):
+    def _get_all_extensions(self) -> List[ExtensionInfo]:
         extensions = []
         for ext_id, _ in find_extensions(EXTENSIONS_DIR):
             prefs = ExtensionPreferences.create_instance(ext_id)
@@ -433,7 +449,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         return extensions
 
-    def _get_extension_info(self, ext_id, prefs):
+    def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
         ext_db_record = ext_db.find(ext_id, {})
         return {

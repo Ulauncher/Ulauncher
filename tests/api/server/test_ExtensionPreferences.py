@@ -11,13 +11,14 @@ class TestExtensionPreferences:
     @pytest.fixture(autouse=True)
     def db(self, mocker):
         Db = mocker.patch('ulauncher.api.server.ExtensionPreferences.KeyValueDb')
-        Db.return_value = mock.create_autospec(KeyValueDb)
+        db_mock = mock.create_autospec(KeyValueDb)
+        Db.__getitem__.return_value.return_value = db_mock
 
         def find(_, default=None):
             return default
 
-        Db.return_value.find.side_effect = find
-        return Db.return_value
+        db_mock.find.side_effect = find
+        return db_mock
 
     @pytest.fixture
     def manifest_prefs(self):
@@ -74,7 +75,7 @@ class TestExtensionPreferences:
         assert prefs.get_dict() == {
             'main_kw': 'ti',
             'name': 'def',
-            'description': None
+            'description': ''
         }
 
     def test_set__db_put__is_called(self, prefs, db):

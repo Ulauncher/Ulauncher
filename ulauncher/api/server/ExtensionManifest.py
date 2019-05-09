@@ -1,58 +1,89 @@
 import os
 from json import load
+from typing import cast, Optional, List, Union
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.utils.image_loader import load_image
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.api.version import api_version
 from ulauncher.utils.semver import satisfies
+from ulauncher.utils.mypy_extensions import TypedDict
 
 
 class ExtensionManifestError(UlauncherAPIError):
     pass
 
 
+OptionItemExtended = TypedDict('OptionItemExtended', {
+    'value': str,
+    'text': str
+})
+OptionItem = Union[str, OptionItemExtended]
+OptionItems = List[OptionItem]
+Options = TypedDict('Options', {
+    'query_debounce': float
+})
+ManifestPreferenceItem = TypedDict('ManifestPreferenceItem', {
+    'id': str,
+    'type': str,
+    'name': str,
+    'description': str,
+    'default_value': str,
+    'options': OptionItems
+})
+ManifestJson = TypedDict('ManifestJson', {
+    'required_api_version': str,
+    'name': str,
+    'description': str,
+    'developer_name': str,
+    'icon': str,
+    'options': Optional[Options],
+    'preferences': List[ManifestPreferenceItem]
+})
+
+
 class ExtensionManifest:
     """
     Reads `manifest.json`
     """
+    manifest = None  # type: ManifestJson
 
     @classmethod
     def open(cls, extension_id, extensions_dir=EXTENSIONS_DIR):
         return cls(extension_id, read_manifest(extension_id, extensions_dir), extensions_dir)
 
-    def __init__(self, extension_id, manifest, extensions_dir=EXTENSIONS_DIR):
+    def __init__(self, extension_id: str, manifest: ManifestJson, extensions_dir: str = EXTENSIONS_DIR):
         self.extensions_dir = extensions_dir
         self.extension_id = extension_id
         self.manifest = manifest
 
     def refresh(self):
-        self.manifest = read_manifest(self.extension_id, self.extensions_dir)
+        self.manifest = cast(ManifestJson, read_manifest(self.extension_id, self.extensions_dir))
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.manifest['name']
 
-    def get_description(self):
+    def get_description(self) -> str:
         return self.manifest['description']
 
-    def get_icon(self):
+    def get_icon(self) -> str:
         return self.manifest['icon']
 
-    def get_icon_path(self):
+    def get_icon_path(self) -> str:
         return os.path.join(self.extensions_dir, self.extension_id, self.get_icon())
 
     def load_icon(self, size):
         return load_image(self.get_icon_path(), size)
 
-    def get_required_api_version(self):
+    def get_required_api_version(self) -> str:
         return self.manifest['required_api_version']
 
-    def get_developer_name(self):
+    def get_developer_name(self) -> str:
         return self.manifest['developer_name']
 
-    def get_preferences(self):
+    def get_preferences(self) -> List[ManifestPreferenceItem]:
         return self.manifest.get('preferences', [])
 
-    def get_preference(self, id):
+    def get_preference(self, id) -> Optional[ManifestPreferenceItem]:
         for p in self.get_preferences():
             if p['id'] == id:
                 return p
