@@ -27,7 +27,7 @@
             <br>
             <b>{{ errorMessage }}</b>
           </p>
-          <p>
+          <p v-if="extUrl">
             Please make sure that you are running the latest version of Ulauncher app.
             If problem persists, report this issue to the author of the extension via
             <a
@@ -50,7 +50,7 @@
             @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
           >Github issues</a>.
         </p>
-        <p v-if="reportableErrors.indexOf(errorName) > -1">
+        <p v-if="extUrl && reportableErrors.indexOf(errorName) > -1">
           Let the author know about this problem via
           <a
             href

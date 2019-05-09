@@ -1,3 +1,5 @@
+const placeholderImage = 'https://dummyimage.com/40x40/540154/0011ff.png'
+
 export default function(url, params) {
   function isMatch(url, resource) {
     return url.indexOf(resource) !== -1
@@ -55,7 +57,7 @@ export default function(url, params) {
       console.log('/show/file-browser', params)
       setTimeout(resolve, 0)
       setTimeout(function() {
-        window.onNotification(params.name, { value: `https://placeholdit.imgix.net/~text?txt=Icon&w=80&h=80` })
+        window.onNotification(params.name, { value: placeholderImage })
       }, 500)
     } else if (isMatch(url, '/shortcut/get-all')) {
       console.log('/shortcut/get-all', params)
@@ -121,11 +123,21 @@ function _getExtensions() {
   return [
     generateExtensionRecord('ext.custom', 'Very Very Very Very Long Extension Name', 2, null),
     generateExtensionRecord('ext.timer', 'Timer'),
-    generateExtensionRecord('ext.dict', 'Dictionary', 0)
+    generateExtensionRecord('ext.dict', 'Dictionary', 0),
+    generateExtensionRecord('ext.witherror', 'With Error', 0, 'https://github.com/ulauncher/ulauncher-demo-ext', {
+      message: "'required_api_version' is not provided",
+      errorName: 'InvalidManifestJson'
+    })
   ]
 }
 
-function generateExtensionRecord(extId, name, numOfPrefs = 4, url = 'https://github.com/ulauncher/ulauncher-demo-ext') {
+function generateExtensionRecord(
+  extId,
+  name,
+  numOfPrefs = 4,
+  url = 'https://github.com/ulauncher/ulauncher-demo-ext',
+  error = null
+) {
   let prefs = [
     {
       id: 'keyword',
@@ -171,13 +183,14 @@ function generateExtensionRecord(extId, name, numOfPrefs = 4, url = 'https://git
     url: url,
     name: name,
     updated_at: '2017-07-21T20:50:44.850738',
-    icon: 'https://assets-cdn.github.com/favicon.ico',
+    icon: placeholderImage,
     description: 'My extension description',
     developer_name: 'John Doe',
     version: '1.2.3',
     last_commit: 'abc234fd23425234a2',
     last_commit_time: '2017-07-21T20:50:44',
-    preferences: prefs
+    preferences: prefs,
+    error
   }
 }
 
@@ -200,7 +213,7 @@ function _getShortcuts() {
     },
     {
       id: '3ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Maps',
       keyword: 'maps',
       cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch',
@@ -208,7 +221,7 @@ function _getShortcuts() {
     },
     {
       id: '4ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Play',
       keyword: 'play',
       cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch',
@@ -216,84 +229,84 @@ function _getShortcuts() {
     },
     {
       id: '5ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Gihub',
       keyword: 'g',
       cmd: 'http://github.com/search?q=%s'
     },
     {
       id: '6ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'gismeteo.ua',
       keyword: 'gismeteo.ua',
       cmd: 'http://www.gismeteo.ua/city/?gis20141120102952990=%s&searchQueryData=%2758175%27'
     },
     {
       id: '7ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Maps',
       keyword: 'maps',
       cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch'
     },
     {
       id: '8ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Play',
       keyword: 'play',
       cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch'
     },
     {
       id: '9ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Gihub',
       keyword: 'g',
       cmd: 'http://github.com/search?q=%s'
     },
     {
       id: '0ad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'gismeteo.ua',
       keyword: 'gismeteo.ua',
       cmd: 'http://www.gismeteo.ua/city/?gis20141120102952990=%s&searchQueryData=%2758175%27'
     },
     {
       id: 'aad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Maps',
       keyword: 'maps',
       cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch'
     },
     {
       id: 'bad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Play',
       keyword: 'play',
       cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch'
     },
     {
       id: 'cad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Gihub',
       keyword: 'g',
       cmd: 'http://github.com/search?q=%s'
     },
     {
       id: 'dad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'gismeteo.ua',
       keyword: 'gismeteo.ua',
       cmd: 'http://www.gismeteo.ua/city/?gis20141120102952990=%s&searchQueryData=%2758175%27'
     },
     {
       id: 'ead51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Maps',
       keyword: 'maps',
       cmd: 'https://www.google.com.ua/maps/search/%s?hl=en&source=opensearch'
     },
     {
       id: 'fad51010-04ee-44fc-81c4-ed6fb72cbf19',
-      icon: 'https://assets-cdn.github.com/favicon.ico',
+      icon: placeholderImage,
       name: 'Google Play',
       keyword: 'play',
       cmd: 'https://play.google.com/store/search?q=%s&utm_source=opensearch'

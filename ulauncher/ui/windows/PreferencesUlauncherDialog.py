@@ -3,7 +3,7 @@ import os
 import logging
 import json
 from urllib.parse import unquote
-from typing import List
+from typing import List, Optional, cast
 import traceback
 
 import gi
@@ -45,6 +45,11 @@ class PrefsApiError(UlauncherAPIError):
     pass
 
 
+ExtError = TypedDict('ExtError', {
+    'errorName': str,
+    'message': str
+})
+
 ExtensionInfo = TypedDict('ExtensionInfo', {
     'id': str,
     'url': str,
@@ -55,7 +60,8 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
     'icon': str,
     'description': str,
     'developer_name': str,
-    'preferences': PreferenceItems
+    'preferences': PreferenceItems,
+    'error': Optional[ExtError]
 })
 
 
@@ -438,18 +444,27 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def _get_all_extensions(self) -> List[ExtensionInfo]:
         extensions = []
         for ext_id, _ in find_extensions(EXTENSIONS_DIR):
-            prefs = ExtensionPreferences.create_instance(ext_id)
+            prefs = ExtensionPreferences.create_instance(ext_id)  # type: ExtensionPreferences
             prefs.manifest.refresh()
+            error = None
             try:
                 prefs.manifest.validate()
                 prefs.manifest.check_compatibility()
-            except ExtensionManifestError:
-                continue
-            extensions.append(self._get_extension_info(ext_id, prefs))
+            except UlauncherAPIError as e:
+                error = cast(ExtError, {
+                    'message': str(e),
+                    'errorName': e.error_name
+                })
+            except Exception as e:
+                error = cast(ExtError, {
+                    'message': str(e),
+                    'errorName': ErrorName.UnexpectedError.value
+                })
+            extensions.append(self._get_extension_info(ext_id, prefs, error))
 
         return extensions
 
-    def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences) -> ExtensionInfo:
+    def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
         ext_db_record = ext_db.find(ext_id, {})
         return {
@@ -462,7 +477,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'icon': prefs.manifest.get_icon_path(),
             'description': prefs.manifest.get_description(),
             'developer_name': prefs.manifest.get_developer_name(),
-            'preferences': prefs.get_items()
+            'preferences': prefs.get_items(),
+            'error': error
         }
 
     def _load_prefs_html(self, page=''):

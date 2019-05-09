@@ -9,6 +9,7 @@
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
           <span>{{ ext.name }}</span>
+          <b-badge v-if="ext.error" variant="warning">error</b-badge>
         </li>
         <li class="link" @click="addExtDialog">
           <i class="fa fa-plus"></i>
@@ -29,6 +30,7 @@
         ok-title="Add"
         close-title="Cancel"
         hide-header-close
+        no-fade
         no-auto-focus
         @shown="onAddExtFormShown"
         @ok="onModalOk"
@@ -207,6 +209,14 @@ $veryLightGrey: #c8c8c8;
 }
 .warning {
   color: #b30000;
+}
+.left-nav {
+  flex: 0 0 250px;
+}
+.ext-view {
+  flex: 1;
+  max-width: none;
+  min-height: 350px;
 }
 .ext-list {
   $listIconSize: 17px;

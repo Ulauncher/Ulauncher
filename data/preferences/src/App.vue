@@ -10,6 +10,7 @@
     <b-modal
         ref="errorModal"
         ok-only
+        no-fade
         ok-title="Dismiss"
         hide-header-close
         @ok="onErrorDismiss">

@@ -27,6 +27,8 @@ class ExtensionPreferences:
     Manages extension preferences. Stores them in pickled file in cache directory
     """
 
+    manifest = None  # type: ExtensionManifest
+
     @classmethod
     @lru_cache(maxsize=1000)
     def create_instance(cls, ext_id):
@@ -35,7 +37,7 @@ class ExtensionPreferences:
     def __init__(self, ext_id: str, manifest: ExtensionManifest, ext_preferences_dir: str = EXT_PREFERENCES_DIR):
         self.db_path = os.path.join(ext_preferences_dir, '%s.db' % ext_id)
         self.db = KeyValueDb[str, str](self.db_path)
-        self.manifest = manifest  # type: ExtensionManifest
+        self.manifest = manifest
         self._db_is_open = False
 
     def get_items(self, type: str = None) -> PreferenceItems:
