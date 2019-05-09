@@ -17,8 +17,7 @@ class KeywordQueryEvent(BaseEvent):
     :param ~ulauncher.search.Query.Query query:
     """
 
-    def __init__(self, query, preferences):
-        self.preferences = preferences
+    def __init__(self, query):
         self.query = query
 
     def get_keyword(self):
@@ -26,17 +25,6 @@ class KeywordQueryEvent(BaseEvent):
         :rtype: str
         """
         return self.query.get_keyword()
-
-    def get_keyword_id(self):
-        """
-        :rtype: str
-        """
-        keyword = self.query.get_keyword()
-        for pref in self.preferences.get_items():
-            if pref['type'] == "keyword" and pref['value'] == keyword:
-                return pref['id']
-
-        return ""
 
     def get_query(self):
         """
