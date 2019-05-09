@@ -39,7 +39,7 @@ class ExtensionController(WebSocket):
 
         :returns: :class:`BaseAction` object
         """
-        event = KeywordQueryEvent(query, self.preferences)
+        event = KeywordQueryEvent(query)
         return self.trigger_event(event)
 
     def trigger_event(self, event):
