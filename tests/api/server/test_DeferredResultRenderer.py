@@ -4,6 +4,7 @@ import pytest
 from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
+from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
 from ulauncher.search.Query import Query
@@ -48,17 +49,21 @@ class TestDeferredResultRenderer:
         timer.cancel.assert_called_once_with()
 
     def test_handle_response__action__is_ran(self, renderer, controller):
+        mockManifest = ExtensionManifest('test_extension', {}, '/tmp')
+        mockPreferences = ExtensionPreferences('test_extension', mockManifest, '/tmp')
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'))
+        response.event = KeywordQueryEvent(Query('test'), mockPreferences)
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
         response.action.run.assert_called_once_with()
 
     def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, mocker):
+        mockManifest = ExtensionManifest('test_extension', {}, '/tmp')
+        mockPreferences = ExtensionPreferences('test_extension', mockManifest, '/tmp')
         UlauncherWindow = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'))
+        response.event = KeywordQueryEvent(Query('test'), mockPreferences)
         response.action.keep_app_open.return_value = False
         renderer.active_event = response.event
         renderer.active_controller = controller
