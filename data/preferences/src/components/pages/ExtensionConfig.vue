@@ -19,8 +19,7 @@
           @click="onDropdownClick"
           :text="(canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
         >
-          <b-dropdown-item @click="save" v-if="canSave">Save</b-dropdown-item>
-          <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates">Check Updates</b-dropdown-item>
+          <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check Updates</b-dropdown-item>
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
           <b-dropdown-divider/>
           <b-dropdown-item v-if="extension.url" @click="reportIssue">Report Issue</b-dropdown-item>
@@ -31,18 +30,20 @@
           </b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-code-fork fa-fw"></i>
-            {{ extension.last_commit.substring(0, 7) }}
+            <span class="text-monospace">{{ extension.last_commit.substring(0, 7) }}</span>
           </b-dropdown-item>
         </b-dropdown>
       </div>
     </div>
 
-    <ext-error-explanation
-      v-if="extension.error"
-      :extUrl="extension.url"
-      :errorMessage="extension.error.message"
-      :errorName="extension.error.errorName"
-    />
+    <div class="error-wrapper" v-if="extension.error">
+      <ext-error-explanation
+        is-update
+        :extUrl="extension.url"
+        :errorMessage="extension.error.message"
+        :errorName="extension.error.errorName"
+      />
+    </div>
 
     <div class="ext-form" v-if="!extension.error">
       <template v-for="pref in extension.preferences">
@@ -129,6 +130,13 @@
       <div v-if="updateState == 'updated'">
         <i class="fa fa-check-circle"></i> Updated
       </div>
+
+      <ext-error-explanation
+        v-if="updateError"
+        :extUrl="extension.url"
+        :errorMessage="updateError.message"
+        :errorName="updateError.errorName"
+      />
     </b-modal>
   </div>
 </template>
@@ -149,6 +157,7 @@ export default {
       updateExtModal: false,
       removeExtModal: false,
       showSavedMsg: false,
+      updateError: null,
       updateState: null, // null | checking-updates | update-available | no-updates | updating | updated
       newVersionInfo: null
     }
@@ -251,6 +260,7 @@ export default {
       )
     },
     checkUpdates() {
+      this.updateError = null
       this.updateExtModal = true
       this.newVersionInfo = null
       this.updateState = 'checking-updates'
@@ -264,18 +274,21 @@ export default {
           }
         },
         err => {
-          bus.$emit('error', err)
+          this.updateState = null
+          this.updateError = err
         }
       )
     },
     update() {
+      this.updateError = null
       this.updateState = 'updating'
       jsonp('prefs://extension/update-ext', { id: this.extension.id }).then(
         () => {
           this.updateState = 'updated'
         },
         err => {
-          bus.$emit('error', err)
+          this.updateState = null
+          this.updateError = err
         }
       )
     },
@@ -294,7 +307,7 @@ export default {
     flex: 0 0 70px;
 
     img {
-      width: 50px;
+      width: 55px;
     }
   }
 
@@ -335,6 +348,9 @@ export default {
   .row {
     display: block;
   }
+}
+.error-wrapper {
+  margin-top: 20px;
 }
 .ext-config {
   h1 {

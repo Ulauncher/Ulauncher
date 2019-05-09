@@ -51,7 +51,12 @@
           >Github issues</a>.
         </p>
         <p v-if="extUrl && reportableErrors.indexOf(errorName) > -1">
-          Let the author know about this problem via
+          <span v-if="isUpdate">
+            Try
+            <b>updating</b> the extension. If the doesn't help let
+          </span>
+          <span v-else>Let</span>
+          the author know about this problem via
           <a
             href
             @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
@@ -68,6 +73,7 @@ import jsonp from '@/api'
 export default {
   name: 'ext-error-explanation',
   props: {
+    isUpdate: Boolean,
     errorMessage: String,
     errorName: String,
     extUrl: String
@@ -91,7 +97,7 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
-  margin: 20px 0 5px 0;
+  margin-bottom: 5px;
 }
 p:last-of-type {
   margin-bottom: 0;

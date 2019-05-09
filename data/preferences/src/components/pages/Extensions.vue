@@ -50,12 +50,13 @@
           <i class="fa fa-spinner fa-spin"></i> Downloading extension...
         </div>
 
-        <ext-error-explanation
-          v-if="addingExtensionError && addingExtensionError.errorName"
-          :extUrl="extUrlToDownload"
-          :errorMessage="addingExtensionError.message"
-          :errorName="addingExtensionError.errorName"
-        />
+        <div class="error-wrapper" v-if="addingExtensionError && addingExtensionError.errorName">
+          <ext-error-explanation
+            :extUrl="extUrlToDownload"
+            :errorMessage="addingExtensionError.message"
+            :errorName="addingExtensionError.errorName"
+          />
+        </div>
 
         <small
           v-if="addingExtensionError && hideCopyErrorDetails.indexOf(addingExtensionError.errorName) === -1"
@@ -217,6 +218,9 @@ $veryLightGrey: #c8c8c8;
   flex: 1;
   max-width: none;
   min-height: 350px;
+}
+.error-wrapper {
+  margin-top: 20px;
 }
 .ext-list {
   $listIconSize: 17px;
