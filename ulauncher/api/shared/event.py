@@ -36,6 +36,8 @@ class KeywordQueryEvent(BaseEvent):
             if pref['type'] == "keyword" and pref['value'] == keyword:
                 return pref['id']
 
+        return ""
+
     def get_query(self):
         """
         :rtype: :class:`~ulauncher.search.Query.Query`
