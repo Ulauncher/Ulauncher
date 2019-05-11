@@ -3,12 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-`Ulauncher <https://ulauncher.io>`_ |version| documentation
-===========================================================
+`Ulauncher <https://ulauncher.io>`_ |version| (Extension API v2.0.0)
+====================================================================
 
-Currently only docs about extensions are available here.
+Here you can find only docs on extensions and color themes.
 Everything else is on
 `Github Wiki <https://github.com/Ulauncher/Ulauncher/wiki/>`_.
+
+.. NOTE::
+  To find out how to migrate your extension from API v1 to v2 navigate to :doc:`extensions/migration`
 
 
 Custom Color Themes

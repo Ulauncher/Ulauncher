@@ -53,6 +53,16 @@
       />
     </div>
 
+    <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifestJson'">
+      <small>
+        To find out how to migrate extension from API v1 to v2 see
+        <a
+          href
+          @click.prevent="openUrl('http://docs.ulauncher.io/en/latest/extensions/migration.html#migrate-from-api-v1-to-v2-0-0')"
+        >extension migration docs</a>.
+      </small>
+    </b-alert>
+
     <div class="ext-form" v-if="!extension.error && extension.is_running">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset

@@ -1,5 +1,5 @@
-Migration
-=========
+Extension Migration
+===================
 
 Migrate from API v1 to v2.0.0
 -----------------------------
