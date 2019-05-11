@@ -20,7 +20,7 @@ from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.api.server.extension_finder import find_extensions
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences, PreferenceItems
 from ulauncher.api.server.ExtensionDb import ExtensionDb
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtRunError
 from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
@@ -60,6 +60,8 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
     'icon': str,
     'description': str,
     'developer_name': str,
+    'is_running': bool,
+    'runtime_error': Optional[ExtRunError],
     'preferences': PreferenceItems,
     'error': Optional[ExtError]
 })
@@ -466,6 +468,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
+        ext_runner = ExtensionRunner.get_instance()
         ext_db_record = ext_db.find(ext_id, {})
         return {
             'id': ext_id,
@@ -478,7 +481,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'description': prefs.manifest.get_description(),
             'developer_name': prefs.manifest.get_developer_name(),
             'preferences': prefs.get_items(),
-            'error': error
+            'error': error,
+            'is_running': ext_runner.is_running(ext_id),
+            'runtime_error': ext_runner.get_extension_error(ext_id)
         }
 
     def _load_prefs_html(self, page=''):

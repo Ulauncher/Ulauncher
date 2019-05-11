@@ -2,16 +2,31 @@ import logging
 import os
 import sys
 from subprocess import Popen
+from typing import Dict, Optional
 from time import time, sleep
+from enum import Enum
 
 from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
 from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.extension_finder import find_extensions
 
 logger = logging.getLogger(__name__)
+
+ExtRunError = TypedDict('ExtRunError', {
+    'name': str,
+    'message': str
+})
+
+
+class ExtRunErrorName(Enum):
+    NoExtensionsFlag = 'NoExtensionsFlag'
+    Terminated = 'Terminated'
+    ExitedInstantly = 'ExitedInstantly'
+    Exited = 'Exited'
 
 
 class ExtensionRunner:
@@ -22,7 +37,8 @@ class ExtensionRunner:
         return cls(ExtensionServer.get_instance())
 
     def __init__(self, extension_server):
-        self.extensions_dir = EXTENSIONS_DIR
+        self.extensions_dir = EXTENSIONS_DIR  # type: str
+        self.extension_errors = {}  # type: Dict[str, ExtRunError]
         self.extension_procs = {}
         self.extension_server = extension_server
         self.dont_run_extensions = get_options().no_extensions
@@ -71,8 +87,11 @@ class ExtensionRunner:
         if self.dont_run_extensions:
             args = [env.get('VERBOSE', ''), env['ULAUNCHER_WS_API'], env['PYTHONPATH']]
             args.extend(cmd)
+            run_cmd = 'VERBOSE={} ULAUNCHER_WS_API={} PYTHONPATH={} {} {}'.format(*args)
             logger.warning('Copy and run the following command to start %s', extension_id)
-            logger.warning('VERBOSE=%s ULAUNCHER_WS_API=%s PYTHONPATH=%s %s %s', *args)
+            logger.warning(run_cmd)
+            self.set_extension_error(extension_id, ExtRunErrorName.NoExtensionsFlag, run_cmd)
+
             return
 
         while True:
@@ -80,10 +99,13 @@ class ExtensionRunner:
             proc = Popen(cmd, env=env)
             logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
             self.extension_procs[extension_id] = proc
+            self.unset_extension_error(extension_id)
             code = proc.wait()
 
             if code <= 0:
-                logger.error('Extension "%s" was terminated with code %s', extension_id, code)
+                error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
+                logger.error(error_msg)
+                self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
                 try:
                     del self.extension_procs[extension_id]
                 except KeyError:
@@ -92,7 +114,9 @@ class ExtensionRunner:
                 break
 
             if time() - t_start < 1:
-                logger.error('Extension "%s" exited instantly with code %s', extension_id, code)
+                error_msg = 'Extension "%s" exited instantly with code %s' % (extension_id, code)
+                logger.error(error_msg)
+                self.set_extension_error(extension_id, ExtRunErrorName.ExitedInstantly, error_msg)
                 try:
                     del self.extension_procs[extension_id]
                 except KeyError:
@@ -100,7 +124,9 @@ class ExtensionRunner:
 
                 break
 
-            logger.error('Extension "%s" exited with code %s. Restarting...', extension_id, code)
+            error_msg = 'Extension "%s" exited with code %s. Restarting...' % (extension_id, code)
+            self.set_extension_error(extension_id, ExtRunErrorName.Exited, error_msg)
+            logger.error(error_msg)
 
     def stop(self, extension_id):
         """
@@ -124,8 +150,23 @@ class ExtensionRunner:
             logger.warning("Kill extension \"%s\" since it doesn't react to SIGTERM", extension_id)
             proc.kill()
 
-    def is_running(self, extension_id):
+    def is_running(self, extension_id: str) -> bool:
         return extension_id in self.extension_procs.keys()
+
+    def set_extension_error(self, extension_id: str, errorName: ExtRunErrorName, message: str):
+        self.extension_errors[extension_id] = {
+            'name': errorName.value,
+            'message': message
+        }
+
+    def unset_extension_error(self, extension_id: str):
+        try:
+            del self.extension_errors[extension_id]
+        except KeyError:
+            pass
+
+    def get_extension_error(self, extension_id: str) -> Optional[ExtRunError]:
+        return self.extension_errors.get(extension_id)
 
 
 class ExtensionIsRunningError(RuntimeError):

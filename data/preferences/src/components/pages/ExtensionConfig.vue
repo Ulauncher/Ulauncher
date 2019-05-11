@@ -21,7 +21,7 @@
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check Updates</b-dropdown-item>
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
-          <b-dropdown-divider/>
+          <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="reportIssue">Report Issue</b-dropdown-item>
           <b-dropdown-item v-if="extension.url" @click="openGithub">Open Github</b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
@@ -36,16 +36,24 @@
       </div>
     </div>
 
+    <div class="error-wrapper" v-if="extension.runtime_error">
+      <ext-runtime-error
+        :extUrl="extension.url"
+        :errorMessage="extension.runtime_error.message"
+        :errorName="extension.runtime_error.name"
+      />
+    </div>
+
     <div class="error-wrapper" v-if="extension.error">
       <ext-error-explanation
-        is-update
+        is-updatable
         :extUrl="extension.url"
         :errorMessage="extension.error.message"
         :errorName="extension.error.errorName"
       />
     </div>
 
-    <div class="ext-form" v-if="!extension.error">
+    <div class="ext-form" v-if="!extension.error && extension.is_running">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
           v-if="pref.type == 'keyword'"
@@ -145,10 +153,12 @@
 import jsonp from '@/api'
 import bus from '@/event-bus'
 import ExtensionErrorExplanation from '@/components/widgets/ExtensionErrorExplanation'
+import ExtensionRuntimeError from '@/components/widgets/ExtensionRuntimeError'
 
 export default {
   components: {
-    'ext-error-explanation': ExtensionErrorExplanation
+    'ext-error-explanation': ExtensionErrorExplanation,
+    'ext-runtime-error': ExtensionRuntimeError
   },
   name: 'extension-config',
   props: ['extension'],
@@ -169,7 +179,8 @@ export default {
     },
     canSave() {
       const { preferences } = this.$props.extension
-      return !this.$props.extension.error && preferences && !!preferences.length
+      const isRunning = this.$props.extension.is_running
+      return isRunning && !this.$props.extension.error && preferences && !!preferences.length
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
@@ -302,6 +313,7 @@ export default {
 <style lang="scss" scoped>
 .header-info {
   display: flex;
+  margin-bottom: 15px;
 
   .logo {
     flex: 0 0 70px;
@@ -343,7 +355,7 @@ export default {
   outline: none;
 }
 .ext-form {
-  padding-top: 30px;
+  padding-top: 15px;
 
   .row {
     display: block;

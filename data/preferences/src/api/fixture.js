@@ -89,16 +89,19 @@ export default function(url, params) {
     } else if (isMatch(url, '/extension/check-updates')) {
       console.log('/extension/check-updates', params)
       setTimeout(() => {
-        reject({
-          message: 'Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"',
-          type: 'GithubExtensionError',
-          errorName: 'VersionsJsonNotFound',
-          stacktrace: 'Traceback (most recent call last):\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 101, in _read_json\n    return json.loads(urlopen(url).read().decode(\'utf-8\'))\n  File "/usr/lib/python3.6/urllib/request.py", line 223, in urlopen\n    return opener.open(url, data, timeout)\n  File "/usr/lib/python3.6/urllib/request.py", line 532, in open\n    response = meth(req, response)\n  File "/usr/lib/python3.6/urllib/request.py", line 642, in http_response\n    \'http\', request, response, code, msg, hdrs)\n  File "/usr/lib/python3.6/urllib/request.py", line 570, in error\n    return self._call_chain(*args)\n  File "/usr/lib/python3.6/urllib/request.py", line 504, in _call_chain\n    result = func(*args)\n  File "/usr/lib/python3.6/urllib/request.py", line 650, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 404: Not Found\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File "/home/agornostal/projects/ulauncher/ulauncher/ui/windows/PreferencesUlauncherDialog.py", line 189, in on_scheme_callback\n    resp = rt.dispatch(self, scheme_request.get_uri())\n  File "/home/agornostal/projects/ulauncher/ulauncher/utils/Router.py", line 49, in dispatch\n    return callback(context, url_params)\n  File "/home/agornostal/projects/ulauncher/ulauncher/ui/windows/PreferencesUlauncherDialog.py", line 419, in prefs_extension_check_updates\n    return ExtensionDownloader.get_instance().get_new_version(ext_id)\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/ExtensionDownloader.py", line 156, in get_new_version\n    commit = gh_ext.find_compatible_version()\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 71, in find_compatible_version\n    for ver in self.read_versions():\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 110, in read_versions\n    versions = self._read_json(\'master\', \'versions.json\')\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 106, in _read_json\n    url, ErrorName.VersionsJsonNotFound)\nulauncher.api.server.GithubExtension.GithubExtensionError: Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"'
-        })
-        // resolve(Math.random() > 0.5 ? {
-        //   last_commit: '64e106cawef23f2q332',
-        //   last_commit_time: '2017-05-01T07:30:39Z'
-        // } : null)
+        if (Math.random() > 0.75) {
+          reject({
+            message: 'Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"',
+            type: 'GithubExtensionError',
+            errorName: 'VersionsJsonNotFound',
+            stacktrace: 'Traceback (most recent call last):\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 101, in _read_json\n    return json.loads(urlopen(url).read().decode(\'utf-8\'))\n  File "/usr/lib/python3.6/urllib/request.py", line 223, in urlopen\n    return opener.open(url, data, timeout)\n  File "/usr/lib/python3.6/urllib/request.py", line 532, in open\n    response = meth(req, response)\n  File "/usr/lib/python3.6/urllib/request.py", line 642, in http_response\n    \'http\', request, response, code, msg, hdrs)\n  File "/usr/lib/python3.6/urllib/request.py", line 570, in error\n    return self._call_chain(*args)\n  File "/usr/lib/python3.6/urllib/request.py", line 504, in _call_chain\n    result = func(*args)\n  File "/usr/lib/python3.6/urllib/request.py", line 650, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 404: Not Found\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File "/home/agornostal/projects/ulauncher/ulauncher/ui/windows/PreferencesUlauncherDialog.py", line 189, in on_scheme_callback\n    resp = rt.dispatch(self, scheme_request.get_uri())\n  File "/home/agornostal/projects/ulauncher/ulauncher/utils/Router.py", line 49, in dispatch\n    return callback(context, url_params)\n  File "/home/agornostal/projects/ulauncher/ulauncher/ui/windows/PreferencesUlauncherDialog.py", line 419, in prefs_extension_check_updates\n    return ExtensionDownloader.get_instance().get_new_version(ext_id)\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/ExtensionDownloader.py", line 156, in get_new_version\n    commit = gh_ext.find_compatible_version()\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 71, in find_compatible_version\n    for ver in self.read_versions():\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 110, in read_versions\n    versions = self._read_json(\'master\', \'versions.json\')\n  File "/home/agornostal/projects/ulauncher/ulauncher/api/server/GithubExtension.py", line 106, in _read_json\n    url, ErrorName.VersionsJsonNotFound)\nulauncher.api.server.GithubExtension.GithubExtensionError: Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"'
+          })
+        } else {
+          resolve(Math.random() > 0.5 ? {
+            last_commit: '64e106cawef23f2q332',
+            last_commit_time: '2017-05-01T07:30:39Z'
+          } : null)
+        }
       }, 300)
     } else if (isMatch(url, '/extension/add')) {
       console.log('/extension/add', params)
@@ -127,23 +130,52 @@ export default function(url, params) {
 
 function _getExtensions() {
   return [
-    generateExtensionRecord('ext.custom', 'Very Very Very Very Long Extension Name', 2, null),
-    generateExtensionRecord('ext.timer', 'Timer'),
-    generateExtensionRecord('ext.dict', 'Dictionary', 0),
-    generateExtensionRecord('ext.witherror', 'With Error', 0, 'https://github.com/ulauncher/ulauncher-demo-ext', {
-      message: "'required_api_version' is not provided",
-      errorName: 'InvalidManifestJson'
+    generateExtensionRecord({
+      extId: 'ext.custom',
+      name: 'Extension without URL and with a very long name',
+      numOfPrefs: 2,
+      url: null
+    }),
+    generateExtensionRecord({
+      extId: 'ext.timer',
+      name: 'Just a regular one'
+    }),
+    generateExtensionRecord({
+      extId: 'ext.dict',
+      name: 'Without preferences',
+      numOfPrefs: 0
+    }),
+    generateExtensionRecord({
+      extId: 'ext.stopped',
+      name: 'Stopped because of --no-extensions flag',
+      isRunning: false,
+      runtimeError: {
+        name: 'NoExtensionsFlag',
+        message: 'bash exec /file --no-things abc | script > null /python/path/env/var EXEC_ONLY=true /bin/bash ulauncher'
+      }
+    }),
+    generateExtensionRecord({
+      extId: 'ext.crashed',
+      name: 'Crashed on start',
+      isRunning: false,
+      runtimeError: {
+        name: 'ExitedInstantly',
+        message: 'Extension "ext.crashed" exited instantly with code 123'
+      }
+    }),
+    generateExtensionRecord({
+      extId: 'ext.witherror',
+      name: 'Manifest validation error',
+      numOfPrefs: 0,
+      error: {
+        message: "'required_api_version' is not provided",
+        errorName: 'InvalidManifestJson'
+      }
     })
   ]
 }
 
-function generateExtensionRecord(
-  extId,
-  name,
-  numOfPrefs = 4,
-  url = 'https://github.com/ulauncher/ulauncher-demo-ext',
-  error = null
-) {
+function generateExtensionRecord(config) {
   let prefs = [
     {
       id: 'keyword',
@@ -182,12 +214,12 @@ function generateExtensionRecord(
       value: 'Hello Steve!'
     }
   ]
-  prefs.length = numOfPrefs
+  prefs.length = config.numOfPrefs !== undefined ? config.numOfPrefs : 4
 
   return {
-    id: extId,
-    url: url,
-    name: name,
+    id: config.extId,
+    url: config.url || 'https://github.com/ulauncher/ulauncher-demo-ext',
+    name: config.name,
     updated_at: '2017-07-21T20:50:44.850738',
     icon: placeholderImage,
     description: 'My extension description',
@@ -196,7 +228,9 @@ function generateExtensionRecord(
     last_commit: 'abc234fd23425234a2',
     last_commit_time: '2017-07-21T20:50:44',
     preferences: prefs,
-    error
+    error: config.error,
+    is_running: config.isRunning !== undefined ? config.isRunning : true,
+    runtime_error: config.runtimeError
   }
 }
 

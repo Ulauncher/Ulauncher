@@ -1,6 +1,6 @@
 import mock
 import pytest
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner
+from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtRunErrorName
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.shared.errors import ErrorName
@@ -53,3 +53,9 @@ class TestExtensionRunner:
         runner.run.assert_any_call('id_1')
         runner.run.assert_any_call('id_2')
         runner.run.assert_any_call('id_3')
+
+    def test_set_extension_error(self, runner):
+        runner.set_extension_error('id_1', ExtRunErrorName.Terminated, 'message')
+        error = runner.get_extension_error('id_1')
+        assert error['name'] == ExtRunErrorName.Terminated.value
+        assert error['message'] == 'message'

@@ -4,16 +4,38 @@
       <ul class="ext-list">
         <li
           v-for="(ext, idx) in extensions"
-          :class="{active: ext.id == activeExt.id, last: idx == extensions.length - 1}"
+          v-bind:key="ext.id"
+          :class="{
+            active: ext.id == activeExt.id,
+            last: idx == extensions.length - 1
+          }"
           @click="selectExtension(ext)"
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
+          <b-badge v-if="ext.error" variant="warning">Error</b-badge>
+          <b-badge
+            v-else-if="!ext.is_running && ext.runtime_error && ext.runtime_error.name !== 'NoExtensionsFlag'"
+            variant="warning"
+          >Crashed</b-badge>
+          <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
           <span>{{ ext.name }}</span>
-          <b-badge v-if="ext.error" variant="warning">error</b-badge>
         </li>
         <li class="link" @click="addExtDialog">
-          <i class="fa fa-plus"></i>
-          <span>Add extension</span>
+          <b>
+            <i class="fa fa-plus"></i>
+            <span>Add extension</span>
+          </b>
+        </li>
+        <li class="link" @click="reload">
+          <i
+            :class="{
+            fa: true,
+            ['fa-refresh']: !reloading,
+            ['fa-spinner']: reloading,
+            ['fa-spin']: reloading
+          }"
+          ></i>
+          <span>Reload the list</span>
         </li>
         <li class="link" @click="openUrlInBrowser('https://ext.ulauncher.io')">
           <i class="fa fa-external-link"></i>
@@ -107,6 +129,7 @@ export default {
       extUrlToDownload: '',
       activeExt: null,
       addingExtension: false,
+      reloading: false,
       addingExtensionError: null,
       extensions: [],
       hideCopyErrorDetails: [
@@ -124,6 +147,9 @@ export default {
         data => {
           this.extensions = data
           this.activeExt = data[0]
+          setTimeout(() => {
+            this.reloading = false
+          }, 500)
         },
         err => bus.$emit('error', err)
       )
@@ -134,6 +160,10 @@ export default {
     },
     addExtDialog() {
       this.$refs.addExtForm.show()
+    },
+    reload() {
+      this.reloading = true
+      this.fetchData()
     },
     openUrlInBrowser(url) {
       jsonp('prefs://open/web-url', { url: url })

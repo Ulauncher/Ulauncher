@@ -51,7 +51,7 @@
           >Github issues</a>.
         </p>
         <p v-if="extUrl && reportableErrors.indexOf(errorName) > -1">
-          <span v-if="isUpdate">
+          <span v-if="isUpdatable">
             Try
             <b>updating</b> the extension. If the doesn't help let
           </span>
@@ -73,7 +73,7 @@ import jsonp from '@/api'
 export default {
   name: 'ext-error-explanation',
   props: {
-    isUpdate: Boolean,
+    isUpdatable: Boolean,
     errorMessage: String,
     errorName: String,
     extUrl: String
