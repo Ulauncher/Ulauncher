@@ -79,6 +79,13 @@ export default function(url, params) {
     } else if (isMatch(url, '/extension/get-all')) {
       console.log('/extension/get-all', params)
       setTimeout(function() {
+        // reject({
+        //   message: 'Something went wrong',
+        //   type: 'Exception',
+        //   errorName: 'UnhandledError',
+        //   stacktrace:
+        //     'Traceback (most recent call last):\n  File "PreferencesUlauncherDialog.py", line 192, in on_scheme_callback\n    resp = rt.dispatch...'
+        // })
         resolve(_getExtensions())
       }, 0)
     } else if (isMatch(url, '/extension/update-prefs')) {

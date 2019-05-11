@@ -1,29 +1,49 @@
 <template>
   <div id="app" class="noselect">
     <header id="header">
-      <NavBar />
+      <NavBar/>
     </header>
     <div class="page-content">
       <router-view></router-view>
     </div>
 
     <b-modal
-        ref="errorModal"
-        ok-only
-        no-fade
-        ok-title="Dismiss"
-        hide-header-close
-        @ok="onErrorDismiss">
-          <template slot="modal-title">
-            <i class="fa fa-warning"></i> Error
-          </template>
+      ref="errorModal"
+      ok-only
+      no-fade
+      ok-title="Dismiss"
+      hide-header-close
+      @ok="onErrorDismiss"
+    >
+      <template slot="modal-title">
+        <i class="fa fa-warning"></i> Error
+      </template>
 
-          <div class="selectable">{{ error && error.message }}</div>
-      </b-modal>
+      <div class="selectable">
+        <p>An unexpected error has occurred.</p>
+        <p>
+          Please copy error details and create a bug in
+          <a
+            href
+            @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
+          >Github Issues</a>.
+        </p>
+        <small>
+          <i class="fa fa-copy"></i>
+          <a
+            class="text-muted"
+            href
+            @click.prevent
+            v-clipboard:copy="errorDetails"
+          >Copy error details to clipboard</a>
+        </small>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
+import jsonp from '@/api'
 import bus from '@/event-bus'
 import NavBar from '@/components/NavBar'
 
@@ -32,24 +52,36 @@ export default {
   components: {
     NavBar
   },
-  data () {
+  data() {
     return {
       error: null
     }
   },
-  created () {
+  created() {
     this.$store.dispatch('getAllPrefs')
     bus.$on('error', this.onError)
   },
-  beforeDestroy () {
+  beforeDestroy() {
     bus.$off('error', this.onError)
   },
+  computed: {
+    errorDetails() {
+      if (!this.error) {
+        return ''
+      }
+      const { message, errorName, stacktrace, type } = this.error
+      return `Message: ${message}\nError Name: ${errorName}\nType: ${type}\n\nStacktrace:\n\`\`\`\n${stacktrace}\n\`\`\``
+    }
+  },
   methods: {
-    onError (err) {
+    openUrlInBrowser(url) {
+      jsonp('prefs://open/web-url', { url: url })
+    },
+    onError(err) {
       this.error = err
       this.$refs.errorModal.show()
     },
-    onErrorDismiss () {
+    onErrorDismiss() {
       this.error = null
     }
   }
@@ -57,7 +89,8 @@ export default {
 </script>
 
 <style>
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -125,5 +158,4 @@ button {
   -webkit-user-select: auto;
   user-select: auto;
 }
-
 </style>

@@ -470,7 +470,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
+        is_connected = True
+        try:
+            ExtensionServer.get_instance().get_controller(ext_id)
+        except KeyError:
+            is_connected = False
         ext_runner = ExtensionRunner.get_instance()
+        is_running = is_connected or ext_runner.is_running(ext_id)
         ext_db_record = ext_db.find(ext_id, {})
         return {
             'id': ext_id,
@@ -484,8 +490,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'developer_name': prefs.manifest.get_developer_name(),
             'preferences': prefs.get_items(),
             'error': error,
-            'is_running': ext_runner.is_running(ext_id),
-            'runtime_error': ext_runner.get_extension_error(ext_id)
+            'is_running': is_running,
+            'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
         }
 
     def _load_prefs_html(self, page=''):
