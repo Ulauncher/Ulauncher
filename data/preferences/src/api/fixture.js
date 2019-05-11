@@ -20,6 +20,7 @@ export default function(url, params) {
         is_wayland: true,
         env: {
           version: '1.2.3',
+          api_version: '2.1.0',
           user_home: '/home/username'
         }
       })

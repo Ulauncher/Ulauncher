@@ -16,6 +16,7 @@ from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.Builder import Builder
+from ulauncher.api.version import api_version
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.api.server.extension_finder import find_extensions
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences, PreferenceItems
@@ -239,6 +240,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'is_wayland': is_wayland(),
             'env': {
                 'version': get_version(),
+                'api_version': api_version,
                 'user_home': os.path.expanduser('~')
             }
         }

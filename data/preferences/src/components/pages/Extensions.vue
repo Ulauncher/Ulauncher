@@ -45,6 +45,7 @@
           <i class="fa fa-external-link"></i>
           <span>Create your own</span>
         </li>
+        <li v-if="prefsLoaded" class="api-version">Extension API v{{ this.prefs.env.api_version }}</li>
       </ul>
 
       <b-modal
@@ -103,6 +104,7 @@
 <script>
 import jsonp from '@/api'
 import bus from '@/event-bus'
+import { mapState, mapGetters } from 'vuex'
 import ExtensionConfig from '@/components/pages/ExtensionConfig'
 import ExtensionErrorExplanation from '@/components/widgets/ExtensionErrorExplanation'
 
@@ -116,6 +118,8 @@ export default {
     'ext-error-explanation': ExtensionErrorExplanation
   },
   computed: {
+    ...mapState(['prefs']),
+    ...mapGetters(['prefsLoaded']),
     errorDetails() {
       if (!this.addingExtensionError) {
         return ''
@@ -297,6 +301,12 @@ $veryLightGrey: #c8c8c8;
 
     &.last {
       margin-bottom: 25px;
+    }
+    &.api-version {
+      cursor: default;
+      font-size: 15px;
+      color: #888;
+      text-shadow: 1px 1px 1px #fff;
     }
   }
 

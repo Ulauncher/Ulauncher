@@ -29,8 +29,8 @@
         </g>
         </svg>
       </div>
-      <p class="logo-label">Ulauncher</p>
-      <p class="version">v{{ this.prefs.env.version }}</p>
+      <p class="logo-label">Ulauncher v{{ this.prefs.env.version }}</p>
+      <p class="api-version">Extension API v{{ this.prefs.env.api_version }}</p>
     </div>
     <div class="col-8">
       <section class="text-container copyright-text" v-if="!isCreditsShown">
@@ -55,6 +55,7 @@
           <h2>Contributors:</h2>
           <p>
             <ul>
+              <li>@friday &lt;github.com/friday&gt;</li>
               <li>Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;</li>
               <li>Eugene Chulkov &lt;genechulkov@gmail.com&gt;</li>
             </ul>
@@ -102,9 +103,10 @@ export default {
     color: #507caf;
   }
 
-  .version {
-    margin: 0;
-    color: #507caf;
+  .api-version {
+    font-size: 15px;
+    color: #888;
+    text-shadow: 1px 1px 1px #fff;
   }
 
   .text-container {
