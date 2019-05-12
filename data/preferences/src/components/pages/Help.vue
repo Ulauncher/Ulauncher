@@ -1,8 +1,6 @@
 <template>
   <div class="row help-page">
-
-    <div class="col-4 item" v-for="item in items">
-
+    <div class="col-4 item" v-for="item in items" v-bind:key="item.url">
       <div @click="openUrlInBrowser(item.url)">
         <div class="outer-circle">
           <div class="inner-circle">
@@ -14,7 +12,6 @@
 
       <div class="text">{{ item.text }}</div>
     </div>
-
   </div>
 </template>
 
@@ -23,9 +20,15 @@ import jsonp from '@/api'
 
 export default {
   name: 'help',
-  data () {
+  data() {
     return {
       items: [
+        {
+          icon: 'fa-book',
+          label: 'Extension API Docs',
+          text: 'Here you can find documentation on how to create extensions and custom color themes',
+          url: 'http://docs.ulauncher.io'
+        },
         {
           icon: 'fa-github',
           label: 'Troubleshooting',
@@ -37,19 +40,13 @@ export default {
           label: 'Follow on Twitter',
           text: 'Follow UlauncherApp on Twitter to get the latest updates and news',
           url: 'https://twitter.com/UlauncherApp'
-        },
-        {
-          icon: 'fa-envelope',
-          label: 'Email Us',
-          text: "Just in case you don't want to open a Github issue for some reason, you can always email us",
-          url: 'mailto:ulauncher.app@gmail.com'
         }
       ]
     }
   },
   methods: {
-    openUrlInBrowser (url) {
-      jsonp('prefs://open/web-url', {url: url})
+    openUrlInBrowser(url) {
+      jsonp('prefs://open/web-url', { url: url })
     }
   }
 }
