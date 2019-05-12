@@ -13,9 +13,13 @@ help () {
     ${dim}Alias for './bin/ulauncher -v --dev'
     Run './ul init-dev-env' first. Otherwise the app won't work${normal}
 
-  ${bold}./ul dev-container
+  ${bold}./ul dev-container [IMAGE_NAME]
     ${dim}Takes you into a Docker container from which you can run tests and build binary packages
-    This is added for convenience so developers won't be required to install all the build and test dependencies locally${normal}
+    This is added for convenience so developers won't be required to install all the build and test dependencies locally
+
+    IMAGE_NAME is an optional argument.
+    If not set, an image based on ubuntu image will be used.
+    Other possible options: ${normal}${bold}fedora28, fedora29, arch${normal}
 
   ${bold}./ul rm-python-cache
     ${dim}Removes .pyc, .pyo, __pycache__${normal}

@@ -32,7 +32,7 @@ main () {
     test-flake8) warn-if-not-in-docker && test-flake8 ;;
     test-pytest) warn-if-not-in-docker && test-pytest ;;
     test) warn-if-not-in-docker && test-mypy && test-flake8 && test-pylint && test-pytest ;;
-    dev-container) dev-container ;;
+    dev-container) dev-container $2 ;;
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
