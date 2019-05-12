@@ -51,10 +51,8 @@ The commands below are useful for maintainers:
 
   ${bold}./ul build-rpm <VERSION> <DISTRO_NAME> [FILE_SUFFIX]
     ${dim}Builds an rpm package
-    DISTRO_NAME is a required second argument and can take one of this values: feodra, centos7
-    FILE_SUFFIX is an optional argument. By default, file suffix is DISTRO_NAME
-
-    In order to build for centos7 use fedora28 as an image (see help for dev-container command)${normal}
+    DISTRO_NAME is a required second argument and can take one of this values: feodra, suse, centos
+    FILE_SUFFIX is an optional argument. By default, file suffix is DISTRO_NAME${normal}
 
   ${bold}./ul build-targz <VERSION>
     ${dim}Builds a targz archive with the source code${normal}
