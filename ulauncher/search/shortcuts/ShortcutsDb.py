@@ -34,7 +34,7 @@ class ShortcutsDb(KeyValueJsonDb):
         return self.get_records().values()
 
     # pylint: disable=too-many-arguments
-    def put_shortcut(self, name, keyword, cmd, icon, is_default_search, id=None):
+    def put_shortcut(self, name, keyword, cmd, icon, is_default_search, run_without_argument, id=None):
         """
         If id is not provided it will be generated using uuid4() function
         """
@@ -46,6 +46,7 @@ class ShortcutsDb(KeyValueJsonDb):
             "cmd": cmd,
             "icon": icon,
             "is_default_search": bool(is_default_search),
+            "run_without_argument": bool(run_without_argument),
             # use previously added time if record with the same id exists
             "added": self._records.get(id, {"added": time()})["added"]
         }

@@ -105,6 +105,7 @@ def get_default_shortcuts():
         "cmd": "https://google.com/search?q=%s",
         "icon": get_data_file('media/google-search-icon.png'),
         "is_default_search": True,
+        "run_without_argument": False,
         "added": time()
     }
     stackoverflow = {
@@ -114,6 +115,7 @@ def get_default_shortcuts():
         "cmd": "http://stackoverflow.com/search?q=%s",
         "icon": get_data_file('media/stackoverflow-icon.svg'),
         "is_default_search": True,
+        "run_without_argument": False,
         "added": time()
     }
     wikipedia = {
@@ -123,6 +125,7 @@ def get_default_shortcuts():
         "cmd": "https://en.wikipedia.org/wiki/%s",
         "icon": get_data_file('media/wikipedia-icon.png'),
         "is_default_search": True,
+        "run_without_argument": False,
         "added": time()
     }
 

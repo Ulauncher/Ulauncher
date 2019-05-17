@@ -38,9 +38,17 @@ console.log("Query is:", process.argv[1]);</code></pre>
         </small>
       </b-form-fieldset>
 
-      <b-form-checkbox v-model="localIsDefaultSearch">
-        Default search (suggest this shortcut when no results found)
-      </b-form-checkbox>
+      <b-form-fieldset>
+        <b-form-checkbox v-model="localIsDefaultSearch">
+          Default search (suggest this shortcut when no results found)
+        </b-form-checkbox>
+      </b-form-fieldset>
+
+      <b-form-fieldset>
+        <b-form-checkbox v-model="localRunWithoutArgument">
+          Run without arguments
+        </b-form-checkbox>
+      </b-form-fieldset>
 
       <b-button-toolbar>
         <b-button class="save" variant="primary" href="" @click="save">Save</b-button>
@@ -61,7 +69,7 @@ const shortcutIconEventName = 'shortcut-icon-event'
 
 export default {
   name: 'edit-shortcut',
-  props: ['id', 'icon', 'name', 'keyword', 'cmd', 'is_default_search'],
+  props: ['id', 'icon', 'name', 'keyword', 'cmd', 'is_default_search', 'run_without_argument'],
   created () {
     bus.$on(shortcutIconEventName, this.onIconSelected)
   },
@@ -75,6 +83,7 @@ export default {
       localKeyword: this.keyword,
       localCmd: this.cmd,
       localIsDefaultSearch: !!this.is_default_search,
+      localRunWithoutArgument: !!this.run_without_argument,
       validate: false,
       cmdDescriptionExpanded: false
     }
@@ -115,7 +124,8 @@ export default {
         name: this.localName,
         keyword: this.localKeyword.trim(),
         cmd: this.localCmd,
-        is_default_search: this.localIsDefaultSearch
+        is_default_search: this.localIsDefaultSearch,
+        run_without_argument: this.localRunWithoutArgument
       }
       let method = shortcut.id ? 'update' : 'add'
       jsonp('prefs://shortcut/' + method, shortcut)
