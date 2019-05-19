@@ -12,12 +12,13 @@ from ulauncher.config import get_data_file
 class ShortcutResultItem(ResultItem):
 
     # pylint: disable=super-init-not-called, too-many-arguments
-    def __init__(self, keyword, name, cmd, icon, default_search=False, **kw):
+    def __init__(self, keyword, name, cmd, icon, default_search=False, run_without_argument=False, **kw):
         self.keyword = keyword
         self.name = name
         self.cmd = cmd
         self.icon = icon
         self.is_default_search = default_search
+        self.run_without_argument = run_without_argument
 
     def get_keyword(self):
         return self.keyword
@@ -44,7 +45,8 @@ class ShortcutResultItem(ResultItem):
 
         if query.get_keyword() == self.keyword and query.get_argument():
             return description.replace('%s', query.get_argument())
-
+        if query.get_keyword() == self.keyword and not query.get_argument() and self.run_without_argument:
+            return 'Type in your query or press Enter...'
         if query.get_keyword() == self.keyword and not query.get_argument():
             return 'Type in your query and press Enter...'
 
@@ -64,15 +66,19 @@ class ShortcutResultItem(ResultItem):
             argument = query
         else:
             argument = None
-
         if argument:
-
             if re.match(r'^http(s)?://', self.cmd.strip()):
                 command = self.cmd.strip().replace('%s', argument)
                 action = OpenUrlAction(command)
             else:
                 action = RunScriptAction(self.cmd, argument)
-
+            action_list.append(action)
+        elif self.run_without_argument:
+            if re.match(r'^http(s)?://', self.cmd.strip()):
+                command = self.cmd.strip().replace('%s', "")
+                action = OpenUrlAction(command)
+            else:
+                action = RunScriptAction(self.cmd, "")
             action_list.append(action)
         else:
             action_list.append(SetUserQueryAction('%s ' % self.keyword))

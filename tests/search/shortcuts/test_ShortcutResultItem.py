@@ -23,7 +23,8 @@ class TestShortcutResultItem:
 
     @pytest.fixture
     def item(self):
-        return ShortcutResultItem('kw', 'name', 'http://site/?q=%s', 'icon_path', is_default_search=True)
+        return ShortcutResultItem('kw', 'name', 'http://site/?q=%s', 'icon_path',
+                                  is_default_search=True, run_without_argument=False)
 
     def test_get_keyword(self, item):
         assert item.get_keyword() == 'kw'
@@ -50,6 +51,12 @@ class TestShortcutResultItem:
         item.is_default_search = True
         assert item.on_enter(Query('search query')) is ActionList.return_value
         OpenUrlAction.assert_called_once_with('http://site/?q=search query')
+        assert not SetUserQueryAction.called
+
+    def test_on_enter__run_without_arguments(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
+        item.run_without_argument = True
+        assert item.on_enter(Query('kw')) is ActionList.return_value
+        OpenUrlAction.assert_called_once_with('http://site/?q=')
         assert not SetUserQueryAction.called
 
     def test_on_enter__misspelled_kw(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
