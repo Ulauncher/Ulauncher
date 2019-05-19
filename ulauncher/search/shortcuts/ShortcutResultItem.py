@@ -45,8 +45,8 @@ class ShortcutResultItem(ResultItem):
 
         if query.get_keyword() == self.keyword and query.get_argument():
             return description.replace('%s', query.get_argument())
-        if query.get_keyword() == self.keyword and not query.get_argument() and self.run_without_argument:
-            return 'Type in your query or press Enter...'
+        if query.get_keyword() == self.keyword and self.run_without_argument:
+            return 'Press Enter to run the shortcut'
         if query.get_keyword() == self.keyword and not query.get_argument():
             return 'Type in your query and press Enter...'
 
@@ -66,21 +66,24 @@ class ShortcutResultItem(ResultItem):
             argument = query
         else:
             argument = None
-        if argument:
-            if re.match(r'^http(s)?://', self.cmd.strip()):
+
+        if self.run_without_argument:
+            if self._is_url():
+                action = OpenUrlAction(self.cmd.strip())
+            else:
+                action = RunScriptAction(self.cmd)
+            action_list.append(action)
+        elif argument:
+            if self._is_url():
                 command = self.cmd.strip().replace('%s', argument)
                 action = OpenUrlAction(command)
             else:
                 action = RunScriptAction(self.cmd, argument)
             action_list.append(action)
-        elif self.run_without_argument:
-            if re.match(r'^http(s)?://', self.cmd.strip()):
-                command = self.cmd.strip().replace('%s', "")
-                action = OpenUrlAction(command)
-            else:
-                action = RunScriptAction(self.cmd, "")
-            action_list.append(action)
         else:
             action_list.append(SetUserQueryAction('%s ' % self.keyword))
 
         return action_list
+
+    def _is_url(self) -> bool:
+        return bool(re.match(r'^http(s)?://', self.cmd.strip()))

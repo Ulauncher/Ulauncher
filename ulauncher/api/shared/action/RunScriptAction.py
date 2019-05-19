@@ -13,7 +13,7 @@ class RunScriptAction(BaseAction):
     :param list args: arguments
     """
 
-    def __init__(self, script, args):
+    def __init__(self, script, args=None):
         self.script = script
         self.args = args
 

@@ -17,6 +17,8 @@ class ShortcutSearchMode(BaseSearchMode):
 
     def _get_active_shortcut(self, query):
         for s in self.shortcutsDb.get_shortcuts():
+            if query == s.get('keyword') and s.get('run_without_argument'):
+                return s
             if query.startswith('%s ' % s.get('keyword')):
                 return s
 

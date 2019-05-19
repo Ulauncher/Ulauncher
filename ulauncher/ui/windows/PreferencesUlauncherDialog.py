@@ -374,6 +374,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
                                     req_data['cmd'],
                                     req_data.get('icon') or None,
                                     str_to_bool(req_data['is_default_search']),
+                                    str_to_bool(req_data['run_without_argument']),
                                     req_data.get('id'))
         shortcuts.commit()
         return {'id': id}

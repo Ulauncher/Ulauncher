@@ -131,7 +131,7 @@ button { cursor: pointer }
   .actions {
     position: absolute;
     display: none;
-    top: 0;
+    top: -4px;
     right: 0;
   }
 }

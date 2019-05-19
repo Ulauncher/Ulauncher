@@ -56,7 +56,8 @@ class TestShortcutResultItem:
     def test_on_enter__run_without_arguments(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         item.run_without_argument = True
         assert item.on_enter(Query('kw')) is ActionList.return_value
-        OpenUrlAction.assert_called_once_with('http://site/?q=')
+        # it doesn't replace %s if run_without_argument = True
+        OpenUrlAction.assert_called_once_with('http://site/?q=%s')
         assert not SetUserQueryAction.called
 
     def test_on_enter__misspelled_kw(self, item, ActionList, OpenUrlAction, SetUserQueryAction):

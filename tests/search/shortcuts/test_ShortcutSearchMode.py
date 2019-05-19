@@ -41,6 +41,13 @@ class TestShortcutSearchMode:
 
         assert not mode.is_enabled(query)
 
+    def test_is_enabled__query_run_without_argument__returns_true(self, mode, shortcuts_db):
+        query = 'wk'
+        shortcut = {'keyword': 'wk', 'run_without_argument': True}
+        shortcuts_db.get_shortcuts.return_value = [shortcut]
+
+        assert mode.is_enabled(query)
+
     def test_handle_query__return_value__is_RenderAction_object(self, mode, shortcuts_db, RenderAction):
         query = 'kw something'
         shortcut = {'keyword': 'kw'}
