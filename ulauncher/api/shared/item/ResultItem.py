@@ -37,6 +37,12 @@ class ResultItem:
                  highlightable: bool = True,
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None):
+        if not isinstance(name, str):
+            raise TypeError('"name" must be of type "str", "%s" given' % type(name).__name__)
+        if not isinstance(description, str):
+            raise TypeError('"description" must be of type "str", "%s" given' % type(description).__name__)
+        if not isinstance(keyword, str):
+            raise TypeError('"keyword" must be of type "str", "%s" given' % type(keyword).__name__)
         self._name = name
         self._description = description
         self._keyword = keyword
