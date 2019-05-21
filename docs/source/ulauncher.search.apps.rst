@@ -12,10 +12,10 @@ ulauncher\.search\.apps\.AppDb module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.apps\.AppQueryDb module
+ulauncher\.search\.apps\.QueryHistoryDb module
 ------------------------------------------
 
-.. automodule:: ulauncher.search.apps.AppQueryDb
+.. automodule:: ulauncher.search.QueryHistoryDb
     :members:
     :undoc-members:
     :show-inheritance:

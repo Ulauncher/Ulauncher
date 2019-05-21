@@ -1,6 +1,6 @@
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.search.apps.AppQueryDb import AppQueryDb
+from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 from ulauncher.search.apps.AppStatDb import AppStatDb
 
 
@@ -12,7 +12,7 @@ class AppResultItem(ResultItem):
     # pylint: disable=super-init-not-called
     def __init__(self, record):
         self.record = record
-        self._app_queries = AppQueryDb.get_instance()
+        self._query_history = QueryHistoryDb.get_instance()
         self._app_stat_db = AppStatDb.get_instance()
 
     def get_name(self):
@@ -28,17 +28,13 @@ class AppResultItem(ResultItem):
         """
         :param ~ulauncher.search.Query.Query query:
         """
-        return self._app_queries.find(query) == self.record.get('name')
+        return self._query_history.find(query) == self.record.get('name')
 
     def get_icon(self):
         return self.record.get('icon')
 
     def on_enter(self, query):
-        if query:
-            # don't record empty queries
-            # they occur if a user selects item from a default list
-            self._app_queries.put(str(query), self.record.get('name'))
-            self._app_queries.commit()
+        self._query_history.save_query(str(query), self.record.get('name'))
 
         self._app_stat_db.inc_count(self.record.get('desktop_file'))
         self._app_stat_db.commit()

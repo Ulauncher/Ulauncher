@@ -4,6 +4,7 @@ import sys
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.utils.image_loader import load_image
+from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 
 
 class ExtensionResultItem(ResultItem):
@@ -37,3 +38,7 @@ class ExtensionResultItem(ResultItem):
 
     def on_alt_enter(self, query):
         return self._on_alt_enter
+
+    def selected_by_default(self, query):
+        query_history = QueryHistoryDb.get_instance()
+        return query_history.find(query) == self.get_name()

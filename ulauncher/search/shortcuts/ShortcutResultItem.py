@@ -7,6 +7,7 @@ from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.utils.image_loader import load_image
 from ulauncher.config import get_data_file
+from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 
 
 class ShortcutResultItem(ResultItem):
@@ -19,6 +20,7 @@ class ShortcutResultItem(ResultItem):
         self.icon = icon
         self.is_default_search = default_search
         self.run_without_argument = run_without_argument
+        self._query_history = QueryHistoryDb.get_instance()
 
     def get_keyword(self):
         return self.keyword
@@ -58,6 +60,12 @@ class ShortcutResultItem(ResultItem):
 
         return load_image(get_data_file('media', 'executable-icon.png'), self.ICON_SIZE)
 
+    def selected_by_default(self, query):
+        """
+        :param ~ulauncher.search.Query.Query query:
+        """
+        return self._query_history.find(query) == self.get_name()
+
     def on_enter(self, query):
         action_list = ActionList()
         if query.get_keyword() == self.keyword and query.get_argument():
@@ -82,6 +90,8 @@ class ShortcutResultItem(ResultItem):
             action_list.append(action)
         else:
             action_list.append(SetUserQueryAction('%s ' % self.keyword))
+
+        self._query_history.save_query(query, self.get_name())
 
         return action_list
 

@@ -17,6 +17,10 @@ class TestShortcutResultItem:
     def RunScriptAction(self, mocker):
         return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.RunScriptAction')
 
+    @pytest.fixture(autouse=True)
+    def query_history(self, mocker):
+        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.QueryHistoryDb.get_instance').return_value
+
     @pytest.fixture
     def SetUserQueryAction(self, mocker):
         return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.SetUserQueryAction')
@@ -69,3 +73,7 @@ class TestShortcutResultItem:
         item = ShortcutResultItem('kw', 'name', '/usr/bin/something', 'icon_path')
         assert item.on_enter(Query('kw query')) is ActionList.return_value
         RunScriptAction.assert_called_once_with('/usr/bin/something', 'query')
+
+    def test_on_enter__save_query_to_history(self, item, query_history):
+        item.on_enter(Query('my-query'))
+        query_history.save_query.assert_called_once_with('my-query', 'name')

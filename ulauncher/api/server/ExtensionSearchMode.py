@@ -1,10 +1,7 @@
-from functools import partial
-
 from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.search.BaseSearchMode import BaseSearchMode
+from ulauncher.api.server.ExtensionKeywordResultItem import ExtensionKeywordResultItem
 
 
 class ExtensionSearchMode(BaseSearchMode):
@@ -56,18 +53,10 @@ class ExtensionSearchMode(BaseSearchMode):
                 if not pref['value']:
                     continue
 
-                items.append(ResultItem(name=pref['name'],
-                                        description=pref['description'],
-                                        keyword=pref['value'],
-                                        icon=c.manifest.load_icon(ResultItem.ICON_SIZE),
-                                        on_enter=partial(self._on_item_enter, pref['value'])))
+                icon = c.manifest.load_icon(ExtensionKeywordResultItem.ICON_SIZE)
+                items.append(ExtensionKeywordResultItem(name=pref['name'],
+                                                        description=pref['description'],
+                                                        keyword=pref['value'],
+                                                        icon=icon))
 
         return items
-
-    # pylint: disable=unused-argument
-    def _on_item_enter(self, keyword, query):
-        """
-        :param str kw: Keyword
-        :param ~ulauncher.search.Query.Query query: query
-        """
-        return SetUserQueryAction('%s ' % keyword)
