@@ -24,41 +24,41 @@ build-deb () {
 
     set -ex
 
-    root_dir=$(pwd)
-    ./ul build-preferences
+    # root_dir=$(pwd)
+    # ./ul build-preferences
 
-    name="ulauncher"
-    tmpdir="/tmp"
-    tmpsrc="$tmpdir/$name"
+    # name="ulauncher"
+    # tmpdir="/tmp"
+    tmpsrc=$(pwd)
 
-    rm -rf $tmpdir || true
-    mkdir -p $tmpsrc || true
+    # rm -rf $tmpdir || true
+    # mkdir -p $tmpsrc || true
 
-    rsync -aq --progress \
-        AUTHORS \
-        bin \
-        data \
-        debian \
-        LICENSE \
-        README.md \
-        setup.cfg \
-        setup.py \
-        ulauncher \
-        ulauncher.desktop.in \
-        $tmpsrc \
-        --exclude-from=.gitignore
+    # rsync -aq --progress \
+    #     AUTHORS \
+    #     bin \
+    #     data \
+    #     debian \
+    #     LICENSE \
+    #     README.md \
+    #     setup.cfg \
+    #     setup.py \
+    #     ulauncher \
+    #     ulauncher.desktop.in \
+    #     $tmpsrc \
+    #     --exclude-from=.gitignore
 
-    rm -rf $tmpsrc/data/preferences/*
-    cp -r data/preferences/dist $tmpsrc/data/preferences
+    # rm -rf $tmpsrc/data/preferences/*
+    # cp -r data/preferences/dist $tmpsrc/data/preferences
 
-    sed -i "s/%VERSION%/$1/g" $tmpsrc/setup.py
+    # sed -i "s/%VERSION%/$1/g" $tmpsrc/setup.py
 
-    cd $tmpsrc
+    # cd $tmpsrc
 
     if [ "$2" = "--deb" ]; then
         sed -i "s/%VERSION%/$1/g" $tmpsrc/debian/changelog
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
-        echo "$tmpdir/${name}_${1}_all.deb is created"
+        # echo "$tmpdir/${name}_${1}_all.deb is created"
     elif [ "$2" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
             echo "ERROR: RELEASE env var is not supplied"
