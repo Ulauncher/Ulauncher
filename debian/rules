@@ -7,3 +7,6 @@ else
 endif
 
 
+override_dh_auto_configure:
+	cd data/preferences && npm i yarn && ./node_modules/.bin/yarn && ./node_modules/.bin/yarn build
+	dh_auto_configure

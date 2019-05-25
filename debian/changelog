@@ -1,5 +1,11 @@
-ulauncher (%VERSION%) trusty; urgency=medium
+ulauncher (%VERSION%) xenial; urgency=medium
 
-  * New upstream upload
+  * No code changes. Started using proper versioning
 
- -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Wed, 22 Feb 2016 22:39:00 +0200
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sat, 25 May 2019 20:00:00 +0200
+
+ulauncher (5.2.0~beta1) xenial; urgency=medium
+
+  * #191 - Allow executing shortcuts without specifying an argument
+
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sun, 19 May 2019 22:39:00 +0200
