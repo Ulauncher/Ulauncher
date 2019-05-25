@@ -5,93 +5,84 @@
 ######################
 build-deb () {
     # Args:
-    # $1 version
-    # $2 --deb | --upload
+    #   $1 version
+    #   $2 --deb | --upload
     #
     # Env vars:
-    # GPGKEY required for upload
-    # PPA required for upload
-    # RELEASE release name required for upload
+    #   PPA required for upload
+    #   RELEASE release name required for upload
+    #   GPGKEY [optional] for upload
 
-    if [ -z "$1" ]; then
-        echo "First argument should be version"
+    set -e
+
+    GPGKEY=${GPGKEY:-6BD735B0}
+    dest_dir=$(dirname `pwd`)
+    version=$(fix-version-format "$1")
+
+    if [ -z "$version" ]; then
+        error "First argument should be a version"
         exit 1
     fi
 
-    echo "######################"
-    echo "# Building DEB package"
-    echo "######################"
+    h2 "Building DEB package for Ulauncher $version..."
 
-    set -ex
+    underline "Checking that current version is not in debian/changelog"
+    if grep -q "$version" debian/changelog; then
+        error "debian/changelog already has a record about this version"
+        exit 1
+    fi
 
-    root_dir=$(pwd)
-    ./ul build-preferences
+    # back up debian/changelog and setup.py
+    if [[ -f /tmp/changelog ]]; then
+        cp /tmp/changelog debian/changelog
+        cp /tmp/setup.py setup.py
+    else
+        cp debian/changelog /tmp
+        cp setup.py /tmp/setup.py
+    fi
 
-    name="ulauncher"
-    tmpdir="/tmp"
-    tmpsrc="$tmpdir/$name"
-
-    rm -rf $tmpdir || true
-    mkdir -p $tmpsrc || true
-
-    rsync -aq --progress \
-        AUTHORS \
-        bin \
-        data \
-        debian \
-        LICENSE \
-        README.md \
-        setup.cfg \
-        setup.py \
-        ulauncher \
-        ulauncher.desktop.in \
-        $tmpsrc \
-        --exclude-from=.gitignore
-
-    rm -rf $tmpsrc/data/preferences/*
-    cp -r data/preferences/dist $tmpsrc/data/preferences
-
-    sed -i "s/%VERSION%/$1/g" $tmpsrc/setup.py
-
-    cd $tmpsrc
+    sed -i "s/%VERSION%/$version/g" setup.py
 
     if [ "$2" = "--deb" ]; then
-        sed -i "s/%VERSION%/$1/g" $tmpsrc/debian/changelog
+        sed -i "s/%VERSION%/$version/g" debian/changelog
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
-        echo "$tmpdir/${name}_${1}_all.deb is created"
+        success "ulauncher_${version}_all.deb saved to $dest_dir"
     elif [ "$2" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
-            echo "ERROR: RELEASE env var is not supplied"
-            exit 1
-        fi
-        if [ -z "$GPGKEY" ]; then
-            echo "ERROR: GPGKEY env var is not supplied"
+            error "RELEASE env var is not supplied"
             exit 1
         fi
         if [ -z "$PPA" ]; then
-            echo "ERROR: PPA env var is not supplied"
+            error "PPA env var is not supplied"
             exit 1
         fi
 
         # replace version and release name
-        sed -i "s/trusty/$RELEASE/g" $tmpsrc/debian/changelog
-        sed -i "s/%VERSION%/${1}-0ubuntu1ppa1~${RELEASE}/g" $tmpsrc/debian/changelog
+        sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
+        sed -i "s/%VERSION%/${version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
 
-        # import GPG keys
+        underline "Importing GPG keys"
         if gpg --list-keys | grep -q $GPGKEY; then
-            echo "GPG key is already imported"
+            info "GPG key is already imported"
         else
-            echo "Importing GPG key"
-            gpg --import $root_dir/scripts/launchpad-public.key
-            gpg --import $root_dir/scripts/launchpad-secret.key
+            gpg --import scripts/launchpad-public.key
+            gpg --import scripts/launchpad-secret.key
+            success "GPG key has been imported"
         fi
 
-        # build and upload
+        underline "Starting dpkg-buildpackage"
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
-        dput ppa:$PPA /tmp/*.changes
+
+        underline "Uploading to launchpad"
+        dput ppa:$PPA $dest_dir/*.changes
     else
-        echo
-        echo "ERROR: Invalid arguments supplied"
+        error "Second argument must be either --deb or --upload"
         exit 1
+    fi
+
+    # restore changelog
+    if [[ -f /tmp/changelog ]]; then
+        cp /tmp/changelog debian/changelog
+        cp /tmp/setup.py setup.py
     fi
 }

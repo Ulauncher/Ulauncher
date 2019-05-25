@@ -22,3 +22,4 @@ launchpad.ssh.tar
 .pytest_cache/
 .mypy_cache/
 .vscode
+package-lock.json
