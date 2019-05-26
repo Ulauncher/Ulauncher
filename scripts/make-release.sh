@@ -7,7 +7,7 @@ make-release() {
     # Args:
     # $1 version
 
-    VERSION=$(fix-version-format "$1")
+    export VERSION=$(fix-version-format "$1")
     if [ -z "$VERSION" ]; then
         echo "First argument should be version"
         exit 1

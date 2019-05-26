@@ -22,7 +22,7 @@ branches:
   - master
   - dev
   - python3
-  - "/^\\d+.\\d+.\\d+(\\.r\\d+)?$/"
+  - "/^\\d+.\\d+.\\d+/"
 deploy:
   provider: releases
   api_key:
