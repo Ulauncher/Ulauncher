@@ -16,7 +16,6 @@ build-deb () {
     set -e
 
     GPGKEY=${GPGKEY:-6BD735B0}
-    dest_dir=$(dirname `pwd`)
     version=$(fix-version-format "$1")
 
     if [ -z "$version" ]; then
@@ -26,27 +25,48 @@ build-deb () {
 
     h2 "Building DEB package for Ulauncher $version..."
 
-    underline "Checking that current version is not in debian/changelog"
+    info "Checking that current version is not in debian/changelog"
     if grep -q "$version" debian/changelog; then
         error "debian/changelog already has a record about this version"
         exit 1
     fi
 
-    # back up debian/changelog and setup.py
-    if [[ -f /tmp/changelog ]]; then
-        cp /tmp/changelog debian/changelog
-        cp /tmp/setup.py setup.py
-    else
-        cp debian/changelog /tmp
-        cp setup.py /tmp/setup.py
-    fi
+    src_dir=$(pwd)
+    name="ulauncher"
+    tmpdir="/tmp"
+    tmpsrc="$tmpdir/$name"
 
+    info "Building Preferences UI"
+    ./ul build-preferences
+
+    info "Copying src to a temp dir"
+    rm -rf $tmpdir/* || true
+    mkdir -p $tmpsrc || true
+    rsync -aq --progress \
+        AUTHORS \
+        bin \
+        data \
+        debian \
+        LICENSE \
+        README.md \
+        setup.cfg \
+        setup.py \
+        ulauncher \
+        ulauncher.desktop.in \
+        $tmpsrc \
+        --exclude-from=.gitignore
+    rm -rf $tmpsrc/data/preferences/*
+    cp -r data/preferences/dist $tmpsrc/data/preferences
+
+    cd $tmpsrc
     sed -i "s/%VERSION%/$version/g" setup.py
+    sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
 
     if [ "$2" = "--deb" ]; then
         sed -i "s/%VERSION%/$version/g" debian/changelog
+        info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
-        success "ulauncher_${version}_all.deb saved to $dest_dir"
+        success "ulauncher_${version}_all.deb saved to $tmpdir"
     elif [ "$2" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
             error "RELEASE env var is not supplied"
@@ -58,31 +78,24 @@ build-deb () {
         fi
 
         # replace version and release name
-        sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
         sed -i "s/%VERSION%/${version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
 
-        underline "Importing GPG keys"
+        info "Importing GPG keys"
         if gpg --list-keys | grep -q $GPGKEY; then
             info "GPG key is already imported"
         else
-            gpg --import scripts/launchpad-public.key
-            gpg --import scripts/launchpad-secret.key
+            gpg --import $src_dir/scripts/launchpad-public.key
+            gpg --import $src_dir/scripts/launchpad-secret.key
             success "GPG key has been imported"
         fi
 
-        underline "Starting dpkg-buildpackage"
+        info "Starting dpkg-buildpackage"
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
 
-        underline "Uploading to launchpad"
-        dput ppa:$PPA $dest_dir/*.changes
+        info "Uploading to launchpad"
+        dput ppa:$PPA $tmpdir/*.changes
     else
         error "Second argument must be either --deb or --upload"
         exit 1
-    fi
-
-    # restore changelog
-    if [[ -f /tmp/changelog ]]; then
-        cp /tmp/changelog debian/changelog
-        cp /tmp/setup.py setup.py
     fi
 }

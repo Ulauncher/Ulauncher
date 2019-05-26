@@ -1,4 +1,4 @@
-ulauncher (%VERSION%) xenial; urgency=medium
+ulauncher (%VERSION%) %RELEASE%; urgency=medium
 
   * No code changes. Started using proper versioning
 
