@@ -20,6 +20,8 @@ except IndexError:
     print("ERROR: First argument should be version")
     sys.exit(1)
 
+git_tag = version.replace('~', '-')
+
 try:
     update_stable = os.environ['UPDATE_STABLE'] in ('1', 'true')
 except KeyError:
@@ -56,13 +58,13 @@ def main():
 
 
 def fetch_release():
-    url = 'https://ext-api.ulauncher.io/misc/ulauncher-releases/%s' % version
+    url = 'https://ext-api.ulauncher.io/misc/ulauncher-releases/%s' % git_tag
     print("Fetching release info from '%s'..." % url)
     return json.loads(urlopen(url).read().decode('utf-8'))
 
 
 def get_targz_link():
-    return 'https://github.com/Ulauncher/Ulauncher/releases/download/%s/ulauncher_%s.tar.gz' % (version, version)
+    return 'https://github.com/Ulauncher/Ulauncher/releases/download/%s/ulauncher_%s.tar.gz' % (git_tag, version)
 
 
 def pkgbuild_from_template(targz):

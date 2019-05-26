@@ -76,7 +76,7 @@ aur_update() {
 
 launchpad_upload() {
     # check if release name contains beta or dev to decide which PPA to use
-    if curl --silent https://api.github.com/repos/ulauncher/ulauncher/releases | egrep -qi "$VERSION\W+(Beta|Dev)"; then
+    if echo "$VERSION" | grep -q beta; then
         PPA="agornostal/ulauncher-dev"
     else
         PPA="agornostal/ulauncher"
