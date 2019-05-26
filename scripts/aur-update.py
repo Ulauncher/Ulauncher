@@ -47,7 +47,7 @@ project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__f
 
 def main():
     release = fetch_release()
-    is_stable = ' ' not in release['name']  # because "x.y.z (Beta)"
+    is_stable = 'beta' not in git_tag
     if (not release['prerelease'] or allow_prerelease) and ((update_stable and is_stable) or not update_stable):
         targz = get_targz_link()
         pkgbuild = pkgbuild_from_template(targz)
@@ -92,7 +92,8 @@ def push_update(pkgbuild):
     run_shell(('git', 'config', 'user.name', 'Aleksandr Gornostal'))
     with open('PKGBUILD', 'w') as f:
         f.write(pkgbuild)
-    run_shell(('mksrcinfo'))
+    with open('.SRCINFO', 'w') as f:
+        run_shell(('makepkg', '--printsrcinfo'), stdout=f)
     run_shell(('git', 'add', 'PKGBUILD', '.SRCINFO'))
     run_shell(('git', 'commit', '-m', 'Version update %s' % version))
     run_shell(('git', 'push', 'origin', 'master'), env=ssh_enabled_env)
