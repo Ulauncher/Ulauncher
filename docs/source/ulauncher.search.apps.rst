@@ -12,8 +12,8 @@ ulauncher\.search\.apps\.AppDb module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.apps\.QueryHistoryDb module
-------------------------------------------
+ulauncher\.search\.QueryHistoryDb module
+----------------------------------------
 
 .. automodule:: ulauncher.search.QueryHistoryDb
     :members:

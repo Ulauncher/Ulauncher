@@ -9,7 +9,7 @@ Subpackages
     ulauncher.api
     ulauncher.search
     ulauncher.ui
-    ulauncher.util
+    ulauncher.utils
 
 Submodules
 ----------
