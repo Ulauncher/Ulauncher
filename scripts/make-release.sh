@@ -38,8 +38,8 @@ create_deb() {
         $BUILD_IMAGE \
         bash -c "$step1 && $step2 && $step3 && $step4 && $step5"
     set +x
-    docker cp ulauncher-deb:/root/ulauncher_$VERSION.tar.gz .
-    docker cp ulauncher-deb:/root/ulauncher_${VERSION}_all.deb .
+    docker cp ulauncher-deb:/tmp/ulauncher_$VERSION.tar.gz .
+    docker cp ulauncher-deb:/tmp/ulauncher_${VERSION}_all.deb .
     docker rm ulauncher-deb
 }
 
