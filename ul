@@ -41,7 +41,7 @@ main () {
     aur-update) ./scripts/aur-update.py $2 ;;
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
-    build-preferences) build-preferences ;;
+    build-preferences) build-preferences $2 ;;
     make-release) make-release $2 ;;
     travis-cli-container) travis-cli-container ;;
     run-ci) run-ci ;;
