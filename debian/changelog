@@ -1,8 +1,9 @@
 ulauncher (%VERSION%) %RELEASE%; urgency=medium
 
-  * No code changes. Started using proper versioning
+  * Change version schema. Now there's stable version and beta version
+  * Fixed #377: Result item that belongs to an extension is not automatically selected if user previously selected the same item using the same query
 
- -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sat, 25 May 2019 20:00:00 +0200
+ -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sun, 26 May 2019 20:00:00 +0200
 
 ulauncher (5.2.0~beta1) xenial; urgency=medium
 

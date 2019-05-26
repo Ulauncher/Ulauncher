@@ -60,10 +60,10 @@ build-deb () {
 
     cd $tmpsrc
     sed -i "s/%VERSION%/$version/g" setup.py
-    sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
 
     if [ "$2" = "--deb" ]; then
         sed -i "s/%VERSION%/$version/g" debian/changelog
+        sed -i "s/%RELEASE%/xenial/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
         success "ulauncher_${version}_all.deb saved to $tmpdir"
@@ -79,6 +79,7 @@ build-deb () {
 
         # replace version and release name
         sed -i "s/%VERSION%/${version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
+        sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
 
         info "Importing GPG keys"
         if gpg --list-keys | grep -q $GPGKEY; then
