@@ -69,7 +69,7 @@ def is_wayland_compatibility_on():
     In this mode user won't be able to set app hotkey via preferences
     Set hotkey in OS Settings > Devices > Keyboard > Add Hotkey > Command: ulauncher-toggle
     """
-    return is_wayland() and gdk_backend().lower() == 'wayland'
+    return is_wayland() and (gdk_backend().lower() == 'wayland' or gdk_backend() == '')
 
 
 def gdk_backend():
