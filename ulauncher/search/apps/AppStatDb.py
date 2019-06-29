@@ -15,7 +15,7 @@ class AppStatDb(KeyValueDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(os.path.join(CACHE_DIR, 'app_stat_db.db')).open()
+        return cls(os.path.join(CACHE_DIR, 'app_stat_v2.db')).open()
 
     def inc_count(self, path):
         count = self._records.get(path, 0)
