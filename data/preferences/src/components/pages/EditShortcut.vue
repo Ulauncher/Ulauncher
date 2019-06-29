@@ -26,7 +26,7 @@
             <a
               @click.prevent="cmdDescriptionExpanded = !cmdDescriptionExpanded"
               href
-            >(toggle example)</a>
+            >(show script example)</a>
           </p>
           <div v-if="cmdDescriptionExpanded">
             <pre class="selectable"><code>#!/usr/bin/env node
