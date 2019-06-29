@@ -86,16 +86,21 @@ def push_update(pkgbuild):
 
     temp_dir = mkdtemp()
     print("Temp dir: %s" % temp_dir)
+    print("Cloning AUR repo: %s" % aur_repo)
     run_shell(('git', 'clone', aur_repo, temp_dir), env=ssh_enabled_env)
     os.chdir(temp_dir)
     run_shell(('git', 'config', 'user.email', 'ulauncher.app@gmail.com'))
     run_shell(('git', 'config', 'user.name', 'Aleksandr Gornostal'))
+    print("Writing PKGBUILD")
     with open('PKGBUILD', 'w') as f:
         f.write(pkgbuild)
+    print("Writing .SRCINFO")
     with open('.SRCINFO', 'w') as f:
         run_shell(('makepkg', '--printsrcinfo'), stdout=f)
+    print("Making a git commit")
     run_shell(('git', 'add', 'PKGBUILD', '.SRCINFO'))
     run_shell(('git', 'commit', '-m', 'Version update %s' % version))
+    print("Pushing changes to master branch")
     run_shell(('git', 'push', 'origin', 'master'), env=ssh_enabled_env)
 
 

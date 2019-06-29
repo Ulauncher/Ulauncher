@@ -67,9 +67,13 @@ create_rpms() {
 
 aur_update() {
     h1 "Push new PKGBUILD to AUR stable channel"
+    workdir=/home/notroot/ulauncher
+
     docker run \
         --rm \
-        -v $(pwd):/root/ulauncher \
+        -u notroot \
+        -w $workdir \
+        -v $(pwd):$workdir \
         $ARCH_BUILD_IMAGE \
         bash -c "UPDATE_STABLE=1 ./ul aur-update $VERSION"
 }

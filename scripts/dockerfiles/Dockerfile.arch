@@ -11,3 +11,5 @@ RUN pacman --noconfirm -Syu && \
         grep \
         openssh \
         base-devel
+
+RUN useradd -ms /bin/bash notroot
