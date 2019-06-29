@@ -9,4 +9,5 @@ RUN pacman --noconfirm -Syu && \
         python \
         git \
         grep \
-        openssh
+        openssh \
+        base-devel
