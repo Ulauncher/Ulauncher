@@ -21,6 +21,9 @@ Create a new directory there (name it as you wish) with the following structure:
 * :file:`images/` contains at least an icon of you extension
 
 
+Check out :doc:`debugging` to learn how to test and debug your extension.
+
+
 versions.json
 -------------
 
