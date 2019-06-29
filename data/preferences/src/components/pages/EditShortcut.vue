@@ -6,7 +6,7 @@
         slot="aside"
         @click="selectIcon"
       >
-        <img v-if="localIcon" :src="expandUserPath(localIcon)">
+        <img v-if="localIcon" :src="expandUserPath(localIcon)" />
       </div>
 
       <b-form-fieldset label="Name" :state="nameState">
@@ -18,7 +18,7 @@
       </b-form-fieldset>
 
       <b-form-fieldset label="Query or Script" :state="cmdState">
-        <b-form-input class="cmd" textarea :rows="3" v-model="localCmd"></b-form-input>
+        <b-form-textarea class="cmd" :rows="3" v-model="localCmd"></b-form-textarea>
         <small class="form-text text-muted">
           <p>
             Use
@@ -30,8 +30,11 @@
           </p>
           <div v-if="cmdDescriptionExpanded">
             <pre class="selectable"><code>#!/usr/bin/env node
-// query is passed as a first argument
-console.log("Query is:", process.argv[1]);</code></pre>
+// scripts must start with a shebang string ^
+//
+// query params will be passed as arguments
+// Ulauncher doesn't replace %s in scripts
+console.log("Arguments:", process.argv);</code></pre>
           </div>
         </small>
       </b-form-fieldset>
