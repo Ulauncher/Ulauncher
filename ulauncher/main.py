@@ -14,7 +14,7 @@ gi.require_version('Gtk', '3.0')
 
 # pylint: disable=wrong-import-position
 from ulauncher.config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
-                              gdk_backend, CACHE_DIR, CONFIG_DIR)
+                              gdk_backend, CACHE_DIR, CONFIG_DIR, DATA_DIR)
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -30,6 +30,9 @@ DBUS_PATH = '/net/launchpad/ulauncher'
 def _create_dirs():
     if not os.path.exists(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
+
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
 
     # make sure ~/.cache/ulauncher exists
     if not os.path.exists(CACHE_DIR):
