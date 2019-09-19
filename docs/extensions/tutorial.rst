@@ -4,7 +4,7 @@ Development Tutorial
 Creating a Project
 ------------------
 
-Ulauncher runs all extensions from ``~/.cache/ulauncher_cache/extensions/``.
+Ulauncher runs all extensions from ``~/.local/share/ulauncher/extensions/``.
 
 Create a new directory there (name it as you wish) with the following structure::
 

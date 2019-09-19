@@ -2,7 +2,7 @@ import os
 from operator import itemgetter
 from itertools import islice
 
-from ulauncher.config import CACHE_DIR
+from ulauncher.config import DATA_DIR
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.decorator.singleton import singleton
 
@@ -15,7 +15,7 @@ class AppStatDb(KeyValueDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(os.path.join(CACHE_DIR, 'app_stat_v2.db')).open()
+        return cls(os.path.join(DATA_DIR, 'app_stat_v2.db')).open()
 
     def inc_count(self, path):
         count = self._records.get(path, 0)
