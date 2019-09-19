@@ -193,6 +193,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if keyname == 'Escape':
             self.hide()
 
+        return True
+
     ######################################
     # Helpers
     ######################################
