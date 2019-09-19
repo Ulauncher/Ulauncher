@@ -34,10 +34,10 @@ cleanup-dev-env () {
   # remove ulaucher dbs
   rm \
   -rv \
-  "${HOME}/.cache/ulauncher_cache/"*.db
+  "${HOME}/.local/share/ulauncher/"*.db
 
   # remove ulaucher log
   rm \
   -rv \
-  "${HOME}/.cache/ulauncher_cache/last.log"
+  "${HOME}/.local/share/ulauncher/last.log"
 }
