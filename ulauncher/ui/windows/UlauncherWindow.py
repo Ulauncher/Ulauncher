@@ -160,6 +160,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         Search.get_instance().on_query_change(self._get_user_query())
 
+    # pylint: disable=inconsistent-return-statements
     def on_input_key_press_event(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
@@ -170,10 +171,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             if keyname == 'Up':
                 self.results_nav.go_up()
                 return True
-            elif keyname == 'Down':
+            if keyname == 'Down':
                 self.results_nav.go_down()
                 return True
-            elif alt and keyname in ('Return', 'KP_Enter'):
+            if alt and keyname in ('Return', 'KP_Enter'):
                 self.enter_result_item(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
                 self.enter_result_item()
