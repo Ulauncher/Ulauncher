@@ -169,8 +169,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if self.results_nav:
             if keyname == 'Up':
                 self.results_nav.go_up()
+                return True
             elif keyname == 'Down':
                 self.results_nav.go_down()
+                return True
             elif alt and keyname in ('Return', 'KP_Enter'):
                 self.enter_result_item(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
@@ -192,8 +194,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         if keyname == 'Escape':
             self.hide()
-
-        return True
 
     ######################################
     # Helpers
