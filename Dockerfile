@@ -34,7 +34,7 @@ RUN apt-get update && \
         python3-paramiko \
         python3-pip && \
     pip3 install --upgrade pip pybuild setuptools && \
-    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_8.x && \
+    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_10.x && \
     bash /tmp/node-setup.sh && \
     apt install -y nodejs && \
     apt autoremove -y && \
