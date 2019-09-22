@@ -68,6 +68,8 @@ create_rpms() {
 aur_update() {
     h1 "Push new PKGBUILD to AUR stable channel"
     workdir=/home/notroot/ulauncher
+    chmod 600 scripts/aur_key
+    sudo chown 1000:1000 scripts/aur_key
 
     docker run \
         --rm \
