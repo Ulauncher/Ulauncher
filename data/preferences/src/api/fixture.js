@@ -217,7 +217,7 @@ function generateExtensionRecord(config) {
       type: 'text',
       name: 'Default Message',
       default_value: '',
-      description: 'This is description',
+      description: 'Should open link in browser <a href="https://example.com">here</a>',
       user_value: 'Hello Steve!',
       value: 'Hello Steve!'
     }

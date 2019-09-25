@@ -63,7 +63,7 @@
       </small>
     </b-alert>
 
-    <div class="ext-form" v-if="!extension.error && extension.is_running">
+    <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
           v-if="pref.type == 'keyword'"
@@ -172,6 +172,12 @@ export default {
   },
   name: 'extension-config',
   props: ['extension'],
+  mounted() {
+    this.$refs['ext-form'].addEventListener('click', this.handleNativeClick)
+  },
+  beforeDestroy() {
+    this.$refs['ext-form'].removeEventListener('click', this.handleNativeClick)
+  },
   data() {
     return {
       updateExtModal: false,
@@ -315,6 +321,15 @@ export default {
     },
     openUrl(url) {
       jsonp('prefs://open/web-url', { url })
+    },
+    handleNativeClick(e) {
+      if (e.target && e.target.tagName === 'A') {
+        // prevent default action
+        e.preventDefault()
+        const el = e.srcElement
+        const href = el.href
+        this.openUrl(href)
+      }
     }
   }
 }
