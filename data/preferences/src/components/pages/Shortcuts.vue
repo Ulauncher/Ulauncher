@@ -2,16 +2,16 @@
   <div class="page" v-if="prefsLoaded">
 
     <b-table striped small hover show-empty :items="items" :fields="fields">
-      <template slot="name" slot-scope="item">
+      <template slot="cell(name)" slot-scope="item">
         <div class="limited-width">{{ item.value }}</div>
       </template>
-      <template slot="keyword" slot-scope="item">
+      <template slot="cell(keyword)" slot-scope="item">
         <div class="limited-width">{{ item.value }}</div>
       </template>
-      <template slot="icon" slot-scope="item">
+      <template slot="cell(icon)" slot-scope="item">
         <img class="icon" :src="item.value ? expandUserPath(item.value) : defaultIcon" />
       </template>
-      <template slot="cmd" slot-scope="item">
+      <template slot="cell(cmd)" slot-scope="item">
         <div class="cmd">
           <div class="text-wrapper">
             <div class="text">{{ item.value }}</div>
@@ -48,12 +48,12 @@ export default {
     return {
       items: [],
       defaultIcon: defaultIcon,
-      fields: {
-        icon: {label: ''},
-        name: {label: 'Name'},
-        keyword: {label: 'Keyword'},
-        cmd: {label: 'Query or Script'}
-      }
+      fields: [
+        {key: 'icon', label: ''},
+        {key: 'name', label: 'Name'},
+        {key: 'keyword', label: 'Keyword'},
+        {key: 'cmd', label: 'Query or Script'}
+      ]
     }
   },
   computed: {

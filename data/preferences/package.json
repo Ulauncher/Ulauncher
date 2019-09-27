@@ -14,7 +14,7 @@
     "lint-autofix": "eslint --ext .js,.vue src test --fix"
   },
   "dependencies": {
-    "bootstrap-vue": "^2.0.0-rc.11",
+    "bootstrap-vue": "^2.0.0",
     "vue": "^2.5.21",
     "vue-clipboard2": "^0.3.0",
     "vue-router": "^3.0.2",
