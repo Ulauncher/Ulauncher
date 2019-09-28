@@ -14,8 +14,8 @@
     "lint-autofix": "eslint --ext .js,.vue src test --fix"
   },
   "dependencies": {
-    "bootstrap-vue": "^2.0.0-rc.11",
-    "vue": "^2.5.21",
+    "bootstrap-vue": "^2.0.0",
+    "vue": "^2.6.10",
     "vue-clipboard2": "^0.3.0",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1"
@@ -82,7 +82,7 @@
     "vue-eslint-parser": "^4.0.3",
     "vue-loader": "^11.3.4",
     "vue-style-loader": "^2.0.5",
-    "vue-template-compiler": "^2.4.4",
+    "vue-template-compiler": "^2.6.10",
     "webpack": "^2.3.3",
     "webpack-bundle-analyzer": "^2.2.1",
     "webpack-dev-middleware": "^1.10.0",
