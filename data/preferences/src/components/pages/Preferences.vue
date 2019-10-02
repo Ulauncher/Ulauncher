@@ -81,6 +81,19 @@
         </td>
       </tr>
 
+      <tr>
+        <td>
+          <label for="render-on-screen">Render On</label>
+        </td>
+        <td>
+          <b-form-select
+            id="render-on-screen"
+            class="render-on-screen-select"
+            :options="prefs.render_on_screen_options"
+            v-model="render_on_screen"></b-form-select>
+        </td>
+      </tr>
+
     </table>
 
     <h1>Advanced</h1>
@@ -219,6 +232,18 @@ export default {
           err => bus.$emit('error', err)
         )
       }
+    },
+
+    render_on_screen: {
+      get() {
+        return this.prefs.render_on_screen
+      },
+      set(value) {
+        return jsonp('prefs://set/render-on-screen', { value: value }).then(
+          () => this.setPrefs({ render_on_screen: value }),
+          err => bus.$emit('error', err)
+        )
+      }
     }
 
   },
@@ -292,7 +317,8 @@ label {
   padding: 0.4em 0.7em;
   line-height: 95%;
 }
-.theme-select {
+.theme-select,
+.render-on-screen-select {
   width: auto;
 }
 </style>

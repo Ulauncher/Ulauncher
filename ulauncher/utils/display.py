@@ -26,6 +26,13 @@ def get_current_screen(window=None):
     return screen
 
 
+def get_primary_screen_geometry():
+    """
+    :returns: dict with keys: x, y, width, height
+    """
+    return get_screens()[Gdk.Screen.get_default().get_primary_monitor()]
+
+
 def get_current_screen_geometry(window=None):
     """
     :returns: dict with keys: x, y, width, height

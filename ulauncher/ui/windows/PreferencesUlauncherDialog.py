@@ -237,6 +237,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
+            'render_on_screen': self.settings.get_property('render-on-screen'),
+            'render_on_screen_options': self._get_render_on_screen_options(),
             'is_wayland': is_wayland(),
             'env': {
                 'version': get_version(),
@@ -318,6 +320,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         dirs = url_params['query']['value']
         logger.info('Set blacklisted-desktop-dirs to %s', dirs)
         self.settings.set_property('blacklisted-desktop-dirs', dirs)
+        self.settings.save_to_file()
+
+    @rt.route('/set/render-on-screen')
+    def prefs_set_render_on_screen(self, url_params):
+        selected_option = url_params['query']['value']
+        logger.info('Set render-on-screen to %s', selected_option)
+        self.settings.set_property('render-on-screen', selected_option)
         self.settings.save_to_file()
 
     @rt.route('/show/file-browser')
@@ -505,6 +514,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def _get_available_themes(self):
         load_available_themes()
         return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
+
+    def _get_render_on_screen_options(self):
+        return {
+            "mouse-pointer-monitor": "Monitor with a mouse pointer",
+            "default-monitor": "Default monitor"
+        }
 
     def get_app_hotkey(self):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')
