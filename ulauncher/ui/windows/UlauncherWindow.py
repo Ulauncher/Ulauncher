@@ -79,6 +79,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         self.results_nav = None
         self.window = self.ui['ulauncher_window']
+        self.window_body = self.ui['body']
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
@@ -216,6 +217,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         load_available_themes()
         theme = Theme.get_current()
         theme.clear_cache()
+
+        # removing window shadow solves issue with DEs without a compositor (#230)
+        if get_options().no_window_shadow:
+            self.window_body.get_style_context().add_class('no-window-shadow')
+
         self.init_styles(theme.compile_css())
 
     def activate_preferences(self, page='preferences'):

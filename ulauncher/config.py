@@ -91,6 +91,9 @@ def get_options():
         "--no-extensions", action="store_true",
         help=gettext("Do not run extensions"))
     parser.add_option(
+        "--no-window-shadow", action="store_true",
+        help=gettext("Removes window shadow. On DEs without a compositor this solves issue with a black border"))
+    parser.add_option(
         "--dev", action="store_true",
         help=gettext("Development mode"))
     (options, _) = parser.parse_args()
