@@ -36,9 +36,6 @@
     border: 1px solid @window_border_color;
     border-radius: 4px;
 }
-.no-window-shadow {
-    box-shadow: none;
-}
 
 .input {
     color: @input_color;
@@ -103,4 +100,8 @@
 }
 .prefs-btn:hover {
     background-color: @prefs_backgroud;
+}
+
+.no-window-shadow {
+    margin: -20px;
 }
