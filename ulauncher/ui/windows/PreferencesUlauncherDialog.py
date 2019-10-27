@@ -109,12 +109,18 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.settings = Settings.get_instance()
         self._init_webview()
+        self._handle_no_window_shadow_option(self.ui['window_wrapper'])
         self.init_styles(get_data_file('styles', 'preferences.css'))
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
 
         self.show_all()
+
+    def _handle_no_window_shadow_option(self, window_wrapper):
+        # removing window shadow solves issue with DEs without a compositor (#230)
+        if get_options().no_window_shadow:
+            window_wrapper.get_style_context().add_class('no-window-shadow')
 
     def _init_webview(self):
         """

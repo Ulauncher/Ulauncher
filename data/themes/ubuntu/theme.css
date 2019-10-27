@@ -79,7 +79,3 @@
 .prefs-btn:hover {
     background-color: @prefs_backgroud;
 }
-
-.no-window-shadow {
-    margin: -20px;
-}
