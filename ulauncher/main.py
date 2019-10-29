@@ -5,12 +5,13 @@ import logging
 import time
 from threading import Event
 import gi
+
+gi.require_version('Gtk', '3.0')
+
 from gi.repository import Gtk
 import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
-
-gi.require_version('Gtk', '3.0')
 
 # pylint: disable=wrong-import-position
 from ulauncher.config import (get_version, get_options, is_wayland, is_wayland_compatibility_on,
