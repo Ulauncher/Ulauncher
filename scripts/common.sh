@@ -15,8 +15,7 @@ cyan=$'\e[96m'
 white=$'\e[97m'
 
 BUILD_IMAGE=ulauncher/build-image:5.0
-FEDORA_28_BUILD_IMAGE=ulauncher/fedora:5.0-28
-FEDORA_29_BUILD_IMAGE=ulauncher/fedora:5.0-29
+FEDORA_BUILD_IMAGE=ulauncher/fedora:5.0-31
 ARCH_BUILD_IMAGE=ulauncher/arch:5.0
 
 underline() {

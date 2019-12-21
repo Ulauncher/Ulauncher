@@ -6,8 +6,7 @@
 dev-container () {
     # port 3002 is used for developing Preferences UI
   case "$1" in
-    fedora28) image=$FEDORA_28_BUILD_IMAGE ;;
-    fedora29) image=$FEDORA_29_BUILD_IMAGE ;;
+    fedora) image=$FEDORA_BUILD_IMAGE ;;
     arch) image=$ARCH_BUILD_IMAGE ;;
     *) image=$BUILD_IMAGE ;;
   esac

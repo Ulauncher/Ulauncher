@@ -31,8 +31,7 @@ deploy:
   file:
     - ulauncher_${APP_VERSION}.tar.gz
     - ulauncher_${APP_VERSION}_all.deb
-    - ulauncher_${APP_VERSION}_fedora28.rpm
-    - ulauncher_${APP_VERSION}_fedora29.rpm
+    - ulauncher_${APP_VERSION}_fedora.rpm
   skip_cleanup: true
   on:
     repo: Ulauncher/Ulauncher

@@ -14,9 +14,6 @@ create-build-images () {
     docker build -f Dockerfile.arch -t $ARCH_BUILD_IMAGE .
     docker push $ARCH_BUILD_IMAGE
 
-    docker build -f Dockerfile.fedora-28 -t $FEDORA_28_BUILD_IMAGE .
-    docker push $FEDORA_28_BUILD_IMAGE
-
-    docker build -f Dockerfile.fedora-29 -t $FEDORA_29_BUILD_IMAGE .
-    docker push $FEDORA_29_BUILD_IMAGE
+    docker build -f Dockerfile.fedora-31 -t $FEDORA_BUILD_IMAGE .
+    docker push $FEDORA_BUILD_IMAGE
 }
