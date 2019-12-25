@@ -19,9 +19,11 @@ class TestAppNotifyEventHandler:
         return AppNotifyEventHandler(db)
 
     @pytest.fixture
-    def event(self):
+    def event(self, mocker):
         event = mock.create_autospec(pyinotify.Event)
         event.pathname = 'file.desktop'
+        find_desktop_files = mocker.patch('ulauncher.search.apps.app_watcher.find_desktop_files')
+        find_desktop_files.return_value = [event.pathname]
         return event
 
     @pytest.fixture(autouse=True)
@@ -39,6 +41,9 @@ class TestAppNotifyEventHandler:
         filter_app = mocker.patch('ulauncher.search.apps.app_watcher.filter_app')
         filter_app.return_value = False  # this will make _add_file_sync fail at first
 
+        find_desktop_files = mocker.patch('ulauncher.search.apps.app_watcher.find_desktop_files')
+        find_desktop_files.return_value = ['mypath']
+
         AppNotifyEventHandler.RETRY_INTERVAL = 0.05
         AppNotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
         event_handler = AppNotifyEventHandler(db)
@@ -48,6 +53,17 @@ class TestAppNotifyEventHandler:
         filter_app.return_value = True  # now file should be added successfully
         sleep(.2)
         db.put_app.assert_called_with(app)
+
+    def test_add_file_deferred_skip_desktop_file(self, db, app, mocker):
+        find_desktop_files = mocker.patch('ulauncher.search.apps.app_watcher.find_desktop_files')
+        find_desktop_files.return_value = []
+
+        AppNotifyEventHandler.RETRY_INTERVAL = 0.05
+        AppNotifyEventHandler.RETRY_TIME_SPAN = (0, 30)
+        event_handler = AppNotifyEventHandler(db)
+        event_handler.add_file_deferred('mypath')
+        sleep(.1)
+        assert not db.put_app.called
 
     def test_on_created_add_app(self, event_handler, event, db, app):
         event_handler.process_IN_CREATE(event)

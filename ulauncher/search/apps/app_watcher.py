@@ -7,7 +7,7 @@ from typing import Dict
 import pyinotify
 
 from ulauncher.utils.decorator.run_async import run_async
-from ulauncher.utils.desktop.reader import read_desktop_file, filter_app, find_apps_cached
+from ulauncher.utils.desktop.reader import find_desktop_files, read_desktop_file, filter_app, find_apps_cached
 from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
 
@@ -38,6 +38,9 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
     # otherwise application icon or .desktop file itself may not be ready
 
     class InvalidDesktopFile(IOError):
+        pass
+
+    class SkipDesktopFile(Exception):
         pass
 
     def __init__(self, db):
@@ -71,6 +74,11 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
                 except self.InvalidDesktopFile:
                     # retry
                     pass
+                except self.SkipDesktopFile:
+                    # skip adding, and break the loop
+                    if pathname in self._deferred_files:
+                        del self._deferred_files[pathname]
+                    break
                 # pylint: disable=broad-except
                 except Exception as e:
                     # give up on unexpected exception
@@ -96,6 +104,18 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
         Raises self.InvalidDesktopFile if failed to add an app
         """
+
+        # get filename of the desktop file (i.e chromium.desktop)
+        file_name = os.path.basename(pathname)
+        # search for desktop file in all of DESKTOP_DIRS
+        pathnames_in_xdg_dirs = list(find_desktop_files(DESKTOP_DIRS, file_name))
+        # if the pathname is not found in the desktop files it is overridden
+        # with a file of the same name in a different XDG directory, so skip
+        # trying to add this desktop file
+        if pathname not in pathnames_in_xdg_dirs:
+            logger.warning('Skipping adding %s to DB -> desktop file overridden in a different XDG directory', pathname)
+            raise self.SkipDesktopFile(pathname)
+
         try:
             app = read_desktop_file(pathname)
             if filter_app(app):
