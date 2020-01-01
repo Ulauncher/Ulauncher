@@ -25,5 +25,4 @@ def highlight_text(query, text: str, open_tag='<span foreground="white">', close
         # don't forget to close tag if it is opened
         hlted.append(close_tag)
 
-    # replace & characters with &amp;
-    return ''.join(hlted).replace('&', '&amp;')
+    return ''.join(hlted)
