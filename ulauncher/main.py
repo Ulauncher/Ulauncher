@@ -5,6 +5,10 @@ import logging
 import time
 from threading import Event
 import gi
+
+# Fixes issue #488
+sys.path.append('/usr/lib/python3.8/site-packages')
+
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk
