@@ -1,10 +1,9 @@
-FROM fedora:30
+FROM fedora:31
 
 MAINTAINER ulauncher.app@gmail.com
 
 WORKDIR /root/ulauncher
 
-# Python 3.7.5
 RUN dnf install -y \
         gcc \
         make \
