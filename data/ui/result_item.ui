@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.8"/>
   <requires lib="result_item" version="1.0"/>
@@ -42,7 +42,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
-                <property name="hexpand">False</property>
+                <property name="hexpand">True</property>
                 <property name="vexpand">False</property>
                 <child>
                   <object class="GtkLabel" id="item-name">

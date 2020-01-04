@@ -95,7 +95,7 @@ def get_options():
         help=gettext("Removes window shadow. On DEs without a compositor this solves issue with a black border"))
     parser.add_option(
         "--dev", action="store_true",
-        help=gettext("Development mode"))
+        help=gettext("Enables context menu in the Preferences UI"))
     (options, _) = parser.parse_args()
 
     return options
