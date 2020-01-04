@@ -112,6 +112,10 @@ export default {
   name: 'extensions',
   created() {
     this.fetchData()
+    bus.$on('extension/get-all', this.fetchData)
+  },
+  beforeDestroy() {
+    bus.$off('extension/get-all', this.fetchData)
   },
   components: {
     'extension-config': ExtensionConfig,

@@ -312,6 +312,7 @@ export default {
       jsonp('prefs://extension/update-ext', { id: this.extension.id }).then(
         () => {
           this.updateState = 'updated'
+          bus.$emit('extension/get-all')
         },
         err => {
           this.updateState = null
