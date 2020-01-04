@@ -13,7 +13,7 @@ First, start Ulauncher with the following command::
 
 Then find in the logs command to run your extension. It should look like this::
 
-  VERBOSE=1 ULAUNCHER_WS_API=ws://127.0.0.1:5050/ulauncher-demo PYTHONPATH=/home/username/projects/ulauncher /usr/bin/python /home/username/.cache/ulauncher_cache/extensions/ulauncher-demo/main.py
+  VERBOSE=1 ULAUNCHER_WS_API=ws://127.0.0.1:5050/ulauncher-demo PYTHONPATH=/home/username/projects/ulauncher /usr/bin/python /home/username/.local/share/ulauncher/extensions/ulauncher-demo/main.py
 
 Now when you need to restart your extension hit ``Ctrl+C`` and run the last command again.
 
