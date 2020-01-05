@@ -244,7 +244,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
             'render_on_screen': self.settings.get_property('render-on-screen'),
-            'render_on_screen_options': self._get_render_on_screen_options(),
             'is_wayland': is_wayland(),
             'env': {
                 'version': get_version(),
@@ -520,12 +519,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def _get_available_themes(self):
         load_available_themes()
         return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
-
-    def _get_render_on_screen_options(self):
-        return {
-            "mouse-pointer-monitor": "Monitor with a mouse pointer",
-            "default-monitor": "Default monitor"
-        }
 
     def get_app_hotkey(self):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')

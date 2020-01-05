@@ -11,15 +11,22 @@
           <b-form-input
             id="hotkey-show-app"
             @focus.native="showHotkeyDialog($event)"
-            :value="prefs.hotkey_show_app"></b-form-input>
-            <div v-if="prefs.is_wayland" class="hotkey-warning">
-              <b-alert show variant="warning">
-                <small>It appears that your are in Wayland session.
-                  This hotkey may not work all the time.<br />
-                  Check <a href="" @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')">this</a>
-                  to get better user experience</small>
-              </b-alert>
-            </div>
+            :value="prefs.hotkey_show_app"
+          ></b-form-input>
+          <div v-if="prefs.is_wayland" class="hotkey-warning">
+            <b-alert show variant="warning">
+              <small>
+                It appears that your are in Wayland session.
+                This hotkey may not work all the time.
+                <br />Check
+                <a
+                  href
+                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')"
+                >this</a>
+                to get better user experience
+              </small>
+            </b-alert>
+          </div>
         </td>
       </tr>
 
@@ -32,7 +39,8 @@
             id="theme-name"
             class="theme-select"
             :options="prefs.available_themes"
-            v-model="theme_name"></b-form-select>
+            v-model="theme_name"
+          ></b-form-select>
         </td>
       </tr>
 
@@ -44,7 +52,8 @@
           <b-form-checkbox
             :disabled="!prefs.autostart_allowed"
             id="autostart"
-            v-model="autostart_enabled"></b-form-checkbox>
+            v-model="autostart_enabled"
+          ></b-form-checkbox>
         </td>
       </tr>
 
@@ -53,9 +62,7 @@
           <label for="show-indicator-icon">Show Indicator Icon</label>
         </td>
         <td>
-          <b-form-checkbox
-            id="show-indicator-icon"
-            v-model="show_indicator_icon"></b-form-checkbox>
+          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
         </td>
       </tr>
 
@@ -64,9 +71,7 @@
           <label for="show-recent-apps">Show Frequent Apps</label>
         </td>
         <td>
-          <b-form-checkbox
-            id="show-recent-apps"
-            v-model="show_recent_apps"></b-form-checkbox>
+          <b-form-checkbox id="show-recent-apps" v-model="show_recent_apps"></b-form-checkbox>
         </td>
       </tr>
 
@@ -75,9 +80,7 @@
           <label for="clear_previous_query">Clear Input on Hide</label>
         </td>
         <td>
-          <b-form-checkbox
-            id="clear_previous_query"
-            v-model="clear_previous_query"></b-form-checkbox>
+          <b-form-checkbox id="clear_previous_query" v-model="clear_previous_query"></b-form-checkbox>
         </td>
       </tr>
 
@@ -89,11 +92,11 @@
           <b-form-select
             id="render-on-screen"
             class="render-on-screen-select"
-            :options="prefs.render_on_screen_options"
-            v-model="render_on_screen"></b-form-select>
+            :options="renderOnScreenOptions"
+            v-model="render_on_screen"
+          ></b-form-select>
         </td>
       </tr>
-
     </table>
 
     <h1>Advanced</h1>
@@ -103,9 +106,7 @@
         <td class="pull-top">
           <label>Blacklisted App Dirs</label>
           <small>
-            <p>
-              Ulauncher won't search for .desktop files in these dirs
-            </p>
+            <p>Ulauncher won't search for .desktop files in these dirs</p>
             <p v-if="blacklistedDirsChanged">
               <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
             </p>
@@ -115,11 +116,11 @@
           <editable-text-list
             width="450px"
             v-model="blacklisted_desktop_dirs"
-            newItemPlaceholder="Type in an absolute path and press Enter"></editable-text-list>
+            newItemPlaceholder="Type in an absolute path and press Enter"
+          ></editable-text-list>
         </td>
       </tr>
-
-      </table>
+    </table>
   </div>
 </template>
 
@@ -150,7 +151,11 @@ export default {
   data() {
     return {
       previous_theme_name: null,
-      blacklistedDirsChanged: false
+      blacklistedDirsChanged: false,
+      renderOnScreenOptions: {
+        'mouse-pointer-monitor': 'Monitor with a mouse pointer',
+        'default-monitor': 'Default monitor'
+      }
     }
   },
 
@@ -245,14 +250,13 @@ export default {
         )
       }
     }
-
   },
 
   methods: {
     ...mapMutations(['setPrefs']),
 
-    openUrlInBrowser (url) {
-      jsonp('prefs://open/web-url', {url: url})
+    openUrlInBrowser(url) {
+      jsonp('prefs://open/web-url', { url: url })
     },
 
     showHotkeyDialog(e) {
@@ -293,11 +297,13 @@ td:first-child {
 td {
   padding-bottom: 20px;
 }
-tr:last-child td {padding-bottom: 0;}
+tr:last-child td {
+  padding-bottom: 0;
+}
 label {
   cursor: pointer;
 
-  &+small {
+  & + small {
     position: relative;
     top: -5px;
     line-height: 1.3em;
