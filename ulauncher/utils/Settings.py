@@ -48,6 +48,11 @@ GPROPERTIES = {
                                  None,
                                  ':'.join(DEFAULT_BLACKLISTED_DIRS),
                                  GObject.ParamFlags.READWRITE),
+    "render-on-screen": (str,
+                         "Monitor to render on",
+                         None,
+                         "mouse-pointer-monitor",
+                         GObject.ParamFlags.READWRITE),
 }
 
 
