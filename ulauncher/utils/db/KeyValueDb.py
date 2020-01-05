@@ -31,6 +31,10 @@ class KeyValueDb(Generic[Key, Value]):
             if not os.path.isfile(self._name):
                 raise IOError("%s exists and is not a file" % self._name)
 
+            if os.path.getsize(self._name) == 0:
+                # ignore empty files
+                return self
+
             with open(self._name, 'rb') as _in:  # binary mode
                 self.set_records(pickle.load(_in))
         else:
