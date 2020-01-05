@@ -14,8 +14,10 @@ from ulauncher.utils.db.KeyValueDb import KeyValueDb
 logger = logging.getLogger(__name__)
 
 
-def find_desktop_files(dirs: List[str] = None) -> Generator[str, None, None]:
+def find_desktop_files(dirs: List[str] = None, pattern: str = "*.desktop") -> Generator[str, None, None]:
     """
+    Returns deduped list of .desktop files (full paths)
+
     :param list dirs:
     :rtype: list
     """
@@ -25,7 +27,7 @@ def find_desktop_files(dirs: List[str] = None) -> Generator[str, None, None]:
 
     # pylint: disable=cell-var-from-loop
     all_files = chain.from_iterable(
-        map(lambda f: os.path.join(f_path, f), find_files(f_path, '*.desktop')) for f_path in dirs)
+        map(lambda f: os.path.join(f_path, f), find_files(f_path, pattern)) for f_path in dirs)
 
     # dedup desktop file according to follow XDG data dir order
     # specifically the first file name (i.e. firefox.desktop) take precedence
