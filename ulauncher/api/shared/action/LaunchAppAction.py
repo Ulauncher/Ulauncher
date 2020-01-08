@@ -22,4 +22,7 @@ class LaunchAppAction(BaseAction):
     def run(self):
         app = read_desktop_file(self.filename)
         logger.info('Run application %s (%s)', app.get_name(), self.filename)
-        app.launch()
+        try:
+            app.launch()
+        except Exception as e:
+            logger.error('%s: %s', type(e).__name__, e)
