@@ -145,7 +145,8 @@ button {
   height: 100%;
 }
 .page-content {
-  margin-top: 69px;
+  position: relative;
+  top: 69px;
   max-height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;
