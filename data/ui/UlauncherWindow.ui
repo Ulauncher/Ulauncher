@@ -8,7 +8,7 @@
     <property name="width_request">604</property>
     <property name="can_focus">False</property>
     <property name="has_focus">True</property>
-    <property name="title">Ulauncher window title</property>
+    <property name="title">Ulauncher - Application Launcher</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="icon_name">ulauncher</property>

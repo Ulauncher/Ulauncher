@@ -10,4 +10,4 @@ dbus-send \
 # dbus-send is asynchronous and sometimes it takes a bit of time for Ulauncher window to be presented
 sleep 0.03
 
-wmctrl -a "Ulauncher window title"
+wmctrl -a "Ulauncher - Application Launcher"
