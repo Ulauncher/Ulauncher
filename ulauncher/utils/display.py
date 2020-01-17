@@ -35,7 +35,12 @@ def get_primary_screen_geometry():
 
 def get_monitor_scale_factor() -> int:
     # TODO: use scaling factor of a monitor where ulauncher window is going to be displayed
-    return Gdk.Display.get_default().get_primary_monitor().get_scale_factor()
+    try:
+        return Gdk.Display.get_default().get_primary_monitors().get_scale_factor()
+    except AttributeError:  # Fallback to support GTK <3.22
+        screen = Gdk.Screen.get_default()
+        prim_monitor_num = screen.get_primary_monitor()
+        return screen.get_monitor_scale_factor(prim_monitor_num)
 
 
 def get_current_screen_geometry(window=None):
