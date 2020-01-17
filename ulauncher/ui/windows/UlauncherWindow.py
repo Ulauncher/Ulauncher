@@ -28,7 +28,8 @@ from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.AppCacheDb import AppCacheDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry
+from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry, get_monitor_scale_factor
+from ulauncher.utils.image_loader import load_image
 from ulauncher.utils.version_cmp import gtk_version_is_gte
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.Theme import Theme, load_available_themes
@@ -222,6 +223,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if get_options().no_window_shadow:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
+        self._render_prefs_icon()
         self.init_styles(theme.compile_css())
 
     def activate_preferences(self, page='preferences'):
@@ -348,6 +350,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.result_box.set_margin_bottom(0)
             self.result_box.set_margin_top(0)
         logger.debug('render %s results', len(results))
+
+    def _render_prefs_icon(self):
+        scale_factor = get_monitor_scale_factor()
+        prefs_pixbuf = load_image(get_data_file('media', 'gear.svg'), 16 * scale_factor)
+        surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scale_factor, self.get_window())
+        prefs_image = Gtk.Image.new_from_surface(surface)
+        self.prefs_btn.set_image(prefs_image)
 
     @staticmethod
     def create_item_widgets(items, query):

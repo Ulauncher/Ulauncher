@@ -31,13 +31,13 @@ def load_image(path, size):
         logger.warning('Could not load image %s. E: %s', path, e)
 
 
-def get_app_icon_pixbuf(app, icon_size):
+def get_app_icon_pixbuf(icon, icon_size, icon_name):
     """
-    :param Gio.DesktopAppInfo app:
+    :param Gio.Icon icon:
     :param int icon_size:
+    :param str icon_name:
     :rtype: :class:`GtkPixbuf`
     """
-    icon = app.get_icon()
     pixbuf_icon = None
     # pylint: disable=broad-except
 
@@ -48,7 +48,7 @@ def get_app_icon_pixbuf(app, icon_size):
                 return None
             pixbuf_icon = get_themed_icon_by_name(icon_name, icon_size)
         except Exception as e:
-            logger.info('Could not load icon for %s. E: %s', app.get_string('Icon'), e)
+            logger.info('Could not load icon for %s. E: %s', icon_name, e)
 
     elif isinstance(icon, Gio.FileIcon):
         pixbuf_icon = load_image(icon.get_file().get_path(), icon_size)

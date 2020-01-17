@@ -53,7 +53,7 @@ class ExtensionSearchMode(BaseSearchMode):
                 if not pref['value']:
                     continue
 
-                icon = c.manifest.load_icon(ExtensionKeywordResultItem.ICON_SIZE)
+                icon = c.manifest.load_icon(ExtensionKeywordResultItem.get_icon_size())
                 items.append(ExtensionKeywordResultItem(name=pref['name'],
                                                         description=pref['description'],
                                                         keyword=pref['value'],

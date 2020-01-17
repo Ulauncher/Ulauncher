@@ -76,6 +76,9 @@
 .prefs-btn {
     opacity: 0.8;
 }
+.prefs-btn * {
+    box-shadow: none;
+}
 .prefs-btn:hover {
     background-color: @prefs_backgroud;
 }

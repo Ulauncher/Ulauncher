@@ -3,6 +3,7 @@ from typing import Any, Callable, Optional
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.search.Query import Query
 from ulauncher.utils.text_highlighter import highlight_text
+from ulauncher.utils.display import get_monitor_scale_factor
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
@@ -52,6 +53,10 @@ class ResultItem:
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
         self._highlightable = highlightable
+
+    @classmethod
+    def get_icon_size(cls):
+        return cls.ICON_SIZE * get_monitor_scale_factor()
 
     def get_keyword(self) -> str:
         """

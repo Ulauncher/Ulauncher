@@ -1,8 +1,9 @@
 import logging
 from typing import Any
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from ulauncher.utils.Theme import Theme
+from ulauncher.utils.display import get_monitor_scale_factor
 from ulauncher.search.Query import Query
 
 logger = logging.getLogger(__name__)
@@ -56,8 +57,20 @@ class ResultItemWidget(Gtk.EventBox):
         """
         :param PixBuf icon:
         """
-        if icon:
-            iconWgt = self.builder.get_object('item-icon')
+        if not icon:
+            return
+
+        iconWgt = self.builder.get_object('item-icon')
+        scale_factor = get_monitor_scale_factor()
+
+        if scale_factor == 1:
+            iconWgt.set_from_pixbuf(icon)
+            return
+
+        try:
+            surface = Gdk.cairo_surface_create_from_pixbuf(icon, scale_factor, self.get_window())
+            iconWgt.set_from_surface(surface)
+        except AttributeError:  # Fallback for GTK+ older than 3.10
             iconWgt.set_from_pixbuf(icon)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:

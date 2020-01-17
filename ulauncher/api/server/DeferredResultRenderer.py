@@ -43,7 +43,7 @@ class DeferredResultRenderer:
         self._cancel_loading()
         self.loading = Timer(self.LOADING_DELAY,
                              partial(self._render_loading,
-                                     controller.get_manifest().load_icon(ResultItem.ICON_SIZE)))
+                                     controller.get_manifest().load_icon(ResultItem.get_icon_size())))
         self.loading.start()
         self.active_event = event
         self.active_controller = controller

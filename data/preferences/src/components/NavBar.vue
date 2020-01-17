@@ -51,12 +51,14 @@ $veryLightGrey: #c8c8c8;
 
   .close-btn {
     position: absolute;
-    top: 18px;
-    right: 25px;
+    top: 11px;
+    right: 14px;
     cursor: pointer;
-    width: 28px;
-    height: 28px;
-    background: url('../assets/big-plus-sign.png') no-repeat;
+    width: 38px;
+    height: 38px;
+    background: url('../assets/close-sign.png') no-repeat;
+    background-size: 38px 38px;
+    opacity: 0.35;
   }
 }
 

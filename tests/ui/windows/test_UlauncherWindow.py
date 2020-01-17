@@ -1,6 +1,10 @@
 import pytest
 import mock
 
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
@@ -18,6 +22,24 @@ class TestUlauncherWindow:
     @pytest.fixture(autouse=True)
     def load_available_themes(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
+
+    @pytest.fixture(autouse=True)
+    def get_monitor_scale_factor(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_monitor_scale_factor')
+
+    @pytest.fixture(autouse=True)
+    def cairo_surface_create_from_pixbuf(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gdk.cairo_surface_create_from_pixbuf')
+
+    @pytest.fixture(autouse=True)
+    def new_image_from_surface(self, mocker):
+        mocked = mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk.Image.new_from_surface')
+        mocked.return_value = Gtk.Image()
+        return mocked
+
+    @pytest.fixture(autouse=True)
+    def load_image(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_image')
 
     @pytest.fixture(autouse=True)
     def start_sync(self, mocker):

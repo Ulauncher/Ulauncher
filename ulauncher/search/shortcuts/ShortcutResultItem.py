@@ -56,9 +56,9 @@ class ShortcutResultItem(ResultItem):
 
     def get_icon(self):
         if self.icon:
-            return load_image(self.icon, self.ICON_SIZE)
+            return load_image(self.icon, self.get_icon_size())
 
-        return load_image(get_data_file('media', 'executable-icon.png'), self.ICON_SIZE)
+        return load_image(get_data_file('media', 'executable-icon.png'), self.get_icon_size())
 
     def selected_by_default(self, query):
         """

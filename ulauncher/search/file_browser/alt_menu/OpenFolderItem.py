@@ -24,7 +24,7 @@ class OpenFolderItem(SmallResultItem):
         return self._name
 
     def get_icon(self):
-        return get_themed_icon_by_name('system-file-manager', self.ICON_SIZE)
+        return get_themed_icon_by_name('system-file-manager', self.get_icon_size())
 
     def on_enter(self, query):
         return OpenAction(self.path.get_abs_path())

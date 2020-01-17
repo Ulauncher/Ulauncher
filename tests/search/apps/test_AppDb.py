@@ -2,13 +2,20 @@ from collections import Iterable
 import pytest
 import mock
 from ulauncher.search.apps.AppDb import AppDb, search_name
+from ulauncher.search.apps.AppIconCache import AppIconCache
 
 
 class TestAppDb:
 
     @pytest.fixture
-    def app_db(self):
-        return AppDb(':memory:').open()
+    def app_icon_cache(self, mocker):
+        get_instance = mocker.patch('ulauncher.search.apps.AppIconCache.AppIconCache.get_instance')
+        get_instance.return_value = mock.create_autospec(AppIconCache)
+        return get_instance.return_value
+
+    @pytest.fixture
+    def app_db(self, app_icon_cache):
+        return AppDb(':memory:', app_icon_cache).open()
 
     @pytest.fixture
     def db_with_data(self, app_db):
@@ -101,20 +108,14 @@ class TestAppDb:
                 :search_name
             )
         """, values)
-        for rec in values:
-            app_db.get_icons()[rec['desktop_file']] = rec['icon']
         return app_db
-
-    @pytest.fixture(autouse=True)
-    def get_app_icon_pixbuf(self, mocker):
-        return mocker.patch('ulauncher.search.apps.AppDb.get_app_icon_pixbuf')
 
     def test_remove_by_path(self, db_with_data):
         assert db_with_data.get_by_path('/foo/jane.desktop')
         db_with_data.remove_by_path('/foo/jane.desktop')
         assert not db_with_data.get_by_path('/foo/jane.desktop')
 
-    def test_put_app(self, app_db, get_app_icon_pixbuf):
+    def test_put_app(self, app_db, app_icon_cache):
         app = mock.MagicMock()
         app.get_filename.return_value = '/foo/file_name_test1'
         app.get_string.return_value = None
@@ -129,7 +130,7 @@ class TestAppDb:
             'name': 'name_test1',
             'description': 'description_test1',
             'search_name': 'name_test1',
-            'icon': get_app_icon_pixbuf.return_value
+            'icon': app_icon_cache.get_pixbuf.return_value
         }
 
     def test_find_returns_sorted_results(self, db_with_data, mocker):
@@ -147,25 +148,25 @@ class TestAppDb:
     def test_find_empty_query(self, db_with_data):
         assert isinstance(db_with_data.find(''), Iterable)
 
-    def test_get_by_name(self, db_with_data):
+    def test_get_by_name(self, db_with_data, app_icon_cache):
         # also test case insensitive search
         assert db_with_data.get_by_name('JohN') == {
             'name': 'john',
             'description': 'test',
             'desktop_file': '/foo/john.desktop',
             'desktop_file_short': 'john.desktop',
-            'icon': 'icon',
+            'icon': app_icon_cache.get_pixbuf.return_value,
             'search_name': 'john'
         }
 
-    def test_get_by_path(self, db_with_data):
+    def test_get_by_path(self, db_with_data, app_icon_cache):
         # also test case insensitive search
         assert db_with_data.get_by_path('/foo/libre.calc') == {
             'name': 'LibreOffice Calc',
             'description': 'test',
             'desktop_file': '/foo/libre.calc',
             'desktop_file_short': 'libre.calc',
-            'icon': 'icon',
+            'icon': app_icon_cache.get_pixbuf.return_value,
             'search_name': 'LibreOffice Calc'
         }
 

@@ -28,7 +28,7 @@ class ExtensionResultItem(ResultItem):
             if not icon_path.startswith('/'):
                 icon_path = os.path.join(self.extension_path, icon_path)
 
-            return load_image(icon_path, self.ICON_SIZE)
+            return load_image(icon_path, self.get_icon_size())
 
         # assuming it's GtkPixbuf
         return self._icon

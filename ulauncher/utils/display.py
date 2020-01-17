@@ -33,6 +33,11 @@ def get_primary_screen_geometry():
     return get_screens()[Gdk.Screen.get_default().get_primary_monitor()]
 
 
+def get_monitor_scale_factor() -> int:
+    # TODO: use scaling factor of a monitor where ulauncher window is going to be displayed
+    return Gdk.Display.get_default().get_primary_monitor().get_scale_factor()
+
+
 def get_current_screen_geometry(window=None):
     """
     :returns: dict with keys: x, y, width, height

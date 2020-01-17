@@ -96,7 +96,6 @@
 .prefs-btn {
     border-radius: 12px;
     opacity: 0.8;
-    background: url("./prefs.svg") center no-repeat;
 }
 .prefs-btn:hover {
     background-color: @prefs_backgroud;

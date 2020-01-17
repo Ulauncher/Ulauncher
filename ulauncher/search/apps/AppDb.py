@@ -5,8 +5,8 @@ import logging
 
 from ulauncher.search.SortedList import SortedList
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.utils.image_loader import get_app_icon_pixbuf
 from ulauncher.search.apps.AppResultItem import AppResultItem
+from ulauncher.search.apps.AppIconCache import AppIconCache
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,11 @@ class AppDb:
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(':memory:').open()  # in-memory SqLite DB
+        return cls(':memory:', AppIconCache.get_instance()).open()  # in-memory SqLite DB
 
-    def __init__(self, path):
+    def __init__(self, path: str, app_icon_cache: AppIconCache):
         self._path = path
-        self._icons = {}  # save icons to a local map
+        self._app_icon_cache = app_icon_cache
         self._conn = None
 
     def open(self):
@@ -61,11 +61,8 @@ class AppDb:
             'name': row['name'],
             'description': row['description'],
             'search_name': row['search_name'],
-            'icon': self._icons[row['desktop_file']],
+            'icon': self._app_icon_cache.get_pixbuf(row['desktop_file']),
         }
-
-    def get_icons(self):
-        return self._icons
 
     def put_app(self, app):
         """
@@ -80,7 +77,7 @@ class AppDb:
             "name": name,
             "search_name": search_name(name, exec_name)
         }
-        self._icons[record['desktop_file']] = get_app_icon_pixbuf(app, AppResultItem.ICON_SIZE)
+        self._app_icon_cache.add_icon(record['desktop_file'], app.get_icon(), app.get_string('Icon'))
 
         query = '''INSERT OR REPLACE INTO app_db (name, desktop_file, desktop_file_short, description, search_name)
                    VALUES (:name, :desktop_file, :desktop_file_short, :description, :search_name)'''
@@ -131,10 +128,7 @@ class AppDb:
             logger.exception('Exception %s for query: %s. Path: %s', e, query, desktop_file)
             raise
 
-        try:
-            del self._icons[desktop_file]
-        except KeyError:
-            pass
+        self._app_icon_cache.remove_icon(desktop_file)
 
     def get_records(self):
         for row in self._conn.execute('SELECT * FROM app_db'):

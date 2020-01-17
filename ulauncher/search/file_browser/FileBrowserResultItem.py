@@ -33,7 +33,7 @@ class FileBrowserResultItem(SmallResultItem):
         return super(FileBrowserResultItem, self).get_name_highlighted(query, color)
 
     def get_icon(self):
-        return get_file_icon(self.path, self.ICON_SIZE)
+        return get_file_icon(self.path, self.get_icon_size())
 
     def on_enter(self, query):
         self._file_queries.save_query(self.path.get_abs_path())
