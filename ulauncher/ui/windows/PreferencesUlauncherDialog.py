@@ -245,6 +245,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'theme_name': Theme.get_current().get_name(),
             'render_on_screen': self.settings.get_property('render-on-screen'),
             'is_wayland': is_wayland(),
+            'terminal_command': self.settings.get_property('terminal-command'),
             'env': {
                 'version': get_version(),
                 'api_version': api_version,
@@ -305,6 +306,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.init_theme()
+
+    @rt.route('/set/terminal-command')
+    def prefs_set_terminal_command(self, url_params):
+        terminal_command = url_params['query']['value']
+        logger.info('Set terminal launch command to %s', terminal_command)
+        self.settings.set_property('terminal-command', terminal_command)
+        self.settings.save_to_file()
 
     @rt.route('/show/hotkey-dialog')
     @glib_idle_add

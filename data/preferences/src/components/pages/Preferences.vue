@@ -103,6 +103,21 @@
 
     <table>
       <tr>
+        <td>
+          <label for="terminal-exec">Terminal Command</label>
+          <small>
+            <p>Overrides terminal for apps that are configured to be run from a terminal.
+              Set to an empty value for default terminal</p>
+          </small>
+        </td>
+        <td>
+          <b-form-input
+            style="width:250px"
+            id="terminal-exec"
+            v-model="terminal_command"></b-form-input>
+        </td>
+      </tr>
+      <tr>
         <td class="pull-top">
           <label>Blacklisted App Dirs</label>
           <small>
@@ -195,6 +210,18 @@ export default {
       set(value) {
         return jsonp('prefs://set/show-recent-apps', { value: value }).then(
           () => this.setPrefs({ show_recent_apps: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    terminal_command: {
+      get() {
+        return this.prefs.terminal_command
+      },
+      set(value) {
+        return jsonp('prefs://set/terminal-command', { value: value }).then(
+          () => this.setPrefs({ terminal_command: value }),
           err => bus.$emit('error', err)
         )
       }

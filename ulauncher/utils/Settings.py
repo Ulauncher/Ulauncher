@@ -53,6 +53,11 @@ GPROPERTIES = {
                          None,
                          "mouse-pointer-monitor",
                          GObject.ParamFlags.READWRITE),
+    "terminal-command": (str,
+                         "Terminal command",
+                         None,
+                         "",
+                         GObject.PARAM_READWRITE),
 }
 
 
