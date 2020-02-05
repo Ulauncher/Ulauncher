@@ -70,10 +70,13 @@ class AppDb:
         """
         name = app.get_string('X-GNOME-FullName') or app.get_name()
         exec_name = app.get_string('Exec') or ''
+        description = app.get_description() or ''
+        if not description and (app.get_generic_name() != name):
+            description = app.get_generic_name() or ''
         record = {
             "desktop_file": app.get_filename(),
             "desktop_file_short": os.path.basename(app.get_filename()),
-            "description": app.get_description() or '',
+            "description": description,
             "name": name,
             "search_name": search_name(name, exec_name)
         }
