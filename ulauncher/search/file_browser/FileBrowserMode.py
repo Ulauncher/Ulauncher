@@ -23,11 +23,10 @@ class FileBrowserMode(BaseSearchMode):
         """
         Enabled for queries like:
         ~/Downloads
-        $USER/Downloads
         /usr/bin/foo
         """
         try:
-            return (query.lstrip()[0] in ('~', '/', '$')) and (len(query) > 1 and query != '~')
+            return query.lstrip()[0] in ('~', '/')
         except IndexError:
             return False
 
