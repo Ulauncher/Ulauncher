@@ -27,7 +27,7 @@ class FileBrowserMode(BaseSearchMode):
         /usr/bin/foo
         """
         try:
-            return (query.lstrip()[0] in ('~', '/', '$')) and (len(query) > 1)
+            return (query.lstrip()[0] in ('~', '/', '$')) and (len(query) > 1 and query != '~')
         except IndexError:
             return False
 
