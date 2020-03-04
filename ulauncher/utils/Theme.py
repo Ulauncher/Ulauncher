@@ -138,6 +138,9 @@ class Theme:
         rmtree(new_theme_dir)
         copytree(self.path, new_theme_dir)
 
+        # change file permissions (because Nix store is read-only)
+        os.chmod(new_theme_dir, 0o755)
+
         return os.path.join(new_theme_dir, 'generated.css')
 
 
