@@ -90,6 +90,10 @@ You must have the following things installed:
 
 Check out output of `./ul` to find more useful commands.
 
+### Packaging status
+
+[Fedora](https://src.fedoraproject.org/rpms/ulauncher): `sudo dnf install ulauncher`
+
 
 License
 =======
