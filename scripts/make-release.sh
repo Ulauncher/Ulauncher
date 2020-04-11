@@ -44,13 +44,24 @@ create_deb() {
 }
 
 create_rpms() {
+    # RPMs are tricky because different distros have different Python3 versions
+    # We know that
+    #   Fedora 30 and 31 has Python 3.7
+    #   Fedora 32 has Python 3.8
+    # This means that we should use separate docker images to build different RPM packages
+
     h1 "Creating .rpm"
 
     set -ex
     docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_BUILD_IMAGE \
         bash -c "./ul build-rpm $VERSION fedora"
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
+
+    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_32_BUILD_IMAGE \
+        bash -c "./ul build-rpm $VERSION fedora fedora32"
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora32.rpm .
     docker rm ulauncher-rpm
+
     set +x
 }
 
