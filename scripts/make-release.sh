@@ -78,8 +78,8 @@ launchpad_upload() {
     fi
     xenial="PPA=$PPA RELEASE=xenial ./ul build-deb $VERSION --upload"
     bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
-    disco="PPA=$PPA RELEASE=disco ./ul build-deb $VERSION --upload"
     eoan="PPA=$PPA RELEASE=eoan ./ul build-deb $VERSION --upload"
+    focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each realease
@@ -89,6 +89,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $disco && $eoan"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $eoan && $focal"
     set +x
 }
