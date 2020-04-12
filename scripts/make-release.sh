@@ -56,6 +56,7 @@ create_rpms() {
     docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_BUILD_IMAGE \
         bash -c "./ul build-rpm $VERSION fedora"
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
+    docker rm ulauncher-rpm
 
     docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_32_BUILD_IMAGE \
         bash -c "./ul build-rpm $VERSION fedora fedora32"
