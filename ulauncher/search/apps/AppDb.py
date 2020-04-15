@@ -69,7 +69,6 @@ class AppDb:
         :param Gio.DesktopAppInfo app:
         """
         name = app.get_string('X-GNOME-FullName') or app.get_name()
-        description = app.get_description() or ''
         exec_name = app.get_string('Exec') or ''
         description = app.get_description() or ''
         if not description and (app.get_generic_name() != name):
@@ -77,9 +76,9 @@ class AppDb:
         record = {
             "desktop_file": app.get_filename(),
             "desktop_file_short": os.path.basename(app.get_filename()),
-            "description": description,
+            "description": app.get_description() or '',
             "name": name,
-            "search_name": search_name(name, exec_name, description=description)
+            "search_name": search_name(name, exec_name)
         }
         self._app_icon_cache.add_icon(record['desktop_file'], app.get_icon(), app.get_string('Icon'))
 
@@ -156,7 +155,7 @@ class AppDb:
         return result_list
 
 
-def search_name(name, exec_name, description=None):
+def search_name(name, exec_name):
     """
     Returns string that will be used for search
     We want to make sure app can be searchable by its exec_name
@@ -178,11 +177,6 @@ def search_name(name, exec_name, description=None):
     common_words = exec_name_split & name_split
 
     if common_words:
-        result = name
-    else:
-        result = '%s %s' % (name, exec_name)
+        return name
 
-    if description:
-        result = '%s %s' % (result, description)
-
-    return result
+    return '%s %s' % (name, exec_name)
