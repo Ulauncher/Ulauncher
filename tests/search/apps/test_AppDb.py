@@ -181,5 +181,3 @@ def test_search_name():
     assert search_name('Amazon', r'unity-webapps-runner --amazon --app-id=ubuntu-amazon-default') == \
         'Amazon unity-webapps-runner'
     assert search_name('Back Up', r'env VAR1=VAL1 VAR2=VAL2 deja-dup --backup') == 'Back Up deja-dup'
-    assert search_name('Chromium', '/usr/bin/chromium %U', description='Access the Internet') == \
-        'Chromium Access the Internet'
