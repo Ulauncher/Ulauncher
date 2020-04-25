@@ -6,7 +6,7 @@
           You ran ulauncher with
           <code>--no-extensions</code> flag.
           You have to manually start this extension by running
-          <br>
+          <br />
           <code>{{ errorMessage }}</code>
         </p>
         <p
@@ -15,8 +15,16 @@
         <p
           v-else-if="errorName === 'ExitedInstantly'"
         >The extension exited instantly. Please check the logs.</p>
+        <p v-else-if="errorName === 'MissingModule'">
+          The extension crashed because it could not import module
+          <code>{{ errorMessage }}</code>.
+          <br />Try installing this module manually:
+          <code>pip3 install {{ errorMessage }} --user</code> and then restart Ulauncher.
+          <br />If that doesn't help, report the issue on
+          <a href @click.prevent="openUrlInBrowser(`${extUrl}/issues`)">Github</a>.
+        </p>
         <p v-else>{{ errorMessage }}</p>
-        <p v-if="extUrl && errorName !== 'NoExtensionsFlag'">
+        <p v-if="extUrl && errorName !== 'NoExtensionsFlag' && errorName !== 'MissingModule'">
           You can let the author know about this problem by creating a
           <a
             href
