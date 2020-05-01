@@ -1,6 +1,5 @@
 import os
 import json
-from distutils.dir_util import mkpath
 
 from ulauncher.utils.db.KeyValueDb import KeyValueDb, Key, Value
 
@@ -21,7 +20,7 @@ class KeyValueJsonDb(KeyValueDb[Key, Value]):
                 self.set_records(json.load(_in))
         else:
             # make sure path exists
-            mkpath(os.path.dirname(self._name))
+            os.makedirs(os.path.dirname(self._name))
             self.commit()
 
         return self
