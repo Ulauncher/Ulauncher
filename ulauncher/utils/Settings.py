@@ -103,7 +103,7 @@ class Settings(GObject.GObject):
             with open(filename, 'r') as f:
                 self._properties = json.load(f)
         else:
-            os.makedirs(os.path.dirname(filename))
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             self.save_to_file()
 
     def save_to_file(self):

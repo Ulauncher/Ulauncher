@@ -20,7 +20,7 @@ class KeyValueJsonDb(KeyValueDb[Key, Value]):
                 self.set_records(json.load(_in))
         else:
             # make sure path exists
-            os.makedirs(os.path.dirname(self._name))
+            os.makedirs(os.path.dirname(self._name), exist_ok=True)
             self.commit()
 
         return self
