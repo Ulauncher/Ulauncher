@@ -68,7 +68,7 @@
 
       <tr>
         <td>
-          <label for="recent-apps-number">Number of frequent apps to show</label>
+          <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
           <b-form-input
