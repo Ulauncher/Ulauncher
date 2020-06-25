@@ -31,7 +31,7 @@ GPROPERTIES = {
     "show-recent-apps": (str,
                          "Show list of recent apps",
                          None,
-                         "3",
+                         "0",
                          GObject.ParamFlags.READWRITE),
     "clear-previous-query": (bool,
                              "Clear query when app looses focus",

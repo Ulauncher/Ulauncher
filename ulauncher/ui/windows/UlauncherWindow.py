@@ -330,11 +330,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
+        show_recent_apps = self.settings.get_property('show-recent-apps')
+        recent_apps_number = 3 if show_recent_apps else 0
         try:
-            recent_apps_number = int(self.settings.get_property('show-recent-apps'))
+            recent_apps_number = int(str(show_recent_apps))
         except ValueError:
             logger.warning("show-recent-apps in settings is not a number, fallback do default value")
-            recent_apps_number = 3
         if not result_items and not self.input.get_text() and recent_apps_number > 0:
             result_items = AppStatDb.get_instance().get_most_frequent(recent_apps_number)
 
