@@ -68,10 +68,13 @@
 
       <tr>
         <td>
-          <label for="show-recent-apps">Show Frequent Apps</label>
+          <label for="recent-apps-number">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-checkbox id="show-recent-apps" v-model="show_recent_apps"></b-form-checkbox>
+          <b-form-input
+            style="width:250px"
+            id="show-recent-apps"
+            v-model="show_recent_apps"></b-form-input>
         </td>
       </tr>
 

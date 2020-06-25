@@ -276,9 +276,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set show-recent-apps to %s', is_on)
-        self.settings.set_property('show-recent-apps', is_on)
+        try:
+            recent_apps_number = int(url_params['query']['value'])
+        except ValueError:
+            recent_apps_number = 3
+        logger.info('Set show-recent-apps to %s', recent_apps_number)
+        self.settings.set_property('show-recent-apps', recent_apps_number)
         self.settings.save_to_file()
 
     @rt.route('/set/hotkey-show-app')
