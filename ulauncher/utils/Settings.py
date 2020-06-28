@@ -29,7 +29,7 @@ GPROPERTIES = {
                             True,
                             GObject.ParamFlags.READWRITE),
     "show-recent-apps": (str,
-                         "Show list of recent apps",
+                         "Number of recent apps",
                          None,
                          "0",
                          GObject.ParamFlags.READWRITE),

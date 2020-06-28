@@ -71,10 +71,7 @@
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-input
-            style="width:250px"
-            id="show-recent-apps"
-            v-model="show_recent_apps"></b-form-input>
+          <b-form-input style="width:250px" id="show-recent-apps" v-model="show_recent_apps"></b-form-input>
         </td>
       </tr>
 
@@ -109,15 +106,14 @@
         <td>
           <label for="terminal-exec">Terminal Command</label>
           <small>
-            <p>Overrides terminal for apps that are configured to be run from a terminal.
-              Set to an empty value for default terminal</p>
+            <p>
+              Overrides terminal for apps that are configured to be run from a terminal.
+              Set to an empty value for default terminal
+            </p>
           </small>
         </td>
         <td>
-          <b-form-input
-            style="width:250px"
-            id="terminal-exec"
-            v-model="terminal_command"></b-form-input>
+          <b-form-input style="width:250px" id="terminal-exec" v-model="terminal_command"></b-form-input>
         </td>
       </tr>
       <tr>
@@ -208,6 +204,11 @@ export default {
 
     show_recent_apps: {
       get() {
+        if (this.prefs.show_recent_apps === true) {
+          return '3'
+        } else if (this.prefs.show_recent_apps === false) {
+          return '0'
+        }
         return this.prefs.show_recent_apps
       },
       set(value) {
