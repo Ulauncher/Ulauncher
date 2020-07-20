@@ -27,6 +27,15 @@ Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 As of Ulauncher v4, you can create your own color themes
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
 
+[Systemd users](https://www.freedesktop.org/wiki/Software/systemd/)
+==============================================================
+
+If your distribution packages [ulauncher.service](contrib/systemd/ulauncher.service) properly, then you can run `ulauncher` on startup by running:
+
+```
+systemctl --user enable ulauncher.service
+```
+
 
 Known Issues
 ============
