@@ -1,0 +1,13 @@
+[Unit]
+Description=Linux Application Launcher
+Documentation=https://ulauncher.io/
+After=display-manager.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/usr/bin/ulauncher --hide-window
+
+[Install]
+WantedBy=graphical.target
