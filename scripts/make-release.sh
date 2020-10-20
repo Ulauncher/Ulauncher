@@ -92,6 +92,7 @@ launchpad_upload() {
     bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
     eoan="PPA=$PPA RELEASE=eoan ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
+    groovy="PPA=$PPA RELEASE=groovy ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each realease
@@ -101,6 +102,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $eoan && $focal"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $eoan && $focal && $groovy"
     set +x
 }
