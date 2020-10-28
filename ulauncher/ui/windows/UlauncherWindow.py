@@ -170,10 +170,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
-            if keyname == 'Up':
+            if keyname in ('Up', 'ISO_Left_Tab'):
                 self.results_nav.go_up()
                 return True
-            if keyname == 'Down':
+            if keyname in ('Down', 'Tab'):
                 self.results_nav.go_down()
                 return True
             if alt and keyname in ('Return', 'KP_Enter'):
