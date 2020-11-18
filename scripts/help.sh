@@ -19,7 +19,7 @@ help () {
 
     IMAGE_NAME is an optional argument.
     If not set, an image based on ubuntu image will be used.
-    Other possible options: ${normal}${bold}fedora28, fedora29, arch${normal}
+    Other possible options: ${normal}${bold}fedora, fedora33, arch${normal}
 
   ${bold}./ul rm-python-cache
     ${dim}Removes .pyc, .pyo, __pycache__${normal}

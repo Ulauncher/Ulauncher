@@ -12,7 +12,7 @@
       "stopOnEntry": false,
       "cwd": "${workspaceRoot}",
       "logToFile": true,
-      "pythonPath": "python3",
+      "python": "python3",
       "args": ["-v", "--no-extensions"],
       "console": "integratedTerminal"
     }
