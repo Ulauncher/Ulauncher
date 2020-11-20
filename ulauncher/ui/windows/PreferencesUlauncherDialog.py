@@ -246,6 +246,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'render_on_screen': self.settings.get_property('render-on-screen'),
             'is_wayland': is_wayland(),
             'terminal_command': self.settings.get_property('terminal-command'),
+            'grab_mouse_pointer': self.settings.get_property('grab-mouse-pointer'),
             'env': {
                 'version': get_version(),
                 'api_version': api_version,
@@ -329,6 +330,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         is_on = self._get_bool(url_params['query']['value'])
         logger.info('Set clear-previous-query to %s', is_on)
         self.settings.set_property('clear-previous-query', is_on)
+        self.settings.save_to_file()
+
+    @rt.route('/set/grab-mouse-pointer')
+    def prefs_set_grab_mouse_pointer(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set grab-mouse-pointer to %s', is_on)
+        self.settings.set_property('grab-mouse-pointer', is_on)
         self.settings.save_to_file()
 
     @rt.route('/set/blacklisted-desktop-dirs')
