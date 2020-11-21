@@ -338,8 +338,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def get_pointer_device(self):
         return (self
-                .window.get_window()
-                .get_display().get_device_manager().get_client_pointer())
+                .window
+                .get_window()
+                .get_display()
+                .get_device_manager()
+                .get_client_pointer())
 
     def hide_and_clear_input(self):
         self.input.set_text('')
