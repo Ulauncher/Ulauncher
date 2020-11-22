@@ -97,6 +97,15 @@
           ></b-form-select>
         </td>
       </tr>
+
+      <tr>
+        <td>
+          <label for="grab_mouse_pointer">Don't hide after losing mouse focus</label>
+        </td>
+        <td>
+          <b-form-checkbox id="grab_mouse_pointer" v-model="grab_mouse_pointer"></b-form-checkbox>
+        </td>
+      </tr>
     </table>
 
     <h1>Advanced</h1>
@@ -250,6 +259,18 @@ export default {
       set(value) {
         return jsonp('prefs://set/clear-previous-query', { value: value }).then(
           () => this.setPrefs({ clear_previous_query: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    grab_mouse_pointer: {
+      get() {
+        return this.prefs.grab_mouse_pointer
+      },
+      set(value) {
+        return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
+          () => this.setPrefs({ grab_mouse_pointer: value }),
           err => bus.$emit('error', err)
         )
       }

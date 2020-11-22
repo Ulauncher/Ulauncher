@@ -58,6 +58,11 @@ GPROPERTIES = {
                          None,
                          "",
                          GObject.PARAM_READWRITE),
+    "grab-mouse-pointer": (bool,
+                           "Grab mouse while open (prevents losing focus)",
+                           None,
+                           False,
+                           GObject.ParamFlags.READWRITE),
 }
 
 

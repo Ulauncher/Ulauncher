@@ -51,7 +51,7 @@ note() {
 }
 
 warn-if-not-in-docker () {
-    if [ ! -f /.dockerenv ]; then
+    if [ ! -f /.dockerenv -a ! -f /run/.containerenv ]; then
         echo
         echo "${yellow}WARNING: It's recommended to run tests in a docker container to be sure they will also pass in CI${normal}"
         echo

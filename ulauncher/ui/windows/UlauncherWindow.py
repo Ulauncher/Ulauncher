@@ -154,6 +154,17 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         t.start()
 
     def on_focus_in_event(self, *args):
+        if self.settings.get_property('grab-mouse-pointer'):
+            ptr_dev = self.get_pointer_device()
+            result = ptr_dev.grab(
+                self.window.get_window(),
+                Gdk.GrabOwnership.NONE,
+                True,
+                Gdk.EventMask.ALL_EVENTS_MASK,
+                None,
+                0
+            )
+            logger.debug("Focus in event, grabbing pointer: %s", result)
         self.is_focused = True
 
     def on_input_changed(self, entry):
@@ -318,6 +329,20 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
+
+    def hide(self, *args, **kwargs):
+        """Override the hide method to ensure the pointer grab is released."""
+        if self.settings.get_property('grab-mouse-pointer'):
+            self.get_pointer_device().ungrab(0)
+        super(UlauncherWindow, self).hide(*args, **kwargs)
+
+    def get_pointer_device(self):
+        return (self
+                .window
+                .get_window()
+                .get_display()
+                .get_device_manager()
+                .get_client_pointer())
 
     def hide_and_clear_input(self):
         self.input.set_text('')
