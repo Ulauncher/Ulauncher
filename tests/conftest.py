@@ -8,7 +8,7 @@ is_display_enabled = bool(GdkX11.X11Display.get_default())
 
 def pytest_runtest_setup(item):
     if isinstance(item, pytest.Function):
-        if item.get_marker('with_display') and not is_display_enabled:
+        if item.iter_markers('with_display') and not is_display_enabled:
             pytest.skip("Cannot run without a display enabled.")
 
 
