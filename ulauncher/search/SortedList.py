@@ -1,6 +1,7 @@
+from ulauncher.api.shared.item.ResultItem import ResultItem
+
 from ulauncher.search.Query import Query
 
-from ulauncher.search.apps.AppResultItem import AppResultItem
 
 from ulauncher.utils.SortedCollection import SortedCollection
 from ulauncher.utils.fuzzy_search import get_score
@@ -46,7 +47,7 @@ class SortedList:
         for item in items:
             self.append(item)
 
-    def append(self, result_item: AppResultItem):
+    def append(self, result_item: ResultItem):
         score_from_name = get_score(self._query, result_item.get_search_name())
         score_from_description = get_score(
             self._query,
@@ -57,7 +58,7 @@ class SortedList:
         if score_from_name >= self._min_score:
             result_item.score = -score_from_name
         elif score_from_description >= self._min_score:
-            # Halving the score so that it will rank below items which match with the name
+            # Halving so that it will rank below items which match with the name
             result_item.score = -(score_from_description / 2)
         else:
             return
