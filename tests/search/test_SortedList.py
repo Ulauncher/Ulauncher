@@ -75,15 +75,3 @@ class TestSortedList:
         assert ri6 in res_list
 
         assert res_list[0] == ri5  # ri5 stays first, because it has the highest score (100)
-
-
-class TestSortedListOrder:
-    def test_order_if_name_and_description_match(self):
-        r1 = ResultItem(name='Problem Reporting', description='An application to report problems')
-        r2 = ResultItem(name='VS Code', description='Code editing, redefined')
-
-        sorted_list_instance = SortedList(query='re', min_score=50)
-        sorted_list_instance.append(r1)
-        sorted_list_instance.append(r2)
-        assert sorted_list_instance[0].get_name() == 'Problem Reporting'
-        assert sorted_list_instance[1].get_name() == 'VS Code'
