@@ -14,6 +14,5 @@ class TestSortedListOrder:
         sorted_list_instance.append(r2)
         assert sorted_list_instance[0].get_name() == app_name_1
 
-        # TODO: Need to investigate why the sorted list instance is 1, even after appending two items
         assert len(sorted_list_instance) == 2
         assert sorted_list_instance[1].get_name() == app_name_2

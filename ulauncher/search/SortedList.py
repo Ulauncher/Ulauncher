@@ -48,11 +48,11 @@ class SortedList:
             self.append(item)
 
     def append(self, result_item: ResultItem):
-        score_from_name = get_score(self._query, result_item.get_search_name())
         score_from_description = get_score(
             self._query,
             result_item.get_description(Query(self._query))
         )
+        score_from_name = get_score(self._query, result_item.get_search_name())
 
         # use negative to sort by score in desc. order
         if score_from_name >= self._min_score:
