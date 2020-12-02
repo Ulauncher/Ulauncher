@@ -73,7 +73,7 @@ class ShortcutResultItem(ResultItem):
         elif self.is_default_search:
             argument = query
         else:
-            argument = None
+            argument = ' '
 
         if self.run_without_argument:
             if self._is_url():
