@@ -9,6 +9,9 @@ about: Report a bug in Ulauncher
 
   Before you submit this, make sure that the issue doesn't already exist
   or if it is not closed.
+  
+  IF YOU ARE GETTING ISSUES INSTALLING EXTENSIONS, ENSURE YOU HAVE ALL
+  THE DEPENDENCIES (SEE THE GITHUB PAGE FOR THE EXTENSION).
 
   Otherwise, please fill in the items bellow and submit a new issue.
 -->
