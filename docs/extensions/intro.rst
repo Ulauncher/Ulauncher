@@ -26,7 +26,7 @@ Extension API v2 (current) enables extension developers to write **custom handle
   "ti" is a keyword, the rest of the query is an argument in this case.
 
 With Extension API it is possible to capture event when user enters "ti<Space>" into the input
-and then render any results bellow the input box.
+and then render any results below the input box.
 
 Extensions can define preferences in ``manifest.json`` that can be overridden by a user
 from Ulauncher Preferences window.

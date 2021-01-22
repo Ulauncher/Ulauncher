@@ -94,7 +94,7 @@ launchpad_upload() {
     groovy="PPA=$PPA RELEASE=groovy ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
-    # then uploads each realease
+    # then uploads each release
     h1 "Launchpad upload"
     set -x
     docker run \
