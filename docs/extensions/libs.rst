@@ -2,7 +2,7 @@ Available Libraries
 ===================
 
 Currently it's not possible to define python packages required for your extension.
-However, libraries listed bellow are available to use in extensions since
+However, libraries listed below are available to use in extensions since
 they are required for Ulauncher and are pre-installed with the app.
 
 In future we'll make it possible to support ``requirements.txt`` for extensions.

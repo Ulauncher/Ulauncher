@@ -133,7 +133,7 @@ def main():
     if Settings.get_instance().get_property('show-indicator-icon'):
         AppIndicator.get_instance().show()
 
-    # workaround to make Ctrl+C quiting the app
+    # workaround to make Ctrl+C quitting the app
     signal_handler = SignalHandler(window)
     gtk_thread = run_async(Gtk.main)()
     try:

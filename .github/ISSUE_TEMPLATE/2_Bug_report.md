@@ -13,7 +13,7 @@ about: Report a bug in Ulauncher
   IF YOU ARE GETTING ISSUES INSTALLING EXTENSIONS, ENSURE YOU HAVE ALL
   THE DEPENDENCIES (SEE THE GITHUB PAGE FOR THE EXTENSION).
 
-  Otherwise, please fill in the items bellow and submit a new issue.
+  Otherwise, please fill in the items below and submit a new issue.
 -->
 
 ### Steps to reproduce
