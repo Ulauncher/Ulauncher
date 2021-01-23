@@ -59,7 +59,7 @@ warn-if-not-in-docker () {
 }
 
 fix-version-format () {
-    # By Debian convension we must use tilde before "beta", but git tag cannot contain that character
+    # By Debian convention we must use tilde before "beta", but git tag cannot contain that character
     # So when tag for beta release is created, I have to write 1.2.3-beta4, which then should be converted
     # to 1.2.3~beta4
     echo "$1" | sed 's/-beta/~beta/'

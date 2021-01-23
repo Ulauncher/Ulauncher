@@ -32,6 +32,6 @@ class ProcessErrorExtractor:
         """
         match = re.match(r"^.*'(\w+)'$", self.error)
         if not match:
-            raise UlauncherAPIError('Could not exctract errored module name from process output')
+            raise UlauncherAPIError('Could not extract errored module name from process output')
 
         return match.group(1)
