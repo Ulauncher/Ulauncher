@@ -360,7 +360,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         try:
             recent_apps_number = int(str(show_recent_apps))
         except ValueError:
-            logger.warning("show-recent-apps in settings is not a number, fallback do default value")
+            pass
         if not result_items and not self.input.get_text() and recent_apps_number > 0:
             result_items = AppStatDb.get_instance().get_most_frequent(recent_apps_number)
 
