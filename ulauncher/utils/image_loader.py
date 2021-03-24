@@ -3,7 +3,10 @@ import logging
 from functools import lru_cache
 
 import gi
+gi.require_version('GLib', '2.0')
 gi.require_version('Gtk', '3.0')
+gi.require_version('Gio', '2.0')
+gi.require_version('GdkPixbuf', '2.0')
 
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gio, GLib, GdkPixbuf

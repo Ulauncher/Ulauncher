@@ -1,4 +1,8 @@
 import logging
+import gi
+gi.require_version('Gdk', '3.0')
+gi.require_version('GdkX11', '3.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gdk, GdkX11
 
 logger = logging.getLogger(__name__)
