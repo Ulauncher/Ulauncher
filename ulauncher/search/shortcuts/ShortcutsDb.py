@@ -18,8 +18,7 @@ class ShortcutsDb(KeyValueJsonDb):
 
         if is_first_run:
             db.set_records(get_default_shortcuts())
-
-        db.commit()
+            db.commit()
 
         return db
 

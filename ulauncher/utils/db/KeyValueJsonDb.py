@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from distutils.dir_util import mkpath
 
 from ulauncher.utils.db.KeyValueDb import KeyValueDb, Key, Value
@@ -32,8 +33,11 @@ class KeyValueJsonDb(KeyValueDb[Key, Value]):
 
     def commit(self) -> 'KeyValueJsonDb':
         """Write the database to a file"""
-        with open(self._name, 'w') as out:
-            json.dump(self._records, out, indent=4)
-            out.close()
+        try:
+            with open(self._name, 'w') as out:
+                json.dump(self._records, out, indent=4)
+                out.close()
+        except IOError as e:
+            logging.error(e)
 
         return self
