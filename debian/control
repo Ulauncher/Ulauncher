@@ -22,7 +22,6 @@ Depends: ${misc:Depends},
  gir1.2-glib-2.0,
  gir1.2-notify-0.7,
  gir1.2-gdkpixbuf-2.0,
- gir1.2-appindicator3-0.1,
  python3-gi,
  python3-gi-cairo,
  python3-distutils-extra,
@@ -31,5 +30,6 @@ Depends: ${misc:Depends},
  python3-pyinotify,
  python3-websocket,
  python3-xdg
+Recommends: gir1.2-ayatanaappindicator3-0.1
 Description: Application launcher for Linux
  See https://ulauncher.io for more information

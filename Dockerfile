@@ -21,7 +21,7 @@ RUN apt-get update && \
         gir1.2-webkit2-4.0 \
         gir1.2-glib-2.0 \
         gir1.2-gdkpixbuf-2.0 \
-        gir1.2-appindicator3-0.1 \
+        gir1.2-ayatanaappindicator3-0.1 \
         gir1.2-notify-0.7 \
         python3-all \
         python3-gi \

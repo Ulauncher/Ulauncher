@@ -82,7 +82,7 @@ You must have the following things installed:
     gir1.2-glib-2.0 \
     gir1.2-notify-0.7 \
     gir1.2-gdkpixbuf-2.0 \
-    gir1.2-appindicator3-0.1 \
+    gir1.2-ayatanaappindicator3-0.1 \
     python3-dbus \
     python3-levenshtein \
     python3-pyinotify \
