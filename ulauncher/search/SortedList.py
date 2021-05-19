@@ -1,5 +1,7 @@
 from ulauncher.utils.SortedCollection import SortedCollection
 from ulauncher.utils.fuzzy_search import get_score
+from ulauncher.search.apps.AppStatDb import AppStatDb
+from ulauncher.search.apps.AppResultItem import AppResultItem
 
 
 class SortedList:
@@ -43,9 +45,13 @@ class SortedList:
             self.append(item)
 
     def append(self, result_item):
+        if isinstance(result_item, AppResultItem):
+            frequency_score = AppStatDb.get_instance().find(result_item.record['desktop_file'], default=0)
+        else:
+            frequency_score = 0
         score = get_score(self._query, result_item.get_search_name())
         if score >= self._min_score:
-            result_item.score = -score  # use negative to sort by score in desc. order
+            result_item.score = (-frequency_score, -score)  # use negative to sort by score in desc. order
             self._items.insert(result_item)
             while len(self._items) > self._limit:
                 self._items.pop()  # remove items with the lowest score to maintain limited number of items
