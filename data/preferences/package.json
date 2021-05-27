@@ -80,7 +80,7 @@
     "vue-eslint-parser": "^4.0.3",
     "vue-loader": "^11.3.4",
     "vue-style-loader": "^2.0.5",
-    "vue-template-compiler": "^2.6.10",
+    "vue-template-compiler": "2.6.10",
     "webpack": "^2.3.3",
     "webpack-bundle-analyzer": "^2.2.1",
     "webpack-dev-middleware": "^1.10.0",
