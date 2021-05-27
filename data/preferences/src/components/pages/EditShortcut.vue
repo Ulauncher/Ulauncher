@@ -140,7 +140,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 .page {
   padding: 15px;
 }
@@ -167,16 +167,17 @@ fieldset p {
   box-sizing: border-box;
   padding-top: 37px;
   position: relative;
+}
 
-  img {
+.icon-container img {
     display: block;
     width: 100px;
     height: 100px;
     margin-left: 10px;
-  }
+}
 
-  &:hover:before,
-  &.no-icon:before {
+.icon-container:hover:before,
+.icon-container.no-icon:before {
     z-index: 1;
     content: '\f093';
     font: 64px FontAwesome;
@@ -190,8 +191,8 @@ fieldset p {
     color: #555;
     text-align: center;
     line-height: 100px;
-  }
-  &.no-icon:after {
+}
+.icon-container.no-icon:after {
     content: 'Click to select icon';
     font-size: 0.7em;
     display: block;
@@ -200,13 +201,12 @@ fieldset p {
     width: 100px;
     left: 10px;
     top: 140px;
-  }
-  &.no-icon.validate:before {
+}
+.icon-container.no-icon.validate:before {
     color: #d9534f;
-  }
-  &.no-icon.validate:after {
+}
+.icon-container.no-icon.validate:after {
     content: 'Please select an icon';
     font-weight: bold;
-  }
 }
 </style>
