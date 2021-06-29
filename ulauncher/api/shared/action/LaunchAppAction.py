@@ -1,6 +1,7 @@
 import logging
-import pipes
 import subprocess
+import re
+import shlex
 
 from ulauncher.utils.desktop.reader import read_desktop_file
 from ulauncher.utils.Settings import Settings
@@ -25,14 +26,20 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        command = app.get_string('Exec')
-        terminal_exec = settings.get_property('terminal-command')
-        if app.get_boolean('Terminal') and terminal_exec and command:
-            logger.info('Run command %s (%s) in preferred terminal (%s)', command, self.filename, terminal_exec)
-            subprocess.Popen(terminal_exec.split() + [pipes.quote(command)])
+        exec = app.get_string('Exec')
+        if not exec:
+            logger.error("No command to run %s", self.filename)
         else:
-            logger.info('Run application %s (%s)', app.get_name(), self.filename)
+            # strip field codes %f, %F, %u, %U, etc
+            sanitized_exec = re.sub(r'\%[uUfFdDnNickvm]', '', exec).rstrip()
+            terminal_exec = shlex.split(settings.get_property('terminal-command'))
+            if app.get_boolean('Terminal') and terminal_exec:
+                logger.info('Will run command in preferred terminal (%s)', terminal_exec)
+                sanitized_exec = terminal_exec + [shlex.quote(sanitized_exec)]
+            else:
+                sanitized_exec = shlex.split(sanitized_exec)
             try:
-                app.launch()
+                logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
+                subprocess.Popen(sanitized_exec, start_new_session=True)
             except Exception as e:
                 logger.error('%s: %s', type(e).__name__, e)
