@@ -1,5 +1,6 @@
 import os
 import logging
+import mimetypes
 from functools import lru_cache
 
 import gi
@@ -69,14 +70,6 @@ def get_themed_icon_by_name(icon_name, icon_size):
     return icon_theme.load_icon(icon_name, icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
 
 
-ULAUNCHER_FILE_ICON_DB = ['3g2', '3gp', 'ai', 'air', 'asf', 'avi', 'bib', 'cls', 'csv', 'deb', 'djvu', 'dmg', 'doc',
-                          'docx', 'dwf', 'dwg', 'eps', 'epub', 'exe', 'f77', 'f90', 'f', 'flac', 'flv', 'gif', 'gz',
-                          'ico', 'indd', 'iso', 'jpeg', 'jpg', 'log', 'm4a', 'm4v', 'midi', 'mkv', 'mov', 'mp3', 'mp4',
-                          'mpeg', 'mpg', 'msi', 'odp', 'ods', 'odt', 'oga', 'ogg', 'ogv', 'pdf', 'png', 'pps', 'ppsx',
-                          'ppt', 'pptx', 'psd', 'pub', 'py', 'qt', 'ra', 'ram', 'rar', 'rm', 'rpm', 'rtf', 'rv', 'skp',
-                          'spx', 'sql', 'sty', 'tar', 'tex', 'tgz', 'tiff', 'ttf', 'txt', 'vob', 'wav', 'wmv', 'xls',
-                          'xlsx', 'xml', 'xpi', 'zip']
-
 SPECIAL_DIRS = {
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): 'folder-download',
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS): 'folder-documents',
@@ -87,10 +80,6 @@ SPECIAL_DIRS = {
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS): 'folder-videos',
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP): 'user-desktop',
     os.path.expanduser('~'): 'folder-home'
-}
-
-FREEDESKTOP_STANDARD = {
-    'html': 'text-html'
 }
 
 
@@ -107,17 +96,13 @@ def get_file_icon(path, icon_size):
                 return get_themed_icon_by_name(special_dir, icon_size)
             return get_themed_icon_by_name('folder', icon_size)
 
-        ext = path.get_ext()
-        if ext in ULAUNCHER_FILE_ICON_DB:
-            return load_image(get_data_file('media', 'fileicons', '%s.png' % ext), icon_size)
-
-        freedesktop = FREEDESKTOP_STANDARD.get(ext)
-        if freedesktop:
-            return get_themed_icon_by_name(freedesktop, icon_size)
+        mime = mimetypes.guess_type(path.get_basename())[0]
+        if mime:
+            return get_themed_icon_by_name(mime.replace('/','-'), icon_size)
 
         if path.is_exe():
-            return load_image(get_data_file('media', 'executable-icon.png'), icon_size)
+            return get_themed_icon_by_name("application-x-executable", icon_size)
     except Exception as e:
         logger.warning('Icon not found %s. %s: %s', path, type(e).__name__, e)
 
-    return load_image(get_data_file('media', 'unknown-file-icon.png'), icon_size)
+    return get_themed_icon_by_name("unknown", icon_size)
