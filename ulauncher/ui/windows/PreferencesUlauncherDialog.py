@@ -154,11 +154,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # pylint: disable=arguments-differ
     def present(self, page):
         self._load_prefs_html(page)
-        super(PreferencesUlauncherDialog, self).present()
+        super().present()
 
     def show(self, page):
         self._load_prefs_html(page)
-        super(PreferencesUlauncherDialog, self).show()
+        super().show()
 
     ######################################
     # GTK event handlers
@@ -276,7 +276,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             self.autostart_pref.switch(is_on)
         except Exception as e:
-            raise PrefsApiError('Caught an error while switching "autostart": %s' % e)
+            raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
 
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):

@@ -27,7 +27,7 @@ class ExtensionController(WebSocket):
     def __init__(self, controllers, *args, **kw):
         self.controllers = controllers
         self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
-        super(ExtensionController, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
 
     def _send_event(self, event):
         logger.debug('Send event %s to "%s"', type(event).__name__, self.extension_id)

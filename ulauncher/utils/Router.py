@@ -43,8 +43,8 @@ class Router:
         url_params = get_url_params(url)
         try:
             callback = self._callbacks[url_params['path'].strip('/')]
-        except KeyError:
-            raise RouteNotFound('Route not found for path %s' % url_params['path'])
+        except KeyError as e:
+            raise RouteNotFound('Route not found for path %s' % url_params['path']) from e
 
         return callback(context, url_params)
 

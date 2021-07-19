@@ -10,7 +10,7 @@ class DesktopParser:
         self.__property_list = []
         self.set_filename(filename)
         self.read()
-        super(DesktopParser, self).__init__()
+        super().__init__()
 
     def set_filename(self, filename):
         self._filename = filename

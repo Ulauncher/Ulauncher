@@ -103,8 +103,8 @@ class GithubExtension:
             logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
             if e.code == 404:
                 raise GithubExtensionError('Could not find versions.json file using URL "%s"' %
-                                           url, ErrorName.VersionsJsonNotFound)
-            raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError)
+                                           url, ErrorName.VersionsJsonNotFound) from e
+            raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError) from e
 
     def read_versions(self) -> List[Dict[str, str]]:
         versions = self._read_json('master', 'versions.json')

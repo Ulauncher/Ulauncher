@@ -18,5 +18,5 @@ class UlauncherAPIError(Exception):
     error_name = None  # type: str
 
     def __init__(self, message: str, error_name: ErrorName = ErrorName.UnexpectedError):
-        super(UlauncherAPIError, self).__init__(message)
+        super().__init__(message)
         self.error_name = error_name.value

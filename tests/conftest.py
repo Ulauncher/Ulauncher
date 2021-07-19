@@ -32,7 +32,7 @@ class DictHasValus(dict):
         return reduce(lambda d, key: d[key], keys, other)
 
 
-pytest.DictHasValus = DictHasValus
+setattr(pytest, 'DictHasValus', DictHasValus)
 
 
 def test_DictWithValues():

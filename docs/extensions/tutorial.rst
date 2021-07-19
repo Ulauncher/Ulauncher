@@ -168,7 +168,7 @@ Copy the following code to ``main.py``::
   class DemoExtension(Extension):
 
       def __init__(self):
-          super(DemoExtension, self).__init__()
+          super().__init__()
           self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
 
@@ -221,7 +221,7 @@ Basic API Concepts
     class DemoExtension(Extension):
 
         def __init__(self):
-            super(DemoExtension, self).__init__()
+            super().__init__()
             self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
 
@@ -336,7 +336,7 @@ Custom Action on Item Enter
     class DemoExtension(Extension):
 
         def __init__(self):
-            super(DemoExtension, self).__init__()
+            super().__init__()
             self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
             self.subscribe(ItemEnterEvent, ItemEnterEventListener())  # <-- add this line
 

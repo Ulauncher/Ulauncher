@@ -20,7 +20,7 @@ class FileQueries(KeyValueDb[str, float]):
         return db
 
     def __init__(self, basename: str) -> None:
-        super(FileQueries, self).__init__(basename)
+        super().__init__(basename)
         self._init_autosave()
 
     @run_async(daemon=True)
@@ -38,4 +38,4 @@ class FileQueries(KeyValueDb[str, float]):
 
     def save_query(self, path: str) -> None:
         self.__last_put_time = time()
-        super(FileQueries, self).put(path, self.__last_put_time)
+        super().put(path, self.__last_put_time)

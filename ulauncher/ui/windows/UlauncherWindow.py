@@ -334,7 +334,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.get_property('grab-mouse-pointer'):
             self.get_pointer_device().ungrab(0)
-        super(UlauncherWindow, self).hide(*args, **kwargs)
+        super().hide(*args, **kwargs)
 
     def get_pointer_device(self):
         return (self

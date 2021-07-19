@@ -73,6 +73,6 @@ def get_screens():
                             "width": rect.width,
                             "height": rect.height})
     except Exception as e:
-        raise RuntimeError("Unable to find any video sources: %s" % e)
+        raise RuntimeError("Unable to find any video sources: %s" % e) from e
 
     return screens

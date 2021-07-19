@@ -33,7 +33,7 @@ class ShortcutResultItem(ResultItem):
         if query.get_keyword() == self.keyword and query.get_argument():
             return None
 
-        return super(ShortcutResultItem, self).get_name_highlighted(query, color)
+        return super().get_name_highlighted(query, color)
 
     def get_description(self, query):
         if self.cmd.startswith('#!'):

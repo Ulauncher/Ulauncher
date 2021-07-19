@@ -46,7 +46,7 @@ class UlauncherDbusService(dbus.service.Object):
     def __init__(self, window):
         self.window = window
         bus_name = dbus.service.BusName(DBUS_SERVICE, bus=dbus.SessionBus())
-        super(UlauncherDbusService, self).__init__(bus_name, DBUS_PATH)
+        super().__init__(bus_name, DBUS_PATH)
 
     @dbus.service.method(DBUS_SERVICE)
     def toggle_window(self):

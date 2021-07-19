@@ -15,7 +15,7 @@ class ExtensionResultItem(ResultItem):
     """
 
     def __init__(self, *args, **kw):
-        super(ExtensionResultItem, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
         self._is_extension = True
         self.extension_path = os.path.dirname(sys.argv[0])
         if self._on_enter and not isinstance(self._on_enter, BaseAction):
