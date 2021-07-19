@@ -7,9 +7,6 @@ def test_get_matching_indexes():
 
 
 def test_get_score():
-    assert get_score('fiwebro', 'Firefox Web Browser') > get_score('fiwebro', 'Firefox Web SBrowser')
-    assert get_score('j', 'johnny') < get_score('j', 'john')
-    assert get_score('calc', 'LibreOffice Calc') < get_score('calc', 'Calc')
     assert get_score('calc', 'Contacts') < get_score('calc', 'LibreOffice Calc')
     assert get_score('pla', 'Pycharm') < get_score('pla', 'Google Play Music')
     assert get_score('', 'LibreOffice Calc') == 0
