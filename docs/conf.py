@@ -18,6 +18,7 @@
 #
 import os
 import sys
+from typing import Dict
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -126,7 +127,7 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
-}
+} # type: Dict[str, str]
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
