@@ -9,7 +9,7 @@ pkgdesc='Application launcher for Linux'
 arch=('any')
 url="https://ulauncher.io"
 license=('GPL3')
-depends=('gobject-introspection-runtime' 'libappindicator-gtk3' 'libkeybinder3' 'webkit2gtk'
+depends=('gobject-introspection-runtime' 'libkeybinder3' 'webkit2gtk'
          "python-"{dbus,gobject,cairo,pyinotify,levenshtein,xdg,websocket-client})
 makedepends=('python-distutils-extra')
 provides=("${pkgname%-*}")

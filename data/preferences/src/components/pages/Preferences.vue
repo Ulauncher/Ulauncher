@@ -59,15 +59,6 @@
 
       <tr>
         <td>
-          <label for="show-indicator-icon">Show Indicator Icon</label>
-        </td>
-        <td>
-          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
@@ -111,6 +102,18 @@
     <h1>Advanced</h1>
 
     <table>
+      <tr>
+        <td>
+          <label for="show-indicator-icon">Show Indicator Icon</label>
+          <small>
+            <p>It's supported only if gir1.2-ayatanaappindicator3-0.1 or an equivalent is installed</p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
+        </td>
+      </tr>
+
       <tr>
         <td>
           <label for="terminal-exec">Terminal Command</label>
