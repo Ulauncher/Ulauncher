@@ -5,6 +5,7 @@
 .cache
 ulauncherc
 *.egg-info
+dist
 build
 !data/preferences/build
 _build
