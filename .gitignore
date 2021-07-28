@@ -2,12 +2,13 @@
 **/*.pyc
 **/*~
 **/*#
+.DS_Store
 .cache
 ulauncherc
 *.egg-info
 dist
 build
-!data/preferences/build
+!preferences-src/build
 _build
 .build-checksum
 po
@@ -24,3 +25,8 @@ launchpad.ssh.tar
 .mypy_cache/
 .vscode
 package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+preferences-src/test/unit/coverage
+data/preferences

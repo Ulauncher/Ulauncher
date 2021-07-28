@@ -24,7 +24,7 @@ build-rpm () {
         exit 1
     fi
 
-    if [ ! -f data/preferences/dist/index.html ]; then
+    if [ ! -f data/preferences/index.html ]; then
         echo "Preferences are not built"
         exit 1
     fi
@@ -52,8 +52,8 @@ build-rpm () {
         $tmpdir \
         --exclude-from=.gitignore
 
-    rm -rf $tmpdir/data/preferences/*
-    cp -r data/preferences/dist $tmpdir/data/preferences
+    # This is only needed because data/preferences is in .gitignore
+    cp -r data/preferences $tmpdir/data/preferences
 
     # set version to a tag name
     sed -i "s/%VERSION%/$version/g" $tmpdir/setup.py

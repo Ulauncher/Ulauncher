@@ -41,7 +41,7 @@ RUN apt-get update && \
     apt clean && \
     npm install -g yarn
 
-COPY [ "requirements.txt", "data/preferences/package.json", "./" ]
+COPY [ "requirements.txt", "preferences-src/package.json", "./" ]
 COPY [ "docs/requirements.txt", "./docs/" ]
 
 # update /etc/dput.cf to use sftp for upload to ppa.launchpad.net

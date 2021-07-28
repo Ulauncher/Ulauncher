@@ -34,8 +34,8 @@ build-targz () {
         $tmpdir \
         --exclude-from=.gitignore
 
-    rm -rf $tmpdir/data/preferences/*
-    cp -r data/preferences/dist $tmpdir/data/preferences
+    # This is only needed because data/preferences is in .gitignore
+    cp -r data/preferences $tmpdir/data/preferences
 
     # set version to a tag name ($1)
     sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py

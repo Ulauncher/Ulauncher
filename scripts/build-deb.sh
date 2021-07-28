@@ -58,8 +58,9 @@ build-deb () {
         ulauncher.service \
         $tmpsrc \
         --exclude-from=.gitignore
-    rm -rf $tmpsrc/data/preferences/*
-    cp -r data/preferences/dist $tmpsrc/data/preferences
+
+    # This is only needed because data/preferences is in .gitignore
+    cp -r data/preferences $tmpdir/data/preferences
 
     cd $tmpsrc
     sed -i "s/%VERSION%/$version/g" setup.py

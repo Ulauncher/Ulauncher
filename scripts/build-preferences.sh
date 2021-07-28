@@ -5,12 +5,12 @@
 #############################################
 build-preferences () {
     set -e
-    if [[ "$1" == '--skip-if-built' ]] && [[ -d data/preferences/dist ]]; then
+    if [[ "$1" == '--skip-if-built' ]] && [[ -d data/preferences ]]; then
         success "Preferences are already built. Skipping."
         return
     fi
 
-    cd data/preferences
+    cd preferences-src
 
     set -x
     yarn install
