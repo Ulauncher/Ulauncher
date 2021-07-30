@@ -222,7 +222,7 @@ def main():
                 'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
             ]),
             ('share/icons/ubuntu-mono-dark/scalable/apps', [
-                'data/media/icons/ubuntu-mono-dark/ulauncher-indicator.svg'
+                'data/media/icons/hicolor/ulauncher-indicator.svg'
             ]),
             ('share/icons/ubuntu-mono-light/scalable/apps', [
                 'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
