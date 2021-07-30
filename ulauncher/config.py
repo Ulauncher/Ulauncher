@@ -92,7 +92,7 @@ def get_default_shortcuts():
         "name": "Google Search",
         "keyword": "g",
         "cmd": "https://google.com/search?q=%s",
-        "icon": get_data_file('media/google-search-icon.png'),
+        "icon": get_data_file('icons/google-search.png'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()
@@ -102,7 +102,7 @@ def get_default_shortcuts():
         "name": "Stack Overflow",
         "keyword": "so",
         "cmd": "https://stackoverflow.com/search?q=%s",
-        "icon": get_data_file('media/stackoverflow-icon.svg'),
+        "icon": get_data_file('icons/stackoverflow.svg'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()
@@ -112,7 +112,7 @@ def get_default_shortcuts():
         "name": "Wikipedia",
         "keyword": "wiki",
         "cmd": "https://en.wikipedia.org/wiki/%s",
-        "icon": get_data_file('media/wikipedia-icon.png'),
+        "icon": get_data_file('icons/wikipedia.png'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()

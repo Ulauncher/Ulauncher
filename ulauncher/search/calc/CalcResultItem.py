@@ -23,7 +23,7 @@ class CalcResultItem(ResultItem):
         return 'Enter to copy to the clipboard' if self.result else self.error
 
     def get_icon(self):
-        return load_image(get_data_file('media/calculator-icon.png'), self.get_icon_size())
+        return load_image(get_data_file('icons/calculator.png'), self.get_icon_size())
 
     def on_enter(self, query):
         if self.result is not None:

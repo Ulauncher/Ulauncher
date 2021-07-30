@@ -61,7 +61,7 @@ def get_app_icon_pixbuf(icon, icon_size, icon_name):
         pixbuf_icon = load_image(icon, icon_size)
 
     if not pixbuf_icon:
-        pixbuf_icon = load_image(get_data_file('media', 'executable-icon.png'), icon_size)
+        pixbuf_icon = load_image(get_data_file('icons', 'executable.png'), icon_size)
 
     return pixbuf_icon
 
