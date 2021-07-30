@@ -184,36 +184,36 @@ def main():
         url='https://ulauncher.io',
         data_files=DataFileList([
             ('share/icons/hicolor/48x48/apps', [
-                'data/media/icons/hicolor/ulauncher.svg'
+                'data/media/icons/default/ulauncher.svg'
             ]),
             ('share/icons/hicolor/48x48/apps', [
-                'data/media/icons/hicolor/ulauncher-indicator.svg'
+                'data/media/icons/default/ulauncher-indicator.svg'
             ]),
             ('share/icons/hicolor/scalable/apps', [
-                'data/media/icons/hicolor/ulauncher.svg'
+                'data/media/icons/default/ulauncher.svg'
             ]),
             ('share/icons/hicolor/scalable/apps', [
-                'data/media/icons/hicolor/ulauncher-indicator.svg'
+                'data/media/icons/default/ulauncher-indicator.svg'
             ]),
             # for fedora + GNOME
             ('share/icons/gnome/scalable/apps', [
-                'data/media/icons/hicolor/ulauncher.svg'
+                'data/media/icons/default/ulauncher.svg'
             ]),
             ('share/icons/gnome/scalable/apps', [
-                'data/media/icons/hicolor/ulauncher-indicator.svg'
+                'data/media/icons/default/ulauncher-indicator.svg'
             ]),
             # for ubuntu
             ('share/icons/breeze/apps/48', [
-                'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
+                'data/media/icons/dark/ulauncher-indicator.svg'
             ]),
             ('share/icons/ubuntu-mono-dark/scalable/apps', [
-                'data/media/icons/hicolor/ulauncher-indicator.svg'
+                'data/media/icons/default/ulauncher-indicator.svg'
             ]),
             ('share/icons/ubuntu-mono-light/scalable/apps', [
-                'data/media/icons/ubuntu-mono-light/ulauncher-indicator.svg'
+                'data/media/icons/dark/ulauncher-indicator.svg'
             ]),
             ('share/icons/elementary/scalable/apps', [
-                'data/media/icons/elementary/ulauncher-indicator.svg'
+                'data/media/icons/light/ulauncher-indicator.svg'
             ]),
             ('share/applications', [
                 'build/share/applications/ulauncher.desktop'
