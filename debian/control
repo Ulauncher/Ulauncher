@@ -5,7 +5,7 @@ Build-Depends: debhelper (>=9~),
  dh-python,
  python3-all,
  gobject-introspection,
- python3-distutils-extra (>=2.10)
+ python3-setuptools (>= 39.2)
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 4.1.4
 X-Python3-Version: >= 3.5

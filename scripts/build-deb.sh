@@ -5,8 +5,7 @@
 ######################
 build-deb () {
     # Args:
-    #   $1 version
-    #   $2 --deb | --upload
+    #   $1 --deb | --upload
     #
     # Env vars:
     #   PPA required for upload
@@ -16,14 +15,9 @@ build-deb () {
     set -e
 
     GPGKEY=${GPGKEY:-6BD735B0}
-    version=$1
+    version=$(./setup.py --version)
     # Debian prerelease separator is "~" instead of "-" (semver prerelease separator)
     deb_version=$(echo "$version" | tr "-" "~")
-
-    if [ -z "$version" ]; then
-        error "First argument should be a version"
-        exit 1
-    fi
 
     h2 "Building DEB package for Ulauncher $version..."
 
@@ -39,7 +33,7 @@ build-deb () {
     tmpsrc="$tmpdir/$name"
 
     info "Building Preferences UI"
-    ./ul build-preferences --skip-if-built
+    ./setup.py build_prefs
 
     info "Copying src to a temp dir"
     rm -rf $tmpdir/* || true
@@ -54,7 +48,7 @@ build-deb () {
         setup.cfg \
         setup.py \
         ulauncher \
-        ulauncher.desktop.in \
+        ulauncher.desktop \
         ulauncher.service \
         $tmpsrc \
         --exclude-from=.gitignore
@@ -63,15 +57,14 @@ build-deb () {
     cp -r data/preferences $tmpdir/data/preferences
 
     cd $tmpsrc
-    sed -i "s/%VERSION%/$version/g" setup.py
 
-    if [ "$2" = "--deb" ]; then
+    if [ "$1" = "--deb" ]; then
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
         sed -i "s/%RELEASE%/xenial/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
         success "ulauncher_${version}_all.deb saved to $tmpdir"
-    elif [ "$2" = "--upload" ]; then
+    elif [ "$1" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
             error "RELEASE env var is not supplied"
             exit 1

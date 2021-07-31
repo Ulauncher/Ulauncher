@@ -6,7 +6,7 @@ run-ci () {
     step1="ln -s /var/node_modules preferences-src" # take node modules from cache
     step2="cd docs && sphinx-apidoc -d 5 -o source ../ulauncher && make html && cd .."
     step3="./ul test"
-    step4="./ul build-preferences --skip-if-built"
+    step4="./setup.py build_prefs --verify 1"
 
     exec docker run \
         --rm \

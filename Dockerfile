@@ -25,7 +25,6 @@ RUN apt-get update && \
         gir1.2-notify-0.7 \
         python3-all \
         python3-gi \
-        python3-distutils-extra \
         python3-xdg \
         python3-dbus \
         python3-pyinotify \

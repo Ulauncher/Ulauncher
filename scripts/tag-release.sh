@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #############################
-# Helper script to tag a new release
+# Helper script to tag a new release with changelog and bump setup.cfg version
 #############################
 tag-release() {
     # Args:
@@ -27,6 +27,10 @@ tag-release() {
     # Let us edit the log
     $EDITOR /tmp/ulauncher-release-notes
     LOG=$(cat /tmp/ulauncher-release-notes)
+
+    # Bump the setup.cfg version
+    ./setup.py setopt --command metadata --option version --set-value $TAG
+    git commit setup.cfg -m "Release $TAG"
 
     # Creates the tag
     git tag -a $TAG -m "$LOG"

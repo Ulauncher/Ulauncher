@@ -1,6 +1,6 @@
 [Desktop Entry]
-_Name=Ulauncher
-_Comment=Application launcher for Linux
+Name=Ulauncher
+Comment=Application launcher for Linux
 GenericName=Launcher
 Categories=GNOME;GTK;Utility;
 TryExec=ulauncher

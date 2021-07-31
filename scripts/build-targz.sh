@@ -4,19 +4,16 @@
 # Builds tar.gz file with (un)install script and Ulauncher src
 ##############################################################
 build-targz () {
-    # Args:
-    # $1 - version
+    version=$(./setup.py --version)
+    name="ulauncher"
+    tmpdir="/tmp/$name"
 
     echo "###################################"
-    echo "# Building ulauncher-$1.tar.gz"
+    echo "# Building ulauncher-$version.tar.gz"
     echo "###################################"
 
     set -ex
-
-    ./ul build-preferences --skip-if-built
-
-    name="ulauncher"
-    tmpdir="/tmp/$name"
+    ./setup.py build_prefs
 
     rm -rf $tmpdir || true
     mkdir -p $tmpdir || true
@@ -29,7 +26,7 @@ build-targz () {
         setup.cfg \
         setup.py \
         ulauncher \
-        ulauncher.desktop.in \
+        ulauncher.desktop \
         ulauncher.service \
         $tmpdir \
         --exclude-from=.gitignore
@@ -37,13 +34,9 @@ build-targz () {
     # This is only needed because data/preferences is in .gitignore
     cp -r data/preferences $tmpdir/data/preferences
 
-    # set version to a tag name ($1)
-    sed -i "s/__version__ =.*/__version__ = '$1'/g" $tmpdir/ulauncher/config.py
-    sed -i "s/%VERSION%/$1/g" $tmpdir/setup.py
-
     filename=$name
-    if [ ! -z "$1" ]; then
-        filename="${name}_$1"
+    if [ ! -z "$version" ]; then
+        filename="${name}_$version"
     fi
 
     cd /tmp

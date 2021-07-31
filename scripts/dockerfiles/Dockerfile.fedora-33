@@ -11,5 +11,4 @@ RUN dnf install -y \
         python3-devel \
         rsync \
         intltool \
-        python3-distutils-extra \
         python3-setuptools

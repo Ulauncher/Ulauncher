@@ -1,233 +1,110 @@
 #!/usr/bin/env python3
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
-import os
-import re
+import subprocess
 import sys
+from pathlib import Path
+from setuptools import Command, find_packages, setup
+from setuptools.command.build_py import build_py
+from ulauncher import __version__
 
-try:
-    import DistUtilsExtra.auto
-except ImportError:
-    print('To build ulauncher you need "python3-distutils-extra"', file=sys.stderr)
-    sys.exit(1)
-
-assert DistUtilsExtra.auto.__version__ >= '2.18', \
-    'needs DistUtilsExtra.auto >= 2.18'
-
-
-def update_config(libdir, values={}):
-
-    filename = os.path.join(libdir, 'ulauncher/config.py')
-    oldvalues = {}
-    try:
-        fin = open(filename, 'r')
-        fout = open(filename + '.new', 'w')
-
-        for line in fin:
-            fields = line.split(' = ')  # Separate variable from value
-            if fields[0] in values:
-                oldvalues[fields[0]] = fields[1].strip()
-                line = "%s = %s\n" % (fields[0], values[fields[0]])
-            fout.write(line)
-
-        fout.flush()
-        fout.close()
-        fin.close()
-        os.rename(fout.name, fin.name)
-    except (OSError, IOError):
-        print("ERROR: Can't find %s" % filename)
-        sys.exit(1)
-
-    return oldvalues
+icons = {
+    "app": "data/icons/system/default/ulauncher.svg",
+    "indicator": "data/icons/system/default/ulauncher-indicator.svg",
+    "indicator-dark": "data/icons/system/dark/ulauncher-indicator.svg",
+    "indicator-light": "data/icons/system/light/ulauncher-indicator.svg"
+}
 
 
-def move_desktop_file(root, target_data, prefix):
-    # The desktop file is rightly installed into install_data.  But it should
-    # always really be installed into prefix, because while we can install
-    # normal data files anywhere we want, the desktop file needs to exist in
-    # the main system to be found.  Only actually useful for /opt installs.
-
-    old_desktop_path = os.path.normpath(root + target_data + '/share/applications')
-    old_desktop_file = old_desktop_path + '/ulauncher.desktop'
-    desktop_path = os.path.normpath(root + prefix + '/share/applications')
-    desktop_file = desktop_path + '/ulauncher.desktop'
-
-    if not os.path.exists(old_desktop_file):
-        print("ERROR: Can't find", old_desktop_file)
-        sys.exit(1)
-    elif os.path.normpath(target_data) != os.path.normpath(prefix):
-        # This is an /opt install, so rename desktop file to use extras-
-        desktop_file = desktop_path + '/extras-ulauncher.desktop'
-        try:
-            os.makedirs(desktop_path)
-            os.rename(old_desktop_file, desktop_file)
-            os.rmdir(old_desktop_path)
-        except OSError as e:
-            print("ERROR: Can't rename", old_desktop_file, ":", e)
-            sys.exit(1)
-
-    return desktop_file
+def data_files_from_path(target_path, source_path):
+    # Creates a list of valid entries for data_files weird custom format
+    # Recurses over the real_path and adds it's content to package_path
+    entries = []
+    for p in Path.cwd().glob(source_path + '/**/*'):
+        if p.is_file():
+            relative_file = p.relative_to(Path(source_path).absolute())
+            entries.append((
+                f'{target_path}/{relative_file.parent}',
+                [f'{source_path}/{relative_file}'])
+            )
+    return entries
 
 
-def update_desktop_file(filename, target_pkgdata, target_scripts):
-    try:
-        with open(filename, "r") as fin:
-            src = fin.read()
+class build_preferences(Command):
+    description = "Build Ulauncher preferences (Vue.js app)"
+    force = "0"
+    verify = "0"
+    user_options = [
+        ('force=', None, 'Rebuild even if source has no modifications since last build (default: 0)'),
+        ('verify=', None, 'run linting, unit tests and always build (default: 1)')
+    ]
 
-        dst = re.sub(
-            r"((Try)?Exec)=(.*?)(/[^ ]+/)?ulauncher(.*)",
-            r"\1=\3{}ulauncher\5".format(target_scripts),
-            src
-        )
+    def initialize_options(self):
+        pass
 
-        with open(filename, "w") as fout:
-            fout.write(dst)
-    except (OSError, IOError):
-        print("ERROR: Can't find %s" % filename)
-        sys.exit(1)
+    def finalize_options(self):
+        pass
 
-
-class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
     def run(self):
-        DistUtilsExtra.auto.install_auto.run(self)
+        src = Path("preferences-src")
+        dst = Path("data/preferences")
+        force = hasattr(self, "force") and self.force == "1"
+        verify = hasattr(self, "verify") and self.verify == "1"
 
-        # Root is undefined if not installing into an alternate root
-        root = self.root or "/"
-        target_data = '/' + os.path.relpath(self.install_data, root) + '/'
-        target_pkgdata = target_data + 'share/ulauncher/'
-        target_scripts = '/' + os.path.relpath(self.install_scripts,
-                                               root) + '/'
+        if not dst.is_dir() and not src.is_dir():
+            raise Exception("Preferences are missing.")
 
-        values = {'__ulauncher_data_directory__': "'%s'" % (target_pkgdata),
-                  '__version__': "'%s'" % self.distribution.get_version()}
-        update_config(self.install_lib, values)
-
-        desktop_file = move_desktop_file(root, target_data, self.prefix)
-        update_desktop_file(desktop_file, target_pkgdata, target_scripts)
-
-
-class DataFileList(list):
-
-    def append(self, item):
-        # don't add node_modules to data_files that DistUtilsExtra tries to
-        # add automatically
-        filename = item[1][0]
-        if 'node_modules' in filename \
-           or 'bower_components' in filename or '.tmp' in filename:
+        if not force and dst.is_dir() and not src.is_dir():
+            print("Using pre-built Preferences.")
             return
-        else:
-            return super().append(item)
+
+        sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob('preferences-src/**/*')))
+
+        if verify:
+            subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn lint; yarn unit"], check=True)
+
+        if not force and dst.is_dir() and dst.stat().st_mtime > sourceModified:
+            print("Detected no changes to Preferences since last build.")
+            return
+
+        subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn build"], check=True)
 
 
-def exclude_files(patterns=[]):
-    """
-    Suppress completely useless warning about files DistUtilsExta.aut does
-    recognize because require developer to scroll past them to get to useful
-    output.
-
-    Example of the useless warnings:
-
-    WARNING: the following files are not recognized by DistUtilsExtra.auto:
-    Dockerfile.build
-    Dockerfile.build-arch
-    Dockerfile.build-rpm
-    PKGBUILD.template
-    scripts/aur-update.py
-    """
-
-    # it's maddening the DistUtilsExtra does not offer a way to exclude globs
-    # from it's scans and just using "print" to print the warning instead of
-    # using warning module which has a mechanism for suppressions
-    # it forces us to take the approach of monkeypatching their src_find
-    # function.
-    original_src_find = DistUtilsExtra.auto.src_find
-
-    def src_find_with_excludes(attrs):
-        src = original_src_find(attrs)
-
-        for pattern in patterns:
-            DistUtilsExtra.auto.src_markglob(src, pattern)
-
-        return src
-
-    DistUtilsExtra.auto.src_find = src_find_with_excludes
-
-    return original_src_find
+class build_wrapper(build_py):
+    def run(self):
+        # Build Preferences before python package build
+        build_preferences.run(self)
+        build_py.run(self)
+        print("Overwriting the namespace package with fixed values")
+        Path(self.build_lib + "/ulauncher/__init__.py").write_text("\n".join([
+            "__data_directory__ = '%s/share/ulauncher'" % sys.prefix,
+            "__version__ = '%s'" % __version__,
+            "__is_dev__ = False"
+        ]))
 
 
-def main():
-
-    # exclude files/folder patterns from being considered by distutils-extra
-    # this returns the original DistUtilsExtra.auto.src_find function
-    # so we can patch bit back in later
-    original_find_src = exclude_files([
-        "*.sh",
-        "ul",
-        "Dockerfile.build*",
-        "PKGBUILD.template",
-        "scripts/*",
-        "docs/*",
-        "glade",
-        "test",
-        "ulauncher.desktop.dev",
-        "requirements.txt",
-        "conftest.py"
-    ])
-
-    DistUtilsExtra.auto.setup(
-        name='ulauncher',
-        version='%VERSION%',
-        license='GPL-3',
-        author='Aleksandr Gornostal',
-        author_email='ulauncher.app@gmail.com',
-        description='Application launcher for Linux',
-        url='https://ulauncher.io',
-        data_files=DataFileList([
-            ('share/icons/hicolor/48x48/apps', [
-                'data/icons/system/default/ulauncher.svg'
-            ]),
-            ('share/icons/hicolor/48x48/apps', [
-                'data/icons/system/default/ulauncher-indicator.svg'
-            ]),
-            ('share/icons/hicolor/scalable/apps', [
-                'data/icons/system/default/ulauncher.svg'
-            ]),
-            ('share/icons/hicolor/scalable/apps', [
-                'data/icons/system/default/ulauncher-indicator.svg'
-            ]),
-            # for fedora + GNOME
-            ('share/icons/gnome/scalable/apps', [
-                'data/icons/system/default/ulauncher.svg'
-            ]),
-            ('share/icons/gnome/scalable/apps', [
-                'data/icons/system/default/ulauncher-indicator.svg'
-            ]),
-            # for ubuntu
-            ('share/icons/breeze/apps/48', [
-                'data/icons/system/dark/ulauncher-indicator.svg'
-            ]),
-            ('share/icons/ubuntu-mono-dark/scalable/apps', [
-                'data/icons/system/default/ulauncher-indicator.svg'
-            ]),
-            ('share/icons/ubuntu-mono-light/scalable/apps', [
-                'data/icons/system/dark/ulauncher-indicator.svg'
-            ]),
-            ('share/icons/elementary/scalable/apps', [
-                'data/icons/system/light/ulauncher-indicator.svg'
-            ]),
-            ('share/applications', [
-                'build/share/applications/ulauncher.desktop'
-            ]),
-            ('lib/systemd/user', [
-                'ulauncher.service'
-            ])
-        ]),
-        cmdclass={'install': InstallAndUpdateDataDirectory}
-    )
-
-    # unpatch distutils-extra src_find
-    DistUtilsExtra.auto.src_find = original_find_src
-
-
-if __name__ == '__main__':
-    main()
+setup(
+    packages=find_packages(exclude=["tests", "conftest.py"]),
+    # These will be placed in /usr
+    data_files=[
+        ("share/applications", ["ulauncher.desktop"]),
+        ("lib/systemd/user", ["ulauncher.service"]),
+        ("share/doc/ulauncher", ["README.md"]),
+        ("share/licenses/ulauncher", ["LICENSE"]),
+        # Install icons in themes, so different icons can be used for different depending on theme
+        # It's only needed for the app indicator icon
+        ("share/icons/hicolor/48x48/apps", [icons["app"], icons["indicator"]]),
+        ("share/icons/hicolor/scalable/apps", [icons["app"], icons["indicator"]]),
+        # for Fedora + GNOME
+        ("share/icons/gnome/scalable/apps", [icons["app"], icons["indicator"]]),
+        # for Elementary
+        ("share/icons/elementary/scalable/apps", [icons["indicator-light"]]),
+        # for Ubuntu
+        ("share/icons/breeze/apps/48", [icons["indicator-dark"]]),
+        ("share/icons/ubuntu-mono-dark/scalable/apps", [icons["indicator"]]),
+        ("share/icons/ubuntu-mono-light/scalable/apps", [icons["indicator-dark"]]),
+        # Recursively add data as share/ulauncher
+        *data_files_from_path("share/ulauncher", "data"),
+    ],
+    cmdclass={'build_py': build_wrapper, 'build_prefs': build_preferences}
+)

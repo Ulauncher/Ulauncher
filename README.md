@@ -49,8 +49,8 @@ Contributions are appreciated, but before you put a the work in please ensure th
 
 You need the the following:
 
-* [Docker](https://docs.docker.com/engine/installation/)
-* python3-distutils-extra (may just be named python-distutils-extra in some distros)
+* [Yarn](https://classic.yarnpkg.com/en/docs/install)
+* python3-setuptools (if you have pip, you have it already)
 * Application runtime dependencies (if you already installed Ulauncher you should have these)
 
 #### Distro specific instructions
@@ -58,20 +58,13 @@ You need the the following:
 <details>
   <summary>Ubuntu/Debian</summary>
 
-  Install the dependencies (note that Docker recommends to use their installation instructions instead to get the latest version)
+  Install the dependencies
 
   ```
   sudo apt-get update && sudo apt-get install \
-    docker.io gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
+    yarnpkg gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
     gir1.2-{gtk-3.0,keybinder-3.0,webkit2-4.0,glib-2.0,gdkpixbuf-2.0,notify-0.7,ayatanaappindicator3-0.1} \
-    python3-{all,gi,distutils-extra,xdg,dbus,pyinotify,levenshtein,websocket}
-  ```
-  
-  Enable docker and set permissions
-  
-  ```
-  sudo systemctl enable --now docker
-  sudo usermod -aG docker $USER
+    python3-{setuptools,all,gi,xdg,dbus,pyinotify,levenshtein,websocket}
   ```
 
 </details>
@@ -79,18 +72,16 @@ You need the the following:
 ### How to build, run and contribute
 1. Fork the repo and clone your fork locally.
 1. Create a new branch for your PR
-1. Run `$ ./ul dev-container` to take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
-1. Build the preferences UI from inside the docker container: `root@container: # ./ul build-preferences`
 1. Make your changes to the code
-1. Run the app `$ ./ul run`
-1. Write unit tests and check if all tests pass using `root@container: # ./ul test` command (preferably from inside the container)
+1. If you have Ulauncher installed, make sure you stop the background process (`systemctl --user stop ulauncher.service`)
+1. `./bin/ulauncher -v` runs the app from the git root directory (`-v` turns on verbose logging), so you can test it.
 1. Create a pull request (provide the relevant information suggested by the template)
 
 For GTK-related issues you may want to check out [Useful Resources for a Python GTK Developer](https://github.com/Ulauncher/Ulauncher/wiki/Resources-for-a-Python-GTK-Developer).
 
 If you have any questions, feel free to ask in a Github issue.
 
-`./ul` lists more commands (note that many of them are only useful to the maintainers).
+There are more developer and maintainer commands provided by the `ul` wrapper. `./ul` lists all of these (note that most of them are only useful to the maintainers and/or requires docker/podman).
 
 
 ### License

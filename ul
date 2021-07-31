@@ -12,7 +12,6 @@
 . scripts/build-targz.sh
 . scripts/create-build-images.sh
 . scripts/build-doc.sh
-. scripts/build-preferences.sh
 . scripts/tag-release.sh
 . scripts/build-release.sh
 . scripts/send-signal.sh
@@ -42,7 +41,6 @@ main () {
     aur-update) ./scripts/aur-update.py $2 ;;
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
-    build-preferences) build-preferences $2 ;;
     tag-release) tag-release $2 ;;
     build-release) build-release $2 ;;
     travis-cli-container) travis-cli-container ;;

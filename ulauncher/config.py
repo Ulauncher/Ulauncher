@@ -3,18 +3,13 @@
 # files). By default, this is ../data, relative your trunk layout
 # pylint: disable=deprecated-module
 import optparse
-
-__ulauncher_data_directory__ = '../data/'
-__license__ = 'GPL-3'
-__version__ = 'VERSION'
-
 import os
 from uuid import uuid4
 from time import time
 from functools import lru_cache
-
 from gettext import gettext
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs, xdg_data_home
+from ulauncher import __version__, __data_directory__
 
 
 DATA_DIR = os.path.join(xdg_data_home, 'ulauncher')
@@ -51,21 +46,16 @@ def get_data_path():
     is specified at installation time.
     """
 
-    # Get pathname absolute or relative.
-    path = os.path.join(
-        os.path.dirname(__file__), __ulauncher_data_directory__)
+    if not os.path.exists(__data_directory__):
+        raise ProjectPathNotFoundError(__data_directory__)
 
-    abs_data_path = os.path.abspath(path)
-    if not os.path.exists(abs_data_path):
-        raise ProjectPathNotFoundError(abs_data_path)
-
-    return abs_data_path
+    return __data_directory__
 
 
 @lru_cache()
 def get_options():
     """Support for command line options"""
-    parser = optparse.OptionParser(version="%%prog %s" % get_version())
+    parser = optparse.OptionParser(version="%%prog %s" % __version__)
     parser.add_option(
         "-v", "--verbose", action="count", dest="verbose",
         help=gettext("Show debug messages"))
