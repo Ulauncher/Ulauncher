@@ -13,6 +13,9 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "lint-autofix": "eslint --ext .js,.vue src test --fix"
   },
+  "resolutions": {
+    "shelljs": "0.8.4"
+  },
   "dependencies": {
     "bootstrap-vue": "^2.0.0",
     "vue": "^2.6.10",
@@ -71,7 +74,6 @@
     "prettier": "^1.15.3",
     "rimraf": "^2.6.0",
     "semver": "^5.3.0",
-    "shelljs": "^0.7.6",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.8.0",
     "style-loader": "^0.17.0",
