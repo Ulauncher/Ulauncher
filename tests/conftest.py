@@ -15,9 +15,9 @@ def pytest_runtest_setup(item):
             pytest.skip("Cannot run without a display enabled.")
 
 
-class DictHasValus(dict):
+class DictHasValues(dict):
     """
-    DictHasValus({('foo', 'bar'): 'hello'}) == {'foo': {'bar': 'hello'}}
+    DictHasValues({('foo', 'bar'): 'hello'}) == {'foo': {'bar': 'hello'}}
     """
 
     def __eq__(self, other):
@@ -32,15 +32,15 @@ class DictHasValus(dict):
         return reduce(lambda d, key: d[key], keys, other)
 
 
-setattr(pytest, 'DictHasValus', DictHasValus)
+setattr(pytest, 'DictHasValues', DictHasValues)
 
 
 def test_DictWithValues():
 
-    assert DictHasValus({'test': 'hello'}) == {'test': 'hello', 'other': False}
-    assert DictHasValus({('test',): 'hello'}) == {'test': 'hello'}
-    assert DictHasValus({('foo', 'bar'): 'hello'}) == {'foo': {'bar': 'hello', 1: 2}}
-    assert DictHasValus({(1, 'bar'): 'hello'}) == {1: {'bar': 'hello'}}
+    assert DictHasValues({'test': 'hello'}) == {'test': 'hello', 'other': False}
+    assert DictHasValues({('test',): 'hello'}) == {'test': 'hello'}
+    assert DictHasValues({('foo', 'bar'): 'hello'}) == {'foo': {'bar': 'hello', 1: 2}}
+    assert DictHasValues({(1, 'bar'): 'hello'}) == {1: {'bar': 'hello'}}
 
-    assert DictHasValus({'test': 'hello'}) != {'test': 'wrong val', 'other': False}
-    assert DictHasValus({('foo', 'bar'): 'hello'}) != {'foo': None}
+    assert DictHasValues({'test': 'hello'}) != {'test': 'wrong val', 'other': False}
+    assert DictHasValues({('foo', 'bar'): 'hello'}) != {'foo': None}
