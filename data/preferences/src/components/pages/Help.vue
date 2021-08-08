@@ -52,9 +52,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-$mainGrey: #e0e0e0;
-$steelBlue: #4675ab;
+<style lang="css" scoped>
+:root {
+  --main-grey: #e0e0e0;
+  --steel-blue: #4675ab;
+}
 
 .help-page {
   box-sizing: border-box;
@@ -64,8 +66,9 @@ $steelBlue: #4675ab;
 
 .item {
   cursor: pointer;
+}
 
-  .outer-circle {
+.item .outer-circle {
     display: block;
     width: 94px;
     height: 94px;
@@ -73,9 +76,9 @@ $steelBlue: #4675ab;
     border-radius: 50%;
     text-align: center;
     margin: 0 auto;
-  }
+}
 
-  .inner-circle {
+.item .inner-circle {
     margin-top: 7px;
     display: inline-block;
     width: 80px;
@@ -85,41 +88,36 @@ $steelBlue: #4675ab;
     text-align: center;
     background: #fff;
     color: $mainGrey;
+}
 
-    .fa-icon {
+.item .inner-circle .fa-icon {
       margin-top: 10px;
       color: $mainGrey;
       font-size: 54px;
-    }
-  }
+}
 
-  .label {
+.item .label {
     text-transform: uppercase;
     padding: 20px 0 12px 0;
     font-size: 0.9em;
     text-align: center;
     cursor: pointer;
-  }
+}
 
-  .text {
+.item .text {
     color: #a7a7a7;
     text-align: center;
     font-size: 0.9em;
     visibility: hidden;
-  }
+}
 
-  &:hover {
-    .outer-circle {
-      background: $steelBlue;
-      .inner-circle {
-        .fa-icon {
-          color: $steelBlue;
-        }
-      }
-    }
-    .text {
-      visibility: visible;
-    }
-  }
+.item:hover .outer-circle {
+  background: var(--steel-blue);
+}
+.item:hover .outer-circle .inner-circle .fa-icon {
+  color: var(--steel-blue);
+}
+.item:hover .text {
+  visibility: visible;
 }
 </style>

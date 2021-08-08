@@ -66,7 +66,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 ul, li {
   margin: 0;
   padding: 0;
@@ -79,13 +79,12 @@ li {
   margin-bottom: 5px;
   position: relative;
   padding-right: 20px;
-
-  i {
+}
+li i {
     position: absolute;
     top: 4px;
     right: 0;
     cursor: pointer;
-  }
 }
 .delete {
   color: #888;

@@ -329,7 +329,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 /* use tables to support WebKit on Ubuntu 14.04 */
 table {
   width: 100%;
@@ -357,14 +357,13 @@ tr:last-child td {
 }
 label {
   cursor: pointer;
-
-  & + small {
+}
+label + small {
     position: relative;
     top: -5px;
     line-height: 1.3em;
     display: block;
     color: #888;
-  }
 }
 #hotkey-show-app {
   cursor: pointer;

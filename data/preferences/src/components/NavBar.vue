@@ -28,11 +28,13 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-$headerHeight: 60px;
-$underlineHeight: 4px;
-$darkBlue: #006890;
-$veryLightGrey: #c8c8c8;
+<style lang="css" scoped>
+:root {
+  --header-height: 60px;
+  --underline-height: 4px;
+  --dark-blue: #006890;
+  --very-light-grey: #c8c8c8;
+}
 
 .stripe {
   background: #4B71A5 url('../assets/stripe.png') no-repeat;
@@ -41,15 +43,16 @@ $veryLightGrey: #c8c8c8;
 
 .main-header {
   box-sizing: border-box;
-  height: $headerHeight;
+  height: var(--header-height);
   padding: 0 15px 0 25px;
-  border-bottom: 1px solid $veryLightGrey;
+  border-bottom: 1px solid var(--very-light-grey);
   background: #e4e4e4;
   font-size: 0.95em;
   letter-spacing: 0.04px;
   position: relative;
+}
 
-  .close-btn {
+.main-header .close-btn {
     position: absolute;
     top: 11px;
     right: 14px;
@@ -59,7 +62,6 @@ $veryLightGrey: #c8c8c8;
     background: url('../assets/close-sign.png') no-repeat;
     background-size: 38px 38px;
     opacity: 0.35;
-  }
 }
 
 ul, li {
@@ -83,26 +85,26 @@ a {
   color: #6b6b6b;
   text-transform: uppercase;
   margin-right: 15px;
+}
 
-  &:hover {
+a:hover {
     color: #4675ab;
     text-decoration: none !important;
-  }
+}
 
-  &.router-link-exact-active {
-    color: $darkBlue;
+a.router-link-exact-active {
+    color: var(--dark-blue);
+}
 
-    &:after {
+a.router-link-exact-active:after {
       content: '';
       position: absolute;
-      top: $headerHeight - $underlineHeight;
+      top: calc(var(--header-height) - var(--underline-height));
       left: 0;
       display: inline-block;
-      height: $underlineHeight;
+      height: var(--underline-height);
       width: 100%;
-      background: $darkBlue;
-    }
-  }
+      background: var(--dark-blue);
 }
 
 i {

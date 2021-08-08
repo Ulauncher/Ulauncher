@@ -90,40 +90,40 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 .about-container {
   padding: 33px;
   padding-top: 80px;
   padding-bottom: 0;
   text-align: center;
+}
 
-  .logo-label {
+.about-container .logo-label {
     margin: 20px 0 5px 0;
     font-size: 20px;
     color: #507caf;
-  }
+}
 
-  .api-version {
+.about-container .api-version {
     font-size: 15px;
     color: #888;
     text-shadow: 1px 1px 1px #fff;
-  }
+}
 
-  .text-container {
+.about-container .text-container {
     padding: 30px 35px 30px 35px;
     border: 1px solid #7ec183;
     border-radius: 8px;
     font-size: 0.95em;
     color: #858585;
-  }
+}
 
-  .credits-text {
+.about-container .credits-text {
     text-align: left;
-  }
+}
 
-  .logo svg {
+.about-container .logo svg {
     width: 190px;
     height: 190px;
-  }
 }
 </style>

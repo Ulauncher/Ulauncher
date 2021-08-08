@@ -84,7 +84,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 .page { padding: 15px; }
 button { cursor: pointer }
 .empty-text { text-align: center }
@@ -94,16 +94,15 @@ button { cursor: pointer }
   font-style: italic;
   display: inline-block;
   padding-left: 8px;
-
-  i {
+}
+.add-link i {
     margin-right: 5px;
     display: inline-block;
-  }
+}
 
-  &:hover {
+.add-link:hover {
     color: #015aa7;
     text-decoration: underline;
-  }
 }
 .limited-width {
   white-space: nowrap;
@@ -114,26 +113,25 @@ button { cursor: pointer }
 }
 .cmd {
   position: relative;
-
-  .text-wrapper {
+}
+.cmd .text-wrapper {
     display: table;
     table-layout: fixed;
     width:100%;
+}
 
-    .text {
+.cmd .text-wrapper .text {
       display: table-cell;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-    }
-  }
+}
 
-  .actions {
+.cmd .actions {
     position: absolute;
     display: none;
     top: -4px;
     right: 0;
-  }
 }
 tr:hover .actions {
   display: block;
