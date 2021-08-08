@@ -4,6 +4,9 @@ from collections import OrderedDict
 from itertools import chain
 from typing import Generator, List
 
+import gi
+gi.require_version('Gio', '2.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gio
 
 from ulauncher.utils.file_finder import find_files

@@ -2,6 +2,7 @@ from functools import wraps
 import logging
 
 import gi
+gi.require_version('Gtk', '3.0')
 
 # AppIndicator support is optional. It'll work if you install
 # gir1.2-ayatanaappindicator3-0.1 or an equivalent package for your distro

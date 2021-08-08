@@ -1,5 +1,8 @@
 import os
 from typing import List, Union
+import gi
+gi.require_version('Gdk', '3.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gdk
 
 from ulauncher.api.shared.action.BaseAction import BaseAction

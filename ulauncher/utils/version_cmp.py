@@ -1,4 +1,7 @@
 from distutils.version import StrictVersion
+import gi
+gi.require_version('Gtk', '3.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gtk
 
 
