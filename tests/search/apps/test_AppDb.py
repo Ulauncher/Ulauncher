@@ -1,4 +1,4 @@
-from collections import Iterable
+from collections.abc import Iterable
 import pytest
 import mock
 from ulauncher.search.apps.AppDb import AppDb, search_name
