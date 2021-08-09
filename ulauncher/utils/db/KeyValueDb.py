@@ -2,8 +2,6 @@ import os
 import pickle
 from typing import Dict, TypeVar, Generic, Optional
 
-from distutils.dir_util import mkpath
-
 Key = TypeVar('Key')
 Value = TypeVar('Value')
 Records = Dict[Key, Value]
@@ -39,7 +37,7 @@ class KeyValueDb(Generic[Key, Value]):
                 self.set_records(pickle.load(_in))
         else:
             # make sure path exists
-            mkpath(os.path.dirname(self._name))
+            os.makedirs(os.path.dirname(self._name), exist_ok=True)
             self.commit()
 
         return self

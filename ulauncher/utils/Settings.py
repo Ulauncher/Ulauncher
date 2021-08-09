@@ -1,6 +1,5 @@
 import os
 import json
-from distutils.dir_util import mkpath
 import gi
 gi.require_version('GObject', '2.0')
 # pylint: disable=wrong-import-position
@@ -112,7 +111,7 @@ class Settings(GObject.GObject):
             with open(filename, 'r') as f:
                 self._properties = json.load(f)
         else:
-            mkpath(os.path.dirname(filename))
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             self.save_to_file()
 
     def save_to_file(self):
