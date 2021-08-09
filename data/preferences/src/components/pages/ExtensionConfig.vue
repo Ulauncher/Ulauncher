@@ -336,43 +336,43 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 .header-info {
   display: flex;
   margin-bottom: 15px;
+}
 
-  .logo {
+.header-info .logo {
     flex: 0 0 70px;
+}
 
-    img {
+.header-info .logo img {
       width: 55px;
-    }
-  }
+}
 
-  .ext-info {
+.header-info .ext-info {
     flex: 1 0 0;
+}
 
-    .ext-name {
+.header-info .ext-info .ext-name {
       font-size: 1.3em;
-    }
-    .developer-name {
+}
+.header-info .ext-info .developer-name {
       font-style: italic;
       opacity: 0.8;
-    }
-  }
+}
 
-  .saved-notif {
+.header-info .saved-notif {
     flex: 0 0 20px;
     font-size: 20px;
     position: relative;
     right: 0;
     top: 10px;
     opacity: 0.9;
-  }
+}
 
-  .menu {
+.header-info .menu {
     flex: 0 0 0;
-  }
 }
 .menu-button {
   white-space: nowrap !important;
@@ -382,23 +382,20 @@ export default {
 }
 .ext-form {
   padding-top: 15px;
-
-  .row {
+}
+.ext-form .row {
     display: block;
-  }
 }
 .error-wrapper {
   margin-top: 20px;
 }
-.ext-config {
-  h1 {
+.ext-config h1 {
     font-size: 1.3em;
-  }
-  small {
+}
+.ext-config small {
     font-style: italic;
-  }
-  button {
+}
+.ext-config button {
     margin-right: 10px;
-  }
 }
 </style>

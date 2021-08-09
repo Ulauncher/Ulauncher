@@ -16,7 +16,7 @@ operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
-    4
+    64
     >>> eval_expr('2**6')
     64
     >>> eval_expr('2*6+')
@@ -24,6 +24,7 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
+    expr = expr.replace("^", "**")
     try:
         return _eval(ast.parse(expr, mode='eval').body)
     # pylint: disable=broad-except

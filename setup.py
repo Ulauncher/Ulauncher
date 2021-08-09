@@ -132,7 +132,7 @@ class DataFileList(list):
            or 'bower_components' in filename or '.tmp' in filename:
             return
         else:
-            return super(DataFileList, self).append(item)
+            return super().append(item)
 
 
 def exclude_files(patterns=[]):

@@ -85,6 +85,11 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_showhotkey_dialog.original(dialog, {'query': {'name': 'hotkey-name'}})
         hotkey_dialog.present.assert_called_with()
 
+    def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
+        dialog.prefs_set_grab_mouse_pointer({'query': {'value': 'true'}})
+        settings.set_property.assert_called_with('grab-mouse-pointer', True)
+        settings.save_to_file.assert_called_with()
+
     @pytest.mark.with_display
     def test_get_app_hotkey(self, dialog, settings):
         settings.get_property.return_value = '<Primary>B'

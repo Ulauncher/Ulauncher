@@ -7,7 +7,7 @@ help () {
     ${dim}Installs Ulauncher data (icons, static files for preferences, etc.) to '~/.local/share/ulauncher/'${normal}
 
   ${bold}./ul cleanup-dev-evn
-    ${dim}Removes files installed by './ul init-dev-env'. Also removes chache files, but not configs${normal}
+    ${dim}Removes files installed by './ul init-dev-env'. Also removes cache files, but not configs${normal}
 
   ${bold}./ul run
     ${dim}Alias for './bin/ulauncher -v --dev'
@@ -19,7 +19,7 @@ help () {
 
     IMAGE_NAME is an optional argument.
     If not set, an image based on ubuntu image will be used.
-    Other possible options: ${normal}${bold}fedora28, fedora29, arch${normal}
+    Other possible options: ${normal}${bold}fedora, fedora33, arch${normal}
 
   ${bold}./ul rm-python-cache
     ${dim}Removes .pyc, .pyo, __pycache__${normal}

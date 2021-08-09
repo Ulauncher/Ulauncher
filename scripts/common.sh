@@ -15,8 +15,8 @@ cyan=$'\e[96m'
 white=$'\e[97m'
 
 BUILD_IMAGE=ulauncher/build-image:5.0
-FEDORA_BUILD_IMAGE=ulauncher/fedora:5.0-31
-FEDORA_32_BUILD_IMAGE=ulauncher/fedora:5.0-32
+FEDORA_BUILD_IMAGE=ulauncher/fedora:5.0-32
+FEDORA_33_BUILD_IMAGE=ulauncher/fedora:5.0-33
 ARCH_BUILD_IMAGE=ulauncher/arch:5.0
 
 underline() {
@@ -51,7 +51,7 @@ note() {
 }
 
 warn-if-not-in-docker () {
-    if [ ! -f /.dockerenv ]; then
+    if [ ! -f /.dockerenv -a ! -f /run/.containerenv ]; then
         echo
         echo "${yellow}WARNING: It's recommended to run tests in a docker container to be sure they will also pass in CI${normal}"
         echo
@@ -59,7 +59,7 @@ warn-if-not-in-docker () {
 }
 
 fix-version-format () {
-    # By Debian convension we must use tilde before "beta", but git tag cannot contain that character
+    # By Debian convention we must use tilde before "beta", but git tag cannot contain that character
     # So when tag for beta release is created, I have to write 1.2.3-beta4, which then should be converted
     # to 1.2.3~beta4
     echo "$1" | sed 's/-beta/~beta/'

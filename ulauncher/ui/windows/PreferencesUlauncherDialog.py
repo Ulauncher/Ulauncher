@@ -7,6 +7,9 @@ from typing import List, Optional, cast
 import traceback
 
 import gi
+gi.require_version('Gio', '2.0')
+gi.require_version('GLib', '2.0')
+gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
@@ -151,11 +154,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     # pylint: disable=arguments-differ
     def present(self, page):
         self._load_prefs_html(page)
-        super(PreferencesUlauncherDialog, self).present()
+        super().present()
 
     def show(self, page):
         self._load_prefs_html(page)
-        super(PreferencesUlauncherDialog, self).show()
+        super().show()
 
     ######################################
     # GTK event handlers
@@ -246,6 +249,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'render_on_screen': self.settings.get_property('render-on-screen'),
             'is_wayland': is_wayland(),
             'terminal_command': self.settings.get_property('terminal-command'),
+            'grab_mouse_pointer': self.settings.get_property('grab-mouse-pointer'),
             'env': {
                 'version': get_version(),
                 'api_version': api_version,
@@ -272,13 +276,16 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             self.autostart_pref.switch(is_on)
         except Exception as e:
-            raise PrefsApiError('Caught an error while switching "autostart": %s' % e)
+            raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
 
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set show-recent-apps to %s', is_on)
-        self.settings.set_property('show-recent-apps', is_on)
+        try:
+            recent_apps_number = int(url_params['query']['value'])
+        except ValueError:
+            recent_apps_number = 3
+        logger.info('Set show-recent-apps to %s', recent_apps_number)
+        self.settings.set_property('show-recent-apps', recent_apps_number)
         self.settings.save_to_file()
 
     @rt.route('/set/hotkey-show-app')
@@ -326,6 +333,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         is_on = self._get_bool(url_params['query']['value'])
         logger.info('Set clear-previous-query to %s', is_on)
         self.settings.set_property('clear-previous-query', is_on)
+        self.settings.save_to_file()
+
+    @rt.route('/set/grab-mouse-pointer')
+    def prefs_set_grab_mouse_pointer(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set grab-mouse-pointer to %s', is_on)
+        self.settings.set_property('grab-mouse-pointer', is_on)
         self.settings.save_to_file()
 
     @rt.route('/set/blacklisted-desktop-dirs')

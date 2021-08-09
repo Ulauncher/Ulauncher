@@ -16,8 +16,12 @@ class KeyValueJsonDb(KeyValueDb[Key, Value]):
             if not os.path.isfile(self._name):
                 raise IOError("%s exists and is not a file" % self._name)
 
-            with open(self._name, 'r') as _in:
-                self.set_records(json.load(_in))
+            try:
+                with open(self._name, 'r') as _in:
+                    self.set_records(json.load(_in))
+            except json.JSONDecodeError:
+                # file corrupted, reset it.
+                self.commit()
         else:
             # make sure path exists
             os.makedirs(os.path.dirname(self._name), exist_ok=True)

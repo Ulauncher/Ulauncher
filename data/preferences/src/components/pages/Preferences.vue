@@ -59,19 +59,10 @@
 
       <tr>
         <td>
-          <label for="show-indicator-icon">Show Indicator Icon</label>
+          <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <label for="show-recent-apps">Show Frequent Apps</label>
-        </td>
-        <td>
-          <b-form-checkbox id="show-recent-apps" v-model="show_recent_apps"></b-form-checkbox>
+          <b-form-input style="width:250px" id="show-recent-apps" v-model="show_recent_apps"></b-form-input>
         </td>
       </tr>
 
@@ -97,6 +88,15 @@
           ></b-form-select>
         </td>
       </tr>
+
+      <tr>
+        <td>
+          <label for="grab_mouse_pointer">Don't hide after losing mouse focus</label>
+        </td>
+        <td>
+          <b-form-checkbox id="grab_mouse_pointer" v-model="grab_mouse_pointer"></b-form-checkbox>
+        </td>
+      </tr>
     </table>
 
     <h1>Advanced</h1>
@@ -104,17 +104,28 @@
     <table>
       <tr>
         <td>
-          <label for="terminal-exec">Terminal Command</label>
+          <label for="show-indicator-icon">Show Indicator Icon</label>
           <small>
-            <p>Overrides terminal for apps that are configured to be run from a terminal.
-              Set to an empty value for default terminal</p>
+            <p>It's supported only if gir1.2-ayatanaappindicator3-0.1 or an equivalent is installed</p>
           </small>
         </td>
         <td>
-          <b-form-input
-            style="width:250px"
-            id="terminal-exec"
-            v-model="terminal_command"></b-form-input>
+          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <label for="terminal-exec">Terminal Command</label>
+          <small>
+            <p>
+              Overrides terminal for apps that are configured to be run from a terminal.
+              Set to an empty value for default terminal
+            </p>
+          </small>
+        </td>
+        <td>
+          <b-form-input style="width:250px" id="terminal-exec" v-model="terminal_command"></b-form-input>
         </td>
       </tr>
       <tr>
@@ -205,6 +216,11 @@ export default {
 
     show_recent_apps: {
       get() {
+        if (this.prefs.show_recent_apps === true) {
+          return '3'
+        } else if (this.prefs.show_recent_apps === false) {
+          return '0'
+        }
         return this.prefs.show_recent_apps
       },
       set(value) {
@@ -246,6 +262,18 @@ export default {
       set(value) {
         return jsonp('prefs://set/clear-previous-query', { value: value }).then(
           () => this.setPrefs({ clear_previous_query: value }),
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    grab_mouse_pointer: {
+      get() {
+        return this.prefs.grab_mouse_pointer
+      },
+      set(value) {
+        return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
+          () => this.setPrefs({ grab_mouse_pointer: value }),
           err => bus.$emit('error', err)
         )
       }
@@ -301,7 +329,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 /* use tables to support WebKit on Ubuntu 14.04 */
 table {
   width: 100%;
@@ -329,14 +357,13 @@ tr:last-child td {
 }
 label {
   cursor: pointer;
-
-  & + small {
+}
+label + small {
     position: relative;
     top: -5px;
     line-height: 1.3em;
     display: block;
     color: #888;
-  }
 }
 #hotkey-show-app {
   cursor: pointer;

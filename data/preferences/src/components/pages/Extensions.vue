@@ -234,9 +234,10 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-$darkBlue: #015aa7;
-$veryLightGrey: #c8c8c8;
+<style lang="css" scoped>
+:root {
+  --dark-blue: #015aa7;
+}
 
 .page {
   padding: 20px 15px 15px 25px;
@@ -261,14 +262,14 @@ $veryLightGrey: #c8c8c8;
   margin-top: 20px;
 }
 .ext-list {
-  $listIconSize: 17px;
+  --list-icon-size: 17px;
 
   list-style: none;
   padding: 0;
   margin: 0;
   margin-bottom: 10px;
-
-  li {
+}
+.ext-list li {
     cursor: pointer;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -278,44 +279,45 @@ $veryLightGrey: #c8c8c8;
     padding: 3px 0;
     margin: 3px 0;
     color: #555;
+}
 
-    i {
+.ext-list li i {
       margin-right: 5px;
-      width: $listIconSize;
-      height: $listIconSize;
-    }
+      width: var(--list-icon-size);
+      height: var(--list-icon-size);
+}
 
-    .ext-icon {
+.ext-list li .ext-icon {
       display: inline-block;
       background-repeat: no-repeat;
-      background-size: $listIconSize $listIconSize;
+      background-size: var(--list-icon-size) var(--list-icon-size);
       position: relative;
       top: 3px;
-    }
+}
 
-    &.active,
-    &:hover {
-      color: $darkBlue;
-    }
+.ext-list li.active,
+.ext-list li:active,
+.ext-list li:hover {
+      color: var(--dark-blue);
+}
 
-    &.active span,
-    &:hover span {
+.ext-list li.active span,
+.ext-list li:active span,
+.ext-list li:hover span {
       text-decoration: underline;
-    }
+}
 
-    &.last {
+.ext-list li.last {
       margin-bottom: 25px;
-    }
-    &.api-version {
+}
+.ext-list li.api-version {
       cursor: default;
       font-size: 15px;
       color: #888;
       text-shadow: 1px 1px 1px #fff;
-    }
-  }
+}
 
-  .link {
+.ext-list .link {
     font-style: italic;
-  }
 }
 </style>

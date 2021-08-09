@@ -46,8 +46,8 @@ create_deb() {
 create_rpms() {
     # RPMs are tricky because different distros have different Python3 versions
     # We know that
-    #   Fedora 30 and 31 has Python 3.7
     #   Fedora 32 has Python 3.8
+    #   Fedora 33 has Python 3.9
     # This means that we should use separate docker images to build different RPM packages
 
     h1 "Creating .rpm"
@@ -58,9 +58,9 @@ create_rpms() {
     docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
     docker rm ulauncher-rpm
 
-    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_32_BUILD_IMAGE \
-        bash -c "./ul build-rpm $VERSION fedora fedora32"
-    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora32.rpm .
+    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_33_BUILD_IMAGE \
+        bash -c "./ul build-rpm $VERSION fedora fedora33"
+    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora33.rpm .
     docker rm ulauncher-rpm
 
     set +x
@@ -89,18 +89,18 @@ launchpad_upload() {
         PPA="agornostal/ulauncher"
     fi
     xenial="PPA=$PPA RELEASE=xenial ./ul build-deb $VERSION --upload"
-    bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
-    eoan="PPA=$PPA RELEASE=eoan ./ul build-deb $VERSION --upload"
+    hirsute="PPA=$PPA RELEASE=hirsute ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
+    groovy="PPA=$PPA RELEASE=groovy ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
-    # then uploads each realease
+    # then uploads each release
     h1 "Launchpad upload"
     set -x
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $bionic && $eoan && $focal"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $hirsute && $focal && $groovy"
     set +x
 }

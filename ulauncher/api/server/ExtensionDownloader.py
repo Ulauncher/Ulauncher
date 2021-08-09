@@ -44,7 +44,7 @@ class ExtensionDownloader:
         return cls(ext_db, ext_runner)
 
     def __init__(self, ext_db: ExtensionDb, ext_runner: ExtensionRunner):
-        super(ExtensionDownloader, self).__init__()
+        super().__init__()
         self.ext_db = ext_db
         self.ext_runner = ext_runner
 

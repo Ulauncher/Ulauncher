@@ -272,7 +272,7 @@ class WebSocket:
                     self.handshaked = True
                     self.handleConnected()
                 except Exception as e:
-                    raise Exception('handshake failed: %s' % e)
+                    raise Exception('handshake failed: %s' % e) from e
 
         # else do normal data
         else:
@@ -630,9 +630,8 @@ class SimpleWebSocketServer:
                         if remaining is not None:
                             client.sendq.appendleft((opcode, remaining))
                             break
-                        else:
-                            if opcode == CLOSE:
-                                raise Exception('received client close')
+                        if opcode == CLOSE:
+                            raise Exception('received client close')
 
                 except Exception:
                     client.client.close()

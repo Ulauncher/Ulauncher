@@ -1,4 +1,8 @@
 import logging
+import gi
+gi.require_version('Gdk', '3.0')
+gi.require_version('GdkX11', '3.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gdk, GdkX11
 
 logger = logging.getLogger(__name__)
@@ -69,6 +73,6 @@ def get_screens():
                             "width": rect.width,
                             "height": rect.height})
     except Exception as e:
-        raise RuntimeError("Unable to find any video sources: %s" % e)
+        raise RuntimeError("Unable to find any video sources: %s" % e) from e
 
     return screens

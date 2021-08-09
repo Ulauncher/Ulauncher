@@ -6,7 +6,7 @@ from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 class ExtensionKeywordResultItem(ResultItem):
 
     def __init__(self, *args, **kw):
-        super(ExtensionKeywordResultItem, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
         self._query_history = QueryHistoryDb.get_instance()
 
     def selected_by_default(self, query):

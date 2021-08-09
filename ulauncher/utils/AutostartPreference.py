@@ -70,7 +70,7 @@ class AutostartPreference:
             autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
             autostart_info.write()
         except Exception as e:
-            raise SwitchError('Unexpected exception: %s' % e)
+            raise SwitchError('Unexpected exception: %s' % e) from e
 
 
 class SwitchError(RuntimeError):

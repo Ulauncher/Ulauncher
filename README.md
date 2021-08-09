@@ -27,6 +27,15 @@ Check out [docs.ulauncher.io](http://docs.ulauncher.io/) to find out how.
 As of Ulauncher v4, you can create your own color themes
 Check out [docs.ulauncher.io](http://docs.ulauncher.io/en/latest/themes/themes.html) to find out how.
 
+[Systemd users](https://www.freedesktop.org/wiki/Software/systemd/)
+==============================================================
+
+If your distribution packages [ulauncher.service](ulauncher.service) properly, then you can run `ulauncher` on startup by running:
+
+```
+systemctl --user enable ulauncher.service
+```
+
 
 Known Issues
 ============
@@ -73,7 +82,7 @@ You must have the following things installed:
     gir1.2-glib-2.0 \
     gir1.2-notify-0.7 \
     gir1.2-gdkpixbuf-2.0 \
-    gir1.2-appindicator3-0.1 \
+    gir1.2-ayatanaappindicator3-0.1 \
     python3-dbus \
     python3-levenshtein \
     python3-pyinotify \

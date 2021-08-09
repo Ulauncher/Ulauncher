@@ -25,7 +25,7 @@ class SortedCollection:
     Finding and indexing are O(log n) operations while iteration and insertion
     are O(n).  The initial sort is O(n log n).
 
-    The key function is stored in the 'key' attibute for easy introspection or
+    The key function is stored in the 'key' attribute for easy introspection or
     so that you can assign a new key function (triggering an automatic re-sort).
 
     In short, the class was designed to handle all of the common use cases for
@@ -157,7 +157,7 @@ class SortedCollection:
         self._items.pop(index)
 
     def remove(self, item):
-        'Remove first occurence of item.  Raise ValueError if not found'
+        'Remove first occurrence of item.  Raise ValueError if not found'
         i = self.index(item)
         del self._keys[i]
         del self._items[i]

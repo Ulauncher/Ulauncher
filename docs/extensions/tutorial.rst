@@ -90,7 +90,7 @@ Create :file:`manifest.json` using the following template::
 * ``required_api_version`` - a version of Ulauncher Extension API that the extension requires. It should follow `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format. In most of the cases you would want to specify a string like ``^x.y.z`` where ``x.y.z`` is the current version of extension API (not Ulauncher). You can find the current version number on the About page of Ulauncher preferences.
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon
-* ``options`` - dictionary of optional parameters. See available options bellow
+* ``options`` - dictionary of optional parameters. See available options below
 * ``preferences`` - list of preferences available for users to override.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
@@ -168,7 +168,7 @@ Copy the following code to ``main.py``::
   class DemoExtension(Extension):
 
       def __init__(self):
-          super(DemoExtension, self).__init__()
+          super().__init__()
           self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
 
@@ -221,7 +221,7 @@ Basic API Concepts
     class DemoExtension(Extension):
 
         def __init__(self):
-            super(DemoExtension, self).__init__()
+            super().__init__()
             self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
 
@@ -336,7 +336,7 @@ Custom Action on Item Enter
     class DemoExtension(Extension):
 
         def __init__(self):
-            super(DemoExtension, self).__init__()
+            super().__init__()
             self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
             self.subscribe(ItemEnterEvent, ItemEnterEventListener())  # <-- add this line
 

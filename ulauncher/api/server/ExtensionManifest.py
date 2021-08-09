@@ -116,9 +116,9 @@ class ExtensionManifest:
                     assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
                     assert p.get('options'), 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
-            raise ExtensionManifestError(str(e), ErrorName.InvalidManifestJson)
+            raise ExtensionManifestError(str(e), ErrorName.InvalidManifestJson) from e
         except KeyError as e:
-            raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson)
+            raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson) from e
 
     def check_compatibility(self):
         if not satisfies(api_version, self.get_required_api_version()):

@@ -1,5 +1,8 @@
 import os
 import json
+import gi
+gi.require_version('GObject', '2.0')
+# pylint: disable=wrong-import-position
 from gi.repository import GObject
 
 from ulauncher.utils.decorator.singleton import singleton
@@ -27,10 +30,10 @@ GPROPERTIES = {
                             None,
                             True,
                             GObject.ParamFlags.READWRITE),
-    "show-recent-apps": (bool,
-                         "Show list of recent apps",
+    "show-recent-apps": (str,
+                         "Number of recent apps",
                          None,
-                         False,
+                         "0",
                          GObject.ParamFlags.READWRITE),
     "clear-previous-query": (bool,
                              "Clear query when app looses focus",
@@ -57,6 +60,11 @@ GPROPERTIES = {
                          None,
                          "",
                          GObject.PARAM_READWRITE),
+    "grab-mouse-pointer": (bool,
+                           "Grab mouse while open (prevents losing focus)",
+                           None,
+                           False,
+                           GObject.ParamFlags.READWRITE),
 }
 
 

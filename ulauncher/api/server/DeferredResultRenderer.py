@@ -1,6 +1,9 @@
 import logging
 from functools import partial
 from threading import Timer
+import gi
+gi.require_version('GLib', '2.0')
+# pylint: disable=wrong-import-position
 from gi.repository import GLib
 
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction

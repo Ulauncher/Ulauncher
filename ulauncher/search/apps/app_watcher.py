@@ -44,7 +44,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
         pass
 
     def __init__(self, db):
-        super(AppNotifyEventHandler, self).__init__()
+        super().__init__()
         self.__db = db  # type: AppDb
 
         # key is a file path, value is an addition time

@@ -154,6 +154,17 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         t.start()
 
     def on_focus_in_event(self, *args):
+        if self.settings.get_property('grab-mouse-pointer'):
+            ptr_dev = self.get_pointer_device()
+            result = ptr_dev.grab(
+                self.window.get_window(),
+                Gdk.GrabOwnership.NONE,
+                True,
+                Gdk.EventMask.ALL_EVENTS_MASK,
+                None,
+                0
+            )
+            logger.debug("Focus in event, grabbing pointer: %s", result)
         self.is_focused = True
 
     def on_input_changed(self, entry):
@@ -170,10 +181,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
-            if keyname == 'Up':
+            if keyname in ('Up', 'ISO_Left_Tab'):
                 self.results_nav.go_up()
                 return True
-            if keyname == 'Down':
+            if keyname in ('Down', 'Tab'):
                 self.results_nav.go_down()
                 return True
             if alt and keyname in ('Return', 'KP_Enter'):
@@ -319,6 +330,20 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
+    def hide(self, *args, **kwargs):
+        """Override the hide method to ensure the pointer grab is released."""
+        if self.settings.get_property('grab-mouse-pointer'):
+            self.get_pointer_device().ungrab(0)
+        super().hide(*args, **kwargs)
+
+    def get_pointer_device(self):
+        return (self
+                .window
+                .get_window()
+                .get_display()
+                .get_device_manager()
+                .get_client_pointer())
+
     def hide_and_clear_input(self):
         self.input.set_text('')
         self.hide()
@@ -330,8 +355,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
-        if not result_items and not self.input.get_text() and self.settings.get_property('show-recent-apps'):
-            result_items = AppStatDb.get_instance().get_most_frequent(3)
+        show_recent_apps = self.settings.get_property('show-recent-apps')
+        recent_apps_number = 3 if show_recent_apps else 0
+        try:
+            recent_apps_number = int(str(show_recent_apps))
+        except ValueError:
+            pass
+        if not result_items and not self.input.get_text() and recent_apps_number > 0:
+            result_items = AppStatDb.get_instance().get_most_frequent(recent_apps_number)
 
         results = self.create_item_widgets(result_items, self._get_user_query())
 

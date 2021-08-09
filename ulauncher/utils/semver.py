@@ -493,7 +493,7 @@ class SemVer:
                 self.patch += 1
             self.prerelease = []
         elif release == "pre":
-            #  This probably shouldn't be used publically.
+            #  This probably shouldn't be used publicly.
             #  1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
             logger.debug("inc prerelease %s", self.prerelease)
             if len(self.prerelease) == 0:
