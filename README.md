@@ -40,7 +40,6 @@ systemctl --user enable ulauncher.service
 Known Issues
 ============
 
-* Ubuntu 14.04 is not supported since v4.0
 * If your DE doesn't use compositing, run ulauncher with `--no-window-shadow` to remove a black box around a window
 * [[Solved] inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
 * [[Workaround exists] Can't map the keys to ALT+SPACE](https://github.com/Ulauncher/Ulauncher/issues/100)
