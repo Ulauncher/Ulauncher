@@ -59,7 +59,7 @@ GPROPERTIES = {
                          "Terminal command",
                          None,
                          "",
-                         GObject.PARAM_READWRITE),
+                         GObject.ParamFlags.READWRITE),
     "grab-mouse-pointer": (bool,
                            "Grab mouse while open (prevents losing focus)",
                            None,
