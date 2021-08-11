@@ -12,6 +12,7 @@ import re
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARN)
 SEMVER_SPEC_VERSION = '2.0.0'
 
 
