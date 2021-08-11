@@ -182,7 +182,20 @@ def unzip(filename: str, ext_path: str) -> None:
     temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
 
     with ZipFile(filename) as zipfile:
-        zipfile.extractall(temp_ext_path)
+        for zipinfo in zipfile.infolist():
+            filepath = zipfile.extract(zipinfo, temp_ext_path)
+            # Check if file is symlink from its attributes or zipfile did extract it as a symlink
+            # see https://learning-python.com/cgi/showcode.py?name=ziptools/ziptools/ziptools/zipsymlinks.py
+            if (zipinfo.external_attr >> 28) != 0xA or os.path.islink(filepath):
+                continue
+            with open(filepath) as f:
+                symlink = f.read()
+            symlink_abs = os.path.abspath(os.path.join(os.path.dirname(filepath), symlink))
+            # Don't create symlink if it points outside of extension directory
+            if not symlink_abs.startswith(temp_ext_path + os.sep):
+                continue
+            os.remove(filepath)
+            os.symlink(symlink, filepath)
 
     for dir in os.listdir(temp_ext_path):
         move(os.path.join(temp_ext_path, dir), ext_path)
