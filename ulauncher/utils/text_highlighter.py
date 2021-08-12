@@ -6,6 +6,8 @@ def highlight_text(query, text: str, open_tag='<span foreground="white">', close
     Highlights words from query in a given text string
     :returns: string with Pango markup
     """
+    text = text.replace("&amp;", "&")
+
     positions = get_matching_indexes(query, text)
 
     # use positions to highlight text with tags
@@ -25,4 +27,4 @@ def highlight_text(query, text: str, open_tag='<span foreground="white">', close
         # don't forget to close tag if it is opened
         hlted.append(close_tag)
 
-    return ''.join(hlted)
+    return ''.join(hlted).replace("&", "&amp;")
