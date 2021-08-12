@@ -1,21 +1,9 @@
 import re
-import io
-from itertools import takewhile
 
 from ulauncher.api.shared.errors import UlauncherAPIError
 
 
 class ProcessErrorExtractor:
-
-    @classmethod
-    def extract_from_file_object(cls, file: io.BytesIO) -> 'ProcessErrorExtractor':
-        error = b''
-        for line in takewhile(bool, iter(file.readline, b'')):
-            if line:
-                error = line
-
-        return cls(error.decode('utf-8') if isinstance(error, bytes) else error)
-
     def __init__(self, error: str):
         """
         expecting an error like this:
