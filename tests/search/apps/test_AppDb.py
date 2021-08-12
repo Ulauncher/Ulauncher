@@ -129,7 +129,7 @@ class TestAppDb:
             'desktop_file_short': 'file_name_test1',
             'name': 'name_test1',
             'description': 'description_test1',
-            'search_name': 'name_test1',
+            'search_name': 'name_test1\n',
             'icon': app_icon_cache.get_pixbuf.return_value
         }
 
@@ -182,6 +182,6 @@ def test_get_exec_name():
 
 
 def test_search_name():
-    assert search_name('Mouse & Touchpad', 'unity-control-center') == 'Mouse & Touchpad unity-control-center'
-    assert search_name('Back Up', 'deja-dup') == 'Back Up deja-dup'
-    assert search_name('Calendar', 'gnome-calendar') == 'Calendar'
+    assert search_name('Mouse & Touchpad', 'unity-control-center') == 'Mouse & Touchpad\nunity-control-center'
+    assert search_name('Back Up', 'deja-dup') == 'Back Up\ndeja-dup'
+    assert search_name('Calendar', 'gnome-calendar') == 'Calendar\ngnome-calendar'

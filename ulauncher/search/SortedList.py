@@ -43,7 +43,15 @@ class SortedList:
             self.append(item)
 
     def append(self, result_item):
-        score = get_score(self._query, result_item.get_search_name())
+        # get_search_name() returns a string with the app display name, but it may contain a
+        # second line in which case that line is the name of the executable
+        search_fields = result_item.get_search_name()
+        name, exec_name, *_ = f'{search_fields}\n'.split('\n')
+        score = max(
+            get_score(self._query, name),
+            get_score(self._query, exec_name)
+        )
+
         if score >= self._min_score:
             result_item.score = -score  # use negative to sort by score in desc. order
             self._items.insert(result_item)

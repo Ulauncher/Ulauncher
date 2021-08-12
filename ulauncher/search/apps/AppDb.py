@@ -169,11 +169,4 @@ def search_name(name, exec_name):
     Returns string that will be used for search
     We want to make sure app can be searchable by its exec_line
     """
-    exec_name_split = set(exec_name.split('-'))
-    name_split = set(name.lower().split(' '))
-    common_words = exec_name_split & name_split
-
-    if common_words or not exec_name:
-        return name
-
-    return '%s %s' % (name, exec_name)
+    return f'{name}\n{exec_name}'
