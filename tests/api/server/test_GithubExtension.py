@@ -98,7 +98,7 @@ class TestGithubExtension:
             GithubExtension('https://github.com/Ulauncher/ulauncher-timer/').validate_url()
 
     def test_get_download_url(self, gh_ext):
-        assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/archive/master.zip'
+        assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/archive/master.tar.gz'
 
     def test_get_commit(self, gh_ext, mocker):
         urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')

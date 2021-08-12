@@ -26,7 +26,7 @@ class TestExtensionDownloader:
     def gh_ext(self, mocker):
         gh_ext = mocker.patch('ulauncher.api.server.ExtensionDownloader.GithubExtension').return_value
         gh_ext.get_ext_id.return_value = 'com.github.ulauncher.ulauncher-timer'
-        gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.zip'
+        gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.tar.gz'
         gh_ext.get_last_commit.return_value = {
             'last_commit': '64e106c',
             'last_commit_time': '2017-05-01T07:30:39'
@@ -39,29 +39,29 @@ class TestExtensionDownloader:
         return gh_ext
 
     @pytest.fixture(autouse=True)
-    def download_zip(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.download_zip')
+    def download_tarball(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionDownloader.download_tarball')
 
     @pytest.fixture(autouse=True)
     def GithubExtension(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.GithubExtension')
 
     @pytest.fixture(autouse=True)
-    def unzip(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.unzip')
+    def untar(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionDownloader.untar')
 
     @pytest.fixture(autouse=True)
     def datetime(self, mocker):
         return mocker.patch('ulauncher.api.server.ExtensionDownloader.datetime')
 
     # pylint: disable=unused-argument,too-many-arguments
-    def test_download(self, downloader, mocker, unzip, ext_db, download_zip, datetime):
+    def test_download(self, downloader, mocker, untar, ext_db, download_tarball, datetime):
         os = mocker.patch('ulauncher.api.server.ExtensionDownloader.os')
         os.path.exists.return_value = False
         assert downloader.download('https://github.com/Ulauncher/ulauncher-timer') == \
             'com.github.ulauncher.ulauncher-timer'
 
-        unzip.assert_called_with(download_zip.return_value, mock.ANY)
+        untar.assert_called_with(download_tarball.return_value, mock.ANY)
         ext_db.put.assert_called_with('com.github.ulauncher.ulauncher-timer', {
             'id': 'com.github.ulauncher.ulauncher-timer',
             'url': 'https://github.com/Ulauncher/ulauncher-timer',
@@ -86,7 +86,7 @@ class TestExtensionDownloader:
         with pytest.raises(ExtensionDownloaderError):
             assert downloader.download('https://github.com/Ulauncher/ulauncher-timer')
 
-    def test_update(self, downloader, ext_db, ext_runner, gh_ext, download_zip, unzip, datetime):
+    def test_update(self, downloader, ext_db, ext_runner, gh_ext, download_tarball, untar, datetime):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.find.return_value = {
             'id': ext_id,
@@ -99,8 +99,8 @@ class TestExtensionDownloader:
 
         assert downloader.update(ext_id)
 
-        download_zip.assert_called_with(gh_ext.get_download_url.return_value)
-        unzip.assert_called_with(download_zip.return_value, mock.ANY)
+        download_tarball.assert_called_with(gh_ext.get_download_url.return_value)
+        untar.assert_called_with(download_tarball.return_value, mock.ANY)
         ext_runner.stop.assert_called_with(ext_id)
         ext_runner.run.assert_called_with(ext_id)
         ext_db.put.assert_called_with(ext_id, {
