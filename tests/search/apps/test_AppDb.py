@@ -172,12 +172,12 @@ class TestAppDb:
 
 
 def test_search_name():
-    assert search_name('GNU Image Manipulation Program', r'gimp-2.8 %U') == 'GNU Image Manipulation Program gimp-2.8'
-    assert search_name('Content Hub Clipboard', r'content-hub-clipboard %U') == 'Content Hub Clipboard'
-    assert search_name('Scopes', r'/usr/bin/unity8-dash') == 'Scopes unity8-dash'
-    assert search_name('Mouse & Touchpad', r'unity-control-center mouse') == 'Mouse & Touchpad unity-control-center'
-    assert search_name('Back Up', r'deja-dup --backup') == 'Back Up deja-dup'
-    assert search_name('Calendar', r'gnome-calendar') == 'Calendar'
-    assert search_name('Amazon', r'unity-webapps-runner --amazon --app-id=ubuntu-amazon-default') == \
+    assert search_name('GNU Image Manipulation Program', 'gimp-2.8 %U') == 'GNU Image Manipulation Program gimp-2.8'
+    assert search_name('Content Hub Clipboard', 'content-hub-clipboard %U') == 'Content Hub Clipboard'
+    assert search_name('Scopes', '/usr/bin/unity8-dash') == 'Scopes unity8-dash'
+    assert search_name('Mouse & Touchpad', 'unity-control-center mouse') == 'Mouse & Touchpad unity-control-center'
+    assert search_name('Back Up', 'deja-dup --backup') == 'Back Up deja-dup'
+    assert search_name('Calendar', 'gnome-calendar') == 'Calendar'
+    assert search_name('Amazon', 'unity-webapps-runner --amazon --app-id=ubuntu-amazon-default') == \
         'Amazon unity-webapps-runner'
-    assert search_name('Back Up', r'env VAR1=VAL1 VAR2=VAL2 deja-dup --backup') == 'Back Up deja-dup'
+    assert search_name('Back Up', 'env VAR1=VAL1 VAR2=VAL2 deja-dup --backup') == 'Back Up deja-dup'
