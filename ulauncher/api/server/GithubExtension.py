@@ -139,9 +139,9 @@ class GithubExtension:
     def get_download_url(self, commit: str = DEFAULT_GITHUB_BRANCH) -> str:
         """
         >>> https://github.com/Ulauncher/ulauncher-timer
-        <<< https://github.com/Ulauncher/ulauncher-timer/archive/master.zip
+        <<< https://github.com/Ulauncher/ulauncher-timer/tarball/master
         """
-        return '%s/archive/%s.zip' % (self.url, commit)
+        return '%s/tarball/%s' % (self.url, commit)
 
     def get_ext_id(self) -> str:
         """

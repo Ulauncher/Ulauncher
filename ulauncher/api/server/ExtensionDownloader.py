@@ -1,6 +1,6 @@
 import os
 import logging
-from zipfile import ZipFile
+import tarfile
 from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
@@ -52,7 +52,7 @@ class ExtensionDownloader:
         """
         1. check if ext already exists
         2. get last commit info
-        3. download & unzip
+        3. download & untar
         4. add it to the db
 
         :rtype: str
@@ -74,9 +74,9 @@ class ExtensionDownloader:
         # 2. get last commit info
         commit = gh_ext.find_compatible_version()
 
-        # 3. download & unzip
-        filename = download_zip(gh_ext.get_download_url(commit['sha']))
-        unzip(filename, ext_path)
+        # 3. download & untar
+        filename = download_tarball(gh_ext.get_download_url(commit['sha']))
+        untar(filename, ext_path)
 
         # 4. add to the db
         self.ext_db.put(ext_id, {
@@ -133,8 +133,8 @@ class ExtensionDownloader:
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
         gh_ext = GithubExtension(ext['url'])
-        filename = download_zip(gh_ext.get_download_url(commit['last_commit']))
-        unzip(filename, ext_path)
+        filename = download_tarball(gh_ext.get_download_url(commit['last_commit']))
+        untar(filename, ext_path)
 
         ext['updated_at'] = datetime.now().isoformat()
         ext['last_commit'] = commit['last_commit']
@@ -170,10 +170,10 @@ class ExtensionDownloader:
         return ext
 
 
-def unzip(filename: str, ext_path: str) -> None:
+def untar(filename: str, ext_path: str) -> None:
     """
     1. Remove ext_path
-    2. Extract zip into temp dir
+    2. Extract tar into temp dir
     3. Move contents of <temp_dir>/<project_name>-master/* to ext_path
     """
     if os.path.exists(ext_path):
@@ -181,8 +181,7 @@ def unzip(filename: str, ext_path: str) -> None:
 
     temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
 
-    with ZipFile(filename) as zipfile:
-        zipfile.extractall(temp_ext_path)
+    tarfile.open(filename, mode="r").extractall(temp_ext_path)
 
     for dir in os.listdir(temp_ext_path):
         move(os.path.join(temp_ext_path, dir), ext_path)
@@ -190,8 +189,8 @@ def unzip(filename: str, ext_path: str) -> None:
         return
 
 
-def download_zip(url: str) -> str:
-    dest_zip = mktemp('.zip', prefix='ulauncher_dl_')
-    filename, _ = urlretrieve(url, dest_zip)
+def download_tarball(url: str) -> str:
+    dest_tar = mktemp('.tar.gz', prefix='ulauncher_dl_')
+    filename, _ = urlretrieve(url, dest_tar)
 
     return filename
