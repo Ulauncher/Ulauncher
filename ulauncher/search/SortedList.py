@@ -49,7 +49,7 @@ class SortedList:
         name, exec_name, *_ = f'{search_fields}\n'.split('\n')
         score = max(
             get_score(self._query, name),
-            get_score(self._query, exec_name)
+            get_score(self._query, exec_name) * .8
         )
 
         if score >= self._min_score:
