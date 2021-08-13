@@ -104,6 +104,10 @@ def main():
     instance = bus.request_name(DBUS_SERVICE)
 
     if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print(
+            "DBus name already taken. Ulauncher is probably backgrounded. Did you mean `ulauncher-toggle`?",
+            file=sys.stderr
+        )
         toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
         toggle_window()
         return
