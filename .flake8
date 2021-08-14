@@ -1,4 +1,0 @@
-[flake8]
-exclude = docs,data,scripts
-max-line-length = 120
-ignore = E402,W504
