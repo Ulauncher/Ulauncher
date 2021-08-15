@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import pytest
 import mock
-from ulauncher.search.apps.AppDb import AppDb, search_name, get_exec_name
+from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.search.apps.AppIconCache import AppIconCache
 
 
@@ -120,6 +120,7 @@ class TestAppDb:
         app.get_filename.return_value = '/foo/file_name_test1'
         app.get_string.return_value = None
         app.get_name.return_value = 'name_test1'
+        app.get_executable.return_value = 'exec_test1'
         app.get_description.return_value = 'description_test1'
 
         app_db.put_app(app)
@@ -129,7 +130,7 @@ class TestAppDb:
             'desktop_file_short': 'file_name_test1',
             'name': 'name_test1',
             'description': 'description_test1',
-            'search_name': 'name_test1\n',
+            'search_name': 'name_test1\nexec_test1',
             'icon': app_icon_cache.get_pixbuf.return_value
         }
 
@@ -169,19 +170,3 @@ class TestAppDb:
             'icon': app_icon_cache.get_pixbuf.return_value,
             'search_name': 'LibreOffice Calc'
         }
-
-
-def test_get_exec_name():
-    assert get_exec_name('gnome-system-monitor') == 'gnome-system-monitor'
-    assert get_exec_name('gimp-2.10 %U') == 'gimp-2.10'
-    assert get_exec_name('nautilus --new-window %U') == 'nautilus'
-    assert get_exec_name('gnome-control-center applications') == 'gnome-control-center'
-    assert get_exec_name('/opt/sublime_text/sublime_text %F') == 'sublime_text'
-    assert get_exec_name('thunar --bulk-rename %F') == 'thunar'
-    assert get_exec_name('env VAR1=VAL1 /usr/bin/asdf --arg') == 'asdf'
-
-
-def test_search_name():
-    assert search_name('Mouse & Touchpad', 'unity-control-center') == 'Mouse & Touchpad\nunity-control-center'
-    assert search_name('Back Up', 'deja-dup') == 'Back Up\ndeja-dup'
-    assert search_name('Calendar', 'gnome-calendar') == 'Calendar\ngnome-calendar'

@@ -1,5 +1,4 @@
-import os
-import re
+from os.path import basename, exists
 import sqlite3
 import logging
 
@@ -24,7 +23,7 @@ class AppDb:
         self._conn = None
 
     def open(self):
-        create_db_scheme = self._path == ':memory:' or not os.path.exists(self._path)
+        create_db_scheme = self._path == ':memory:' or not exists(self._path)
         self._conn = sqlite3.connect(self._path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         if create_db_scheme:
@@ -69,16 +68,19 @@ class AppDb:
         :param Gio.DesktopAppInfo app:
         """
         name = app.get_string('X-GNOME-FullName') or app.get_name()
-        exec_name = get_exec_name(app.get_string('Exec') or '')
+        # TryExec is what we actually want (name of/path to exec), but it's often not specified
+        # get_executable uses Exec, which is always specified, but it will return the actual executable.
+        # Sometimes the actual executable is not the app to start, but a wrappers like "env", "run-or-raise" or "sh -c"
+        exec = basename(app.get_string('TryExec') or app.get_executable())
         description = app.get_description() or ''
         if not description and (app.get_generic_name() != name):
             description = app.get_generic_name() or ''
         record = {
             "desktop_file": app.get_filename(),
-            "desktop_file_short": os.path.basename(app.get_filename()),
+            "desktop_file_short": basename(app.get_filename()),
             "description": app.get_description() or '',
             "name": name,
-            "search_name": search_name(name, exec_name)
+            "search_name": f'{name}\n{exec}'
         }
         self._app_icon_cache.add_icon(record['desktop_file'], app.get_icon(), app.get_string('Icon'))
 
@@ -153,20 +155,3 @@ class AppDb:
             result_list.append(AppResultItem(rec))
 
         return result_list
-
-
-def get_exec_name(exec):
-    """
-    Returns name of the executable file without the full path, env keyword and environment vars
-    Similar to Gio.DesktopAppInfo.get_executable(), except that will not drop env keyword and vars
-    """
-    match = re.match(r'^(env\s+)?([^\s=]+=[^\s=]+\s+)*([^\s=]+\/)*(?P<bin>[^\s=]*)', exec, re.I)
-    return match.group('bin') if match else ""
-
-
-def search_name(name, exec_name):
-    """
-    Returns string that will be used for search
-    We want to make sure app can be searchable by its exec_line
-    """
-    return '{}\n{}'.format(name, exec_name)
