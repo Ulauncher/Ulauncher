@@ -1,7 +1,7 @@
 import operator
 from functools import lru_cache
 # pylint: disable=no-name-in-module
-from Levenshtein import ratio
+from Levenshtein import distance
 
 
 @lru_cache(maxsize=150)
@@ -48,19 +48,24 @@ def get_matching_indexes(query, text):
     return sorted(positions)
 
 
-def get_score(query, text):
+def get_score(query="", text=""):
     """
     Uses Levenshtein's algorithm + some improvements to the score
     :returns: number between 0 and 100
     """
-    if not query or not text:
-        return 0
-
     query = query.lower()
     text = text.lower()
-    score = ratio(query, text) * 100
-
-    # increase score if a word from text starts with a query
+    query_len = len(query)
+    if not query or not text:
+        return 0
+    if text.startswith(query):
+        return 100
+    # Wrap and counter-weight distance so that short queries can match better with long texts.
+    # With regular distance "Fir" and "Firefox" is only 3/7 similar
+    # We want them to be counted as near 100% matches (if you have an actual app named "Fir"
+    # it's better that is listed first).
+    diff = distance(query, text) - (max(0, len(text) - query_len) * .95)
+    score = 100 * max(0, query_len - diff) / query_len
     for text_part in text.split(' '):
         if text_part.startswith(query):
             score += 30

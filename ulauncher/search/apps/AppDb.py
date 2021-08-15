@@ -69,7 +69,7 @@ class AppDb:
         :param Gio.DesktopAppInfo app:
         """
         name = app.get_string('X-GNOME-FullName') or app.get_name()
-        exec_name = app.get_string('Exec') or ''
+        exec_name = get_exec_name(app.get_string('Exec') or '')
         description = app.get_description() or ''
         if not description and (app.get_generic_name() != name):
             description = app.get_generic_name() or ''
@@ -144,7 +144,7 @@ class AppDb:
         :rtype: :class:`ResultList`
         """
 
-        result_list = result_list or SortedList(query, min_score=50, limit=9)
+        result_list = result_list or SortedList(query, min_score=75, limit=9)
 
         if not query:
             return result_list
@@ -155,28 +155,18 @@ class AppDb:
         return result_list
 
 
+def get_exec_name(exec):
+    """
+    Returns name of the executable file without the full path, env keyword and environment vars
+    Similar to Gio.DesktopAppInfo.get_executable(), except that will not drop env keyword and vars
+    """
+    match = re.match(r'^(env\s+)?([^\s=]+=[^\s=]+\s+)*([^\s=]+\/)*(?P<bin>[^\s=]*)', exec, re.I)
+    return match.group('bin') if match else ""
+
+
 def search_name(name, exec_name):
     """
     Returns string that will be used for search
-    We want to make sure app can be searchable by its exec_name
+    We want to make sure app can be searchable by its exec_line
     """
-    if not exec_name:
-        return name
-
-    # drop env vars
-    exec_name = ' '.join([p for p in exec_name.split(' ') if p != 'env' and '=' not in p])
-
-    # drop "/usr/bin/"
-    match = re.match(r'^(\/.+\/)?([-\w\.]+)([^\w\/]|$)', exec_name.lower(), re.I)
-    if not match:
-        return name
-
-    exec_name = match.group(2)
-    exec_name_split = set(exec_name.split('-'))
-    name_split = set(name.lower().split(' '))
-    common_words = exec_name_split & name_split
-
-    if common_words:
-        return name
-
-    return '%s %s' % (name, exec_name)
+    return f'{name}\n{exec_name}'

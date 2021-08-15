@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import pytest
 import mock
-from ulauncher.search.apps.AppDb import AppDb, search_name
+from ulauncher.search.apps.AppDb import AppDb, search_name, get_exec_name
 from ulauncher.search.apps.AppIconCache import AppIconCache
 
 
@@ -129,7 +129,7 @@ class TestAppDb:
             'desktop_file_short': 'file_name_test1',
             'name': 'name_test1',
             'description': 'description_test1',
-            'search_name': 'name_test1',
+            'search_name': 'name_test1\n',
             'icon': app_icon_cache.get_pixbuf.return_value
         }
 
@@ -171,13 +171,17 @@ class TestAppDb:
         }
 
 
+def test_get_exec_name():
+    assert get_exec_name('gnome-system-monitor') == 'gnome-system-monitor'
+    assert get_exec_name('gimp-2.10 %U') == 'gimp-2.10'
+    assert get_exec_name('nautilus --new-window %U') == 'nautilus'
+    assert get_exec_name('gnome-control-center applications') == 'gnome-control-center'
+    assert get_exec_name('/opt/sublime_text/sublime_text %F') == 'sublime_text'
+    assert get_exec_name('thunar --bulk-rename %F') == 'thunar'
+    assert get_exec_name('env VAR1=VAL1 /usr/bin/asdf --arg') == 'asdf'
+
+
 def test_search_name():
-    assert search_name('GNU Image Manipulation Program', r'gimp-2.8 %U') == 'GNU Image Manipulation Program gimp-2.8'
-    assert search_name('Content Hub Clipboard', r'content-hub-clipboard %U') == 'Content Hub Clipboard'
-    assert search_name('Scopes', r'/usr/bin/unity8-dash') == 'Scopes unity8-dash'
-    assert search_name('Mouse & Touchpad', r'unity-control-center mouse') == 'Mouse & Touchpad unity-control-center'
-    assert search_name('Back Up', r'deja-dup --backup') == 'Back Up deja-dup'
-    assert search_name('Calendar', r'gnome-calendar') == 'Calendar'
-    assert search_name('Amazon', r'unity-webapps-runner --amazon --app-id=ubuntu-amazon-default') == \
-        'Amazon unity-webapps-runner'
-    assert search_name('Back Up', r'env VAR1=VAL1 VAR2=VAL2 deja-dup --backup') == 'Back Up deja-dup'
+    assert search_name('Mouse & Touchpad', 'unity-control-center') == 'Mouse & Touchpad\nunity-control-center'
+    assert search_name('Back Up', 'deja-dup') == 'Back Up\ndeja-dup'
+    assert search_name('Calendar', 'gnome-calendar') == 'Calendar\ngnome-calendar'
