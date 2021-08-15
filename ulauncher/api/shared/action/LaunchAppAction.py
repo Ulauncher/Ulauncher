@@ -2,6 +2,7 @@ import logging
 import subprocess
 import re
 import shlex
+import shutil
 
 from ulauncher.utils.desktop.reader import read_desktop_file
 from ulauncher.utils.Settings import Settings
@@ -9,6 +10,7 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger(__name__)
 settings = Settings.get_instance()
+hasSystemdRun = bool(shutil.which("systemd-run"))
 
 
 class LaunchAppAction(BaseAction):
@@ -38,8 +40,14 @@ class LaunchAppAction(BaseAction):
                 sanitized_exec = terminal_exec + [shlex.quote(sanitized_exec)]
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
+            if hasSystemdRun:
+                # Escape the Ulauncher cgroup, so this process isn't considered a child process of Ulauncher
+                # and doesn't die if Ulauncher dies/crashed/is terminated
+                sanitized_app = re.sub(r'[\W]', '-', app.get_name())
+                sanitized_exec = ['systemd-run', '--user', f'--slice={sanitized_app}.slice'] + sanitized_exec
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
+                # Start_new_session is only needed if systemd-run is missing
                 subprocess.Popen(sanitized_exec, start_new_session=True)
             except Exception as e:
                 logger.error('%s: %s', type(e).__name__, e)
