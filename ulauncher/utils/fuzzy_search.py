@@ -48,7 +48,7 @@ def get_matching_indexes(query, text):
     return sorted(positions)
 
 
-def get_score(query="", text=""):
+def get_score(query, text):
     """
     Uses Levenshtein's algorithm + some improvements to the score
     :returns: number between 0 and 100
