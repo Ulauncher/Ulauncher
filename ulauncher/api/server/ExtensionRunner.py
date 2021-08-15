@@ -99,10 +99,18 @@ class ExtensionRunner:
         while True:
             t_start = time()
             proc = Popen(cmd, env=env, stderr=PIPE)
+            lasterr = ""
             logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
             self.extension_procs[extension_id] = proc
             self.unset_extension_error(extension_id)
-            code = proc.wait()
+
+            while proc.poll() is None:
+                line = proc.stderr.readline().decode()
+                if line != "":
+                    lasterr = line
+                    print(line, end='')
+
+            code = proc.returncode
 
             if code <= 0:
                 error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
@@ -119,7 +127,7 @@ class ExtensionRunner:
                 error_msg = 'Extension "%s" exited instantly with code %s' % (extension_id, code)
                 logger.error(error_msg)
                 self.set_extension_error(extension_id, ExtRunErrorName.ExitedInstantly, error_msg)
-                error_info = ProcessErrorExtractor.extract_from_file_object(proc.stderr)
+                error_info = ProcessErrorExtractor(lasterr)
                 logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
                 if error_info.is_import_error():
                     self.set_extension_error(extension_id, ExtRunErrorName.MissingModule,
