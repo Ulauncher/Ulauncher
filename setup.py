@@ -187,6 +187,7 @@ def main():
         "test",
         "ulauncher.desktop.dev",
         "requirements.txt",
+        "conftest.py"
     ])
 
     DistUtilsExtra.auto.setup(
