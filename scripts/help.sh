@@ -6,7 +6,7 @@ help () {
   ${bold}./ul init-dev-env
     ${dim}Installs Ulauncher data (icons, static files for preferences, etc.) to '~/.local/share/ulauncher/'${normal}
 
-  ${bold}./ul cleanup-dev-evn
+  ${bold}./ul cleanup-dev-env
     ${dim}Removes files installed by './ul init-dev-env'. Also removes cache files, but not configs${normal}
 
   ${bold}./ul run
