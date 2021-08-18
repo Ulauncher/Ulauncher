@@ -44,7 +44,7 @@ class LaunchAppAction(BaseAction):
                 # Escape the Ulauncher cgroup, so this process isn't considered a child process of Ulauncher
                 # and doesn't die if Ulauncher dies/crashed/is terminated
                 sanitized_app = re.sub(r'[\W]', '-', app.get_name())
-                sanitized_exec = ['systemd-run', '--user', f'--slice={sanitized_app}.slice'] + sanitized_exec
+                sanitized_exec = ['systemd-run', '--user', '--scope', f'--slice={sanitized_app}.slice'] + sanitized_exec
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 # Start_new_session is only needed if systemd-run is missing
