@@ -18,7 +18,8 @@ make-release() {
     set -e
 
     create_deb
-    create_rpms
+    # RPMs deactivated for now
+    # create_rpms
     launchpad_upload
     aur_update
 }
