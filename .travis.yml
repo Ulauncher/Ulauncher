@@ -30,8 +30,6 @@ deploy:
   file:
     - ulauncher_${TRAVIS_TAG}.tar.gz
     - ulauncher_${TRAVIS_TAG}_all.deb
-    - ulauncher_${TRAVIS_TAG}_fedora.rpm
-    - ulauncher_${TRAVIS_TAG}_fedora33.rpm
   skip_cleanup: true
   on:
     repo: Ulauncher/Ulauncher
