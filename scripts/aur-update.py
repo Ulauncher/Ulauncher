@@ -26,7 +26,7 @@ project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__f
 
 
 def main():
-    if '-' in version or '~' in version:
+    if '-' in version:
         print("Unstable release detected. Won't update AUR")
         sys.exit(0)
     targz = get_targz_link()
