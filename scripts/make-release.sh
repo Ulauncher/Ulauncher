@@ -18,10 +18,15 @@ make-release() {
     set -e
 
     create_deb
+
     # RPMs deactivated for now
     # create_rpms
-    launchpad_upload
-    aur_update
+
+    # Upload if tag doesn't contain "test"
+    if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
+        launchpad_upload
+        aur_update
+    fi
 }
 
 create_deb() {
