@@ -20,51 +20,28 @@ except IndexError:
     print("ERROR: First argument should be version")
     sys.exit(1)
 
-git_tag = version.replace('~', '-')
-
-try:
-    update_stable = os.environ['UPDATE_STABLE'] in ('1', 'true')
-except KeyError:
-    print("ERROR: UPDATE_STABLE is not defined")
-    sys.exit(1)
-print('UPDATE_STABLE=%s' % update_stable)
-
-try:
-    allow_prerelease = os.environ['ALLOW_PRERELEASE'] in ('1', 'true')
-except KeyError:
-    print("Optional ALLOW_PRERELEASE is not set. Default to False")
-    allow_prerelease = False
-print('ALLOW_PRERELEASE=%s' % allow_prerelease)
-
-
-if update_stable:
-    aur_repo = "ssh://aur@aur.archlinux.org/ulauncher.git"
-else:
-    aur_repo = "ssh://aur@aur.archlinux.org/ulauncher-git.git"
+aur_repo = "ssh://aur@aur.archlinux.org/ulauncher.git"
 
 project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__file__)), '..')))
 
 
 def main():
-    release = fetch_release()
-    is_stable = 'beta' not in git_tag
-    if (not release['prerelease'] or allow_prerelease) and ((update_stable and is_stable) or not update_stable):
-        targz = get_targz_link()
-        pkgbuild = pkgbuild_from_template(targz)
-        push_update(pkgbuild)
-    else:
-        print("Don't update AUR")
+    if '-' in version or '~' in version:
+        print("Unstable release detected. Won't update AUR")
         sys.exit(0)
+    targz = get_targz_link()
+    pkgbuild = pkgbuild_from_template(targz)
+    push_update(pkgbuild)
 
 
 def fetch_release():
-    url = 'https://ext-api.ulauncher.io/misc/ulauncher-releases/%s' % git_tag
+    url = f'https://ext-api.ulauncher.io/misc/ulauncher-releases/{version}'
     print("Fetching release info from '%s'..." % url)
     return json.loads(urlopen(url).read().decode('utf-8'))
 
 
 def get_targz_link():
-    return 'https://github.com/Ulauncher/Ulauncher/releases/download/%s/ulauncher_%s.tar.gz' % (git_tag, version)
+    return f'https://github.com/Ulauncher/Ulauncher/releases/download/{version}/ulauncher_{version}.tar.gz'
 
 
 def pkgbuild_from_template(targz):
@@ -73,8 +50,6 @@ def pkgbuild_from_template(targz):
         content = f.read()
         content = re.sub(r'%VERSION%', version, content, flags=re.M)
         content = re.sub(r'%SOURCE%', targz, content, flags=re.M)
-        if not update_stable:
-            content = re.sub(r'pkgname=ulauncher', 'pkgname=ulauncher-git', content, flags=re.M)
         return content
 
 
