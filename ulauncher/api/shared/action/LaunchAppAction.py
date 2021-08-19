@@ -37,7 +37,7 @@ class LaunchAppAction(BaseAction):
             terminal_exec = shlex.split(settings.get_property('terminal-command'))
             if app.get_boolean('Terminal') and terminal_exec:
                 logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                sanitized_exec = terminal_exec + [shlex.quote(sanitized_exec)]
+                sanitized_exec = terminal_exec + [sanitized_exec]
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
             if hasSystemdRun:
