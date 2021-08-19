@@ -1,7 +1,9 @@
 [Desktop Entry]
 _Name=Ulauncher
 _Comment=Application launcher for Linux
-Categories=GNOME;Utility;
+GenericName=Launcher
+Categories=GNOME;GDK;Utility;
+TryExec=ulauncher
 Exec=env GDK_BACKEND=x11 ulauncher --hide-window
 Icon=ulauncher
 Terminal=false
