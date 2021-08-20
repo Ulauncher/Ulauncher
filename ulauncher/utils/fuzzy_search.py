@@ -1,51 +1,21 @@
-import operator
 from functools import lru_cache
-# pylint: disable=no-name-in-module
-from Levenshtein import distance
+from Levenshtein import distance, matching_blocks, editops
 
 
 @lru_cache(maxsize=150)
-def get_matching_indexes(query, text):
+def get_matching_blocks(query, text):
     """
-    Uses Longest Common Substring Algorithm to find the best match
-
-    Runs in O(nm)
-
-    :returns: a list of positions of chars from query inside text
+    Uses Levenstein library's get_matching_blocks (Longest Common Substring),
+    This is 8-12x faster than difflib's SequenceMatcher().get_matching_blocks()
+    :returns: List of tuples, containing the index and matching block
     """
-    query = query.lower()
-    text = text.lower()
-    m = len(query)
-    n = len(text)
-    counter = [[0] * (n + 1) for x in range(m + 1)]
-    for i in range(m):
-        for j in range(n):
-            if query[i] == text[j]:
-                c = counter[i][j] + 1
-                counter[i + 1][j + 1] = c
-
-    #       F  i  r  e  f  o  x     W  e  b     B  r  o  w  s  e  r
-    #  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # f [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # i [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    # w [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-    # e [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-    # b [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 0],
-    # r [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1],
-    # o [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0]]
-
-    positions = set()
-    i = m
-    while i > 0:
-        j, c = max(enumerate(counter[i]), key=operator.itemgetter(1))
-        if c:
-            for item in range(j - c, j):
-                positions.add(item)
-            i -= c
-        else:
-            i -= 1
-
-    return sorted(positions)
+    query_l = query.lower()
+    text_l = text.lower()
+    blocks = matching_blocks(editops(query_l, text_l), query_l, text_l)[:-1]
+    output = []
+    for (_, text_index, length) in blocks:
+        output.append((text_index, text[text_index: text_index + length]))
+    return output
 
 
 def get_score(query, text):

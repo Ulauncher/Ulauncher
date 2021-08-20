@@ -1,9 +1,9 @@
 import time
-from ulauncher.utils.fuzzy_search import get_matching_indexes, get_score
+from ulauncher.utils.fuzzy_search import get_matching_blocks, get_score
 
 
 def test_get_matching_indexes():
-    assert get_matching_indexes('fiwebro', 'Firefox Web Browser') == [0, 1, 8, 9, 12, 13, 14]
+    assert get_matching_blocks('thfima', 'Thunar File Manager') == [(0, 'Th'), (7, 'Fi'), (12, 'Ma')]
 
 
 def test_get_score():
