@@ -54,6 +54,8 @@ def push_update(source):
     print("Overwriting PKGBUILD and .SRCINFO")
     set_pkg_key('pkgver', version, 'PKGBUILD')
     set_pkg_key('pkgver', version, '.SRCINFO')
+    set_pkg_key('pkgrel', '1', 'PKGBUILD')
+    set_pkg_key('pkgrel', '1', '.SRCINFO')
     set_pkg_key('source', f'("{source}")', 'PKGBUILD')
     set_pkg_key('source', source, '.SRCINFO')
     print("Making a git commit")
