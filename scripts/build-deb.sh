@@ -16,7 +16,9 @@ build-deb () {
     set -e
 
     GPGKEY=${GPGKEY:-6BD735B0}
-    version=$(fix-version-format "$1")
+    version=$1
+    # Debian prerelease separator is "~" instead of "-" (semver prerelease separator)
+    deb_version=$(echo "$version" | tr "-" "~")
 
     if [ -z "$version" ]; then
         error "First argument should be a version"
@@ -26,7 +28,7 @@ build-deb () {
     h2 "Building DEB package for Ulauncher $version..."
 
     info "Checking that current version is not in debian/changelog"
-    if grep -q "$version" debian/changelog; then
+    if grep -q "$deb_version" debian/changelog; then
         error "debian/changelog already has a record about this version"
         exit 1
     fi
@@ -62,7 +64,7 @@ build-deb () {
     sed -i "s/%VERSION%/$version/g" setup.py
 
     if [ "$2" = "--deb" ]; then
-        sed -i "s/%VERSION%/$version/g" debian/changelog
+        sed -i "s/%VERSION%/$deb_version/g" debian/changelog
         sed -i "s/%RELEASE%/xenial/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
@@ -78,7 +80,7 @@ build-deb () {
         fi
 
         # replace version and release name
-        sed -i "s/%VERSION%/${version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
+        sed -i "s/%VERSION%/${deb_version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
         sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
 
         info "Importing GPG keys"

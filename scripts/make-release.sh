@@ -7,7 +7,7 @@ make-release() {
     # Args:
     # $1 version
 
-    export VERSION=$(fix-version-format "$1")
+    export VERSION=$1
     if [ -z "$VERSION" ]; then
         echo "First argument should be version"
         exit 1
@@ -18,10 +18,15 @@ make-release() {
     set -e
 
     create_deb
+
     # RPMs deactivated for now
     # create_rpms
-    launchpad_upload
-    aur_update
+
+    # Upload if tag doesn't contain "test"
+    if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
+        launchpad_upload
+        aur_update
+    fi
 }
 
 create_deb() {
@@ -79,12 +84,12 @@ aur_update() {
         -w $workdir \
         -v $(pwd):$workdir \
         $ARCH_BUILD_IMAGE \
-        bash -c "UPDATE_STABLE=1 ./ul aur-update $VERSION"
+        bash -c "./ul aur-update $VERSION"
 }
 
 launchpad_upload() {
-    # check if release name contains beta or dev to decide which PPA to use
-    if echo "$VERSION" | grep -q beta; then
+    # check if release name contains prerelease-separator "-" to decide which PPA to use
+    if [[ "$VERSION" == *-* ]]; then
         PPA="agornostal/ulauncher-dev"
     else
         PPA="agornostal/ulauncher"
