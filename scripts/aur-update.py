@@ -4,9 +4,7 @@
 
 import os
 import sys
-import re
-from urllib.request import urlopen
-import json
+import shlex
 from tempfile import mkdtemp
 from subprocess import call
 
@@ -27,33 +25,21 @@ project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__f
 
 def main():
     if '-' in version:
-        print("Unstable release detected. Won't update AUR")
+        print("Pre-release detected. Skipping AUR repository update")
         sys.exit(0)
-    targz = get_targz_link()
-    pkgbuild = pkgbuild_from_template(targz)
-    push_update(pkgbuild)
-
-
-def fetch_release():
-    url = f'https://ext-api.ulauncher.io/misc/ulauncher-releases/{version}'
-    print("Fetching release info from '%s'..." % url)
-    return json.loads(urlopen(url).read().decode('utf-8'))
+    source = get_targz_link()
+    push_update(source)
 
 
 def get_targz_link():
     return f'https://github.com/Ulauncher/Ulauncher/releases/download/{version}/ulauncher_{version}.tar.gz'
 
 
-def pkgbuild_from_template(targz):
-    template_file = '%s/PKGBUILD.template' % project_path
-    with open(template_file) as f:
-        content = f.read()
-        content = re.sub(r'%VERSION%', version, content, flags=re.M)
-        content = re.sub(r'%SOURCE%', targz, content, flags=re.M)
-        return content
+def set_pkg_key(key, val, file):
+    run_shell(f'sed -i -e \'/{key}\\s*=/ s#\\(=\\s*\\).*#\\1{val}#\' {file}')
 
 
-def push_update(pkgbuild):
+def push_update(source):
     ssh_key = os.sep.join((project_path, 'scripts', 'aur_key'))
     git_ssh_command = 'ssh -oStrictHostKeyChecking=no -i %s' % ssh_key
     ssh_enabled_env = dict(os.environ, GIT_SSH_COMMAND=git_ssh_command)
@@ -61,27 +47,25 @@ def push_update(pkgbuild):
     temp_dir = mkdtemp()
     print("Temp dir: %s" % temp_dir)
     print("Cloning AUR repo: %s" % aur_repo)
-    run_shell(('git', 'clone', aur_repo, temp_dir), env=ssh_enabled_env)
+    run_shell(f'git clone {aur_repo} {temp_dir}', env=ssh_enabled_env)
     os.chdir(temp_dir)
-    run_shell(('git', 'config', 'user.email', 'ulauncher.app@gmail.com'))
-    run_shell(('git', 'config', 'user.name', 'Aleksandr Gornostal'))
-    print("Writing PKGBUILD")
-    with open('PKGBUILD', 'w') as f:
-        f.write(pkgbuild)
-    print("Writing .SRCINFO")
-    with open('.SRCINFO', 'w') as f:
-        run_shell(('makepkg', '--printsrcinfo'), stdout=f)
+    run_shell('git config user.email ulauncher.app@gmail.com')
+    run_shell('git config user.name Aleksandr Gornostal')
+    print("Overwriting PKGBUILD and .SRCINFO")
+    set_pkg_key('pkgver', version, 'PKGBUILD')
+    set_pkg_key('pkgver', version, '.SRCINFO')
+    set_pkg_key('source', f'("{source}")', 'PKGBUILD')
+    set_pkg_key('source', source, '.SRCINFO')
     print("Making a git commit")
-    run_shell(('git', 'add', 'PKGBUILD', '.SRCINFO'))
-    run_shell(('git', 'commit', '-m', 'Version update %s' % version))
+    run_shell(f'git commit PKGBUILD .SRCINFO -m "Version update {version}"')
     print("Pushing changes to master branch")
-    run_shell(('git', 'push', 'origin', 'master'), env=ssh_enabled_env)
+    run_shell('git push origin master', env=ssh_enabled_env)
 
 
 def run_shell(command, **kw):
-    code = call(command, **kw)
+    code = call(shlex.split(command), **kw)
     if code:
-        print("ERROR: command %s exited with code %s" % (command, code))
+        print(f'ERROR: command {command} exited with code {code}')
         sys.exit(1)
 
 
