@@ -19,7 +19,7 @@ except IndexError:
     sys.exit(1)
 
 aur_repo = "ssh://aur@aur.archlinux.org/ulauncher.git"
-
+AUR_ARRAY_PROPS = ['source', 'sha256sums']  # Not actually complete, just added the props we use
 project_path = os.path.abspath(os.sep.join((os.path.dirname(os.path.realpath(__file__)), '..')))
 
 
@@ -35,8 +35,14 @@ def get_targz_link():
     return f'https://github.com/Ulauncher/Ulauncher/releases/download/{version}/ulauncher_{version}.tar.gz'
 
 
-def set_pkg_key(key, val, file):
+def _set_pkg_key_(key, val, file):
     run_shell(f'sed -i -e \'/{key}\\s*=/ s#\\(=\\s*\\).*#\\1{val}#\' {file}')
+
+
+# Note that this doesn't work to set arrays unless they're single values
+def set_pkg_key(key, val):
+    _set_pkg_key_(key, val if key not in AUR_ARRAY_PROPS else f'("{val}")', 'PKGBUILD')
+    _set_pkg_key_(key, val, '.SRCINFO')
 
 
 def push_update(source):
@@ -52,12 +58,9 @@ def push_update(source):
     run_shell('git config user.email ulauncher.app@gmail.com')
     run_shell('git config user.name Aleksandr Gornostal')
     print("Overwriting PKGBUILD and .SRCINFO")
-    set_pkg_key('pkgver', version, 'PKGBUILD')
-    set_pkg_key('pkgver', version, '.SRCINFO')
-    set_pkg_key('pkgrel', '1', 'PKGBUILD')
-    set_pkg_key('pkgrel', '1', '.SRCINFO')
-    set_pkg_key('source', f'("{source}")', 'PKGBUILD')
-    set_pkg_key('source', source, '.SRCINFO')
+    set_pkg_key('pkgver', version)
+    set_pkg_key('pkgrel', '1')
+    set_pkg_key('source', source)
     print("Making a git commit")
     run_shell(f'git commit PKGBUILD .SRCINFO -m "Version update {version}"')
     print("Pushing changes to master branch")
