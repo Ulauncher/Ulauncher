@@ -101,4 +101,7 @@ build-deb () {
         error "Second argument must be either --deb or --upload"
         exit 1
     fi
+
+    # Rename dpkg-buildpackage output file to be consistent with our naming 
+    mv "$tmpdir/ulauncher_${deb_version}_all.deb" "$tmpdir/ulauncher_${version}_all.deb"
 }
