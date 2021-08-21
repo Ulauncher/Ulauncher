@@ -30,6 +30,7 @@ make-release() {
 }
 
 create_deb() {
+    DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
     step1="ln -s /var/node_modules data/preferences" # take node modules from cache
     step2="ln -s /var/bower_components data/preferences"
     step3="./ul test"
@@ -45,7 +46,7 @@ create_deb() {
         bash -c "$step1 && $step2 && $step3 && $step4 && $step5"
     set +x
     docker cp ulauncher-deb:/tmp/ulauncher_$VERSION.tar.gz .
-    docker cp ulauncher-deb:/tmp/ulauncher_${VERSION}_all.deb .
+    docker cp "ulauncher-deb:/tmp/ulauncher_${DEB_VERSION}_all.deb" "ulauncher_${VERSION}_all.deb"
     docker rm ulauncher-deb
 }
 
