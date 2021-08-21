@@ -56,7 +56,7 @@ def push_update(source):
     run_shell(f'git clone {aur_repo} {temp_dir}', env=ssh_enabled_env)
     os.chdir(temp_dir)
     run_shell('git config user.email ulauncher.app@gmail.com')
-    run_shell('git config user.name Aleksandr Gornostal')
+    run_shell('git config user.name "Aleksandr Gornostal"')
     print("Overwriting PKGBUILD and .SRCINFO")
     set_pkg_key('pkgver', version)
     set_pkg_key('pkgrel', '1')
