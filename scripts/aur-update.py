@@ -49,14 +49,14 @@ def push_update(source):
     ssh_key = os.sep.join((project_path, 'scripts', 'aur_key'))
     git_ssh_command = 'ssh -oStrictHostKeyChecking=no -i %s' % ssh_key
     ssh_enabled_env = dict(os.environ, GIT_SSH_COMMAND=git_ssh_command)
-
+    run_shell('git config user.email ulauncher.app@gmail.com')
+    run_shell('git config user.name "Aleksandr Gornostal"')
+    cwd = os.getcwd()
     temp_dir = mkdtemp()
     print("Temp dir: %s" % temp_dir)
     print("Cloning AUR repo: %s" % aur_repo)
     run_shell(f'git clone {aur_repo} {temp_dir}', env=ssh_enabled_env)
     os.chdir(temp_dir)
-    run_shell('git config user.email ulauncher.app@gmail.com')
-    run_shell('git config user.name "Aleksandr Gornostal"')
     print("Overwriting PKGBUILD and .SRCINFO")
     set_pkg_key('pkgver', version)
     set_pkg_key('pkgrel', '1')
@@ -65,6 +65,8 @@ def push_update(source):
     run_shell(f'git commit PKGBUILD .SRCINFO -m "Version update {version}"')
     print("Pushing changes to master branch")
     run_shell('git push origin master', env=ssh_enabled_env)
+    os.chdir(cwd)
+    os.rmdir(temp_dir)
 
 
 def run_shell(command, **kw):
