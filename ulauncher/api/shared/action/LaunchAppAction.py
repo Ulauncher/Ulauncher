@@ -3,6 +3,7 @@ import subprocess
 import re
 import shlex
 import shutil
+from pathlib import Path
 
 from ulauncher.utils.desktop.reader import read_desktop_file
 from ulauncher.utils.Settings import Settings
@@ -28,6 +29,7 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
+        app_id = Path(self.filename).with_suffix('').stem
         exec = app.get_string('Exec')
         if not exec:
             logger.error("No command to run %s", self.filename)
@@ -43,8 +45,10 @@ class LaunchAppAction(BaseAction):
             if hasSystemdRun:
                 # Escape the Ulauncher cgroup, so this process isn't considered a child process of Ulauncher
                 # and doesn't die if Ulauncher dies/crashed/is terminated
-                sanitized_app = re.sub(r'[\W]+', ' ', app.get_name()).strip().replace(" ", "-")
-                sanitized_exec = ['systemd-run', '--user', '--scope', f'--slice={sanitized_app}.slice'] + sanitized_exec
+                # The slice name is super sensitive and must not contain invalid characters like space
+                # or trailing or leading hyphens
+                sanitized_app = re.sub(r'(^-*|[^\w^\-^\.]|-*$)', '', app_id)
+                sanitized_exec = ['systemd-run', '--user', '--scope', f'--slice=app-{sanitized_app}'] + sanitized_exec
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 # Start_new_session is only needed if systemd-run is missing
