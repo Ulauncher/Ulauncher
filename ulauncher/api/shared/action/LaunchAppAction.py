@@ -37,9 +37,12 @@ class LaunchAppAction(BaseAction):
             # strip field codes %f, %F, %u, %U, etc
             sanitized_exec = re.sub(r'\%[uUfFdDnNickvm]', '', exec).rstrip()
             terminal_exec = shlex.split(settings.get_property('terminal-command'))
-            if app.get_boolean('Terminal') and terminal_exec:
-                logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                sanitized_exec = terminal_exec + [sanitized_exec]
+            if app.get_boolean('Terminal'):
+                if terminal_exec:
+                    logger.info('Will run command in preferred terminal (%s)', terminal_exec)
+                    sanitized_exec = terminal_exec + [sanitized_exec]
+                else:
+                    sanitized_exec = ['gtk-launch', app_id]
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
             if hasSystemdRun:
