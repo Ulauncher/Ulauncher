@@ -21,12 +21,6 @@ build-release() {
 
     # RPMs deactivated for now
     # create_rpms
-
-    # Upload if tag doesn't contain "test"
-    if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
-        launchpad_upload
-        aur_update
-    fi
 }
 
 create_deb() {

@@ -27,7 +27,6 @@ deploy:
   provider: releases
   draft: true
   name: $TRAVIS_TAG
-  body: $(git tag -l --format='%(contents)' $TRAVIS_TAG)
   api_key:
     secure: EG0AuBGirBDu5XYKFZwITcXq/0U50f2PR5UVhbspr6D8LLcLbuxItMVnNjSuT1BQNpt7ijJ3gQfkh0QXZdv02d/H0l0+U2YCCyytvypMeqSfVawIGxYvYK2i5DH+0k7rVC9WoimpB+4lNx+VZILwzjudCzzefH8+ZSPPoeFOPYC8SU/VYPx2K31jgz7LlTWiEsijPF8XErXmHdQ3IDnDFnNZpNVnWPlArozQkqsJF9tosBPO72ZLFKLpAH+Eg+WVnPmqQlzH6MIzE9bsyxDD98mRvhkBNUI8EJI/qPqLczA9wJVt33VJrnQhJP5QEhNZ4IwyHuK61oUqM6/Q80LJhFpxeNebnkGIYWrkmY8pKJAV/BnIU8ejiVrMxqLzq+plb1Bzz08NLSyD9xp0o4KHDuMC/e6dohuNFaSlOCHv41Z9bQrGBXnQRjG4b4vN1cAK8ozVVLO2hosWf1vj0ItUPzZG4X1psjspbEcWlDyPak6ZUYoVsT9/xsGojN7N6MPqXxnrkzn+ffHL/gzdE6nIxwQNeg42xrRfepvO+96G4c53gF/YEMLYccKarfriLmrpRd+OzYx2Dbc8K2AMhXE5gseswQmHeSJj0ln0Kd1XKBEGqYlwtha3ZzRvOR00I9ONhAZL2fasX/H19nL9odH5NsdVjzxv9vuA2Q2KiA/meZc=
   file:
