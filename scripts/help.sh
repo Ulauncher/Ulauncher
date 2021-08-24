@@ -64,6 +64,9 @@ The commands below are useful for maintainers:
   ${bold}./ul build-preferences
     ${dim}Builds JS/HTML/CSS files for Preferences UI${normal}
 
+  ${bold}./ul tag-release
+    ${dim} Wrapper script to tag a new release and help you make the change note${normal}
+
   ${bold}./ul build-release
     ${dim}[Travis CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
 
