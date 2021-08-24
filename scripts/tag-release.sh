@@ -29,7 +29,7 @@ tag-release() {
     LOG=$(cat /tmp/ulauncher-release-notes)
 
     # Creates the tag
-    git tag -a $TAG -m "\n$LOG"
+    git tag -a $TAG -m "$LOG"
 
-    echo "Push the new tag with 'git push' and 'git push origin $TAG' (assuming origin is the correct remote)"
+    echo "Push the new tag with 'git push && git push origin $TAG' (assuming origin is the correct remote)"
 }
