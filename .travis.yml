@@ -16,7 +16,7 @@ install:
   - true
 script:
   - if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ -z "$TRAVIS_TAG" ]; then ./ul run-ci; fi
-  - if [ ! -z "$TRAVIS_TAG" ] && [ ! -z "$encrypted_103700d0e85f_key" ]; then ./ul make-release $TRAVIS_TAG; fi
+  - if [ ! -z "$TRAVIS_TAG" ] && [ ! -z "$encrypted_103700d0e85f_key" ]; then ./ul build-release $TRAVIS_TAG; fi
 branches:
   only:
   - master

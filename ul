@@ -13,7 +13,7 @@
 . scripts/create-build-images.sh
 . scripts/build-doc.sh
 . scripts/build-preferences.sh
-. scripts/make-release.sh
+. scripts/build-release.sh
 . scripts/send-signal.sh
 . scripts/travis-cli-container.sh
 . scripts/run-ci.sh
@@ -42,7 +42,7 @@ main () {
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
     build-preferences) build-preferences $2 ;;
-    make-release) make-release $2 ;;
+    build-release) build-release $2 ;;
     travis-cli-container) travis-cli-container ;;
     run-ci) run-ci ;;
     watch-doc) watch-doc ;;

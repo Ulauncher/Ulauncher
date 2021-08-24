@@ -3,7 +3,7 @@
 #############################
 # Build tar.gz in a container
 #############################
-make-release() {
+build-release() {
     # Args:
     # $1 version
 
