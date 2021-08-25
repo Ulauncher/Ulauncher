@@ -46,7 +46,7 @@ class SortedList:
         # get_search_name() returns a string with the app display name, but it may contain a
         # second line in which case that line is the name of the executable
         search_fields = result_item.get_search_name()
-        name, exec_name, *_ = f'{search_fields}\n'.split('\n')
+        name, exec_name, *_ = '{}\n'.format(search_fields).split('\n')
         score = max(
             get_score(self._query, name),
             get_score(self._query, exec_name) * .8

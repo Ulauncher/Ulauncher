@@ -169,4 +169,4 @@ def search_name(name, exec_name):
     Returns string that will be used for search
     We want to make sure app can be searchable by its exec_line
     """
-    return f'{name}\n{exec_name}'
+    return '{}\n{}'.format(name, exec_name)
