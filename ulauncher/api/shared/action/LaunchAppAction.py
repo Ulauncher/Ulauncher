@@ -51,7 +51,12 @@ class LaunchAppAction(BaseAction):
                 # The slice name is super sensitive and must not contain invalid characters like space
                 # or trailing or leading hyphens
                 sanitized_app = re.sub(r'(^-*|[^\w^\-^\.]|-*$)', '', app_id)
-                sanitized_exec = ['systemd-run', '--user', '--scope', '--slice=app-{}'.format(sanitized_app)] + sanitized_exec
+                sanitized_exec = [
+                    'systemd-run',
+                    '--user',
+                    '--scope',
+                    '--slice=app-{}'.format(sanitized_app)
+                ] + sanitized_exec
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 # Start_new_session is only needed if systemd-run is missing
