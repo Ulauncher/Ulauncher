@@ -2,9 +2,8 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
 import os
+import re
 import sys
-
-from itertools import takewhile, dropwhile
 
 try:
     import DistUtilsExtra.auto
@@ -71,35 +70,18 @@ def move_desktop_file(root, target_data, prefix):
 
 
 def update_desktop_file(filename, target_pkgdata, target_scripts):
-
-    def is_env(p):
-        return p == 'env' or '=' in p
-
     try:
-        fin = open(filename, 'r')
-        fout = open(filename + '.new', 'w')
+        with open(filename, "r") as fin:
+            src = fin.read()
 
-        for line in fin:
-            if 'Exec=' in line:
-                cmd = line.split("=", 1)[1]
+        dst = re.sub(
+            r"((Try)?Exec)=(.*?)(/[^ ]+/)?ulauncher(.*)",
+            r"\1=\3{}ulauncher\5".format(target_scripts),
+            src
+        )
 
-                # persist env vars
-                env_vars = ''
-                if cmd.startswith('env '):
-                    env_vars = ' '.join(list(takewhile(is_env, cmd.split()))) \
-                               + ' '
-                    cmd = ' '.join(list(dropwhile(is_env, cmd.split())))
-
-                cmd = cmd.split(None, 1)
-                line = "Exec=%s%s%s" % (env_vars, target_scripts, 'ulauncher')
-                if len(cmd) > 1:
-                    line += " %s" % cmd[1].strip()  # Add script arguments back
-                line += "\n"
-            fout.write(line)
-        fout.flush()
-        fout.close()
-        fin.close()
-        os.rename(fout.name, fin.name)
+        with open(filename, "w") as fout:
+            fout.write(dst)
     except (OSError, IOError):
         print("ERROR: Can't find %s" % filename)
         sys.exit(1)
