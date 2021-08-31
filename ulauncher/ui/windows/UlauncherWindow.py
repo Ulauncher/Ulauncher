@@ -178,13 +178,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
-            if keyname in ('Up', 'ISO_Left_Tab'):
+            if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
                 self.results_nav.go_up()
                 return True
-            if keyname in ('Down', 'Tab'):
+            if keyname in ('Down', 'Tab') or (ctrl and keyname == 'n'):
                 self.results_nav.go_down()
                 return True
             if alt and keyname in ('Return', 'KP_Enter'):
