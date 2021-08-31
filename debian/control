@@ -9,6 +9,8 @@ Build-Depends: debhelper (>=9~),
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 4.1.4
 X-Python3-Version: >= 3.5
+Homepage: https://ulauncher.io/
+Vcs-Browser: https://github.com/Ulauncher/Ulauncher
 
 Package: ulauncher
 Architecture: all
