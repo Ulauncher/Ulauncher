@@ -1,4 +1,7 @@
 #!/usr/bin/make -f
+# Enable this export to get more detailed information about what debhelper does during the build process.
+#export DH_VERBOSE = 1
+
 %:
 ifneq ($(shell dh -l | grep -xF translations),)
 	dh $@ --with python3,translations --buildsystem=pybuild
