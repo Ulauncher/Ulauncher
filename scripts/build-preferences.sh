@@ -15,6 +15,5 @@ build-preferences () {
     set -x
     yarn install
     yarn lint
-    yarn unit
     yarn build
 }
