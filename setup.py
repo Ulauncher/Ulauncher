@@ -55,7 +55,7 @@ def move_desktop_file(root, target_data, prefix):
     if not os.path.exists(old_desktop_file):
         print("ERROR: Can't find", old_desktop_file)
         sys.exit(1)
-    elif target_data != prefix + '/':
+    elif os.path.normpath(target_data) != os.path.normpath(prefix):
         # This is an /opt install, so rename desktop file to use extras-
         desktop_file = desktop_path + '/extras-ulauncher.desktop'
         try:
@@ -91,16 +91,18 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
     def run(self):
         DistUtilsExtra.auto.install_auto.run(self)
 
-        target_data = '/' + os.path.relpath(self.install_data, self.root) + '/'
+        # Root is undefined if not installing into an alternate root
+        root = self.root or "/"
+        target_data = '/' + os.path.relpath(self.install_data, root) + '/'
         target_pkgdata = target_data + 'share/ulauncher/'
         target_scripts = '/' + os.path.relpath(self.install_scripts,
-                                               self.root) + '/'
+                                               root) + '/'
 
         values = {'__ulauncher_data_directory__': "'%s'" % (target_pkgdata),
                   '__version__': "'%s'" % self.distribution.get_version()}
         update_config(self.install_lib, values)
 
-        desktop_file = move_desktop_file(self.root, target_data, self.prefix)
+        desktop_file = move_desktop_file(root, target_data, self.prefix)
         update_desktop_file(desktop_file, target_pkgdata, target_scripts)
 
 
@@ -213,6 +215,12 @@ def main():
             ('share/icons/elementary/scalable/apps', [
                 'data/media/icons/elementary/ulauncher-indicator.svg'
             ]),
+            ('share/applications', [
+                'build/share/applications/ulauncher.desktop'
+            ]),
+            ('lib/systemd/user', [
+                'ulauncher.service'
+            ])
         ]),
         cmdclass={'install': InstallAndUpdateDataDirectory}
     )
