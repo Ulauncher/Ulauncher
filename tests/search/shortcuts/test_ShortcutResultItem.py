@@ -27,7 +27,7 @@ class TestShortcutResultItem:
 
     @pytest.fixture
     def item(self):
-        return ShortcutResultItem('kw', 'name', 'http://site/?q=%s', 'icon_path',
+        return ShortcutResultItem('kw', 'name', 'https://site/?q=%s', 'icon_path',
                                   is_default_search=True, run_without_argument=False)
 
     def test_get_keyword(self, item):
@@ -37,9 +37,9 @@ class TestShortcutResultItem:
         assert item.get_name() == 'name'
 
     def test_get_description(self, item):
-        assert item.get_description(Query('kw test')) == 'http://site/?q=test'
-        assert item.get_description(Query('keyword test')) == 'http://site/?q=...'
-        assert item.get_description(Query('goo')) == 'http://site/?q=...'
+        assert item.get_description(Query('kw test')) == 'https://site/?q=test'
+        assert item.get_description(Query('keyword test')) == 'https://site/?q=...'
+        assert item.get_description(Query('goo')) == 'https://site/?q=...'
 
     def test_get_icon(self, mocker, item):
         load_image = mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.load_image')
@@ -48,20 +48,20 @@ class TestShortcutResultItem:
 
     def test_on_enter(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         assert item.on_enter(Query('kw test')) is ActionList.return_value
-        OpenUrlAction.assert_called_once_with('http://site/?q=test')
+        OpenUrlAction.assert_called_once_with('https://site/?q=test')
         assert not SetUserQueryAction.called
 
     def test_on_enter__default_search(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         item.is_default_search = True
         assert item.on_enter(Query('search query')) is ActionList.return_value
-        OpenUrlAction.assert_called_once_with('http://site/?q=search query')
+        OpenUrlAction.assert_called_once_with('https://site/?q=search query')
         assert not SetUserQueryAction.called
 
     def test_on_enter__run_without_arguments(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         item.run_without_argument = True
         assert item.on_enter(Query('kw')) is ActionList.return_value
         # it doesn't replace %s if run_without_argument = True
-        OpenUrlAction.assert_called_once_with('http://site/?q=%s')
+        OpenUrlAction.assert_called_once_with('https://site/?q=%s')
         assert not SetUserQueryAction.called
 
     def test_on_enter__misspelled_kw(self, item, ActionList, OpenUrlAction, SetUserQueryAction):

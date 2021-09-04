@@ -20,7 +20,7 @@ Basically they get the same rights as a user that runs Ulauncher.
 
 Extension API v2 (current) enables extension developers to write **custom handlers for keywords**.
 
-.. figure:: http://i.imgur.com/bc2bzZ8.png
+.. figure:: https://i.imgur.com/bc2bzZ8.png
   :align: center
 
   "ti" is a keyword, the rest of the query is an argument in this case.

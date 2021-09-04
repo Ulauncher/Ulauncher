@@ -8,7 +8,7 @@ Ulauncher is a fast application launcher for Linux. It's is written in Python, u
 
 | App Search | File Browser | Color Themes |
 ---|---|---
-|![screenshot](http://i.imgur.com/8FpJLGG.png?1)|![screenshot](http://i.imgur.com/wJvXSmP.png?1)|![screenshot](http://i.imgur.com/2a4GCW7.png?1)|
+|![screenshot](https://i.imgur.com/8FpJLGG.png?1)|![screenshot](https://i.imgur.com/wJvXSmP.png?1)|![screenshot](https://i.imgur.com/2a4GCW7.png?1)|
 
 For more info or download links see [ulauncher.io](https://ulauncher.io)
 

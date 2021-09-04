@@ -27,7 +27,7 @@ export default {
           icon: 'fa-book',
           label: 'Extension API Docs',
           text: 'Here you can find documentation on how to create extensions and custom color themes',
-          url: 'http://docs.ulauncher.io'
+          url: 'https://docs.ulauncher.io'
         },
         {
           icon: 'fa-github',

@@ -191,7 +191,7 @@ Now restart Ulauncher.
 
 .. TIP:: Run ``ulauncher -v`` from command line to see verbose output.
 
-.. figure:: http://i.imgur.com/GlEfHjA.png
+.. figure:: https://i.imgur.com/GlEfHjA.png
   :align: center
 
 
@@ -342,7 +342,7 @@ Custom Action on Item Enter
 
 
 
-.. figure:: http://i.imgur.com/3x7SXgi.png
+.. figure:: https://i.imgur.com/3x7SXgi.png
   :align: center
 
   Now this will be rendered when you click on any item

@@ -41,5 +41,5 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 `python-websocket <https://github.com/websocket-client/websocket-client>`_
   websocket client for python
 
-`python-xdg <http://pyxdg.readthedocs.io/en/latest/index.html>`_
+`python-xdg <https://pyxdg.readthedocs.io/en/latest/index.html>`_
   Python library supporting various freedesktop standards.

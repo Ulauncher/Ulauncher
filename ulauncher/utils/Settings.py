@@ -83,8 +83,8 @@ class Settings(GObject.GObject):
 
     # __gproperties__ is used only to register properties
     # More info about __gproperties__
-    # http://www.pygtk.org/articles/subclassing-gobject/sub-classing-gobject-in-python.htm#d0e127
-    # http://python-gtk-3-tutorial.readthedocs.org/en/latest/objects.html
+    # https://www.pygtk.org/articles/subclassing-gobject/sub-classing-gobject-in-python.htm#d0e127
+    # https://python-gtk-3-tutorial.readthedocs.org/en/latest/objects.html
     __gproperties__ = GPROPERTIES
 
     _filename = None

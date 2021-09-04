@@ -41,7 +41,7 @@
           <i class="fa fa-external-link"></i>
           <span>Discover extensions</span>
         </li>
-        <li class="link" @click="openUrlInBrowser('http://docs.ulauncher.io')">
+        <li class="link" @click="openUrlInBrowser('https://docs.ulauncher.io')">
           <i class="fa fa-external-link"></i>
           <span>Create your own</span>
         </li>

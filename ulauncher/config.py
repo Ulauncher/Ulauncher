@@ -117,7 +117,7 @@ def get_default_shortcuts():
         "id": str(uuid4()),
         "name": "Stack Overflow",
         "keyword": "so",
-        "cmd": "http://stackoverflow.com/search?q=%s",
+        "cmd": "https://stackoverflow.com/search?q=%s",
         "icon": get_data_file('media/stackoverflow-icon.svg'),
         "is_default_search": True,
         "run_without_argument": False,

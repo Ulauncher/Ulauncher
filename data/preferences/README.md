@@ -24,5 +24,5 @@ yarn run unit
 yarn test
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) 
-and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+For detailed explanation on how things work, checkout the [guide](https://vuejs-templates.github.io/webpack/) 
+and [docs for vue-loader](https://vuejs.github.io/vue-loader).

@@ -58,7 +58,7 @@
         To find out how to migrate extension from API v1 to v2 see
         <a
           href
-          @click.prevent="openUrl('http://docs.ulauncher.io/en/latest/extensions/migration.html#migrate-from-api-v1-to-v2-0-0')"
+          @click.prevent="openUrl('https://docs.ulauncher.io/en/latest/extensions/migration.html')"
         >extension migration docs</a>.
       </small>
     </b-alert>
