@@ -55,6 +55,7 @@ build-deb () {
         setup.py \
         ulauncher \
         ulauncher.desktop.in \
+        ulauncher.service \
         $tmpsrc \
         --exclude-from=.gitignore
     rm -rf $tmpsrc/data/preferences/*
