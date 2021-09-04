@@ -31,6 +31,7 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 * [Can't map the keys to ALT+SPACE](https://github.com/Ulauncher/Ulauncher/issues/100)
 * [Hotkey doesn't work in Wayland when is triggered from certain apps](https://github.com/Ulauncher/Ulauncher/issues/183)
 * [Border appears around ulauncher window in Sway DE](https://github.com/Ulauncher/Ulauncher/issues/230#issuecomment-570736422)
+* [Pass custom environment variable to Ulauncher](https://github.com/Ulauncher/Ulauncher/pull/800#issuecomment-912902616)
 
 
 ### Code Contribution
