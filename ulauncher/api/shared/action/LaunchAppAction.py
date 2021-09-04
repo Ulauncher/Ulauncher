@@ -46,7 +46,7 @@ class LaunchAppAction(BaseAction):
                     sanitized_exec = ['gtk-launch', app_id]
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
-            if hasSystemdRun:
+            if hasSystemdRun and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
                 # Escape the Ulauncher cgroup, so this process isn't considered a child process of Ulauncher
                 # and doesn't die if Ulauncher dies/crashed/is terminated
                 # The slice name is super sensitive and must not contain invalid characters like space
