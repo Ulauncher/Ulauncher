@@ -47,30 +47,34 @@ Contributions are appreciated, but before you put a the work in please ensure th
 
 ### Setup Development Environment
 
-You must have the following things installed:
+You need the the following:
 
 * [Docker](https://docs.docker.com/engine/installation/)
-* python3-distutils-extra
-* Application runtime dependencies.
-  (You don't have to manually install these if you have already installed Ulauncher)
+* python3-distutils-extra (may just be named python-distutils-extra in some distros)
+* Application runtime dependencies (if you already installed Ulauncher you should have these)
+
+#### Distro specific instructions
+
+<details>
+  <summary>Ubuntu/Debian</summary>
+
+  Install the dependencies (note that Docker recommends to use their installation instructions instead to get the latest version)
 
   ```
-  sudo apt-get install \
-    libkeybinder-3.0-0 \
-    libgtk-3-0 \
-    gir1.2-gtk-3.0 \
-    gir1.2-keybinder-3.0 \
-    gir1.2-webkit2-4.0 \
-    gir1.2-glib-2.0 \
-    gir1.2-notify-0.7 \
-    gir1.2-gdkpixbuf-2.0 \
-    gir1.2-ayatanaappindicator3-0.1 \
-    python3-dbus \
-    python3-levenshtein \
-    python3-pyinotify \
-    python3-websocket \
-    python3-xdg
+  sudo apt-get update && sudo apt-get install \
+    docker.io gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
+    gir1.2-{gtk-3.0,keybinder-3.0,webkit2-4.0,glib-2.0,gdkpixbuf-2.0,notify-0.7,ayatanaappindicator3-0.1} \
+    python3-{all,gi,distutils-extra,xdg,dbus,pyinotify,levenshtein,websocket}
   ```
+  
+  Enable docker and set permissions
+  
+  ```
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker $USER
+  ```
+
+</details>
 
 ### How to build, run and contribute
 1. Fork the repo and clone your fork locally.
