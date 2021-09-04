@@ -43,10 +43,7 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 | [Frontend for extensions website](https://github.com/Ulauncher/ext.ulauncher.io) <br> Uses ReactJS | [![GitHub issues by-label](https://img.shields.io/github/issues/Ulauncher/ext.ulauncher.io/contributor-friendly.svg?color=3cf014&label=contributor-friendly&style=for-the-badge)](https://github.com/Ulauncher/ext.ulauncher.io/labels/contributor-friendly)|
 | [API for extensions website](https://github.com/Ulauncher/ext-api.ulauncher.io) <br> Uses Python and bottle library | [![GitHub issues by-label](https://img.shields.io/github/issues/Ulauncher/ext-api.ulauncher.io/contributor-friendly.svg?color=3cf014&label=contributor-friendly&style=for-the-badge)](https://github.com/Ulauncher/ext-api.ulauncher.io/labels/contributor-friendly)|
 
-Any code contributions are welcomed as long as they are discussed in [Github Issues](https://github.com/Ulauncher/Ulauncher/issues) with maintainers.
-Be aware that if you decide to change something and submit a PR on your own, it may not be accepted.
-
-Checkout [Code Contribution Guidelines](https://github.com/Ulauncher/Ulauncher/wiki/Code-Contribution) for more info.
+Contributions are appreciated, but before you put a the work in please ensure that it's a feature or improvement we want by creating an [issue](https://github.com/Ulauncher/Ulauncher/issues) for it if there isn't one already. Be aware that we might still not accept the PR depending on the implementation. Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straight forward to implement without in depth knowledge of the Ulauncher architecture.
 
 ### Setup Development Environment
 
@@ -75,14 +72,21 @@ You must have the following things installed:
     python3-xdg
   ```
 
-### Build and Run
-1. `$ ./ul init-dev-env` installs Ulauncher data to `~/.local/share/ulauncher/`
-1. `$ ./ul dev-container` will take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
-1. `root@container: # ./ul build-preferences` build preferences UI in JS/HTML
-1. `root@container: # ./ul test` runs linter, type checker, and unit tests
-1. `$ ./ul run` runs the app
+### How to build, run and contribute
+1. Fork the repo and clone your fork locally.
+1. Create a new branch for your PR
+1. Run `$ ./ul dev-container` to take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
+1. Build the preferences UI from inside the docker container: `root@container: # ./ul build-preferences`
+1. Make your changes to the code
+1. Run the app `$ ./ul run`
+1. Write unit tests and check if all tests pass using `root@container: # ./ul test` command (preferably from inside the container)
+1. Create a pull request (provide the relevant information suggested by the template)
 
-Check out output of `./ul` to find more useful commands.
+For GTK-related issues you may want to check out [Useful Resources for a Python GTK Developer](https://github.com/Ulauncher/Ulauncher/wiki/Resources-for-a-Python-GTK-Developer).
+
+If you have any questions, feel free to ask in a Github issue.
+
+`./ul` lists more commands (note that many of them are only useful to the maintainers).
 
 
 ### License
