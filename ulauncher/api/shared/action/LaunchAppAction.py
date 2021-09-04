@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 import re
 import shlex
@@ -57,9 +58,15 @@ class LaunchAppAction(BaseAction):
                     '--scope',
                     '--slice=app-{}'.format(sanitized_app)
                 ] + sanitized_exec
+
+            env = dict(os.environ.items())
+            # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
+            # under X11 for proper centering.
+            env.pop("GDK_BACKEND", None)
+
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 # Start_new_session is only needed if systemd-run is missing
-                subprocess.Popen(sanitized_exec, start_new_session=True)
+                subprocess.Popen(sanitized_exec, env=env, start_new_session=True)
             except Exception as e:
                 logger.error('%s: %s', type(e).__name__, e)

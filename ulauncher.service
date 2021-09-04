@@ -6,7 +6,7 @@ Documentation=https://ulauncher.io/
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/usr/bin/ulauncher --hide-window
+ExecStart=env GDK_BACKEND=x11 /usr/bin/ulauncher --hide-window
 
 [Install]
 WantedBy=graphical-session.target
