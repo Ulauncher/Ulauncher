@@ -26,8 +26,8 @@ class TestShortcutsDb:
         assert records[3]['name'] == 'google music'
 
     def test_put_shortcut(self, db):
-        assert db.put_shortcut('google play', 'p', 'https://play.google', 'icon', True, False)
-        assert db.put_shortcut('google play', 'p', 'https://play.google', 'icon', True, False, id='uuid123') == 'uuid123'
+        assert db.put_shortcut('googleplay', 'p', 'https://play.google', 'icon', True, False)
+        assert db.put_shortcut('googleplay', 'p', 'https://play.google', 'icon', True, False, id='uuid123') == 'uuid123'
 
     def test_commit__ensures_user_path(self, db, mocker):
         expanduser = mocker.patch('ulauncher.search.shortcuts.ShortcutsDb.os.path.expanduser')
