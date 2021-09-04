@@ -1,17 +1,17 @@
-How to Create Custom Color Theme
+Color Themes
 ================================
 
-You can create your own custom themes by overriding existing ones.
+Ulauncher comes with built-in color themes you can choose between. In addition to that you can install `community contributed themes <https://gist.github.com/gornostal/02a232e6e560da7946c053555ced6cce>`_ or create you own.
 
-You can only change colors in themes. Changing element sizes won't be possible due to quirky GTK+ API.
-
-Steps
+Creating Custom Color Themes
 -----
 
-#. Take a look at how `built-in themes <https://github.com/Ulauncher/Ulauncher/tree/dev/data/themes>`_ are written
-#. Create a new theme dir in ``~/.config/ulauncher/user-themes/<your_theme_name>``
-#. Copy files from existing theme in there
-#. Change name and display_name in ``manifest.json``
+You can only change colors in themes. Changing element sizes is not possible due to restrictions in the GTK+ API.
+
+#. Take a look at how the `built-in themes <https://github.com/Ulauncher/Ulauncher/tree/dev/data/themes>`_ are written
+#. Ensure that you have the user theme directory ``mkdir -p ~/.config/ulauncher/user-themes``
+#. Copy an existing theme directory to this directory.
+#. Rename the copied directory and change the name and display_name in ``manifest.json``
 #. Open Ulauncher Preferences and select your theme
 #. Edit colors in CSS files
 #. Tell Ulauncher to re-read theme files by running ``kill -HUP <PID>``
