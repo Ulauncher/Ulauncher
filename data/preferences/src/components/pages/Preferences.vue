@@ -146,6 +146,22 @@
           ></editable-text-list>
         </td>
       </tr>
+      <tr>
+        <td class="pull-top">
+          <label for="disable-desktop-filters">Show All Apps</label>
+          <small>
+            <p>
+              Display all applications, even if they are configured to not show in the current desktop environment.
+            </p>
+            <p v-if="disableDesktopFiltersChanged">
+              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
+            </p>
+          </small>
+        </td>
+        <td class="pull-top">
+          <b-form-checkbox id="disable-desktop-filters" v-model="disable_desktop_filters"></b-form-checkbox>
+        </td>
+      </tr>
     </table>
   </div>
 </template>
@@ -288,6 +304,21 @@ export default {
           () => {
             this.setPrefs({ blacklisted_desktop_dirs: value })
             this.blacklistedDirsChanged = true
+          },
+          err => bus.$emit('error', err)
+        )
+      }
+    },
+
+    disable_desktop_filters: {
+      get() {
+        return this.prefs.disable_desktop_filters
+      },
+      set(value) {
+        return jsonp('prefs://set/disable-desktop-filters', { value: value }).then(
+          () => {
+            this.setPrefs({ disable_desktop_filters: value })
+            this.disableDesktopFiltersChanged = true
           },
           err => bus.$emit('error', err)
         )

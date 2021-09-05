@@ -54,13 +54,13 @@ def find_desktop_files(dirs: List[str] = None, pattern: str = "*.desktop") -> Ge
         yield file
 
 
-def filter_app(app):
+def filter_app(app, disable_desktop_filters=False):
     """
     :param Gio.DesktopAppInfo app:
     :returns: True if app can be added to the database
     """
     return app and app.get_string('Name') and app.get_string('Type') == 'Application' \
-        and app.get_show_in() and not app.get_nodisplay() and not app.get_is_hidden()
+        and (app.get_show_in() or disable_desktop_filters) and not app.get_nodisplay() and not app.get_is_hidden()
 
 
 def read_desktop_file(file):
@@ -76,7 +76,7 @@ def read_desktop_file(file):
         return None
 
 
-def find_apps(dirs=None):
+def find_apps(dirs=None, disable_desktop_filters=False):
     """
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
@@ -84,10 +84,11 @@ def find_apps(dirs=None):
     if dirs is None:
         dirs = DESKTOP_DIRS
 
-    return list(filter(filter_app, map(read_desktop_file, find_desktop_files(dirs))))
+    return list(filter(lambda app: filter_app(app, disable_desktop_filters),
+                       map(read_desktop_file, find_desktop_files(dirs))))
 
 
-def find_apps_cached(dirs=None):
+def find_apps_cached(dirs=None, disable_desktop_filters=False):
     """
     :param list dirs: list of paths to `*.desktop` files
     :returns: list of :class:`Gio.DesktopAppInfo` objects
@@ -108,11 +109,11 @@ def find_apps_cached(dirs=None):
     if desktop_dirs:
         for dir in desktop_dirs:
             app_info = read_desktop_file(dir)
-            if filter_app(app_info):
+            if filter_app(app_info, disable_desktop_filters):
                 yield app_info
         logger.info('Found %s apps in cache', len(desktop_dirs))
     new_desktop_dirs = []
-    for app_info in find_apps(DESKTOP_DIRS):
+    for app_info in find_apps(DESKTOP_DIRS, disable_desktop_filters):
         yield app_info
         new_desktop_dirs.append(app_info.get_filename())
     cache.put('desktop_dirs', new_desktop_dirs)
