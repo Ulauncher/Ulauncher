@@ -7,12 +7,18 @@ import shutil
 from pathlib import Path
 
 from ulauncher.utils.desktop.reader import read_desktop_file
+from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.Settings import Settings
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger(__name__)
 settings = Settings.get_instance()
 hasSystemdRun = bool(shutil.which("systemd-run"))
+
+
+@run_async
+def wait_for_pid(pid):
+    os.waitpid(pid, 0)
 
 
 class LaunchAppAction(BaseAction):
@@ -67,6 +73,7 @@ class LaunchAppAction(BaseAction):
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 # Start_new_session is only needed if systemd-run is missing
-                subprocess.Popen(sanitized_exec, env=env, start_new_session=True)
+                pid = subprocess.Popen(sanitized_exec, env=env, start_new_session=True).pid
+                wait_for_pid(pid)
             except Exception as e:
                 logger.error('%s: %s', type(e).__name__, e)
