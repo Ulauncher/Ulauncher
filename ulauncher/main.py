@@ -4,6 +4,10 @@ import signal
 import logging
 import time
 from threading import Event
+# This xinit import must happen before any GUI libraries are initialized.
+# pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
+import ulauncher.utils.xinit  # noqa: F401
+
 import gi
 
 # Fixes issue #488
