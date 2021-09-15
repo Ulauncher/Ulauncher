@@ -90,17 +90,6 @@ def main():
     """
     Main function that starts everything
     """
-    if is_wayland_compatibility_on():
-        warn = """
-                    [!]
-        Looks like you are in Wayland session
-        Please run Ulauncher with env var
-        GDK_BACKEND set to 'x11' like this:
-
-        GDK_BACKEND=x11 ulauncher
-        """
-        print(warn, file=sys.stderr)
-        sys.exit(1)
 
     # start DBus loop
     DBusGMainLoop(set_as_default=True)
