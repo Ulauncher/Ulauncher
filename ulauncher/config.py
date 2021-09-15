@@ -16,6 +16,7 @@ from functools import lru_cache
 from gettext import gettext
 from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs, xdg_data_home
 
+
 DATA_DIR = os.path.join(xdg_data_home, 'ulauncher')
 # Use ulauncher_cache dir because of the WebKit bug
 # https://bugs.webkit.org/show_bug.cgi?id=151646
@@ -59,23 +60,6 @@ def get_data_path():
         raise ProjectPathNotFoundError(abs_data_path)
 
     return abs_data_path
-
-
-def is_wayland():
-    return os.environ.get('XDG_SESSION_TYPE', '').lower() == 'wayland'
-
-
-def is_wayland_compatibility_on():
-    """
-    In this mode user won't be able to set app hotkey via preferences
-    Set hotkey in OS Settings > Devices > Keyboard > Add Hotkey > Command: ulauncher-toggle
-    GDK_BACKEND is typically unset in Wayland sessions to allow GTK apps to self-select
-    """
-    return is_wayland() and (gdk_backend() == '' or gdk_backend().lower().startswith('wayland'))
-
-
-def gdk_backend():
-    return os.environ.get('GDK_BACKEND', '')
 
 
 @lru_cache()

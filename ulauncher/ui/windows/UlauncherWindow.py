@@ -18,7 +18,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultItemWidget import ResultItemWidget  # noqa: F401
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F401
 
-from ulauncher.config import get_data_file, is_wayland_compatibility_on, get_options
+from ulauncher.config import get_data_file, get_options
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
@@ -32,6 +32,7 @@ from ulauncher.utils.display import get_current_screen_geometry, get_primary_scr
 from ulauncher.utils.image_loader import load_image
 from ulauncher.utils.version_cmp import gtk_version_is_gte
 from ulauncher.utils.desktop.notification import show_notification
+from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
