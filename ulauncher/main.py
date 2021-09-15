@@ -90,7 +90,7 @@ def main():
     """
     Main function that starts everything
     """
-    if is_wayland() and gdk_backend().lower() != 'x11' and not is_wayland_compatibility_on():
+    if is_wayland_compatibility_on():
         warn = """
                     [!]
         Looks like you are in Wayland session
