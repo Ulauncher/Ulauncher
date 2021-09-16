@@ -55,7 +55,12 @@ class ExtensionSearchMode(BaseSearchMode):
                 if not pref['value']:
                     continue
 
-                icon = c.manifest.load_icon(ExtensionKeywordResultItem.get_icon_size())
+                if pref['icon'] is not None:
+                    icon = c.manifest.load_icon_from_path(pref['icon'], ExtensionKeywordResultItem.get_icon_size())
+                else:
+                    icon = c.manifest.load_icon(
+                        ExtensionKeywordResultItem.get_icon_size())
+
                 items.append(ExtensionKeywordResultItem(name=html.escape(pref['name']),
                                                         description=html.escape(pref['description']),
                                                         keyword=pref['value'],

@@ -22,14 +22,16 @@ OptionItems = List[OptionItem]
 Options = TypedDict('Options', {
     'query_debounce': float
 })
-ManifestPreferenceItem = TypedDict('ManifestPreferenceItem', {
-    'id': str,
-    'type': str,
-    'name': str,
-    'description': str,
-    'default_value': str,
-    'options': OptionItems
-})
+ManifestPreferenceItem = TypedDict(
+    'ManifestPreferenceItem', {
+        'id': str,
+        'type': str,
+        'name': str,
+        'description': str,
+        'default_value': str,
+        'options': OptionItems,
+        'icon': str,
+    })
 ManifestJson = TypedDict('ManifestJson', {
     'required_api_version': str,
     'name': str,
@@ -73,6 +75,10 @@ class ExtensionManifest:
 
     def load_icon(self, size):
         return load_image(self.get_icon_path(), size)
+
+    def load_icon_from_path(self, path, size):
+        abs_path = os.path.join(self.extensions_dir, self.extension_id, path)
+        return load_image(abs_path, size)
 
     def get_required_api_version(self) -> str:
         return self.manifest['required_api_version']
