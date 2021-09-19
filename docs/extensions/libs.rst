@@ -14,7 +14,7 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 `gir1.2-keybinder-3.0 <https://lazka.github.io/pgi-docs/#Keybinder-3.0>`_
   Library for registering global key bindings for gtk-based applications in X11.
 
-`gir1.2-webkit2-3.0 <https://lazka.github.io/pgi-docs/#WebKit-3.0>`_
+`gir1.2-webkit2-4.0 <https://lazka.github.io/pgi-docs/#WebKit-3.0>`_
   JavaScript engine library from WebKitGTK+
 
 `gir1.2-glib-2.0 <https://lazka.github.io/pgi-docs/#GLib-2.0>`_
