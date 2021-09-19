@@ -65,6 +65,11 @@ GPROPERTIES = {
                            None,
                            False,
                            GObject.ParamFlags.READWRITE),
+    "disable-desktop-filters": (bool,  # type
+                                "Display all apps in environment despite OnlyShowIn/NotShowIn",  # nick name
+                                None,  # description
+                                False,  # default
+                                GObject.ParamFlags.READWRITE),  # flags
 }
 
 

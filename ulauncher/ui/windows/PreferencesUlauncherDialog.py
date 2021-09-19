@@ -245,6 +245,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
+            'disable_desktop_filters': self.settings.get_property('disable-desktop-filters'),
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
             'render_on_screen': self.settings.get_property('render-on-screen'),
@@ -348,6 +349,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         dirs = url_params['query']['value']
         logger.info('Set blacklisted-desktop-dirs to %s', dirs)
         self.settings.set_property('blacklisted-desktop-dirs', dirs)
+        self.settings.save_to_file()
+
+    @rt.route('/set/disable-desktop-filters')
+    def prefs_set_disable_desktop_filters(self, url_params):
+        is_on = self._get_bool(url_params['query']['value'])
+        logger.info('Set disable-desktop-filters to %s', is_on)
+        self.settings.set_property('disable-desktop-filters', is_on)
         self.settings.save_to_file()
 
     @rt.route('/set/render-on-screen')

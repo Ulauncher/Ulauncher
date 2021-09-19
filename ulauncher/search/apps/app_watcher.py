@@ -8,6 +8,7 @@ import pyinotify
 
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.desktop.reader import find_desktop_files, read_desktop_file, filter_app, find_apps_cached
+from ulauncher.utils.Settings import Settings
 from ulauncher.search.apps.AppDb import AppDb
 from ulauncher.config import DESKTOP_DIRS
 
@@ -30,6 +31,9 @@ def _only_desktop_files(func):
 
 
 DeferredFiles = Dict[str, float]
+
+settings = Settings.get_instance()
+disable_desktop_filters = settings.get_property('disable-desktop-filters')
 
 
 class AppNotifyEventHandler(pyinotify.ProcessEvent):
@@ -118,7 +122,7 @@ class AppNotifyEventHandler(pyinotify.ProcessEvent):
 
         try:
             app = read_desktop_file(pathname)
-            if filter_app(app):
+            if filter_app(app, disable_desktop_filters):
                 self.__db.put_app(app)
                 logger.info('New app was added "%s" (%s)', app.get_name(), app.get_filename())
             else:
@@ -165,7 +169,7 @@ def start():
     db = AppDb.get_instance()
     t0 = time()
     logger.info('Started scanning desktop dirs')
-    for app in find_apps_cached():
+    for app in find_apps_cached(None, disable_desktop_filters):
         db.put_app(app)
     logger.info('Scanned desktop dirs in %.2f seconds', (time() - t0))
 
