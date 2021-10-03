@@ -55,15 +55,25 @@ def get_score(query, text):
     """
     query = query.lower()
     text = text.lower()
-    query_len = len(query)
     if not query or not text:
         return 0
-
+    if text.startswith(query):
+        return 100
     # Wrap and counter-weight distance so that short queries can match better with long texts.
     # With regular levensteins distance "Fir" and "Firefox" is only 3/7 similar
-    # This is counter-weighted by 95% here, so it still has a slight benefit when your query matches a short app name.
-    diff = distance(query, text) - (max(0, len(text) - query_len) * .95)
-    score = 100 * max(0, query_len - diff) / query_len
+    # This is counter-weighted here, so you get a much smaller penalty when your query matches a long text.
+    query_len = len(query)
+    text_len = len(text)
+    max_len = max(query_len, text_len)
+
+    # Character "edits" needed to turn query into text
+    char_diff = distance(query, text)
+
+    # Ratio of the query that matches the text
+    base_similarity = (max_len - char_diff) / query_len
+
+    # Rank matches 2% lower per extra character, to slightly favor shorter ones
+    score = 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.02)
 
     # Raise the score by 30% if the query fully matches the beginning of a word
     for text_part in text.split(' '):
