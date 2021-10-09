@@ -95,7 +95,6 @@ launchpad_upload() {
     else
         PPA="agornostal/ulauncher"
     fi
-    xenial="PPA=$PPA RELEASE=xenial ./ul build-deb --upload"
     hirsute="PPA=$PPA RELEASE=hirsute ./ul build-deb --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb --upload"
     groovy="PPA=$PPA RELEASE=groovy ./ul build-deb --upload"
@@ -108,6 +107,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $xenial && $hirsute && $focal && $groovy"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $hirsute && $focal && $groovy"
     set +x
 }

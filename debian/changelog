@@ -5,7 +5,7 @@ ulauncher (%VERSION%) %RELEASE%; urgency=medium
 
  -- Aleksandr Gornostal <ulauncher.app@gmail.com>  Sun, 26 May 2019 20:00:00 +0200
 
-ulauncher (5.2.0~beta1) xenial; urgency=medium
+ulauncher (5.2.0~beta1) bionic; urgency=medium
 
   * #191 - Allow executing shortcuts without specifying an argument
 
