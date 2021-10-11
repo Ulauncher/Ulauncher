@@ -72,7 +72,7 @@ def get_score(query, text):
     # Ratio of the query that matches the text
     base_similarity = (max_len - char_diff) / query_len
 
-    # Rank matches 2% lower per extra character, to slightly favor shorter ones
+    # Rank matches lower for each extra character, to slightly favor shorter ones.
     score = 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.02)
 
     # Raise the score by 30% if the query fully matches the beginning of a word
