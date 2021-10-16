@@ -55,10 +55,8 @@ class ShortcutResultItem(ResultItem):
         return description.replace('%s', '...')
 
     def get_icon(self):
-        if self.icon:
-            return load_image(self.icon, self.get_icon_size())
-
-        return load_image(get_data_file('icons', 'executable.png'), self.get_icon_size())
+        icon = self.icon or get_data_file('icons', 'executable.png')
+        return load_image(icon, self.get_icon_size())
 
     def selected_by_default(self, query):
         """
