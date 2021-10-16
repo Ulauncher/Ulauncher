@@ -98,7 +98,7 @@ def get_file_icon(path, icon_size):
 
         mime = mimetypes.guess_type(path.get_basename())[0]
         if mime:
-            return get_themed_icon_by_name(mime.replace('/','-'), icon_size)
+            return get_themed_icon_by_name(mime.replace('/', '-'), icon_size)
 
         if path.is_exe():
             return get_themed_icon_by_name("application-x-executable", icon_size)
