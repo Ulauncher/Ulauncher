@@ -4,14 +4,6 @@ ulauncher.utils.desktop package
 Submodules
 ----------
 
-ulauncher.utils.desktop.DesktopParser module
---------------------------------------------
-
-.. automodule:: ulauncher.utils.desktop.DesktopParser
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.desktop.notification module
 -------------------------------------------
 

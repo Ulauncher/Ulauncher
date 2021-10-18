@@ -1,77 +1,34 @@
-import os
-from xdg.BaseDirectory import xdg_config_home
+import shutil
+import subprocess
 
-from ulauncher.search.apps.AppDb import AppDb
-from ulauncher.utils.desktop.DesktopParser import DesktopParser
+
+def systemctl_unit_run(*args):
+    try:
+        return subprocess.check_output(["systemctl", "--user"] + list(args) + ["ulauncher"]).decode('utf-8').rstrip()
+    except Exception:
+        return False
 
 
 class AutostartPreference:
-    AUTOSTART_FLAG = 'X-GNOME-Autostart-enabled'
-
-    _ulauncher_desktop = None  # path to ulauncher.desktop
-    _ulauncher_autostart_desktop = None  # path ~/.config/autostart/ulauncher.desktop
-
-    def __init__(self):
-        self._ulauncher_desktop = self._get_app_desktop()
-        self._ulauncher_autostart_desktop = os.path.join(xdg_config_home, 'autostart', 'ulauncher.desktop')
-
-    def _get_app_desktop(self):
-        """
-        :rtype: str
-        :returns: path to desktop file
-        """
-        record = AppDb.get_instance().get_by_name('Ulauncher')
-        if record:
-            return record['desktop_file']
-
-        return None
-
-    def _get_autostart_parser(self):
-        """
-        Read ulauncher.desktop
-        """
-        return DesktopParser(self._ulauncher_autostart_desktop)
-
     def is_allowed(self):
         """
-        :returns: True if autostart is allowed for Ulauncher
+        :returns: True if autostart can be controlled by Ulauncher
         """
-        return bool(self._ulauncher_desktop)
+        return bool(shutil.which("systemctl")) and 'ExecStart' in systemctl_unit_run("cat")
 
     def is_enabled(self):
         """
-        :returns: True if Ulauncher starts automatically
+        :returns: True if Ulauncher is set to start automatically
         """
-        try:
-            return self._get_autostart_parser().get_boolean(self.AUTOSTART_FLAG)
-        # pylint: disable=broad-except
-        except Exception:
-            return False
+        return self.is_allowed() and systemctl_unit_run("is-enabled") == 'enabled'
 
-    def switch(self, is_enabled):
+    def switch(self, status):
         """
-        if `is_enabled` is True, set `X-GNOME-Autostart-enabled=true` and
-        write file to `~/.config/autostart/ulauncher.desktop`
+        Enable or disable Ulauncher systemd unit
 
-        :param bool is_enabled:
-        :raises SwitchError: if something goes wrong
+        :param bool status:
         """
         if not self.is_allowed():
-            raise SwitchError('Autostart is not allowed')
+            raise 'Autostart is not allowed'
 
-        try:
-            try:
-                autostart_info = self._get_autostart_parser()
-            except IOError:
-                autostart_info = DesktopParser(self._ulauncher_desktop)
-                autostart_info.set_filename(self._ulauncher_autostart_desktop)
-
-            autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_enabled)).lower())
-            autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
-            autostart_info.write()
-        except Exception as e:
-            raise SwitchError('Unexpected exception: %s' % e) from e
-
-
-class SwitchError(RuntimeError):
-    pass
+        systemctl_unit_run("reenable" if status else "disable")
