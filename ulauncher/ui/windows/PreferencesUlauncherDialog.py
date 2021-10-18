@@ -241,7 +241,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'show_indicator_icon': self.settings.get_property('show-indicator-icon'),
             'hotkey_show_app': self.get_app_hotkey(),
             'autostart_allowed': self.autostart_pref.is_allowed(),
-            'autostart_enabled': self.autostart_pref.is_on(),
+            'autostart_enabled': self.autostart_pref.is_enabled(),
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
@@ -270,13 +270,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/autostart-enabled')
     def prefs_set_autostart(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set autostart-enabled to %s', is_on)
-        if is_on and not self.autostart_pref.is_allowed():
+        is_enabled = self._get_bool(url_params['query']['value'])
+        logger.info('Set autostart-enabled to %s', is_enabled)
+        if is_enabled and not self.autostart_pref.is_allowed():
             raise PrefsApiError("Unable to turn on autostart preference")
 
         try:
-            self.autostart_pref.switch(is_on)
+            self.autostart_pref.switch(is_enabled)
         except Exception as e:
             raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
 
@@ -332,16 +332,16 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set clear-previous-query to %s', is_on)
-        self.settings.set_property('clear-previous-query', is_on)
+        is_enabled = self._get_bool(url_params['query']['value'])
+        logger.info('Set clear-previous-query to %s', is_enabled)
+        self.settings.set_property('clear-previous-query', is_enabled)
         self.settings.save_to_file()
 
     @rt.route('/set/grab-mouse-pointer')
     def prefs_set_grab_mouse_pointer(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set grab-mouse-pointer to %s', is_on)
-        self.settings.set_property('grab-mouse-pointer', is_on)
+        is_enabled = self._get_bool(url_params['query']['value'])
+        logger.info('Set grab-mouse-pointer to %s', is_enabled)
+        self.settings.set_property('grab-mouse-pointer', is_enabled)
         self.settings.save_to_file()
 
     @rt.route('/set/blacklisted-desktop-dirs')
@@ -353,9 +353,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/disable-desktop-filters')
     def prefs_set_disable_desktop_filters(self, url_params):
-        is_on = self._get_bool(url_params['query']['value'])
-        logger.info('Set disable-desktop-filters to %s', is_on)
-        self.settings.set_property('disable-desktop-filters', is_on)
+        is_enabled = self._get_bool(url_params['query']['value'])
+        logger.info('Set disable-desktop-filters to %s', is_enabled)
+        self.settings.set_property('disable-desktop-filters', is_enabled)
         self.settings.save_to_file()
 
     @rt.route('/set/render-on-screen')

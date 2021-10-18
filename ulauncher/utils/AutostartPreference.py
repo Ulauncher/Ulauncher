@@ -38,7 +38,7 @@ class AutostartPreference:
         """
         return bool(self._ulauncher_desktop)
 
-    def is_on(self):
+    def is_enabled(self):
         """
         :returns: True if Ulauncher starts automatically
         """
@@ -48,12 +48,12 @@ class AutostartPreference:
         except Exception:
             return False
 
-    def switch(self, is_on):
+    def switch(self, is_enabled):
         """
-        if `is_on` is True, set `X-GNOME-Autostart-enabled=true` and
+        if `is_enabled` is True, set `X-GNOME-Autostart-enabled=true` and
         write file to `~/.config/autostart/ulauncher.desktop`
 
-        :param bool is_on:
+        :param bool is_enabled:
         :raises SwitchError: if something goes wrong
         """
         if not self.is_allowed():
@@ -66,7 +66,7 @@ class AutostartPreference:
                 autostart_info = DesktopParser(self._ulauncher_desktop)
                 autostart_info.set_filename(self._ulauncher_autostart_desktop)
 
-            autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_on)).lower())
+            autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_enabled)).lower())
             autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
             autostart_info.write()
         except Exception as e:

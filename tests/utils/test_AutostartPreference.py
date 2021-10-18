@@ -64,14 +64,14 @@ class TestAutostartPreference:
     def test_is_on__returns_True(self, autostart, autostart_path):
         with open(os.path.join(autostart_path, 'ulauncher.desktop'), 'w') as f:
             f.write(''.join((desktop_content, 'X-GNOME-Autostart-enabled=true\n')))
-        assert autostart.is_on()
+        assert autostart.is_enabled()
 
     def test_is_on__returns_False(self, autostart, autostart_path):
-        assert not autostart.is_on()
+        assert not autostart.is_enabled()
 
         with open(os.path.join(autostart_path, 'ulauncher.desktop'), 'w') as f:
             f.write(desktop_content)
-        assert not autostart.is_on()
+        assert not autostart.is_enabled()
 
     def test_switch__raises_when_not_allowed(self, autostart, mocker):
         is_allowed = mocker.patch.object(autostart, 'is_allowed')
