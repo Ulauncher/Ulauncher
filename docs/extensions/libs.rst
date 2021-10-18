@@ -35,9 +35,6 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 `python-pyinotify <https://github.com/seb-m/pyinotify>`_
   Monitoring filesystems events with inotify on Linux
 
-`python-pysqlite2 <https://docs.python.org/2/library/sqlite3.html>`_
-  DB-API 2.0 interface for SQLite databases
-
 `python-websocket <https://github.com/websocket-client/websocket-client>`_
   websocket client for python
 
