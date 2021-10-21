@@ -95,7 +95,7 @@ class TestGithubExtension:
             GithubExtension('http://github.com/Ulauncher/ulauncher-timer').validate_url()
 
         with pytest.raises(GithubExtensionError):
-            GithubExtension('https://github.com/Ulauncher/ulauncher-timer/').validate_url()
+            GithubExtension('git@github.com/Ulauncher/ulauncher-timer/').validate_url()
 
     def test_get_download_url(self, gh_ext):
         assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
