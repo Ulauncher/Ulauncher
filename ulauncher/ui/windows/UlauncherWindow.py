@@ -106,7 +106,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             Keybinder.init()
             accel_name = self.settings.get_property('hotkey-show-app')
             # bind in the main thread
-            GLib.idle_add(self.bind_show_app_hotkey, accel_name)
+            GLib.idle_add(self.bind_hotkey, accel_name)
 
         start_app_watcher()
         ExtensionServer.get_instance().start()
@@ -294,7 +294,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         else:
             self.show_window()
 
-    def bind_show_app_hotkey(self, accel_name):
+    def bind_hotkey(self, accel_name):
         if is_wayland_compatibility_on():
             return
 

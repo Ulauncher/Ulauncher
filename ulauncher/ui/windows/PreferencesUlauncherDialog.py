@@ -299,7 +299,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
-        ulauncher_window.bind_show_app_hotkey(hotkey)
+        ulauncher_window.bind_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
         self.settings.save_to_file()
 

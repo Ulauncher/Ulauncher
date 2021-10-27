@@ -64,7 +64,7 @@ class TestPreferencesUlauncherDialog:
     def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
         hotkey = '<Primary>space'
         dialog.prefs_set_hotkey_show_app.original(dialog, {'query': {'value': hotkey}})
-        ulauncherWindow.bind_show_app_hotkey.assert_called_with(hotkey)
+        ulauncherWindow.bind_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
         settings.save_to_file.assert_called_with()
 
