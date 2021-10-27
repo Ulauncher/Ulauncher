@@ -20,7 +20,7 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from ulauncher.config import get_version, get_options, CACHE_DIR, CONFIG_DIR, DATA_DIR
+from ulauncher.config import get_version, get_options
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
@@ -32,18 +32,6 @@ from ulauncher.api.version import api_version
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
 DBUS_PATH = '/net/launchpad/ulauncher'
-
-
-def _create_dirs():
-    if not os.path.exists(CONFIG_DIR):
-        os.makedirs(CONFIG_DIR)
-
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
-
-    # make sure ~/.cache/ulauncher exists
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
 
 
 class UlauncherDbusService(dbus.service.Object):
@@ -104,8 +92,6 @@ def main():
         toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
         toggle_window()
         return
-
-    _create_dirs()
 
     options = get_options()
     setup_logging(options)

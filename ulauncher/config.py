@@ -25,6 +25,16 @@ EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
+
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+
+
 class ProjectPathNotFoundError(Exception):
     """Raised when we can't find the project directory."""
 
