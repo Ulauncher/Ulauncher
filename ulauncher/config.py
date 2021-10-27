@@ -23,9 +23,12 @@ DESKTOP_DIRS = list(filter(os.path.exists, [os.path.join(dir, "applications") fo
 EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+FIRST_RUN = False
 
 
 if not os.path.exists(CONFIG_DIR):
+    # If there is no config dir, assume it's the first run
+    FIRST_RUN = True
     os.makedirs(CONFIG_DIR)
 
 if not os.path.exists(DATA_DIR):

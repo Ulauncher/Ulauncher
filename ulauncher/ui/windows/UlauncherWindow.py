@@ -18,14 +18,13 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultItemWidget import ResultItemWidget  # noqa: F401
 from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F401
 
-from ulauncher.config import get_data_file, get_options
+from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
 from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
-from ulauncher.utils.AppCacheDb import AppCacheDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry, get_monitor_scale_factor
@@ -308,15 +307,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         logger.info("Trying to bind app hotkey: %s", accel_name)
         Keybinder.bind(accel_name, self.toggle_window)
         self._current_accel_name = accel_name
-        self.notify_hotkey_change(accel_name)
-
-    def notify_hotkey_change(self, accel_name):
-        (key, mode) = Gtk.accelerator_parse(accel_name)
-        display_name = Gtk.accelerator_get_label(key, mode)
-        app_cache_db = AppCacheDb.get_instance()
-        if not app_cache_db.find('startup_hotkey_notification'):
-            app_cache_db.put('startup_hotkey_notification', True)
-            app_cache_db.commit()
+        if FIRST_RUN:
+            (key, mode) = Gtk.accelerator_parse(accel_name)
+            display_name = Gtk.accelerator_get_label(key, mode)
             show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
 
     def _get_user_query(self):

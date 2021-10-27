@@ -13,14 +13,6 @@ Subpackages
 Submodules
 ----------
 
-ulauncher.utils.AppCacheDb module
----------------------------------
-
-.. automodule:: ulauncher.utils.AppCacheDb
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.AutostartPreference module
 ------------------------------------------
 

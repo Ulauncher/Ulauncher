@@ -50,10 +50,6 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
 
     @pytest.fixture(autouse=True)
-    def app_cache_db(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppCacheDb.get_instance').return_value
-
-    @pytest.fixture(autouse=True)
     def app_stat_db(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppStatDb.get_instance').return_value
 
@@ -100,21 +96,6 @@ class TestUlauncherWindow:
     @pytest.fixture
     def window(self):
         return UlauncherWindow()
-
-    @pytest.mark.with_display
-    def test_bind_hotkey(self, window, Keybinder, show_notification, app_cache_db):
-        app_cache_db.find.return_value = False
-        accel_name = '<Primary><Alt>f'
-        window.bind_hotkey(accel_name)
-        Keybinder.bind.assert_called_with(accel_name, window.toggle_window)
-
-        # bind another one
-        # this time Ulauncher should unbind previous key
-        new_accel_name = '<Primary><Alt>r'
-        window.bind_hotkey(new_accel_name)
-        Keybinder.unbind.assert_called_with(accel_name)
-        Keybinder.bind.assert_called_with(new_accel_name, window.toggle_window)
-        show_notification.assert_called_with('Ulauncher', 'Hotkey is set to Ctrl+Alt+R')
 
     def test_create_item_widgets(self, window, result_item, GtkBuilder, get_data_file):
         assert window.create_item_widgets([result_item], 'test') == [GtkBuilder.return_value.get_object.return_value]
