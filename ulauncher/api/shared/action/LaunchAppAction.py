@@ -3,14 +3,13 @@ import os
 import re
 import shlex
 import shutil
-from pathlib import Path
 import gi
 
+gi.require_version("Gio", "2.0")
 gi.require_version("GLib", "2.0")
 # pylint: disable=wrong-import-position
-from gi.repository import GLib
+from gi.repository import Gio, GLib
 
-from ulauncher.utils.desktop.reader import read_desktop_file
 from ulauncher.utils.Settings import Settings
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
@@ -33,9 +32,9 @@ class LaunchAppAction(BaseAction):
         return False
 
     def run(self):
-        app = read_desktop_file(self.filename)
-        app_id = Path(self.filename).with_suffix('').stem
-        exec = app.get_string('Exec')
+        app = Gio.DesktopAppInfo.new_from_filename(self.filename)
+        app_id = app.get_id()
+        exec = app.get_commandline()
         if not exec:
             logger.error("No command to run %s", self.filename)
         else:
