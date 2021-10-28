@@ -30,8 +30,8 @@ class TestKeyValueDb:
         assert db.find('hello') == 123
 
     def test_remove(self, db):
-        db.put('john', {'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})
-        db.put('james', {'name': 'james', 'description': 'test', 'desktop_file': 'james.desktop', 'icon': 'icon'})
+        db.put('john', {'name': 'john', 'description': 'test', 'app_id': 'john.desktop', 'icon': 'icon'})
+        db.put('james', {'name': 'james', 'description': 'test', 'app_id': 'james.desktop', 'icon': 'icon'})
         assert db.get_records().get('james')
         db.remove('james')
         assert not db.get_records().get('james')
