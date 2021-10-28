@@ -1,7 +1,4 @@
 import os
-from operator import itemgetter
-from itertools import islice
-
 from ulauncher.config import DATA_DIR
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.decorator.singleton import singleton
@@ -15,11 +12,11 @@ class AppStatDb(KeyValueDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls(os.path.join(DATA_DIR, 'app_stat_v2.db')).open()
+        return cls(os.path.join(DATA_DIR, 'app_stat_v3.db')).open()
 
-    def inc_count(self, path):
-        count = self._records.get(path, 0)
-        self._records[path] = count + 1
+    def inc_count(self, app_id):
+        count = self._records.get(app_id, 0)
+        self._records[app_id] = count + 1
 
     def get_most_frequent(self, limit=5):
         """
@@ -31,16 +28,5 @@ class AppStatDb(KeyValueDb):
         :rtype: class:`ResultList`
         """
 
-        # pylint: disable=relative-beyond-top-level
-        # import here to avoid circular deps.
-        from ulauncher.search.apps.AppResultItem import AppResultItem
-        from ulauncher.search.apps.AppDb import AppDb
-        app_db = AppDb.get_instance()
-
-        return [AppResultItem(i) for i in islice(
-            filter(None,
-                   map(lambda r: app_db.get_by_path(r[0]),
-                       sorted(self._records.items(),
-                              key=itemgetter(1),
-                              reverse=True))),
-            0, limit)]
+        top_results = sorted(self._records.items(), key=lambda rec: rec[1], reverse=True)[:limit]
+        return [rec[0] for rec in top_results]

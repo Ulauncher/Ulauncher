@@ -67,13 +67,6 @@ class ResultItem:
     def get_name(self) -> str:
         return self._name
 
-    def get_search_name(self) -> str:
-        """
-        Returns string that will be used for search
-        :rtype: str
-        """
-        return self.get_name()
-
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
         """
         :param ~ulauncher.search.Query.Query query:

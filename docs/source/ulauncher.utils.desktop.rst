@@ -12,15 +12,6 @@ ulauncher.utils.desktop.notification module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.desktop.reader module
--------------------------------------
-
-.. automodule:: ulauncher.utils.desktop.reader
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 

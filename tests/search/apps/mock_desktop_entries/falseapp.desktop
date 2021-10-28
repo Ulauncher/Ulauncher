@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=FalseApp
+X-GNOME-FullName=FalseApp - Full Name
+Comment=App 2 comment
+Exec=false
+Icon=dialog-no
+Type=Application

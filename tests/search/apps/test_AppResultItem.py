@@ -1,21 +1,31 @@
+import pathlib
 import mock
 import pytest
+import gi
+gi.require_version('Gio', '2.0')
+gi.require_version('GdkPixbuf', '2.0')
+# pylint: disable=wrong-import-position
+from gi.repository import Gio, GdkPixbuf
+
 from ulauncher.search.apps.AppResultItem import AppResultItem
 from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.search.Query import Query
 
+# Note: These mock apps actually need real values for Exec or Icon, or they won't load,
+# and they need to load from actual files or get_id() and get_filename() will return None
+ENTRIES_DIR = pathlib.Path(__file__).parent.joinpath('mock_desktop_entries').resolve()
+
 
 class TestAppResultItem:
 
     @pytest.fixture
-    def item(self):
-        return AppResultItem({
-            'name': 'TestAppResultItem',
-            'description': 'Description of TestAppResultItem',
-            'icon': 'icon123',
-            'desktop_file': 'path/to/desktop_file.desktop'
-        })
+    def app1(self):
+        return AppResultItem(Gio.DesktopAppInfo.new_from_filename(f'{ENTRIES_DIR}/trueapp.desktop'))
+
+    @pytest.fixture
+    def app2(self):
+        return AppResultItem(Gio.DesktopAppInfo.new_from_filename(f'{ENTRIES_DIR}/falseapp.desktop'))
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
@@ -29,23 +39,24 @@ class TestAppResultItem:
         get_instance.return_value = mock.create_autospec(AppStatDb)
         return get_instance.return_value
 
-    def test_get_name(self, item):
-        assert item.get_name() == 'TestAppResultItem'
+    def test_get_name(self, app1):
+        assert app1.get_name() == 'TrueApp - Full Name'
 
-    def test_get_description(self, item):
-        assert item.get_description(Query('q')) == 'Description of TestAppResultItem'
+    def test_get_description(self, app1):
+        assert app1.get_description(Query('q')) == 'Your own yes-man'
 
-    def test_get_icon(self, item):
-        assert item.get_icon() == 'icon123'
+    def test_get_icon(self, app1):
+        assert isinstance(app1.get_icon(), GdkPixbuf.Pixbuf)
+        assert app1.get('Icon') == 'dialog-yes'
 
-    def test_selected_by_default(self, item, query_history):
-        query_history.find.return_value = 'TestAppResultItem'
-        assert item.selected_by_default('q')
+    def test_selected_by_default(self, app1, query_history):
+        query_history.find.return_value = 'TrueApp - Full Name'
+        assert app1.selected_by_default('q')
         query_history.find.assert_called_with('q')
 
-    def test_on_enter(self, item, mocker, query_history, app_stat_db):
+    def test_on_enter(self, app1, mocker, query_history, app_stat_db):
         LaunchAppAction = mocker.patch('ulauncher.search.apps.AppResultItem.LaunchAppAction')
-        assert item.on_enter(Query('query')) is LaunchAppAction.return_value
-        LaunchAppAction.assert_called_with('path/to/desktop_file.desktop')
-        query_history.save_query.assert_called_with('query', 'TestAppResultItem')
-        app_stat_db.inc_count.assert_called_with('path/to/desktop_file.desktop')
+        assert app1.on_enter(Query('query')) is LaunchAppAction.return_value
+        LaunchAppAction.assert_called_with(f'{ENTRIES_DIR}/trueapp.desktop')
+        query_history.save_query.assert_called_with('query', 'TrueApp - Full Name')
+        app_stat_db.inc_count.assert_called_with('trueapp.desktop')

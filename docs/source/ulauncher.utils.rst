@@ -45,14 +45,6 @@ ulauncher.utils.Settings module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.SortedCollection module
----------------------------------------
-
-.. automodule:: ulauncher.utils.SortedCollection
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.Theme module
 ----------------------------
 

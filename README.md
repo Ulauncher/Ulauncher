@@ -27,7 +27,6 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 ### Known Issues and workarounds
 
 * If your DE doesn't use compositing, run ulauncher with `--no-window-shadow` to remove a black box around a window
-* [inotify watch limit reached](https://github.com/Ulauncher/Ulauncher/issues/51)
 * [Can't map the keys to ALT+SPACE](https://github.com/Ulauncher/Ulauncher/issues/100)
 * [Hotkey doesn't work in Wayland when is triggered from certain apps](https://github.com/Ulauncher/Ulauncher/issues/183)
 * [Border appears around ulauncher window in Sway DE](https://github.com/Ulauncher/Ulauncher/issues/230#issuecomment-570736422)
@@ -64,7 +63,7 @@ You need the the following:
   sudo apt-get update && sudo apt-get install \
     yarnpkg gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
     gir1.2-{gtk-3.0,keybinder-3.0,webkit2-4.0,glib-2.0,gdkpixbuf-2.0,notify-0.7,ayatanaappindicator3-0.1} \
-    python3-{setuptools,all,gi,xdg,dbus,pyinotify,levenshtein}
+    python3-{setuptools,all,gi,xdg,dbus,levenshtein}
   ```
 
 </details>

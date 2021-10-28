@@ -4,14 +4,6 @@ ulauncher\.search\.apps package
 Submodules
 ----------
 
-ulauncher\.search\.apps\.AppDb module
--------------------------------------
-
-.. automodule:: ulauncher.search.apps.AppDb
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.search\.QueryHistoryDb module
 ----------------------------------------
 
@@ -43,15 +35,6 @@ ulauncher\.search\.apps\.AppStatDb module
     :members:
     :undoc-members:
     :show-inheritance:
-
-ulauncher\.search\.apps\.app\_watcher module
---------------------------------------------
-
-.. automodule:: ulauncher.search.apps.app_watcher
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
