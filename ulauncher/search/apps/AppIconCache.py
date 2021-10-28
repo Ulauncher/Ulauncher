@@ -52,7 +52,7 @@ class AppIconCache:
         except KeyError:
             pass
 
-        pixbuf = get_app_icon_pixbuf(icon['icon'], size, icon['name'])
+        pixbuf = get_app_icon_pixbuf(icon['icon'], size)
         icon['sizes'][size] = pixbuf
 
         return pixbuf

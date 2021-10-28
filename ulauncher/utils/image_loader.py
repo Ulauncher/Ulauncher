@@ -46,11 +46,10 @@ def load_image(path, size):
         logger.warning('Could not load image %s. E: %s', path, e)
 
 
-def get_app_icon_pixbuf(icon, icon_size, icon_name):
+def get_app_icon_pixbuf(icon, icon_size):
     """
     :param Gio.Icon icon:
     :param int icon_size:
-    :param str icon_name:
     :rtype: :class:`GtkPixbuf`
     """
     pixbuf_icon = None

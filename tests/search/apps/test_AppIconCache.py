@@ -45,4 +45,4 @@ class TestAppIconCache:
 
     def test_get_pixbuf__cache_miss__calls_get_app_icon(self, cache_with_data, get_app_icon_pixbuf):
         cache_with_data.get_pixbuf('/foo/calc.desktop')
-        get_app_icon_pixbuf.assert_called_with('calc-icon', 40, 'calc-icon-name')
+        get_app_icon_pixbuf.assert_called_with('calc-icon', 40)
