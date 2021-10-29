@@ -4,20 +4,19 @@ import gi
 gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gdk
-
+from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.utils.Path import Path, InvalidPathError
 from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.SortedList import SortedList
 from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
 from ulauncher.search.file_browser.FileQueries import FileQueries
 
 
 class FileBrowserMode(BaseSearchMode):
-    RESULT_LIMIT = 17
+    LIMIT = 17
 
     def __init__(self):
         self._file_queries = FileQueries.get_instance()  # type: FileQueries
@@ -56,27 +55,27 @@ class FileBrowserMode(BaseSearchMode):
             return SetUserQueryAction('~/')
 
         path = Path(query)  # type: Path
-        result_items = []  # type: Union[List, SortedList]
+        result_items = []  # type: List[FileBrowserResultItem]
 
         try:
             existing_dir = path.get_existing_dir()
 
             if existing_dir == path.get_abs_path():
                 file_names = self.list_files(path.get_abs_path(), sort_by_usage=True)
-                for name in self.filter_dot_files(file_names)[:self.RESULT_LIMIT]:
+                for name in self.filter_dot_files(file_names)[:self.LIMIT]:
                     file = os.path.join(existing_dir, name)
                     result_items.append(self.create_result_item(file))
 
             else:
                 file_names = self.list_files(existing_dir)
-                search_for = path.get_search_part()
+                query = path.get_search_part()
 
-                if not search_for.startswith('.'):
+                if not query.startswith('.'):
                     file_names = self.filter_dot_files(file_names)
 
-                files = [os.path.join(existing_dir, name) for name in file_names]
-                result_items = SortedList(search_for, min_score=40, limit=self.RESULT_LIMIT)
-                result_items.extend([self.create_result_item(name) for name in reversed(files)])
+                sorted_files = sorted(file_names, key=lambda fn: get_score(query, fn), reverse=True)
+                filtered_files = list(filter(lambda fn: get_score(query, fn) > 40, sorted_files))[:self.LIMIT]
+                result_items = [self.create_result_item(os.path.join(existing_dir, name)) for name in filtered_files]
 
         except (InvalidPathError, OSError):
             result_items = []

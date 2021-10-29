@@ -20,10 +20,6 @@ class TestFileBrowserMode:
     def SetUserQueryAction(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SetUserQueryAction')
 
-    @pytest.fixture
-    def SortedList(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.SortedList')
-
     @pytest.fixture(autouse=True)
     def RenderAction(self, mocker):
         return mocker.patch('ulauncher.search.file_browser.FileBrowserMode.RenderResultListAction')
@@ -80,20 +76,6 @@ class TestFileBrowserMode:
         path.get_existing_dir.side_effect = InvalidPathError()
         mode.handle_query('~~')
         RenderAction.assert_called_with([])
-
-    def test_handle_qury__path_from_doesnt_exist__SortedList_called(self, mode, path, mocker, SortedList):
-        path.get_existing_dir.return_value = '/tmp/dir'
-        mocker.patch.object(mode, 'list_files', return_value=['a', 'd', 'b', 'c'])
-        mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
-
-        mode.handle_query('/tmp/dir')
-
-        SortedList.assert_called_with(path.get_search_part.return_value,
-                                      min_score=40,
-                                      limit=mode.RESULT_LIMIT)
-
-        SortedList.return_value.extend.assert_called_with(
-            ['/tmp/dir/c', '/tmp/dir/b', '/tmp/dir/d', '/tmp/dir/a'])
 
     def test_handle_key_press_event(self, mode, mocker, SetUserQueryAction):
         mocker.patch('ulauncher.search.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')
