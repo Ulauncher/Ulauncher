@@ -6,7 +6,6 @@ from shutil import copytree, rmtree
 
 from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.version_cmp import gtk_version_is_gte
 
 themes = {}  # type: Dict[str, Any]
 logger = logging.getLogger(__name__)
@@ -67,10 +66,10 @@ class Theme:
         return self._read()['extend_theme']
 
     def get_css_file(self):
-        return self._read()['css_file']
-
-    def get_css_file_gtk_3_20(self):
-        return self._read()['css_file_gtk_3.20+']
+        manifest = self._read()
+        # If "css_file_gtk_3.20+"" is specified, then "css_file" is for older version.
+        # Otherwise use "css_file"
+        return manifest.get('css_file_gtk_3.20+') or manifest.get('css_file')
 
     def clear_cache(self):
         self.theme_dict = None
@@ -91,17 +90,12 @@ class Theme:
             assert self.get_display_name(), '"get_display_name" is empty'
             assert self.get_matched_text_hl_colors(), '"get_matched_text_hl_colors" is empty'
             assert self.get_css_file(), '"get_css_file" is empty'
-            assert self.get_css_file_gtk_3_20(), '"css_file_gtk_3.20+" is empty'
             assert os.path.exists(os.path.join(self.path, self.get_css_file())), '"css_file" does not exist'
-            assert os.path.exists(os.path.join(self.path, self.get_css_file_gtk_3_20())), \
-                '"css_file_gtk_3.20+" does not exist'
         except AssertionError as e:
             raise ThemeManifestError(e) from e
 
     def compile_css(self) -> None:
-        # workaround for issue with a caret-color
-        # GTK+ < 3.20 doesn't support that prop
-        css_file_name = self.get_css_file_gtk_3_20() if gtk_version_is_gte(3, 20, 0) else self.get_css_file()
+        css_file_name = self.get_css_file()
         css_file = os.path.join(self.path, css_file_name)
 
         if not self.get_extend_theme():

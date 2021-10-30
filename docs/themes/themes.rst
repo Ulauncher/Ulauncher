@@ -45,7 +45,6 @@ Use the following template::
     "display_name": "Adwaita",
     "extend_theme": "light",
     "css_file": "theme.css",
-    "css_file_gtk_3.20+": "theme-gtk-3.20.css",
     "matched_text_hl_colors": {
       "when_selected": "#99ccff",
       "when_not_selected": "#99ccff"
@@ -57,7 +56,6 @@ Use the following template::
 * ``display_name`` - is displayed in a list of theme options in preferences
 * ``extend_theme`` - can be ``null`` or a name of an existing theme you'd like to extend
 * ``css_file`` - name of your css file
-* ``css_file_gtk_3.20+`` - name css file for GTK+ v3.20 or higher
 * ``matched_text_hl_colors`` - Colors of characters in name or description of an item that
   match with your query. Must contain ``when_selected`` and ``when_not_selected`` colors.
 

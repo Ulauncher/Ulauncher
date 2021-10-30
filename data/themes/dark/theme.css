@@ -33,6 +33,7 @@
 }
 
 .input {
+    caret-color: @caret_color;
     color: @input_color;
 }
 
@@ -55,8 +56,7 @@
 
 .selected.item-box {
     background-color: @item_box_selected;
-    border-left: 1px solid @window_border_color;
-    border-right: 1px solid @window_border_color;
+    border: none;
 }
 .selected.item-box .item-text {
     color: @item_text_selected;

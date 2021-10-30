@@ -29,7 +29,6 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry, get_monitor_scale_factor
 from ulauncher.utils.image_loader import load_image
-from ulauncher.utils.version_cmp import gtk_version_is_gte
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
@@ -222,9 +221,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         Add 2px to the window width if GTK+ >= 3.20
         Because of the bug in <3.20 that doesn't add css borders to the width
         """
-        if gtk_version_is_gte(3, 20, 0):
-            width, height = self.get_size_request()
-            self.set_size_request(width + 2, height)
+        width, height = self.get_size_request()
+        self.set_size_request(width + 2, height)
 
     def init_theme(self):
         load_available_themes()
