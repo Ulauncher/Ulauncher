@@ -4,7 +4,7 @@ Comment=Application launcher for Linux
 GenericName=Launcher
 Categories=GNOME;GTK;Utility;
 TryExec=ulauncher
-Exec=env GDK_BACKEND=x11 ulauncher --hide-window
+Exec=env GDK_BACKEND=x11 ulauncher --no-window
 Icon=ulauncher
 Terminal=false
 Type=Application

@@ -74,6 +74,9 @@ def get_options():
         help=gettext("Show debug messages"))
     parser.add_argument(
         "--hide-window", action="store_true",
+        help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--no-window", action="store_true",
         help=gettext("Hide window upon application startup"))
     parser.add_argument(
         "--no-extensions", action="store_true",
