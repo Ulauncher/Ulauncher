@@ -49,7 +49,7 @@ class GithubExtensionError(UlauncherAPIError):
 
 class GithubExtension:
 
-    url_match_pattern = r'^https:\/\/github.com\/([\w-]+\/[\w-]+)$'
+    url_match_pattern = r'^(https:\/\/github.com\/|git@github.com:)(([\w-]+\/[\w-]+))\/?(.git|tree\/master\/?)?$'
     url_file_template = 'https://raw.githubusercontent.com/{project_path}/{branch}/{file_path}'
     url_commit_template = 'https://api.github.com/repos/{project_path}/commits/{commit}'
 
@@ -138,10 +138,10 @@ class GithubExtension:
 
     def get_download_url(self, commit: str = DEFAULT_GITHUB_BRANCH) -> str:
         """
-        >>> https://github.com/Ulauncher/ulauncher-timer
+        >>> Ulauncher/ulauncher-timer
         <<< https://github.com/Ulauncher/ulauncher-timer/tarball/master
         """
-        return '%s/tarball/%s' % (self.url, commit)
+        return 'https://github.com/%s/tarball/%s' % (self._get_project_path(), commit)
 
     def get_ext_id(self) -> str:
         """
@@ -159,4 +159,4 @@ class GithubExtension:
         if not match:
             raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
 
-        return match.group(1)
+        return match.group(2)
