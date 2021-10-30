@@ -101,6 +101,8 @@ def main():
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("Is Wayland: %s", is_wayland())
     logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
+    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 20):
+        logger.error("Ulauncher requires GTK+ version 3.20 or newer. Please upgrade your GTK version.")
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
