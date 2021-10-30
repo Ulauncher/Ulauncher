@@ -130,9 +130,9 @@
       </tr>
       <tr>
         <td class="pull-top">
-          <label>Blacklisted App Dirs</label>
+          <label>Blacklisted App Directories</label>
           <small>
-            <p>Ulauncher won't search for .desktop files in these dirs</p>
+            <p>Ulauncher won't include applications from these directories</p>
             <p v-if="blacklistedDirsChanged">
               <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
             </p>
