@@ -2,7 +2,7 @@
 # Where your project will look for your data (for instance, images and ui
 # files). By default, this is ../data, relative your trunk layout
 # pylint: disable=deprecated-module
-import optparse
+import argparse
 import os
 from uuid import uuid4
 from time import time
@@ -68,25 +68,24 @@ def get_data_path():
 @lru_cache()
 def get_options():
     """Support for command line options"""
-    parser = optparse.OptionParser(version="%%prog %s" % __version__)
-    parser.add_option(
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
         "-v", "--verbose", action="count", dest="verbose",
         help=gettext("Show debug messages"))
-    parser.add_option(
+    parser.add_argument(
         "--hide-window", action="store_true",
         help=gettext("Hide window upon application startup"))
-    parser.add_option(
+    parser.add_argument(
         "--no-extensions", action="store_true",
         help=gettext("Do not run extensions"))
-    parser.add_option(
+    parser.add_argument(
         "--no-window-shadow", action="store_true",
         help=gettext("Removes window shadow. On DEs without a compositor this solves issue with a black border"))
-    parser.add_option(
+    parser.add_argument(
         "--dev", action="store_true",
         help=gettext("Enables context menu in the Preferences UI"))
-    (options, _) = parser.parse_args()
 
-    return options
+    return parser.parse_args()
 
 
 def get_default_shortcuts():
