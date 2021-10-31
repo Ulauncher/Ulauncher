@@ -68,15 +68,6 @@ ulauncher\.api\.server\.extension\_finder module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.port\_finder module
--------------------------------------------
-
-.. automodule:: ulauncher.api.server.port_finder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 

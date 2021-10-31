@@ -45,14 +45,6 @@ ulauncher.utils.Settings module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.SimpleWebSocketServer module
---------------------------------------------
-
-.. automodule:: ulauncher.utils.SimpleWebSocketServer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.SortedCollection module
 ---------------------------------------
 
@@ -89,6 +81,14 @@ ulauncher.utils.file\_finder module
 -----------------------------------
 
 .. automodule:: ulauncher.utils.file_finder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ulauncher.utils.framer module
+-----------------------------------
+
+.. automodule:: ulauncher.utils.framer
     :members:
     :undoc-members:
     :show-inheritance:
@@ -153,14 +153,6 @@ ulauncher.utils.text\_highlighter module
 ----------------------------------------
 
 .. automodule:: ulauncher.utils.text_highlighter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ulauncher.utils.version\_cmp module
------------------------------------
-
-.. automodule:: ulauncher.utils.version_cmp
     :members:
     :undoc-members:
     :show-inheritance:

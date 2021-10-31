@@ -29,7 +29,6 @@ RUN apt-get update && \
         python3-dbus \
         python3-pyinotify \
         python3-levenshtein \
-        python3-websocket \
         python3-paramiko \
         python3-pip && \
     pip3 install --upgrade pip pybuild setuptools && \

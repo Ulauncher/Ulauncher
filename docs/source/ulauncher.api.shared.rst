@@ -29,6 +29,14 @@ ulauncher\.api\.shared\.event module
     :noindex:
     :show-inheritance:
 
+ulauncher\.api\.shared\.socket_path module
+------------------------------------------
+
+.. automodule:: ulauncher.api.shared.socket_path
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

@@ -42,9 +42,9 @@ They can only be used to handle an input that starts with a keyword, which exten
 Ulauncher ⇄ Extension Communication Layer
 -----------------------------------------
 
-Ulauncher communicates to extensions using WebSockets.
+Ulauncher communicates to extensions using stream Unix sockets.
 
-For developer convenience there is an abstraction layer over WebSockets
+For developer convenience there is an abstraction layer over the socket interface
 that reduces amount of boilerplate code in extensions.
 
 

@@ -29,7 +29,6 @@ Depends: ${misc:Depends},
  python3-dbus,
  python3-levenshtein,
  python3-pyinotify,
- python3-websocket,
  python3-xdg
 Recommends: gir1.2-ayatanaappindicator3-0.1
 Description: Application launcher for Linux
