@@ -1,10 +1,21 @@
 import logging
-from functools import partial
-from ulauncher.api.server.port_finder import find_unused_port
+import os
+import os.path
+
+import gi
+
+gi.require_versions({
+    "Gio": "2.0",
+    "GObject": "2.0",
+})
+# pylint: disable=wrong-import-position
+from gi.repository import Gio, GObject
+
 from ulauncher.api.server.ExtensionController import ExtensionController
-from ulauncher.utils.SimpleWebSocketServer import SimpleWebSocketServer
-from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.api.shared.socket_path import get_socket_path
+from ulauncher.api.shared.event import RegisterEvent
 from ulauncher.utils.decorator.singleton import singleton
+from ulauncher.utils.framer import PickleFramer
 
 logger = logging.getLogger(__name__)
 
@@ -17,56 +28,71 @@ class ExtensionServer:
         return cls()
 
     def __init__(self):
-        self.hostname = '127.0.0.1'
-        self.port = None
-        self.ws_server = None
+        self.service = None
+        self.socket_path = get_socket_path()
         self.controllers = {}
-
-    def generate_ws_url(self, extension_id):
-        """
-        Returns WebSocket URL for given `extension_id`
-
-        :rtype: str
-        """
-        if not self.is_running():
-            raise ServerIsNotRunningError()
-
-        return 'ws://%s:%s/%s' % (self.hostname, self.port, extension_id)
+        self.pending = {}
 
     def start(self):
         """
-        Starts WS server
+        Starts extension server
         """
-        if self.ws_server:
+        if self.is_running():
             raise ServerIsRunningError()
 
-        self._start_thread()
+        self.service = Gio.SocketService.new()
+        self.service.connect("incoming", self.handle_incoming)
 
-    @run_async(daemon=True)
-    def _start_thread(self):
-        self.port = self.port or find_unused_port(5054)
-        logger.info('Starting WS server on port %s', self.port)
-        self.ws_server = SimpleWebSocketServer(self.hostname,
-                                               self.port,
-                                               partial(ExtensionController, self.controllers))
-        self.ws_server.serveforever()
-        self.ws_server = None
-        logger.warning('WS server exited')
+        if os.path.exists(self.socket_path):
+            logger.debug("Removing existing socket path %s", self.socket_path)
+            os.unlink(self.socket_path)
+
+        self.service.add_address(
+            Gio.UnixSocketAddress.new(self.socket_path),
+            Gio.SocketType.STREAM,
+            Gio.SocketProtocol.DEFAULT,
+            None
+        )
+        self.pending = {}
+        self.controllers = {}
+
+    # pylint: disable=unused-argument
+    def handle_incoming(self, service, conn, source):
+        framer = PickleFramer()
+        msg_handler_id = framer.connect("message_parsed", self.handle_registration)
+        closed_handler_id = framer.connect("closed", self.handle_pending_close)
+        self.pending[id(framer)] = (framer, msg_handler_id, closed_handler_id)
+        framer.set_connection(conn)
+
+    def handle_pending_close(self, framer):
+        self.pending.pop(id(framer))
+
+    def handle_registration(self, framer, event):
+        if isinstance(event, RegisterEvent):
+            pended = self.pending.pop(id(framer))
+            if pended:
+                for msg_id in pended[1:]:
+                    GObject.signal_handler_disconnect(framer, msg_id)
+            ExtensionController(self.controllers, framer, event.extension_id)
+        else:
+            logger.debug("Unhandled message received: %s", event)
 
     def stop(self):
         """
-        Stops WS server
+        Stops extension server
         """
         if not self.is_running():
             raise ServerIsNotRunningError()
 
-        self.ws_server.close()
+        self.service.stop()
+        self.service.close()
+        self.service = None
 
     def is_running(self):
         """
         :rtype: bool
         """
-        return bool(self.ws_server)
+        return bool(self.service)
 
     def get_controller(self, extension_id):
         """

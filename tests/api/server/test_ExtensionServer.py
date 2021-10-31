@@ -1,53 +1,89 @@
-from time import sleep
-
 import mock
 import pytest
 
-from ulauncher.api.server.ExtensionServer import ExtensionServer, ServerIsRunningError
+from ulauncher.api.server.ExtensionServer import ExtensionServer, ServerIsRunningError, RegisterEvent
 
 
 class TestExtensionServer:
 
     @pytest.fixture(autouse=True)
-    def find_unused_port(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.find_unused_port')
+    def SocketService(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.Gio.SocketService')
 
     @pytest.fixture(autouse=True)
-    def SWS(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.SimpleWebSocketServer')
+    def UnixSocketAddress(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.Gio.UnixSocketAddress')
+
+    @pytest.fixture(autouse=True)
+    def ExtensionController(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.ExtensionController')
+
+    @pytest.fixture(autouse=True)
+    def path_exists(self, mocker):
+        exists = mocker.patch('ulauncher.api.server.ExtensionServer.os.path.exists')
+        exists.return_value = False
+        return exists
+
+    @pytest.fixture(autouse=True)
+    def GObject(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.GObject')
+
+    @pytest.fixture(autouse=True)
+    def unlink(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.os.unlink')
+
+    @pytest.fixture(autouse=True)
+    def PickleFramer(self, mocker):
+        return mocker.patch('ulauncher.api.server.ExtensionServer.PickleFramer')
 
     @pytest.fixture
     def server(self):
         return ExtensionServer()
 
-    @pytest.fixture(autouse=True)
-    def run_async(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.run_async')
-
-    def test_start__SimpleWebSocketServer__is_created(self, server, SWS, find_unused_port):
+    def test_start(self, server):
         server.start()
-        sleep(0.02)
-        SWS.assert_called_with('127.0.0.1', find_unused_port.return_value, mock.ANY)
+        server.service.connect.assert_called_once()
+        server.service.add_address.assert_called_once()
 
-    def test_start__serveforever__is_called(self, server, SWS):
+    def test_start__clean_socket(self, server, path_exists, unlink):
+        path_exists.return_value = True
         server.start()
-        sleep(0.02)
-        SWS.return_value.serveforever.assert_called_with()
+        unlink.assert_called_once()
 
     def test_start__server_is_running__exception_raised(self, server):
-        server.ws_server = mock.Mock()
+        server.start()
         with pytest.raises(ServerIsRunningError):
             server.start()
 
-    def test_generate_ws_url(self, server):
-        server.ws_server = mock.Mock()
-        server.port = 3297
-        assert server.generate_ws_url('test_extension') == 'ws://127.0.0.1:3297/test_extension'
+    def test_handle_incoming(self, server, PickleFramer):
+        conn = mock.Mock()
+        source = mock.Mock()
+        server.start()
+        server.handle_incoming(server.service, conn, source)
+        assert id(PickleFramer.return_value) in server.pending
+        PickleFramer.return_value.set_connection.assert_called_with(conn)
 
-    def test_stop__close__is_called(self, server):
-        server.ws_server = mock.Mock()
+    def test_handle_registration(self, server, PickleFramer, GObject, ExtensionController):
+        conn = mock.Mock()
+        source = mock.Mock()
+        server.start()
+        server.handle_incoming(server.service, conn, source)
+        extid = "id"
+        event = RegisterEvent(extid)
+        assert id(PickleFramer.return_value) in server.pending
+        server.handle_registration(PickleFramer.return_value, event)
+        assert id(PickleFramer.return_value) not in server.pending
+        assert GObject.signal_handler_disconnect.call_count == 2
+        ExtensionController.assert_called_once()
+
+    def test_stop(self, server):
+        server.start()
+        assert server.is_running()
+        service = server.service
         server.stop()
-        server.ws_server.close.assert_called_with()
+        assert not server.is_running()
+        assert service.stop.call_count == 1
+        assert service.close.call_count == 1
 
     def test_get_controller_by_keyword__keyword_found__controller_returned(self, server):
         controller = mock.Mock()

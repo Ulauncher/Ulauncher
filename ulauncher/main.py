@@ -1,8 +1,7 @@
 import sys
-import os
 import signal
 import logging
-import time
+from functools import partial
 from threading import Event
 # This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
@@ -14,14 +13,14 @@ import gi
 sys.path.append('/usr/lib/python3.8/site-packages')
 
 gi.require_version('Gtk', '3.0')
+gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
 from ulauncher.config import get_version, get_options
-from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -29,6 +28,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
 from ulauncher.api.version import api_version
 
+logger = logging.getLogger('ulauncher')
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
 DBUS_PATH = '/net/launchpad/ulauncher'
@@ -43,6 +43,18 @@ class UlauncherDbusService(dbus.service.Object):
     @dbus.service.method(DBUS_SERVICE)
     def toggle_window(self):
         self.window.toggle_window()
+
+
+def reload_config(win):
+    logger.info("Reloading config")
+    win.init_theme()
+
+
+def graceful_exit(data):
+    logger.info("Exiting gracefully nesting level %s: %s", Gtk.main_level(), data)
+    # ExtensionServer.get_instance().stop()
+    # Gtk.main_quit()
+    sys.exit(0)
 
 
 # pylint: disable=too-few-public-methods
@@ -95,7 +107,6 @@ def main():
 
     options = get_options()
     setup_logging(options)
-    logger = logging.getLogger('ulauncher')
     logger.info('Ulauncher version %s', get_version())
     logger.info('Extension API version %s', api_version)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
@@ -103,7 +114,7 @@ def main():
     logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 20):
         logger.error("Ulauncher requires GTK+ version 3.20 or newer. Please upgrade your GTK version.")
-    if (options.hide_window):
+    if options.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
         # from starting a second Ulauncher background process we have to make sure the
@@ -124,13 +135,15 @@ def main():
     if Settings.get_instance().get_property('show-indicator-icon'):
         AppIndicator.get_instance().show()
 
-    # workaround to make Ctrl+C quitting the app
-    signal_handler = SignalHandler(window)
-    gtk_thread = run_async(Gtk.main)()
+    GLib.unix_signal_add(
+        GLib.PRIORITY_DEFAULT,
+        signal.SIGHUP,
+        partial(reload_config, window),
+        None
+    )
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, graceful_exit, None)
+
     try:
-        while gtk_thread.is_alive() and not signal_handler.killed():
-            time.sleep(0.5)
+        Gtk.main()
     except KeyboardInterrupt:
         logger.warning('On KeyboardInterrupt')
-    finally:
-        Gtk.main_quit()

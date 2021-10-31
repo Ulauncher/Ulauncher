@@ -6,7 +6,7 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
-from ulauncher.api.client.setup_logging import setup_logging
+from ulauncher.api.client.setup_logging import setup_logging, get_extension_name
 
 
 class Extension:
@@ -15,6 +15,7 @@ class Extension:
     """
 
     def __init__(self):
+        self.extension_id = get_extension_name()
         self._listeners = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}

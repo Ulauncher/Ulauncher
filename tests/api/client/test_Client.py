@@ -1,4 +1,3 @@
-import pickle
 import mock
 import pytest
 
@@ -13,35 +12,42 @@ class TestClient:
         return mocker.patch('ulauncher.api.client.Client.SystemExitEvent')
 
     @pytest.fixture(autouse=True)
-    def Timer(self, mocker):
-        return mocker.patch('ulauncher.api.client.Client.Timer')
+    def sock_client(self, mocker):
+        return mocker.patch('ulauncher.api.client.Client.Gio.SocketClient')
 
     @pytest.fixture(autouse=True)
-    def websocket(self, mocker):
-        return mocker.patch('ulauncher.api.client.Client.websocket')
+    def mainloop(self, mocker):
+        return mocker.patch('ulauncher.api.client.Client.GLib.MainLoop.new')
+
+    @pytest.fixture(autouse=True)
+    def framer(self, mocker):
+        return mocker.patch('ulauncher.api.client.Client.PickleFramer')
+
+    @pytest.fixture(autouse=True)
+    def timer(self, mocker):
+        return mocker.patch('ulauncher.api.client.Client.timer')
 
     @pytest.fixture
     def extension(self):
-        return mock.create_autospec(Extension)
+        ext = mock.create_autospec(Extension)
+        ext.extension_id = "com.example.test-extension"
+        return ext
 
     @pytest.fixture
-    def client(self, extension):
-        return Client(extension, ws_api_url="ws://localhost:5000/test_extension")
+    def client(self, extension, framer, sock_client):
+        client = Client(extension)
+        client.framer = framer
+        client.client = sock_client
+        return client
 
-    def test_connect__WebSocketApp__is_called(self, client, websocket):
+    def test_connect__connect_is_called(self, client, mainloop):
         client.connect()
-        websocket.WebSocketApp.assert_called_with('ws://localhost:5000/test_extension',
-                                                  on_message=mock.ANY,
-                                                  on_error=mock.ANY,
-                                                  on_open=mock.ANY,
-                                                  on_close=mock.ANY)
-
-    def test_connect__run_forever__is_called(self, client, websocket):
-        client.connect()
-        websocket.WebSocketApp.return_value.run_forever.assert_called_with()
+        client.client.connect.assert_called_once()
+        client.framer.send.assert_called_once()
+        mainloop.return_value.run.assert_called_once()
 
     def test_on_message__trigger_event__is_called(self, client, extension):
-        client.on_message(mock.Mock(), pickle.dumps({'hello': 'world'}))
+        client.on_message(mock.Mock(), {'hello': 'world'})
         extension.trigger_event.assert_called_with({'hello': 'world'})
 
     def test_on_close__SystemExitEvent__is_triggered(self, client, extension, SystemExitEvent):
@@ -49,6 +55,5 @@ class TestClient:
         extension.trigger_event.assert_called_with(SystemExitEvent.return_value)
 
     def test_send__ws_send__is_called(self, client):
-        client.ws = mock.Mock()
         client.send({'hello': 'world'})
-        client.ws.send.assert_called_with(pickle.dumps({'hello': 'world'}))
+        client.framer.send.assert_called_with({'hello': 'world'})
