@@ -36,6 +36,6 @@ test-pytest () {
     export PYTHONPATH=`pwd`
 
     set -e
-    py.test
+    py.test $@ tests
 }
 
