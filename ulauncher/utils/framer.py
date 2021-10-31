@@ -41,9 +41,6 @@ class PickleFramer(GObject.GObject):
         self._inprogress = None
         self._partial_reads = 0
 
-    def __str__(self):
-        return "Framer for connection %s" % self._conn
-
     def set_connection(self, conn: Gio.SocketConnection):
         if self._conn:
             raise InvalidStateError("Socket already associated with this framer, please create a new instance.")
