@@ -12,8 +12,8 @@ from ulauncher.search.Query import Query
 class TestDeferredResultRenderer:
 
     @pytest.fixture(autouse=True)
-    def Timer(self, mocker):
-        return mocker.patch('ulauncher.api.server.DeferredResultRenderer.Timer')
+    def timer(self, mocker):
+        return mocker.patch('ulauncher.api.server.DeferredResultRenderer.timer')
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):

@@ -16,8 +16,18 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.init_styles')
 
     @pytest.fixture(autouse=True)
+    def is_wayland_compatibility_on(self, mocker):
+        wayland_compat = mocker.patch('ulauncher.ui.windows.UlauncherWindow.is_wayland_compatibility_on')
+        wayland_compat.return_value = False
+        return wayland_compat
+
+    @pytest.fixture(autouse=True)
     def Theme(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Theme')
+
+    @pytest.fixture(autouse=True)
+    def get_options(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_options')
 
     @pytest.fixture(autouse=True)
     def load_available_themes(self, mocker):
