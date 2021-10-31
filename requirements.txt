@@ -1,6 +1,7 @@
 mock==2.0.0
 pytest==5.2.0
 pytest-mock==3.3.1
+pytest-pep8==1.0.6
 pylint==2.3.1
 mypy==0.701
 mypy_extensions==0.4.1
