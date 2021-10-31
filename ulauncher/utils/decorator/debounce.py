@@ -1,4 +1,4 @@
-from threading import Timer
+from ulauncher.utils.timer import timer
 
 
 def debounce(wait):
@@ -15,8 +15,7 @@ def debounce(wait):
             except AttributeError:
                 pass
 
-            debounced.t = Timer(wait, call_it)
-            debounced.t.start()
+            debounced.t = timer(wait, call_it)
 
         return debounced
 
