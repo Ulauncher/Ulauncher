@@ -29,6 +29,7 @@ SPECIAL_DIRS = {
     os.path.expanduser('~'): 'folder-home'
 }
 
+
 @lru_cache(maxsize=50)
 def load_image(path, size):
     """

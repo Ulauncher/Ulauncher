@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import List
 import gi
 gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
