@@ -49,6 +49,14 @@ class TestAppResultItem:
         assert isinstance(app1.get_icon(), GdkPixbuf.Pixbuf)
         assert app1.get('Icon') == 'dialog-yes'
 
+    def test_search_score(self, app1):
+        assert app1.search_score("true") > app1.search_score("trivago")
+
+    def test_search(self, app1, app2):
+        searchresults = AppResultItem.search('false', min_score=0, apps=[app1._app_info, app2._app_info])
+        assert len(searchresults) == 2
+        assert searchresults[0].get_name() == 'FalseApp - Full Name'
+
     def test_selected_by_default(self, app1, query_history):
         query_history.find.return_value = 'TrueApp - Full Name'
         assert app1.selected_by_default('q')
