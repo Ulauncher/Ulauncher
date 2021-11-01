@@ -1,17 +1,13 @@
+from configparser import ConfigParser
 from pathlib import Path
-from subprocess import check_output, CalledProcessError
 
 # This file is overwritten by the build_wrapper script in setup.py
 # IF YOU EDIT THIS FILE make sure your changes are reflected there
 
-
-def _exec_get_(*args):
-    try:
-        return check_output(list(args)).decode('utf-8').rstrip()
-    except (FileNotFoundError, CalledProcessError):
-        return ""
+config = ConfigParser()
+config.read('setup.cfg')
 
 
 __data_directory__ = f'{Path(__file__).resolve().parent.parent}/data'
 __is_dev__ = True
-__version__ = _exec_get_("git", "describe", "--tags") or "DEV"
+__version__ = config['metadata']['version']
