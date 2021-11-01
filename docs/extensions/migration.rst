@@ -13,8 +13,7 @@ API version 2 was introduced along with Ulauncher v5 after migrating from Python
 1. Remove ``manifest_version`` from ``manifest.json``. It's no longer needed
 2. In the manifest file rename ``api_version`` to ``required_api_version``
 3. Set its value to ``^2.0.0``
-
-   ``required_api_version`` should follow `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format. In most of the cases you would want to specify a string like ``^x.y.z`` where ``x.y.z`` is the current version of extension API not Ulauncher app.
+4. ``required_api_version`` should follow `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format. In most of the cases you would want to specify a string like ``^x.y.z`` where ``x.y.z`` is the current version of extension API not Ulauncher app.
 5. Migrate your extension to Python 3 manually or by using `2to3 tool <https://docs.python.org/2/library/2to3.html>`_
 6. Create a file called ``versions.json`` in the **root** directory of **master** branch using the following content as a template:
 

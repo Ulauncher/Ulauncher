@@ -64,7 +64,7 @@ You need the the following:
   sudo apt-get update && sudo apt-get install \
     yarnpkg gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
     gir1.2-{gtk-3.0,keybinder-3.0,webkit2-4.0,glib-2.0,gdkpixbuf-2.0,notify-0.7,ayatanaappindicator3-0.1} \
-    python3-{setuptools,all,gi,xdg,dbus,pyinotify,levenshtein,websocket}
+    python3-{setuptools,all,gi,xdg,dbus,pyinotify,levenshtein}
   ```
 
 </details>

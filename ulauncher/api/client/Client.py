@@ -1,12 +1,21 @@
 import os
 import sys
-import pickle
 import logging
 import traceback
-from threading import Timer
+from functools import partial
+import gi
 
-import websocket
-from ulauncher.api.shared.event import SystemExitEvent
+gi.require_versions({
+    "GLib": "2.0",
+    "Gio": "2.0",
+})
+# pylint: disable=wrong-import-position
+from gi.repository import GLib, Gio
+
+from ulauncher.api.shared.event import SystemExitEvent, RegisterEvent
+from ulauncher.api.shared.socket_path import get_socket_path
+from ulauncher.utils.framer import PickleFramer
+from ulauncher.utils.timer import timer
 
 logger = logging.getLogger(__name__)
 
@@ -16,39 +25,40 @@ class Client:
     Instantiated in extension code and manages data transfer from/to Ulauncher app
 
     :param ~ulauncher.api.client.Extension extension:
-    :param str ws_api_url: uses env. var `ULAUNCHER_WS_API` by default
     """
 
-    def __init__(self, extension, ws_api_url=os.environ.get('ULAUNCHER_WS_API')):
-        self.ws_api_url = ws_api_url
-        if not self.ws_api_url:
-            raise Exception('ULAUNCHER_WS_API was not specified')
-
+    def __init__(self, extension):
+        self.socket_path = get_socket_path()
         self.extension = extension
-        self.ws = None
+        self.client = Gio.SocketClient()
+        self.unix_client = None
+        self.conn = None
+        self.framer = None
 
     def connect(self):
         """
-        Connects to WS server and blocks thread
+        Connects to the extension server and blocks thread
         """
-        websocket.enableTrace(False)
-        # pylint: disable=unnecessary-lambda
-        self.ws = websocket.WebSocketApp(self.ws_api_url,
-                                         on_message=lambda ws, msg: self.on_message(ws, msg),
-                                         on_error=lambda ws, error: self.on_error(ws, error),
-                                         on_open=lambda ws: self.on_open(ws),
-                                         on_close=lambda ws: self.on_close(ws))
-        self.ws.run_forever()
+        self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
+        if not self.conn:
+            raise RuntimeError("Failed to connect to socket_path {}".format(self.socket_path))
+        self.framer = PickleFramer()
+        self.framer.connect("message_parsed", self.on_message)
+        self.framer.connect("closed", self.on_close)
+        self.framer.set_connection(self.conn)
+        self.send(RegisterEvent(self.extension.extension_id))
+
+        mainloop = GLib.MainLoop.new(None, None)
+        mainloop.run()
 
     # pylint: disable=unused-argument
-    def on_message(self, ws, message):
+    def on_message(self, framer, event):
         """
         Parses message from Ulauncher and triggers extension event
 
-        :param websocket.WebSocketApp ws:
-        :param str message:
+        :param ulauncher.utils.framer.PickleFramer framer:
+        :param ulauncher.api.shared.events.Event event:
         """
-        event = pickle.loads(message)
         logger.debug('Incoming event %s', type(event).__name__)
         try:
             self.extension.trigger_event(event)
@@ -56,24 +66,18 @@ class Client:
         except Exception:
             traceback.print_exc(file=sys.stderr)
 
-    def on_error(self, ws, error):
-        logger.error('WS Client error %s', error)
-
-    def on_close(self, ws):
+    def on_close(self, framer):
         """
-        Terminates extension process on WS disconnect.
+        Terminates extension process on client disconnect.
 
         Triggers :class:`~ulauncher.api.shared.event.SystemExitEvent` for graceful shutdown
 
-        :param websocket.WebSocketApp ws:
+        :param ulauncher.utils.framer.PickleFramer framer:
         """
         logger.warning("Connection closed. Exiting")
         self.extension.trigger_event(SystemExitEvent())
         # extension has 0.5 sec to save it's state, after that it will be terminated
-        Timer(0.5, os._exit, args=[0]).start()
-
-    def on_open(self, ws):
-        self.ws = ws
+        timer(0.5, partial(os._exit, 0))
 
     def send(self, response):
         """
@@ -81,5 +85,5 @@ class Client:
 
         :param ~ulauncher.api.shared.Response.Response response:
         """
-        logger.debug('Send message')
-        self.ws.send(pickle.dumps(response))
+        logger.debug('Send message %s', response)
+        self.framer.send(response)

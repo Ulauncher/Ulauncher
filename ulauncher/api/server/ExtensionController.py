@@ -1,7 +1,4 @@
 import logging
-import pickle
-
-from ulauncher.utils.SimpleWebSocketServer import WebSocket
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
@@ -12,7 +9,7 @@ from ulauncher.api.server.ExtensionManifest import ExtensionManifest, ExtensionM
 logger = logging.getLogger(__name__)
 
 
-class ExtensionController(WebSocket):
+class ExtensionController:
     """
     Handles communication between Ulauncher app and an extension.
 
@@ -24,14 +21,17 @@ class ExtensionController(WebSocket):
     preferences = None
     _debounced_send_event = None
 
-    def __init__(self, controllers, *args, **kw):
+    def __init__(self, controllers, framer, extension_id):
         self.controllers = controllers
+        self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
-        super().__init__(*args, **kw)
+        self.configure(extension_id)
+        self.framer.connect("message_parsed", self.handle_response)
+        self.framer.connect("closed", self.handle_close)
 
     def _send_event(self, event):
         logger.debug('Send event %s to "%s"', type(event).__name__, self.extension_id)
-        self.sendMessage(pickle.dumps(event))
+        self.framer.send(event)
 
     def handle_query(self, query):
         """
@@ -59,16 +59,12 @@ class ExtensionController(WebSocket):
     def get_extension_id(self):
         return self.extension_id
 
-    def handleMessage(self):
+    # pylint: disable=unused-argument
+    def handle_response(self, framer, response):
         """
-        Implements abstract method of :class:`WebSocket`
-
-        Handles incoming message stored in `self.data` by invoking
         :meth:`~ulauncher.api.server.DeferredResultRenderer.DeferredResultRenderer.handle_response`
         of `DeferredResultRenderer`
         """
-        response = pickle.loads(self.data)
-
         if not isinstance(response, Response):
             raise Exception("Unsupported type %s" % type(response).__name__)
 
@@ -77,17 +73,15 @@ class ExtensionController(WebSocket):
                      self.extension_id)
         self.result_renderer.handle_response(response, self)
 
-    def handleConnected(self):
+    def configure(self, extension_id):
         """
-        Implements abstract method of :class:`WebSocket`
-
-        * Appends `self` to `self.controllers`
+        * Adds itself to the controllers dict
         * Validates manifest file.
         * Sends :class:`PreferencesEvent` to extension
         """
-        self.extension_id = self.request.path[1:]
+        self.extension_id = extension_id
         if not self.extension_id:
-            raise Exception('Incorrect path %s' % self.request.path)
+            raise RuntimeError("No extension_id provided")
 
         logger.info('Extension "%s" connected', self.extension_id)
 
@@ -96,7 +90,7 @@ class ExtensionController(WebSocket):
             self.manifest.validate()
         except ExtensionManifestError as e:
             logger.warning("Couldn't connect '%s'. %s: %s", self.extension_id, type(e).__name__, e)
-            self.close()
+            self.framer.close()
             return
 
         self.preferences = ExtensionPreferences.create_instance(self.extension_id)
@@ -105,10 +99,8 @@ class ExtensionController(WebSocket):
 
         self._send_event(PreferencesEvent(self.preferences.get_dict()))
 
-    def handleClose(self):
-        """
-        Implements abstract method of :class:`WebSocket`
-        """
+    # pylint: disable=unused-argument
+    def handle_close(self, framer):
         logger.info('Extension "%s" disconnected', self.extension_id)
         try:
             del self.controllers[self.extension_id]

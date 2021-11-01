@@ -1,4 +1,3 @@
-import pickle
 import mock
 import pytest
 
@@ -9,11 +8,21 @@ from ulauncher.api.shared.event import KeywordQueryEvent
 from ulauncher.search.Query import Query
 
 
+TEST_EXT_ID = "com.example.test-ext-id"
+
+
 class TestExtensionController:
 
     @pytest.fixture
     def controllers(self):
         return {}
+
+    @pytest.fixture(autouse=True)
+    def PreferencesEvent(self, mocker):
+        PreferencesEvent = mocker.patch(
+            'ulauncher.api.server.ExtensionController.PreferencesEvent')
+        PreferencesEvent.return_value = object()
+        return PreferencesEvent
 
     @pytest.fixture(autouse=True)
     def result_renderer(self, mocker):
@@ -32,74 +41,46 @@ class TestExtensionController:
 
     @pytest.fixture
     def controller(self, controllers, mocker):
-        server, sock, address = (None, None, None)
-        controller = ExtensionController(controllers, server, sock, address)
+        controller = ExtensionController(controllers, mock.Mock(), TEST_EXT_ID)
         controller._debounced_send_event = controller._send_event
-
-        # patch WebSocket.sendMessage()
-        mocker.patch.object(controller, 'sendMessage')
-
         return controller
 
-    def test_handleConnected__extension_id__is_stored(self, controller, controllers, extPrefs):
+    def test_configure__typical(self, controller, controllers, extPrefs, PreferencesEvent):
+        # configure() is called implicitly when constructing the controller.
         extPrefs.get_dict.return_value = {}
-        controller.request = mock.Mock()
-        controller.request.path = '/extension-name'
-        controller.handleConnected()
-        assert controllers['extension-name'] == controller
+        assert controller.extension_id == TEST_EXT_ID
+        assert controllers[TEST_EXT_ID] == controller
+        controller.manifest.validate.assert_called_once()
+        controller.framer.send.assert_called_with(PreferencesEvent.return_value)
 
-    def test_handleConnected__invalid_extension_id__raises(self, controller):
-        controller.request = mock.Mock()
-        controller.request.path = '/'
-        with pytest.raises(Exception):
-            controller.handleConnected()
+    def test_configure__invalid_extension_id__raises(self, controller):
+        with pytest.raises(RuntimeError):
+            controller.configure(None)
 
-    def test_handleConnected__preferences__sent_to_client(self, controller, extPrefs, mocker):
-        extPrefs.get_dict.return_value = {}
-        controller.request = mock.Mock()
-        controller.request.path = '/extension-name'
-        PreferencesEvent = mocker.patch(
-            'ulauncher.api.server.ExtensionController.PreferencesEvent')
-        PreferencesEvent.return_value = object()
-        mocker.patch.object(controller, '_send_event')
-        controller.handleConnected()
-        controller._send_event.assert_called_with(PreferencesEvent.return_value)
-
-    def test_trigger_event__sendMessage__is_called_with_pickled_event(self, controller):
+    def test_trigger_event__send__is_called(self, controller):
         event = object()
         controller.trigger_event(event)
-        controller.sendMessage.assert_called_with(pickle.dumps(event))
+        controller.framer.send.assert_called_with(event)
 
-    def test_handle_query__KeywordQueryEvent__is_sent_with_query(self, controller):
+    def test_handle_query__KeywordQueryEvent__is_sent_with_query(self, controller, result_renderer):
         query = Query('def ulauncher')
-        controller.handle_query(query)
-        keywordEvent = pickle.loads(controller.sendMessage.call_args_list[0][0][0])
+        assert controller.handle_query(query) == result_renderer.handle_event.return_value
+        keywordEvent = controller.framer.send.call_args_list[1][0][0]
         assert isinstance(keywordEvent, KeywordQueryEvent)
         assert keywordEvent.get_query() == 'def ulauncher'
+        result_renderer.handle_event.assert_called_with(keywordEvent, controller)
 
-    def test_handle_query__handle_query__is_called(self, controller, result_renderer):
-        query = Query('def ulauncher')
-        controller.extension_id = 'test_extension'
-        controller.manifest = mock.Mock()
-        assert controller.handle_query(query) == result_renderer.handle_event.return_value
-        result_renderer.handle_event.assert_called_with(mock.ANY, controller)
-
-    def test_handleMessage__unsupported_data_type__exception_raised(self, controller):
+    def test_handle_response__unsupported_data_type__exception_raised(self, controller):
         controller.data = dict()
         with pytest.raises(Exception):
-            controller.handleMessage()
+            controller.handle_response(controller.framer, object())
 
-    def test_handleMessage__handle_response__is_called(self, controller, result_renderer, mocker):
-        action = TestAction()
-        event = mock.Mock()
-        controller.extension_id = 'test_extension'
-        controller.data = pickle.dumps(action)
-        loads = mocker.patch('ulauncher.api.server.ExtensionController.pickle.loads')
-        loads.return_value = Response(event, action)
+    def test_handle_response__is_called(self, controller, result_renderer, mocker):
+        response = Response(mock.Mock(), TestAction())
 
-        controller.handleMessage()
+        controller.handle_response(controller.framer, response)
 
-        result_renderer.handle_response.assert_called_with(loads.return_value, controller)
+        result_renderer.handle_response.assert_called_with(response, controller)
 
 
 class TestAction(BaseAction):
