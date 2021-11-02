@@ -130,21 +130,6 @@
       </tr>
       <tr>
         <td class="pull-top">
-          <label>Blacklisted App Directories</label>
-          <small>
-            <p>Ulauncher won't include applications from these directories</p>
-          </small>
-        </td>
-        <td class="pull-top">
-          <editable-text-list
-            width="450px"
-            v-model="blacklisted_desktop_dirs"
-            newItemPlaceholder="Type in an absolute path and press Enter"
-          ></editable-text-list>
-        </td>
-      </tr>
-      <tr>
-        <td class="pull-top">
           <label for="disable-desktop-filters">Show All Apps</label>
           <small>
             <p>
@@ -165,16 +150,11 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 
 import jsonp from '@/api'
 import bus from '@/event-bus'
-import EditableTextList from '@/components/widgets/EditableTextList'
 
 const hotkeyEventName = 'hotkey-show-app'
 
 export default {
   name: 'preferences',
-
-  components: {
-    'editable-text-list': EditableTextList
-  },
 
   created() {
     bus.$on(hotkeyEventName, this.onHotkeySet)
@@ -284,21 +264,6 @@ export default {
       set(value) {
         return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
           () => this.setPrefs({ grab_mouse_pointer: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    blacklisted_desktop_dirs: {
-      get() {
-        return this.prefs.blacklisted_desktop_dirs
-      },
-      set(value) {
-        return jsonp('prefs://set/blacklisted-desktop-dirs', { value: value.join(':') }).then(
-          () => {
-            this.setPrefs({ blacklisted_desktop_dirs: value })
-            this.blacklistedDirsChanged = true
-          },
           err => bus.$emit('error', err)
         )
       }

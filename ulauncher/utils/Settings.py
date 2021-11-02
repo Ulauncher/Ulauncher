@@ -8,17 +8,6 @@ from gi.repository import GObject
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
 
-DEFAULT_BLACKLISTED_DIRS = [
-    '/usr/share/locale',
-    '/usr/share/app-install',
-    '/usr/share/kservices5',
-    '/usr/share/fk5',
-    '/usr/share/kservicetypes5',
-    '/usr/share/applications/screensavers',
-    '/usr/share/kde4',
-    '/usr/share/mimelnk'
-]
-
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type
                         "Hotkey: Show ulauncher window",  # nick name
@@ -45,11 +34,6 @@ GPROPERTIES = {
                    None,
                    "light",
                    GObject.ParamFlags.READWRITE),
-    "blacklisted-desktop-dirs": (str,
-                                 "Blacklisted desktop dirs",
-                                 None,
-                                 ':'.join(DEFAULT_BLACKLISTED_DIRS),
-                                 GObject.ParamFlags.READWRITE),
     "render-on-screen": (str,
                          "Monitor to render on",
                          None,

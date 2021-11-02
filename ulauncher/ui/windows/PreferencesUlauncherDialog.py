@@ -244,7 +244,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'autostart_enabled': self.autostart_pref.is_enabled(),
             'show_recent_apps': self.settings.get_property('show-recent-apps'),
             'clear_previous_query': self.settings.get_property('clear-previous-query'),
-            'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'disable_desktop_filters': self.settings.get_property('disable-desktop-filters'),
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
@@ -342,13 +341,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         is_enabled = self._get_bool(url_params['query']['value'])
         logger.info('Set grab-mouse-pointer to %s', is_enabled)
         self.settings.set_property('grab-mouse-pointer', is_enabled)
-        self.settings.save_to_file()
-
-    @rt.route('/set/blacklisted-desktop-dirs')
-    def prefs_set_blacklisted_desktop_dirs(self, url_params):
-        dirs = url_params['query']['value']
-        logger.info('Set blacklisted-desktop-dirs to %s', dirs)
-        self.settings.set_property('blacklisted-desktop-dirs', dirs)
         self.settings.save_to_file()
 
     @rt.route('/set/disable-desktop-filters')
