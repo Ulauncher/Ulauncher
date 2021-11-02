@@ -33,10 +33,10 @@ def data_files_from_path(target_path, source_path):
 class build_preferences(Command):
     description = "Build Ulauncher preferences (Vue.js app)"
     force = "0"
-    verify = "0"
+    lint = "1"
     user_options = [
         ('force=', None, 'Rebuild even if source has no modifications since last build (default: 0)'),
-        ('verify=', None, 'run linting, unit tests and always build (default: 1)')
+        ('lint=', None, 'Lint before building (default: 1)')
     ]
 
     def initialize_options(self):
@@ -49,7 +49,7 @@ class build_preferences(Command):
         src = Path("preferences-src")
         dst = Path("data/preferences")
         force = hasattr(self, "force") and self.force == "1"
-        verify = hasattr(self, "verify") and self.verify == "1"
+        lint = hasattr(self, "lint") and self.lint == "1"
 
         if not dst.is_dir() and not src.is_dir():
             raise Exception("Preferences are missing.")
@@ -60,14 +60,12 @@ class build_preferences(Command):
 
         sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob('preferences-src/**/*')))
 
-        if verify:
-            subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn lint; yarn unit"], check=True)
-
         if not force and dst.is_dir() and dst.stat().st_mtime > sourceModified:
             print("Detected no changes to Preferences since last build.")
             return
 
-        subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn build"], check=True)
+        lint = "yarn lint;" if lint else ""
+        subprocess.run(["sh", "-c", f"cd preferences-src; yarn; {lint} yarn build"], check=True)
 
 
 class build_wrapper(build_py):
