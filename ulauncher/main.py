@@ -91,20 +91,6 @@ def main():
     Main function that starts everything
     """
 
-    # start DBus loop
-    DBusGMainLoop(set_as_default=True)
-    bus = dbus.SessionBus()
-    instance = bus.request_name(DBUS_SERVICE)
-
-    if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        print(
-            "DBus name already taken. Ulauncher is probably backgrounded. Did you mean `ulauncher-toggle`?",
-            file=sys.stderr
-        )
-        toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
-        toggle_window()
-        return
-
     options = get_options()
     setup_logging(options)
     logger.info('Ulauncher version %s', get_version())
@@ -120,6 +106,21 @@ def main():
         # from starting a second Ulauncher background process we have to make sure the
         # --no-window flag prevents the app from starting.
         sys.exit("The --hide-window option has been renamed to --no-window")
+
+    # start DBus loop
+    DBusGMainLoop(set_as_default=True)
+    bus = dbus.SessionBus()
+    instance = bus.request_name(DBUS_SERVICE)
+
+    if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print(
+            "DBus name already taken. Ulauncher is probably backgrounded. Did you mean `ulauncher-toggle`?",
+            file=sys.stderr
+        )
+        toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
+        toggle_window()
+        return
+
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):

@@ -73,8 +73,8 @@ def get_options():
         "-v", "--verbose", action="count", dest="verbose",
         help=gettext("Show debug messages"))
     parser.add_argument(
-        "--hide-window", action="store_true",
-        help=argparse.SUPPRESS)
+        '--version', action='version',
+        version="Ulauncher %s" % __version__)
     parser.add_argument(
         "--no-window", action="store_true",
         help=gettext("Hide window upon application startup"))
@@ -87,6 +87,9 @@ def get_options():
     parser.add_argument(
         "--dev", action="store_true",
         help=gettext("Enables context menu in the Preferences UI"))
+    parser.add_argument(
+        "--hide-window", action="store_true",
+        help=argparse.SUPPRESS)
 
     return parser.parse_args()
 
