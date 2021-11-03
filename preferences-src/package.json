@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "PORT=3002 node build/dev-server.js",
     "build": "node build/build.js",
+    "analyze": "node build/build.js --analyze"
   },
   "dependencies": {
     "bootstrap-vue": "^2.0.0",

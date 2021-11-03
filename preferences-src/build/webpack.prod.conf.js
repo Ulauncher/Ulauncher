@@ -1,6 +1,7 @@
 var path = require('path')
 var utils = require('./utils')
 var config = require('../config')
+var { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 var { merge } = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 var CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -68,8 +69,9 @@ if (config.build.productionGzip) {
   )
 }
 
-if (config.build.bundleAnalyzerReport) {
-  var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+
+// Run `yarn run analyze` to generate the bundle analyzer report
+if (process.env.npm_lifecycle_event === 'analyze') {
   webpackConfig.plugins.push(new BundleAnalyzerPlugin())
 }
 
