@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "PORT=3002 node build/dev-server.js",
-    "start": "PORT=3002 node build/dev-server.js",
     "build": "node build/build.js",
     "lint": "eslint --ext .js,.vue src",
     "lint-autofix": "eslint --ext .js,.vue src --fix"
