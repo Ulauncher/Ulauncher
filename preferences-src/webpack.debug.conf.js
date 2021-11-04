@@ -1,20 +1,18 @@
-var utils = require('./utils')
 var webpack = require('webpack')
-var config = require('../config')
-var { merge } = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 
 // add hot-reload related code to entry chunks
 Object.keys(baseWebpackConfig.entry).forEach(function (name) {
-  baseWebpackConfig.entry[name] = ['./build/dev-client'].concat(baseWebpackConfig.entry[name])
+  baseWebpackConfig.entry[name] = ['./dev-client'].concat(baseWebpackConfig.entry[name])
 })
 
-module.exports = merge(baseWebpackConfig, {
+module.exports = Object.assign({}, baseWebpackConfig, {
   mode: 'development',
-  module: {
-    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap })
+  output: {
+    filename: '[name].js',
+    publicPath: '/',
   },
   // cheap-module-eval-source-map is faster for development
   devtool: '#cheap-module-eval-source-map',
