@@ -1,5 +1,6 @@
 var { resolve } = require('path')
 var { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+var { DefinePlugin } = require('webpack')
 var baseConfig = require('./webpack.base.conf')
 var CopyPlugin = require('copy-webpack-plugin')
 var HtmlPlugin = require('html-webpack-plugin')
@@ -15,6 +16,9 @@ var webpackConfig = Object.assign({}, baseConfig, {
     publicPath: './'
   },
   plugins: [
+    new DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    }),    
     new VueLoaderPlugin(),
     // Generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
