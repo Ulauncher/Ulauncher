@@ -3,6 +3,7 @@ var { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 var baseConfig = require('./webpack.base.conf')
 var CopyPlugin = require('copy-webpack-plugin')
 var HtmlPlugin = require('html-webpack-plugin')
+var { VueLoaderPlugin } = require('vue-loader')
 
 var webpackConfig = Object.assign({}, baseConfig, {
   // http://vuejs.github.io/vue-loader/en/workflow/production.html
@@ -14,6 +15,7 @@ var webpackConfig = Object.assign({}, baseConfig, {
     publicPath: './'
   },
   plugins: [
+    new VueLoaderPlugin(),
     // Generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
@@ -22,7 +24,11 @@ var webpackConfig = Object.assign({}, baseConfig, {
       template: 'index.html',
     }),
     // Copy custom static assets
-    new CopyPlugin([{ from: 'static' }])
+    new CopyPlugin({
+      patterns: [
+        { from: 'static' }
+      ]
+    })
   ]
 })
 
