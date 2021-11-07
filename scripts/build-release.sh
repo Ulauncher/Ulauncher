@@ -95,9 +95,9 @@ launchpad_upload() {
     else
         PPA="agornostal/ulauncher"
     fi
-    hirsute="PPA=$PPA RELEASE=hirsute ./ul build-deb --upload"
-    focal="PPA=$PPA RELEASE=focal ./ul build-deb --upload"
-    groovy="PPA=$PPA RELEASE=groovy ./ul build-deb --upload"
+    impish="PPA=$PPA RELEASE=impish ./ul build-deb $VERSION --upload"
+    focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
+    bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each release
@@ -107,6 +107,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $hirsute && $focal && $groovy"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $impish && $focal && $bionic"
     set +x
 }
