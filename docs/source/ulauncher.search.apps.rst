@@ -28,14 +28,6 @@ ulauncher\.search\.apps\.AppSearchMode module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.apps\.AppStatDb module
------------------------------------------
-
-.. automodule:: ulauncher.search.apps.AppStatDb
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Module contents
 ---------------
 

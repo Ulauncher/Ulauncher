@@ -20,7 +20,6 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F
 from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
-from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.search.apps.AppResultItem import AppResultItem
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
@@ -353,8 +352,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         except ValueError:
             pass
         if not result_items and not self.input.get_text() and recent_apps_number > 0:
-            recent_apps = AppStatDb.get_instance().get_most_frequent(recent_apps_number)
-            result_items = list(filter(None, map(AppResultItem.from_id, recent_apps)))
+            result_items = AppResultItem.get_most_frequent(recent_apps_number)
 
         results = self.create_item_widgets(result_items, self._get_user_query())
 

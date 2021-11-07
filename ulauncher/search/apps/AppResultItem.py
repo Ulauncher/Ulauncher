@@ -1,17 +1,19 @@
-from os.path import basename
+from os.path import basename, join
 import gi
 gi.require_version('Gio', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio
+from ulauncher.config import DATA_DIR
+from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.search.QueryHistoryDb import QueryHistoryDb
-from ulauncher.search.apps.AppStatDb import AppStatDb
 from ulauncher.utils.image_loader import get_app_icon_pixbuf
 
 settings = Settings.get_instance()
+_app_stat_db = KeyValueDb(join(DATA_DIR, 'app_stat_v3.db')).open()
 
 
 class AppResultItem(ResultItem):
@@ -27,7 +29,6 @@ class AppResultItem(ResultItem):
         self._executable = basename(app_info.get_string('TryExec') or app_info.get_executable())
         self._app_info = app_info
         self._query_history = QueryHistoryDb.get_instance()
-        self._app_stat_db = AppStatDb.get_instance()
 
     @staticmethod
     def from_id(app_id):
@@ -38,11 +39,25 @@ class AppResultItem(ResultItem):
             return None
 
     @staticmethod
-    def search(query, min_score=50, limit=9, apps=None):
+    def search(query, min_score=50, limit=9):
         # Cast apps to AppResultItem objects. Default apps to Gio.DesktopAppInfo.get_all()
-        apps = [AppResultItem(app) for app in apps or Gio.DesktopAppInfo.get_all()]
+        apps = [AppResultItem(app) for app in Gio.DesktopAppInfo.get_all()]
         sorted_apps = sorted(apps, key=lambda app: app.search_score(query), reverse=True)[:limit]
         return list(filter(lambda app: app.search_score(query) > min_score, sorted_apps))
+
+    @staticmethod
+    def get_most_frequent(limit=5):
+        """
+        Returns most frequent apps
+
+        TODO: rename to `get_most_recent` and update method to remove old apps
+
+        :param int limit: limit
+        :rtype: class:`ResultList`
+        """
+        sorted_tuples = sorted(_app_stat_db._records.items(), key=lambda rec: rec[1], reverse=True)
+        sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
+        return list(filter(None, map(AppResultItem.from_id, sorted_app_ids)))[:limit]
 
     def should_show(self):
         disable_desktop_filters = settings.get_property('disable-desktop-filters')
@@ -86,6 +101,8 @@ class AppResultItem(ResultItem):
     def on_enter(self, query):
         self._query_history.save_query(str(query), self._name)
 
-        self._app_stat_db.inc_count(self._app_info.get_id())
-        self._app_stat_db.commit()
+        app_id = self._app_info.get_id()
+        count = _app_stat_db._records.get(app_id, 0)
+        _app_stat_db._records[app_id] = count + 1
+        _app_stat_db.commit()
         return LaunchAppAction(self._app_info.get_filename())
