@@ -61,14 +61,11 @@ class AppResultItem(ResultItem):
 
     def should_show(self):
         disable_desktop_filters = settings.get_property('disable-desktop-filters')
-        blacklisted_dirs = settings.get_property('blacklisted-desktop-dirs')
-        blacklisted_dirs_list = blacklisted_dirs.split(':') if blacklisted_dirs else []
         show_in = self._app_info.get_show_in() or disable_desktop_filters
-        blacklisted = any(map(self._app_info.get_filename().startswith, blacklisted_dirs_list))
         # Make an exception for gnome-control-center, because all the very useful specific settings
         # like "Keyboard", "Wi-Fi", "Sound" etc have NoDisplay=true
         nodisplay = self._app_info.get_nodisplay() and not self._executable == 'gnome-control-center'
-        return self._name and self._executable and show_in and not nodisplay and not blacklisted
+        return self._name and self._executable and show_in and not nodisplay
 
     def search_score(self, query):
         if not self.should_show():

@@ -23,12 +23,7 @@ export default function createStore() {
     actions: {
       getAllPrefs: ({ commit }) => {
         jsonp('prefs:///get/all').then(
-          data => {
-            commit('setPrefs', {
-              ...data,
-              blacklisted_desktop_dirs: data.blacklisted_desktop_dirs ? data.blacklisted_desktop_dirs.split(':') : []
-            })
-          },
+          data => commit('setPrefs', data),
           err => bus.$emit('error', err)
         )
       }

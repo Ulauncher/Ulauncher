@@ -15,7 +15,6 @@ export default function(url, params) {
         autostart_enabled: true,
         clear_previous_text: true,
         grab_mouse_pointer: true,
-        blacklisted_desktop_dirs: ['/var/tmp', '/tmp/var/log/bin/bash/root'].join(':'),
         disable_desktop_filters: false,
         available_themes: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }],
         theme_name: 'light',
@@ -46,9 +45,6 @@ export default function(url, params) {
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/grab-mouse-pointer')) {
       console.log('/set/grab-mouse-pointer', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/blacklisted-desktop-dirs')) {
-      console.log('/set/blacklisted-desktop-dirs', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/disable-desktop-filters')) {
       console.log('/set/disable-desktop-filters', params)
