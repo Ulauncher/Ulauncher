@@ -8,15 +8,18 @@ from uuid import uuid4
 from time import time
 from functools import lru_cache
 from gettext import gettext
-from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 from ulauncher import __version__, __data_directory__
 
+_HOME = os.path.expanduser('~')
+_XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.join(_HOME, '.local', 'share')
+_XDG_CONFIG_HOME = os.environ.get('XDG_CONFIG_HOME') or os.path.join(_HOME, '.config')
+_XDG_CACHE_HOME = os.environ.get('XDG_CACHE_HOME') or os.path.join(_HOME, '.cache')
 
-DATA_DIR = os.path.join(xdg_data_home, 'ulauncher')
+DATA_DIR = os.path.join(_XDG_DATA_HOME, 'ulauncher')
 # Use ulauncher_cache dir because of the WebKit bug
 # https://bugs.webkit.org/show_bug.cgi?id=151646
-CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
-CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
+CACHE_DIR = os.path.join(_XDG_CACHE_HOME, 'ulauncher_cache')
+CONFIG_DIR = os.path.join(_XDG_CONFIG_HOME, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
