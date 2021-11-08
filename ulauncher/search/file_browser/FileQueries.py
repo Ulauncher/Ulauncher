@@ -1,7 +1,7 @@
 import os
 from time import time, sleep
 from typing import Optional
-from ulauncher.config import CACHE_DIR
+from ulauncher.config import STATE_DIR
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
@@ -14,7 +14,7 @@ class FileQueries(KeyValueDb[str, float]):
     @classmethod
     @singleton
     def get_instance(cls) -> 'FileQueries':
-        browser_cache = os.path.join(CACHE_DIR, 'file_browser_queries_v2.db')
+        browser_cache = os.path.join(STATE_DIR, 'file_browser_queries_v2.db')
         db = cls(browser_cache)
         db.open()
         return db

@@ -1,5 +1,5 @@
 import os
-from ulauncher.config import DATA_DIR
+from ulauncher.config import STATE_DIR
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.decorator.singleton import singleton
 
@@ -9,7 +9,7 @@ class QueryHistoryDb(KeyValueDb):
     @classmethod
     @singleton
     def get_instance(cls):
-        db = cls(os.path.join(DATA_DIR, 'query_history.db'))
+        db = cls(os.path.join(STATE_DIR, 'query_history.db'))
         db.open()
         return db
 
