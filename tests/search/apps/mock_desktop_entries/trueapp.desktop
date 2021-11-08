@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=TrueApp
+X-GNOME-FullName=TrueApp - Full Name
+Comment=Your own yes-man
+Exec=true
+Icon=dialog-yes
+Type=Application

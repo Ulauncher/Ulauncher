@@ -20,7 +20,7 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F
 from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.search.Search import Search
-from ulauncher.search.apps.AppStatDb import AppStatDb
+from ulauncher.search.apps.AppResultItem import AppResultItem
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
@@ -32,7 +32,6 @@ from ulauncher.utils.image_loader import load_image
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
-from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.ui.windows.WindowHelper import WindowHelper
@@ -106,7 +105,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             # bind in the main thread
             GLib.idle_add(self.bind_hotkey, accel_name)
 
-        start_app_watcher()
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
@@ -354,7 +352,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         except ValueError:
             pass
         if not result_items and not self.input.get_text() and recent_apps_number > 0:
-            result_items = AppStatDb.get_instance().get_most_frequent(recent_apps_number)
+            result_items = AppResultItem.get_most_frequent(recent_apps_number)
 
         results = self.create_item_widgets(result_items, self._get_user_query())
 

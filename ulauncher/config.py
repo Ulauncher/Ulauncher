@@ -8,7 +8,7 @@ from uuid import uuid4
 from time import time
 from functools import lru_cache
 from gettext import gettext
-from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_dirs, xdg_data_home
+from xdg.BaseDirectory import xdg_config_home, xdg_cache_home, xdg_data_home
 from ulauncher import __version__, __data_directory__
 
 
@@ -19,7 +19,6 @@ CACHE_DIR = os.path.join(xdg_cache_home, 'ulauncher_cache')
 CONFIG_DIR = os.path.join(xdg_config_home, 'ulauncher')
 SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
-DESKTOP_DIRS = list(filter(os.path.exists, [os.path.join(dir, "applications") for dir in xdg_data_dirs]))
 EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

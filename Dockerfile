@@ -27,7 +27,6 @@ RUN apt-get update && \
         python3-gi \
         python3-xdg \
         python3-dbus \
-        python3-pyinotify \
         python3-levenshtein \
         python3-paramiko \
         python3-pip && \

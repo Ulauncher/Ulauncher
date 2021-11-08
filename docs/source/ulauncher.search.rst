@@ -38,15 +38,6 @@ ulauncher\.search\.Search module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.SortedList module
-------------------------------------
-
-.. automodule:: ulauncher.search.SortedList
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 

@@ -133,9 +133,6 @@
           <label>Blacklisted App Directories</label>
           <small>
             <p>Ulauncher won't include applications from these directories</p>
-            <p v-if="blacklistedDirsChanged">
-              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
-            </p>
           </small>
         </td>
         <td class="pull-top">
@@ -152,9 +149,6 @@
           <small>
             <p>
               Display all applications, even if they are configured to not show in the current desktop environment.
-            </p>
-            <p v-if="disableDesktopFiltersChanged">
-              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect
             </p>
           </small>
         </td>

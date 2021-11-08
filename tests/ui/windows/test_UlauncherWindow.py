@@ -3,6 +3,7 @@ import mock
 
 import gi
 gi.require_version('Gtk', '3.0')
+# pylint: disable=wrong-import-position
 from gi.repository import Gtk
 
 from ulauncher.api.shared.item.ResultItem import ResultItem
@@ -52,16 +53,12 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_image')
 
     @pytest.fixture(autouse=True)
-    def start_sync(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.start_app_watcher')
-
-    @pytest.fixture(autouse=True)
     def show_notification(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
 
     @pytest.fixture(autouse=True)
-    def app_stat_db(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppStatDb.get_instance').return_value
+    def AppResultItem(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppResultItem.get_most_frequent').return_value
 
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
