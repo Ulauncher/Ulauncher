@@ -1,7 +1,7 @@
 import os
 import logging
 from copy import copy
-from ulauncher.config import DATA_DIR
+from ulauncher.config import STATE_DIR
 
 
 # The background is set with 40 plus the number of the color, and the foreground with 30
@@ -47,7 +47,7 @@ def setup_logging(opts):
     root.addHandler(stream_handler)
 
     # set up login to a file
-    log_file = os.path.join(DATA_DIR, 'last.log')
+    log_file = os.path.join(STATE_DIR, 'last.log')
     if os.path.exists(log_file):
         os.remove(log_file)
 

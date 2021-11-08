@@ -31,6 +31,3 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 
 `python-dbus <https://github.com/LEW21/pydbus>`_
   Python DBus library.
-
-`python-xdg <https://pyxdg.readthedocs.io/en/latest/index.html>`_
-  Python library supporting various freedesktop standards.

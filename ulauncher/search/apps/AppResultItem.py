@@ -3,7 +3,7 @@ import gi
 gi.require_version('Gio', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio
-from ulauncher.config import DATA_DIR
+from ulauncher.config import STATE_DIR
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
@@ -13,7 +13,7 @@ from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 from ulauncher.utils.image_loader import get_app_icon_pixbuf
 
 settings = Settings.get_instance()
-_app_stat_db = KeyValueDb(join(DATA_DIR, 'app_stat_v3.db')).open()
+_app_stat_db = KeyValueDb(join(STATE_DIR, 'app_stat_v3.db')).open()
 
 
 class AppResultItem(ResultItem):
