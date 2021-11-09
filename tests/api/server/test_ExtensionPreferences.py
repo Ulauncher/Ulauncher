@@ -3,15 +3,15 @@ import pytest
 
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 
 
 class TestExtensionPreferences:
 
     @pytest.fixture(autouse=True)
     def db(self, mocker):
-        Db = mocker.patch('ulauncher.api.server.ExtensionPreferences.KeyValueDb')
-        db_mock = mock.create_autospec(KeyValueDb)
+        Db = mocker.patch('ulauncher.api.server.ExtensionPreferences.KeyValueJsonDb')
+        db_mock = mock.create_autospec(KeyValueJsonDb)
         Db.__getitem__.return_value.return_value = db_mock
 
         def find(_, default=None):
