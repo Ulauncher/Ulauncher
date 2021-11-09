@@ -1,10 +1,13 @@
-import shutil
-import subprocess
+from shutil import which
+from subprocess import check_output, run
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 def systemctl_unit_run(*args):
     try:
-        return subprocess.check_output(["systemctl", "--user"] + list(args) + ["ulauncher"]).decode('utf-8').rstrip()
+        return check_output(["systemctl", "--user"] + list(args) + ["ulauncher"]).decode('utf-8').rstrip()
     except Exception:
         return False
 
@@ -14,7 +17,15 @@ class AutostartPreference:
         """
         :returns: True if autostart can be controlled by Ulauncher
         """
-        return bool(shutil.which("systemctl")) and 'ExecStart' in systemctl_unit_run("cat")
+        if not which("systemctl"):
+            logger.info("Need systemd to use Ulauncher 'Launch at Login'")
+            return False
+        status = systemctl_unit_run("show")
+        if "NeedDaemonReload=yes" in status:
+            logger.info("Reloading systemd daemon")
+            run(["systemctl", "--user", "daemon-reload"], check=True)
+            status = systemctl_unit_run("show")
+        return "CanStart=yes" in status
 
     def is_enabled(self):
         """
