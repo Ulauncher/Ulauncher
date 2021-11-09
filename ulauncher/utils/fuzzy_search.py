@@ -1,17 +1,31 @@
 from functools import lru_cache
-from Levenshtein import matching_blocks, editops
+from logging import getLogger
+from difflib import SequenceMatcher
+
+logger = getLogger(__name__)
+
+
+# Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
+# with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
+try:
+    from Levenshtein import matching_blocks, editops
+
+    def _get_matching_blocks(query, text):
+        return matching_blocks(editops(query, text), query, text)
+except (ModuleNotFoundError, ImportError):
+    logger.warning("Levenshtein is missing or outdated. Falling back to slower fuzzy-finding method.")
+
+    def _get_matching_blocks(query, text):
+        return SequenceMatcher(None, query, text).get_matching_blocks()
 
 
 @lru_cache(maxsize=1000)
 def get_matching_blocks(query, text):
     """
-    Uses Levenstein library's get_matching_blocks (Longest Common Substring),
-    This is 8-12x faster than difflib's SequenceMatcher().get_matching_blocks()
+    Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched
     """
-    query_l = query.lower()
-    text_l = text.lower()
-    blocks = matching_blocks(editops(query_l, text_l), query_l, text_l)[:-1]
+    blocks = _get_matching_blocks(query.lower(), text.lower())[:-1]
     output = []
     total_len = 0
     for (_, text_index, length) in blocks:
