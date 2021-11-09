@@ -4,7 +4,7 @@ gi.require_version('Gio', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio
 from ulauncher.config import STATE_DIR
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
@@ -13,7 +13,7 @@ from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 from ulauncher.utils.image_loader import get_app_icon_pixbuf
 
 settings = Settings.get_instance()
-_app_stat_db = KeyValueDb(join(STATE_DIR, 'app_stat_v3.db')).open()
+_app_starts = KeyValueJsonDb(join(STATE_DIR, 'app_starts.json')).open()
 
 
 class AppResultItem(ResultItem):
@@ -55,7 +55,7 @@ class AppResultItem(ResultItem):
         :param int limit: limit
         :rtype: class:`ResultList`
         """
-        sorted_tuples = sorted(_app_stat_db._records.items(), key=lambda rec: rec[1], reverse=True)
+        sorted_tuples = sorted(_app_starts._records.items(), key=lambda rec: rec[1], reverse=True)
         sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
         return list(filter(None, map(AppResultItem.from_id, sorted_app_ids)))[:limit]
 
@@ -99,7 +99,7 @@ class AppResultItem(ResultItem):
         self._query_history.save_query(str(query), self._name)
 
         app_id = self._app_info.get_id()
-        count = _app_stat_db._records.get(app_id, 0)
-        _app_stat_db._records[app_id] = count + 1
-        _app_stat_db.commit()
+        count = _app_starts._records.get(app_id, 0)
+        _app_starts._records[app_id] = count + 1
+        _app_starts.commit()
         return LaunchAppAction(self._app_info.get_filename())

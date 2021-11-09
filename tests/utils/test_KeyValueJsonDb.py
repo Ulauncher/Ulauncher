@@ -1,9 +1,9 @@
 import os
 import pytest
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 
 
-class TestKeyValueDb:
+class TestKeyValueJsonDb:
 
     @pytest.fixture
     def db_name(self, tmpdir):
@@ -11,22 +11,22 @@ class TestKeyValueDb:
 
     @pytest.fixture
     def db(self, db_name):
-        return KeyValueDb(db_name).open()
+        return KeyValueJsonDb(db_name).open()
 
     def test_open_raises_ioerror(self):
         """It raises IOError if 'name' is a directory"""
 
         with pytest.raises(IOError):
-            KeyValueDb('/tmp').open()
+            KeyValueJsonDb('/tmp').open()
 
     def test_commit(self, db_name):
         """It saves changes to disk"""
 
-        db = KeyValueDb(db_name).open()
+        db = KeyValueJsonDb(db_name).open()
         db.put('hello', 123)
         db.commit()
 
-        db = KeyValueDb(db_name).open()
+        db = KeyValueJsonDb(db_name).open()
         assert db.find('hello') == 123
 
     def test_remove(self, db):

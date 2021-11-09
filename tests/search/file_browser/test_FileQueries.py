@@ -10,7 +10,7 @@ class TestFileQueries:
         return FileQueries('basename')
 
     def test_save_query(self, queries: FileQueries, mocker):
-        orig_put = mocker.patch('ulauncher.search.file_browser.FileQueries.KeyValueDb.put')
+        orig_put = mocker.patch('ulauncher.search.file_browser.FileQueries.KeyValueJsonDb.put')
         time = mocker.patch('ulauncher.search.file_browser.FileQueries.time')
         queries.save_query('path1')
         orig_put.assert_called_with('path1', time.return_value)

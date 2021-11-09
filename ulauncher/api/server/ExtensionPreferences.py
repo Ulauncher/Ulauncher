@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional, Dict
 from functools import lru_cache
 from ulauncher.config import EXT_PREFERENCES_DIR
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest, OptionItems
 
@@ -24,7 +24,7 @@ PreferenceItems = List[PreferenceItem]
 
 class ExtensionPreferences:
     """
-    Manages extension preferences. Stores them in pickled file in cache directory
+    Manages extension preferences. Stores them as json files in config directory
     """
 
     manifest = None  # type: ExtensionManifest
@@ -35,8 +35,8 @@ class ExtensionPreferences:
         return cls(ext_id, ExtensionManifest.open(ext_id))
 
     def __init__(self, ext_id: str, manifest: ExtensionManifest, ext_preferences_dir: str = EXT_PREFERENCES_DIR):
-        self.db_path = os.path.join(ext_preferences_dir, '%s.db' % ext_id)
-        self.db = KeyValueDb[str, str](self.db_path)
+        self.db_path = os.path.join(ext_preferences_dir, '%s.json' % ext_id)
+        self.db = KeyValueJsonDb[str, str](self.db_path)
         self.manifest = manifest
         self._db_is_open = False
 

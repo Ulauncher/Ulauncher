@@ -1,15 +1,15 @@
 import os
 from ulauncher.config import STATE_DIR
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.decorator.singleton import singleton
 
 
-class QueryHistoryDb(KeyValueDb):
+class QueryHistoryDb(KeyValueJsonDb):
 
     @classmethod
     @singleton
     def get_instance(cls):
-        db = cls(os.path.join(STATE_DIR, 'query_history.db'))
+        db = cls(os.path.join(STATE_DIR, 'query_history.json'))
         db.open()
         return db
 

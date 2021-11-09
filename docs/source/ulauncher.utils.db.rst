@@ -4,14 +4,6 @@ ulauncher.utils.db package
 Submodules
 ----------
 
-ulauncher.utils.db.KeyValueDb module
-------------------------------------
-
-.. automodule:: ulauncher.utils.db.KeyValueDb
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.db.KeyValueJsonDb module
 ----------------------------------------
 

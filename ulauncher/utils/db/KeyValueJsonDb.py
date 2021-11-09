@@ -1,14 +1,27 @@
 import os
 import json
+from typing import Dict, TypeVar, Generic, Optional
 
-from ulauncher.utils.db.KeyValueDb import KeyValueDb, Key, Value
+Key = TypeVar('Key')
+Value = TypeVar('Value')
+Records = Dict[Key, Value]
 
 
-class KeyValueJsonDb(KeyValueDb[Key, Value]):
+class KeyValueJsonDb(Generic[Key, Value]):
     """
-    Key-value JSON database
-    Use open() method to load DB from a file and commit() to save it
+    Key-value in-memory database
+    Use open() method to load JSON from a file and commit() to save it
     """
+
+    _name = None  # type: str
+    _records = None  # type: Records
+
+    def __init__(self, basename: str):
+        """
+        :param str basename: path to db file
+        """
+        self._name = basename
+        self.set_records({})
 
     def open(self) -> 'KeyValueJsonDb':
         """Create a new data base or open existing one"""
@@ -36,3 +49,27 @@ class KeyValueJsonDb(KeyValueDb[Key, Value]):
             out.close()
 
         return self
+
+    def remove(self, key: Key) -> bool:
+        """
+        :param str key:
+        :type: bool
+        :return: True if record was removed
+        """
+        try:
+            del self._records[key]
+            return True
+        except KeyError:
+            return False
+
+    def set_records(self, records: Records):
+        self._records = records
+
+    def get_records(self) -> Records:
+        return self._records
+
+    def put(self, key: Key, value: Value) -> None:
+        self._records[key] = value
+
+    def find(self, key: Key, default: Value = None) -> Optional[Value]:
+        return self._records.get(key, default)
