@@ -455,7 +455,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         prefix = 'pref.'
         controller = ExtensionServer.get_instance().get_controller(ext_id)
         if not controller:
-            logger.error("Cannot update preferences. The extension controller is not registered. Try relaunching or restarting Ulauncher")
+            logger.error("Cannot update preferences. The extension controller is not registered. \
+            Try relaunching or restarting Ulauncher, and check the extension readme for external dependencies \
+            you may have to install manually")
             return
         preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
         for pref_id, value in preferences:
