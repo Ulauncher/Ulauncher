@@ -2,19 +2,19 @@ import os
 from time import time, sleep
 from typing import Optional
 from ulauncher.config import STATE_DIR
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
 
 
-class FileQueries(KeyValueDb[str, float]):
+class FileQueries(KeyValueJsonDb[str, float]):
     __last_put_time = None  # type: Optional[float]
     __last_save_time = None  # type: Optional[float]
 
     @classmethod
     @singleton
     def get_instance(cls) -> 'FileQueries':
-        browser_cache = os.path.join(STATE_DIR, 'file_browser_queries_v2.db')
+        browser_cache = os.path.join(STATE_DIR, 'file_browser_queries.json')
         db = cls(browser_cache)
         db.open()
         return db

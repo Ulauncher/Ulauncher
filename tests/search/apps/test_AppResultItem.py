@@ -6,7 +6,7 @@ gi.require_version('Gio', '2.0')
 gi.require_version('GdkPixbuf', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GdkPixbuf
-from ulauncher.utils.db.KeyValueDb import KeyValueDb
+from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.search.apps.AppResultItem import AppResultItem
 from ulauncher.search.QueryHistoryDb import QueryHistoryDb
 from ulauncher.search.Query import Query
@@ -44,10 +44,10 @@ class TestAppResultItem:
         return get_instance.return_value
 
     @pytest.fixture(autouse=True)
-    def _app_stat_db(self, mocker):
-        db = KeyValueDb('/tmp/mock.db').open()
+    def _app_starts(self, mocker):
+        db = KeyValueJsonDb('/tmp/mock.json').open()
         db.set_records({'falseapp.desktop': 3000, 'trueapp.desktop': 765})
-        return mocker.patch("ulauncher.search.apps.AppResultItem._app_stat_db", new=db)
+        return mocker.patch("ulauncher.search.apps.AppResultItem._app_starts", new=db)
 
     def test_get_name(self, app1):
         assert app1.get_name() == 'TrueApp - Full Name'
@@ -72,12 +72,12 @@ class TestAppResultItem:
         assert app1.selected_by_default('q')
         query_history.find.assert_called_with('q')
 
-    def test_on_enter(self, app1, mocker, query_history, _app_stat_db):
+    def test_on_enter(self, app1, mocker, query_history, _app_starts):
         LaunchAppAction = mocker.patch('ulauncher.search.apps.AppResultItem.LaunchAppAction')
         assert app1.on_enter(Query('query')) is LaunchAppAction.return_value
         LaunchAppAction.assert_called_with(f'{ENTRIES_DIR}/trueapp.desktop')
         query_history.save_query.assert_called_with('query', 'TrueApp - Full Name')
-        assert _app_stat_db._records.get('trueapp.desktop') == 766
+        assert _app_starts._records.get('trueapp.desktop') == 766
 
     def test_get_most_frequent(self):
         assert len(AppResultItem.get_most_frequent()) == 2
