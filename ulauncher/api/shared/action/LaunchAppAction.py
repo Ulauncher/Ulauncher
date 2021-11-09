@@ -51,16 +51,10 @@ class LaunchAppAction(BaseAction):
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
             if hasSystemdRun and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
-                # Escape the Ulauncher cgroup, so this process isn't considered a child process of Ulauncher
-                # and doesn't die if Ulauncher dies/crashed/is terminated
-                # The slice name is super sensitive and must not contain invalid characters like space
-                # or trailing or leading hyphens
-                sanitized_app = re.sub(r'(^-*|[^\w^\-^\.]|-*$)', '', app_id)
                 sanitized_exec = [
                     'systemd-run',
                     '--user',
-                    '--scope',
-                    '--slice=app-{}'.format(sanitized_app)
+                    '--remain-after-exit',
                 ] + sanitized_exec
 
             env = dict(os.environ.items())
