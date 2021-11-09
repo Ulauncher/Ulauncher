@@ -121,7 +121,6 @@ def main():
         toggle_window()
         return
 
-
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
         logger.error("Uncaught exception", exc_info=(exctype, value, tb))
