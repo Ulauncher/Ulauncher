@@ -454,6 +454,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Update extension preferences: %s', query)
         prefix = 'pref.'
         controller = ExtensionServer.get_instance().get_controller(ext_id)
+        if not controller:
+            logger.error("Cannot update preferences. The extension controller is not registered. Try relaunching or restarting Ulauncher")
+            return
         preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
         for pref_id, value in preferences:
             old_value = controller.preferences.get(pref_id)['value']
@@ -516,11 +519,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
-        is_connected = True
-        try:
-            ExtensionServer.get_instance().get_controller(ext_id)
-        except KeyError:
-            is_connected = False
+        is_connected = bool(ExtensionServer.get_instance().get_controller(ext_id))
         ext_runner = ExtensionRunner.get_instance()
         is_running = is_connected or ext_runner.is_running(ext_id)
         ext_db_record = ext_db.find(ext_id, {})

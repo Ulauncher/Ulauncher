@@ -73,7 +73,7 @@ class ExtensionServer:
         :param str extension_id:
         :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
         """
-        return self.controllers[extension_id]
+        return self.controllers.get(extension_id)
 
     def get_controllers(self):
         """
