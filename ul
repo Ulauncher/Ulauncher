@@ -2,8 +2,6 @@
 
 . scripts/common.sh
 . scripts/help.sh
-. scripts/init-dev-env.sh
-. scripts/cleanup-dev-env.sh
 . scripts/rm-python-cache.sh
 . scripts/tests.sh
 . scripts/dev-container.sh
@@ -23,8 +21,6 @@
 
 main () {
   case "$1" in
-    init-dev-env) init-dev-env ;;
-    cleanup-dev-env) cleanup-dev-env ;;
     run) exec ./bin/ulauncher -v --dev $2 ;;
     rm-python-cache) rm-python-cache ;;
     test-mypy) warn-if-not-in-docker && test-mypy ;;

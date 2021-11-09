@@ -3,15 +3,8 @@
 help () {
   echo "Usage:
 
-  ${bold}./ul init-dev-env
-    ${dim}Installs Ulauncher data (icons, static files for preferences, etc.) to '~/.local/share/ulauncher/'${normal}
-
-  ${bold}./ul cleanup-dev-env
-    ${dim}Removes files installed by './ul init-dev-env'. Also removes cache files, but not configs${normal}
-
   ${bold}./ul run
-    ${dim}Alias for './bin/ulauncher -v --dev'
-    Run './ul init-dev-env' first. Otherwise the app won't work${normal}
+    ${dim}Alias for './bin/ulauncher -v --dev'${normal}
 
   ${bold}./ul dev-container [IMAGE_NAME]
     ${dim}Takes you into a Docker container from which you can run tests and build binary packages
