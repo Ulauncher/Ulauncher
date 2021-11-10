@@ -5,6 +5,10 @@ from difflib import SequenceMatcher
 logger = getLogger(__name__)
 
 
+def _get_matching_blocks_native(query, text):
+    return SequenceMatcher(None, query, text).get_matching_blocks()
+
+
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
@@ -14,9 +18,7 @@ try:
         return matching_blocks(editops(query, text), query, text)
 except (ModuleNotFoundError, ImportError):
     logger.warning("Levenshtein is missing or outdated. Falling back to slower fuzzy-finding method.")
-
-    def _get_matching_blocks(query, text):
-        return SequenceMatcher(None, query, text).get_matching_blocks()
+    _get_matching_blocks = _get_matching_blocks_native
 
 
 @lru_cache(maxsize=1000)
