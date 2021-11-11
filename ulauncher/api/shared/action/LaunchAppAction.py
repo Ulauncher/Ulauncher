@@ -42,6 +42,10 @@ class LaunchAppAction(BaseAction):
             # strip field codes %f, %F, %u, %U, etc
             sanitized_exec = re.sub(r'\%[uUfFdDnNickvm]', '', exec).rstrip()
             terminal_exec = shlex.split(settings.get_property('terminal-command'))
+            env = dict(os.environ.items())
+            # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
+            # under X11 for proper centering.
+            env.pop("GDK_BACKEND", None)
             if app.get_boolean('Terminal'):
                 if terminal_exec:
                     logger.info('Will run command in preferred terminal (%s)', terminal_exec)
@@ -51,16 +55,12 @@ class LaunchAppAction(BaseAction):
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
             if hasSystemdRun and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
+                setenv = ["--setenv={}={}".format(k, v) for k, v in env.items()]
                 sanitized_exec = [
                     'systemd-run',
                     '--user',
-                    '--remain-after-exit',
-                ] + sanitized_exec
-
-            env = dict(os.environ.items())
-            # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
-            # under X11 for proper centering.
-            env.pop("GDK_BACKEND", None)
+                    '--remain-after-exit'
+                ] + setenv + sanitized_exec
 
             try:
                 logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
