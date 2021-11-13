@@ -1,6 +1,7 @@
 from functools import lru_cache
 from logging import getLogger
 from difflib import SequenceMatcher
+from ulauncher.utils.string import remove_accents
 
 logger = getLogger(__name__)
 
@@ -27,7 +28,7 @@ def get_matching_blocks(query, text):
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched
     """
-    blocks = _get_matching_blocks(query.lower(), text.lower())[:-1]
+    blocks = _get_matching_blocks(remove_accents(query.lower()), remove_accents(text.lower()))[:-1]
     output = []
     total_len = 0
     for (_, text_index, length) in blocks:
