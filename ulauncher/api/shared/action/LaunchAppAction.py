@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import shlex
-import shutil
+from shutil import which
 from pathlib import Path
 import gi
 
@@ -16,7 +16,8 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger(__name__)
 settings = Settings.get_instance()
-hasSystemdRun = bool(shutil.which("systemd-run"))
+has_systemd = which("systemctl") and which("systemd-run")
+runs_in_systemd = has_systemd and os.system('systemctl --user is-active --quiet ulauncher') == 0
 
 
 class LaunchAppAction(BaseAction):
@@ -50,11 +51,15 @@ class LaunchAppAction(BaseAction):
                     sanitized_exec = ['gtk-launch', app_id]
             else:
                 sanitized_exec = shlex.split(sanitized_exec)
-            if hasSystemdRun and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
+            if runs_in_systemd and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
+                logger.warning("Will attempt to launch the app using systemd-run with --scope argument")
+                logger.warning("This prevents the apps from terminating if Ulauncher crashes or is restarted.")
+                logger.warning("On some systems with outdated systemd or incorrect permissions this doesn't work.")
+                logger.warning("If this happens to you, don't run Ulauncher from systemd.")
                 sanitized_exec = [
                     'systemd-run',
                     '--user',
-                    '--remain-after-exit',
+                    '--scope',
                 ] + sanitized_exec
 
             env = dict(os.environ.items())
