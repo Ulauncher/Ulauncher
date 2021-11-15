@@ -13,12 +13,6 @@ class TestKeyValueJsonDb:
     def db(self, db_name):
         return KeyValueJsonDb(db_name).open()
 
-    def test_open_raises_ioerror(self):
-        """It raises IOError if 'name' is a directory"""
-
-        with pytest.raises(IOError):
-            KeyValueJsonDb('/tmp').open()
-
     def test_commit(self, db_name):
         """It saves changes to disk"""
 
