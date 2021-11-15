@@ -13,38 +13,38 @@ class KeyValueJsonDb(Generic[Key, Value]):
     Use open() method to load JSON from a file and commit() to save it
     """
 
-    _name = None  # type: str
+    _path = None  # type: str
     _records = None  # type: Records
 
-    def __init__(self, basename: str):
+    def __init__(self, path: str):
         """
         :param str basename: path to db file
         """
-        self._name = basename
+        self._path = path
         self.set_records({})
 
     def open(self) -> 'KeyValueJsonDb':
         """Create a new data base or open existing one"""
-        if os.path.exists(self._name):
-            if not os.path.isfile(self._name):
-                raise IOError("%s exists and is not a file" % self._name)
+        if os.path.exists(self._path):
+            if not os.path.isfile(self._path):
+                raise IOError("%s exists and is not a file" % self._path)
 
             try:
-                with open(self._name, 'r') as _in:
+                with open(self._path, 'r') as _in:
                     self.set_records(json.load(_in))
             except json.JSONDecodeError:
                 # file corrupted, reset it.
                 self.commit()
         else:
             # make sure path exists
-            os.makedirs(os.path.dirname(self._name), exist_ok=True)
+            os.makedirs(os.path.dirname(self._path), exist_ok=True)
             self.commit()
 
         return self
 
     def commit(self) -> 'KeyValueJsonDb':
         """Write the database to a file"""
-        with open(self._name, 'w') as out:
+        with open(self._path, 'w') as out:
             json.dump(self._records, out, indent=4)
             out.close()
 
