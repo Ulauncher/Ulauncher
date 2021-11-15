@@ -4,8 +4,7 @@ from typing import cast, Optional, List, Union
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.utils.image_loader import load_image
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
-from ulauncher.api.version import api_version
-from ulauncher.utils.semver import satisfies
+from ulauncher.api.version import api_version, satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
 
 

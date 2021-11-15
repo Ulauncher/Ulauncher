@@ -117,14 +117,6 @@ ulauncher.utils.named\_tuple\_from\_dict module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.semver module
------------------------------
-
-.. automodule:: ulauncher.utils.semver
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.setup\_logging module
 -------------------------------------
 
