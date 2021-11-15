@@ -1,10 +1,13 @@
-import os
 import json
+from pathlib import Path
 from typing import Dict, TypeVar, Generic, Optional
+from logging import getLogger
 
 Key = TypeVar('Key')
 Value = TypeVar('Value')
 Records = Dict[Key, Value]
+
+logger = getLogger(__name__)
 
 
 class KeyValueJsonDb(Generic[Key, Value]):
@@ -13,42 +16,40 @@ class KeyValueJsonDb(Generic[Key, Value]):
     Use open() method to load JSON from a file and commit() to save it
     """
 
-    _name = None  # type: str
+    _path = None  # type: Path
     _records = None  # type: Records
 
-    def __init__(self, basename: str):
+    def __init__(self, path: str):
         """
         :param str basename: path to db file
         """
-        self._name = basename
+        self._path = Path(path)
         self.set_records({})
 
     def open(self) -> 'KeyValueJsonDb':
         """Create a new data base or open existing one"""
-        if os.path.exists(self._name):
-            if not os.path.isfile(self._name):
-                raise IOError("%s exists and is not a file" % self._name)
+        # Ensure parent dir
+        self._path.parent.mkdir(parents=True, exist_ok=True)
 
+        if self._path.exists():
             try:
-                with open(self._name, 'r') as _in:
-                    self.set_records(json.load(_in))
-            except json.JSONDecodeError:
-                # file corrupted, reset it.
-                self.commit()
-        else:
-            # make sure path exists
-            os.makedirs(os.path.dirname(self._name), exist_ok=True)
-            self.commit()
+                self.set_records(json.loads(self._path.read_text()))
+            except Exception as e:
+                logger.error("Error '%s' opening JSON file %s: %s", type(e).__name__, self._path, e)
+                logger.warning("Resetting invalid JSON file (%s)", self._path)
+                if not self.commit():
+                    logger.warning("Failed to reset JSON file")
 
         return self
 
-    def commit(self) -> 'KeyValueJsonDb':
+    def commit(self) -> bool:
         """Write the database to a file"""
-        with open(self._name, 'w') as out:
-            json.dump(self._records, out, indent=4)
-            out.close()
-
-        return self
+        try:
+            self._path.write_text(json.dumps(self._records, indent=4))
+            return True
+        except Exception as e:
+            logger.error("Error '%s' writing to JSON file %s: %s.", type(e).__name__, self._path, e)
+        return False
 
     def remove(self, key: Key) -> bool:
         """
