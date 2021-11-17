@@ -5,7 +5,8 @@ from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound, get_ur
 
 
 def test_get_url_params():
-    p = get_url_params('settings://get/all/?k1=v1&k2=&k3=%s' % quote('!(*#&^%?'))
+    # Domain can be ammended completely since it's never used, but it's good to test both ways
+    p = get_url_params('settings://domain/get/all/?k1=v1&k2=&k3=%s' % quote('!(*#&^%?'))
     assert p['scheme'] == 'settings'
     assert p['path'] == 'get/all/'
     assert p['query'] == {
@@ -14,7 +15,7 @@ def test_get_url_params():
         'k3': '!(*#&^%?'
     }
 
-    p = get_url_params('settings://get/all/?')
+    p = get_url_params('settings:///get/all/?')
     assert p['scheme'] == 'settings'
     assert p['path'] == 'get/all/'
     assert p['query'] is None
@@ -32,7 +33,7 @@ class TestRouter:
 
     def test_router_dispatch_raises(self, router):
         with pytest.raises(RouteNotFound):
-            router.dispatch(None, 'settings://unknown/path')
+            router.dispatch(None, 'settings:///unknown/path')
 
     def test_router_dispatch(self, router):
         m = mock.Mock()
@@ -44,7 +45,7 @@ class TestRouter:
             m(ctx, url_params)
             return 'result'
 
-        assert router.dispatch(ctx, 'settings://get/all?q=1&s=3') == 'result'
+        assert router.dispatch(ctx, 'settings:///get/all?q=1&s=3') == 'result'
         m.assert_called_with(ctx, {
             'scheme': 'settings',
             'path': 'get/all',

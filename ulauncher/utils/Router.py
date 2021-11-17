@@ -1,7 +1,7 @@
 import re
 from urllib.parse import unquote
 
-RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
+RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<domain>[^\/]*)/(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
 
 
 def get_url_params(url):

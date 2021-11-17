@@ -83,7 +83,7 @@ export default {
   }),
   methods: {
     openUrlInBrowser(url) {
-      jsonp('prefs://open/web-url', { url: url })
+      jsonp('prefs:///open/web-url', { url: url })
     },
     alertVariant() {
       if (this.errorName === 'UnexpectedError') {

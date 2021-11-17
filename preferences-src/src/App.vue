@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     openUrlInBrowser(url) {
-      jsonp('prefs://open/web-url', { url: url })
+      jsonp('prefs:///open/web-url', { url: url })
     },
     onError(err) {
       this.error = err

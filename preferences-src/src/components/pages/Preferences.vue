@@ -184,7 +184,7 @@ export default {
         return this.prefs.autostart_enabled
       },
       set(value) {
-        return jsonp('prefs://set/autostart-enabled', { value: value }).then(
+        return jsonp('prefs:///set/autostart-enabled', { value: value }).then(
           () => this.setPrefs({ autostart_enabled: value }),
           err => bus.$emit('error', err)
         )
@@ -196,7 +196,7 @@ export default {
         return this.prefs.show_indicator_icon
       },
       set(value) {
-        return jsonp('prefs://set/show-indicator-icon', { value: value }).then(
+        return jsonp('prefs:///set/show-indicator-icon', { value: value }).then(
           () => this.setPrefs({ show_indicator_icon: value }),
           err => bus.$emit('error', err)
         )
@@ -213,7 +213,7 @@ export default {
         return this.prefs.show_recent_apps
       },
       set(value) {
-        return jsonp('prefs://set/show-recent-apps', { value: value }).then(
+        return jsonp('prefs:///set/show-recent-apps', { value: value }).then(
           () => this.setPrefs({ show_recent_apps: value }),
           err => bus.$emit('error', err)
         )
@@ -225,7 +225,7 @@ export default {
         return this.prefs.terminal_command
       },
       set(value) {
-        return jsonp('prefs://set/terminal-command', { value: value }).then(
+        return jsonp('prefs:///set/terminal-command', { value: value }).then(
           () => this.setPrefs({ terminal_command: value }),
           err => bus.$emit('error', err)
         )
@@ -237,7 +237,7 @@ export default {
         return this.prefs.theme_name
       },
       set(value) {
-        return jsonp('prefs://set/theme-name', { value: value }).then(
+        return jsonp('prefs:///set/theme-name', { value: value }).then(
           () => this.setPrefs({ theme_name: value }),
           err => bus.$emit('error', err)
         )
@@ -249,7 +249,7 @@ export default {
         return this.prefs.clear_previous_query
       },
       set(value) {
-        return jsonp('prefs://set/clear-previous-query', { value: value }).then(
+        return jsonp('prefs:///set/clear-previous-query', { value: value }).then(
           () => this.setPrefs({ clear_previous_query: value }),
           err => bus.$emit('error', err)
         )
@@ -261,7 +261,7 @@ export default {
         return this.prefs.grab_mouse_pointer
       },
       set(value) {
-        return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
+        return jsonp('prefs:///set/grab-mouse-pointer', { value: value }).then(
           () => this.setPrefs({ grab_mouse_pointer: value }),
           err => bus.$emit('error', err)
         )
@@ -273,7 +273,7 @@ export default {
         return this.prefs.disable_desktop_filters
       },
       set(value) {
-        return jsonp('prefs://set/disable-desktop-filters', { value: value }).then(
+        return jsonp('prefs:///set/disable-desktop-filters', { value: value }).then(
           () => {
             this.setPrefs({ disable_desktop_filters: value })
             this.disableDesktopFiltersChanged = true
@@ -288,7 +288,7 @@ export default {
         return this.prefs.render_on_screen
       },
       set(value) {
-        return jsonp('prefs://set/render-on-screen', { value: value }).then(
+        return jsonp('prefs:///set/render-on-screen', { value: value }).then(
           () => this.setPrefs({ render_on_screen: value }),
           err => bus.$emit('error', err)
         )
@@ -300,16 +300,16 @@ export default {
     ...mapMutations(['setPrefs']),
 
     openUrlInBrowser(url) {
-      jsonp('prefs://open/web-url', { url: url })
+      jsonp('prefs:///open/web-url', { url: url })
     },
 
     showHotkeyDialog(e) {
-      jsonp('prefs://show/hotkey-dialog', { name: hotkeyEventName })
+      jsonp('prefs:///show/hotkey-dialog', { name: hotkeyEventName })
       e.target.blur()
     },
 
     onHotkeySet(e) {
-      jsonp('prefs://set/hotkey-show-app', { value: e.value }).then(
+      jsonp('prefs:///set/hotkey-show-app', { value: e.value }).then(
         () => this.setPrefs({ hotkey_show_app: e.displayValue }),
         err => bus.$emit('error', err)
       )
