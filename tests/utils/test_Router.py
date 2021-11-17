@@ -1,25 +1,6 @@
-from urllib.parse import quote
 import mock
 import pytest
-from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound, get_url_params
-
-
-def test_get_url_params():
-    # Domain can be ammended completely since it's never used, but it's good to test both ways
-    p = get_url_params('settings://domain/get/all/?k1=v1&k2=&k3=%s' % quote('!(*#&^%?'))
-    assert p['scheme'] == 'settings'
-    assert p['path'] == 'get/all/'
-    assert p['query'] == {
-        'k1': 'v1',
-        'k2': '',
-        'k3': '!(*#&^%?'
-    }
-
-    p = get_url_params('settings:///get/all/?')
-    assert p['scheme'] == 'settings'
-    assert p['path'] == 'get/all/'
-    assert p['query'] is None
-
+from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound
 
 class TestRouter:
 
@@ -47,10 +28,6 @@ class TestRouter:
 
         assert router.dispatch(ctx, 'settings:///get/all?q=1&s=3') == 'result'
         m.assert_called_with(ctx, {
-            'scheme': 'settings',
-            'path': 'get/all',
-            'query': {
-                'q': '1',
-                's': '3'
-            }
+            'q': '1',
+            's': '3'
         })

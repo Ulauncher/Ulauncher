@@ -1,20 +1,4 @@
-import re
-from urllib.parse import unquote
-
-RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<domain>[^\/]*)/(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
-
-
-def get_url_params(url):
-    params = re.search(RE_URL, url)
-    query = params.group('query')
-    if query:
-        pairs = list(map(lambda kv: kv.split('='), query.split('&')))
-        query = {k: unquote(v) for k, v in pairs}
-    return {
-        'scheme': params.group('scheme'),
-        'path': params.group('path'),
-        'query': query or None
-    }
+from urllib.parse import urlparse, parse_qsl
 
 
 class Router:
@@ -40,13 +24,14 @@ class Router:
         self._callbacks = {}
 
     def dispatch(self, context, url):
-        url_params = get_url_params(url)
+        params = urlparse(url)
+        query = dict(parse_qsl(params.query)) if params.query else None
         try:
-            callback = self._callbacks[url_params['path'].strip('/')]
+            callback = self._callbacks[params.path.strip('/')]
         except KeyError as e:
-            raise RouteNotFound('Route not found for path %s' % url_params['path']) from e
+            raise RouteNotFound('Route not found for path %s' % params.path) from e
 
-        return callback(context, url_params)
+        return callback(context, query)
 
     def route(self, path):
         if not path:

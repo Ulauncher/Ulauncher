@@ -52,41 +52,41 @@ class TestPreferencesUlauncherDialog:
 
     # pylint: disable=too-many-arguments
     def test_prefs_set_show_indicator_icon(self, dialog, settings, indicator, idle_add):
-        dialog.prefs_set_show_indicator_icon({'query': {'value': 'true'}})
+        dialog.prefs_set_show_indicator_icon({'value': 'true'})
         idle_add.assert_called_with(indicator.switch, True)
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
-        dialog.prefs_set_show_indicator_icon({'query': {'value': '0'}})
+        dialog.prefs_set_show_indicator_icon({'value': '0'})
         idle_add.assert_called_with(indicator.switch, False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
 
     def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
         hotkey = '<Primary>space'
-        dialog.prefs_set_hotkey_show_app.original(dialog, {'query': {'value': hotkey}})
+        dialog.prefs_set_hotkey_show_app.original(dialog, {'value': hotkey})
         ulauncherWindow.bind_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
         settings.save_to_file.assert_called_with()
 
     def test_prefs_set_autostart(self, dialog, autostart_pref):
-        dialog.prefs_set_autostart({'query': {'value': 'true'}})
+        dialog.prefs_set_autostart({'value': 'true'})
         autostart_pref.switch.assert_called_with(True)
 
-        dialog.prefs_set_autostart({'query': {'value': 'false'}})
+        dialog.prefs_set_autostart({'value': 'false'})
         autostart_pref.switch.assert_called_with(False)
 
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
-        dialog.prefs_set_theme_name.original(dialog, {'query': {'value': 'light'}})
+        dialog.prefs_set_theme_name.original(dialog, {'value': 'light'})
         settings.set_property.assert_called_with('theme-name', 'light')
         settings.save_to_file.assert_called_with()
         ulauncherWindow.init_theme.assert_called_with()
 
     def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
-        dialog.prefs_showhotkey_dialog.original(dialog, {'query': {'name': 'hotkey-name'}})
+        dialog.prefs_showhotkey_dialog.original(dialog, {'name': 'hotkey-name'})
         hotkey_dialog.present.assert_called_with()
 
     def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
-        dialog.prefs_set_grab_mouse_pointer({'query': {'value': 'true'}})
+        dialog.prefs_set_grab_mouse_pointer({'value': 'true'})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
         settings.save_to_file.assert_called_with()
 
