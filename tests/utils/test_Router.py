@@ -1,6 +1,9 @@
+import json
+from urllib.parse import quote
 import mock
 import pytest
 from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound
+
 
 class TestRouter:
 
@@ -26,8 +29,6 @@ class TestRouter:
             m(ctx, url_params)
             return 'result'
 
-        assert router.dispatch(ctx, 'settings:///get/all?q=1&s=3') == 'result'
-        m.assert_called_with(ctx, {
-            'q': '1',
-            's': '3'
-        })
+        payload = {'n': 1, 's': 'str', 'b': True}
+        assert router.dispatch(ctx, 'settings:///get/all?' + quote(json.dumps(payload))) == 'result'
+        m.assert_called_with(ctx, payload)

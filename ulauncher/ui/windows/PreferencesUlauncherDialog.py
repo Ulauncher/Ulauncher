@@ -2,7 +2,7 @@
 import os
 import logging
 import json
-from urllib.parse import unquote, urlparse, parse_qs
+from urllib.parse import unquote, urlparse
 from typing import List, Optional, cast
 import traceback
 
@@ -192,7 +192,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         # pylint: disable=broad-except
         try:
             params = urlparse(scheme_request.get_uri())
-            [callback_name] = parse_qs(params.query)['callback']
+            query = json.loads(unquote(params.query))
+            callback_name = query['callback']
             assert callback_name
         except Exception as e:
             logger.exception('API call failed. %s: %s', type(e).__name__, e)
@@ -260,7 +261,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/show-indicator-icon')
     def prefs_set_show_indicator_icon(self, query):
-        show_indicator = self._get_bool(query['value'])
+        show_indicator = query['value']
         logger.info('Set show-indicator-icon to %s', show_indicator)
         self.settings.set_property('show-indicator-icon', show_indicator)
         self.settings.save_to_file()
@@ -269,7 +270,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/autostart-enabled')
     def prefs_set_autostart(self, query):
-        is_enabled = self._get_bool(query['value'])
+        is_enabled = query['value']
         logger.info('Set autostart-enabled to %s', is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
             raise PrefsApiError("Unable to turn on autostart preference")
@@ -331,21 +332,21 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, query):
-        is_enabled = self._get_bool(query['value'])
+        is_enabled = query['value']
         logger.info('Set clear-previous-query to %s', is_enabled)
         self.settings.set_property('clear-previous-query', is_enabled)
         self.settings.save_to_file()
 
     @rt.route('/set/grab-mouse-pointer')
     def prefs_set_grab_mouse_pointer(self, query):
-        is_enabled = self._get_bool(query['value'])
+        is_enabled = query['value']
         logger.info('Set grab-mouse-pointer to %s', is_enabled)
         self.settings.set_property('grab-mouse-pointer', is_enabled)
         self.settings.save_to_file()
 
     @rt.route('/set/disable-desktop-filters')
     def prefs_set_disable_desktop_filters(self, query):
-        is_enabled = self._get_bool(query['value'])
+        is_enabled = query['value']
         logger.info('Set disable-desktop-filters to %s', is_enabled)
         self.settings.set_property('disable-desktop-filters', is_enabled)
         self.settings.save_to_file()
@@ -385,7 +386,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     @rt.route('/open/web-url')
     def prefs_open_url(self, query):
-        url = unquote(query['url'])
+        url = query['url']
         logger.info('Open Web URL %s', url)
         OpenUrlAction(url).run()
 
@@ -529,9 +530,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def _load_prefs_html(self, page=''):
         uri = "file://%s#/%s" % (get_data_file('preferences', 'index.html'), page)
         self.webview.load_uri(uri)
-
-    def _get_bool(self, str_val):
-        return str(str_val).lower() in ('true', '1', 'on')
 
     def _get_available_themes(self):
         load_available_themes()

@@ -52,11 +52,11 @@ class TestPreferencesUlauncherDialog:
 
     # pylint: disable=too-many-arguments
     def test_prefs_set_show_indicator_icon(self, dialog, settings, indicator, idle_add):
-        dialog.prefs_set_show_indicator_icon({'value': 'true'})
+        dialog.prefs_set_show_indicator_icon({'value': True})
         idle_add.assert_called_with(indicator.switch, True)
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
-        dialog.prefs_set_show_indicator_icon({'value': '0'})
+        dialog.prefs_set_show_indicator_icon({'value': False})
         idle_add.assert_called_with(indicator.switch, False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
         settings.save_to_file.assert_called_with()
@@ -69,10 +69,10 @@ class TestPreferencesUlauncherDialog:
         settings.save_to_file.assert_called_with()
 
     def test_prefs_set_autostart(self, dialog, autostart_pref):
-        dialog.prefs_set_autostart({'value': 'true'})
+        dialog.prefs_set_autostart({'value': True})
         autostart_pref.switch.assert_called_with(True)
 
-        dialog.prefs_set_autostart({'value': 'false'})
+        dialog.prefs_set_autostart({'value': False})
         autostart_pref.switch.assert_called_with(False)
 
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
@@ -86,7 +86,7 @@ class TestPreferencesUlauncherDialog:
         hotkey_dialog.present.assert_called_with()
 
     def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
-        dialog.prefs_set_grab_mouse_pointer({'value': 'true'})
+        dialog.prefs_set_grab_mouse_pointer({'value': True})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
         settings.save_to_file.assert_called_with()
 

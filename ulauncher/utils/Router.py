@@ -1,4 +1,5 @@
-from urllib.parse import urlparse, parse_qsl
+import json
+from urllib.parse import urlparse, unquote
 
 
 class Router:
@@ -25,9 +26,13 @@ class Router:
 
     def dispatch(self, context, url):
         params = urlparse(url)
-        query = dict(parse_qsl(params.query)) if params.query else None
+        query = None
         try:
+            if params.query:
+                query = json.loads(unquote(params.query))
             callback = self._callbacks[params.path.strip('/')]
+        except json.decoder.JSONDecodeError as e:
+            raise RouterQueryError('Invalid query %s. Expected JSON' % unquote(params.query)) from e
         except KeyError as e:
             raise RouteNotFound('Route not found for path %s' % params.path) from e
 
@@ -42,6 +47,10 @@ class Router:
             return callback
 
         return decorator
+
+
+class RouterQueryError(RuntimeError):
+    pass
 
 
 class RouterError(RuntimeError):
