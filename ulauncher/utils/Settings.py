@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import gi
 gi.require_version('GObject', '2.0')
 # pylint: disable=wrong-import-position
@@ -7,6 +8,8 @@ from gi.repository import GObject
 
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
+
+logger = logging.getLogger(__name__)
 
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type
@@ -118,4 +121,6 @@ class Settings(GObject.GObject):
             return GPROPERTIES[prop.name][3]
 
     def do_set_property(self, prop, value):
+        logger.info('Set %s to %s', prop.name, value)
         self._properties[prop.name] = value
+        self.save_to_file()

@@ -59,14 +59,12 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_set_show_indicator_icon({'value': False})
         idle_add.assert_called_with(indicator.switch, False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
-        settings.save_to_file.assert_called_with()
 
     def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
         hotkey = '<Primary>space'
         dialog.prefs_set_hotkey_show_app.original(dialog, {'value': hotkey})
         ulauncherWindow.bind_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
-        settings.save_to_file.assert_called_with()
 
     def test_prefs_set_autostart(self, dialog, autostart_pref):
         dialog.prefs_set_autostart({'value': True})
@@ -78,7 +76,6 @@ class TestPreferencesUlauncherDialog:
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
         dialog.prefs_set_theme_name.original(dialog, {'value': 'light'})
         settings.set_property.assert_called_with('theme-name', 'light')
-        settings.save_to_file.assert_called_with()
         ulauncherWindow.init_theme.assert_called_with()
 
     def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
@@ -88,7 +85,6 @@ class TestPreferencesUlauncherDialog:
     def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
         dialog.prefs_set_grab_mouse_pointer({'value': True})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
-        settings.save_to_file.assert_called_with()
 
     @pytest.mark.with_display
     def test_get_app_hotkey(self, dialog, settings):

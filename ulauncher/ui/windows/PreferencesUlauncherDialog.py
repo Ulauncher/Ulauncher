@@ -262,9 +262,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/show-indicator-icon')
     def prefs_set_show_indicator_icon(self, query):
         show_indicator = query['value']
-        logger.info('Set show-indicator-icon to %s', show_indicator)
         self.settings.set_property('show-indicator-icon', show_indicator)
-        self.settings.save_to_file()
         indicator = AppIndicator.get_instance()
         GLib.idle_add(indicator.switch, show_indicator)
 
@@ -286,31 +284,24 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             recent_apps_number = int(query['value'])
         except ValueError:
             recent_apps_number = 3
-        logger.info('Set show-recent-apps to %s', recent_apps_number)
         self.settings.set_property('show-recent-apps', recent_apps_number)
-        self.settings.save_to_file()
 
     @rt.route('/set/hotkey-show-app')
     @glib_idle_add
     def prefs_set_hotkey_show_app(self, query):
         hotkey = query['value']
-        logger.info('Set hotkey-show-app to %s', hotkey)
 
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.bind_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
-        self.settings.save_to_file()
 
     @rt.route('/set/theme-name')
     @glib_idle_add
     def prefs_set_theme_name(self, query):
         name = query['value']
-        logger.info('Set theme-name to %s', name)
-
         self.settings.set_property('theme-name', name)
-        self.settings.save_to_file()
 
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
@@ -319,9 +310,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/terminal-command')
     def prefs_set_terminal_command(self, query):
         terminal_command = query['value']
-        logger.info('Set terminal launch command to %s', terminal_command)
         self.settings.set_property('terminal-command', terminal_command)
-        self.settings.save_to_file()
 
     @rt.route('/show/hotkey-dialog')
     @glib_idle_add
@@ -333,30 +322,22 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/set/clear-previous-query')
     def prefs_set_clear_previous_text(self, query):
         is_enabled = query['value']
-        logger.info('Set clear-previous-query to %s', is_enabled)
         self.settings.set_property('clear-previous-query', is_enabled)
-        self.settings.save_to_file()
 
     @rt.route('/set/grab-mouse-pointer')
     def prefs_set_grab_mouse_pointer(self, query):
         is_enabled = query['value']
-        logger.info('Set grab-mouse-pointer to %s', is_enabled)
         self.settings.set_property('grab-mouse-pointer', is_enabled)
-        self.settings.save_to_file()
 
     @rt.route('/set/disable-desktop-filters')
     def prefs_set_disable_desktop_filters(self, query):
         is_enabled = query['value']
-        logger.info('Set disable-desktop-filters to %s', is_enabled)
         self.settings.set_property('disable-desktop-filters', is_enabled)
-        self.settings.save_to_file()
 
     @rt.route('/set/render-on-screen')
     def prefs_set_render_on_screen(self, query):
         selected_option = query['value']
-        logger.info('Set render-on-screen to %s', selected_option)
         self.settings.set_property('render-on-screen', selected_option)
-        self.settings.save_to_file()
 
     @rt.route('/show/file-browser')
     @glib_idle_add
