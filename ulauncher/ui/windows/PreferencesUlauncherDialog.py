@@ -238,37 +238,37 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     @rt.route('/get/all')
     def prefs_get_all(self, query):
         logger.info('API call /get/all')
-        return {
-            'show_indicator_icon': self.settings.get_property('show-indicator-icon'),
-            'hotkey_show_app': self.get_app_hotkey(),
+        settings = self.settings.get_all()
+        settings.update({
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_enabled(),
-            'show_recent_apps': self.settings.get_property('show-recent-apps'),
-            'clear_previous_query': self.settings.get_property('clear-previous-query'),
-            'disable_desktop_filters': self.settings.get_property('disable-desktop-filters'),
             'available_themes': self._get_available_themes(),
-            'theme_name': Theme.get_current().get_name(),
-            'render_on_screen': self.settings.get_property('render-on-screen'),
-            'terminal_command': self.settings.get_property('terminal-command'),
-            'grab_mouse_pointer': self.settings.get_property('grab-mouse-pointer'),
+            'hotkey_show_app': self.get_app_hotkey(),
             'env': {
                 'version': get_version(),
                 'api_version': api_version,
                 'user_home': os.path.expanduser('~'),
                 'is_wayland': is_wayland(),
             }
-        }
+        })
+        return settings
 
-    @rt.route('/set/show-indicator-icon')
-    def prefs_set_show_indicator_icon(self, query):
-        show_indicator = query['value']
-        self.settings.set_property('show-indicator-icon', show_indicator)
-        indicator = AppIndicator.get_instance()
-        GLib.idle_add(indicator.switch, show_indicator)
+    @rt.route('/set')
+    def prefs_set(self, query):
+        property = query['property']
+        value = query['value']
+        # This setting is not stored to the config
+        if property == 'autostart-enabled':
+            return self.prefs_set_autostart(value)
 
-    @rt.route('/set/autostart-enabled')
-    def prefs_set_autostart(self, query):
-        is_enabled = query['value']
+        self.settings.set_property(property, value)
+
+        if property == 'show-indicator-icon':
+            GLib.idle_add(AppIndicator.get_instance().switch, value)
+        if property == 'theme-name':
+            self.prefs_apply_theme()
+
+    def prefs_set_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
             raise PrefsApiError("Unable to turn on autostart preference")
@@ -278,39 +278,20 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         except Exception as e:
             raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
 
-    @rt.route('/set/show-recent-apps')
-    def prefs_set_show_recent_apps(self, query):
-        try:
-            recent_apps_number = int(query['value'])
-        except ValueError:
-            recent_apps_number = 3
-        self.settings.set_property('show-recent-apps', recent_apps_number)
+    def prefs_apply_theme(self):
+        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        ulauncher_window = UlauncherWindow.get_instance()
+        ulauncher_window.init_theme()
 
     @rt.route('/set/hotkey-show-app')
     @glib_idle_add
     def prefs_set_hotkey_show_app(self, query):
         hotkey = query['value']
-
         # Bind a new key
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.bind_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
-
-    @rt.route('/set/theme-name')
-    @glib_idle_add
-    def prefs_set_theme_name(self, query):
-        name = query['value']
-        self.settings.set_property('theme-name', name)
-
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        ulauncher_window = UlauncherWindow.get_instance()
-        ulauncher_window.init_theme()
-
-    @rt.route('/set/terminal-command')
-    def prefs_set_terminal_command(self, query):
-        terminal_command = query['value']
-        self.settings.set_property('terminal-command', terminal_command)
 
     @rt.route('/show/hotkey-dialog')
     @glib_idle_add
@@ -318,26 +299,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self._hotkey_name = query['name']
         logger.info('Show hotkey-dialog for %s', self._hotkey_name)
         self.hotkey_dialog.present()
-
-    @rt.route('/set/clear-previous-query')
-    def prefs_set_clear_previous_text(self, query):
-        is_enabled = query['value']
-        self.settings.set_property('clear-previous-query', is_enabled)
-
-    @rt.route('/set/grab-mouse-pointer')
-    def prefs_set_grab_mouse_pointer(self, query):
-        is_enabled = query['value']
-        self.settings.set_property('grab-mouse-pointer', is_enabled)
-
-    @rt.route('/set/disable-desktop-filters')
-    def prefs_set_disable_desktop_filters(self, query):
-        is_enabled = query['value']
-        self.settings.set_property('disable-desktop-filters', is_enabled)
-
-    @rt.route('/set/render-on-screen')
-    def prefs_set_render_on_screen(self, query):
-        selected_option = query['value']
-        self.settings.set_property('render-on-screen', selected_option)
 
     @rt.route('/show/file-browser')
     @glib_idle_add

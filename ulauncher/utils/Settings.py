@@ -124,3 +124,6 @@ class Settings(GObject.GObject):
         logger.info('Set %s to %s', prop.name, value)
         self._properties[prop.name] = value
         self.save_to_file()
+
+    def get_all(self):
+        return dict(list(map(lambda prop: (prop, getattr(self.props, prop)), dir(self.props))))

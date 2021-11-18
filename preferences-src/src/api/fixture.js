@@ -25,29 +25,12 @@ export default function(url, params) {
           is_wayland: true,
         }
       })
-    } else if (isMatch(url, '/set/show-indicator-icon')) {
-      console.log('/set/show-indicator-icon', params)
-      setTimeout(resolve, 0) // preventDefault doesn't work unless resolution is done in the next event loop
-    } else if (isMatch(url, '/set/autostart-enabled')) {
-      console.log('/set/autostart-enabled', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/show-recent-apps')) {
-      console.log('/set/show-recent-apps', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/theme-name')) {
-      console.log('/set/theme-name', params)
+      // preventDefault doesn't work unless resolution is done in the next event loop
+    } else if (isMatch(url, '/set')) {
+      console.log('/set', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/set/hotkey-show-app')) {
       console.log('/set/hotkey-show-app', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/clear-previous-query')) {
-      console.log('/set/clear-previous-query', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/grab-mouse-pointer')) {
-      console.log('/set/grab-mouse-pointer', params)
-      setTimeout(resolve, 0)
-    } else if (isMatch(url, '/set/disable-desktop-filters')) {
-      console.log('/set/disable-desktop-filters', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/open/web-url')) {
       console.log('/open/web-url', params)
