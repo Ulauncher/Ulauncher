@@ -27,15 +27,7 @@ export default {
   }
 }
 </script>
-
 <style lang="css" scoped>
-:root {
-  --header-height: 60px;
-  --underline-height: 4px;
-  --dark-blue: #006890;
-  --very-light-grey: #c8c8c8;
-}
-
 .stripe {
   background: #4B71A5 url('../assets/stripe.png') no-repeat;
   height: 9px;

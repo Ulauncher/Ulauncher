@@ -53,11 +53,6 @@ export default {
 </script>
 
 <style lang="css" scoped>
-:root {
-  --main-grey: #e0e0e0;
-  --steel-blue: #4675ab;
-}
-
 .help-page {
   box-sizing: border-box;
   padding: 40px;
@@ -72,7 +67,7 @@ export default {
     display: block;
     width: 94px;
     height: 94px;
-    background: $mainGrey;
+    background: var(--main-grey);
     border-radius: 50%;
     text-align: center;
     margin: 0 auto;
@@ -87,12 +82,12 @@ export default {
     border-radius: 50%;
     text-align: center;
     background: #fff;
-    color: $mainGrey;
+    color: var(--main-grey);
 }
 
 .item .inner-circle .fa-icon {
       margin-top: 10px;
-      color: $mainGrey;
+      color: var(--main-grey);
       font-size: 54px;
 }
 

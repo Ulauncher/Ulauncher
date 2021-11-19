@@ -235,10 +235,6 @@ export default {
 </script>
 
 <style lang="css" scoped>
-:root {
-  --dark-blue: #015aa7;
-}
-
 .page {
   padding: 20px 15px 15px 25px;
 }
