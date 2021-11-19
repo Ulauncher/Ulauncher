@@ -23,7 +23,7 @@
         </div>
       </template>
       <template slot="empty">
-        <td class="empty-text" colspan="4">There are not shortcuts</td>
+        <td class="empty-text" colspan="4">There are no shortcuts</td>
       </template>
     </b-table>
 
