@@ -48,6 +48,8 @@
           <h2>Maintainers:</h2>
           <p>
             <ul>
+              <li>@friday &lt;github.com/friday&gt;</li>
+              <li>@troycurtisjr &lt;github.com/troycurtisjr&gt;</li>
               <li>Aleksandr Gornostal &lt;ulauncher.app@gmail.com&gt; </li>
             </ul>
           </p>
@@ -55,7 +57,6 @@
           <h2>Contributors:</h2>
           <p>
             <ul>
-              <li>@friday &lt;github.com/friday&gt;</li>
               <li>Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;</li>
               <li>Eugene Chulkov &lt;genechulkov@gmail.com&gt;</li>
             </ul>
