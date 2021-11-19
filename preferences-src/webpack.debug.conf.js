@@ -16,7 +16,7 @@ module.exports = Object.assign({}, baseWebpackConfig, {
     publicPath: '/',
   },
   // cheap-module-eval-source-map is faster for development
-  devtool: '#cheap-module-eval-source-map',
+  devtool: 'eval-cheap-module-source-map',
   plugins: [
     new VueLoaderPlugin(),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
