@@ -18,4 +18,9 @@ class AppSearchMode(BaseSearchMode):
         return True
 
     def handle_query(self, query):
-        return RenderResultListAction(AppResultItem.search(query))
+        items = AppResultItem.search(query)
+        # If the search result is empty, add the default items for all other modes (only shotcuts currently)
+        if not items:
+            for mode in self.search_modes:
+                items.extend(mode.get_default_items())
+        return RenderResultListAction(items)
