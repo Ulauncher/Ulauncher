@@ -167,7 +167,6 @@ export default {
   data() {
     return {
       previous_theme_name: null,
-      blacklistedDirsChanged: false,
       renderOnScreenOptions: {
         'mouse-pointer-monitor': 'Monitor with a mouse pointer',
         'default-monitor': 'Default monitor'
