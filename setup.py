@@ -61,7 +61,7 @@ class build_preferences(Command):
             print("Detected no changes to Preferences since last build.")
             return
 
-        subprocess.run(["sh", "-c", f"cd preferences-src; yarn; yarn build"], check=True)
+        subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn build"], check=True)
 
 
 class build_wrapper(build_py):
