@@ -18,11 +18,11 @@ export default function(url, params) {
         disable_desktop_filters: false,
         available_themes: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }],
         theme_name: 'light',
-        is_wayland: true,
         env: {
           version: '1.2.3',
           api_version: '2.1.0',
-          user_home: '/home/username'
+          user_home: '/home/username',
+          is_wayland: true,
         }
       })
     } else if (isMatch(url, '/set/show-indicator-icon')) {

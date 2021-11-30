@@ -249,13 +249,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'available_themes': self._get_available_themes(),
             'theme_name': Theme.get_current().get_name(),
             'render_on_screen': self.settings.get_property('render-on-screen'),
-            'is_wayland': is_wayland(),
             'terminal_command': self.settings.get_property('terminal-command'),
             'grab_mouse_pointer': self.settings.get_property('grab-mouse-pointer'),
             'env': {
                 'version': get_version(),
                 'api_version': api_version,
-                'user_home': os.path.expanduser('~')
+                'user_home': os.path.expanduser('~'),
+                'is_wayland': is_wayland(),
             }
         }
 

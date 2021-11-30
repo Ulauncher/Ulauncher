@@ -13,7 +13,7 @@
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
           ></b-form-input>
-          <div v-if="prefs.is_wayland" class="hotkey-warning">
+          <div v-if="prefs.env.is_wayland" class="hotkey-warning">
             <b-alert show variant="warning">
               <small>
                 It appears that your are in Wayland session.
