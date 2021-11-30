@@ -129,18 +129,9 @@ class TestGithubExtension:
         mocker.patch.object(gh_ext, 'read_versions')
         mocker.patch.object(gh_ext, 'get_commit')
         gh_ext.read_versions.return_value = [
-            {"required_api_version": ">=2.0.0", "commit": "release-for-api-v2"},
-            {"required_api_version": ">=1.3.1", "commit": "master"},
+            {"required_api_version": "2.0.0", "commit": "release-for-api-v2"},
+            {"required_api_version": "~1.3.1", "commit": "master"},
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"}
         ]
         gh_ext.find_compatible_version()
-        gh_ext.get_commit.assert_called_with("master")
-
-    def test_find_compatible_version__invalid_range__raises(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, 'read_versions')
-        mocker.patch.object(gh_ext, 'get_commit')
-        gh_ext.read_versions.return_value = [
-            {"required_api_version": "-2.0.0", "commit": "master"}
-        ]
-        with pytest.raises(GithubExtensionError):
-            gh_ext.find_compatible_version()
+        gh_ext.get_commit.assert_called_with("release-for-api-v2")

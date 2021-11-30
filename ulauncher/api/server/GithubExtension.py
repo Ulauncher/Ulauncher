@@ -8,9 +8,8 @@ from typing import Dict, List, cast
 from ulauncher.utils.mypy_extensions import TypedDict
 
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.api.version import api_version
+from ulauncher.api.version import api_version, satisfies, valid_range
 from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
-from ulauncher.utils.semver import satisfies, valid_range
 
 DEFAULT_GITHUB_BRANCH = 'master'
 
@@ -123,7 +122,7 @@ class GithubExtension:
 
             valid = False
             try:
-                valid = valid_range(ver['required_api_version'], False)
+                valid = valid_range(ver['required_api_version'])
             # pylint: disable=broad-except
             except Exception:
                 pass
