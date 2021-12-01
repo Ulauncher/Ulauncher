@@ -1,0 +1,23 @@
+name: Enhancement request
+description: Request changes to current functionality
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest improvements to Ulauncher!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the changes you want Ulauncher to implement. If you have multiple unrelated suggestions, create multiple issues.
+    validations:
+      required: true
+  - type: checkboxes
+    id: no-duplicate
+    attributes:
+      label: Enhancement isn't already requested
+      description: Did you check the [existing Enhancement requests](https://github.com/Ulauncher/Ulauncher/labels/enhancement)?
+      options:
+        - label: I have checked the existing Enhancement requests before suggesting this
+          required: true

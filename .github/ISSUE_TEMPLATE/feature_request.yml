@@ -1,0 +1,31 @@
+name: Feature
+description: Request a new feature for Ulauncher
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest improvements to Ulauncher! Please keep these requests short and to the point, but be as thorough as needed with the technical details. Be aware that we might move the request to our [GitHub Ideas Discussions](https://github.com/Ulauncher/Ulauncher/discussions/categories/ideas) if we feel it needs more feedback from the community, more time, or more implementation details before we are ready to consider it as an "actionable" task.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the feature you want Ulauncher to add. If you have multiple unrelated suggestions, create multiple issues.
+    validations:
+      required: true
+  - type: checkboxes
+    id: not-extension
+    attributes:
+      label: Feature isn't possible to support as an extension
+      description: Ulauncher's developers doesn't have the time to support all features directly. We rely on third party extensions for this.
+      options:
+        - label: This feature request cannot be added as a third party extension.
+          required: true
+  - type: checkboxes
+    id: no-duplicate
+    attributes:
+      label: Feature isn't already requested
+      description: Did you check the [existing feature requests](https://github.com/Ulauncher/Ulauncher/labels/feature)?
+      options:
+        - label: I have checked the existing feature requests before suggesting this
+          required: true
