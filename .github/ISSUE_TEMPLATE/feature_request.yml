@@ -1,0 +1,23 @@
+name: Feature
+description: Request a new feature for Ulauncher
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest improvements to Ulauncher!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the feature you want Ulauncher to add. If you have multiple unrelated suggestions, create multiple issues.
+    validations:
+      required: true
+  - type: checkboxes
+    id: no-duplicate
+    attributes:
+      label: Feature isn't already requested
+      description: Did you check the [existing feature requests](https://github.com/Ulauncher/Ulauncher/labels/feature)?
+      options:
+        - label: I have checked the existing feature requests before suggesting this
+          required: true

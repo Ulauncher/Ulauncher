@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Extension bug reports
+    url: https://github.com/Ulauncher/Ulauncher/issues/767
+    about: If you are having issues with specific extensions, follow the dependency installation instructions and file the bug at THEIR GitHub pages
+  - name: Existing Issues
+    url: https://github.com/Ulauncher/Ulauncher/issues
+    about: Please search the existing issues before creating a new one
+  - name: Developer documentation
+    url: https://docs.ulauncher.io/
+    about: Our Developer Documentation has answers about developing Extensions and Color Themes

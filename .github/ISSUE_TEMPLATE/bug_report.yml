@@ -1,0 +1,44 @@
+name: Bug Report
+description: Report a bug in Ulauncher
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this report!
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Your Linux distro, desktop environment and other relevant information such as using a Ulauncher pre-release
+    validations:
+      required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: What did you do to trigger the issue? What happened, and what did you expected to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output
+      description: Run Ulauncher from the shell with `ulauncher -v` and copy and paste the log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: checkboxes
+    id: no-duplicate
+    attributes:
+      label: Issue isn't already reported
+      description: Did you search the [open issues](https://github.com/Ulauncher/Ulauncher/issues)?
+      options:
+        - label: I have searched for similar issues before reporting this to avoid creating a duplicate issue
+          required: true
+  - type: checkboxes
+    id: latest
+    attributes:
+      label: Latest version
+      description: You must test with the [latest Ulauncher release](https://github.com/Ulauncher/Ulauncher/releases) to make sure the bug hasn't already been fixed
+      options:
+        - label: I am using the latest Ulauncher release
+          required: true
