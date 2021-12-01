@@ -108,7 +108,7 @@ export default {
       return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     selectIcon() {
-      jsonp('prefs://show/file-browser', { type: 'image', name: shortcutIconEventName }).then(null, err =>
+      jsonp('prefs:///show/file-browser', { type: 'image', name: shortcutIconEventName }).then(null, err =>
         bus.$emit('error', err)
       )
     },
@@ -131,7 +131,7 @@ export default {
         run_without_argument: this.localRunWithoutArgument
       }
       let method = shortcut.id ? 'update' : 'add'
-      jsonp('prefs://shortcut/' + method, shortcut).then(this.hide, err => bus.$emit('error', err))
+      jsonp('prefs:///shortcut/' + method, shortcut).then(this.hide, err => bus.$emit('error', err))
     },
     hide() {
       this.$router.push({ path: '/shortcuts' })

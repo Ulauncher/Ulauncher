@@ -1,20 +1,5 @@
-import re
-from urllib.parse import unquote
-
-RE_URL = re.compile(r'^(?P<scheme>.*)://(?P<path>[^\?]*)(\?(?P<query>.*))?$', flags=re.IGNORECASE)
-
-
-def get_url_params(url):
-    params = re.search(RE_URL, url)
-    query = params.group('query')
-    if query:
-        pairs = list(map(lambda kv: kv.split('='), query.split('&')))
-        query = {k: unquote(v) for k, v in pairs}
-    return {
-        'scheme': params.group('scheme'),
-        'path': params.group('path'),
-        'query': query or None
-    }
+import json
+from urllib.parse import urlparse, unquote
 
 
 class Router:
@@ -40,13 +25,18 @@ class Router:
         self._callbacks = {}
 
     def dispatch(self, context, url):
-        url_params = get_url_params(url)
+        params = urlparse(url)
+        query = None
         try:
-            callback = self._callbacks[url_params['path'].strip('/')]
+            if params.query:
+                query = json.loads(unquote(params.query))
+            callback = self._callbacks[params.path.strip('/')]
+        except json.decoder.JSONDecodeError as e:
+            raise RouterQueryError('Invalid query %s. Expected JSON' % unquote(params.query)) from e
         except KeyError as e:
-            raise RouteNotFound('Route not found for path %s' % url_params['path']) from e
+            raise RouteNotFound('Route not found for path %s' % params.path) from e
 
-        return callback(context, url_params)
+        return callback(context, query)
 
     def route(self, path):
         if not path:
@@ -57,6 +47,10 @@ class Router:
             return callback
 
         return decorator
+
+
+class RouterQueryError(RuntimeError):
+    pass
 
 
 class RouterError(RuntimeError):

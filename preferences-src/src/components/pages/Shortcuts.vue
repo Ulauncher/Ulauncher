@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     fetchData () {
-      jsonp('prefs://shortcut/get-all').then((data) => {
+      jsonp('prefs:///shortcut/get-all').then((data) => {
         this.items = data
       })
     },
@@ -73,7 +73,7 @@ export default {
       this.$router.push({path: 'edit-shortcut', query: item})
     },
     remove (item) {
-      jsonp('prefs://shortcut/remove', {id: item.id}).then(() => {
+      jsonp('prefs:///shortcut/remove', {id: item.id}).then(() => {
         this.items = this.items.filter((i) => item.id === i.id ? null : i)
       }, (err) => bus.$emit('error', err))
     },

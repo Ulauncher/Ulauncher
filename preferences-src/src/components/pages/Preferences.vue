@@ -13,7 +13,7 @@
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
           ></b-form-input>
-          <div v-if="prefs.is_wayland" class="hotkey-warning">
+          <div v-if="prefs.env.is_wayland" class="hotkey-warning">
             <b-alert show variant="warning">
               <small>
                 It appears that your are in Wayland session.
@@ -176,140 +176,49 @@ export default {
 
   computed: {
     ...mapState(['prefs']),
-
     ...mapGetters(['prefsLoaded']),
-
-    autostart_enabled: {
+    // Generate getters/setters for all preferences that are just storing to the config file
+    // Unfortunately there seems to be no way to generate these from the backend data,
+    // as we haven't recievened it yet at this point in the runtime
+    // A more reasonable approach would probably be to use a wrapper rather than directly accessing these
+    // As in v-model="prefs.show_recent_apps" instead of v-model="show_recent_apps"?
+    ...Object.fromEntries([
+      'autostart_enabled',
+      'clear_previous_query',
+      'disable_desktop_filters',
+      'grab_mouse_pointer',
+      'render_on_screen',
+      'show_indicator_icon',
+      'show_recent_apps',
+      'terminal_command',
+      'theme_name',
+    ].map(name => ([name, {
       get() {
-        return this.prefs.autostart_enabled
+        return this.prefs[name]
       },
       set(value) {
-        return jsonp('prefs://set/autostart-enabled', { value: value }).then(
-          () => this.setPrefs({ autostart_enabled: value }),
+        return jsonp('prefs:///set', {property: name.replace('_', '-'), value}).then(
+          () => this.setPrefs({[name]: value}),
           err => bus.$emit('error', err)
         )
       }
-    },
-
-    show_indicator_icon: {
-      get() {
-        return this.prefs.show_indicator_icon
-      },
-      set(value) {
-        return jsonp('prefs://set/show-indicator-icon', { value: value }).then(
-          () => this.setPrefs({ show_indicator_icon: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    show_recent_apps: {
-      get() {
-        if (this.prefs.show_recent_apps === true) {
-          return '3'
-        } else if (this.prefs.show_recent_apps === false) {
-          return '0'
-        }
-        return this.prefs.show_recent_apps
-      },
-      set(value) {
-        return jsonp('prefs://set/show-recent-apps', { value: value }).then(
-          () => this.setPrefs({ show_recent_apps: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    terminal_command: {
-      get() {
-        return this.prefs.terminal_command
-      },
-      set(value) {
-        return jsonp('prefs://set/terminal-command', { value: value }).then(
-          () => this.setPrefs({ terminal_command: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    theme_name: {
-      get() {
-        return this.prefs.theme_name
-      },
-      set(value) {
-        return jsonp('prefs://set/theme-name', { value: value }).then(
-          () => this.setPrefs({ theme_name: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    clear_previous_query: {
-      get() {
-        return this.prefs.clear_previous_query
-      },
-      set(value) {
-        return jsonp('prefs://set/clear-previous-query', { value: value }).then(
-          () => this.setPrefs({ clear_previous_query: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    grab_mouse_pointer: {
-      get() {
-        return this.prefs.grab_mouse_pointer
-      },
-      set(value) {
-        return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
-          () => this.setPrefs({ grab_mouse_pointer: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    disable_desktop_filters: {
-      get() {
-        return this.prefs.disable_desktop_filters
-      },
-      set(value) {
-        return jsonp('prefs://set/disable-desktop-filters', { value: value }).then(
-          () => {
-            this.setPrefs({ disable_desktop_filters: value })
-            this.disableDesktopFiltersChanged = true
-          },
-          err => bus.$emit('error', err)
-        )
-      }
-    },
-
-    render_on_screen: {
-      get() {
-        return this.prefs.render_on_screen
-      },
-      set(value) {
-        return jsonp('prefs://set/render-on-screen', { value: value }).then(
-          () => this.setPrefs({ render_on_screen: value }),
-          err => bus.$emit('error', err)
-        )
-      }
-    }
+    }]))),
   },
 
   methods: {
     ...mapMutations(['setPrefs']),
 
     openUrlInBrowser(url) {
-      jsonp('prefs://open/web-url', { url: url })
+      jsonp('prefs:///open/web-url', { url: url })
     },
 
     showHotkeyDialog(e) {
-      jsonp('prefs://show/hotkey-dialog', { name: hotkeyEventName })
+      jsonp('prefs:///show/hotkey-dialog', { name: hotkeyEventName })
       e.target.blur()
     },
 
     onHotkeySet(e) {
-      jsonp('prefs://set/hotkey-show-app', { value: e.value }).then(
+      jsonp('prefs:///set/hotkey-show-app', { value: e.value }).then(
         () => this.setPrefs({ hotkey_show_app: e.displayValue }),
         err => bus.$emit('error', err)
       )

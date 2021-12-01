@@ -22,7 +22,7 @@ export default {
   name: 'navbar',
   methods: {
     closeWindow () {
-      jsonp('prefs://close').then(null, (err) => bus.$emit('error', err))
+      jsonp('prefs:///close').then(null, (err) => bus.$emit('error', err))
     }
   }
 }

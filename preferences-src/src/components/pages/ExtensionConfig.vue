@@ -253,7 +253,7 @@ export default {
         }
         updates[`pref.${pref.id}`] = value
       }
-      jsonp('prefs://extension/update-prefs', updates).then(
+      jsonp('prefs:///extension/update-prefs', updates).then(
         () => {
           this.showSavedMsg = true
           setTimeout(() => {
@@ -277,7 +277,7 @@ export default {
       }
     },
     remove() {
-      jsonp('prefs://extension/remove', { id: this.extension.id }).then(
+      jsonp('prefs:///extension/remove', { id: this.extension.id }).then(
         () => {
           this.$emit('removed', this.extension.id)
         },
@@ -291,7 +291,7 @@ export default {
       this.updateExtModal = true
       this.newVersionInfo = null
       this.updateState = 'checking-updates'
-      jsonp('prefs://extension/check-updates', { id: this.extension.id }).then(
+      jsonp('prefs:///extension/check-updates', { id: this.extension.id }).then(
         data => {
           if (data) {
             this.newVersionInfo = data
@@ -309,7 +309,7 @@ export default {
     update() {
       this.updateError = null
       this.updateState = 'updating'
-      jsonp('prefs://extension/update-ext', { id: this.extension.id }).then(
+      jsonp('prefs:///extension/update-ext', { id: this.extension.id }).then(
         () => {
           this.updateState = 'updated'
           bus.$emit('extension/get-all')
@@ -321,7 +321,7 @@ export default {
       )
     },
     openUrl(url) {
-      jsonp('prefs://open/web-url', { url })
+      jsonp('prefs:///open/web-url', { url })
     },
     handleNativeClick(e) {
       if (e.target && e.target.tagName === 'A') {
