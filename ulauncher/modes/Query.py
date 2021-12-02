@@ -4,10 +4,7 @@ class Query(str):
     """
 
     def get_keyword(self):
-        return self.strip().split(' ', 1)[0]
+        return self and self.split(None, 1)[0]
 
     def get_argument(self, default=None):
-        try:
-            return self.strip().split(' ', 1)[1].strip()
-        except IndexError:
-            return default
+        return self and (self.split(None, 1) + [default])[1]
