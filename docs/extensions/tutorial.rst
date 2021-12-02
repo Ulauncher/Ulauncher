@@ -140,6 +140,9 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
 ``description``
   Optional description
 
+``icon``
+  Optional per-keyword icon path. If not specificed it will use the extension icon
+
 ``options``
   Required for type "select". Must be a list of strings or objects like: ``{"value": "...", "text": "..."}``
 
