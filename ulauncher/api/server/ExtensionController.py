@@ -39,7 +39,7 @@ class ExtensionController:
 
         :returns: :class:`BaseAction` object
         """
-        event = KeywordQueryEvent(query)
+        event = KeywordQueryEvent(query, self.preferences)
         return self.trigger_event(event)
 
     def trigger_event(self, event):
