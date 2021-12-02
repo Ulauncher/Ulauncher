@@ -345,11 +345,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.result_box.foreach(lambda w: w.destroy())
 
         show_recent_apps = self.settings.get_property('show-recent-apps')
-        recent_apps_number = 3 if show_recent_apps else 0
-        try:
-            recent_apps_number = int(str(show_recent_apps))
-        except ValueError:
-            pass
+        recent_apps_number = int(show_recent_apps) if show_recent_apps.isnumeric() else 0
         if not result_items and not self.input.get_text() and recent_apps_number > 0:
             result_items = AppResultItem.get_most_frequent(recent_apps_number)
 
