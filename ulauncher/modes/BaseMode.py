@@ -1,7 +1,7 @@
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 
-class BaseSearchMode:
+class BaseMode:
 
     # pylint: disable=unused-argument
     def is_enabled(self, query):
@@ -19,7 +19,7 @@ class BaseSearchMode:
         """
         :param Gdk.Widget widget:
         :param Gdk.EventKey event:
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         :rtype: :class:`BaseAction`
         """
         return DoNothingAction()

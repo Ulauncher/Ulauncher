@@ -7,9 +7,9 @@ from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 from ulauncher.utils.Path import Path
 from ulauncher.utils.image_loader import get_file_icon
 
-from ulauncher.search.file_browser.FileQueries import FileQueries
-from ulauncher.search.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
-from ulauncher.search.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
+from ulauncher.modes.file_browser.FileQueries import FileQueries
+from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
+from ulauncher.modes.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
 
 
 class FileBrowserResultItem(SmallResultItem):

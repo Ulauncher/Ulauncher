@@ -1,10 +1,10 @@
 import logging
 
-from ulauncher.api.server.ExtensionSearchMode import ExtensionSearchMode
-from ulauncher.search.apps.AppSearchMode import AppSearchMode
-from ulauncher.search.shortcuts.ShortcutSearchMode import ShortcutSearchMode
-from ulauncher.search.file_browser.FileBrowserMode import FileBrowserMode
-from ulauncher.search.calc.CalcMode import CalcMode
+from ulauncher.api.server.ExtensionMode import ExtensionMode
+from ulauncher.modes.apps.AppMode import AppMode
+from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
+from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
+from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger(__name__)
@@ -17,9 +17,9 @@ class Search:
     def get_instance(cls):
         file_browser_mode = FileBrowserMode()
         calc_mode = CalcMode()
-        shortcut_search_mode = ShortcutSearchMode()
-        extension_search_mode = ExtensionSearchMode()
-        app_search_mode = AppSearchMode([shortcut_search_mode, extension_search_mode])
+        shortcut_search_mode = ShortcutMode()
+        extension_search_mode = ExtensionMode()
+        app_search_mode = AppMode([shortcut_search_mode, extension_search_mode])
         return cls([file_browser_mode,
                     calc_mode,
                     shortcut_search_mode,
@@ -32,7 +32,7 @@ class Search:
     def on_query_change(self, query):
         """
         Iterate over all search modes and run first enabled.
-        AppSearchMode is always enabled
+        AppMode is always enabled
         """
         for mode in self.search_modes:
             mode.on_query_change(query)

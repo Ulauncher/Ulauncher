@@ -1,7 +1,7 @@
 import mock
 import pytest
-from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
-from ulauncher.search.file_browser.FileQueries import FileQueries
+from ulauncher.modes.file_browser.FileBrowserResultItem import FileBrowserResultItem
+from ulauncher.modes.file_browser.FileQueries import FileQueries
 from ulauncher.utils.Path import Path
 
 
@@ -19,35 +19,35 @@ class TestFileBrowserResultItem:
 
     @pytest.fixture
     def ActionList(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.ActionList')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.ActionList')
 
     @pytest.fixture
     def Path(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.Path')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.Path')
 
     @pytest.fixture
     def OpenFolderItem(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.OpenFolderItem')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.OpenFolderItem')
 
     @pytest.fixture(autouse=True)
     def SetUserQueryAction(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.SetUserQueryAction')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.SetUserQueryAction')
 
     @pytest.fixture(autouse=True)
     def OpenAction(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.OpenAction')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.OpenAction')
 
     @pytest.fixture(autouse=True)
     def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.RenderResultListAction')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.RenderResultListAction')
 
     @pytest.fixture(autouse=True)
     def CopyPathToClipboardItem(self, mocker):
-        return mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.CopyPathToClipboardItem')
+        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.CopyPathToClipboardItem')
 
     @pytest.fixture
     def result_item(self, path, file_queries, mocker):
-        FileQueriesMock = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.FileQueries')
+        FileQueriesMock = mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.FileQueries')
         FileQueriesMock.get_instance.return_value = file_queries
         return FileBrowserResultItem(path)
 
@@ -55,7 +55,7 @@ class TestFileBrowserResultItem:
         assert result_item.get_name() == path.get_basename.return_value
 
     def test_icon(self, result_item, path, mocker):
-        get_file_icon = mocker.patch('ulauncher.search.file_browser.FileBrowserResultItem.get_file_icon')
+        get_file_icon = mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.get_file_icon')
         assert result_item.get_icon() == get_file_icon.return_value
         get_file_icon.assert_called_with(path, result_item.ICON_SIZE)
 

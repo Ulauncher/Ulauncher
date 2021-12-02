@@ -7,9 +7,9 @@ gi.require_version('GdkPixbuf', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GdkPixbuf
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
-from ulauncher.search.apps.AppResultItem import AppResultItem
-from ulauncher.search.QueryHistoryDb import QueryHistoryDb
-from ulauncher.search.Query import Query
+from ulauncher.modes.apps.AppResultItem import AppResultItem
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
+from ulauncher.modes.Query import Query
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None
@@ -21,13 +21,13 @@ class TestAppResultItem:
     def patch_DesktopAppInfo_new(self, mocker):
         def mkappinfo(app_id):
             return Gio.DesktopAppInfo.new_from_filename(f'{ENTRIES_DIR}/{app_id}')
-        return mocker.patch("ulauncher.search.apps.AppResultItem.Gio.DesktopAppInfo.new", new=mkappinfo)
+        return mocker.patch("ulauncher.modes.apps.AppResultItem.Gio.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
     def patch_DesktopAppInfo_get_all(self, mocker):
         def get_all_appinfo():
             return map(Gio.DesktopAppInfo.new, ['trueapp.desktop', 'falseapp.desktop'])
-        return mocker.patch("ulauncher.search.apps.AppResultItem.Gio.DesktopAppInfo.get_all", new=get_all_appinfo)
+        return mocker.patch("ulauncher.modes.apps.AppResultItem.Gio.DesktopAppInfo.get_all", new=get_all_appinfo)
 
     @pytest.fixture
     def app1(self):
@@ -39,7 +39,7 @@ class TestAppResultItem:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        get_instance = mocker.patch('ulauncher.search.apps.AppResultItem.QueryHistoryDb.get_instance')
+        get_instance = mocker.patch('ulauncher.modes.apps.AppResultItem.QueryHistoryDb.get_instance')
         get_instance.return_value = mock.create_autospec(QueryHistoryDb)
         return get_instance.return_value
 
@@ -47,7 +47,7 @@ class TestAppResultItem:
     def _app_starts(self, mocker):
         db = KeyValueJsonDb('/tmp/mock.json').open()
         db.set_records({'falseapp.desktop': 3000, 'trueapp.desktop': 765})
-        return mocker.patch("ulauncher.search.apps.AppResultItem._app_starts", new=db)
+        return mocker.patch("ulauncher.modes.apps.AppResultItem._app_starts", new=db)
 
     def test_get_name(self, app1):
         assert app1.get_name() == 'TrueApp - Full Name'
@@ -73,7 +73,7 @@ class TestAppResultItem:
         query_history.find.assert_called_with('q')
 
     def test_on_enter(self, app1, mocker, query_history, _app_starts):
-        LaunchAppAction = mocker.patch('ulauncher.search.apps.AppResultItem.LaunchAppAction')
+        LaunchAppAction = mocker.patch('ulauncher.modes.apps.AppResultItem.LaunchAppAction')
         assert app1.on_enter(Query('query')) is LaunchAppAction.return_value
         LaunchAppAction.assert_called_with(f'{ENTRIES_DIR}/trueapp.desktop')
         query_history.save_query.assert_called_with('query', 'TrueApp - Full Name')

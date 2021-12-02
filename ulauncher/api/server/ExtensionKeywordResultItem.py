@@ -1,6 +1,6 @@
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.search.QueryHistoryDb import QueryHistoryDb
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
 class ExtensionKeywordResultItem(ResultItem):
@@ -11,13 +11,13 @@ class ExtensionKeywordResultItem(ResultItem):
 
     def selected_by_default(self, query):
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         """
         return self._query_history.find(query) == self.get_name()
 
     def on_enter(self, query):
         """
-        :param ~ulauncher.search.Query.Query query: query
+        :param ~ulauncher.modes.Query.Query query: query
         """
         self._query_history.save_query(query, self.get_name())
         return SetUserQueryAction('%s ' % self.get_keyword())

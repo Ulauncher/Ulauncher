@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
 
     ulauncher.api
-    ulauncher.search
+    ulauncher.modes
     ulauncher.ui
     ulauncher.utils
 

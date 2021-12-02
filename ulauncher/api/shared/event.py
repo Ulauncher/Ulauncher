@@ -23,7 +23,7 @@ class KeywordQueryEvent(BaseEvent):
     """
     Is triggered when user enters query that starts with your keyword + Space
 
-    :param ~ulauncher.search.Query.Query query:
+    :param ~ulauncher.modes.Query.Query query:
     :param ~ulauncher.api.server.ExtensionPreferences preferences:
     """
 
@@ -53,7 +53,7 @@ class KeywordQueryEvent(BaseEvent):
 
     def get_query(self):
         """
-        :rtype: :class:`~ulauncher.search.Query.Query`
+        :rtype: :class:`~ulauncher.modes.Query.Query`
         """
         return self.query
 

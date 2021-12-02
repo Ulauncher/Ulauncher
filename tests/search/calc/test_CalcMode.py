@@ -1,16 +1,16 @@
 import pytest
-from ulauncher.search.calc.CalcMode import CalcMode
+from ulauncher.modes.calc.CalcMode import CalcMode
 
 
 class TestCalcMode:
 
     @pytest.fixture
     def RenderResultListAction(self, mocker):
-        return mocker.patch('ulauncher.search.calc.CalcMode.RenderResultListAction')
+        return mocker.patch('ulauncher.modes.calc.CalcMode.RenderResultListAction')
 
     @pytest.fixture
     def CalcResultItem(self, mocker):
-        return mocker.patch('ulauncher.search.calc.CalcMode.CalcResultItem')
+        return mocker.patch('ulauncher.modes.calc.CalcMode.CalcResultItem')
 
     @pytest.fixture
     def mode(self):

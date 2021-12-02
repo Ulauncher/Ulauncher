@@ -1,21 +1,21 @@
-ulauncher\.search\.calc package
+ulauncher\.modes\.calc package
 ===============================
 
 Submodules
 ----------
 
-ulauncher\.search\.calc\.CalcMode module
+ulauncher\.modes\.calc\.CalcMode module
 ----------------------------------------
 
-.. automodule:: ulauncher.search.calc.CalcMode
+.. automodule:: ulauncher.modes.calc.CalcMode
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.calc\.CalcResultItem module
+ulauncher\.modes\.calc\.CalcResultItem module
 ----------------------------------------------
 
-.. automodule:: ulauncher.search.calc.CalcResultItem
+.. automodule:: ulauncher.modes.calc.CalcResultItem
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ ulauncher\.search\.calc\.CalcResultItem module
 Module contents
 ---------------
 
-.. automodule:: ulauncher.search.calc
+.. automodule:: ulauncher.modes.calc
     :members:
     :undoc-members:
     :show-inheritance:

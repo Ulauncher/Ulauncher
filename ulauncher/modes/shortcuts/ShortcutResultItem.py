@@ -7,7 +7,7 @@ from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.utils.image_loader import load_image
 from ulauncher.config import get_data_file
-from ulauncher.search.QueryHistoryDb import QueryHistoryDb
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
 class ShortcutResultItem(ResultItem):
@@ -60,7 +60,7 @@ class ShortcutResultItem(ResultItem):
 
     def selected_by_default(self, query):
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         """
         return self._query_history.find(query) == self.get_name()
 

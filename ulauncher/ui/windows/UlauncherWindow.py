@@ -19,8 +19,8 @@ from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F
 
 from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.search.Search import Search
-from ulauncher.search.apps.AppResultItem import AppResultItem
+from ulauncher.modes.Search import Search
+from ulauncher.modes.apps.AppResultItem import AppResultItem
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
@@ -32,7 +32,7 @@ from ulauncher.utils.image_loader import load_image
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog

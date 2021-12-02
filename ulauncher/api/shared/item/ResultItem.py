@@ -1,7 +1,7 @@
 from typing import Any, Callable, Optional
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.display import get_monitor_scale_factor
 
@@ -69,7 +69,7 @@ class ResultItem:
 
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         :param str color:
         :rtype: str
         """
@@ -86,7 +86,7 @@ class ResultItem:
         """
         optional
 
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         """
         return self._description
 
@@ -112,7 +112,7 @@ class ResultItem:
 
     def on_enter(self, query: Query) -> Optional[BaseAction]:
         """
-        :param ~ulauncher.search.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
+        :param ~ulauncher.modes.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
                                                     This allows you to create flows with a result item
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
@@ -122,7 +122,7 @@ class ResultItem:
         """
         Optional alternative enter
 
-        :param ~ulauncher.search.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
+        :param ~ulauncher.modes.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
                                                     This allows you to create flows with a result item
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """

@@ -10,12 +10,12 @@ from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.utils.Path import Path, InvalidPathError
-from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.file_browser.FileBrowserResultItem import FileBrowserResultItem
-from ulauncher.search.file_browser.FileQueries import FileQueries
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.file_browser.FileBrowserResultItem import FileBrowserResultItem
+from ulauncher.modes.file_browser.FileQueries import FileQueries
 
 
-class FileBrowserMode(BaseSearchMode):
+class FileBrowserMode(BaseMode):
     LIMIT = 17
 
     def __init__(self):

@@ -1,11 +1,11 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.apps.AppResultItem import AppResultItem
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.apps.AppResultItem import AppResultItem
 
 
-class AppSearchMode(BaseSearchMode):
+class AppMode(BaseMode):
     """
-    :type list search_modes: a list of other :class:`SearchMode` objects that provide additional result items
+    :type list search_modes: a list of other :class:`Mode` objects that provide additional result items
     """
 
     def __init__(self, search_modes):
@@ -13,7 +13,7 @@ class AppSearchMode(BaseSearchMode):
 
     def is_enabled(self, _):
         """
-        AppSearchMode is a default search mode and is always enabled
+        AppMode is a default search mode and is always enabled
         """
         return True
 

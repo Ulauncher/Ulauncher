@@ -1,4 +1,4 @@
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 
 
 class TestQuery:

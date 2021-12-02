@@ -38,7 +38,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
 
 

@@ -4,7 +4,7 @@ import sys
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.utils.image_loader import load_image
-from ulauncher.search.QueryHistoryDb import QueryHistoryDb
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
 class ExtensionResultItem(ResultItem):
