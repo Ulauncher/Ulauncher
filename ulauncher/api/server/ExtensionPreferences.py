@@ -18,6 +18,7 @@ PreferenceItem = TypedDict('PreferenceItem', {
     'default_value': str,
     'user_value': str,
     'value': str,
+    'icon': Optional[str]
 })
 PreferenceItems = List[PreferenceItem]
 
@@ -61,7 +62,8 @@ class ExtensionPreferences:
                 'options': p.get('options', []),
                 'default_value': default_value,
                 'user_value': self.db.find(p['id']) or '',
-                'value': self.db.find(p['id']) or default_value
+                'value': self.db.find(p['id']) or default_value,
+                'icon': p.get('icon', None)
             })
 
         return items
