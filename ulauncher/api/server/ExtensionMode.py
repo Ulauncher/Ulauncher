@@ -17,7 +17,7 @@ class ExtensionMode(BaseMode):
         :param ~ulauncher.modes.Query.Query query:
         :rtype: `True` if mode should be enabled for a query
         """
-        return bool(self._get_controller_by_keyword(query.get_keyword())) and query.is_mode_active()
+        return bool(self._get_controller_by_keyword(query.get_keyword())) and " " in query
 
     def on_query_change(self, query):
         """

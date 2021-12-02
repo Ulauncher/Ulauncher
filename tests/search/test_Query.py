@@ -12,8 +12,3 @@ class TestQuery:
         assert Query('kw arg text').get_argument() == 'arg text'
         assert not Query('kw').get_argument()
         assert not Query('').get_argument()
-
-    def test_is_mode_active(self):
-        assert not Query('kw').is_mode_active()
-        assert Query('kw ').is_mode_active()
-        assert Query('kw arg').is_mode_active()
