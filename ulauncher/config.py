@@ -89,11 +89,11 @@ def get_options():
         "--no-extensions", action="store_true",
         help=gettext("Do not run extensions"))
     parser.add_argument(
-        "--no-window-shadow", action="store_true",
-        help=gettext("Removes window shadow. On DEs without a compositor this solves issue with a black border"))
-    parser.add_argument(
         "--dev", action="store_true",
         help=gettext("Enables context menu in the Preferences UI"))
+    parser.add_argument(
+        "--no-window-shadow", action="store_true",
+        help=argparse.SUPPRESS)
     parser.add_argument(
         "--hide-window", action="store_true",
         help=argparse.SUPPRESS)

@@ -226,8 +226,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         theme = Theme.get_current()
         theme.clear_cache()
 
-        # removing window shadow solves issue with DEs without a compositor (#230)
-        if get_options().no_window_shadow:
+        if self.settings.get_property('disable-window-shadow'):
             self.window_body.get_style_context().add_class('no-window-shadow')
 
         self._render_prefs_icon()

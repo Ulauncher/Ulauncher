@@ -26,10 +26,9 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 
 ### Known Issues and workarounds
 
-* If your DE doesn't use compositing, run ulauncher with `--no-window-shadow` to remove a black box around a window
+* If you get a black box or border a border around the Ulauncher window, it's likely because your compositor or desktop environment doesn't support shadows. Try turning them off from the settings. For Sway in particular you may need to follow [these instructions](https://github.com/Ulauncher/Ulauncher/issues/230#issuecomment-570736422)
 * [Can't map the keys to ALT+SPACE](https://github.com/Ulauncher/Ulauncher/issues/100)
 * [Hotkey doesn't work in Wayland when is triggered from certain apps](https://github.com/Ulauncher/Ulauncher/issues/183)
-* [Border appears around ulauncher window in Sway DE](https://github.com/Ulauncher/Ulauncher/issues/230#issuecomment-570736422)
 * [Pass custom environment variable to Ulauncher](https://github.com/Ulauncher/Ulauncher/issues/780#issuecomment-912982174)
 
 

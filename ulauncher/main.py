@@ -100,12 +100,14 @@ def main():
     logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 20):
         logger.error("Ulauncher requires GTK+ version 3.20 or newer. Please upgrade your GTK version.")
+    if options.no_window_shadow:
+        logger.warning("The --no-window-shadow argument has been moved to a user setting")
     if options.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
         # from starting a second Ulauncher background process we have to make sure the
         # --no-window flag prevents the app from starting.
-        sys.exit("The --hide-window option has been renamed to --no-window")
+        sys.exit("The --hide-window argument has been renamed to --no-window")
 
     # start DBus loop
     DBusGMainLoop(set_as_default=True)
