@@ -166,6 +166,7 @@ export default {
 
   data() {
     return {
+      changed : {},
       renderOnScreenOptions: {
         'mouse-pointer-monitor': 'Monitor with a mouse pointer',
         'default-monitor': 'Default monitor'
@@ -197,7 +198,10 @@ export default {
       },
       set(value) {
         return jsonp('prefs:///set', {property: name.replace('_', '-'), value}).then(
-          () => this.setPrefs({[name]: value}),
+          () => {
+            this.setPrefs({[name]: value})
+            this.changed[name] = true
+          },
           err => bus.$emit('error', err)
         )
       }
