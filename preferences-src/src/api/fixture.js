@@ -16,6 +16,7 @@ export default function(url, params) {
         clear_previous_text: true,
         grab_mouse_pointer: true,
         disable_desktop_filters: false,
+        disable_window_shadow: false,
         available_themes: [{ text: 'Dark', value: 'dark' }, { text: 'Light', value: 'light' }],
         theme_name: 'light',
         env: {
