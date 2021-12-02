@@ -57,6 +57,11 @@ GPROPERTIES = {
                                 None,  # description
                                 False,  # default
                                 GObject.ParamFlags.READWRITE),  # flags
+    "disable-window-shadow": (bool,
+                              "Disable the shadow drawn around the Ulauncher window",
+                              None,
+                              False,
+                              GObject.ParamFlags.READWRITE),
 }
 
 

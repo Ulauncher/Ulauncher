@@ -104,6 +104,23 @@
     <table>
       <tr>
         <td>
+          <label for="disable_window_shadow">No window shadow</label>
+          <small>
+            <p>
+              Try this if you see a box or border instead of shadows.
+            </p>
+            <p v-if="changed.disable_window_shadow">
+              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect.
+            </p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="disable_window_shadow" v-model="disable_window_shadow"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="show-indicator-icon">Show Indicator Icon</label>
           <small>
             <p>It's supported only if gir1.2-ayatanaappindicator3-0.1 or an equivalent is installed</p>
@@ -166,6 +183,7 @@ export default {
 
   data() {
     return {
+      changed : {},
       renderOnScreenOptions: {
         'mouse-pointer-monitor': 'Monitor with a mouse pointer',
         'default-monitor': 'Default monitor'
@@ -185,6 +203,7 @@ export default {
       'autostart_enabled',
       'clear_previous_query',
       'disable_desktop_filters',
+      'disable_window_shadow',
       'grab_mouse_pointer',
       'render_on_screen',
       'show_indicator_icon',
@@ -197,7 +216,10 @@ export default {
       },
       set(value) {
         return jsonp('prefs:///set', {property: name.replace('_', '-'), value}).then(
-          () => this.setPrefs({[name]: value}),
+          () => {
+            this.setPrefs({[name]: value})
+            this.changed[name] = true
+          },
           err => bus.$emit('error', err)
         )
       }
