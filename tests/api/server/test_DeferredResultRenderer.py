@@ -6,7 +6,7 @@ from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.api.server.ExtensionManifest import ExtensionManifest
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 
 
 class TestDeferredResultRenderer:

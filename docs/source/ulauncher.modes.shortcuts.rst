@@ -1,29 +1,29 @@
-ulauncher\.search\.shortcuts package
+ulauncher\.modes\.shortcuts package
 ====================================
 
 Submodules
 ----------
 
-ulauncher\.search\.shortcuts\.ShortcutResultItem module
+ulauncher\.modes\.shortcuts\.ShortcutResultItem module
 -------------------------------------------------------
 
-.. automodule:: ulauncher.search.shortcuts.ShortcutResultItem
+.. automodule:: ulauncher.modes.shortcuts.ShortcutResultItem
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.shortcuts\.ShortcutSearchMode module
+ulauncher\.modes\.shortcuts\.ShortcutMode module
 -------------------------------------------------------
 
-.. automodule:: ulauncher.search.shortcuts.ShortcutSearchMode
+.. automodule:: ulauncher.modes.shortcuts.ShortcutMode
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.shortcuts\.ShortcutsDb module
+ulauncher\.modes\.shortcuts\.ShortcutsDb module
 ------------------------------------------------
 
-.. automodule:: ulauncher.search.shortcuts.ShortcutsDb
+.. automodule:: ulauncher.modes.shortcuts.ShortcutsDb
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ ulauncher\.search\.shortcuts\.ShortcutsDb module
 Module contents
 ---------------
 
-.. automodule:: ulauncher.search.shortcuts
+.. automodule:: ulauncher.modes.shortcuts
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,24 +1,24 @@
 import pytest
-from ulauncher.search.shortcuts.ShortcutSearchMode import ShortcutSearchMode
+from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 
 
-class TestShortcutSearchMode:
+class TestShortcutMode:
 
     @pytest.fixture
     def mode(self):
-        return ShortcutSearchMode()
+        return ShortcutMode()
 
     @pytest.fixture(autouse=True)
     def shortcuts_db(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutSearchMode.ShortcutsDb.get_instance').return_value
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutsDb.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutSearchMode.RenderResultListAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.RenderResultListAction')
 
     @pytest.fixture(autouse=True)
     def ShortcutResultItem(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutSearchMode.ShortcutResultItem')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutResultItem')
 
     def test_is_enabled__query_starts_with_query_and_space__returns_true(self, mode, shortcuts_db):
         query = 'kw '

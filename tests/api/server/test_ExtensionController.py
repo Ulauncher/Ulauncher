@@ -5,7 +5,7 @@ from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import KeywordQueryEvent
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 
 
 TEST_EXT_ID = "com.example.test-ext-id"

@@ -1,29 +1,29 @@
-ulauncher\.search\.apps package
+ulauncher\.modes\.apps package
 ===============================
 
 Submodules
 ----------
 
-ulauncher\.search\.QueryHistoryDb module
+ulauncher\.modes\.QueryHistoryDb module
 ----------------------------------------
 
-.. automodule:: ulauncher.search.QueryHistoryDb
+.. automodule:: ulauncher.modes.QueryHistoryDb
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.apps\.AppResultItem module
+ulauncher\.modes\.apps\.AppResultItem module
 ---------------------------------------------
 
-.. automodule:: ulauncher.search.apps.AppResultItem
+.. automodule:: ulauncher.modes.apps.AppResultItem
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.apps\.AppSearchMode module
+ulauncher\.modes\.apps\.AppMode module
 ---------------------------------------------
 
-.. automodule:: ulauncher.search.apps.AppSearchMode
+.. automodule:: ulauncher.modes.apps.AppMode
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,7 +31,7 @@ ulauncher\.search\.apps\.AppSearchMode module
 Module contents
 ---------------
 
-.. automodule:: ulauncher.search.apps
+.. automodule:: ulauncher.modes.apps
     :members:
     :undoc-members:
     :show-inheritance:

@@ -8,7 +8,7 @@ from gi.repository import Gtk, Gdk
 
 from ulauncher.utils.Theme import Theme
 from ulauncher.utils.display import get_monitor_scale_factor
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 
 logger = logging.getLogger(__name__)
 

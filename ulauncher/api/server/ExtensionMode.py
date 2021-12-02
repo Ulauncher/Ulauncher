@@ -2,11 +2,11 @@ import html
 
 from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.search.BaseSearchMode import BaseSearchMode
+from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.api.server.ExtensionKeywordResultItem import ExtensionKeywordResultItem
 
 
-class ExtensionSearchMode(BaseSearchMode):
+class ExtensionMode(BaseMode):
 
     def __init__(self):
         self.extensionServer = ExtensionServer.get_instance()
@@ -14,7 +14,7 @@ class ExtensionSearchMode(BaseSearchMode):
 
     def is_enabled(self, query):
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         :rtype: `True` if mode should be enabled for a query
         """
         return bool(self._get_controller_by_keyword(query.get_keyword())) and query.is_mode_active()
@@ -23,13 +23,13 @@ class ExtensionSearchMode(BaseSearchMode):
         """
         Triggered when user changes a search query
 
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         """
         self.deferredResultRenderer.on_query_change()
 
     def handle_query(self, query):
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
         controller = self._get_controller_by_keyword(query.get_keyword())

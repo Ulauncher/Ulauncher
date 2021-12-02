@@ -6,34 +6,34 @@ Subpackages
 
 .. toctree::
 
-    ulauncher.search.apps
-    ulauncher.search.calc
-    ulauncher.search.file_browser
-    ulauncher.search.shortcuts
+    ulauncher.modes.apps
+    ulauncher.modes.calc
+    ulauncher.modes.file_browser
+    ulauncher.modes.shortcuts
 
 Submodules
 ----------
 
-ulauncher\.search\.BaseSearchMode module
+ulauncher\.modes\.BaseMode module
 ----------------------------------------
 
-.. automodule:: ulauncher.search.BaseSearchMode
+.. automodule:: ulauncher.modes.BaseMode
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.Query module
+ulauncher\.modes\.Query module
 -------------------------------
 
-.. automodule:: ulauncher.search.Query
+.. automodule:: ulauncher.modes.Query
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.search\.Search module
+ulauncher\.modes\.Search module
 --------------------------------
 
-.. automodule:: ulauncher.search.Search
+.. automodule:: ulauncher.modes.Search
     :members:
     :undoc-members:
     :show-inheritance:
@@ -41,7 +41,7 @@ ulauncher\.search\.Search module
 Module contents
 ---------------
 
-.. automodule:: ulauncher.search
+.. automodule:: ulauncher.modes
     :members:
     :undoc-members:
     :show-inheritance:

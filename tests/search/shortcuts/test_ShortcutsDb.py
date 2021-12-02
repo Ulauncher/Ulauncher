@@ -1,13 +1,13 @@
 import os
 import pytest
-from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 
 
 class TestShortcutsDb:
 
     @pytest.fixture(autouse=True)
     def get_default_shortcuts(self, mocker):
-        default = mocker.patch('ulauncher.search.shortcuts.ShortcutsDb.get_default_shortcuts')
+        default = mocker.patch('ulauncher.modes.shortcuts.ShortcutsDb.get_default_shortcuts')
         default.return_value = []
         return default
 
@@ -30,7 +30,7 @@ class TestShortcutsDb:
         assert db.put_shortcut('googleplay', 'p', 'https://play.google', 'icon', True, False, id='uuid123') == 'uuid123'
 
     def test_commit__ensures_user_path(self, db, mocker):
-        expanduser = mocker.patch('ulauncher.search.shortcuts.ShortcutsDb.os.path.expanduser')
+        expanduser = mocker.patch('ulauncher.modes.shortcuts.ShortcutsDb.os.path.expanduser')
         expanduser.return_value = '/home/username'
         db.put_shortcut('test shortcut', 't', 'https://example.com',
                         '/home/username/dir/~/file', True, False, id='test1')

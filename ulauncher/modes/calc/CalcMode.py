@@ -3,8 +3,8 @@ import ast
 import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.calc.CalcResultItem import CalcResultItem
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.calc.CalcResultItem import CalcResultItem
 
 
 # supported operators
@@ -44,7 +44,7 @@ def _eval(node):
     raise TypeError(node)
 
 
-class CalcMode(BaseSearchMode):
+class CalcMode(BaseMode):
     RE_CALC = re.compile(r'^[\d\-\(\.][\d\*+\/\-\.e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):

@@ -9,7 +9,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.search.QueryHistoryDb import QueryHistoryDb
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 from ulauncher.utils.image_loader import get_app_icon_pixbuf
 
 settings = Settings.get_instance()
@@ -88,7 +88,7 @@ class AppResultItem(ResultItem):
 
     def selected_by_default(self, query):
         """
-        :param ~ulauncher.search.Query.Query query:
+        :param ~ulauncher.modes.Query.Query query:
         """
         return self._query_history.find(query) == self._name
 

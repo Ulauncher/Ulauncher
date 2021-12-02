@@ -1,7 +1,7 @@
 import pytest
 
 from ulauncher.api.server.ExtensionKeywordResultItem import ExtensionKeywordResultItem
-from ulauncher.search.Query import Query
+from ulauncher.modes.Query import Query
 
 
 class TestExtensionKeywordResultItem:

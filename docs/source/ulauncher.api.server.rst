@@ -44,10 +44,10 @@ ulauncher\.api\.server\.ExtensionRunner module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionSearchMode module
+ulauncher\.api\.server\.ExtensionMode module
 --------------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionSearchMode
+.. automodule:: ulauncher.api.server.ExtensionMode
     :members:
     :undoc-members:
     :show-inheritance:

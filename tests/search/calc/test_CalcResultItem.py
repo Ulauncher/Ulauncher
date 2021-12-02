@@ -1,16 +1,16 @@
 import pytest
-from ulauncher.search.calc.CalcResultItem import CalcResultItem
+from ulauncher.modes.calc.CalcResultItem import CalcResultItem
 
 
 class TestCalcResultItem:
 
     @pytest.fixture
     def DoNothingAction(self, mocker):
-        return mocker.patch('ulauncher.search.calc.CalcResultItem.DoNothingAction')
+        return mocker.patch('ulauncher.modes.calc.CalcResultItem.DoNothingAction')
 
     @pytest.fixture
     def CopyToClipboardAction(self, mocker):
-        return mocker.patch('ulauncher.search.calc.CalcResultItem.CopyToClipboardAction')
+        return mocker.patch('ulauncher.modes.calc.CalcResultItem.CopyToClipboardAction')
 
     def test_get_name(self):
         assert CalcResultItem(52).get_name() == '52'

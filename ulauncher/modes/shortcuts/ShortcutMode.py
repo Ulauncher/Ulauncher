@@ -1,10 +1,10 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.search.shortcuts.ShortcutResultItem import ShortcutResultItem
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.modes.shortcuts.ShortcutResultItem import ShortcutResultItem
 
 
-class ShortcutSearchMode(BaseSearchMode):
+class ShortcutMode(BaseMode):
 
     def __init__(self):
         self.shortcutsDb = ShortcutsDb.get_instance()

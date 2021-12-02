@@ -1,14 +1,14 @@
 import pytest
 import mock
-from ulauncher.search.BaseSearchMode import BaseSearchMode
-from ulauncher.search.Search import Search
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.Search import Search
 
 
 class TestSearch:
 
     @pytest.fixture
     def search_mode(self):
-        return mock.create_autospec(BaseSearchMode)
+        return mock.create_autospec(BaseMode)
 
     @pytest.fixture
     def search(self, search_mode):

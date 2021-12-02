@@ -1,29 +1,29 @@
 import pytest
-from ulauncher.search.shortcuts.ShortcutResultItem import ShortcutResultItem
-from ulauncher.search.Query import Query
+from ulauncher.modes.shortcuts.ShortcutResultItem import ShortcutResultItem
+from ulauncher.modes.Query import Query
 
 
 class TestShortcutResultItem:
 
     @pytest.fixture
     def ActionList(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.ActionList')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.ActionList')
 
     @pytest.fixture(autouse=True)
     def OpenUrlAction(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.OpenUrlAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.OpenUrlAction')
 
     @pytest.fixture(autouse=True)
     def RunScriptAction(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.RunScriptAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.RunScriptAction')
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.QueryHistoryDb.get_instance').return_value
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.QueryHistoryDb.get_instance').return_value
 
     @pytest.fixture
     def SetUserQueryAction(self, mocker):
-        return mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.SetUserQueryAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.SetUserQueryAction')
 
     @pytest.fixture
     def item(self):
@@ -42,7 +42,7 @@ class TestShortcutResultItem:
         assert item.get_description(Query('goo')) == 'https://site/?q=...'
 
     def test_get_icon(self, mocker, item):
-        load_image = mocker.patch('ulauncher.search.shortcuts.ShortcutResultItem.load_image')
+        load_image = mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.load_image')
         assert item.get_icon() is load_image.return_value
         load_image.assert_called_once_with('icon_path', 40)
 
