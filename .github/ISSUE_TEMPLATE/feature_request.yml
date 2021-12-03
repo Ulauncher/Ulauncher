@@ -14,6 +14,14 @@ body:
     validations:
       required: true
   - type: checkboxes
+    id: not-extension
+    attributes:
+      label: Feature isn't possible to support as an extension
+      description: Ulauncher's developers doesn't have the time to support all features directly. We rely on third party extensions for this.
+      options:
+        - label: This feature request cannot be added as a third party extension.
+          required: true
+  - type: checkboxes
     id: no-duplicate
     attributes:
       label: Feature isn't already requested
