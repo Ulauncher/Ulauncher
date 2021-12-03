@@ -48,7 +48,7 @@ class CalcMode(BaseMode):
     RE_CALC = re.compile(r'^[\d\-\(\.][\d\*+\/\-\.e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
-        return re.match(self.RE_CALC, query)
+        return bool(re.match(self.RE_CALC, query))
 
     def handle_query(self, query):
         try:
