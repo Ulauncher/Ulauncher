@@ -10,7 +10,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Your Linux distro, desktop environment and other relevant information such as using a Ulauncher pre-release
+      description: Your Linux distro, desktop environment and other relevant information for reproducing the issue.
     validations:
       required: true
   - type: textarea
@@ -32,7 +32,15 @@ body:
       label: Issue isn't already reported
       description: Did you search the [open issues](https://github.com/Ulauncher/Ulauncher/issues)?
       options:
-        - label: I have searched for similar issues before reporting this to avoid creating a duplicate issue
+        - label: I have searched for similar issues before reporting this to avoid creating a duplicate issue.
+          required: true
+  - type: checkboxes
+    id: no-extension
+    attributes:
+      label: Not an extension issue
+      description: Ulauncher does not support or maintain third party extensions. If you have issues with extensions you should read and follow their dependency installation instructions and file any issues on their issue trackers.
+      options:
+        - label: This issue applies to the Ulauncher application, not a specific extension
           required: true
   - type: checkboxes
     id: latest
