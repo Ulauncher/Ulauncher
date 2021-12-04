@@ -1,5 +1,6 @@
 import re
 import ast
+from decimal import Decimal
 import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
@@ -35,7 +36,7 @@ def eval_expr(expr):
 
 def _eval(node):
     if isinstance(node, ast.Num):  # <number>
-        return node.n
+        return Decimal(str(node.n))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
