@@ -1,6 +1,6 @@
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.utils.image_loader import get_themed_icon_by_name
+from ulauncher.utils.icon import load_icon
 
 
 class OpenFolderItem(SmallResultItem):
@@ -24,7 +24,7 @@ class OpenFolderItem(SmallResultItem):
         return self._name
 
     def get_icon(self):
-        return get_themed_icon_by_name('system-file-manager', self.get_icon_size())
+        return load_icon('system-file-manager', self.get_icon_size())
 
     def on_enter(self, query):
         return OpenAction(self.path.get_abs_path())

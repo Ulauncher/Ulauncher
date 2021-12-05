@@ -2,7 +2,7 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.config import get_data_file
-from ulauncher.utils.image_loader import load_image
+from ulauncher.utils.icon import load_icon
 
 
 class CalcResultItem(ResultItem):
@@ -23,7 +23,7 @@ class CalcResultItem(ResultItem):
         return 'Enter to copy to the clipboard' if self.result else self.error
 
     def get_icon(self):
-        return load_image(get_data_file('icons/calculator.png'), self.get_icon_size())
+        return load_icon(get_data_file('icons/calculator.png'), self.get_icon_size())
 
     def on_enter(self, query):
         if self.result is not None:

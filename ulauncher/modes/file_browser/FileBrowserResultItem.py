@@ -5,7 +5,7 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 from ulauncher.utils.Path import Path
-from ulauncher.utils.image_loader import get_file_icon
+from ulauncher.utils.icon import get_file_icon
 
 from ulauncher.modes.file_browser.FileQueries import FileQueries
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem

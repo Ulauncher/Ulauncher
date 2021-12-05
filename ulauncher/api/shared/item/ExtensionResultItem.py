@@ -3,7 +3,7 @@ import sys
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.utils.image_loader import load_image
+from ulauncher.utils.icon import load_icon
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
@@ -28,7 +28,7 @@ class ExtensionResultItem(ResultItem):
             if not icon_path.startswith('/'):
                 icon_path = os.path.join(self.extension_path, icon_path)
 
-            return load_image(icon_path, self.get_icon_size())
+            return load_icon(icon_path, self.get_icon_size())
 
         # assuming it's GtkPixbuf
         return self._icon

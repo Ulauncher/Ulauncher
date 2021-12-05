@@ -5,8 +5,7 @@ from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.utils.image_loader import load_image
-from ulauncher.config import get_data_file
+from ulauncher.utils.icon import load_icon
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
@@ -55,8 +54,7 @@ class ShortcutResultItem(ResultItem):
         return description.replace('%s', '...')
 
     def get_icon(self):
-        icon = self.icon or get_data_file('icons', 'executable.png')
-        return load_image(icon, self.get_icon_size())
+        return load_icon(self.icon, self.get_icon_size())
 
     def selected_by_default(self, query):
         """

@@ -28,7 +28,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry, get_monitor_scale_factor
-from ulauncher.utils.image_loader import load_image
+from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
@@ -369,7 +369,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def _render_prefs_icon(self):
         scale_factor = get_monitor_scale_factor()
-        prefs_pixbuf = load_image(get_data_file('icons', 'gear.svg'), 16 * scale_factor)
+        prefs_pixbuf = load_icon(get_data_file('icons', 'gear.svg'), 16 * scale_factor)
         surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scale_factor, self.get_window())
         prefs_image = Gtk.Image.new_from_surface(surface)
         self.prefs_btn.set_image(prefs_image)
