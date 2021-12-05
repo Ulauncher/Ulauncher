@@ -41,10 +41,8 @@ class TestShortcutResultItem:
         assert item.get_description(Query('keyword test')) == 'https://site/?q=...'
         assert item.get_description(Query('goo')) == 'https://site/?q=...'
 
-    def test_get_icon(self, mocker, item):
-        load_image = mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.load_image')
-        assert item.get_icon() is load_image.return_value
-        load_image.assert_called_once_with('icon_path', 40)
+    def test_get_icon(self, item):
+        assert isinstance(item.get_icon(), str)
 
     def test_on_enter(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
         assert item.on_enter(Query('kw test')) is ActionList.return_value

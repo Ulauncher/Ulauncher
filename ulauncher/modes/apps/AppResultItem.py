@@ -10,7 +10,6 @@ from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
-from ulauncher.utils.image_loader import get_app_icon_pixbuf
 
 settings = Settings.get_instance()
 _app_starts = KeyValueJsonDb(join(STATE_DIR, 'app_starts.json')).open()
@@ -93,7 +92,7 @@ class AppResultItem(ResultItem):
         return self._query_history.find(query) == self._name
 
     def get_icon(self):
-        return get_app_icon_pixbuf(self._app_info.get_icon(), self.get_icon_size())
+        return self._app_info.get_string('Icon')
 
     def on_enter(self, query):
         self._query_history.save_query(str(query), self._name)

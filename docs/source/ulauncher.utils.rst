@@ -96,7 +96,7 @@ ulauncher.utils.fuzzy\_search module
 ulauncher.utils.image\_loader module
 ------------------------------------
 
-.. automodule:: ulauncher.utils.image_loader
+.. automodule:: ulauncher.utils.icon
     :members:
     :undoc-members:
     :show-inheritance:

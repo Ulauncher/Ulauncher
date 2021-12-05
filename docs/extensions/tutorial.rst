@@ -96,7 +96,7 @@ Create :file:`manifest.json` using the following template::
 
 * ``required_api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
-* ``icon`` - relative path to an extension icon
+* ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
 * ``options`` - dictionary of optional parameters. See available options below
 * ``preferences`` - list of preferences available for users to override.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
@@ -148,7 +148,7 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
   Optional description
 
 ``icon``
-  Optional per-keyword icon path. If not specificed it will use the extension icon
+  Optional per-keyword icon (path or themed icon). If not specificed it will use the extension icon
 
 ``options``
   Required for type "select". Must be a list of strings or objects like: ``{"value": "...", "text": "..."}``
