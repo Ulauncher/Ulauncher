@@ -10,7 +10,6 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 from ulauncher.utils.Path import Path
-from ulauncher.utils.icon import load_icon
 
 from ulauncher.modes.file_browser.FileQueries import FileQueries
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
@@ -49,7 +48,7 @@ class FileBrowserResultItem(SmallResultItem):
         query = os.path.basename(query)
         return super().get_name_highlighted(query, color)
 
-    def get_file_icon(self):
+    def get_icon(self):
         if self.path.is_dir():
             return SPECIAL_DIRS.get(str(self.path)) or "folder"
 
@@ -61,9 +60,6 @@ class FileBrowserResultItem(SmallResultItem):
             return "application-x-executable"
 
         return "unknown"
-
-    def get_icon(self):
-        return load_icon(self.get_file_icon(), self.get_icon_size())
 
     def on_enter(self, query):
         self._file_queries.save_query(self.path.get_abs_path())

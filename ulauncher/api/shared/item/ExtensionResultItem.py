@@ -3,7 +3,6 @@ import sys
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.item.ResultItem import ResultItem
-from ulauncher.utils.icon import load_icon
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
@@ -22,13 +21,8 @@ class ExtensionResultItem(ResultItem):
             raise Exception("Incorrect type of on_enter argument")
 
     def get_icon(self):
-        if isinstance(self._icon, str):
-            icon_path = self._icon
-
-            if not icon_path.startswith('/'):
-                icon_path = os.path.join(self.extension_path, icon_path)
-
-            return load_icon(icon_path, self.get_icon_size())
+        if isinstance(self._icon, str) and not self._icon.startswith('/') and "." in self._icon:
+            return os.path.join(self.extension_path, self._icon)
 
         # assuming it's GtkPixbuf
         return self._icon

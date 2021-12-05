@@ -1,6 +1,5 @@
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.utils.icon import load_icon
 
 
 class CopyPathToClipboardItem(SmallResultItem):
@@ -20,7 +19,7 @@ class CopyPathToClipboardItem(SmallResultItem):
         pass
 
     def get_icon(self):
-        return load_icon('edit-copy', self.get_icon_size())
+        return 'edit-copy'
 
     def on_enter(self, query):
         return CopyToClipboardAction(self.path.get_abs_path())

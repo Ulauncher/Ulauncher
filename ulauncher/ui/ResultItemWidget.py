@@ -6,8 +6,9 @@ gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk
 
-from ulauncher.utils.Theme import Theme
 from ulauncher.utils.display import get_monitor_scale_factor
+from ulauncher.utils.icon import load_icon
+from ulauncher.utils.Theme import Theme
 from ulauncher.modes.Query import Query
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class ResultItemWidget(Gtk.EventBox):
         self.query = query
         self.set_index(index)
 
-        self.set_icon(item_object.get_icon())
+        self.set_icon(load_icon(item_object.get_icon(), item_object.get_icon_size()))
         self.set_description(item_object.get_description(query))
         self.set_name_highlighted()
 

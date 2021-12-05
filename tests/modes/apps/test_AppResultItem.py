@@ -3,9 +3,8 @@ import mock
 import pytest
 import gi
 gi.require_version('Gio', '2.0')
-gi.require_version('GdkPixbuf', '2.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gio, GdkPixbuf
+from gi.repository import Gio
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.modes.apps.AppResultItem import AppResultItem
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
@@ -56,7 +55,7 @@ class TestAppResultItem:
         assert app1.get_description(Query('q')) == 'Your own yes-man'
 
     def test_get_icon(self, app1):
-        assert isinstance(app1.get_icon(), GdkPixbuf.Pixbuf)
+        assert isinstance(app1.get_icon(), str)
         assert app1.get('Icon') == 'dialog-yes'
 
     def test_search_score(self, app1):

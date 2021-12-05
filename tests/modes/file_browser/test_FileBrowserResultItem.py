@@ -54,10 +54,8 @@ class TestFileBrowserResultItem:
     def test_get_name(self, result_item, path):
         assert result_item.get_name() == path.get_basename.return_value
 
-    def test_icon(self, result_item, path, mocker):
-        get_file_icon = mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.get_file_icon')
-        assert result_item.get_icon() == get_file_icon.return_value
-        get_file_icon.assert_called_with(path, result_item.ICON_SIZE)
+    def test_icon(self, result_item):
+        assert isinstance(result_item.get_icon(), str)
 
     # pylint: disable=too-many-arguments
     def test_on_enter(self, result_item, path, file_queries, OpenAction, SetUserQueryAction):
