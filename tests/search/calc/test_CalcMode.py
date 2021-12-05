@@ -34,6 +34,11 @@ class TestCalcMode:
         assert eval_expr('110 / 3') == Decimal('36.66666666666666666666666667')
         assert eval_expr('1.1 + 2.2') == Decimal('3.3')
 
+    def test_eval_expr_syntax_variation(self):
+        assert eval_expr('5.5 * 10') == Decimal('55')
+        assert eval_expr('12 / 1,5') == eval_expr('12 / 1.5') == Decimal('8')
+        assert eval_expr('3 ** 2') == eval_expr('3^2') == Decimal('9')
+
     def test_handle_query(self, mode, RenderResultListAction, CalcResultItem):
         assert mode.handle_query('3+2') == RenderResultListAction.return_value
         assert mode.handle_query('3+2*') == RenderResultListAction.return_value

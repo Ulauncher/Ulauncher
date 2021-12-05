@@ -25,7 +25,7 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = expr.replace("^", "**")
+    expr = expr.replace("^", "**").replace(",", ".")
     try:
         return _eval(ast.parse(expr, mode='eval').body)
     # pylint: disable=broad-except
@@ -46,7 +46,7 @@ def _eval(node):
 
 
 class CalcMode(BaseSearchMode):
-    RE_CALC = re.compile(r'^[\d\-\(\.][\d\*+\/\-\.e\(\)\^ ]*$', flags=re.IGNORECASE)
+    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
         return re.match(self.RE_CALC, query)
