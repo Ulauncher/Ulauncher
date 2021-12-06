@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.event import PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
@@ -51,8 +52,10 @@ class Extension:
 
         for listener in listeners:
             action = listener.on_event(event, self)
+            if isinstance(action, list):
+                action = RenderResultListAction(action)
             if action:
-                assert isinstance(action, BaseAction), "on_event return value is not an instance of BaseAction"
+                assert isinstance(action, BaseAction), "on_event must return list of ResultItems or a BaseAction"
                 self._client.send(Response(event, action))
 
     def run(self):

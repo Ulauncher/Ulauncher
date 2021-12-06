@@ -13,10 +13,6 @@ class TestShortcutMode:
         return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutsDb.get_instance').return_value
 
     @pytest.fixture(autouse=True)
-    def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.RenderResultListAction')
-
-    @pytest.fixture(autouse=True)
     def ShortcutResultItem(self, mocker):
         return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutResultItem')
 
@@ -48,12 +44,12 @@ class TestShortcutMode:
 
         assert mode.is_enabled(query)
 
-    def test_handle_query__return_value__is_RenderAction_object(self, mode, shortcuts_db, RenderAction):
+    def test_handle_query__return_value__is(self, mode, shortcuts_db, ShortcutResultItem):
         query = 'kw something'
         shortcut = {'keyword': 'kw'}
         shortcuts_db.get_shortcuts.return_value = [shortcut]
 
-        assert mode.handle_query(query) == RenderAction.return_value
+        assert mode.handle_query(query)[0] == ShortcutResultItem.return_value
 
     def test_handle_query__ShortcutResultItem__is_called(self, mode, shortcuts_db, ShortcutResultItem):
         query = 'kw something'
@@ -63,15 +59,6 @@ class TestShortcutMode:
         mode.handle_query(query)
 
         ShortcutResultItem.assert_called_once_with(keyword='kw')
-
-    def test_handle_query__RenderAction__is_called(self, mode, shortcuts_db, RenderAction, ShortcutResultItem):
-        query = 'kw something'
-        shortcut = {'keyword': 'kw'}
-        shortcuts_db.get_shortcuts.return_value = [shortcut]
-
-        mode.handle_query(query)
-
-        RenderAction.assert_called_once_with([ShortcutResultItem.return_value])
 
     def test_get_default_items__ShortcutResultItems__returned(self, mode, shortcuts_db, ShortcutResultItem):
         shortcut = {'keyword': 'kw', 'is_default_search': True}

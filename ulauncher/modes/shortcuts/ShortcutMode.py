@@ -1,4 +1,3 @@
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.modes.shortcuts.ShortcutResultItem import ShortcutResultItem
@@ -35,7 +34,7 @@ class ShortcutMode(BaseMode):
         if not shortcut:
             raise Exception('No active shortcut. This line should not be entered')
 
-        return RenderResultListAction([ShortcutResultItem(**shortcut)])
+        return [ShortcutResultItem(**shortcut)]
 
     def get_default_items(self):
         return self._create_items([s for s in self.shortcutsDb.get_shortcuts() if s['is_default_search']],

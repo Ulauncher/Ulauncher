@@ -26,9 +26,9 @@ class BaseMode:
 
     def handle_query(self, query):
         """
-        :rtype: :class:`BaseAction`
+        :rtype: list of ResultItems
         """
-        return DoNothingAction()
+        return []
 
     def get_default_items(self):
         """

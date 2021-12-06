@@ -171,7 +171,6 @@ Copy the following code to ``main.py``::
   from ulauncher.api.client.EventListener import EventListener
   from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
   from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-  from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
   from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 
@@ -192,7 +191,7 @@ Copy the following code to ``main.py``::
                                                description='Item description %s' % i,
                                                on_enter=HideWindowAction()))
 
-          return RenderResultListAction(items)
+          return items
 
   if __name__ == '__main__':
       DemoExtension().run()
@@ -259,8 +258,7 @@ Basic API Concepts
 
 **3. Render results**
 
-  Return :class:`~ulauncher.api.shared.action.RenderResultListAction.RenderResultListAction` in order to render results.
-  :class:`~ulauncher.api.shared.item.ExtensionResultItem.ExtensionResultItem` describes a single result item.
+  Return a list of :class:`~ulauncher.api.shared.item.ExtensionResultItem.ExtensionResultItem` in order to render results.
 
   You can also use :class:`~ulauncher.api.shared.item.ExtensionSmallResultItem.ExtensionSmallResultItem` if you want
   to render more items. You won't have item description with this type.
@@ -276,7 +274,7 @@ Basic API Concepts
                                                  description='Item description %s' % i,
                                                  on_enter=HideWindowAction()))
 
-            return RenderResultListAction(items)
+            return items
 
 
   :code:`on_enter` is an action that will be ran when item is entered/clicked.
@@ -333,9 +331,9 @@ Custom Action on Item Enter
             # do additional actions here...
 
             # you may want to return another list of results
-            return RenderResultListAction([ExtensionResultItem(icon='images/icon.png',
-                                                               name=data['new_name'],
-                                                               on_enter=HideWindowAction())])
+            return [ExtensionResultItem(icon='images/icon.png',
+                                        name=data['new_name'],
+                                        on_enter=HideWindowAction())]
 
 **3. Subscribe to ItemEnterEvent**
 

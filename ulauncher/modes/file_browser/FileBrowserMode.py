@@ -5,9 +5,7 @@ gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gdk
 from ulauncher.utils.fuzzy_search import get_score
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.utils.Path import Path, InvalidPathError
 from ulauncher.modes.BaseMode import BaseMode
@@ -50,7 +48,7 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: List[str]) -> List[str]:
         return list(filter(lambda f: not f.startswith('.'), file_list))
 
-    def handle_query(self, query: str) -> BaseAction:
+    def handle_query(self, query: str) -> List[FileBrowserResultItem]:
         path = Path(query)  # type: Path
         result_items = []  # type: List[FileBrowserResultItem]
 
@@ -77,7 +75,7 @@ class FileBrowserMode(BaseMode):
         except (InvalidPathError, OSError):
             result_items = []
 
-        return RenderResultListAction(result_items)
+        return result_items
 
     def handle_key_press_event(self, widget, event, query):
         keyval = event.get_keyval()
