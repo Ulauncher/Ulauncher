@@ -1,69 +1,69 @@
-ulauncher\.api\.server package
+ulauncher\.modes\.extensions package
 ==============================
 
 Submodules
 ----------
 
-ulauncher\.api\.server\.DeferredResultRenderer module
+ulauncher\.modes\.extensions\.DeferredResultRenderer module
 -----------------------------------------------------
 
-.. automodule:: ulauncher.api.server.DeferredResultRenderer
+.. automodule:: ulauncher.modes.extensions.DeferredResultRenderer
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionController module
+ulauncher\.modes\.extensions\.ExtensionController module
 --------------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionController
+.. automodule:: ulauncher.modes.extensions.ExtensionController
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionManifest module
+ulauncher\.modes\.extensions\.ExtensionManifest module
 ------------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionManifest
+.. automodule:: ulauncher.modes.extensions.ExtensionManifest
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionPreferences module
+ulauncher\.modes\.extensions\.ExtensionPreferences module
 ---------------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionPreferences
+.. automodule:: ulauncher.modes.extensions.ExtensionPreferences
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionRunner module
+ulauncher\.modes\.extensions\.ExtensionRunner module
 ----------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionRunner
+.. automodule:: ulauncher.modes.extensions.ExtensionRunner
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionMode module
+ulauncher\.modes\.extensions\.ExtensionMode module
 --------------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionMode
+.. automodule:: ulauncher.modes.extensions.ExtensionMode
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.ExtensionServer module
+ulauncher\.modes\.extensions\.ExtensionServer module
 ----------------------------------------------
 
-.. automodule:: ulauncher.api.server.ExtensionServer
+.. automodule:: ulauncher.modes.extensions.ExtensionServer
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.server\.extension\_finder module
+ulauncher\.modes\.extensions\.extension\_finder module
 ------------------------------------------------
 
-.. automodule:: ulauncher.api.server.extension_finder
+.. automodule:: ulauncher.modes.extensions.extension_finder
     :members:
     :undoc-members:
     :show-inheritance:
@@ -71,7 +71,7 @@ ulauncher\.api\.server\.extension\_finder module
 Module contents
 ---------------
 
-.. automodule:: ulauncher.api.server
+.. automodule:: ulauncher.modes.extensions
     :members:
     :undoc-members:
     :show-inheritance:

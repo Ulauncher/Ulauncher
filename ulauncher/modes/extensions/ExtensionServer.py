@@ -11,7 +11,7 @@ gi.require_versions({
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GObject
 
-from ulauncher.api.server.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.api.shared.event import RegisterEvent
 from ulauncher.utils.decorator.singleton import singleton
@@ -96,14 +96,14 @@ class ExtensionServer:
 
     def get_controllers(self):
         """
-        :rtype: list of  :class:`~ulauncher.api.server.ExtensionController.ExtensionController`
+        :rtype: list of  :class:`~ulauncher.modes.extensions.ExtensionController.ExtensionController`
         """
         return self.controllers.values()
 
     def get_controller_by_keyword(self, keyword):
         """
         :param str keyword:
-        :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
+        :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
         """
         for _, ctl in self.controllers.items():
             if keyword in ctl.preferences.get_active_keywords():

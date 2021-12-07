@@ -64,7 +64,7 @@ class GithubExtension:
         Finds maximum version that is compatible with current version of Ulauncher
         and returns a commit or branch/tag name
 
-        :raises ulauncher.api.server.GithubExtension.InvalidVersionsFileError:
+        :raises ulauncher.modes.extensions.GithubExtension.InvalidVersionsFileError:
         """
         sha_or_branch = ""
         for ver in self.read_versions():

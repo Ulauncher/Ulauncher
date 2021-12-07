@@ -1,9 +1,9 @@
 import html
 
-from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.api.server.ExtensionKeywordResultItem import ExtensionKeywordResultItem
+from ulauncher.modes.extensions.ExtensionKeywordResultItem import ExtensionKeywordResultItem
 
 
 class ExtensionMode(BaseMode):

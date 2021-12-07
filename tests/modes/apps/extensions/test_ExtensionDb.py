@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from ulauncher.api.server.ExtensionDb import ExtensionDb
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 
 
 class TestExtensionDb:

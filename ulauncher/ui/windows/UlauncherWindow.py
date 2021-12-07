@@ -21,9 +21,9 @@ from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.Search import Search
 from ulauncher.modes.apps.AppResultItem import AppResultItem
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner
-from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.api.server.ExtensionDownloader import ExtensionDownloader
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer

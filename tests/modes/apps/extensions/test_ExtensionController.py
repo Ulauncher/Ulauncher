@@ -1,7 +1,7 @@
 import mock
 import pytest
 
-from ulauncher.api.server.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import KeywordQueryEvent
@@ -20,24 +20,24 @@ class TestExtensionController:
     @pytest.fixture(autouse=True)
     def PreferencesEvent(self, mocker):
         PreferencesEvent = mocker.patch(
-            'ulauncher.api.server.ExtensionController.PreferencesEvent')
+            'ulauncher.modes.extensions.ExtensionController.PreferencesEvent')
         PreferencesEvent.return_value = object()
         return PreferencesEvent
 
     @pytest.fixture(autouse=True)
     def result_renderer(self, mocker):
         return mocker.patch(
-            'ulauncher.api.server.ExtensionController.DeferredResultRenderer.get_instance').return_value
+            'ulauncher.modes.extensions.ExtensionController.DeferredResultRenderer.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def extPrefs(self, mocker):
         return mocker.patch(
-            'ulauncher.api.server.ExtensionController.ExtensionPreferences.create_instance').return_value
+            'ulauncher.modes.extensions.ExtensionController.ExtensionPreferences.create_instance').return_value
 
     @pytest.fixture(autouse=True)
     def manifest(self, mocker):
         return mocker.patch(
-            'ulauncher.api.server.ExtensionController.ExtensionManifest.open').return_value
+            'ulauncher.modes.extensions.ExtensionController.ExtensionManifest.open').return_value
 
     @pytest.fixture
     def controller(self, controllers, mocker):

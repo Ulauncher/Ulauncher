@@ -21,10 +21,10 @@ from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.api.server.ExtensionManifest import ExtensionManifest
-from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.api.server.ProcessErrorExtractor import ProcessErrorExtractor
-from ulauncher.api.server.extension_finder import find_extensions
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
+from ulauncher.modes.extensions.extension_finder import find_extensions
 
 logger = logging.getLogger(__name__)
 

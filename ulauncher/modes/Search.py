@@ -1,6 +1,6 @@
 import logging
 
-from ulauncher.api.server.ExtensionMode import ExtensionMode
+from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
