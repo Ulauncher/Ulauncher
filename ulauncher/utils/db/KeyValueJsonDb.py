@@ -57,11 +57,7 @@ class KeyValueJsonDb(Generic[Key, Value]):
         :type: bool
         :return: True if record was removed
         """
-        try:
-            del self._records[key]
-            return True
-        except KeyError:
-            return False
+        return self._records.pop(key, None) is not None
 
     def set_records(self, records: Records):
         self._records = records

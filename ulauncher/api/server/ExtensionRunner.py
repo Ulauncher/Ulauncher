@@ -146,10 +146,7 @@ class ExtensionRunner:
             error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
             logger.error(error_msg)
             self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
-            try:
-                del self.extension_procs[extension_id]
-            except KeyError:
-                pass
+            self.extension_procs.pop(extension_id, None)
             return
 
         extproc = self.extension_procs.get(extension_id)
@@ -170,19 +167,13 @@ class ExtensionRunner:
                 self.set_extension_error(extension_id, ExtRunErrorName.MissingModule,
                                          error_info.get_missing_package_name())
 
-            try:
-                del self.extension_procs[extension_id]
-            except KeyError:
-                pass
+            self.extension_procs.pop(extension_id, None)
             return
 
         error_msg = 'Extension "%s" exited with code %s after %d seconds. Restarting...' % (extension_id, code, runtime)
         self.set_extension_error(extension_id, ExtRunErrorName.Exited, error_msg)
         logger.error(error_msg)
-        try:
-            del self.extension_procs[extension_id]
-        except KeyError:
-            pass
+        self.extension_procs.pop(extension_id, None)
         self.run(extension_id)
 
     def stop(self, extension_id):
@@ -194,10 +185,7 @@ class ExtensionRunner:
 
         logger.info('Terminating extension "%s"', extension_id)
         extproc = self.extension_procs[extension_id]
-        try:
-            del self.extension_procs[extension_id]
-        except KeyError:
-            pass
+        self.extension_procs.pop(extension_id, None)
 
         extproc.subprocess.send_signal(signal.SIGTERM)
 

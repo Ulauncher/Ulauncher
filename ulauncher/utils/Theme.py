@@ -37,13 +37,11 @@ class Theme:
     def get_current(cls):
         default = 'light'
         current_name = Settings.get_instance().get_property('theme-name') or default
-        try:
-            current = themes[current_name]
-        except KeyError:
+        if not current_name in themes:
             logger.warning('No theme with name %s', current_name)
-            current = themes[default]
+            current_name = default
 
-        return current
+        return themes.get(current_name)
 
     theme_dict = None
 
@@ -97,17 +95,14 @@ class Theme:
     def compile_css(self) -> None:
         css_file_name = self.get_css_file()
         css_file = os.path.join(self.path, css_file_name)
-
-        if not self.get_extend_theme():
-            return css_file
-
         # if theme extends another one, we must import it in css
         # therefore a new css file (generated.css) is created here
         extend_theme_name = self.get_extend_theme()
-        try:
-            extend_theme = themes[extend_theme_name]
-        except KeyError:
-            logger.error('Cannot extend theme "%s". It does not exist', extend_theme_name)
+        extend_theme = themes.get(extend_theme_name)
+
+        if not extend_theme:
+            if extend_theme_name:
+                logger.error('Cannot extend theme "%s". It does not exist', extend_theme_name)
             return css_file
 
         generated_css = self._get_path_for_generated_css()

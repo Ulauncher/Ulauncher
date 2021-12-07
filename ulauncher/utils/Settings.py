@@ -119,11 +119,7 @@ class Settings(GObject.GObject):
             json.dump(self._properties, f, indent=4, sort_keys=True)
 
     def do_get_property(self, prop):
-        try:
-            return self._properties[prop.name]
-        except KeyError:
-            # return default
-            return GPROPERTIES[prop.name][3]
+        return self._properties[prop.name] if prop.name in self._properties else GPROPERTIES[prop.name][3]
 
     def do_set_property(self, prop, value):
         logger.info('Set %s to %s', prop.name, value)

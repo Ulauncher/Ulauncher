@@ -93,10 +93,8 @@ class ExtensionManifest:
         return None
 
     def get_option(self, name, default=None):
-        try:
-            return self.manifest['options'][name]
-        except KeyError:
-            return default
+        options = self.manifest.get('options') or {}
+        return options.get(name) or default
 
     def validate(self):
         try:
