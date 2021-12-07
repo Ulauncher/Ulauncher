@@ -1,7 +1,5 @@
 import re
 
-from ulauncher.api.shared.errors import UlauncherAPIError
-
 
 class ProcessErrorExtractor:
     def __init__(self, error: str):
@@ -18,8 +16,5 @@ class ProcessErrorExtractor:
         """
         Returns a name of a module that extension failed to import
         """
-        match = re.match(r"^.*'(\w+)'$", self.error)
-        if not match:
-            raise UlauncherAPIError('Could not extract errored module name from process output')
-
-        return match.group(1)
+        match = re.match(r"^.*'(\w+)['\.]", self.error)
+        return match and match.group(1)

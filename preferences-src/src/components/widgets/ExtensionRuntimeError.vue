@@ -15,6 +15,9 @@
         <p
           v-else-if="errorName === 'ExitedInstantly'"
         >The extension exited instantly. Please check the logs.</p>
+        <p
+          v-else-if="errorName === 'Incompatible'"
+        >The extension is not compatible with this version of Ulauncher. Please report this issue to the extension developer, and attach the logs for details.</p>
         <p v-else-if="errorName === 'MissingModule'">
           The extension crashed because it could not import module
           <code>{{ errorMessage }}</code>.

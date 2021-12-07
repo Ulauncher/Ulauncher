@@ -44,6 +44,7 @@ class ExtRunErrorName(Enum):
     ExitedInstantly = 'ExitedInstantly'
     Exited = 'Exited'
     MissingModule = 'MissingModule'
+    Incompatible = 'Incompatible'
 
 
 class ExtensionRunner:
@@ -164,8 +165,12 @@ class ExtensionRunner:
             error_info = ProcessErrorExtractor(lasterr)
             logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
             if error_info.is_import_error():
-                self.set_extension_error(extension_id, ExtRunErrorName.MissingModule,
-                                         error_info.get_missing_package_name())
+                package_name = error_info.get_missing_package_name()
+                if package_name == "ulauncher":
+                    logger.error('Extension tried to import internal parts of Ulauncher which has been moved or removed.')
+                    self.set_extension_error(extension_id, ExtRunErrorName.Incompatible, error_msg)
+                elif package_name:
+                    self.set_extension_error(extension_id, ExtRunErrorName.MissingModule, package_name)
 
             self.extension_procs.pop(extension_id, None)
             return
