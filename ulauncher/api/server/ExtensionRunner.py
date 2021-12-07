@@ -220,12 +220,6 @@ class ExtensionRunner:
             'message': message
         }
 
-    def unset_extension_error(self, extension_id: str):
-        try:
-            del self.extension_errors[extension_id]
-        except KeyError:
-            pass
-
     def get_extension_error(self, extension_id: str) -> Optional[ExtRunError]:
         return self.extension_errors.get(extension_id)
 
