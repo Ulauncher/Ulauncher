@@ -93,8 +93,7 @@ class ExtensionManifest:
         return None
 
     def get_option(self, name, default=None):
-        options = self.manifest.get('options') or {}
-        return options.get(name) or default
+        return self.manifest.get('options', {}).get(name, default)
 
     def validate(self):
         try:
