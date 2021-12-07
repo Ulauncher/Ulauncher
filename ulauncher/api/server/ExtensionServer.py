@@ -94,13 +94,6 @@ class ExtensionServer:
         """
         return bool(self.service)
 
-    def get_controller(self, extension_id):
-        """
-        :param str extension_id:
-        :rtype: ~ulauncher.api.server.ExtensionController.ExtensionController
-        """
-        return self.controllers[extension_id]
-
     def get_controllers(self):
         """
         :rtype: list of  :class:`~ulauncher.api.server.ExtensionController.ExtensionController`

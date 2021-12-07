@@ -385,7 +385,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         ext_id = query['id']
         logger.info('Update extension preferences: %s', query)
         prefix = 'pref.'
-        controller = ExtensionServer.get_instance().get_controller(ext_id)
+        controller = ExtensionServer.get_instance().controllers.get(ext_id)
         preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
         for pref_id, value in preferences:
             old_value = controller.preferences.get(pref_id)['value']
@@ -445,11 +445,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
-        is_connected = True
-        try:
-            ExtensionServer.get_instance().get_controller(ext_id)
-        except KeyError:
-            is_connected = False
+        is_connected = ext_id in ExtensionServer.get_instance().controllers
         ext_runner = ExtensionRunner.get_instance()
         is_running = is_connected or ext_runner.is_running(ext_id)
         ext_db_record = ext_db.find(ext_id, {})
