@@ -48,15 +48,6 @@ ulauncher\.api\.shared\.action\.ExtensionCustomAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.LaunchAppAction module
-------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.LaunchAppAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.OpenAction module
 -------------------------------------------------
 

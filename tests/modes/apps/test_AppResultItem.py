@@ -72,9 +72,9 @@ class TestAppResultItem:
         query_history.find.assert_called_with('q')
 
     def test_on_enter(self, app1, mocker, query_history, _app_starts):
-        LaunchAppAction = mocker.patch('ulauncher.modes.apps.AppResultItem.LaunchAppAction')
-        assert app1.on_enter(Query('query')) is LaunchAppAction.return_value
-        LaunchAppAction.assert_called_with(f'{ENTRIES_DIR}/trueapp.desktop')
+        launch_app = mocker.patch('ulauncher.modes.apps.AppResultItem.launch_app')
+        assert app1.on_enter(Query('query')) is launch_app.return_value
+        launch_app.assert_called_with('trueapp.desktop')
         query_history.save_query.assert_called_with('query', 'TrueApp - Full Name')
         assert _app_starts._records.get('trueapp.desktop') == 766
 

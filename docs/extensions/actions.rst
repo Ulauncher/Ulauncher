@@ -32,12 +32,6 @@ HideWindowAction
 .. autoclass:: ulauncher.api.shared.action.HideWindowAction.HideWindowAction
 
 
-LaunchAppAction
----------------
-
-.. autoclass:: ulauncher.api.shared.action.LaunchAppAction.LaunchAppAction
-
-
 OpenAction
 ----------
 
