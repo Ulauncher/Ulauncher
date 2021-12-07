@@ -7,7 +7,7 @@ from ulauncher.config import STATE_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
-from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
+from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
@@ -101,4 +101,4 @@ class AppResultItem(ResultItem):
         count = _app_starts._records.get(app_id, 0)
         _app_starts._records[app_id] = count + 1
         _app_starts.commit()
-        return LaunchAppAction(self._app_info.get_filename())
+        return launch_app(app_id)
