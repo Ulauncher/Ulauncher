@@ -11,10 +11,10 @@ from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
-from ulauncher.api.server.ExtensionDb import ExtensionDb, ExtensionRecord
-from ulauncher.api.server.GithubExtension import GithubExtension
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
-from ulauncher.api.server.extension_finder import find_extensions
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
+from ulauncher.modes.extensions.GithubExtension import GithubExtension
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
+from ulauncher.modes.extensions.extension_finder import find_extensions
 
 
 logger = logging.getLogger(__name__)

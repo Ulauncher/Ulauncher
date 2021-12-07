@@ -23,11 +23,11 @@ class ExtensionCustomAction(BaseAction):
 
     def run(self):
         """
-        Runs :meth:`~ulauncher.api.server.ExtensionController.ExtensionController.trigger_event`
+        Runs :meth:`~ulauncher.modes.extensions.ExtensionController.ExtensionController.trigger_event`
         with :class:`ItemEnterEvent`
         """
         # import here to avoid circular deps
-        from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
+        from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
         window = UlauncherWindow.get_instance()

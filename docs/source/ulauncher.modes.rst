@@ -8,8 +8,10 @@ Subpackages
 
     ulauncher.modes.apps
     ulauncher.modes.calc
+    ulauncher.modes.extensions
     ulauncher.modes.file_browser
     ulauncher.modes.shortcuts
+
 
 Submodules
 ----------

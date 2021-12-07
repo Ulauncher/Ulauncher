@@ -1,5 +1,5 @@
 import os
-from ulauncher.api.server.extension_finder import find_extensions
+from ulauncher.modes.extensions.extension_finder import find_extensions
 
 
 def test_find_extensions__test_extension__is_found():

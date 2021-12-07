@@ -1,4 +1,4 @@
-from ulauncher.api.server.ProcessErrorExtractor import ProcessErrorExtractor
+from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 
 
 class TestProcessErrorExtractor:

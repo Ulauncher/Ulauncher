@@ -1,40 +1,40 @@
 import mock
 import pytest
 
-from ulauncher.api.server.ExtensionServer import ExtensionServer, ServerIsRunningError, RegisterEvent
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, ServerIsRunningError, RegisterEvent
 
 
 class TestExtensionServer:
 
     @pytest.fixture(autouse=True)
     def SocketService(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.Gio.SocketService')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.Gio.SocketService')
 
     @pytest.fixture(autouse=True)
     def UnixSocketAddress(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.Gio.UnixSocketAddress')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.Gio.UnixSocketAddress')
 
     @pytest.fixture(autouse=True)
     def ExtensionController(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.ExtensionController')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.ExtensionController')
 
     @pytest.fixture(autouse=True)
     def path_exists(self, mocker):
-        exists = mocker.patch('ulauncher.api.server.ExtensionServer.os.path.exists')
+        exists = mocker.patch('ulauncher.modes.extensions.ExtensionServer.os.path.exists')
         exists.return_value = False
         return exists
 
     @pytest.fixture(autouse=True)
     def GObject(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.GObject')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.GObject')
 
     @pytest.fixture(autouse=True)
     def unlink(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.os.unlink')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.os.unlink')
 
     @pytest.fixture(autouse=True)
     def PickleFramer(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.PickleFramer')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionServer.PickleFramer')
 
     @pytest.fixture
     def server(self):

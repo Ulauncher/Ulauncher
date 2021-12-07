@@ -2,9 +2,9 @@ import logging
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
-from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences
-from ulauncher.api.server.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class ExtensionController:
     """
     Handles communication between Ulauncher app and an extension.
 
-    :param list controllers: list of :class:`~ulauncher.api.server.ExtensionController`
+    :param list controllers: list of :class:`~ulauncher.modes.extensions.ExtensionController`
     """
 
     extension_id = None
@@ -62,7 +62,7 @@ class ExtensionController:
     # pylint: disable=unused-argument
     def handle_response(self, framer, response):
         """
-        :meth:`~ulauncher.api.server.DeferredResultRenderer.DeferredResultRenderer.handle_response`
+        :meth:`~ulauncher.modes.extensions.DeferredResultRenderer.DeferredResultRenderer.handle_response`
         of `DeferredResultRenderer`
         """
         if not isinstance(response, Response):

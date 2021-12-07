@@ -2,9 +2,9 @@ import mock
 import pytest
 
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.api.server.ExtensionDb import ExtensionDb
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner
-from ulauncher.api.server.ExtensionDownloader import (
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
+from ulauncher.modes.extensions.ExtensionDownloader import (
     ExtensionDownloader, ExtensionDownloaderError, ExtensionIsUpToDateError)
 
 
@@ -24,7 +24,7 @@ class TestExtensionDownloader:
 
     @pytest.fixture(autouse=True)
     def gh_ext(self, mocker):
-        gh_ext = mocker.patch('ulauncher.api.server.ExtensionDownloader.GithubExtension').return_value
+        gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.GithubExtension').return_value
         gh_ext.get_ext_id.return_value = 'com.github.ulauncher.ulauncher-timer'
         gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
         gh_ext.get_last_commit.return_value = {
@@ -40,23 +40,23 @@ class TestExtensionDownloader:
 
     @pytest.fixture(autouse=True)
     def download_tarball(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.download_tarball')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.download_tarball')
 
     @pytest.fixture(autouse=True)
     def GithubExtension(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.GithubExtension')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.GithubExtension')
 
     @pytest.fixture(autouse=True)
     def untar(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.untar')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.untar')
 
     @pytest.fixture(autouse=True)
     def datetime(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionDownloader.datetime')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.datetime')
 
     # pylint: disable=unused-argument,too-many-arguments
     def test_download(self, downloader, mocker, untar, ext_db, download_tarball, datetime):
-        os = mocker.patch('ulauncher.api.server.ExtensionDownloader.os')
+        os = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.os')
         os.path.exists.return_value = False
         assert downloader.download('https://github.com/Ulauncher/ulauncher-timer') == \
             'com.github.ulauncher.ulauncher-timer'
@@ -80,7 +80,7 @@ class TestExtensionDownloader:
             'last_commit': 'aDbc',
             'last_commit_time': '2017-01-01'
         }
-        os = mocker.patch('ulauncher.api.server.ExtensionDownloader.os')
+        os = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.os')
         os.path.exists.return_value = True
 
         with pytest.raises(ExtensionDownloaderError):

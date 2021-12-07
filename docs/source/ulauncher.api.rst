@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     ulauncher.api.client
-    ulauncher.api.server
     ulauncher.api.shared
 
 Module contents

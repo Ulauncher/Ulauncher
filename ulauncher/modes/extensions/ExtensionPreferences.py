@@ -5,7 +5,7 @@ from functools import lru_cache
 from ulauncher.config import EXT_PREFERENCES_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.mypy_extensions import TypedDict
-from ulauncher.api.server.ExtensionManifest import ExtensionManifest, OptionItems
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, OptionItems
 
 logger = logging.getLogger(__name__)
 

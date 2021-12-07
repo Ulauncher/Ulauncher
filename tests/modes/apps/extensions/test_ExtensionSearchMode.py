@@ -1,20 +1,20 @@
 import mock
 import pytest
 from ulauncher.modes.Query import Query
-from ulauncher.api.server.ExtensionMode import ExtensionMode
-from ulauncher.api.server.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 
 
 class TestExtensionMode:
 
     @pytest.fixture(autouse=True)
     def extServer(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionMode.ExtensionServer.get_instance').return_value
+        return mocker.patch('ulauncher.modes.extensions.ExtensionMode.ExtensionServer.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def resultRenderer(self, mocker):
         return mocker.patch(
-            'ulauncher.api.server.ExtensionMode.DeferredResultRenderer.get_instance').return_value
+            'ulauncher.modes.extensions.ExtensionMode.DeferredResultRenderer.get_instance').return_value
 
     def test_is_enabled__controller_is_running__returns_true(self, extServer):
         controller = mock.create_autospec(ExtensionController)

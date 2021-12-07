@@ -1,7 +1,7 @@
 import os
 import pytest
 from ulauncher.api.shared.errors import ErrorName
-from ulauncher.api.server.ExtensionManifest import (ExtensionManifest, ExtensionManifestError)
+from ulauncher.modes.extensions.ExtensionManifest import (ExtensionManifest, ExtensionManifestError)
 
 
 class TestExtensionManifest:
@@ -31,7 +31,7 @@ class TestExtensionManifest:
         assert manifest.get_name() == "Test Extension"
 
     def test_load_icon__load_icon__is_called(self, ext_dir, mocker):
-        load_icon = mocker.patch('ulauncher.api.server.ExtensionManifest.load_icon')
+        load_icon = mocker.patch('ulauncher.modes.extensions.ExtensionManifest.load_icon')
         manifest = ExtensionManifest('test_extension', {'icon': 'images/icon.png'}, ext_dir)
         assert manifest.load_icon(100) is load_icon.return_value
         load_icon.assert_called_with(os.path.join(ext_dir, 'test_extension', 'images/icon.png'), 100)

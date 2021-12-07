@@ -21,14 +21,14 @@ from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.api.version import api_version
 from ulauncher.api.shared.event import PreferencesUpdateEvent
-from ulauncher.api.server.extension_finder import find_extensions
-from ulauncher.api.server.ExtensionPreferences import ExtensionPreferences, PreferenceItems
-from ulauncher.api.server.ExtensionDb import ExtensionDb
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtRunError
-from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
-from ulauncher.api.server.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
+from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
-from ulauncher.api.server.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import themes, Theme, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.mypy_extensions import TypedDict

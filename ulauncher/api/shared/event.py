@@ -24,7 +24,7 @@ class KeywordQueryEvent(BaseEvent):
     Is triggered when user enters query that starts with your keyword + Space
 
     :param ~ulauncher.modes.Query.Query query:
-    :param ~ulauncher.api.server.ExtensionPreferences preferences:
+    :param ~ulauncher.modes.extensions.ExtensionPreferences preferences:
     """
 
     def __init__(self, query, preferences):

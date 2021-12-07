@@ -5,7 +5,7 @@ import pytest
 from urllib.error import HTTPError
 
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.api.server.GithubExtension import GithubExtension, GithubExtensionError
+from ulauncher.modes.extensions.GithubExtension import GithubExtension, GithubExtensionError
 
 
 manifest_example = {'required_api_version': '1',
@@ -27,13 +27,13 @@ class TestGithubExtension:
         return GithubExtension('https://github.com/Ulauncher/ulauncher-timer')
 
     def test_read_json(self, gh_ext: GithubExtension, mocker):
-        urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
+        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
         urlopen.return_value.read.return_value = dumps(manifest_example).encode('utf-8')
         actual = gh_ext._read_json('master', 'manifest.json')
         assert actual == manifest_example
 
     def test_read_json__HTTPError__raises(self, gh_ext: GithubExtension, mocker):
-        urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
+        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
         urlopen.side_effect = HTTPError('https://url', 404, 'urlopen error', {}, None)
         with pytest.raises(GithubExtensionError) as e:
             gh_ext._read_json('master', 'manifest.json')
@@ -101,7 +101,7 @@ class TestGithubExtension:
         assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
 
     def test_get_commit(self, gh_ext, mocker):
-        urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
+        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
         urlopen.return_value = io.BytesIO(dumps({
             'sha': '64e106c57ad90f9f02e9941dfa9780846b7457b9',
             'commit': {

@@ -1,9 +1,9 @@
 import mock
 import pytest
 
-from ulauncher.api.server.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.api.server.ExtensionController import ExtensionController
-from ulauncher.api.server.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
 from ulauncher.modes.Query import Query
@@ -13,11 +13,11 @@ class TestDeferredResultRenderer:
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
-        return mocker.patch('ulauncher.api.server.DeferredResultRenderer.timer')
+        return mocker.patch('ulauncher.modes.extensions.DeferredResultRenderer.timer')
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
-        return mocker.patch('ulauncher.api.server.DeferredResultRenderer.GLib')
+        return mocker.patch('ulauncher.modes.extensions.DeferredResultRenderer.GLib')
 
     @pytest.fixture
     def event(self):

@@ -1,6 +1,6 @@
 import pytest
 
-from ulauncher.api.server.ExtensionKeywordResultItem import ExtensionKeywordResultItem
+from ulauncher.modes.extensions.ExtensionKeywordResultItem import ExtensionKeywordResultItem
 from ulauncher.modes.Query import Query
 
 
@@ -8,7 +8,7 @@ class TestExtensionKeywordResultItem:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionKeywordResultItem.QueryHistoryDb.get_instance').return_value
+        return mocker.patch('ulauncher.modes.extensions.ExtensionKeywordResultItem.QueryHistoryDb.get_instance').return_value
 
     @pytest.fixture
     def item(self):

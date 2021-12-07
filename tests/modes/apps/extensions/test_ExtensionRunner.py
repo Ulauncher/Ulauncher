@@ -2,9 +2,9 @@ import mock
 import pytest
 import signal
 
-from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtRunErrorName, ExtensionIsNotRunningError
-from ulauncher.api.server.ExtensionServer import ExtensionServer
-from ulauncher.api.server.ExtensionManifest import ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunErrorName, ExtensionIsNotRunningError
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.shared.errors import ErrorName
 
 
@@ -22,19 +22,19 @@ class TestExtensionRunner:
 
     @pytest.fixture(autouse=True)
     def find_extensions(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.find_extensions')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.find_extensions')
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.timer')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.timer')
 
     @pytest.fixture(autouse=True)
     def get_options(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.get_options')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.get_options')
 
     @pytest.fixture(autouse=True)
     def ExtensionManifest(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.ExtensionManifest')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest')
 
     @pytest.fixture
     def manifest(self, ExtensionManifest):
@@ -42,19 +42,19 @@ class TestExtensionRunner:
 
     @pytest.fixture
     def SubprocessLauncher(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.Gio.SubprocessLauncher')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.Gio.SubprocessLauncher')
 
     @pytest.fixture
     def DataInputStream(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.Gio.DataInputStream')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.Gio.DataInputStream')
 
     @pytest.fixture
     def ProcessErrorExtractor(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.ProcessErrorExtractor')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ProcessErrorExtractor')
 
     @pytest.fixture
     def time(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionRunner.time')
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.time')
 
     def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
         manifest.check_compatibility.side_effect = ExtensionManifestError(
