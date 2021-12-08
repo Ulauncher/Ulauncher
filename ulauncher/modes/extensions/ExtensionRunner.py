@@ -167,7 +167,9 @@ class ExtensionRunner:
             if error_info.is_import_error():
                 package_name = error_info.get_missing_package_name()
                 if package_name == "ulauncher":
-                    logger.error('Extension tried to import internal parts of Ulauncher which has been moved or removed.')
+                    logger.error('Extension tried to import Ulauncher modules which have been moved or removed.')
+                    logger.error('This is likely Ulauncher internals which were not part of the extension API.')
+                    logger.error('Extensions importing these can break at any Ulauncher release.')
                     self.set_extension_error(extension_id, ExtRunErrorName.Incompatible, error_msg)
                 elif package_name:
                     self.set_extension_error(extension_id, ExtRunErrorName.MissingModule, package_name)

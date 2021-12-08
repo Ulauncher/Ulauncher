@@ -1,7 +1,7 @@
 # Ulauncher API version compatibility checking, featuring a subset of the "semver" standard, without the patch version.
 # For backward compatibility with Ulauncher 5, the contraints are fully valid semver contraints.
 # Hypen-ranges are supported, as well as the "x" wildcard syntax (x must be lowercase)
-# Tilde and Caret are permitted, but ignored. Unlike semver the contraint "2.0" matches version 2.0 or newer 
+# Tilde and Caret are permitted, but ignored. Unlike semver the contraint "2.0" matches version 2.0 or newer
 # There is no support for "*", "||", comparison operators like ">=", "!=", or the pre-release annotation
 
 api_version = '2.0'

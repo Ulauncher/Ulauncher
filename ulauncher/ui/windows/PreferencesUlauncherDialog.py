@@ -29,7 +29,7 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.utils.Theme import themes, Theme, load_available_themes
+from ulauncher.utils.Theme import themes, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
@@ -119,7 +119,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
         self.show_all()
-
 
     def handle_no_window_shadow(self):
         if get_options().no_window_shadow:
@@ -281,7 +280,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.init_theme()
-
 
     @rt.route('/set/hotkey-show-app')
     @glib_idle_add

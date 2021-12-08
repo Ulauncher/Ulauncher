@@ -17,4 +17,4 @@ class ProcessErrorExtractor:
         Returns a name of a module that extension failed to import
         """
         match = re.match(r"^.*'(\w+)['\.]", self.error)
-        return match and match.group(1)
+        return match.group(1) if match else ""

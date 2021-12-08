@@ -37,7 +37,7 @@ class Theme:
     def get_current(cls):
         default = 'light'
         current_name = Settings.get_instance().get_property('theme-name') or default
-        if not current_name in themes:
+        if current_name not in themes:
             logger.warning('No theme with name %s', current_name)
             current_name = default
 
