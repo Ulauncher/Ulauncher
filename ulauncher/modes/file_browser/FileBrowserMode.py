@@ -51,9 +51,6 @@ class FileBrowserMode(BaseMode):
         return list(filter(lambda f: not f.startswith('.'), file_list))
 
     def handle_query(self, query: str) -> BaseAction:
-        if query == '~':
-            return SetUserQueryAction('~/')
-
         path = Path(query)  # type: Path
         result_items = []  # type: List[FileBrowserResultItem]
 
