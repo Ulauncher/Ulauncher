@@ -59,9 +59,6 @@ class TestFileBrowserMode:
     def test_filter_dot_files(self, mode):
         assert mode.filter_dot_files(['a', '.b', 'c', '.d']) == ['a', 'c']
 
-    def test_handle_query__query_is_tilde__tilde_slash_is_set_for_query(self, mode, SetUserQueryAction):
-        assert mode.handle_query('~') == SetUserQueryAction.return_value
-
     def test_handle_qury__path_from_q_exists__dir_listing_rendered(self, mode, path, mocker, RenderAction):
         path.get_existing_dir.return_value = '/tmp/dir'
         path.get_abs_path.return_value = path.get_existing_dir.return_value
