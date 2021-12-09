@@ -47,4 +47,4 @@ class Search:
             if mode.is_enabled(query):
                 return mode
 
-        raise Exception('This line should not be entered')
+        raise Exception('No mode matches the query')
