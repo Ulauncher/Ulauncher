@@ -6,14 +6,6 @@ from ulauncher.modes.calc.CalcMode import CalcMode, eval_expr
 class TestCalcMode:
 
     @pytest.fixture
-    def RenderResultListAction(self, mocker):
-        return mocker.patch('ulauncher.modes.calc.CalcMode.RenderResultListAction')
-
-    @pytest.fixture
-    def CalcResultItem(self, mocker):
-        return mocker.patch('ulauncher.modes.calc.CalcMode.CalcResultItem')
-
-    @pytest.fixture
     def mode(self):
         return CalcMode()
 
@@ -39,17 +31,12 @@ class TestCalcMode:
         assert eval_expr('12 / 1,5') == eval_expr('12 / 1.5') == Decimal('8')
         assert eval_expr('3 ** 2') == eval_expr('3^2') == Decimal('9')
 
-    def test_handle_query(self, mode, RenderResultListAction, CalcResultItem):
-        assert mode.handle_query('3+2') == RenderResultListAction.return_value
-        assert mode.handle_query('3+2*') == RenderResultListAction.return_value
-        RenderResultListAction.assert_called_with([CalcResultItem.return_value])
-        CalcResultItem.assert_called_with(result=5)
+    def test_handle_query(self, mode):
+        assert mode.handle_query('3+2')[0].result == 5
+        assert mode.handle_query('3+2*')[0].result == 5
+        assert mode.handle_query('2-2')[0].result == 0
 
-    def test_handle_query__invalid_expr(self, mode, RenderResultListAction, CalcResultItem):
-        assert mode.handle_query('3++') == RenderResultListAction.return_value
-        RenderResultListAction.assert_called_with([CalcResultItem.return_value])
-        CalcResultItem.assert_called_with(error='Invalid expression')
-
-    def test_handle_query__result_is_0__returns_0(self, mode, CalcResultItem):
-        mode.handle_query('2-2')
-        CalcResultItem.assert_called_with(result=0)
+    def test_handle_query__invalid_expr(self, mode):
+        [invalid_result] = mode.handle_query('3++')
+        assert invalid_result.get_name() == 'Error!'
+        assert invalid_result.error == 'Invalid expression'

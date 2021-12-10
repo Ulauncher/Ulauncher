@@ -20,10 +20,6 @@ class TestFileBrowserMode:
     def SetUserQueryAction(self, mocker):
         return mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.SetUserQueryAction')
 
-    @pytest.fixture(autouse=True)
-    def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.RenderResultListAction')
-
     @pytest.fixture
     def mode(self, file_queries, mocker):
         FileQueriesMock = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.FileQueries')
@@ -59,20 +55,16 @@ class TestFileBrowserMode:
     def test_filter_dot_files(self, mode):
         assert mode.filter_dot_files(['a', '.b', 'c', '.d']) == ['a', 'c']
 
-    def test_handle_qury__path_from_q_exists__dir_listing_rendered(self, mode, path, mocker, RenderAction):
+    def test_handle_query__path_from_q_exists__dir_listing_rendered(self, mode, path, mocker):
         path.get_existing_dir.return_value = '/tmp/dir'
         path.get_abs_path.return_value = path.get_existing_dir.return_value
         mocker.patch.object(mode, 'list_files', return_value=['a', 'd', 'b', 'c'])
         mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
+        assert mode.handle_query('/tmp/dir') == ['/tmp/dir/a', '/tmp/dir/d', '/tmp/dir/b', '/tmp/dir/c']
 
-        mode.handle_query('/tmp/dir')
-
-        RenderAction.assert_called_with(['/tmp/dir/a', '/tmp/dir/d', '/tmp/dir/b', '/tmp/dir/c'])
-
-    def test_handle_qury__InvalidPathError__empty_list_rendered(self, mode, path, RenderAction):
+    def test_handle_query__InvalidPathError__empty_list_rendered(self, mode, path):
         path.get_existing_dir.side_effect = InvalidPathError()
-        mode.handle_query('~~')
-        RenderAction.assert_called_with([])
+        assert mode.handle_query('~~') == []
 
     def test_handle_key_press_event(self, mode, mocker, SetUserQueryAction):
         mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.Gdk.keyval_name', return_value='BackSpace')

@@ -38,10 +38,6 @@ class TestFileBrowserResultItem:
         return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.OpenAction')
 
     @pytest.fixture(autouse=True)
-    def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.RenderResultListAction')
-
-    @pytest.fixture(autouse=True)
     def CopyPathToClipboardItem(self, mocker):
         return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.CopyPathToClipboardItem')
 
@@ -66,14 +62,12 @@ class TestFileBrowserResultItem:
         path.is_dir.return_value = False
         assert result_item.on_enter('query') == OpenAction.return_value
 
-    def test_on_alt_enter_dir(self, result_item, RenderAction, OpenFolderItem, CopyPathToClipboardItem):
-        assert result_item.on_alt_enter('query') == RenderAction.return_value
-        RenderAction.assert_called_with([OpenFolderItem.return_value, CopyPathToClipboardItem.return_value])
+    def test_on_alt_enter_dir(self, result_item, OpenFolderItem, CopyPathToClipboardItem):
+        assert result_item.on_alt_enter('query') == [OpenFolderItem.return_value, CopyPathToClipboardItem.return_value]
 
     # pylint: disable=too-many-arguments, redefined-outer-name
-    def test_on_alt_enter_file(self, result_item, path, OpenFolderItem, Path, RenderAction, CopyPathToClipboardItem):
+    def test_on_alt_enter_file(self, result_item, path, OpenFolderItem, Path, CopyPathToClipboardItem):
         path.is_dir.return_value = False
-        assert result_item.on_alt_enter('query') == RenderAction.return_value
+        assert result_item.on_alt_enter('query') == [OpenFolderItem.return_value, CopyPathToClipboardItem.return_value]
         Path.assert_called_with(path.get_dirname.return_value)
         OpenFolderItem.assert_called_with(Path.return_value)
-        RenderAction.assert_called_with([OpenFolderItem.return_value, CopyPathToClipboardItem.return_value])

@@ -3,7 +3,6 @@ import ast
 from decimal import Decimal
 import operator as op
 
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcResultItem import CalcResultItem
 
@@ -66,4 +65,4 @@ class CalcMode(BaseMode):
         # pylint: disable=broad-except
         except Exception:
             result_item = CalcResultItem(error='Invalid expression')
-        return RenderResultListAction([result_item])
+        return [result_item]

@@ -1,3 +1,6 @@
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+
+
 class ItemNavigation:
     """
     Performs navigation through found results
@@ -58,6 +61,8 @@ class ItemNavigation:
             action = item.on_enter(query) if not alt else item.on_alt_enter(query)
             if not action:
                 return True
+            if isinstance(action, list):
+                action = RenderResultListAction(action)
             action.run()
             return action.keep_app_open()
 

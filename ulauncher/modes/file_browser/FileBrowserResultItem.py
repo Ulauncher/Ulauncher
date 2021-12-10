@@ -6,7 +6,6 @@ gi.require_version('GLib', '2.0')
 from gi.repository import GLib
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 from ulauncher.utils.Path import Path
@@ -70,7 +69,7 @@ class FileBrowserResultItem(SmallResultItem):
 
     def on_alt_enter(self, query):
         menu_items = self._get_dir_alt_menu() if self.path.is_dir() else self._get_file_alt_menu()
-        return RenderResultListAction(menu_items)
+        return menu_items
 
     def _get_dir_alt_menu(self):
         """

@@ -1,5 +1,6 @@
 import logging
 
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
@@ -37,7 +38,8 @@ class Search:
         for mode in self.search_modes:
             mode.on_query_change(query)
 
-        self._choose_search_mode(query).handle_query(query).run()
+        mode = self._choose_search_mode(query)
+        RenderResultListAction(mode.handle_query(query)).run()
 
     def on_key_press_event(self, widget, event, query):
         self._choose_search_mode(query).handle_key_press_event(widget, event, query).run()

@@ -1,4 +1,3 @@
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.apps.AppResultItem import AppResultItem
 
@@ -23,4 +22,4 @@ class AppMode(BaseMode):
         if not items:
             for mode in self.search_modes:
                 items.extend(mode.get_default_items())
-        return RenderResultListAction(items)
+        return items
