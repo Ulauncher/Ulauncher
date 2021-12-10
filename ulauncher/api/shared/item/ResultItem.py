@@ -20,7 +20,6 @@ class ResultItem:
     _description = None  # type: str
     _keyword = None  # type: str
     _icon = None  # type: Optional[str]
-    _include_in_results = True  # type: bool
     _selected_by_default = False  # type: bool
     _on_enter = None  # type: OnEnterCallback
     _on_alt_enter = None  # type: OnEnterCallback
@@ -33,7 +32,6 @@ class ResultItem:
                  description: str = '',
                  keyword: str = '',
                  icon: str = None,
-                 include_in_results: bool = True,
                  selected_by_default: bool = False,
                  highlightable: bool = True,
                  on_enter: OnEnterCallback = None,
@@ -48,7 +46,6 @@ class ResultItem:
         self._description = description
         self._keyword = keyword
         self._icon = icon
-        self._include_in_results = include_in_results
         self._selected_by_default = selected_by_default
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
@@ -97,12 +94,6 @@ class ResultItem:
         :rtype: str path to icon or themed icon name
         """
         return self._icon
-
-    def include_in_results(self):
-        """
-        Return True to display item among apps in the default search
-        """
-        return self._include_in_results
 
     def selected_by_default(self, query):
         """
