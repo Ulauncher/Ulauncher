@@ -76,7 +76,7 @@ class FileBrowserResultItem(SmallResultItem):
         :rtype: list of ResultItems
         """
         open_folder = OpenFolderItem(self.path)
-        open_folder.set_name("Open Folder '%s'" % self.path.get_basename())
+        open_folder.set_name('Open Folder "%s"' % self.path.get_basename())
         return [open_folder, CopyPathToClipboardItem(self.path)]
 
     def _get_file_alt_menu(self):
