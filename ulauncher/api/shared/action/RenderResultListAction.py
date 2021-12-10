@@ -19,6 +19,7 @@ class RenderResultListAction(BaseAction):
         return True
 
     def run(self):
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
         window = UlauncherWindow.get_instance()

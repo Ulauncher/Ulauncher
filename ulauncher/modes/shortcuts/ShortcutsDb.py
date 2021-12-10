@@ -28,7 +28,7 @@ class ShortcutsDb(KeyValueJsonDb):
         super().commit()
 
     def get_sorted_records(self):
-        return [rec for rec in sorted(self.get_records().values(), key=lambda rec: rec['added'])]
+        return sorted(self.get_records().values(), key=lambda rec: rec['added'])
 
     def get_shortcuts(self):
         return self.get_records().values()

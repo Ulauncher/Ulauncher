@@ -84,6 +84,7 @@ class DeferredResultRenderer:
         RenderResultListAction([loading_item]).run()
 
     def _hide_window(self):
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
         window = UlauncherWindow.get_instance()

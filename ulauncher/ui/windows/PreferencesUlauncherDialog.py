@@ -257,7 +257,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         value = query['value']
         # This setting is not stored to the config
         if property == 'autostart-enabled':
-            return self.prefs_set_autostart(value)
+            self.prefs_set_autostart(value)
+            return
 
         self.settings.set_property(property, value)
 
@@ -277,6 +278,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
 
     def prefs_apply_theme(self):
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.init_theme()
@@ -286,6 +288,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_set_hotkey_show_app(self, query):
         hotkey = query['value']
         # Bind a new key
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         ulauncher_window = UlauncherWindow.get_instance()
         ulauncher_window.bind_hotkey(hotkey)
@@ -406,7 +409,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         try:
             downloader.update(query['id'])
         except ExtensionManifestError as e:
-            raise PrefsApiError(e)
+            raise PrefsApiError(e) from e
 
     @rt.route('/extension/remove')
     def prefs_extension_remove(self, query):

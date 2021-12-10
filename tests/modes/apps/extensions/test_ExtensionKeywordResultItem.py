@@ -8,7 +8,8 @@ class TestExtensionKeywordResultItem:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionKeywordResultItem.QueryHistoryDb.get_instance').return_value
+        module_path = 'ulauncher.modes.extensions.ExtensionKeywordResultItem'
+        return mocker.patch(f'{module_path}.QueryHistoryDb.get_instance').return_value
 
     @pytest.fixture
     def item(self):

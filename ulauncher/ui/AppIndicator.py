@@ -50,6 +50,7 @@ class AppIndicator:
     @classmethod
     @singleton
     def get_instance(cls):
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         window = UlauncherWindow.get_instance()
         indicator = cls("ulauncher")

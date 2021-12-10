@@ -27,6 +27,7 @@ class ExtensionCustomAction(BaseAction):
         with :class:`ItemEnterEvent`
         """
         # import here to avoid circular deps
+        # pylint: disable=import-outside-toplevel
         from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 

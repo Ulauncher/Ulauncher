@@ -24,6 +24,7 @@ class SetUserQueryAction(BaseAction):
         GLib.idle_add(self._update_query)
 
     def _update_query(self):
+        # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
         input = UlauncherWindow.get_instance().get_input()
