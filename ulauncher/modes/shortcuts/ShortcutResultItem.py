@@ -1,3 +1,4 @@
+import os
 import re
 
 from ulauncher.api.shared.action.ActionList import ActionList
@@ -53,7 +54,7 @@ class ShortcutResultItem(ResultItem):
         return description.replace('%s', '...')
 
     def get_icon(self):
-        return self.icon
+        return os.path.expanduser(self.icon)
 
     def selected_by_default(self, query):
         """
