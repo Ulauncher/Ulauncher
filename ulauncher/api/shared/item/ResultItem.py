@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.modes.Query import Query
@@ -19,7 +19,7 @@ class ResultItem:
     _name = None  # type: str
     _description = None  # type: str
     _keyword = None  # type: str
-    _icon = None  # type: Any
+    _icon = None  # type: Optional[str]
     _include_in_results = True  # type: bool
     _selected_by_default = False  # type: bool
     _on_enter = None  # type: OnEnterCallback
@@ -32,7 +32,7 @@ class ResultItem:
                  name: str = '',
                  description: str = '',
                  keyword: str = '',
-                 icon: Any = None,
+                 icon: str = None,
                  include_in_results: bool = True,
                  selected_by_default: bool = False,
                  highlightable: bool = True,
@@ -94,7 +94,7 @@ class ResultItem:
         """
         optional
 
-        :rtype: :class:`Gtk.PixBuf`
+        :rtype: str path to icon or themed icon name
         """
         return self._icon
 
