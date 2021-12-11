@@ -77,6 +77,9 @@ You need the the following:
 </details>
 
 ### How to build, run and contribute
+
+Please note that no more releases are planned for Ulauncher v5 unless they are critical bug fixes. All the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the v6 branch as the base branch and target for new Pull requests, and check that your contributions haven't already been fixed.
+
 1. Fork the repo and clone your fork locally.
 1. Create a new branch for your PR
 1. Run `$ ./ul dev-container` to take you into a Docker container from which you can run build and test scripts. Use `sudo -E ./ul dev-container` if your user is not in the `docker` group.
