@@ -5,6 +5,9 @@ Please read our contribution instructions if you haven't:
 https://github.com/Ulauncher/Ulauncher#code-contribution
 
 Explain the changes in this PR and link to related issue(s) if applicable
+
+NOTE THAT OUR WORK AT THIS TIME IS FOCUSED ON THE v6 branch https://github.com/Ulauncher/Ulauncher/tree/v6
+This is where we want contributions. We won't make more v5 releases unless it's critical fixes.
 -->
 
 ### Checklist
