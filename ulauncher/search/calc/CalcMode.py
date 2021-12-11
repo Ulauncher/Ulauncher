@@ -45,7 +45,7 @@ def _eval(node):
 
 
 class CalcMode(BaseSearchMode):
-    RE_CALC = re.compile(r'^[\d\-\(\.][\d\*+\/\-\.e\(\)\^ ]*$', flags=re.IGNORECASE)
+    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
         return re.match(self.RE_CALC, query)
