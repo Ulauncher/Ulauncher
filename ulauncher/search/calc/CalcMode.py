@@ -24,7 +24,7 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = expr.replace("^", "**")
+    expr = expr.replace("^", "**").replace(",", ".")
     try:
         return _eval(ast.parse(expr, mode='eval').body)
     # pylint: disable=broad-except

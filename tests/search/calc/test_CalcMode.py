@@ -22,7 +22,11 @@ class TestCalcMode:
         assert mode.is_enabled('5+')
         assert mode.is_enabled('(5/0')
         assert mode.is_enabled('0.5/0')
+        assert mode.is_enabled('.5/0')
         assert mode.is_enabled('0.5e3+ (11**3+-2^3)')
+        assert mode.is_enabled('0,5/0')
+        assert mode.is_enabled(',5/0')
+        assert mode.is_enabled('0,5e3+ (11**3+-2^3)')
 
         assert not mode.is_enabled('+2')
         assert not mode.is_enabled(')+3')
@@ -42,4 +46,8 @@ class TestCalcMode:
 
     def test_handle_query__result_is_0__returns_0(self, mode, CalcResultItem):
         mode.handle_query('2-2')
-        CalcResultItem.assert_called_with(result=0)
+
+    def test_handle_query__comma_used_instead_of_dot(self, mode, RenderResultListAction, CalcResultItem):
+        assert mode.handle_query(',3+,2') == RenderResultListAction.return_value
+        RenderResultListAction.assert_called_with([CalcResultItem.return_value])
+        CalcResultItem.assert_called_with(result=0.5)
