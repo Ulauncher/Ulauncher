@@ -34,7 +34,7 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 * [Pass custom environment variable to Ulauncher](https://github.com/Ulauncher/Ulauncher/issues/780#issuecomment-912982174)
 
 
-### [Code Contributions](CONTRIBUTING.md)
+### Code Contributions
 
 Please see our [Code Contributions](CONTRIBUTING.md) documentation.
 
