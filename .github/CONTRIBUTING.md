@@ -1,1 +1,0 @@
-Please read [Code Contribution document](https://github.com/Ulauncher/Ulauncher/wiki/Code-Contribution).
