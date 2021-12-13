@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in Ulauncher
+description: Report a bug in Ulauncher.
 labels: ["bug"]
 body:
   - type: markdown
@@ -27,12 +27,12 @@ body:
       description: Run Ulauncher from the shell with `ulauncher -v` and copy and paste the log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: checkboxes
-    id: no-duplicate
+    id: communication-guidelines
     attributes:
-      label: Issue isn't already reported
-      description: Did you search the [open issues](https://github.com/Ulauncher/Ulauncher/issues)?
+      label: Communication guidelines
+      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/dev/CODE_OF_CONDUCT.md#general-communication-guidelines)?
       options:
-        - label: I have searched for similar issues before reporting this to avoid creating a duplicate issue.
+        - label: I have read and agree with Ulauncher's communication guidelines.
           required: true
   - type: checkboxes
     id: no-extension
@@ -40,13 +40,13 @@ body:
       label: Not an extension issue
       description: Ulauncher does not support or maintain third party extensions. If you have issues with extensions you should read and follow their dependency installation instructions and file any issues on their issue trackers.
       options:
-        - label: This issue applies to the Ulauncher application, not a specific extension
+        - label: This issue applies to the Ulauncher application, not a specific extension.
           required: true
   - type: checkboxes
     id: latest
     attributes:
       label: Latest version
-      description: You must test with the [latest Ulauncher release](https://github.com/Ulauncher/Ulauncher/releases) to make sure the bug hasn't already been fixed
+      description: You must test with the [latest Ulauncher release](https://github.com/Ulauncher/Ulauncher/releases) to make sure the bug hasn't already been fixed.
       options:
-        - label: I am using the latest Ulauncher release
+        - label: I am using the latest Ulauncher release.
           required: true

@@ -1,5 +1,5 @@
 name: Enhancement request
-description: Request changes to current functionality
+description: Request changes to current functionality.
 labels: ["enhancement"]
 body:
   - type: markdown
@@ -14,10 +14,10 @@ body:
     validations:
       required: true
   - type: checkboxes
-    id: no-duplicate
+    id: communication-guidelines
     attributes:
-      label: Enhancement isn't already requested
-      description: Did you check the [existing Enhancement requests](https://github.com/Ulauncher/Ulauncher/labels/enhancement)?
+      label: Communication guidelines
+      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/dev/CODE_OF_CONDUCT.md#general-communication-guidelines)?
       options:
-        - label: I have checked the existing Enhancement requests before suggesting this
+        - label: I have read and agree with Ulauncher's communication guidelines and checked the [existing enhancement requests](https://github.com/Ulauncher/Ulauncher/labels/enhancement) before suggesting this.
           required: true

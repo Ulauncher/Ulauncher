@@ -1,5 +1,5 @@
 name: Feature
-description: Request a new feature for Ulauncher
+description: Request a new feature for Ulauncher.
 labels: ["feature"]
 body:
   - type: markdown
@@ -14,18 +14,18 @@ body:
     validations:
       required: true
   - type: checkboxes
-    id: not-extension
+    id: communication-guidelines
     attributes:
-      label: Feature isn't possible to support as an extension
-      description: Ulauncher's developers doesn't have the time to support all features directly. We rely on third party extensions for this.
+      label: Communication guidelines
+      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/dev/CODE_OF_CONDUCT.md#general-communication-guidelines)?
       options:
-        - label: This feature request cannot be added as a third party extension.
+        - label: I have read and agree with Ulauncher's communication guidelines and checked the [existing feature requests](https://github.com/Ulauncher/Ulauncher/labels/feature) before suggesting this.
           required: true
   - type: checkboxes
-    id: no-duplicate
+    id: not-extension
     attributes:
-      label: Feature isn't already requested
-      description: Did you check the [existing feature requests](https://github.com/Ulauncher/Ulauncher/labels/feature)?
+      label: Feature isn't possible to support as an extension.
+      description: Ulauncher's developers doesn't have the time to support all features directly. We rely on third party extensions for this.
       options:
-        - label: I have checked the existing feature requests before suggesting this
+        - label: This feature request cannot satisfactory be supported as a third party extension.
           required: true
