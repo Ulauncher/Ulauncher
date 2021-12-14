@@ -40,6 +40,6 @@ class AutostartPreference:
         :param bool status:
         """
         if not self.is_allowed():
-            raise 'Autostart is not allowed'
+            raise OSError('Autostart is not allowed')
 
         systemctl_unit_run("reenable" if status else "disable")
