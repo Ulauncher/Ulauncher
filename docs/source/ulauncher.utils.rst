@@ -69,14 +69,6 @@ ulauncher.utils.display module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.file\_finder module
------------------------------------
-
-.. automodule:: ulauncher.utils.file_finder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.framer module
 -----------------------------------
 
@@ -93,7 +85,7 @@ ulauncher.utils.fuzzy\_search module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.image\_loader module
+ulauncher.utils.icon module
 ------------------------------------
 
 .. automodule:: ulauncher.utils.icon

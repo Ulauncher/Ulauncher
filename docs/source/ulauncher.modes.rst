@@ -1,4 +1,4 @@
-ulauncher\.search package
+ulauncher\.modes package
 =========================
 
 Subpackages
