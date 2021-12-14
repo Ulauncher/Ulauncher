@@ -1,12 +1,12 @@
 import os
 import sys
 
+from ulauncher.api import Result
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
-class ExtensionResultItem(ResultItem):
+class ExtensionResult(Result):
     """
     Should be used in extensions.
 

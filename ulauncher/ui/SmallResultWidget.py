@@ -1,7 +1,7 @@
-from ulauncher.ui.ResultItemWidget import ResultItemWidget
+from ulauncher.ui.ResultWidget import ResultWidget
 
 
-class SmallResultItemWidget(ResultItemWidget):
+class SmallResultWidget(ResultWidget):
     """
     It is instantiated automagically if the following is done:
         - its name is set in .ui file in class attribute
@@ -9,4 +9,4 @@ class SmallResultItemWidget(ResultItemWidget):
         - this class is be imported somewhere in the code before .ui file is built
     """
 
-    __gtype_name__ = "SmallResultItemWidget"
+    __gtype_name__ = "SmallResultWidget"

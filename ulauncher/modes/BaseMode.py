@@ -26,7 +26,7 @@ class BaseMode:
 
     def handle_query(self, query):
         """
-        :rtype: list of ResultItems
+        :rtype: list of Results
         """
         return []
 

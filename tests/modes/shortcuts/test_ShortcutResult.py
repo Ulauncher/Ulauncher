@@ -1,30 +1,30 @@
 import pytest
-from ulauncher.modes.shortcuts.ShortcutResultItem import ShortcutResultItem
+from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
 from ulauncher.modes.Query import Query
 
 
-class TestShortcutResultItem:
+class TestShortcutResult:
 
     @pytest.fixture(autouse=True)
     def OpenUrlAction(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.OpenUrlAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.OpenUrlAction')
 
     @pytest.fixture(autouse=True)
     def RunScriptAction(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.RunScriptAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.RunScriptAction')
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.QueryHistoryDb.get_instance').return_value
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.QueryHistoryDb.get_instance').return_value
 
     @pytest.fixture
     def SetUserQueryAction(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.SetUserQueryAction')
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.SetUserQueryAction')
 
     @pytest.fixture
     def item(self):
-        return ShortcutResultItem('kw', 'name', 'https://site/?q=%s', 'icon_path',
-                                  is_default_search=True, run_without_argument=False)
+        return ShortcutResult('kw', 'name', 'https://site/?q=%s', 'icon_path',
+                              is_default_search=True, run_without_argument=False)
 
     def test_get_keyword(self, item):
         assert item.get_keyword() == 'kw'
@@ -64,7 +64,7 @@ class TestShortcutResultItem:
         SetUserQueryAction.assert_called_once_with('kw ')
 
     def test_on_enter__run_file(self, RunScriptAction):
-        item = ShortcutResultItem('kw', 'name', '/usr/bin/something/%s', 'icon_path')
+        item = ShortcutResult('kw', 'name', '/usr/bin/something/%s', 'icon_path')
         item.on_enter(Query('kw query'))
         RunScriptAction.assert_called_once_with('/usr/bin/something/query')
 

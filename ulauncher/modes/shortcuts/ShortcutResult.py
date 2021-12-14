@@ -1,14 +1,14 @@
 import os
 import re
 
+from ulauncher.api import Result
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
-class ShortcutResultItem(ResultItem):
+class ShortcutResult(Result):
 
     # pylint: disable=super-init-not-called, too-many-arguments
     def __init__(self, keyword, name, cmd, icon, default_search=False, run_without_argument=False, **kw):

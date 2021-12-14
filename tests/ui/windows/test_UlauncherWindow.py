@@ -6,7 +6,7 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk
 
-from ulauncher.api.shared.item.ResultItem import ResultItem
+from ulauncher.api import Result
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
 
@@ -57,8 +57,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
 
     @pytest.fixture(autouse=True)
-    def AppResultItem(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppResultItem.get_most_frequent').return_value
+    def AppResult(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppResult.get_most_frequent').return_value
 
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
@@ -89,8 +89,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk').Builder
 
     @pytest.fixture
-    def result_item(self):
-        return mock.create_autospec(ResultItem)
+    def result(self):
+        return mock.create_autospec(Result)
 
     @pytest.fixture(autouse=True)
     def os_path_exists(self, mocker):
@@ -104,10 +104,10 @@ class TestUlauncherWindow:
     def window(self):
         return UlauncherWindow()
 
-    def test_create_item_widgets(self, window, result_item, GtkBuilder, get_data_file):
-        assert window.create_item_widgets([result_item], 'test') == [GtkBuilder.return_value.get_object.return_value]
+    def test_create_item_widgets(self, window, result, GtkBuilder, get_data_file):
+        assert window.create_item_widgets([result], 'test') == [GtkBuilder.return_value.get_object.return_value]
         GtkBuilder.return_value.get_object.assert_called_with('item-frame')
         GtkBuilder.return_value.get_object.return_value.initialize.assert_called_with(
-            GtkBuilder.return_value, result_item, 0, 'test')
+            GtkBuilder.return_value, result, 0, 'test')
         GtkBuilder.return_value.add_from_file.assert_called_with(get_data_file.return_value)
-        get_data_file.assert_called_with('ui', '%s.ui' % result_item.UI_FILE)
+        get_data_file.assert_called_with('ui', '%s.ui' % result.UI_FILE)

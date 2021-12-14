@@ -1,6 +1,5 @@
-from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api import SmallResult, ExtensionResult
 
 
-class ExtensionSmallResultItem(ExtensionResultItem, SmallResultItem):
+class ExtensionSmallResult(ExtensionResult, SmallResult):
     pass

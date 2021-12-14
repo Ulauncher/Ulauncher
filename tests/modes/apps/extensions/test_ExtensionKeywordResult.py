@@ -1,19 +1,19 @@
 import pytest
 
-from ulauncher.modes.extensions.ExtensionKeywordResultItem import ExtensionKeywordResultItem
+from ulauncher.modes.extensions.ExtensionKeywordResult import ExtensionKeywordResult
 from ulauncher.modes.Query import Query
 
 
-class TestExtensionKeywordResultItem:
+class TestExtensionKeywordResult:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker):
-        module_path = 'ulauncher.modes.extensions.ExtensionKeywordResultItem'
+        module_path = 'ulauncher.modes.extensions.ExtensionKeywordResult'
         return mocker.patch(f'{module_path}.QueryHistoryDb.get_instance').return_value
 
     @pytest.fixture
     def item(self):
-        return ExtensionKeywordResultItem('name', 'description', 'kw', 'icon_path')
+        return ExtensionKeywordResult('name', 'description', 'kw', 'icon_path')
 
     def test_selected_by_default__query_in_history__returns_true(self, item, query_history):
         query_history.find.return_value = 'name'

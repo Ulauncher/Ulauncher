@@ -8,14 +8,14 @@ from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.modes.apps.launch_app import launch_app
-from ulauncher.api.shared.item.ResultItem import ResultItem
+from ulauncher.api import Result
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 settings = Settings.get_instance()
 _app_starts = KeyValueJsonDb(join(STATE_DIR, 'app_starts.json')).open()
 
 
-class AppResultItem(ResultItem):
+class AppResult(Result):
     """
     :param Gio.DesktopAppInfo app_info:
     """
@@ -33,14 +33,14 @@ class AppResultItem(ResultItem):
     def from_id(app_id):
         try:
             app_info = Gio.DesktopAppInfo.new(app_id)
-            return AppResultItem(app_info)
+            return AppResult(app_info)
         except TypeError:
             return None
 
     @staticmethod
     def search(query, min_score=50, limit=9):
-        # Cast apps to AppResultItem objects. Default apps to Gio.DesktopAppInfo.get_all()
-        apps = [AppResultItem(app) for app in Gio.DesktopAppInfo.get_all()]
+        # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
+        apps = [AppResult(app) for app in Gio.DesktopAppInfo.get_all()]
         sorted_apps = sorted(apps, key=lambda app: app.search_score(query), reverse=True)[:limit]
         return list(filter(lambda app: app.search_score(query) > min_score, sorted_apps))
 
@@ -56,7 +56,7 @@ class AppResultItem(ResultItem):
         """
         sorted_tuples = sorted(_app_starts._records.items(), key=lambda rec: rec[1], reverse=True)
         sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
-        return list(filter(None, map(AppResultItem.from_id, sorted_app_ids)))[:limit]
+        return list(filter(None, map(AppResult.from_id, sorted_app_ids)))[:limit]
 
     def should_show(self):
         disable_desktop_filters = settings.get_property('disable-desktop-filters')

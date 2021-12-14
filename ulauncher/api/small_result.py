@@ -1,6 +1,6 @@
-from .ResultItem import ResultItem
+from .result import Result
 
 
-class SmallResultItem(ResultItem):
+class SmallResult(Result):
     ICON_SIZE = 25
-    UI_FILE = 'small_result_item'
+    UI_FILE = 'small_result'

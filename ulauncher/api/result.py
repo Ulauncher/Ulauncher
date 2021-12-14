@@ -9,10 +9,10 @@ OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
 
 # pylint: disable=too-many-instance-attributes
-class ResultItem:
+class Result:
 
     ICON_SIZE = 40
-    UI_FILE = 'result_item'
+    UI_FILE = 'result'
 
     score = None  # used by SortedResultList class to maintain sorted by score order of items
 

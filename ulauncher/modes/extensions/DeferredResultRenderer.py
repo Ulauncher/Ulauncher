@@ -5,9 +5,9 @@ gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import GLib
 
+from ulauncher.api import Result
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 
@@ -46,7 +46,7 @@ class DeferredResultRenderer:
         self._cancel_loading()
         self.loading = timer(self.LOADING_DELAY,
                              partial(self._render_loading,
-                                     controller.get_manifest().load_icon(ResultItem.get_icon_size())))
+                                     controller.get_manifest().load_icon(Result.get_icon_size())))
         self.active_event = event
         self.active_controller = controller
 
@@ -78,9 +78,7 @@ class DeferredResultRenderer:
             self.loading = None
 
     def _render_loading(self, icon):
-        loading_item = ResultItem(name='Loading...',
-                                  icon=icon,
-                                  highlightable=False)
+        loading_item = Result(name='Loading...', icon=icon, highlightable=False)
         RenderResultListAction([loading_item]).run()
 
     def _hide_window(self):

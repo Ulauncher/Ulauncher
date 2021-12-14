@@ -12,10 +12,10 @@ ulauncher\.modes\.calc\.CalcMode module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.calc\.CalcResultItem module
+ulauncher\.modes\.calc\.CalcResult module
 ----------------------------------------------
 
-.. automodule:: ulauncher.modes.calc.CalcResultItem
+.. automodule:: ulauncher.modes.calc.CalcResult
     :members:
     :undoc-members:
     :show-inheritance:

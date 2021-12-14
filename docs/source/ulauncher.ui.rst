@@ -27,18 +27,18 @@ ulauncher\.ui\.ItemNavigation module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.ResultItemWidget module
+ulauncher\.ui\.ResultWidget module
 --------------------------------------
 
-.. automodule:: ulauncher.ui.ResultItemWidget
+.. automodule:: ulauncher.ui.ResultWidget
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.SmallResultItemWidget module
+ulauncher\.ui\.SmallResultWidget module
 -------------------------------------------
 
-.. automodule:: ulauncher.ui.SmallResultItemWidget
+.. automodule:: ulauncher.ui.SmallResultWidget
     :members:
     :undoc-members:
     :show-inheritance:

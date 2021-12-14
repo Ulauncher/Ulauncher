@@ -1,5 +1,5 @@
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.apps.AppResultItem import AppResultItem
+from ulauncher.modes.apps.AppResult import AppResult
 
 
 class AppMode(BaseMode):
@@ -17,7 +17,7 @@ class AppMode(BaseMode):
         return True
 
     def handle_query(self, query):
-        items = AppResultItem.search(query)
+        items = AppResult.search(query)
         # If the search result is empty, add the default items for all other modes (only shotcuts currently)
         if not items:
             for mode in self.search_modes:

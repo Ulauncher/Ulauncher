@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     ulauncher.api.shared.action
-    ulauncher.api.shared.item
 
 Submodules
 ----------

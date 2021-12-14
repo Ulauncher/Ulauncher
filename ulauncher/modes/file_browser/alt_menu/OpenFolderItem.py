@@ -1,8 +1,8 @@
+from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 
 
-class OpenFolderItem(SmallResultItem):
+class OpenFolderItem(SmallResult):
     """
     :param ~ulauncher.utils.Path.Path path:
     """

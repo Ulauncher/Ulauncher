@@ -3,7 +3,7 @@ import html
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.extensions.ExtensionKeywordResultItem import ExtensionKeywordResultItem
+from ulauncher.modes.extensions.ExtensionKeywordResult import ExtensionKeywordResult
 
 
 class ExtensionMode(BaseMode):
@@ -47,7 +47,7 @@ class ExtensionMode(BaseMode):
 
     def get_searchable_items(self):
         """
-        :rtype: list of :class:`~ulauncher.api.shared.item.ResultItem.ResultItem`
+        :rtype: list of :class:`~ulauncher.api.Result`
         """
         items = []
         for c in self.extensionServer.get_controllers():
@@ -55,10 +55,10 @@ class ExtensionMode(BaseMode):
                 if not pref['value']:
                     continue
 
-                icon = c.manifest.load_icon(ExtensionKeywordResultItem.get_icon_size(), path=pref['icon'])
-                items.append(ExtensionKeywordResultItem(name=html.escape(pref['name']),
-                                                        description=html.escape(pref['description']),
-                                                        keyword=pref['value'],
-                                                        icon=icon))
+                icon = c.manifest.load_icon(ExtensionKeywordResult.get_icon_size(), path=pref['icon'])
+                items.append(ExtensionKeywordResult(name=html.escape(pref['name']),
+                                                    description=html.escape(pref['description']),
+                                                    keyword=pref['value'],
+                                                    icon=icon))
 
         return items
