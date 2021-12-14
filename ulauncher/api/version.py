@@ -4,8 +4,6 @@
 # Tilde and Caret are permitted, but ignored. Unlike semver the contraint "2.0" matches version 2.0 or newer
 # There is no support for "*", "||", comparison operators like ">=", "!=", or the pre-release annotation
 
-api_version = '2.0'
-
 
 def get_version(version_string):
     sanitized = version_string.translate(str.maketrans({'^': '', '~': '', 'x': ''}))

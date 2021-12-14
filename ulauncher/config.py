@@ -16,6 +16,7 @@ _XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.join(_HOME, '.local'
 _XDG_CONFIG_HOME = os.environ.get('XDG_CONFIG_HOME') or os.path.join(_HOME, '.config')
 _XDG_CACHE_HOME = os.environ.get('XDG_CACHE_HOME') or os.path.join(_HOME, '.cache')
 
+API_VERSION = '2.0'
 STATE_DIR = os.path.join(_XDG_STATE_HOME, 'ulauncher')
 DATA_DIR = os.path.join(_XDG_DATA_HOME, 'ulauncher')
 # Use ulauncher_cache dir because of the WebKit bug

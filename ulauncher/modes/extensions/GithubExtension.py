@@ -5,10 +5,11 @@ from datetime import datetime
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from typing import Dict, List, cast
-from ulauncher.utils.mypy_extensions import TypedDict
 
+from ulauncher.config import API_VERSION
+from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.api.version import api_version, satisfies, valid_range
+from ulauncher.api.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
 
 DEFAULT_GITHUB_BRANCH = 'master'
@@ -68,12 +69,12 @@ class GithubExtension:
         """
         sha_or_branch = ""
         for ver in self.read_versions():
-            if satisfies(api_version, ver['required_api_version']):
+            if satisfies(API_VERSION, ver['required_api_version']):
                 sha_or_branch = ver['commit']
 
         if not sha_or_branch:
             raise GithubExtensionError(
-                "This extension is not compatible with current version Ulauncher extension API (v%s)" % api_version,
+                "This extension is not compatible with current version Ulauncher extension API (v%s)" % API_VERSION,
                 ErrorName.IncompatibleVersion)
 
         return self.get_commit(sha_or_branch)

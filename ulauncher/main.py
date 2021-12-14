@@ -20,13 +20,12 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from ulauncher.config import VERSION, get_options
+from ulauncher.config import API_VERSION, VERSION, get_options
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
-from ulauncher.api.version import api_version
 
 logger = logging.getLogger('ulauncher')
 
@@ -94,7 +93,7 @@ def main():
     options = get_options()
     setup_logging(options)
     logger.info('Ulauncher version %s', VERSION)
-    logger.info('Extension API version %s', api_version)
+    logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("Is Wayland: %s", is_wayland())
     logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))

@@ -1,10 +1,10 @@
 import os
 from json import load
 from typing import cast, Optional, List, Union
-from ulauncher.config import EXTENSIONS_DIR
+from ulauncher.config import API_VERSION, EXTENSIONS_DIR
 from ulauncher.utils.icon import load_icon
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
-from ulauncher.api.version import api_version, satisfies
+from ulauncher.api.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
 
 
@@ -120,9 +120,9 @@ class ExtensionManifest:
             raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson) from e
 
     def check_compatibility(self):
-        if not satisfies(api_version, self.get_required_api_version()):
+        if not satisfies(API_VERSION, self.get_required_api_version()):
             raise ExtensionManifestError('Extension "%s" requires Ulauncher API %s, but current API version is %s' %
-                                         (self.extension_id, self.get_required_api_version(), api_version),
+                                         (self.extension_id, self.get_required_api_version(), API_VERSION),
                                          ErrorName.ExtensionCompatibilityError)
 
 

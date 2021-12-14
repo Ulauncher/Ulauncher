@@ -19,7 +19,6 @@ from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.Builder import Builder
-from ulauncher.api.version import api_version
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
@@ -39,8 +38,7 @@ from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.config import get_asset, get_options, VERSION, EXTENSIONS_DIR
-
+from ulauncher.config import get_asset, get_options, API_VERSION, VERSION, EXTENSIONS_DIR
 
 logger = logging.getLogger(__name__)
 rt = Router()
@@ -244,7 +242,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'hotkey_show_app': self.get_app_hotkey(),
             'env': {
                 'version': VERSION,
-                'api_version': api_version,
+                'api_version': API_VERSION,
                 'user_home': os.path.expanduser('~'),
                 'is_wayland': is_wayland(),
             }
