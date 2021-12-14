@@ -1,7 +1,7 @@
 from ulauncher.api import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.config import get_data_file
+from ulauncher.config import get_asset
 
 
 class CalcResult(Result):
@@ -22,7 +22,7 @@ class CalcResult(Result):
         return 'Enter to copy to the clipboard' if self.result else self.error
 
     def get_icon(self):
-        return get_data_file('icons/calculator.png')
+        return get_asset('icons/calculator.png')
 
     def on_enter(self, query):
         if self.result is not None:

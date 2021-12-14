@@ -4,7 +4,7 @@ from json import load
 from typing import Dict, Any
 from shutil import copytree, rmtree
 
-from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
+from ulauncher.config import ASSETS_DIR, CONFIG_DIR, CACHE_DIR
 from ulauncher.utils.Settings import Settings
 
 themes = {}  # type: Dict[str, Any]
@@ -14,7 +14,7 @@ user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
 
 def load_available_themes():
     themes.clear()
-    ulauncher_theme_dir = os.path.join(get_data_path(), 'themes')
+    ulauncher_theme_dir = os.path.join(ASSETS_DIR, 'themes')
     theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
     if os.path.exists(user_theme_dir):
         theme_dirs.extend([os.path.join(user_theme_dir, d) for d in os.listdir(user_theme_dir)])

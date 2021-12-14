@@ -39,7 +39,7 @@ from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.config import get_data_file, get_options, VERSION, EXTENSIONS_DIR
+from ulauncher.config import get_asset, get_options, VERSION, EXTENSIONS_DIR
 
 
 logger = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.settings = Settings.get_instance()
         self._init_webview()
-        self.init_styles(get_data_file('styles', 'preferences.css'))
+        self.init_styles(get_asset('styles/preferences.css'))
         self.handle_no_window_shadow()
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
@@ -467,7 +467,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         }
 
     def _load_prefs_html(self, page=''):
-        uri = "file://%s#/%s" % (get_data_file('preferences', 'index.html'), page)
+        uri = "file://%s#/%s" % (get_asset('preferences', 'index.html'), page)
         self.webview.load_uri(uri)
 
     def _get_available_themes(self):

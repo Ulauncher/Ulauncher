@@ -8,7 +8,7 @@ from uuid import uuid4
 from time import time
 from functools import lru_cache
 from gettext import gettext
-from ulauncher import __version__ as VERSION, __data_directory__
+from ulauncher import __version__ as VERSION, __assets_dir__ as ASSETS_DIR
 
 _HOME = os.path.expanduser('~')
 _XDG_STATE_HOME = os.environ.get('XDG_STATE_HOME') or os.path.join(_HOME, '.local', 'state')
@@ -30,6 +30,13 @@ ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'
 FIRST_RUN = False
 
 
+class AssetsPathNotFoundError(Exception):
+    """Raised when we can't find the Ulauncher assets directory."""
+
+
+if not os.path.exists(ASSETS_DIR):
+    raise AssetsPathNotFoundError(ASSETS_DIR)
+
 if not os.path.exists(CONFIG_DIR):
     # If there is no config dir, assume it's the first run
     FIRST_RUN = True
@@ -45,31 +52,13 @@ if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 
 
-class ProjectPathNotFoundError(Exception):
-    """Raised when we can't find the project directory."""
-
-
-def get_data_file(*path_segments):
+def get_asset(*path_segments):
     """Get the full path to a data file.
 
-    :returns: path to a file underneath the data directory (as defined by :func:`get_data_path`).
-              Equivalent to :code:`os.path.join(get_data_path(),*path_segments)`.
+    :returns: path to a file underneath the data directory (as defined by ASSETS_DIR`).
+              Equivalent to :code:`os.path.join(ASSETS_DIR, *path_segments)`.
     """
-    return os.path.join(get_data_path(), *path_segments)
-
-
-def get_data_path():
-    """Retrieve ulauncher data path
-
-    This path is by default `<ulauncher_path>/../data/` in trunk
-    and `/usr/share/ulauncher` in an installed version but this path
-    is specified at installation time.
-    """
-
-    if not os.path.exists(__data_directory__):
-        raise ProjectPathNotFoundError(__data_directory__)
-
-    return __data_directory__
+    return os.path.join(ASSETS_DIR, *path_segments)
 
 
 @lru_cache()
@@ -107,7 +96,7 @@ def get_default_shortcuts():
         "name": "Google Search",
         "keyword": "g",
         "cmd": "https://google.com/search?q=%s",
-        "icon": get_data_file('icons/google-search.png'),
+        "icon": get_asset('icons/google-search.png'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()
@@ -117,7 +106,7 @@ def get_default_shortcuts():
         "name": "Stack Overflow",
         "keyword": "so",
         "cmd": "https://stackoverflow.com/search?q=%s",
-        "icon": get_data_file('icons/stackoverflow.svg'),
+        "icon": get_asset('icons/stackoverflow.svg'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()
@@ -127,7 +116,7 @@ def get_default_shortcuts():
         "name": "Wikipedia",
         "keyword": "wiki",
         "cmd": "https://en.wikipedia.org/wiki/%s",
-        "icon": get_data_file('icons/wikipedia.png'),
+        "icon": get_asset('icons/wikipedia.png'),
         "is_default_search": True,
         "run_without_argument": False,
         "added": time()

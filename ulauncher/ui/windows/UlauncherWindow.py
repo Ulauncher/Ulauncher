@@ -17,7 +17,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_data_file, get_options, FIRST_RUN
+from ulauncher.config import get_asset, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.Search import Search
 from ulauncher.modes.apps.AppResult import AppResult
@@ -369,7 +369,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def _render_prefs_icon(self):
         scale_factor = get_monitor_scale_factor()
-        prefs_pixbuf = load_icon(get_data_file('icons', 'gear.svg'), 16 * scale_factor)
+        prefs_pixbuf = load_icon(get_asset('icons/gear.svg'), 16 * scale_factor)
         surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scale_factor, self.get_window())
         prefs_image = Gtk.Image.new_from_surface(surface)
         self.prefs_btn.set_image(prefs_image)
@@ -378,7 +378,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def create_item_widgets(items, query):
         results = []
         for index, result in enumerate(items):
-            glade_filename = get_data_file('ui', '%s.ui' % result.UI_FILE)
+            glade_filename = get_asset('ui/%s.ui' % result.UI_FILE)
             if not os.path.exists(glade_filename):
                 glade_filename = None
 

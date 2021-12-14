@@ -12,7 +12,7 @@ gi.require_version('GObject', '2.0')
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position, wrong-import-order
 from gi.repository import GObject, Gtk
-from ulauncher.config import get_data_file
+from ulauncher.config import get_asset
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class Builder(Gtk.Builder):
             Assumed to be in the 'ui' directory under the data path.
         """
         # Look for the ui file that describes the user interface.
-        ui_filename = get_data_file('ui', '%s.ui' % (builder_file_name,))
+        ui_filename = get_asset('ui', '%s.ui' % (builder_file_name,))
         if not os.path.exists(ui_filename):
             ui_filename = None
 
