@@ -1,7 +1,6 @@
 import os
 import re
 
-from ulauncher.api.shared.action.ActionList import ActionList
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
@@ -63,7 +62,8 @@ class ShortcutResultItem(ResultItem):
         return self._query_history.find(query) == self.get_name()
 
     def on_enter(self, query):
-        action_list = ActionList()
+        self._query_history.save_query(query, self.get_name())
+
         if query.get_keyword() == self.keyword and query.get_argument():
             argument = query.get_argument()
         elif self.is_default_search:
@@ -71,25 +71,14 @@ class ShortcutResultItem(ResultItem):
         else:
             argument = None
 
-        if self.run_without_argument:
-            if self._is_url():
-                action = OpenUrlAction(self.cmd.strip())
-            else:
-                action = RunScriptAction(self.cmd)
-            action_list.append(action)
-        elif argument:
-            if self._is_url():
-                command = self.cmd.strip().replace('%s', argument)
-                action = OpenUrlAction(command)
-            else:
-                action = RunScriptAction(self.cmd, argument)
-            action_list.append(action)
-        else:
-            action_list.append(SetUserQueryAction('%s ' % self.keyword))
+        command = self.cmd.strip()
+        if argument and not self.run_without_argument:
+            command = command.replace('%s', argument)
 
-        self._query_history.save_query(query, self.get_name())
+        if argument or self.run_without_argument:
+            return OpenUrlAction(command) if self._is_url() else RunScriptAction(command)
 
-        return action_list
+        return SetUserQueryAction('%s ' % self.keyword)
 
     def _is_url(self) -> bool:
         return bool(re.match(r'^http(s)?://', self.cmd.strip()))

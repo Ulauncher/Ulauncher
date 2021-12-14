@@ -8,12 +8,6 @@ ExtensionCustomAction
 .. autoclass:: ulauncher.api.shared.action.ExtensionCustomAction.ExtensionCustomAction
 
 
-ActionList
-----------
-
-.. autoclass:: ulauncher.api.shared.action.ActionList.ActionList
-
-
 CopyToClipboardAction
 ---------------------
 

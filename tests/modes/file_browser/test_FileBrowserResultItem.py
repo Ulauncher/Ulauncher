@@ -18,10 +18,6 @@ class TestFileBrowserResultItem:
         return mock.create_autospec(FileQueries)
 
     @pytest.fixture
-    def ActionList(self, mocker):
-        return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.ActionList')
-
-    @pytest.fixture
     def Path(self, mocker):
         return mocker.patch('ulauncher.modes.file_browser.FileBrowserResultItem.Path')
 

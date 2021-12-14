@@ -5,10 +5,6 @@ from ulauncher.modes.Query import Query
 
 class TestShortcutResultItem:
 
-    @pytest.fixture
-    def ActionList(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.ActionList')
-
     @pytest.fixture(autouse=True)
     def OpenUrlAction(self, mocker):
         return mocker.patch('ulauncher.modes.shortcuts.ShortcutResultItem.OpenUrlAction')
@@ -44,32 +40,32 @@ class TestShortcutResultItem:
     def test_get_icon(self, item):
         assert isinstance(item.get_icon(), str)
 
-    def test_on_enter(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
-        assert item.on_enter(Query('kw test')) is ActionList.return_value
+    def test_on_enter(self, item, OpenUrlAction, SetUserQueryAction):
+        item.on_enter(Query('kw test'))
         OpenUrlAction.assert_called_once_with('https://site/?q=test')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__default_search(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__default_search(self, item, OpenUrlAction, SetUserQueryAction):
         item.is_default_search = True
-        assert item.on_enter(Query('search query')) is ActionList.return_value
+        item.on_enter(Query('search query'))
         OpenUrlAction.assert_called_once_with('https://site/?q=search query')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__run_without_arguments(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__run_without_arguments(self, item, OpenUrlAction, SetUserQueryAction):
         item.run_without_argument = True
-        assert item.on_enter(Query('kw')) is ActionList.return_value
+        item.on_enter(Query('kw'))
         # it doesn't replace %s if run_without_argument = True
         OpenUrlAction.assert_called_once_with('https://site/?q=%s')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__misspelled_kw(self, item, ActionList, OpenUrlAction, SetUserQueryAction):
-        assert item.on_enter(Query('keyword query')) is ActionList.return_value
+    def test_on_enter__misspelled_kw(self, item, OpenUrlAction, SetUserQueryAction):
+        item.on_enter(Query('keyword query'))
         assert not OpenUrlAction.called
         SetUserQueryAction.assert_called_once_with('kw ')
 
-    def test_on_enter__run_file(self, ActionList, RunScriptAction):
+    def test_on_enter__run_file(self, RunScriptAction):
         item = ShortcutResultItem('kw', 'name', '/usr/bin/something', 'icon_path')
-        assert item.on_enter(Query('kw query')) is ActionList.return_value
+        item.on_enter(Query('kw query'))
         RunScriptAction.assert_called_once_with('/usr/bin/something', 'query')
 
     def test_on_enter__save_query_to_history(self, item, query_history):
