@@ -4,7 +4,7 @@ from decimal import Decimal
 import operator as op
 
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.calc.CalcResultItem import CalcResultItem
+from ulauncher.modes.calc.CalcResult import CalcResult
 
 
 # supported operators
@@ -61,8 +61,8 @@ class CalcMode(BaseMode):
             if int(result) == result:
                 result = int(result)
 
-            result_item = CalcResultItem(result=result)
+            result = CalcResult(result=result)
         # pylint: disable=broad-except
         except Exception:
-            result_item = CalcResultItem(error='Invalid expression')
-        return [result_item]
+            result = CalcResult(error='Invalid expression')
+        return [result]

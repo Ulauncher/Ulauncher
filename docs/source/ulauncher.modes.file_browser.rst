@@ -19,10 +19,10 @@ ulauncher\.modes\.file\_browser\.FileBrowserMode module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.file\_browser\.FileBrowserResultItem module
+ulauncher\.modes\.file\_browser\.FileBrowserResult module
 --------------------------------------------------------------
 
-.. automodule:: ulauncher.modes.file_browser.FileBrowserResultItem
+.. automodule:: ulauncher.modes.file_browser.FileBrowserResult
     :members:
     :undoc-members:
     :show-inheritance:

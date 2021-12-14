@@ -1,10 +1,10 @@
+from ulauncher.api import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.item.ResultItem import ResultItem
 from ulauncher.config import get_data_file
 
 
-class CalcResultItem(ResultItem):
+class CalcResult(Result):
 
     # pylint: disable=super-init-not-called
     def __init__(self, result: str = None, error: str = 'Unknown error'):

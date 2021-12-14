@@ -8,7 +8,7 @@ class ItemNavigation:
 
     def __init__(self, items):
         """
-        :param list items: list of ResultItemWidget()'s
+        :param list items: list of ResultWidget()'s
         """
         self.items = items
         self.items_num = len(items)

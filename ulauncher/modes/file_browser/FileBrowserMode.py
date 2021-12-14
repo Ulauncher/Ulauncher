@@ -9,7 +9,7 @@ from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.utils.Path import Path, InvalidPathError
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.file_browser.FileBrowserResultItem import FileBrowserResultItem
+from ulauncher.modes.file_browser.FileBrowserResult import FileBrowserResult
 from ulauncher.modes.file_browser.FileQueries import FileQueries
 
 
@@ -42,15 +42,15 @@ class FileBrowserMode(BaseMode):
 
         return sorted(files)
 
-    def create_result_item(self, path_srt: str) -> FileBrowserResultItem:
-        return FileBrowserResultItem(Path(path_srt))
+    def create_result(self, path_srt: str) -> FileBrowserResult:
+        return FileBrowserResult(Path(path_srt))
 
     def filter_dot_files(self, file_list: List[str]) -> List[str]:
         return list(filter(lambda f: not f.startswith('.'), file_list))
 
-    def handle_query(self, query: str) -> List[FileBrowserResultItem]:
+    def handle_query(self, query: str) -> List[FileBrowserResult]:
         path = Path(query)  # type: Path
-        result_items = []  # type: List[FileBrowserResultItem]
+        results = []  # type: List[FileBrowserResult]
 
         try:
             existing_dir = path.get_existing_dir()
@@ -59,7 +59,7 @@ class FileBrowserMode(BaseMode):
                 file_names = self.list_files(path.get_abs_path(), sort_by_usage=True)
                 for name in self.filter_dot_files(file_names)[:self.LIMIT]:
                     file = os.path.join(existing_dir, name)
-                    result_items.append(self.create_result_item(file))
+                    results.append(self.create_result(file))
 
             else:
                 file_names = self.list_files(existing_dir)
@@ -70,12 +70,12 @@ class FileBrowserMode(BaseMode):
 
                 sorted_files = sorted(file_names, key=lambda fn: get_score(query, fn), reverse=True)
                 filtered_files = list(filter(lambda fn: get_score(query, fn) > 40, sorted_files))[:self.LIMIT]
-                result_items = [self.create_result_item(os.path.join(existing_dir, name)) for name in filtered_files]
+                results = [self.create_result(os.path.join(existing_dir, name)) for name in filtered_files]
 
         except (InvalidPathError, OSError):
-            result_items = []
+            results = []
 
-        return result_items
+        return results
 
     def handle_key_press_event(self, widget, event, query):
         keyval = event.get_keyval()

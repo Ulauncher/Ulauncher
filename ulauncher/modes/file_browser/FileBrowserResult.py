@@ -5,11 +5,10 @@ gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import GLib
 
+from ulauncher.utils.Path import Path
+from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
-from ulauncher.utils.Path import Path
-
 from ulauncher.modes.file_browser.FileQueries import FileQueries
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
 from ulauncher.modes.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
@@ -27,7 +26,7 @@ SPECIAL_DIRS = {
 }
 
 
-class FileBrowserResultItem(SmallResultItem):
+class FileBrowserResult(SmallResult):
     """
     :param ~ulauncher.utils.Path.Path path:
     """
@@ -73,7 +72,7 @@ class FileBrowserResultItem(SmallResultItem):
 
     def _get_dir_alt_menu(self):
         """
-        :rtype: list of ResultItems
+        :rtype: list of Results
         """
         open_folder = OpenFolderItem(self.path)
         open_folder.set_name('Open Folder "%s"' % self.path.get_basename())
@@ -81,7 +80,7 @@ class FileBrowserResultItem(SmallResultItem):
 
     def _get_file_alt_menu(self):
         """
-        :rtype: list of ResultItems
+        :rtype: list of Results
         """
         open_folder = OpenFolderItem(Path(self.path.get_dirname()))
         open_folder.set_name('Open Containing Folder')

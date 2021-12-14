@@ -167,10 +167,10 @@ main.py
 
 Copy the following code to ``main.py``::
 
+  from ulauncher.api import ExtensionResult
   from ulauncher.api.client.Extension import Extension
   from ulauncher.api.client.EventListener import EventListener
   from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
-  from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
   from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 
@@ -186,10 +186,12 @@ Copy the following code to ``main.py``::
       def on_event(self, event, extension):
           items = []
           for i in range(5):
-              items.append(ExtensionResultItem(icon='images/icon.png',
-                                               name='Item %s' % i,
-                                               description='Item description %s' % i,
-                                               on_enter=HideWindowAction()))
+              items.append(ExtensionResult(
+                  icon='images/icon.png',
+                  name='Item %s' % i,
+                  description='Item description %s' % i,
+                  on_enter=HideWindowAction()
+              ))
 
           return items
 
@@ -258,9 +260,9 @@ Basic API Concepts
 
 **3. Render results**
 
-  Return a list of :class:`~ulauncher.api.shared.item.ExtensionResultItem.ExtensionResultItem` in order to render results.
+  Return a list of :class:`~ulauncher.api.ExtensionResult` in order to render results.
 
-  You can also use :class:`~ulauncher.api.shared.item.ExtensionSmallResultItem.ExtensionSmallResultItem` if you want
+  You can also use :class:`~ulauncher.api.ExtensionSmallResult` if you want
   to render more items. You won't have item description with this type.
   ::
 
@@ -269,10 +271,12 @@ Basic API Concepts
         def on_event(self, event, extension):
             items = []
             for i in range(5):
-                items.append(ExtensionResultItem(icon='images/icon.png',
-                                                 name='Item %s' % i,
-                                                 description='Item description %s' % i,
-                                                 on_enter=HideWindowAction()))
+                items.append(ExtensionResult(
+                    icon='images/icon.png',
+                    name='Item %s' % i,
+                    description='Item description %s' % i,
+                    on_enter=HideWindowAction()
+                ))
 
             return items
 
@@ -300,16 +304,18 @@ Custom Action on Item Enter
 
 **1. Pass custom data with ExtensionCustomAction**
 
-  Instantiate :class:`~ulauncher.api.shared.item.ExtensionResultItem.ExtensionResultItem`
+  Instantiate :class:`~ulauncher.api.ExtensionResult`
   with ``on_enter`` that is instance of :class:`~ulauncher.api.shared.action.ExtensionCustomAction.ExtensionCustomAction`
 
   ::
 
     data = {'new_name': 'Item %s was clicked' % i}
-    ExtensionResultItem(icon='images/icon.png',
-                        name='Item %s' % i,
-                        description='Item description %s' % i,
-                        on_enter=ExtensionCustomAction(data, keep_app_open=True))
+    ExtensionResult(
+        icon='images/icon.png',
+        name='Item %s' % i,
+        description='Item description %s' % i,
+        on_enter=ExtensionCustomAction(data, keep_app_open=True)
+    )
 
   ``data`` is any custom data that you want to pass to your callback function.
 
@@ -331,9 +337,11 @@ Custom Action on Item Enter
             # do additional actions here...
 
             # you may want to return another list of results
-            return [ExtensionResultItem(icon='images/icon.png',
-                                        name=data['new_name'],
-                                        on_enter=HideWindowAction())]
+            return [ExtensionResult(
+                icon='images/icon.png',
+                name=data['new_name'],
+                on_enter=HideWindowAction()
+            )]
 
 **3. Subscribe to ItemEnterEvent**
 

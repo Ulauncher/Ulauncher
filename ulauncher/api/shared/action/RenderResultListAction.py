@@ -9,7 +9,7 @@ class RenderResultListAction(BaseAction):
     """
     Renders list of result items
 
-    :param list result_list: list of :class:`~ulauncher.api.shared.item.ResultItem.ResultItem` objects
+    :param list result_list: list of :class:`~ulauncher.api.Result` objects
     """
 
     def __init__(self, result_list):

@@ -1,9 +1,9 @@
-from ulauncher.api.shared.item.ResultItem import ResultItem
+from ulauncher.api import Result
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
-class ExtensionKeywordResultItem(ResultItem):
+class ExtensionKeywordResult(Result):
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)

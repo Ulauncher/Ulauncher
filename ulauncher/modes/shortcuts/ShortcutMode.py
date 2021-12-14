@@ -1,6 +1,6 @@
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.modes.shortcuts.ShortcutResultItem import ShortcutResultItem
+from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
 
 
 class ShortcutMode(BaseMode):
@@ -24,7 +24,7 @@ class ShortcutMode(BaseMode):
         return None
 
     def _create_items(self, shortcuts, default_search=False):
-        return [ShortcutResultItem(default_search=default_search, **s) for s in shortcuts]
+        return [ShortcutResult(default_search=default_search, **s) for s in shortcuts]
 
     def handle_query(self, query):
         """
@@ -34,7 +34,7 @@ class ShortcutMode(BaseMode):
         if not shortcut:
             raise Exception('No active shortcut. This line should not be entered')
 
-        return [ShortcutResultItem(**shortcut)]
+        return [ShortcutResult(**shortcut)]
 
     def get_default_items(self):
         return self._create_items([s for s in self.shortcutsDb.get_shortcuts() if s['is_default_search']],

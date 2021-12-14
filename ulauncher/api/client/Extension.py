@@ -55,7 +55,7 @@ class Extension:
             if isinstance(action, list):
                 action = RenderResultListAction(action)
             if action:
-                assert isinstance(action, BaseAction), "on_event must return list of ResultItems or a BaseAction"
+                assert isinstance(action, BaseAction), "on_event must return list of Results or a BaseAction"
                 self._client.send(Response(event, action))
 
     def run(self):

@@ -12,10 +12,10 @@ ulauncher\.modes\.QueryHistoryDb module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.apps\.AppResultItem module
+ulauncher\.modes\.apps\.AppResult module
 ---------------------------------------------
 
-.. automodule:: ulauncher.modes.apps.AppResultItem
+.. automodule:: ulauncher.modes.apps.AppResult
     :members:
     :undoc-members:
     :show-inheritance:

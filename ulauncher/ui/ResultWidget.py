@@ -14,8 +14,8 @@ from ulauncher.modes.Query import Query
 logger = logging.getLogger(__name__)
 
 
-class ResultItemWidget(Gtk.EventBox):
-    __gtype_name__ = "ResultItemWidget"
+class ResultWidget(Gtk.EventBox):
+    __gtype_name__ = "ResultWidget"
 
     shortcut = ''  # type: str
     index = 0  # type: int
@@ -97,12 +97,12 @@ class ResultItemWidget(Gtk.EventBox):
 
     # pylint: disable=unused-argument
     def on_click(self, widget, event=None):
-        self.get_toplevel().select_result_item(self.index)
+        self.get_toplevel().select_result(self.index)
         alt_enter = bool(event and event.button != 1)
-        self.get_toplevel().enter_result_item(alt=alt_enter)
+        self.get_toplevel().enter_result(alt=alt_enter)
 
     def on_mouse_hover(self, widget, event):
-        self.get_toplevel().select_result_item(self.index, onHover=True)
+        self.get_toplevel().select_result(self.index, onHover=True)
 
     def set_description(self, description):
         description_obj = self.builder.get_object('item-descr')

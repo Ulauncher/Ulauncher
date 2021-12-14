@@ -1,8 +1,8 @@
+from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.item.SmallResultItem import SmallResultItem
 
 
-class CopyPathToClipboardItem(SmallResultItem):
+class CopyPathToClipboardItem(SmallResult):
     """
     :param ~ulauncher.utils.Path.Path path:
     """

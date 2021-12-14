@@ -4,10 +4,10 @@ ulauncher\.modes\.shortcuts package
 Submodules
 ----------
 
-ulauncher\.modes\.shortcuts\.ShortcutResultItem module
+ulauncher\.modes\.shortcuts\.ShortcutResult module
 -------------------------------------------------------
 
-.. automodule:: ulauncher.modes.shortcuts.ShortcutResultItem
+.. automodule:: ulauncher.modes.shortcuts.ShortcutResult
     :members:
     :undoc-members:
     :show-inheritance:

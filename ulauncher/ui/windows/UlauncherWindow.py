@@ -14,13 +14,13 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
-from ulauncher.ui.ResultItemWidget import ResultItemWidget  # noqa: F401
-from ulauncher.ui.SmallResultItemWidget import SmallResultItemWidget   # noqa: F401
+from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
+from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
 from ulauncher.config import get_data_file, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.Search import Search
-from ulauncher.modes.apps.AppResultItem import AppResultItem
+from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
@@ -185,20 +185,20 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 self.results_nav.go_down()
                 return True
             if alt and keyname in ('Return', 'KP_Enter'):
-                self.enter_result_item(alt=True)
+                self.enter_result(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
-                self.enter_result_item()
+                self.enter_result()
             elif alt and keyname.isdigit() and 0 < int(keyname) < 10:
                 # on Alt+<num>
                 try:
-                    self.enter_result_item(int(keyname) - 1)
+                    self.enter_result(int(keyname) - 1)
                 except IndexError:
                     # selected non-existing result item
                     pass
             elif alt and len(keyname) == 1 and 97 <= ord(keyname) <= 122:
                 # on Alt+<char>
                 try:
-                    self.enter_result_item(ord(keyname) - 97 + 9)
+                    self.enter_result(ord(keyname) - 97 + 9)
                 except IndexError:
                     # selected non-existing result item
                     pass
@@ -309,12 +309,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def _get_user_query(self):
         return Query(self.input.get_text().strip())
 
-    def select_result_item(self, index, onHover=False):
+    def select_result(self, index, onHover=False):
         if time.time() - self._results_render_time > 0.1:
             # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
             self.results_nav.select(index)
 
-    def enter_result_item(self, index=None, alt=False):
+    def enter_result(self, index=None, alt=False):
         if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
@@ -337,19 +337,19 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.input.set_text('')
         self.hide()
 
-    def show_results(self, result_items):
+    def show_results(self, results):
         """
-        :param list result_items: list of ResultItem instances
+        :param list results: list of Result instances
         """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
         show_recent_apps = self.settings.get_property('show-recent-apps')
         recent_apps_number = int(show_recent_apps) if show_recent_apps.isnumeric() else 0
-        if not result_items and not self.input.get_text() and recent_apps_number > 0:
-            result_items = AppResultItem.get_most_frequent(recent_apps_number)
+        if not results and not self.input.get_text() and recent_apps_number > 0:
+            results = AppResult.get_most_frequent(recent_apps_number)
 
-        results = self.create_item_widgets(result_items, self._get_user_query())
+        results = self.create_item_widgets(results, self._get_user_query())
 
         if results:
             self._results_render_time = time.time()
@@ -377,8 +377,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     @staticmethod
     def create_item_widgets(items, query):
         results = []
-        for index, result_item in enumerate(items):
-            glade_filename = get_data_file('ui', '%s.ui' % result_item.UI_FILE)
+        for index, result in enumerate(items):
+            glade_filename = get_data_file('ui', '%s.ui' % result.UI_FILE)
             if not os.path.exists(glade_filename):
                 glade_filename = None
 
@@ -387,7 +387,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             builder.add_from_file(glade_filename)
 
             item_frame = builder.get_object('item-frame')
-            item_frame.initialize(builder, result_item, index, query)
+            item_frame.initialize(builder, result, index, query)
 
             results.append(item_frame)
 

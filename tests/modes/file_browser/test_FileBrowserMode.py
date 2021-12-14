@@ -45,11 +45,11 @@ class TestFileBrowserMode:
         assert mode.list_files('path') == sorted(listdir.return_value)
         assert mode.list_files('path', sort_by_usage=True) == sorted(listdir.return_value, reverse=True)
 
-    def test_create_result_item(self, mode, mocker):
-        FileBrowserResultItem = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.FileBrowserResultItem')
+    def test_create_result(self, mode, mocker):
+        FileBrowserResult = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.FileBrowserResult')
         Path = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.Path')
-        assert mode.create_result_item('path') == FileBrowserResultItem.return_value
-        FileBrowserResultItem.assert_called_once_with(Path.return_value)
+        assert mode.create_result('path') == FileBrowserResult.return_value
+        FileBrowserResult.assert_called_once_with(Path.return_value)
         Path.assert_called_once_with('path')
 
     def test_filter_dot_files(self, mode):
@@ -59,7 +59,7 @@ class TestFileBrowserMode:
         path.get_existing_dir.return_value = '/tmp/dir'
         path.get_abs_path.return_value = path.get_existing_dir.return_value
         mocker.patch.object(mode, 'list_files', return_value=['a', 'd', 'b', 'c'])
-        mocker.patch.object(mode, 'create_result_item', side_effect=lambda i: i)
+        mocker.patch.object(mode, 'create_result', side_effect=lambda i: i)
         assert mode.handle_query('/tmp/dir') == ['/tmp/dir/a', '/tmp/dir/d', '/tmp/dir/b', '/tmp/dir/c']
 
     def test_handle_query__InvalidPathError__empty_list_rendered(self, mode, path):
