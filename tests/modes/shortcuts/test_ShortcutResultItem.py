@@ -64,9 +64,9 @@ class TestShortcutResultItem:
         SetUserQueryAction.assert_called_once_with('kw ')
 
     def test_on_enter__run_file(self, RunScriptAction):
-        item = ShortcutResultItem('kw', 'name', '/usr/bin/something', 'icon_path')
+        item = ShortcutResultItem('kw', 'name', '/usr/bin/something/%s', 'icon_path')
         item.on_enter(Query('kw query'))
-        RunScriptAction.assert_called_once_with('/usr/bin/something', 'query')
+        RunScriptAction.assert_called_once_with('/usr/bin/something/query')
 
     def test_on_enter__save_query_to_history(self, item, query_history):
         item.on_enter(Query('my-query'))
