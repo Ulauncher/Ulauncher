@@ -2,7 +2,7 @@ import mock
 import pytest
 
 from ulauncher.api.client.Client import Client
-from ulauncher.api.client.Extension import Extension
+from ulauncher.api import Extension
 
 
 class TestClient:

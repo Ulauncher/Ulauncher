@@ -24,7 +24,7 @@ class Client:
     """
     Instantiated in extension code and manages data transfer from/to Ulauncher app
 
-    :param ~ulauncher.api.client.Extension extension:
+    :param ~ulauncher.api.Extension extension:
     """
 
     def __init__(self, extension):

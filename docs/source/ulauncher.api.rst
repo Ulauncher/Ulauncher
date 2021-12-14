@@ -9,6 +9,19 @@ Subpackages
     ulauncher.api.client
     ulauncher.api.shared
 
+
+Submodules
+----------
+
+ulauncher\.api\.extension module
+----------------------------------------
+
+.. automodule:: ulauncher.api.extension
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Module contents
 ---------------
 

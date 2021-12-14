@@ -167,8 +167,7 @@ main.py
 
 Copy the following code to ``main.py``::
 
-  from ulauncher.api import ExtensionResult
-  from ulauncher.api.client.Extension import Extension
+  from ulauncher.api import Extension, ExtensionResult
   from ulauncher.api.client.EventListener import EventListener
   from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
   from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
@@ -226,7 +225,7 @@ Basic API Concepts
 
 **1. Define extension class and subscribe to an event**
 
-  Create a subclass of :class:`~ulauncher.api.client.Extension.Extension` and subscribe to events in :meth:`__init__`.
+  Create a subclass of :class:`~ulauncher.api.Extension` and subscribe to events in :meth:`__init__`.
   ::
 
     class DemoExtension(Extension):
