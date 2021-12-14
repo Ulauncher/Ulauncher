@@ -39,7 +39,7 @@ from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
+from ulauncher.config import get_data_file, get_options, VERSION, EXTENSIONS_DIR
 
 
 logger = logging.getLogger(__name__)
@@ -243,7 +243,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'available_themes': self._get_available_themes(),
             'hotkey_show_app': self.get_app_hotkey(),
             'env': {
-                'version': get_version(),
+                'version': VERSION,
                 'api_version': api_version,
                 'user_home': os.path.expanduser('~'),
                 'is_wayland': is_wayland(),
