@@ -1,4 +1,4 @@
-from ulauncher.api.version import satisfies, valid_range
+from ulauncher.utils.version import satisfies, valid_range
 
 
 class TestVersion:

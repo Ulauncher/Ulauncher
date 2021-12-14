@@ -9,7 +9,7 @@ from typing import Dict, List, cast
 from ulauncher.config import API_VERSION
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.api.version import satisfies, valid_range
+from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
 
 DEFAULT_GITHUB_BRANCH = 'master'
