@@ -1,11 +1,12 @@
 import os
 import mimetypes
+from pathlib import Path
 import gi
 gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import GLib
 
-from ulauncher.utils.Path import Path
+from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
@@ -28,7 +29,7 @@ SPECIAL_DIRS = {
 
 class FileBrowserResult(SmallResult):
     """
-    :param ~ulauncher.utils.Path.Path path:
+    :param ~str path:
     """
 
     # pylint: disable=super-init-not-called
@@ -40,48 +41,35 @@ class FileBrowserResult(SmallResult):
         """
         :return: name to show in the list
         """
-        return self.path.get_basename()
+        return Path(self.path).name
 
     def get_name_highlighted(self, query, color):
         query = os.path.basename(query)
         return super().get_name_highlighted(query, color)
 
     def get_icon(self):
-        if self.path.is_dir():
-            return SPECIAL_DIRS.get(str(self.path)) or "folder"
+        if Path(self.path).is_dir():
+            return SPECIAL_DIRS.get(self.path) or "folder"
 
-        mime = mimetypes.guess_type(self.path.get_basename())[0]
+        mime = mimetypes.guess_type(Path(self.path).name)[0]
         if mime:
             return mime.replace("/", "-")
 
-        if self.path.is_exe():
+        if os.access(self.path, os.X_OK):
             return "application-x-executable"
 
         return "unknown"
 
     def on_enter(self, query):
-        self._file_queries.save_query(self.path.get_abs_path())
-        if self.path.is_dir():
-            return SetUserQueryAction(os.path.join(self.path.get_user_path(), ''))
+        self._file_queries.save_query(self.path)
+        if Path(self.path).is_dir():
+            return SetUserQueryAction(os.path.join(fold_user_path(self.path), ''))
 
-        return OpenAction(self.path.get_abs_path())
+        return OpenAction(self.path)
 
     def on_alt_enter(self, query):
-        menu_items = self._get_dir_alt_menu() if self.path.is_dir() else self._get_file_alt_menu()
-        return menu_items
-
-    def _get_dir_alt_menu(self):
-        """
-        :rtype: list of Results
-        """
-        open_folder = OpenFolderItem(self.path)
-        open_folder.set_name('Open Folder "%s"' % self.path.get_basename())
-        return [open_folder, CopyPathToClipboardItem(self.path)]
-
-    def _get_file_alt_menu(self):
-        """
-        :rtype: list of Results
-        """
-        open_folder = OpenFolderItem(Path(self.path.get_dirname()))
-        open_folder.set_name('Open Containing Folder')
+        if Path(self.path).is_dir():
+            open_folder = OpenFolderItem(self.path, f'Open Folder "{Path(self.path).name}"')
+        else:
+            open_folder = OpenFolderItem(str(Path(self.path).parent), 'Open Containing Folder')
         return [open_folder, CopyPathToClipboardItem(self.path)]

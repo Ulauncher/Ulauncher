@@ -8,11 +8,8 @@ class OpenFolderItem(SmallResult):
     """
 
     # pylint: disable=super-init-not-called
-    def __init__(self, path):
+    def __init__(self, path, name='Open Folder'):
         self.path = path
-        self._name = 'Open Folder'
-
-    def set_name(self, name):
         self._name = name
 
     # pylint: disable=arguments-differ
@@ -26,4 +23,4 @@ class OpenFolderItem(SmallResult):
         return 'system-file-manager'
 
     def on_enter(self, query):
-        return OpenAction(self.path.get_abs_path())
+        return OpenAction(self.path)

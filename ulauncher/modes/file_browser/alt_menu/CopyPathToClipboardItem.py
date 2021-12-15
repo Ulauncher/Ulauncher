@@ -22,4 +22,4 @@ class CopyPathToClipboardItem(SmallResult):
         return 'edit-copy'
 
     def on_enter(self, query):
-        return CopyToClipboardAction(self.path.get_abs_path())
+        return CopyToClipboardAction(self.path)

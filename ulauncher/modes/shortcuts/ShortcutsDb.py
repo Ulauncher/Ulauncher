@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 from time import time
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
+from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.decorator.singleton import singleton
 
@@ -24,7 +25,8 @@ class ShortcutsDb(KeyValueJsonDb):
         return db
 
     def commit(self):
-        self.ensure_user_paths()
+        for shortcut in self.get_shortcuts():
+            shortcut['icon'] = fold_user_path(shortcut['icon'])
         super().commit()
 
     def get_sorted_records(self):
@@ -51,15 +53,3 @@ class ShortcutsDb(KeyValueJsonDb):
             "added": self._records.get(id, {"added": time()})["added"]
         }
         return id
-
-    def ensure_user_paths(self):
-        for s in self.get_shortcuts():
-            s['icon'] = get_user_path(s['icon'])
-
-
-def get_user_path(path):
-    user_home = os.path.expanduser('~')
-    if path and path.startswith(user_home):
-        return path.replace(user_home, '~', 1)
-
-    return path
