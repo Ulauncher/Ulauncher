@@ -14,7 +14,7 @@ class CalcResult(Result):
         self.error = error
 
     def get_name(self) -> str:
-        return locale.format_string('%d', self.result, grouping=True) if self.result is not None else 'Error!'
+        return locale.format_string('%d', int(self.result), grouping=True) if self.result is not None else 'Error!'
 
     # pylint: disable=super-init-not-called, arguments-differ
     def get_name_highlighted(self, *args) -> None:
