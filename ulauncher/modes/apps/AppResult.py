@@ -25,7 +25,11 @@ class AppResult(Result):
         # TryExec is what we actually want (name of/path to exec), but it's often not specified
         # get_executable uses Exec, which is always specified, but it will return the actual executable.
         # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
-        self._executable = basename(app_info.get_string('TryExec') or app_info.get_executable())
+        self._executable = basename(
+            app_info.get_string('TryExec')
+            or app_info.get_executable()
+            or ""
+        )
         self._app_info = app_info
         self._query_history = QueryHistoryDb.get_instance()
 
