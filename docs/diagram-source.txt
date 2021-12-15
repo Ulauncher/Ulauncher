@@ -5,9 +5,9 @@ participant Extension
 User->Ulauncher: types in query
 note over Ulauncher: extracts keyword\nand checks if any extension\ncan handle it
 Ulauncher->Extension: sends KeywordQueryEvent
-note over Extension: on_event method of \nKeywordQueryEventListener\nis triggered
+note over Extension: on_query_change method is triggered
 note over Extension: handles event by preparing\na list of result items
-Extension->Ulauncher: returns a list of ExtensionResults in on_event
+Extension->Ulauncher: returns a list of ExtensionResults in on_query_change
 note over Ulauncher: runs the action
 Ulauncher->User: render a list of items\nsent by the extension
 User->Ulauncher: selects an item

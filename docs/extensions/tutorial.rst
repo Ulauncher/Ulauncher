@@ -45,7 +45,6 @@ Previously Ulauncher used semver for the API version. We simplified this by drop
 
 Let's take this example::
 
-
   [
     {"required_api_version": "2.1", "commit": "release-for-api-v2"},
     {"required_api_version": "3", "commit": "release-for-api-v3"},
@@ -156,33 +155,18 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
 .. NOTE:: All fields except ``description`` are required and cannot be empty.
 
 
-
-
-
-
-
-
 main.py
 -------
 
 Copy the following code to ``main.py``::
 
   from ulauncher.api import Extension, ExtensionResult
-  from ulauncher.api.client.EventListener import EventListener
-  from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
   from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 
   class DemoExtension(Extension):
 
-      def __init__(self):
-          super().__init__()
-          self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
-
-
-  class KeywordQueryEventListener(EventListener):
-
-      def on_event(self, event, extension):
+      def on_query_change(self, event):
           items = []
           for i in range(5):
               items.append(ExtensionResult(
@@ -209,13 +193,8 @@ When you type in "dm " (keyword that you defined) you'll get a list of items.
 This is all your extension can do now -- show a list of 5 items.
 
 
-
-
-
-
 Basic API Concepts
 ------------------
-
 
 .. figure:: https://imgur.com/Wzb6KUz.png
   :align: center
@@ -223,41 +202,21 @@ Basic API Concepts
   Message flow
 
 
-**1. Define extension class and subscribe to an event**
+**1. Define extension class and the `on_query_change` listener**
 
-  Create a subclass of :class:`~ulauncher.api.Extension` and subscribe to events in :meth:`__init__`.
+  Create a subclass of :class:`~ulauncher.api.Extension`.
   ::
 
     class DemoExtension(Extension):
 
-        def __init__(self):
-            super().__init__()
-            self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
-
-
-  :code:`self.subscribe(event_class, event_listener)`
-
-
-  In our case we subscribed to one event -- :class:`KeywordQueryEvent`.
-  This means whenever user types in a query that starts with a keyword from manifest file,
-  :meth:`KeywordQueryEventListener.on_event` will be invoked.
-
-**2. Define a new event listener**
-
-  Create a subclass of :class:`~ulauncher.api.client.EventListener.EventListener` and implement :func:`on_event`
-  ::
-
-    class KeywordQueryEventListener(EventListener):
-
-        def on_event(self, event, extension):
-            # in this case `event` will be an instance of KeywordQueryEvent
+        def on_query_change(self, event):
+            # `event` will be an instance of :class:`KeywordQueryEvent`
 
             ...
 
-  :meth:`~ulauncher.api.client.EventListener.EventListener.on_event` may return an action (see :doc:`actions`).
+  `on_query_change` is new in the V3 API. Previously this was handled by manually binding the events.
 
-
-**3. Render results**
+**2. Render results**
 
   Return a list of :class:`~ulauncher.api.ExtensionResult` in order to render results.
 
@@ -265,9 +224,8 @@ Basic API Concepts
   to render more items. You won't have item description with this type.
   ::
 
-    class KeywordQueryEventListener(EventListener):
-
-        def on_event(self, event, extension):
+    class DemoExtension(Extension):
+        def on_query_change(self, event):
             items = []
             for i in range(5):
                 items.append(ExtensionResult(
@@ -283,19 +241,12 @@ Basic API Concepts
   :code:`on_enter` is an action that will be ran when item is entered/clicked.
 
 
-**4. Run extension**
+**3. Run extension**
 
   ::
 
     if __name__ == '__main__':
         DemoExtension().run()
-
-
-
-
-
-
-
 
 
 Custom Action on Item Enter
@@ -325,11 +276,12 @@ Custom Action on Item Enter
 
   ::
 
-    from ulauncher.api.client.EventListener import EventListener
+    class DemoExtension(Extension):
 
-    class ItemEnterEventListener(EventListener):
+        def on_query_change(self, event):
+            ...
 
-        def on_event(self, event, extension):
+        def on_item_enter(self, event):
             # event is instance of ItemEnterEvent
 
             data = event.get_data()
@@ -341,19 +293,6 @@ Custom Action on Item Enter
                 name=data['new_name'],
                 on_enter=HideWindowAction()
             )]
-
-**3. Subscribe to ItemEnterEvent**
-
-  You want your new listener to be subscribed to :class:`ItemEnterEvent` like this::
-
-    from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
-
-    class DemoExtension(Extension):
-
-        def __init__(self):
-            super().__init__()
-            self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
-            self.subscribe(ItemEnterEvent, ItemEnterEventListener())  # <-- add this line
 
 
 
