@@ -6,7 +6,7 @@ Please read our General communication guidelines [here](CODE_OF_CONDUCT.md#Gener
 
 Thank you for you interest in contributing to Ulauncher! We much appreciate it.
 
-Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straight forward to implement. Other issues mat require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
+Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straight forward to implement. Other issues may require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
 
 There are no more releases are planned for Ulauncher v5 unless we discover critical bugs and fix these. All the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the [v6 branch](https://github.com/Ulauncher/Ulauncher/tree/v6) as the base branch and target for new pull requests, and check that your contributions haven't already been fixed there.
 
