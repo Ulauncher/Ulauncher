@@ -1,3 +1,5 @@
+import locale
+
 from ulauncher.api import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
@@ -12,7 +14,7 @@ class CalcResult(Result):
         self.error = error
 
     def get_name(self) -> str:
-        return str(self.result) if self.result is not None else 'Error!'
+        return locale.format_string('%d', self.result, grouping=True) if self.result is not None else 'Error!'
 
     # pylint: disable=super-init-not-called, arguments-differ
     def get_name_highlighted(self, *args) -> None:
