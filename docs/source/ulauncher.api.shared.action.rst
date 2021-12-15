@@ -4,6 +4,15 @@ ulauncher\.api\.shared\.action package
 Submodules
 ----------
 
+ulauncher\.api\.shared\.action\.ActionList module
+-------------------------------------------------
+
+.. automodule:: ulauncher.api.shared.action.ActionList
+    :members:
+    :undoc-members:
+    :noindex:
+    :show-inheritance:
+
 ulauncher\.api\.shared\.action\.BaseAction module
 -------------------------------------------------
 
