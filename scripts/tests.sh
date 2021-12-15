@@ -9,7 +9,7 @@ test-mypy () {
 test-pylint () {
     echo '[ test: pylint ]'
     set -e
-    pylint --output-format=colorized ulauncher
+    pylint --output-format=colorized ulauncher --disable=consider-using-f-string,unspecified-encoding
 }
 
 test-flake8 () {
