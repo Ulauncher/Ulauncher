@@ -2,7 +2,7 @@ import os
 import re
 
 from ulauncher.api import Result
-from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
@@ -76,7 +76,7 @@ class ShortcutResult(Result):
             command = command.replace('%s', argument)
 
         if argument or self.run_without_argument:
-            return OpenUrlAction(command) if self._is_url() else RunScriptAction(command)
+            return OpenAction(command) if self._is_url() else RunScriptAction(command)
 
         return SetUserQueryAction('%s ' % self.keyword)
 

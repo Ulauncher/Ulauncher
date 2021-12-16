@@ -4,16 +4,16 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 
 class OpenAction(BaseAction):
     """
-    Run platform specific command to open either file or directory
+    Run platform specific command to open a file path or URL
 
-    :param str path: file or dir path
+    :param str item: file path or URL
     """
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, item):
+        self.item = item
 
     def keep_app_open(self):
         return False
 
     def run(self):
-        subprocess.Popen(['xdg-open', self.path])
+        subprocess.Popen(['xdg-open', self.item])
