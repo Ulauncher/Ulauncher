@@ -6,8 +6,8 @@ from ulauncher.modes.Query import Query
 class TestShortcutResult:
 
     @pytest.fixture(autouse=True)
-    def OpenUrlAction(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.OpenUrlAction')
+    def OpenAction(self, mocker):
+        return mocker.patch('ulauncher.modes.shortcuts.ShortcutResult.OpenAction')
 
     @pytest.fixture(autouse=True)
     def RunScriptAction(self, mocker):
@@ -40,27 +40,27 @@ class TestShortcutResult:
     def test_get_icon(self, item):
         assert isinstance(item.get_icon(), str)
 
-    def test_on_enter(self, item, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter(self, item, OpenAction, SetUserQueryAction):
         item.on_enter(Query('kw test'))
-        OpenUrlAction.assert_called_once_with('https://site/?q=test')
+        OpenAction.assert_called_once_with('https://site/?q=test')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__default_search(self, item, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__default_search(self, item, OpenAction, SetUserQueryAction):
         item.is_default_search = True
         item.on_enter(Query('search query'))
-        OpenUrlAction.assert_called_once_with('https://site/?q=search query')
+        OpenAction.assert_called_once_with('https://site/?q=search query')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__run_without_arguments(self, item, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__run_without_arguments(self, item, OpenAction, SetUserQueryAction):
         item.run_without_argument = True
         item.on_enter(Query('kw'))
         # it doesn't replace %s if run_without_argument = True
-        OpenUrlAction.assert_called_once_with('https://site/?q=%s')
+        OpenAction.assert_called_once_with('https://site/?q=%s')
         assert not SetUserQueryAction.called
 
-    def test_on_enter__misspelled_kw(self, item, OpenUrlAction, SetUserQueryAction):
+    def test_on_enter__misspelled_kw(self, item, OpenAction, SetUserQueryAction):
         item.on_enter(Query('keyword query'))
-        assert not OpenUrlAction.called
+        assert not OpenAction.called
         SetUserQueryAction.assert_called_once_with('kw ')
 
     def test_on_enter__run_file(self, RunScriptAction):
