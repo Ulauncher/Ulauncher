@@ -75,10 +75,11 @@ class AppResult(Result):
             return 0
 
         # Also use the executable name, such as "baobab" or "nautilus", but score that lower
-        return max(
+        return max([
             get_score(query, self._name),
-            get_score(query, self._executable) * .8
-        )
+            get_score(query, self._executable) * .8,
+            get_score(query, self._app_info.get_description()) * .7
+        ])
 
     def get(self, property):
         return self._app_info.get_string(property)
