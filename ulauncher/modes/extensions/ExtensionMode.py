@@ -50,15 +50,15 @@ class ExtensionMode(BaseMode):
         :rtype: list of :class:`~ulauncher.api.Result`
         """
         items = []
-        for c in self.extensionServer.get_controllers():
-            for pref in c.preferences.get_items(type='keyword'):
-                if not pref['value']:
-                    continue
-
-                icon = c.manifest.load_icon(ExtensionKeywordResult.get_icon_size(), path=pref['icon'])
-                items.append(ExtensionKeywordResult(name=html.escape(pref['name']),
-                                                    description=html.escape(pref['description']),
-                                                    keyword=pref['value'],
-                                                    icon=icon))
+        for controller in self.extensionServer.get_controllers():
+            for pref in controller.preferences.get_items(type='keyword'):
+                if pref['value']:
+                    icon_size = ExtensionKeywordResult.get_icon_size()
+                    items.append(ExtensionKeywordResult(
+                        name=html.escape(pref['name']),
+                        description=html.escape(pref['description']),
+                        keyword=pref['value'],
+                        icon=controller.manifest.load_icon(icon_size, path=pref['icon'])
+                    ))
 
         return items
