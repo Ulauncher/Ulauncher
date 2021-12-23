@@ -1,11 +1,5 @@
 import os
-import mimetypes
 from pathlib import Path
-import gi
-gi.require_version('GLib', '2.0')
-# pylint: disable=wrong-import-position
-from gi.repository import GLib
-
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
@@ -13,18 +7,7 @@ from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.file_browser.FileQueries import FileQueries
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
 from ulauncher.modes.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
-
-SPECIAL_DIRS = {
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): 'folder-download',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS): 'folder-documents',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC): 'folder-music',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES): 'folder-pictures',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PUBLIC_SHARE): 'folder-publicshare',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_TEMPLATES): 'folder-templates',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS): 'folder-videos',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP): 'user-desktop',
-    os.path.expanduser('~'): 'folder-home'
-}
+from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 
 
 class FileBrowserResult(SmallResult):
@@ -48,17 +31,7 @@ class FileBrowserResult(SmallResult):
         return super().get_name_highlighted(query, color)
 
     def get_icon(self):
-        if Path(self.path).is_dir():
-            return SPECIAL_DIRS.get(self.path) or "folder"
-
-        mime = mimetypes.guess_type(Path(self.path).name)[0]
-        if mime:
-            return mime.replace("/", "-")
-
-        if os.access(self.path, os.X_OK):
-            return "application-x-executable"
-
-        return "unknown"
+        return get_icon_from_path(self.path)
 
     def on_enter(self, query):
         self._file_queries.save_query(self.path)
