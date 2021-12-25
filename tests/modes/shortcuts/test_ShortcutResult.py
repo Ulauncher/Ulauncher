@@ -26,19 +26,19 @@ class TestShortcutResult:
         return ShortcutResult('kw', 'name', 'https://site/?q=%s', 'icon_path',
                               is_default_search=True, run_without_argument=False)
 
-    def test_get_keyword(self, item):
-        assert item.get_keyword() == 'kw'
+    def test_keyword(self, item):
+        assert item.keyword == 'kw'
 
-    def test_get_name(self, item):
-        assert item.get_name() == 'name'
+    def test_name(self, item):
+        assert item.name == 'name'
 
     def test_get_description(self, item):
         assert item.get_description(Query('kw test')) == 'https://site/?q=test'
         assert item.get_description(Query('keyword test')) == 'https://site/?q=...'
         assert item.get_description(Query('goo')) == 'https://site/?q=...'
 
-    def test_get_icon(self, item):
-        assert isinstance(item.get_icon(), str)
+    def test_icon(self, item):
+        assert isinstance(item.icon, str)
 
     def test_on_enter(self, item, OpenAction, SetUserQueryAction):
         item.on_enter(Query('kw test'))

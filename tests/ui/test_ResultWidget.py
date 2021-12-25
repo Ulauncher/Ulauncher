@@ -122,8 +122,8 @@ class TestResultWidget:
         assert result_wgt.on_alt_enter('test') is item_obj.on_alt_enter.return_value
         item_obj.on_alt_enter.assert_called_with('test')
 
-    def test_get_keyword(self, result_wgt, item_obj):
-        assert result_wgt.get_keyword() is item_obj.get_keyword.return_value
+    def test_keyword(self, result_wgt, item_obj):
+        assert result_wgt.get_keyword() is item_obj.keyword
 
     def test_selected_by_default(self, result_wgt, item_obj):
         assert result_wgt.selected_by_default('q') is item_obj.selected_by_default.return_value

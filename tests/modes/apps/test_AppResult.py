@@ -49,14 +49,13 @@ class TestAppResult:
         return mocker.patch("ulauncher.modes.apps.AppResult._app_starts", new=db)
 
     def test_get_name(self, app1):
-        assert app1.get_name() == 'TrueApp - Full Name'
+        assert app1.name == 'TrueApp - Full Name'
 
     def test_get_description(self, app1):
         assert app1.get_description(Query('q')) == 'Your own yes-man'
 
-    def test_get_icon(self, app1):
-        assert isinstance(app1.get_icon(), str)
-        assert app1.get('Icon') == 'dialog-yes'
+    def test_icon(self, app1):
+        assert app1.icon == 'dialog-yes'
 
     def test_search_score(self, app1):
         assert app1.search_score("true") > app1.search_score("trivago")
@@ -64,7 +63,7 @@ class TestAppResult:
     def test_search(self):
         searchresults = AppResult.search('false', min_score=0)
         assert len(searchresults) == 2
-        assert searchresults[0].get_name() == 'FalseApp - Full Name'
+        assert searchresults[0].name == 'FalseApp - Full Name'
 
     def test_selected_by_default(self, app1, query_history):
         query_history.find.return_value = 'TrueApp - Full Name'
@@ -80,4 +79,4 @@ class TestAppResult:
 
     def test_get_most_frequent(self):
         assert len(AppResult.get_most_frequent()) == 2
-        assert AppResult.get_most_frequent()[0].get_name() == 'FalseApp - Full Name'
+        assert AppResult.get_most_frequent()[0].name == 'FalseApp - Full Name'

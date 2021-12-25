@@ -21,7 +21,9 @@ class AppResult(Result):
     """
     # pylint: disable=super-init-not-called
     def __init__(self, app_info):
-        self._name = app_info.get_display_name()
+        self.name = app_info.get_display_name()
+        self.icon = app_info.get_string('Icon')
+        self.description = app_info.get_description()
         # TryExec is what we actually want (name of/path to exec), but it's often not specified
         # get_executable uses Exec, which is always specified, but it will return the actual executable.
         # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
@@ -68,39 +70,30 @@ class AppResult(Result):
         # Make an exception for gnome-control-center, because all the very useful specific settings
         # like "Keyboard", "Wi-Fi", "Sound" etc have NoDisplay=true
         nodisplay = self._app_info.get_nodisplay() and not self._executable == 'gnome-control-center'
-        return self._name and self._executable and show_in and not nodisplay
+        return self.name and self._executable and show_in and not nodisplay
 
     def search_score(self, query):
         if not self.should_show():
             return 0
 
         # Also use the executable name, such as "baobab" or "nautilus", but score that lower
-        return max([
-            get_score(query, self._name),
+        return max(
+            get_score(query, self.name),
             get_score(query, self._executable) * .8,
-            get_score(query, self._app_info.get_description()) * .7
-        ])
+            get_score(query, self.description) * .7
+        )
 
     def get(self, property):
         return self._app_info.get_string(property)
-
-    def get_name(self):
-        return self._name
-
-    def get_description(self, _):
-        return self._app_info.get_description()
 
     def selected_by_default(self, query):
         """
         :param ~ulauncher.modes.Query.Query query:
         """
-        return self._query_history.find(query) == self._name
-
-    def get_icon(self):
-        return self._app_info.get_string('Icon')
+        return self._query_history.find(query) == self.name
 
     def on_enter(self, query):
-        self._query_history.save_query(str(query), self._name)
+        self._query_history.save_query(str(query), self.name)
 
         app_id = self._app_info.get_id()
         count = _app_starts._records.get(app_id, 0)

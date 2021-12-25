@@ -16,15 +16,15 @@ class Result:
 
     score = None  # used by SortedResultList class to maintain sorted by score order of items
 
-    _name = None  # type: str
-    _description = None  # type: str
-    _keyword = None  # type: str
-    _icon = None  # type: Optional[str]
+    name = None  # type: str
+    description = None  # type: str
+    keyword = None  # type: str
+    icon = None  # type: Optional[str]
     _selected_by_default = False  # type: bool
     _on_enter = None  # type: OnEnterCallback
     _on_alt_enter = None  # type: OnEnterCallback
-    _highlightable = True  # type: bool
-    _is_extension = False  # type: bool
+    highlightable = True  # type: bool
+    is_extension = False  # type: bool
 
     # pylint: disable=too-many-arguments
     def __init__(self,
@@ -42,27 +42,27 @@ class Result:
             raise TypeError(f'"description" must be of type "str", "{type(description).__name__}" given')
         if not isinstance(keyword, str):
             raise TypeError(f'"keyword" must be of type "str", "{type(keyword).__name__}" given')
-        self._name = name
-        self._description = description
-        self._keyword = keyword
-        self._icon = icon
+        self.name = name
+        self.description = description
+        self.keyword = keyword
+        self.icon = icon
+        self.highlightable = highlightable
         self._selected_by_default = selected_by_default
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
-        self._highlightable = highlightable
 
     @classmethod
     def get_icon_size(cls):
         return cls.ICON_SIZE * get_monitor_scale_factor()
 
     def get_keyword(self) -> str:
-        """
-        If keyword is defined, search will be performed by keyword, otherwise by name.
-        """
-        return self._keyword
+        return self.keyword
 
     def get_name(self) -> str:
-        return self._name
+        return self.name
+
+    def get_icon(self) -> Optional[str]:
+        return self.icon
 
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
         """
@@ -70,15 +70,15 @@ class Result:
         :param str color:
         :rtype: str
         """
-        if query and self._highlightable:
+        if query and self.highlightable:
             return highlight_text(
-                query if not self._is_extension else query.get_argument(''),
-                self.get_name(),
+                query if not self.is_extension else query.get_argument(''),
+                self.name,
                 open_tag=f'<span foreground="{color}">',
                 close_tag='</span>'
             )
         # don't highlight if query is empty
-        return self.get_name()
+        return self.name
 
     # pylint: disable=unused-argument
     def get_description(self, query: Query) -> str:
@@ -87,15 +87,7 @@ class Result:
 
         :param ~ulauncher.modes.Query.Query query:
         """
-        return self._description
-
-    def get_icon(self):
-        """
-        optional
-
-        :rtype: str path to icon or themed icon name
-        """
-        return self._icon
+        return self.description
 
     def selected_by_default(self, query):
         """

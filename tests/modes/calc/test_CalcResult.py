@@ -13,12 +13,12 @@ class TestCalcResult:
         return mocker.patch('ulauncher.modes.calc.CalcResult.CopyToClipboardAction')
 
     def test_get_name(self):
-        assert CalcResult(52).get_name() == '52'
-        assert CalcResult('42').get_name() == '42'
-        assert CalcResult(error='message').get_name() == 'Error!'
+        assert CalcResult(52).name == '52'
+        assert CalcResult('42').name == '42'
+        assert CalcResult(error='message').name == 'Error!'
 
     def test_get_description(self):
-        assert CalcResult(52).get_description('q') == 'Enter to copy to the clipboard'
+        assert CalcResult(52).description == 'Enter to copy to the clipboard'
         assert CalcResult(error='message').get_description('q') == 'message'
 
     def test_on_enter(self, CopyToClipboardAction):

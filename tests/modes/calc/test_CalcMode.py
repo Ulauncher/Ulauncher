@@ -38,5 +38,5 @@ class TestCalcMode:
 
     def test_handle_query__invalid_expr(self, mode):
         [invalid_result] = mode.handle_query('3++')
-        assert invalid_result.get_name() == 'Error!'
-        assert invalid_result.error == 'Invalid expression'
+        assert invalid_result.name == 'Error!'
+        assert invalid_result.description == 'Invalid expression'

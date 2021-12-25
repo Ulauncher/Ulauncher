@@ -1,4 +1,3 @@
-import os
 import re
 
 from ulauncher.api import Result
@@ -19,12 +18,6 @@ class ShortcutResult(Result):
         self.is_default_search = default_search
         self.run_without_argument = run_without_argument
         self._query_history = QueryHistoryDb.get_instance()
-
-    def get_keyword(self):
-        return self.keyword
-
-    def get_name(self):
-        return self.name
 
     def get_name_highlighted(self, query, color):
         # highlight only if we did not enter Web search item keyword
@@ -52,17 +45,14 @@ class ShortcutResult(Result):
 
         return description.replace('%s', '...')
 
-    def get_icon(self):
-        return os.path.expanduser(self.icon)
-
     def selected_by_default(self, query):
         """
         :param ~ulauncher.modes.Query.Query query:
         """
-        return self._query_history.find(query) == self.get_name()
+        return self._query_history.find(query) == self.name
 
     def on_enter(self, query):
-        self._query_history.save_query(query, self.get_name())
+        self._query_history.save_query(query, self.name)
 
         if query.get_keyword() == self.keyword and query.get_argument():
             argument = query.get_argument()

@@ -18,20 +18,13 @@ class FileBrowserResult(SmallResult):
     # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
+        self.name = Path(path).name
+        self.icon = get_icon_from_path(path)
         self._file_queries = FileQueries.get_instance()
-
-    def get_name(self):
-        """
-        :return: name to show in the list
-        """
-        return Path(self.path).name
 
     def get_name_highlighted(self, query, color):
         query = os.path.basename(query)
         return super().get_name_highlighted(query, color)
-
-    def get_icon(self):
-        return get_icon_from_path(self.path)
 
     def on_enter(self, query):
         self._file_queries.save_query(self.path)

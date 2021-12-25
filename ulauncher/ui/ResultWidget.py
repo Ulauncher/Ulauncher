@@ -36,7 +36,7 @@ class ResultWidget(Gtk.EventBox):
         self.query = query
         self.set_index(index)
 
-        self.set_icon(load_icon(item_object.get_icon(), item_object.get_icon_size()))
+        self.set_icon(load_icon(item_object.icon, item_object.get_icon_size()))
         self.set_description(item_object.get_description(query))
         self.set_name_highlighted()
 
@@ -72,11 +72,8 @@ class ResultWidget(Gtk.EventBox):
             iconWgt.set_from_pixbuf(icon)
             return
 
-        try:
-            surface = Gdk.cairo_surface_create_from_pixbuf(icon, scale_factor, self.get_window())
-            iconWgt.set_from_surface(surface)
-        except AttributeError:  # Fallback for GTK+ older than 3.10
-            iconWgt.set_from_pixbuf(icon)
+        surface = Gdk.cairo_surface_create_from_pixbuf(icon, scale_factor, self.get_window())
+        iconWgt.set_from_surface(surface)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
         colors = Theme.get_current().get_matched_text_hl_colors()
@@ -125,7 +122,7 @@ class ResultWidget(Gtk.EventBox):
         return self.item_object.on_alt_enter(query)
 
     def get_keyword(self):
-        return self.item_object.get_keyword()
+        return self.item_object.keyword
 
     def selected_by_default(self, query):
         return self.item_object.selected_by_default(query)

@@ -13,11 +13,11 @@ class ExtensionKeywordResult(Result):
         """
         :param ~ulauncher.modes.Query.Query query:
         """
-        return self._query_history.find(query) == self.get_name()
+        return self._query_history.find(query) == self.name
 
     def on_enter(self, query):
         """
         :param ~ulauncher.modes.Query.Query query: query
         """
-        self._query_history.save_query(query, self.get_name())
-        return SetUserQueryAction(f'{self.get_keyword()} ')
+        self._query_history.save_query(query, self.name)
+        return SetUserQueryAction(f'{self.keyword} ')

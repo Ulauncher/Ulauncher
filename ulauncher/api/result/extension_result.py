@@ -15,17 +15,14 @@ class ExtensionResult(Result):
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self._is_extension = True
+        self.is_extension = True
         self.extension_path = os.path.dirname(sys.argv[0])
+
+        if isinstance(self.icon, str) and not self.icon.startswith('/') and "." in self.icon:
+            self.icon = os.path.join(self.extension_path, self.icon)
+
         if self._on_enter and not isinstance(self._on_enter, BaseAction):
             raise Exception("Incorrect type of on_enter argument")
-
-    def get_icon(self):
-        if isinstance(self._icon, str) and not self._icon.startswith('/') and "." in self._icon:
-            return os.path.join(self.extension_path, self._icon)
-
-        # assuming it's GtkPixbuf
-        return self._icon
 
     def on_enter(self, query):
         return self._on_enter
