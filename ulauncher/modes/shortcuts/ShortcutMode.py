@@ -15,11 +15,10 @@ class ShortcutMode(BaseMode):
         return bool(self._get_active_shortcut(query))
 
     def _get_active_shortcut(self, query):
-        for s in self.shortcutsDb.get_shortcuts():
-            if query == s.get('keyword') and s.get('run_without_argument'):
-                return s
-            if query.startswith('%s ' % s.get('keyword')):
-                return s
+        for shortcut in self.shortcutsDb.get_shortcuts():
+            keyword = shortcut.get('keyword')
+            if query.startswith(f"{keyword} ") or (query == keyword and shortcut.get('run_without_argument')):
+                return shortcut
 
         return None
 

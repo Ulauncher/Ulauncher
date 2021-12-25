@@ -71,8 +71,8 @@ class build_wrapper(build_py):
         build_py.run(self)
         print("Overwriting the namespace package with fixed values")
         Path(self.build_lib + "/ulauncher/__init__.py").write_text("\n".join([
-            "__assets_dir__ = '%s/share/ulauncher'" % sys.prefix,
-            "__version__ = '%s'" % __version__,
+            f"__assets_dir__ = '{sys.prefix}/share/ulauncher'",
+            f"__version__ = '{__version__}'",
             "__is_dev__ = False"
         ]))
 

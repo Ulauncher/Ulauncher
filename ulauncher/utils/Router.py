@@ -31,10 +31,10 @@ class Router:
             if params.query:
                 query = json.loads(unquote(params.query))
             callback = self._callbacks[params.path.strip('/')]
-        except json.decoder.JSONDecodeError as e:
-            raise RouterQueryError('Invalid query %s. Expected JSON' % unquote(params.query)) from e
-        except KeyError as e:
-            raise RouteNotFound('Route not found for path %s' % params.path) from e
+        except json.decoder.JSONDecodeError as err:
+            raise RouterQueryError(f"Invalid query {unquote(params.query)}. Expected JSON") from err
+        except KeyError as err:
+            raise RouteNotFound(f"Route not found for path {params.path}") from err
 
         return callback(context, query)
 

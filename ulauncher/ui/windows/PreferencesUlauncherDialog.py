@@ -197,25 +197,26 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         try:
             resp = rt.dispatch(self, scheme_request.get_uri())
-            callback = '%s(%s);' % (callback_name, json.dumps(resp))
+            callback = f'{callback_name}({json.dumps(resp)});'
         except UlauncherAPIError as e:
             error_type = type(e).__name__
             logger.error('%s: %s', error_type, e)
-            callback = '%s(null, %s);' % (callback_name, json.dumps({
+            err_meta = json.dumps({
                 'message': str(e),
                 'type': error_type,
                 'errorName': e.error_name,
                 'stacktrace': traceback.format_exc()
-            }))
+            })
+            callback = f'{callback_name}(null, {err_meta});'
         except Exception as e:
-            message = 'Unexpected API error. %s: %s' % (type(e).__name__, e)
-            logger.exception(message)
-            callback = '%s(null, %s);' % (callback_name, json.dumps({
+            logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
+            err_meta = json.dumps({
                 'message': str(e),
                 'type': type(e).__name__,
                 'errorName': ErrorName.UnhandledError.value,
                 'stacktrace': traceback.format_exc()
-            }))
+            })
+            callback = f'{callback_name}(null, {err_meta});'
 
         try:
             stream = Gio.MemoryInputStream.new_from_data(callback.encode())
@@ -225,7 +226,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
 
     def send_webview_notification(self, name, data):
-        self.webview.run_javascript('onNotification("%s", %s)' % (name, json.dumps(data)))
+        self.webview.run_javascript(f'onNotification("{name}", {json.dumps(data)})')
 
     ######################################
     # Request handlers
@@ -272,8 +273,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         try:
             self.autostart_pref.switch(is_enabled)
-        except Exception as e:
-            raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
+        except Exception as err:
+            raise PrefsApiError(f'Caught an error while switching "autostart": {err}') from err
 
     def prefs_apply_theme(self):
         # pylint: disable=import-outside-toplevel
@@ -465,8 +466,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         }
 
     def _load_prefs_html(self, page=''):
-        uri = "file://%s#/%s" % (get_asset('preferences', 'index.html'), page)
-        self.webview.load_uri(uri)
+        self.webview.load_uri(f"file://{get_asset('preferences', 'index.html')}#/{page}")
 
     def _get_available_themes(self):
         load_available_themes()

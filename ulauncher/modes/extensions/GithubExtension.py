@@ -58,7 +58,7 @@ class GithubExtension:
 
     def validate_url(self):
         if not re.match(self.url_match_pattern, self.url, re.I):
-            raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
+            raise GithubExtensionError(f'Invalid GithubUrl: {self.url}', ErrorName.InvalidGithubUrl)
 
     def find_compatible_version(self) -> Commit:
         """
@@ -74,7 +74,7 @@ class GithubExtension:
 
         if not sha_or_branch:
             raise GithubExtensionError(
-                "This extension is not compatible with current version Ulauncher extension API (v%s)" % API_VERSION,
+                f"This extension is not compatible with current version Ulauncher extension API (v{API_VERSION})",
                 ErrorName.IncompatibleVersion)
 
         return self.get_commit(sha_or_branch)
@@ -102,8 +102,8 @@ class GithubExtension:
         except HTTPError as e:
             logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
             if e.code == 404:
-                raise GithubExtensionError('Could not find versions.json file using URL "%s"' %
-                                           url, ErrorName.VersionsJsonNotFound) from e
+                raise GithubExtensionError(f'Could not find versions.json file using URL "{url}"',
+                                           ErrorName.VersionsJsonNotFound) from e
             raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError) from e
 
     def read_versions(self) -> List[Dict[str, str]]:
@@ -128,7 +128,7 @@ class GithubExtension:
             except Exception:
                 pass
             if not valid:
-                raise GithubExtensionError("versions.json: invalid range '%s'" % ver['required_api_version'],
+                raise GithubExtensionError(f"versions.json: invalid range '{ver['required_api_version']}'",
                                            ErrorName.InvalidVersionsJson)
 
         return versions
@@ -141,14 +141,14 @@ class GithubExtension:
         >>> Ulauncher/ulauncher-timer
         <<< https://github.com/Ulauncher/ulauncher-timer/tarball/master
         """
-        return 'https://github.com/%s/tarball/%s' % (self._get_project_path(), commit)
+        return f'https://github.com/{self._get_project_path()}/tarball/{commit}'
 
     def get_ext_id(self) -> str:
         """
         >>> https://github.com/Ulauncher/ulauncher-timer
         <<< com.github.ulauncher.ulauncher-timer
         """
-        return 'com.github.%s' % self._get_project_path().replace('/', '.').lower()
+        return f"com.github.{self._get_project_path().replace('/', '.').lower()}"
 
     def _get_project_path(self) -> str:
         """
@@ -157,6 +157,6 @@ class GithubExtension:
         """
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
+            raise GithubExtensionError(f'Invalid GithubUrl: {self.url}', ErrorName.InvalidGithubUrl)
 
         return match.group(2)

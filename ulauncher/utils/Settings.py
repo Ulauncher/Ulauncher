@@ -103,7 +103,7 @@ class Settings(GObject.GObject):
         self._filename = filename
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                raise IOError("%s exists and is not a file" % filename)
+                raise IOError(f"{filename} exists and is not a file")
 
             with open(filename, 'r') as f:
                 self._properties = json.load(f)

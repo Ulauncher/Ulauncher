@@ -45,7 +45,7 @@ class Builder(Gtk.Builder):
             Assumed to be in the 'ui' directory under the data path.
         """
         # Look for the ui file that describes the user interface.
-        ui_filename = get_asset('ui', '%s.ui' % (builder_file_name,))
+        ui_filename = get_asset(f'ui/{builder_file_name}.ui')
         if not os.path.exists(ui_filename):
             ui_filename = None
 
@@ -282,7 +282,7 @@ def auto_connect_by_name(callback_obj, builder):
         for sig in signal_names:
             # using convention suggested by glade
             sig = sig.replace("-", "_")
-            handler_names = ["on_%s_%s" % (widget_name, sig)]
+            handler_names = [f"on_{widget_name}_{sig}"]
 
             # log all possible event handler names
             # if widget_name == 'notebook':
@@ -292,7 +292,7 @@ def auto_connect_by_name(callback_obj, builder):
             # specified in the handler name. That is use
             # on_destroy() instead of on_windowname_destroy()
             if widget is callback_obj:
-                handler_names.append("on_%s" % sig)
+                handler_names.append(f"on_{sig}")
 
             do_connect(item, sig, handler_names, callback_handler_dict, builder.connections)
 

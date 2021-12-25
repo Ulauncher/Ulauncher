@@ -107,7 +107,7 @@ class Theme:
 
         generated_css = self._get_path_for_generated_css()
         with open(generated_css, 'w') as new_css_file:
-            new_css_file.write('@import url("%s");\n\n' % extend_theme.compile_css())
+            new_css_file.write(f'@import url("{extend_theme.compile_css()}");\n\n')
             with open(css_file, 'r') as theme_css_file:
                 new_css_file.write(theme_css_file.read())
 

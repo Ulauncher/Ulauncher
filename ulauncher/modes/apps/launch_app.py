@@ -52,7 +52,7 @@ def launch_app(app_id):
 
         try:
             logger.info('Run application %s (%s) Exec %s', app.get_name(), app_id, exec)
-            envp = ["{}={}".format(k, v) for k, v in env.items()]
+            envp = [f"{k}={v}" for k, v in env.items()]
             GLib.spawn_async(
                 argv=sanitized_exec,
                 envp=envp,

@@ -78,7 +78,7 @@ class ShortcutResult(Result):
         if argument or self.run_without_argument:
             return OpenAction(command) if self._is_url() else RunScriptAction(command)
 
-        return SetUserQueryAction('%s ' % self.keyword)
+        return SetUserQueryAction(f'{self.keyword} ')
 
     def _is_url(self) -> bool:
         return bool(re.match(r'^http(s)?://', self.cmd.strip()))

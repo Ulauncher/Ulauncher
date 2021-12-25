@@ -79,7 +79,7 @@ class ExtensionRunner:
         * Runs extension in a new process
         """
         if self.is_running(extension_id):
-            raise ExtensionIsRunningError('Extension ID: %s' % extension_id)
+            raise ExtensionIsRunningError(f"Extension ID: {extension_id}")
 
         manifest = ExtensionManifest.open(extension_id)
         manifest.validate()
@@ -144,7 +144,7 @@ class ExtensionRunner:
         subprocess.wait_finish(result)
         if subprocess.get_if_signaled():
             code = subprocess.get_term_sig()
-            error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
+            error_msg = f'Extension "{extension_id}" was terminated with code {code}'
             logger.error(error_msg)
             self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
             self.extension_procs.pop(extension_id, None)
@@ -158,7 +158,7 @@ class ExtensionRunner:
         runtime = time() - extproc.start_time
         code = subprocess.get_exit_status()
         if runtime < 1:
-            error_msg = 'Extension "%s" exited instantly with code %s' % (extension_id, code)
+            error_msg = f'Extension "{extension_id}" exited instantly with code {code}'
             logger.error(error_msg)
             self.set_extension_error(extension_id, ExtRunErrorName.ExitedInstantly, error_msg)
             lasterr = b"\n".join(extproc.recent_errors).decode()
@@ -177,7 +177,7 @@ class ExtensionRunner:
             self.extension_procs.pop(extension_id, None)
             return
 
-        error_msg = 'Extension "%s" exited with code %s after %d seconds. Restarting...' % (extension_id, code, runtime)
+        error_msg = f'Extension "{extension_id}" exited with code {code} after {runtime} seconds. Restarting...'
         self.set_extension_error(extension_id, ExtRunErrorName.Exited, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(extension_id, None)
@@ -188,7 +188,7 @@ class ExtensionRunner:
         Terminates extension
         """
         if not self.is_running(extension_id):
-            raise ExtensionIsNotRunningError('Extension ID: %s' % extension_id)
+            raise ExtensionIsNotRunningError(f"Extension ID: {extension_id}")
 
         logger.info('Terminating extension "%s"', extension_id)
         extproc = self.extension_procs[extension_id]

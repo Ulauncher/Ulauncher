@@ -304,7 +304,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if FIRST_RUN:
             (key, mode) = Gtk.accelerator_parse(accel_name)
             display_name = Gtk.accelerator_get_label(key, mode)
-            show_notification("Ulauncher", "Hotkey is set to %s" % display_name)
+            show_notification("Ulauncher", f"Hotkey is set to {display_name}")
 
     def _get_user_query(self):
         return Query(self.input.get_text().strip())
@@ -378,7 +378,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def create_item_widgets(items, query):
         results = []
         for index, result in enumerate(items):
-            glade_filename = get_asset('ui/%s.ui' % result.UI_FILE)
+            glade_filename = get_asset(f"ui/{result.UI_FILE}.ui")
             if not os.path.exists(glade_filename):
                 glade_filename = None
 

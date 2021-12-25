@@ -20,4 +20,4 @@ class ExtensionKeywordResult(Result):
         :param ~ulauncher.modes.Query.Query query: query
         """
         self._query_history.save_query(query, self.get_name())
-        return SetUserQueryAction('%s ' % self.get_keyword())
+        return SetUserQueryAction(f'{self.get_keyword()} ')

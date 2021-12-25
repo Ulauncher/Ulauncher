@@ -41,7 +41,7 @@ class Client:
         """
         self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
         if not self.conn:
-            raise RuntimeError("Failed to connect to socket_path {}".format(self.socket_path))
+            raise RuntimeError(f"Failed to connect to socket_path {self.socket_path}")
         self.framer = PickleFramer()
         self.framer.connect("message_parsed", self.on_message)
         self.framer.connect("closed", self.on_close)

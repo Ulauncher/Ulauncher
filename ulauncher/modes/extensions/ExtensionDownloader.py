@@ -68,7 +68,7 @@ class ExtensionDownloader:
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
         if os.path.exists(ext_path) and self.ext_runner.is_running(ext_id):
-            raise ExtensionDownloaderError('Extension with URL "%s" is already added' % url,
+            raise ExtensionDownloaderError(f'Extension with URL "{url}" is already added',
                                            ErrorName.ExtensionAlreadyAdded)
 
         # 2. get last commit info

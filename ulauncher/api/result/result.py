@@ -37,11 +37,11 @@ class Result:
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None):
         if not isinstance(name, str):
-            raise TypeError('"name" must be of type "str", "%s" given' % type(name).__name__)
+            raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given')
         if not isinstance(description, str):
-            raise TypeError('"description" must be of type "str", "%s" given' % type(description).__name__)
+            raise TypeError(f'"description" must be of type "str", "{type(description).__name__}" given')
         if not isinstance(keyword, str):
-            raise TypeError('"keyword" must be of type "str", "%s" given' % type(keyword).__name__)
+            raise TypeError(f'"keyword" must be of type "str", "{type(keyword).__name__}" given')
         self._name = name
         self._description = description
         self._keyword = keyword
@@ -71,10 +71,12 @@ class Result:
         :rtype: str
         """
         if query and self._highlightable:
-            return highlight_text(query if not self._is_extension else query.get_argument(''),
-                                  self.get_name(),
-                                  open_tag='<span foreground="%s">' % color,
-                                  close_tag='</span>')
+            return highlight_text(
+                query if not self._is_extension else query.get_argument(''),
+                self.get_name(),
+                open_tag=f'<span foreground="{color}">',
+                close_tag='</span>'
+            )
         # don't highlight if query is empty
         return self.get_name()
 

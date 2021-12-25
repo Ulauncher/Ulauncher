@@ -36,7 +36,7 @@ class ExtensionPreferences:
         return cls(ext_id, ExtensionManifest.open(ext_id))
 
     def __init__(self, ext_id: str, manifest: ExtensionManifest, ext_preferences_dir: str = EXT_PREFERENCES_DIR):
-        self.db_path = os.path.join(ext_preferences_dir, '%s.json' % ext_id)
+        self.db_path = os.path.join(ext_preferences_dir, f'{ext_id}.json')
         self.db = KeyValueJsonDb[str, str](self.db_path)
         self.manifest = manifest
         self._db_is_open = False

@@ -71,7 +71,7 @@ def get_options():
         help=gettext("Show debug messages"))
     parser.add_argument(
         '--version', action='version',
-        version="Ulauncher %s" % VERSION)
+        version=f"Ulauncher {VERSION}")
     parser.add_argument(
         "--no-window", action="store_true",
         help=gettext("Hide window upon application startup"))

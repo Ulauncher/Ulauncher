@@ -117,13 +117,15 @@ class ExtensionManifest:
         except AssertionError as e:
             raise ExtensionManifestError(str(e), ErrorName.InvalidManifestJson) from e
         except KeyError as e:
-            raise ExtensionManifestError('%s is not provided' % e, ErrorName.InvalidManifestJson) from e
+            raise ExtensionManifestError(f'{e} is not provided', ErrorName.InvalidManifestJson) from e
 
     def check_compatibility(self):
         if not satisfies(API_VERSION, self.get_required_api_version()):
-            raise ExtensionManifestError('Extension "%s" requires Ulauncher API %s, but current API version is %s' %
-                                         (self.extension_id, self.get_required_api_version(), API_VERSION),
-                                         ErrorName.ExtensionCompatibilityError)
+            err_msg = (
+                f'Extension "{self.extension_id}" requires API version {self.get_required_api_version()}, '
+                f'but the current API version is: {API_VERSION})'
+            )
+            raise ExtensionManifestError(err_msg, ErrorName.ExtensionCompatibilityError)
 
 
 def read_manifest(extension_id, extensions_dir):
