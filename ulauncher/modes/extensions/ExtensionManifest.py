@@ -37,6 +37,7 @@ ManifestJson = TypedDict('ManifestJson', {
     'description': str,
     'developer_name': str,
     'icon': str,
+    'use_pip_run': bool,
     'options': Optional[Options],
     'preferences': List[ManifestPreferenceItem]
 })
@@ -81,6 +82,9 @@ class ExtensionManifest:
 
     def get_developer_name(self) -> str:
         return self.manifest['developer_name']
+
+    def get_use_pip_run(self) -> bool:
+        return self.manifest.get('use_pip_run', False)
 
     def get_preferences(self) -> List[ManifestPreferenceItem]:
         return self.manifest.get('preferences', [])

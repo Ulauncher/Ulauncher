@@ -85,7 +85,9 @@ class ExtensionRunner:
         manifest.validate()
         manifest.check_compatibility()
 
-        cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
+        cmd = ['pip-run', '--'] if manifest.get_use_pip_run() else [sys.executable]
+        cmd.extend([os.path.join(self.extensions_dir, extension_id, 'main.py')])
+
         env = {}
         env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
 
