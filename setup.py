@@ -64,7 +64,7 @@ class build_preferences(Command):
         subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn build"], check=True)
 
 
-class build_wrapper(build_py):
+class build_wrapper(build_py, Command):
     def run(self):
         # Build Preferences before python package build
         build_preferences.run(self)
