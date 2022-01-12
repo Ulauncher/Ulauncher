@@ -1,5 +1,5 @@
 import os
-from typing import Type, Optional
+from typing import Type
 from ulauncher.utils.mypy_extensions import TypedDict
 
 from ulauncher.config import CONFIG_DIR
@@ -25,10 +25,3 @@ class ExtensionDb(KeyValueJsonDb[str, ExtensionRecord]):
         db.open()
 
         return db
-
-    def find_by_url(self, url: str) -> Optional[ExtensionRecord]:
-        for ext in self.get_records().values():
-            if ext['url'] == url:
-                return ext
-
-        return None
