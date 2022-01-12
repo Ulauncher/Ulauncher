@@ -2,7 +2,6 @@ import sys
 import signal
 import logging
 from functools import partial
-from threading import Event
 # This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
@@ -54,35 +53,6 @@ def graceful_exit(data):
     # ExtensionServer.get_instance().stop()
     # Gtk.main_quit()
     sys.exit(0)
-
-
-# pylint: disable=too-few-public-methods
-class SignalHandler:
-
-    _exit_event = None
-    _app_window = None
-    _logger = None
-
-    def __init__(self, app_window):
-        self._exit_event = Event()
-        self._app_window = app_window
-        self._logger = logging.getLogger('ulauncher')
-        signal.signal(signal.SIGINT, self._exit_gracefully)
-        signal.signal(signal.SIGTERM, self._exit_gracefully)
-        signal.signal(signal.SIGHUP, self._reload_configs)
-
-    def _reload_configs(self, *args):
-        self._logger.info('Received SIGHUP. Reloading configs')
-        self._app_window.init_theme()
-
-    def killed(self):
-        """
-        :rtype: bool
-        """
-        return self._exit_event.is_set()
-
-    def _exit_gracefully(self, *args):
-        self._exit_event.set()
 
 
 def main():
