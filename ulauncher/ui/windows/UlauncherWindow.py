@@ -33,7 +33,7 @@ from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
-from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
 
@@ -52,27 +52,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def get_instance(cls):
         return cls()
 
+    # Python's GTK API seems to requires non-standard workarounds like this.
+    # Use finish_initializing instead of __init__.
     def __new__(cls):
-        """Special static method that's automatically called by Python when
-        constructing a new instance of this class.
+        return GladeObjectFactory(cls.__name__, "ulauncher_window")
 
-        Returns a fully instantiated BaseUlauncherWindow object.
-        """
-        builder = Builder.new_from_file('UlauncherWindow')
-        new_object = builder.get_object("ulauncher_window")
-        new_object.finish_initializing(builder)
-        return new_object
-
-    def finish_initializing(self, builder):
-        """Called while initializing this instance in __new__
-
-        finish_initializing should be called after parsing the UI definition
-        and creating a UlauncherWindow object with it in order to finish
-        initializing the start of the new UlauncherWindow instance.
-        """
-        # Get a reference to the builder and set up the signals.
-        self.builder = builder
-        self.ui = builder.get_ui(self, True)
+    def finish_initializing(self, ui):
+        # pylint: disable=attribute-defined-outside-init
+        self.ui = ui
         self.PreferencesDialog = None  # class
         self.preferences_dialog = None  # instance
 

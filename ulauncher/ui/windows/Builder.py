@@ -330,3 +330,13 @@ def log_unconnected_functions(callback_handler_dict, connections):
 
     for handler_name in unconnected:
         logger.debug("Not connected to builder '%s'", handler_name)
+
+
+# Use with __new__ and finish_initializing in GTK/Glade classes.
+# See: https://stackoverflow.com/a/11600881/633921
+def GladeObjectFactory(class_name, ui_file):
+    builder = Builder.new_from_file(class_name)
+    new_object = builder.get_object(ui_file)
+    new_object.finish_initializing(builder.get_ui(new_object, True))
+
+    return new_object

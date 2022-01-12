@@ -18,7 +18,7 @@ from gi.repository import Gio, Gtk, WebKit2, GLib
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.ui.windows.WindowHelper import WindowHelper
-from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
@@ -76,36 +76,14 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     _hotkey_name = None
 
-    ######################################
-    # Initialization
-    ######################################
-
+    # Python's GTK API seems to requires non-standard workarounds like this.
+    # Use finish_initializing instead of __init__.
     def __new__(cls):
-        """Special static method that's automatically called by Python when
-        constructing a new instance of this class.
+        return GladeObjectFactory(cls.__name__, "preferences_ulauncher_dialog")
 
-        Returns a fully instantiated PreferencesDialog object.
-        """
-        builder = Builder.new_from_file('PreferencesUlauncherDialog')
-        new_object = builder.get_object("preferences_ulauncher_dialog")
-        new_object.finish_initializing(builder)
-        return new_object
-
-    def finish_initializing(self, builder):
-        """Called while initializing this instance in __new__
-
-        finish_initializing should be called after parsing the ui definition
-        and creating a PreferencesDialog object with it in order to
-        finish initializing the start of the new PerferencesUlauncherDialog
-        instance.
-
-        Put your initialization code in here and leave __init__ undefined.
-        """
-
-        # Get a reference to the builder and set up the signals.
-        self.builder = builder
-        self.ui = builder.get_ui(self, True)
-
+    def finish_initializing(self, ui):
+        # pylint: disable=attribute-defined-outside-init
+        self.ui = ui
         # unnecessary action area can be removed only manually, like this
         self.ui['dialog_action_area'].destroy()
 

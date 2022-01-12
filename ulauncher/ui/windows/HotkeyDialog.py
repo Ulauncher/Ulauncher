@@ -6,7 +6,7 @@ gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk, GObject
 
-from ulauncher.ui.windows.Builder import Builder
+from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 
 
@@ -28,31 +28,14 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
     _accel_name = None
     _display_name = None
 
+    # Python's GTK API seems to requires non-standard workarounds like this.
+    # Use finish_initializing instead of __init__.
     def __new__(cls):
-        """Special static method that's automatically called by Python when
-        constructing a new instance of this class.
+        return GladeObjectFactory(cls.__name__, "hotkey_dialog")
 
-        Returns a fully instantiated HotkeyDialog object.
-        """
-        builder = Builder.new_from_file('HotkeyDialog')
-        new_object = builder.get_object("hotkey_dialog")
-        new_object.finish_initializing(builder)
-        return new_object
-
-    def finish_initializing(self, builder):
-        """Called while initializing this instance in __new__
-
-        finish_initializing should be called after parsing the ui definition
-        and creating a HotkeyDialog object with it in order
-        to finish initializing the start of the new HotkeyDialog
-        instance.
-
-        Put your initialization code in here and leave __init__ undefined.
-        """
+    def finish_initializing(self, ui):
         # pylint: disable=attribute-defined-outside-init
-        # Get a reference to the builder and set up the signals.
-        self.builder = builder
-        self.ui = builder.get_ui(self)
+        self.ui = ui
         self.ui['hotkey_dialog_action_area'].destroy()
 
     def on_delete_event(self, *args):
