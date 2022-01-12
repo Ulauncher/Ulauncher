@@ -14,9 +14,6 @@ class ItemNavigation:
         self.items_num = len(items)
         self.selected = None
 
-    def get_selected_index(self):
-        return self.selected
-
     def select_default(self, query):
         """
         Selects item that should be selected by default
