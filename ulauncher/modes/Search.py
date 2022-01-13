@@ -1,5 +1,6 @@
 import logging
 
+from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.apps.AppMode import AppMode
@@ -39,7 +40,10 @@ class Search:
             mode.on_query_change(query)
 
         mode = self._choose_search_mode(query)
-        RenderResultListAction(mode.handle_query(query)).run()
+        action = mode.handle_query(query)
+        if not isinstance(action, BaseAction):
+            action = RenderResultListAction(action)
+        action.run()
 
     def on_key_press_event(self, widget, event, query):
         self._choose_search_mode(query).handle_key_press_event(widget, event, query).run()
