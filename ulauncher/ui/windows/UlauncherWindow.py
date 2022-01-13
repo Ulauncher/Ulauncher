@@ -333,7 +333,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         show_recent_apps = self.settings.get_property('show-recent-apps')
         recent_apps_number = int(show_recent_apps) if show_recent_apps.isnumeric() else 0
-        if not results and not self.input.get_text() and recent_apps_number > 0:
+        if not self.input.get_text() and recent_apps_number > 0:
             results = AppResult.get_most_frequent(recent_apps_number)
 
         results = self.create_item_widgets(results, self._get_user_query())
