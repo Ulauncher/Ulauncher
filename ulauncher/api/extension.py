@@ -4,7 +4,6 @@ from inspect import signature
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, SystemExitEvent, \
     PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.client.EventListener import EventListener
@@ -70,10 +69,8 @@ class Extension:
             # method can and likely will be a member on self for new extensions, in which case
             # it can access self. But for backward compatibility we need to pass self
             action = _method(event) if param_count == 1 else _method(event, self)
-            if isinstance(action, list):
-                action = RenderResultListAction(action)
             if action:
-                assert isinstance(action, BaseAction), "on_event must return list of Results or a BaseAction"
+                assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
                 self._client.send(Response(event, action))
 
     def run(self):
