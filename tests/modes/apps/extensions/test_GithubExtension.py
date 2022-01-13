@@ -34,7 +34,7 @@ class TestGithubExtension:
 
     def test_read_json__HTTPError__raises(self, gh_ext: GithubExtension, mocker):
         urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
-        urlopen.side_effect = HTTPError('https://url', 404, 'urlopen error', {}, None)
+        urlopen.side_effect = HTTPError('https://url', 404, 'urlopen error', {}, None)  # type: ignore
         with pytest.raises(GithubExtensionError) as e:
             gh_ext._read_json('master', 'manifest.json')
 
