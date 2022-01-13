@@ -3,7 +3,6 @@ import sys
 
 from ulauncher.api import Result
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
 class ExtensionResult(Result):
@@ -12,6 +11,7 @@ class ExtensionResult(Result):
 
     Cannot be subclassed there because :func:`pickle.loads` won't work in Ulauncher app
     """
+    searchable = True
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
@@ -29,7 +29,3 @@ class ExtensionResult(Result):
 
     def on_alt_enter(self, query):
         return self._on_alt_enter
-
-    def selected_by_default(self, query):
-        query_history = QueryHistoryDb.get_instance()
-        return query_history.find(query) == self.get_name()

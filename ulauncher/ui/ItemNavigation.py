@@ -1,4 +1,7 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
+
+query_history = QueryHistoryDb.get_instance()
 
 
 class ItemNavigation:
@@ -14,14 +17,20 @@ class ItemNavigation:
         self.items_num = len(items)
         self.selected = None
 
+    def get_default(self, query):
+        """
+        Gets the index of the result that should be selected (0 by default)
+        """
+        previous_pick = query_history.find(query)
+
+        for index, item in enumerate(self.items):
+            result = item.item_object
+            if result.searchable and result.get_name() == previous_pick:
+                return index
+        return 0
+
     def select_default(self, query):
-        """
-        Selects item that should be selected by default
-        If no such items found, select the first one in the list
-        """
-        indices = (index for index, item in enumerate(self.items) if item.selected_by_default(query))
-        index = next(indices, 0)
-        self.select(index)
+        self.select(self.get_default(query))
 
     def select(self, index):
         if not 0 < index < self.items_num:
@@ -55,6 +64,10 @@ class ItemNavigation:
 
         if self.selected is not None:
             item = self.items[self.selected]
+            result = item.item_object
+            if not alt and result.searchable:
+                query_history.save_query(str(query), result.get_name())
+
             action = item.on_enter(query) if not alt else item.on_alt_enter(query)
             if not action:
                 return True

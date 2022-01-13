@@ -20,10 +20,10 @@ class Result:
     description = None  # type: str
     keyword = None  # type: str
     icon = None  # type: Optional[str]
-    _selected_by_default = False  # type: bool
     _on_enter = None  # type: OnEnterCallback
     _on_alt_enter = None  # type: OnEnterCallback
     highlightable = True  # type: bool
+    searchable = False  # type: bool
     is_extension = False  # type: bool
 
     # pylint: disable=too-many-arguments
@@ -32,7 +32,6 @@ class Result:
                  description: str = '',
                  keyword: str = '',
                  icon: str = None,
-                 selected_by_default: bool = False,
                  highlightable: bool = True,
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None):
@@ -47,7 +46,6 @@ class Result:
         self.keyword = keyword
         self.icon = icon
         self.highlightable = highlightable
-        self._selected_by_default = selected_by_default
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
 
@@ -88,12 +86,6 @@ class Result:
         :param ~ulauncher.modes.Query.Query query:
         """
         return self.description
-
-    def selected_by_default(self, query):
-        """
-        Return True if item should be selected by default
-        """
-        return self._selected_by_default
 
     def on_enter(self, query: Query) -> Optional[BaseAction]:
         """

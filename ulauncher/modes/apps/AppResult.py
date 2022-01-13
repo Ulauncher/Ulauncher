@@ -9,13 +9,13 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.api import Result
-from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 settings = Settings.get_instance()
 _app_starts = KeyValueJsonDb(join(STATE_DIR, 'app_starts.json')).open()
 
 
 class AppResult(Result):
+    searchable = True
     """
     :param Gio.DesktopAppInfo app_info:
     """
@@ -33,7 +33,6 @@ class AppResult(Result):
             ""
         )
         self._app_info = app_info
-        self._query_history = QueryHistoryDb.get_instance()
 
     @staticmethod
     def from_id(app_id):
@@ -86,15 +85,7 @@ class AppResult(Result):
     def get(self, property):
         return self._app_info.get_string(property)
 
-    def selected_by_default(self, query):
-        """
-        :param ~ulauncher.modes.Query.Query query:
-        """
-        return self._query_history.find(query) == self.name
-
-    def on_enter(self, query):
-        self._query_history.save_query(str(query), self.name)
-
+    def on_enter(self, _):
         app_id = self._app_info.get_id()
         count = _app_starts._records.get(app_id, 0)
         _app_starts._records[app_id] = count + 1

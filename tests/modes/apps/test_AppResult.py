@@ -7,7 +7,6 @@ gi.require_version('Gio', '2.0')
 from gi.repository import Gio
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 from ulauncher.modes.Query import Query
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
@@ -37,12 +36,6 @@ class TestAppResult:
         return AppResult.from_id('falseapp.desktop')
 
     @pytest.fixture(autouse=True)
-    def query_history(self, mocker):
-        get_instance = mocker.patch('ulauncher.modes.apps.AppResult.QueryHistoryDb.get_instance')
-        get_instance.return_value = mock.create_autospec(QueryHistoryDb)
-        return get_instance.return_value
-
-    @pytest.fixture(autouse=True)
     def _app_starts(self, mocker):
         db = KeyValueJsonDb('/tmp/mock.json').open()
         db.set_records({'falseapp.desktop': 3000, 'trueapp.desktop': 765})
@@ -65,16 +58,10 @@ class TestAppResult:
         assert len(searchresults) == 2
         assert searchresults[0].name == 'FalseApp - Full Name'
 
-    def test_selected_by_default(self, app1, query_history):
-        query_history.find.return_value = 'TrueApp - Full Name'
-        assert app1.selected_by_default('q')
-        query_history.find.assert_called_with('q')
-
-    def test_on_enter(self, app1, mocker, query_history, _app_starts):
+    def test_on_enter(self, app1, mocker, _app_starts):
         launch_app = mocker.patch('ulauncher.modes.apps.AppResult.launch_app')
         assert app1.on_enter(Query('query')) is launch_app.return_value
         launch_app.assert_called_with('trueapp.desktop')
-        query_history.save_query.assert_called_with('query', 'TrueApp - Full Name')
         assert _app_starts._records.get('trueapp.desktop') == 766
 
     def test_get_most_frequent(self):

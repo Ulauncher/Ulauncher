@@ -4,10 +4,10 @@ from ulauncher.api import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
-from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
 
 
 class ShortcutResult(Result):
+    searchable = True
 
     # pylint: disable=super-init-not-called, too-many-arguments
     def __init__(self, keyword, name, cmd, icon, default_search=False, run_without_argument=False, **kw):
@@ -17,7 +17,6 @@ class ShortcutResult(Result):
         self.icon = icon
         self.is_default_search = default_search
         self.run_without_argument = run_without_argument
-        self._query_history = QueryHistoryDb.get_instance()
 
     def get_name_highlighted(self, query, color):
         # highlight only if we did not enter Web search item keyword
@@ -45,15 +44,7 @@ class ShortcutResult(Result):
 
         return description.replace('%s', '...')
 
-    def selected_by_default(self, query):
-        """
-        :param ~ulauncher.modes.Query.Query query:
-        """
-        return self._query_history.find(query) == self.name
-
     def on_enter(self, query):
-        self._query_history.save_query(query, self.name)
-
         if query.get_keyword() == self.keyword and query.get_argument():
             argument = query.get_argument()
         elif self.is_default_search:

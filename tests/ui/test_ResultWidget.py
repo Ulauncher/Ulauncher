@@ -124,6 +124,3 @@ class TestResultWidget:
 
     def test_keyword(self, result_wgt, item_obj):
         assert result_wgt.get_keyword() is item_obj.keyword
-
-    def test_selected_by_default(self, result_wgt, item_obj):
-        assert result_wgt.selected_by_default('q') is item_obj.selected_by_default.return_value

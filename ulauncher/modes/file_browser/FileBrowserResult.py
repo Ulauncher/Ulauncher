@@ -26,7 +26,7 @@ class FileBrowserResult(SmallResult):
         query = os.path.basename(query)
         return super().get_name_highlighted(query, color)
 
-    def on_enter(self, query):
+    def on_enter(self, _):
         self._file_queries.save_query(self.path)
         if Path(self.path).is_dir():
             return SetUserQueryAction(os.path.join(fold_user_path(self.path), ''))
