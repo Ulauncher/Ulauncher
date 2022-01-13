@@ -1,25 +1,26 @@
+import gi
+gi.require_version('Gio', '2.0')
+# pylint: disable=wrong-import-position
+from gi.repository import Gio
+from ulauncher.utils.Settings import Settings
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.apps.AppResult import AppResult
 
+settings = Settings.get_instance()
+
 
 class AppMode(BaseMode):
-    """
-    :type list search_modes: a list of other :class:`Mode` objects that provide additional result items
-    """
+    def get_searchable_items(self):
+        disable_desktop_filters = settings.get_property('disable-desktop-filters')
+        app_results = []
 
-    def __init__(self, search_modes):
-        self.search_modes = search_modes
+        for app in Gio.DesktopAppInfo.get_all():
+            executable = app.get_executable()
+            show_in = app.get_show_in() or disable_desktop_filters
+            # Make an exception for gnome-control-center, because all the very useful specific settings
+            # like "Keyboard", "Wi-Fi", "Sound" etc have NoDisplay=true
+            nodisplay = app.get_nodisplay() and not executable == 'gnome-control-center'
+            if app.get_display_name() and executable and show_in and not nodisplay:
+                app_results.append(AppResult(app))
 
-    def is_enabled(self, _):
-        """
-        AppMode is a default search mode and is always enabled
-        """
-        return True
-
-    def handle_query(self, query):
-        items = AppResult.search(query)
-        # If the search result is empty, add the default items for all other modes (only shotcuts currently)
-        if not items:
-            for mode in self.search_modes:
-                items.extend(mode.get_default_items())
-        return items
+        return app_results

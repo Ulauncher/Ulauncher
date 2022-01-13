@@ -1,13 +1,13 @@
 import pytest
 import mock
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.Search import Search
+from ulauncher.modes.ModeHandler import ModeHandler
 
 
 class TestSearch:
     @pytest.fixture(autouse=True)
     def RenderAction(self, mocker):
-        return mocker.patch('ulauncher.modes.Search.RenderResultListAction')
+        return mocker.patch('ulauncher.modes.ModeHandler.RenderResultListAction')
 
     @pytest.fixture
     def search_mode(self):
@@ -15,7 +15,7 @@ class TestSearch:
 
     @pytest.fixture
     def search(self, search_mode):
-        return Search([search_mode])
+        return ModeHandler([search_mode])
 
     def test_on_query_change__run__is_called(self, search, search_mode, RenderAction):
         search_mode.is_enabled.return_value = True

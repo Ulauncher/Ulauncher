@@ -1,5 +1,4 @@
 import pathlib
-import mock
 import pytest
 import gi
 gi.require_version('Gio', '2.0')
@@ -52,11 +51,6 @@ class TestAppResult:
 
     def test_search_score(self, app1):
         assert app1.search_score("true") > app1.search_score("trivago")
-
-    def test_search(self):
-        searchresults = AppResult.search('false', min_score=0)
-        assert len(searchresults) == 2
-        assert searchresults[0].name == 'FalseApp - Full Name'
 
     def test_on_enter(self, app1, mocker, _app_starts):
         launch_app = mocker.patch('ulauncher.modes.apps.AppResult.launch_app')

@@ -19,7 +19,7 @@ from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
 from ulauncher.config import get_asset, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.modes.Search import Search
+from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
@@ -154,7 +154,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         Triggered by user input
         """
-        Search.get_instance().on_query_change(self._get_user_query())
+        ModeHandler.get_instance().on_query_change(self._get_user_query())
 
     # pylint: disable=inconsistent-return-statements
     def on_input_key_press_event(self, widget, event):
@@ -162,7 +162,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
+        ModeHandler.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
             if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):

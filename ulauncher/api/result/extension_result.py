@@ -1,17 +1,17 @@
 import os
 import sys
 
-from ulauncher.api import Result
+from ulauncher.api import SearchableResult
+
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
-class ExtensionResult(Result):
+class ExtensionResult(SearchableResult):
     """
     Should be used in extensions.
 
     Cannot be subclassed there because :func:`pickle.loads` won't work in Ulauncher app
     """
-    searchable = True
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)

@@ -24,18 +24,18 @@ ulauncher\.modes\.BaseMode module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.Query module
+ulauncher\.modes\.ModeHandler module
 -------------------------------
 
-.. automodule:: ulauncher.modes.Query
+.. automodule:: ulauncher.modes.ModeHandler
     :members:
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.Search module
+ulauncher\.modes\.Query module
 --------------------------------
 
-.. automodule:: ulauncher.modes.Search
+.. automodule:: ulauncher.modes.Query
     :members:
     :undoc-members:
     :show-inheritance:
