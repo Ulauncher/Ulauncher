@@ -20,20 +20,25 @@ runs_in_systemd = has_systemd and os.system('systemctl --user is-active --quiet 
 def launch_app(app_id):
     app = Gio.DesktopAppInfo.new(app_id)
     app_exec = app.get_commandline()
-    if not app_exec:
-        logger.error("No command to run %s", app_id)
-    else:
+    if app.get_boolean('DBusActivatable'):
+        # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
+        exec = ['gapplication', 'launch', app_id.replace('.desktop', '')]
+    elif app_exec:
         # strip field codes %f, %F, %u, %U, etc
         stripped_app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app_exec).rstrip()
-        terminal_exec = shlex.split(settings.get_property('terminal-command'))
         if app.get_boolean('Terminal'):
+            terminal_exec = settings.get_property('terminal-command')
             if terminal_exec:
                 logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                exec = terminal_exec + [stripped_app_exec]
+                exec = shlex.split(terminal_exec) + [stripped_app_exec]
             else:
                 exec = ['gtk-launch', app_id]
         else:
             exec = shlex.split(stripped_app_exec)
+
+    if not exec:
+        logger.error("No command to run %s", app_id)
+    else:
         if runs_in_systemd:
             logger.warning("Will attempt to launch the app using systemd-run with --scope argument")
             logger.warning("This prevents the apps from terminating if Ulauncher crashes or is restarted.")
@@ -47,7 +52,7 @@ def launch_app(app_id):
         env.pop("GDK_BACKEND", None)
 
         try:
-            logger.info('Run application %s (%s) Exec %s', app.get_name(), app_id, app_exec)
+            logger.info('Run application %s (%s) Exec %s', app.get_name(), app_id, exec)
             envp = [f"{k}={v}" for k, v in env.items()]
             GLib.spawn_async(
                 argv=exec,
