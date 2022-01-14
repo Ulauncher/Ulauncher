@@ -2,7 +2,6 @@ import os
 from json import load
 from typing import cast, Optional, List, Union
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR
-from ulauncher.utils.icon import load_icon
 from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
@@ -69,12 +68,8 @@ class ExtensionManifest:
     def get_icon(self) -> str:
         return self.manifest['icon']
 
-    def get_icon_path(self) -> str:
-        return os.path.join(self.extensions_dir, self.extension_id, self.get_icon())
-
-    def load_icon(self, size, path=None):
-        abs_path = os.path.join(self.extensions_dir, self.extension_id, path) if path else self.get_icon_path()
-        return load_icon(abs_path, size)
+    def get_icon_path(self, path=None) -> str:
+        return os.path.join(self.extensions_dir, self.extension_id, path or self.get_icon())
 
     def get_required_api_version(self) -> str:
         return self.manifest['required_api_version']

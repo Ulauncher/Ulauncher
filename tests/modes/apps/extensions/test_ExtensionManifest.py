@@ -30,12 +30,6 @@ class TestExtensionManifest:
         manifest.refresh()
         assert manifest.get_name() == "Test Extension"
 
-    def test_load_icon__load_icon__is_called(self, ext_dir, mocker):
-        load_icon = mocker.patch('ulauncher.modes.extensions.ExtensionManifest.load_icon')
-        manifest = ExtensionManifest('test_extension', {'icon': 'images/icon.png'}, ext_dir)
-        assert manifest.load_icon(100) is load_icon.return_value
-        load_icon.assert_called_with(os.path.join(ext_dir, 'test_extension', 'images/icon.png'), 100)
-
     def test_validate__name_empty__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'required_api_version': '1'}, ext_dir)
         with pytest.raises(ExtensionManifestError) as e:
