@@ -1,8 +1,4 @@
-import os
-import sys
-
-from ulauncher.api import SearchableResult
-
+from ulauncher.api.result.searchable_result import SearchableResult
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
@@ -12,14 +8,13 @@ class ExtensionResult(SearchableResult):
 
     Cannot be subclassed there because :func:`pickle.loads` won't work in Ulauncher app
     """
+    is_extension = True
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self.is_extension = True
-        self.extension_path = os.path.dirname(sys.argv[0])
 
         if self._on_enter and not isinstance(self._on_enter, BaseAction):
-            raise Exception("Incorrect type of on_enter argument")
+            raise Exception("Invalid on_enter argument. Expected BaseAction")
 
     def on_enter(self, query):
         return self._on_enter
