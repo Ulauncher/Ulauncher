@@ -3,7 +3,6 @@ import os
 import re
 import shlex
 from shutil import which
-from pathlib import Path
 import gi
 
 gi.require_version("GLib", "2.0")
@@ -35,22 +34,27 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        app_id = Path(self.filename).with_suffix('').stem
+        app_id = app.get_id()
         app_exec = app.get_string('Exec')
-        if not app_exec:
-            logger.error("No command to run %s", self.filename)
-        else:
+        if app.get_boolean('DBusActivatable'):
+            # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
+            exec = ['gapplication', 'launch', app_id.replace('.desktop', '')]
+        elif app_exec:
             # strip field codes %f, %F, %u, %U, etc
             stripped_app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app_exec).rstrip()
-            terminal_exec = shlex.split(settings.get_property('terminal-command'))
             if app.get_boolean('Terminal'):
+                terminal_exec = settings.get_property('terminal-command')
                 if terminal_exec:
                     logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                    exec = terminal_exec + [stripped_app_exec]
+                    exec = shlex.split(terminal_exec) + [stripped_app_exec]
                 else:
                     exec = ['gtk-launch', app_id]
             else:
                 exec = shlex.split(stripped_app_exec)
+
+        if not exec:
+            logger.error("No command to run %s", app_id)
+        else:
             if runs_in_systemd and not app.get_boolean('X-Ulauncher-Inherit-Scope'):
                 logger.warning("Will attempt to launch the app using systemd-run with --scope argument")
                 logger.warning("This prevents the apps from terminating if Ulauncher crashes or is restarted.")
@@ -64,7 +68,7 @@ class LaunchAppAction(BaseAction):
             env.pop("GDK_BACKEND", None)
 
             try:
-                logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, app_exec)
+                logger.info('Run application %s (%s) Exec %s', app.get_name(), self.filename, exec)
                 envp = ["{}={}".format(k, v) for k, v in env.items()]
                 GLib.spawn_async(
                     argv=exec,
