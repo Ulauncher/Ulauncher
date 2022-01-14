@@ -1,5 +1,4 @@
 import logging
-from functools import partial
 import gi
 gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
@@ -43,10 +42,11 @@ class DeferredResultRenderer:
 
         :rtype: :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
         """
+        icon = controller.get_manifest().get_icon_path()
+        loading_message = Result(name='Loading...', icon=icon, highlightable=False)
+
         self._cancel_loading()
-        self.loading = timer(self.LOADING_DELAY,
-                             partial(self._render_loading,
-                                     controller.get_manifest().get_icon_path()))
+        self.loading = timer(self.LOADING_DELAY, RenderResultListAction([loading_message]).run)
         self.active_event = event
         self.active_controller = controller
 
@@ -79,10 +79,6 @@ class DeferredResultRenderer:
         if self.loading:
             self.loading.cancel()
             self.loading = None
-
-    def _render_loading(self, icon):
-        loading_item = Result(name='Loading...', icon=icon, highlightable=False)
-        RenderResultListAction([loading_item]).run()
 
     def _hide_window(self):
         # pylint: disable=import-outside-toplevel
