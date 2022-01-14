@@ -67,8 +67,8 @@ def main():
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("Is Wayland: %s", is_wayland())
     logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
-    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 20):
-        logger.error("Ulauncher requires GTK+ version 3.20 or newer. Please upgrade your GTK version.")
+    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
+        logger.error("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
     if options.no_window_shadow:
         logger.warning("The --no-window-shadow argument has been moved to a user setting")
     if options.hide_window:
