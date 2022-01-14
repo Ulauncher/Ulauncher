@@ -19,31 +19,27 @@ runs_in_systemd = has_systemd and os.system('systemctl --user is-active --quiet 
 
 def launch_app(app_id):
     app = Gio.DesktopAppInfo.new(app_id)
-    exec = app.get_commandline()
-    if not exec:
+    app_exec = app.get_commandline()
+    if not app_exec:
         logger.error("No command to run %s", app_id)
     else:
         # strip field codes %f, %F, %u, %U, etc
-        sanitized_exec = re.sub(r'\%[uUfFdDnNickvm]', '', exec).rstrip()
+        stripped_app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app_exec).rstrip()
         terminal_exec = shlex.split(settings.get_property('terminal-command'))
         if app.get_boolean('Terminal'):
             if terminal_exec:
                 logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                sanitized_exec = terminal_exec + [sanitized_exec]
+                exec = terminal_exec + [stripped_app_exec]
             else:
-                sanitized_exec = ['gtk-launch', app_id]
+                exec = ['gtk-launch', app_id]
         else:
-            sanitized_exec = shlex.split(sanitized_exec)
+            exec = shlex.split(stripped_app_exec)
         if runs_in_systemd:
             logger.warning("Will attempt to launch the app using systemd-run with --scope argument")
             logger.warning("This prevents the apps from terminating if Ulauncher crashes or is restarted.")
             logger.warning("On some systems with outdated systemd or incorrect permissions this doesn't work.")
             logger.warning("If this happens to you, don't run Ulauncher from systemd.")
-            sanitized_exec = [
-                'systemd-run',
-                '--user',
-                '--scope',
-            ] + sanitized_exec
+            exec = ['systemd-run', '--user', '--scope'] + exec
 
         env = dict(os.environ.items())
         # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
@@ -51,10 +47,10 @@ def launch_app(app_id):
         env.pop("GDK_BACKEND", None)
 
         try:
-            logger.info('Run application %s (%s) Exec %s', app.get_name(), app_id, exec)
+            logger.info('Run application %s (%s) Exec %s', app.get_name(), app_id, app_exec)
             envp = [f"{k}={v}" for k, v in env.items()]
             GLib.spawn_async(
-                argv=sanitized_exec,
+                argv=exec,
                 envp=envp,
                 flags=GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.SEARCH_PATH,
                 # setsid is really only needed if systemd-run is missing, but doesn't hurt to have.
