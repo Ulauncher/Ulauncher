@@ -12,7 +12,6 @@ class OpenFolderItem(SmallResult):
         self.path = path
         self.name = name
         self.icon = 'system-file-manager'
-        self.highlightable = False
 
     def on_enter(self, query):
         return OpenAction(self.path)

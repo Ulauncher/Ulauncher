@@ -14,7 +14,6 @@ class CalcResult(Result):
         self.name = f'{Decimal(self.result):n}' if self.result is not None else 'Error!'
         self.description = 'Enter to copy to the clipboard' if self.result is not None else error
         self.icon = get_asset('icons/calculator.png')
-        self.highlightable = False
 
     def on_enter(self, query):
         if self.result is not None:

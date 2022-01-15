@@ -12,7 +12,6 @@ class CopyPathToClipboardItem(SmallResult):
         self.path = path
         self.name = 'Copy Path to Clipboard'
         self.icon = 'edit-copy'
-        self.highlightable = False
 
     def on_enter(self, query):
         return CopyToClipboardAction(self.path)

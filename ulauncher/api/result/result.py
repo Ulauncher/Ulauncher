@@ -22,7 +22,7 @@ class Result:
     icon = None  # type: Optional[str]
     _on_enter = None  # type: OnEnterCallback
     _on_alt_enter = None  # type: OnEnterCallback
-    highlightable = True  # type: bool
+    highlightable = False  # type: bool
     searchable = False  # type: bool
     is_extension = False  # type: bool
 
@@ -32,7 +32,7 @@ class Result:
                  description: str = '',
                  keyword: str = '',
                  icon: str = None,
-                 highlightable: bool = True,
+                 highlightable: bool = None,
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None):
         if not isinstance(name, str):
@@ -45,7 +45,8 @@ class Result:
         self.description = description
         self.keyword = keyword
         self.icon = icon
-        self.highlightable = highlightable
+        if highlightable is not None:
+            self.highlightable = highlightable
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
 

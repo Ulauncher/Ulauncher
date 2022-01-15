@@ -43,7 +43,7 @@ class DeferredResultRenderer:
         :rtype: :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
         """
         icon = controller.get_manifest().get_icon_path()
-        loading_message = Result(name='Loading...', icon=icon, highlightable=False)
+        loading_message = Result(name='Loading...', icon=icon)
 
         self._cancel_loading()
         self.loading = timer(self.LOADING_DELAY, RenderResultListAction([loading_message]).run)

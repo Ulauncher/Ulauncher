@@ -4,6 +4,7 @@ from .result import Result
 
 class SearchableResult(Result):
     searchable = True
+    highlightable = True
 
     def search_score(self, query):
         return get_score(query, self.get_name())
