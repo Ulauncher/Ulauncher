@@ -1,5 +1,4 @@
-import os
-from pathlib import Path
+from os.path import basename, dirname, isdir, join
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
@@ -18,24 +17,24 @@ class FileBrowserResult(SmallResult):
     # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
-        self.name = Path(path).name
+        self.name = basename(path)
         self.icon = get_icon_from_path(path)
         self._file_queries = FileQueries.get_instance()
 
     def get_name_highlighted(self, query, color):
-        query = os.path.basename(query)
+        query = basename(query)
         return super().get_name_highlighted(query, color)
 
     def on_enter(self, _):
         self._file_queries.save_query(self.path)
-        if Path(self.path).is_dir():
-            return SetUserQueryAction(os.path.join(fold_user_path(self.path), ''))
+        if isdir(self.path):
+            return SetUserQueryAction(join(fold_user_path(self.path), ''))
 
         return OpenAction(self.path)
 
-    def on_alt_enter(self, query):
-        if Path(self.path).is_dir():
-            open_folder = OpenFolderItem(self.path, f'Open Folder "{Path(self.path).name}"')
+    def on_alt_enter(self, _):
+        if isdir(self.path):
+            open_folder = OpenFolderItem(self.path, f'Open Folder "{basename(self.path)}"')
         else:
-            open_folder = OpenFolderItem(str(Path(self.path).parent), 'Open Containing Folder')
+            open_folder = OpenFolderItem(dirname(self.path), 'Open Containing Folder')
         return [open_folder, CopyPathToClipboardItem(self.path)]
