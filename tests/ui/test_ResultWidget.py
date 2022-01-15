@@ -114,13 +114,5 @@ class TestResultWidget:
         result_wgt.set_shortcut('Alt+1')
         builder.get_object.return_value.set_text.assert_called_with('Alt+1')
 
-    def test_on_enter(self, result_wgt, item_obj):
-        assert result_wgt.on_enter('test') is item_obj.on_enter.return_value
-        item_obj.on_enter.assert_called_with('test')
-
-    def test_on_alt_enter(self, result_wgt, item_obj):
-        assert result_wgt.on_alt_enter('test') is item_obj.on_alt_enter.return_value
-        item_obj.on_alt_enter.assert_called_with('test')
-
     def test_keyword(self, result_wgt, item_obj):
         assert result_wgt.get_keyword() is item_obj.keyword

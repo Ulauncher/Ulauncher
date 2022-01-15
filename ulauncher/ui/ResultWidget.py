@@ -22,22 +22,22 @@ class ResultWidget(Gtk.EventBox):
     builder = None  # type: Any
     name = ''  # type: str
     query = Query('')  # type: Query
-    item_object = None  # type: Any
+    result = None  # type: Any
     item_box = None  # type: Any
 
-    def initialize(self, builder: Any, item_object: Any, index: int, query: Query) -> None:
+    def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:
         self.builder = builder
         item_frame = self.builder.get_object('item-frame')
         item_frame.connect("button-release-event", self.on_click)
         item_frame.connect("enter_notify_event", self.on_mouse_hover)
 
         self.item_box = builder.get_object('item-box')
-        self.item_object = item_object
+        self.result = result
         self.query = query
         self.set_index(index)
 
-        self.set_icon(load_icon(item_object.icon, item_object.get_icon_size()))
-        self.set_description(item_object.get_description(query))
+        self.set_icon(load_icon(result.icon, result.get_icon_size()))
+        self.set_description(result.get_description(query))
         self.set_name_highlighted()
 
     def set_index(self, index):
@@ -78,7 +78,7 @@ class ResultWidget(Gtk.EventBox):
     def set_name_highlighted(self, is_selected: bool = False) -> None:
         colors = Theme.get_current().get_matched_text_hl_colors()
         color = colors['when_selected'] if is_selected else colors['when_not_selected']
-        self.set_name(self.item_object.get_name_highlighted(self.query, color) or self.item_object.get_name())
+        self.set_name(self.result.get_name_highlighted(self.query, color) or self.result.get_name())
 
     # pylint: disable=arguments-differ
     def set_name(self, name: str) -> None:
@@ -115,11 +115,5 @@ class ResultWidget(Gtk.EventBox):
     def set_shortcut(self, text):
         self.builder.get_object('item-shortcut').set_text(text)
 
-    def on_enter(self, query):
-        return self.item_object.on_enter(query)
-
-    def on_alt_enter(self, query):
-        return self.item_object.on_alt_enter(query)
-
     def get_keyword(self):
-        return self.item_object.keyword
+        return self.result.keyword

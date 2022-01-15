@@ -9,12 +9,11 @@ class ItemNavigation:
     Performs navigation through found results
     """
 
-    def __init__(self, items):
+    def __init__(self, result_widgets):
         """
-        :param list items: list of ResultWidget()'s
+        :param list result_widgets: list of ResultWidget()'s
         """
-        self.items = items
-        self.items_num = len(items)
+        self.result_widgets = result_widgets
         self.selected = None
 
     def get_default(self, query):
@@ -23,9 +22,8 @@ class ItemNavigation:
         """
         previous_pick = query_history.find(query)
 
-        for index, item in enumerate(self.items):
-            result = item.item_object
-            if result.searchable and result.get_name() == previous_pick:
+        for index, widget in enumerate(self.result_widgets):
+            if widget.result.searchable and widget.result.get_name() == previous_pick:
                 return index
         return 0
 
@@ -33,22 +31,21 @@ class ItemNavigation:
         self.select(self.get_default(query))
 
     def select(self, index):
-        if not 0 < index < self.items_num:
+        if not 0 < index < len(self.result_widgets):
             index = 0
 
         if self.selected is not None:
-            self.items[self.selected].deselect()
+            self.result_widgets[self.selected].deselect()
 
         self.selected = index
-        self.items[index].select()
+        self.result_widgets[index].select()
 
     def go_up(self):
-        index = self.selected - 1 if self.selected is not None and self.selected > 0 else self.items_num - 1
-        self.select(index)
+        self.select((self.selected or len(self.result_widgets)) - 1)
 
     def go_down(self):
-        index = self.selected + 1 if self.selected is not None and self.selected < self.items_num else 0
-        self.select(index)
+        next = (self.selected or 0) + 1
+        self.select(next if next < len(self.result_widgets) else 0)
 
     def enter(self, query, index=None, alt=False):
         """
@@ -56,19 +53,18 @@ class ItemNavigation:
         Return boolean - True if Ulauncher window should be closed
         """
         if index is not None:
-            if not 0 <= index < self.items_num:
+            if not 0 <= index < len(self.result_widgets):
                 raise IndexError
 
             self.select(index)
             return self.enter(query)
 
         if self.selected is not None:
-            item = self.items[self.selected]
-            result = item.item_object
+            result = self.result_widgets[self.selected].result
             if not alt and result.searchable:
                 query_history.save_query(str(query), result.get_name())
 
-            action = item.on_enter(query) if not alt else item.on_alt_enter(query)
+            action = result.on_enter(query) if not alt else result.on_alt_enter(query)
             if not action:
                 return True
             if isinstance(action, list):
