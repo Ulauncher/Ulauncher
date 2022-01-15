@@ -13,9 +13,6 @@ class Result:
 
     ICON_SIZE = 40
     UI_FILE = 'result'
-
-    score = None  # used by SortedResultList class to maintain sorted by score order of items
-
     name = None  # type: str
     description = None  # type: str
     keyword = None  # type: str
