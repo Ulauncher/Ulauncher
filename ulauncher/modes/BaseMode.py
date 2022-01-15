@@ -32,8 +32,7 @@ class BaseMode:
 
     def get_searchable_items(self):
         """
-        Returns a list of result items that
-        can be looked up by name or keyword
+        Returns an iterable of searchable results
         """
         return []
 

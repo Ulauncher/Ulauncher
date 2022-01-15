@@ -47,17 +47,14 @@ class ExtensionMode(BaseMode):
 
     def get_searchable_items(self):
         """
-        :rtype: list of :class:`~ulauncher.api.Result`
+        :rtype: Iterable[:class:`~ulauncher.api.Result`]
         """
-        items = []
         for controller in self.extensionServer.get_controllers():
             for pref in controller.preferences.get_items(type='keyword'):
                 if pref['value']:
-                    items.append(ExtensionKeywordResult(
+                    yield ExtensionKeywordResult(
                         name=html.escape(pref['name']),
                         description=html.escape(pref['description']),
                         keyword=pref['value'],
                         icon=controller.manifest.get_icon_path(path=pref['icon'])
-                    ))
-
-        return items
+                    )
