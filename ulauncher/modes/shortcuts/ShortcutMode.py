@@ -35,7 +35,7 @@ class ShortcutMode(BaseMode):
 
         return [ShortcutResult(**shortcut)]
 
-    def get_default_items(self):
+    def get_fallback_results(self):
         return self._create_items([s for s in self.shortcutsDb.get_shortcuts() if s['is_default_search']],
                                   default_search=True)
 

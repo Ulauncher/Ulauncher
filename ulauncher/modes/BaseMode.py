@@ -30,16 +30,16 @@ class BaseMode:
         """
         return []
 
-    def get_default_items(self):
-        """
-        Returns a list of default result items that
-        should be displayed if no results found
-        """
-        return []
-
     def get_searchable_items(self):
         """
         Returns a list of result items that
         can be looked up by name or keyword
+        """
+        return []
+
+    def get_fallback_results(self):
+        """
+        Returns a list of fallback results to
+        be displayed if nothing matches the user input
         """
         return []

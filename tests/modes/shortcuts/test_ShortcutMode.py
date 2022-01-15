@@ -64,7 +64,7 @@ class TestShortcutMode:
         shortcut = {'keyword': 'kw', 'is_default_search': True}
         shortcuts_db.get_shortcuts.return_value = [shortcut]
 
-        assert mode.get_default_items() == [ShortcutResult.return_value]
+        assert mode.get_fallback_results() == [ShortcutResult.return_value]
 
     def test_get_searchable_items(self, mode, shortcuts_db, ShortcutResult):
         shortcut = {'keyword': 'kw'}

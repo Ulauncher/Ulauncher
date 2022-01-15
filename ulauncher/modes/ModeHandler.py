@@ -46,7 +46,7 @@ class ModeHandler:
             # If the search result is empty, add the default items for all other modes (only shotcuts currently)
             if not results:
                 for mode in self.modes:
-                    results.extend(mode.get_default_items())
+                    results.extend(mode.get_fallback_results())
             RenderResultListAction(results).run()
 
     def on_key_press_event(self, widget, event, query):
