@@ -32,3 +32,7 @@ window.onNotification = function(eventName, data) {
   console.info('onNotification', eventName, JSON.stringify(data))
   bus.$emit(eventName, data)
 }
+
+// Don't open dropped link/file in the main window
+window.addEventListener('drop', event => event.preventDefault());
+window.addEventListener('dragover', event => event.preventDefault());
