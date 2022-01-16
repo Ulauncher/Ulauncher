@@ -116,8 +116,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
-        self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
+        self.webview.connect('button-press-event', self.mouse_down_event)
+        self.webview.connect('button-release-event', self.mouse_up_event)
+        self.webview.connect('motion_notify_event', self.mouse_move_event)
 
         inspector = self.webview.get_inspector()
         inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
@@ -138,17 +140,14 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
     # GTK event handlers
     ######################################
-    #
-    def webview_on_button_press_event(self, widget, event):
-        """
-        Makes preferences window draggable by empty an empty space between navigation and close button
-        also by the color stripe
-        """
-        window_width = self.get_size()[0]
-        if event.button == 1 and (690 < event.x < window_width - 100 and 0 < event.y < 69) or event.y <= 11:
-            self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
-        return False
+    # Override the default event so we can customize it
+    def mouse_down_event(self, _, event):
+        window_width = self.get_size()[0]
+        # Only on right click and not on the rightmost side where the scrollbar is
+        if event.button == 1 and event.x < window_width - 55:
+            # 20 is the margin. self.get_margin_left() and self.get_margin_top() should work, but they don't
+            self.drag_start_coords = {'x': event.x + 20, 'y': event.y + 20}
 
     def webview_on_context_menu(self, *args):
         return bool(not get_options().dev)
@@ -276,6 +275,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_showhotkey_dialog(self, query):
         self._hotkey_name = query['name']
         logger.info('Show hotkey-dialog for %s', self._hotkey_name)
+        # Workaround for not getting mouseup event on the preferences window
+        self.drag_start_coords = None
         self.hotkey_dialog.present()
 
     @rt.route('/show/file-browser')

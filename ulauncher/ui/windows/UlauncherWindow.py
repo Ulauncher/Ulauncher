@@ -85,6 +85,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this will trigger to show frequent apps if necessary
         self.show_results([])
 
+        self.connect('button-press-event', self.mouse_down_event)
+        self.connect('button-release-event', self.mouse_up_event)
+        self.connect('motion_notify_event', self.mouse_move_event)
+
         if not is_wayland_compatibility_on():
             # bind hotkey
             Keybinder.init()
@@ -273,6 +277,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.hide()
         else:
             self.show_window()
+
+    def mouse_down_event(self, _, event):
+        """
+        Prepare moving the window if the user drags
+        """
+        # Only on left clicks and not on the results
+        if event.button == 1 and event.y < 100:
+            self.drag_start_coords = {'x': event.x, 'y': event.y}
 
     def bind_hotkey(self, accel_name):
         if is_wayland_compatibility_on():
