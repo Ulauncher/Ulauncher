@@ -145,7 +145,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def mouse_down_event(self, _, event):
         window_width = self.get_size()[0]
         # Only on right click and not on the rightmost side where the scrollbar is
-        if event.button == 1 and event.x < window_width - 55:
+        if event.button == 1 and event.x < window_width - 100 and event.y < 75:
             # 20 is the margin. self.get_margin_left() and self.get_margin_top() should work, but they don't
             self.drag_start_coords = {'x': event.x + 20, 'y': event.y + 20}
 
@@ -275,8 +275,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_showhotkey_dialog(self, query):
         self._hotkey_name = query['name']
         logger.info('Show hotkey-dialog for %s', self._hotkey_name)
-        # Workaround for not getting mouseup event on the preferences window
-        self.drag_start_coords = None
         self.hotkey_dialog.present()
 
     @rt.route('/show/file-browser')
