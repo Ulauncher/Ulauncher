@@ -10,10 +10,11 @@ from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 
 
 class FileBrowserResult(SmallResult):
+    highlightable = True
+
     """
     :param ~str path:
     """
-
     # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path
