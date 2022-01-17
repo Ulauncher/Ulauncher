@@ -10,7 +10,6 @@ class ExtensionResult(SearchableResult):
 
     Cannot be subclassed there because :func:`pickle.loads` won't work in Ulauncher app
     """
-    is_extension = True
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)

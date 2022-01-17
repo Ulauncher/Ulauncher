@@ -21,7 +21,6 @@ class Result:
     _on_alt_enter = None  # type: OnEnterCallback
     highlightable = False  # type: bool
     searchable = False  # type: bool
-    is_extension = False  # type: bool
 
     # pylint: disable=too-many-arguments
     def __init__(self,
@@ -68,7 +67,7 @@ class Result:
         """
         if query and self.highlightable:
             return highlight_text(
-                query if not self.is_extension else query.get_argument(''),
+                query if not self.keyword else query.get_argument(''),
                 self.name,
                 open_tag=f'<span foreground="{color}">',
                 close_tag='</span>'
