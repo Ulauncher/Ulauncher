@@ -193,6 +193,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 except IndexError:
                     # selected non-existing result item
                     pass
+            elif ctrl and keyname == 'comma':
+                self.activate_preferences()
 
         if keyname == 'Escape':
             self.hide()
