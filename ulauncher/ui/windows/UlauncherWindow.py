@@ -115,10 +115,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """Display the preferences window for ulauncher."""
         self.activate_preferences(page='preferences')
 
-    def on_mnu_close_activate(self, widget, data=None):
-        """Signal handler for closing the UlauncherWindow."""
-        self.destroy()
-
     def on_destroy(self, widget, data=None):
         """Called when the UlauncherWindow is closed."""
         # Clean up code for saving application state should be added here.
