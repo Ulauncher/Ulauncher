@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.6"/>
+  <requires lib="gtk+" version="3.22"/>
   <requires lib="preferences_ulauncher_dialog" version="1.0"/>
   <object class="PreferencesUlauncherDialog" id="preferences_ulauncher_dialog">
-    <property name="can_focus">False</property>
-    <property name="has_focus">True</property>
+    <property name="can-focus">False</property>
+    <property name="has-focus">True</property>
     <property name="title" translatable="yes">Ulauncher Preferences</property>
-    <property name="window_position">center</property>
-    <property name="icon_name">ulauncher</property>
-    <property name="type_hint">normal</property>
+    <property name="window-position">center</property>
+    <property name="icon-name">ulauncher</property>
+    <property name="type-hint">normal</property>
     <property name="decorated">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox1">
         <property name="visible">True</property>
-        <property name="app_paintable">True</property>
-        <property name="can_focus">True</property>
-        <property name="is_focus">True</property>
+        <property name="app-paintable">True</property>
+        <property name="can-focus">True</property>
+        <property name="is-focus">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="dialog_action_area">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
             <child>
               <object class="GtkButton" id="btn_help">
                 <property name="label">gtk-help</property>
-                <property name="use_action_appearance">False</property>
+                <property name="use-action-appearance">False</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -43,11 +43,11 @@
             <child>
               <object class="GtkButton" id="btn_close">
                 <property name="label">gtk-close</property>
-                <property name="use_action_appearance">False</property>
+                <property name="use-action-appearance">False</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -62,27 +62,27 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox" id="window_wrapper">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">20</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">20</property>
-            <property name="margin_bottom">20</property>
+            <property name="can-focus">False</property>
+            <property name="margin-left">20</property>
+            <property name="margin-right">20</property>
+            <property name="margin-top">20</property>
+            <property name="margin-bottom">20</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkScrolledWindow" id="scrolled_window">
-                <property name="width_request">996</property>
-                <property name="height_request">599</property>
+                <property name="width-request">996</property>
+                <property name="height-request">599</property>
                 <property name="visible">True</property>
-                <property name="app_paintable">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
+                <property name="app-paintable">True</property>
+                <property name="can-focus">True</property>
+                <property name="shadow-type">in</property>
                 <child>
                   <placeholder/>
                 </child>
