@@ -304,7 +304,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             show_notification("Ulauncher", f"Hotkey is set to {display_name}")
 
     def _get_user_query(self):
-        return Query(self.input.get_text().strip())
+        return Query(self.input.get_text().lstrip())
 
     def select_result(self, index, onHover=False):
         if time.time() - self._results_render_time > 0.1:
