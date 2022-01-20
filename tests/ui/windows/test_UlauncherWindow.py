@@ -39,12 +39,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_scaling_factor')
 
     @pytest.fixture(autouse=True)
-    def cairo_surface_create_from_pixbuf(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gdk.cairo_surface_create_from_pixbuf')
-
-    @pytest.fixture(autouse=True)
     def new_image_from_surface(self, mocker):
-        mocked = mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk.Image.new_from_surface')
+        mocked = mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk.Image.new_from_pixbuf')
         mocked.return_value = Gtk.Image()
         return mocked
 

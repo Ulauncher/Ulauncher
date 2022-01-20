@@ -2,9 +2,8 @@ import logging
 from typing import Any
 import gi
 gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
 
 from ulauncher.config import ITEM_SHORTCUT_KEYS
 from ulauncher.utils.display import get_scaling_factor
@@ -76,17 +75,8 @@ class ResultWidget(Gtk.EventBox):
         """
         :param PixBuf icon:
         """
-        if not icon:
-            return
-
-        iconWgt = self.builder.get_object('item-icon')
-
-        if self.scaling_factor == 1:
-            iconWgt.set_from_pixbuf(icon)
-            return
-
-        surface = Gdk.cairo_surface_create_from_pixbuf(icon, self.scaling_factor, self.get_window())
-        iconWgt.set_from_surface(surface)
+        if icon:
+            self.builder.get_object('item-icon').set_from_pixbuf(icon)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
         colors = Theme.get_current().get_matched_text_hl_colors()

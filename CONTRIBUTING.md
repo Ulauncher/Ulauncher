@@ -61,7 +61,7 @@ For the v6 branch you need the the following to setup the local build environmen
   ```sh
   sudo pacman -Syu --needed \
     gobject-introspection-runtime gtk3 gdk-pixbuf2 libnotify libkeybinder3 libappindicator-gtk3 \
-    webkit2gtk wmctrl python-{gobject,cairo,dbus,levenshtein}
+    webkit2gtk wmctrl python-{gobject,dbus,levenshtein}
   ```
 </details>
 

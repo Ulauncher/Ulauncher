@@ -358,10 +358,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         logger.debug('render %s results', len(results))
 
     def _render_prefs_icon(self):
-        scaling_factor = get_scaling_factor()
-        prefs_pixbuf = load_icon(get_asset('icons/gear.svg'), 16 * scaling_factor)
-        surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scaling_factor, self.get_window())
-        prefs_image = Gtk.Image.new_from_surface(surface)
+        prefs_pixbuf = load_icon(get_asset('icons/gear.svg'), 16 * get_scaling_factor())
+        prefs_image = Gtk.Image.new_from_pixbuf(prefs_pixbuf)
         self.prefs_btn.set_image(prefs_image)
 
     @staticmethod
