@@ -22,8 +22,8 @@
             <property name="margin-bottom">2</property>
             <child>
               <object class="GtkImage" id="item-icon">
-                <property name="width-request">25</property>
-                <property name="height-request">25</property>
+                <property name="width-request">0</property>
+                <property name="height-request">0</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="stock">gtk-missing-image</property>
@@ -54,7 +54,7 @@
                 </style>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
@@ -76,6 +76,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack-type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>

@@ -38,6 +38,21 @@ class ResultWidget(Gtk.EventBox):
         self.set_index(index)
         self.scaling_factor = get_scaling_factor()
 
+        item_container = builder.get_object('item-container')
+        item_name = builder.get_object('name_wrapper')
+        base_scaling = 1.0
+
+        if not item_name:
+            item_name = builder.get_object('item-name')
+            base_scaling = 0.67
+        item_container.set_property('margin-start', 18 * self.scaling_factor)
+        item_container.set_property('margin-end', 18 * self.scaling_factor)
+        item_container.set_property('margin-top', 5 * base_scaling * self.scaling_factor)
+        item_container.set_property('margin-bottom', 5 * base_scaling * self.scaling_factor)
+        item_name.set_property('margin-start', 12 * base_scaling * self.scaling_factor)
+        item_name.set_property('margin-end', 12 * base_scaling * self.scaling_factor)
+        item_name.set_property('width-request', 350 * self.scaling_factor)
+
         self.set_icon(load_icon(result.icon, result.ICON_SIZE * self.scaling_factor))
         self.set_description(result.get_description(query))
         self.set_name_highlighted()

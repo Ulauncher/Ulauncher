@@ -22,8 +22,8 @@
         <property name="visible">True</property>
         <property name="app-paintable">True</property>
         <property name="can-focus">False</property>
-        <property name="margin-left">20</property>
-        <property name="margin-right">20</property>
+        <property name="margin-start">20</property>
+        <property name="margin-end">20</property>
         <property name="margin-top">20</property>
         <property name="margin-bottom">20</property>
         <property name="orientation">vertical</property>
@@ -40,8 +40,8 @@
                 <property name="is-focus">True</property>
                 <property name="can-default">True</property>
                 <property name="receives-default">True</property>
-                <property name="margin-left">20</property>
-                <property name="margin-right">20</property>
+                <property name="margin-start">20</property>
+                <property name="margin-end">20</property>
                 <property name="margin-top">15</property>
                 <property name="margin-bottom">15</property>
                 <style>
@@ -64,7 +64,7 @@
                 <property name="receives-default">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin-right">15</property>
+                <property name="margin-end">15</property>
                 <style>
                   <class name="prefs-btn"/>
                 </style>
@@ -72,6 +72,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack-type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
