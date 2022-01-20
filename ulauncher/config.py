@@ -4,6 +4,7 @@
 # pylint: disable=deprecated-module
 import argparse
 import os
+import string
 from uuid import uuid4
 from time import time
 from functools import lru_cache
@@ -29,6 +30,8 @@ EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FIRST_RUN = False
+# 1..9, then a..z
+ITEM_SHORTCUT_KEYS = list(map(str, range(1, 10))) + list(string.ascii_lowercase)
 
 
 class AssetsPathNotFoundError(Exception):

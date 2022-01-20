@@ -6,6 +6,7 @@ gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk
 
+from ulauncher.config import ITEM_SHORTCUT_KEYS
 from ulauncher.utils.display import get_monitor_scale_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
@@ -45,9 +46,7 @@ class ResultWidget(Gtk.EventBox):
         Set index for the item and assign shortcut
         """
         self.index = index
-        # Alt+1..9, then Alt+a..z
-        index_text = index + 1 if index < 9 else chr(97 + index - 9)
-        self.shortcut = f"Alt+{index_text}"
+        self.shortcut = f"Alt+{ITEM_SHORTCUT_KEYS[index]}"
         self.set_shortcut(self.shortcut)
 
     def select(self):

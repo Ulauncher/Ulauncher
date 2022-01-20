@@ -17,7 +17,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_asset, get_options, FIRST_RUN
+from ulauncher.config import get_asset, get_options, FIRST_RUN, ITEM_SHORTCUT_KEYS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -175,17 +175,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 self.enter_result(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
                 self.enter_result()
-            elif alt and keyname.isdigit() and 0 < int(keyname) < 10:
-                # on Alt+<num>
+            elif alt and keyname in ITEM_SHORTCUT_KEYS:
+                # on Alt+<num/letter>
                 try:
-                    self.enter_result(int(keyname) - 1)
-                except IndexError:
-                    # selected non-existing result item
-                    pass
-            elif alt and len(keyname) == 1 and 97 <= ord(keyname) <= 122:
-                # on Alt+<char>
-                try:
-                    self.enter_result(ord(keyname) - 97 + 9)
+                    self.enter_result(ITEM_SHORTCUT_KEYS.index(keyname))
                 except IndexError:
                     # selected non-existing result item
                     pass
