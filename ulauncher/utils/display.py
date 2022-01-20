@@ -1,9 +1,12 @@
 import logging
 import gi
-gi.require_version('Gdk', '3.0')
-gi.require_version('GdkX11', '3.0')
+gi.require_versions({
+    'Gio': '2.0',
+    'Gdk': '3.0',
+    'GdkX11': '3.0',
+})
 # pylint: disable=wrong-import-position
-from gi.repository import Gdk, GdkX11
+from gi.repository import Gdk, GdkX11, Gio
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +40,13 @@ def get_primary_screen_geometry():
     return get_screens()[Gdk.Screen.get_default().get_primary_monitor()]
 
 
-def get_monitor_scale_factor() -> int:
-    # TODO: use scaling factor of a monitor where ulauncher window is going to be displayed
-    return Gdk.Display.get_default().get_primary_monitor().get_scale_factor()
+def get_scaling_factor() -> int:
+    # These two are rougly the same thing as the latter doesn't apply only to text
+    # Text_scaling allow fractional scaling
+    # GTK doesn't seem to allow different scaling factors on different displays
+    monitor_scaling = Gdk.Display.get_default().get_primary_monitor().get_scale_factor()
+    text_scaling = Gio.Settings.new("org.gnome.desktop.interface").get_double('text-scaling-factor')
+    return monitor_scaling * text_scaling
 
 
 def get_current_screen_geometry(window=None):

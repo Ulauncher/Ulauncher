@@ -35,8 +35,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
 
     @pytest.fixture(autouse=True)
-    def get_monitor_scale_factor(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_monitor_scale_factor')
+    def get_scaling_factor(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_scaling_factor')
 
     @pytest.fixture(autouse=True)
     def cairo_surface_create_from_pixbuf(self, mocker):

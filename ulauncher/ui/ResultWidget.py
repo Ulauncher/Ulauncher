@@ -7,7 +7,7 @@ gi.require_version('Gdk', '3.0')
 from gi.repository import Gtk, Gdk
 
 from ulauncher.config import ITEM_SHORTCUT_KEYS
-from ulauncher.utils.display import get_monitor_scale_factor
+from ulauncher.utils.display import get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
 from ulauncher.modes.Query import Query
@@ -36,8 +36,9 @@ class ResultWidget(Gtk.EventBox):
         self.result = result
         self.query = query
         self.set_index(index)
+        self.scaling_factor = get_scaling_factor()
 
-        self.set_icon(load_icon(result.icon, result.ICON_SIZE * get_monitor_scale_factor()))
+        self.set_icon(load_icon(result.icon, result.ICON_SIZE * self.scaling_factor))
         self.set_description(result.get_description(query))
         self.set_name_highlighted()
 
@@ -65,13 +66,12 @@ class ResultWidget(Gtk.EventBox):
             return
 
         iconWgt = self.builder.get_object('item-icon')
-        scale_factor = get_monitor_scale_factor()
 
-        if scale_factor == 1:
+        if self.scaling_factor == 1:
             iconWgt.set_from_pixbuf(icon)
             return
 
-        surface = Gdk.cairo_surface_create_from_pixbuf(icon, scale_factor, self.get_window())
+        surface = Gdk.cairo_surface_create_from_pixbuf(icon, self.scaling_factor, self.get_window())
         iconWgt.set_from_surface(surface)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
