@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 class ResultWidget(Gtk.EventBox):
     __gtype_name__ = "ResultWidget"
 
-    shortcut = ''  # type: str
     index = 0  # type: int
     builder = None  # type: Any
     name = ''  # type: str
     query = Query('')  # type: Query
     result = None  # type: Any
     item_box = None  # type: Any
+    scaling_factor = 1.0  # type: float
 
     def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:
         self.builder = builder
@@ -47,8 +47,7 @@ class ResultWidget(Gtk.EventBox):
         Set index for the item and assign shortcut
         """
         self.index = index
-        self.shortcut = f"Alt+{ITEM_SHORTCUT_KEYS[index]}"
-        self.set_shortcut(self.shortcut)
+        self.set_shortcut(f"Alt+{ITEM_SHORTCUT_KEYS[index]}")
 
     def select(self):
         self.set_name_highlighted(True)
