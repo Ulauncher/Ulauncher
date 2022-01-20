@@ -21,7 +21,7 @@ class AppResult(SearchableResult):
     def __init__(self, app_info):
         self.name = app_info.get_display_name()
         self.icon = app_info.get_string('Icon')
-        self.description = app_info.get_description()
+        self.description = app_info.get_description() or app_info.get_generic_name()
         self._app_id = app_info.get_id()
         # TryExec is what we actually want (name of/path to exec), but it's often not specified
         # get_executable uses Exec, which is always specified, but it will return the actual executable.
