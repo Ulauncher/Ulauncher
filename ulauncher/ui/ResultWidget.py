@@ -37,7 +37,7 @@ class ResultWidget(Gtk.EventBox):
         self.query = query
         self.set_index(index)
 
-        self.set_icon(load_icon(result.icon, result.get_icon_size()))
+        self.set_icon(load_icon(result.icon, result.ICON_SIZE * get_monitor_scale_factor()))
         self.set_description(result.get_description(query))
         self.set_name_highlighted()
 
