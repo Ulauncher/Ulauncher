@@ -248,7 +248,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def show_window(self):
         # works only when the following methods are called in that exact order
-        self.set_sensitive(True)
         self.present()
         self.position_window()
         if not is_wayland_compatibility_on():
