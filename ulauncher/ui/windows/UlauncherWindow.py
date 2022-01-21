@@ -64,7 +64,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.preferences_dialog = None  # instance
 
         self.results_nav = None
-        self.window = self.ui['ulauncher_window']
         self.window_body = self.ui['body']
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
@@ -140,7 +139,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if self.settings.get_property('grab-mouse-pointer'):
             ptr_dev = self.get_pointer_device()
             result = ptr_dev.grab(
-                self.window.get_window(),
+                self.get_window(),
                 Gdk.GrabOwnership.NONE,
                 True,
                 Gdk.EventMask.ALL_EVENTS_MASK,
@@ -249,8 +248,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def show_window(self):
         # works only when the following methods are called in that exact order
-        self.window.set_sensitive(True)
-        self.window.present()
+        self.set_sensitive(True)
+        self.present()
         self.position_window()
         if not is_wayland_compatibility_on():
             self.present_with_time(Keybinder.get_current_event_time())
@@ -317,7 +316,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def get_pointer_device(self):
         return (self
-                .window
                 .get_window()
                 .get_display()
                 .get_device_manager()
