@@ -17,7 +17,7 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_asset, get_options, FIRST_RUN, ITEM_SHORTCUT_KEYS
+from ulauncher.config import get_asset, get_options, FIRST_RUN
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -161,6 +161,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        jump_keys = self.settings.get_jump_keys()
         ModeHandler.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
         if self.results_nav:
@@ -174,10 +175,10 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 self.enter_result(alt=True)
             elif keyname in ('Return', 'KP_Enter'):
                 self.enter_result()
-            elif alt and keyname in ITEM_SHORTCUT_KEYS:
+            elif alt and keyname in jump_keys:
                 # on Alt+<num/letter>
                 try:
-                    self.select_result(ITEM_SHORTCUT_KEYS.index(keyname))
+                    self.select_result(jump_keys.index(keyname))
                 except IndexError:
                     # selected non-existing result item
                     pass

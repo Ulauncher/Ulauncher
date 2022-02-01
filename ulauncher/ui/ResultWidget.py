@@ -5,7 +5,7 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk
 
-from ulauncher.config import ITEM_SHORTCUT_KEYS
+from ulauncher.utils.Settings import Settings
 from ulauncher.utils.display import get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
@@ -60,8 +60,9 @@ class ResultWidget(Gtk.EventBox):
         """
         Set index for the item and assign shortcut
         """
+        jump_keys = Settings.get_instance().get_jump_keys()
         self.index = index
-        self.set_shortcut(f"Alt+{ITEM_SHORTCUT_KEYS[index]}")
+        self.set_shortcut(f"Alt+{jump_keys[index]}")
 
     def select(self):
         self.set_name_highlighted(True)

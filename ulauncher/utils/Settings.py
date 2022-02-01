@@ -42,6 +42,12 @@ GPROPERTIES = {
                          None,
                          "mouse-pointer-monitor",
                          GObject.ParamFlags.READWRITE),
+
+    "jump-keys": (str,
+                  "The keys use for quickly jumping to results",
+                  None,
+                  "1234567890abcdefghijklmnopqrstuvwxyz",
+                  GObject.ParamFlags.READWRITE),
     "terminal-command": (str,
                          "Terminal command",
                          None,
@@ -128,3 +134,8 @@ class Settings(GObject.GObject):
 
     def get_all(self):
         return dict(list(map(lambda prop: (prop, getattr(self.props, prop)), dir(self.props))))
+
+    def get_jump_keys(self):
+        # convert to list and filter out duplicates
+        keys_setting = list(self.get_property('jump-keys'))
+        return list(dict.fromkeys(keys_setting))

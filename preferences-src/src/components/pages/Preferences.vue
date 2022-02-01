@@ -133,6 +133,19 @@
 
       <tr>
         <td>
+          <label for="jump-keys">Jump Keys</label>
+          <small>
+            <p>
+              Set the keys use for quickly jumping to results
+            </p>
+          </small>
+        </td>
+        <td>
+          <b-form-input style="width:500px" id="jump-keys" v-model="jump_keys"></b-form-input>
+        </td>
+      </tr>
+      <tr>
+        <td>
           <label for="terminal-exec">Terminal Command</label>
           <small>
             <p>
@@ -142,7 +155,7 @@
           </small>
         </td>
         <td>
-          <b-form-input style="width:250px" id="terminal-exec" v-model="terminal_command"></b-form-input>
+          <b-form-input style="width:500px" id="terminal-exec" v-model="terminal_command"></b-form-input>
         </td>
       </tr>
       <tr>
@@ -205,6 +218,7 @@ export default {
       'disable_desktop_filters',
       'disable_window_shadow',
       'grab_mouse_pointer',
+      'jump_keys',
       'render_on_screen',
       'show_indicator_icon',
       'show_recent_apps',

@@ -29,7 +29,6 @@ EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
 EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
 ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FIRST_RUN = False
-ITEM_SHORTCUT_KEYS = list('1234567890abcdefghijklmnopqrstuvwxyz')
 
 
 class AssetsPathNotFoundError(Exception):
