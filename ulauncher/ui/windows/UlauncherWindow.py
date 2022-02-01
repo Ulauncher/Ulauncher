@@ -177,7 +177,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             elif alt and keyname in ITEM_SHORTCUT_KEYS:
                 # on Alt+<num/letter>
                 try:
-                    self.enter_result(ITEM_SHORTCUT_KEYS.index(keyname))
+                    self.select_result(ITEM_SHORTCUT_KEYS.index(keyname))
                 except IndexError:
                     # selected non-existing result item
                     pass
