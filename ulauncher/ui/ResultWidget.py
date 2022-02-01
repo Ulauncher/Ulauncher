@@ -61,8 +61,9 @@ class ResultWidget(Gtk.EventBox):
         Set index for the item and assign shortcut
         """
         jump_keys = Settings.get_instance().get_jump_keys()
-        self.index = index
-        self.set_shortcut(f"Alt+{jump_keys[index]}")
+        if index < len(jump_keys):
+            self.index = index
+            self.set_shortcut(f"Alt+{jump_keys[index]}")
 
     def select(self):
         self.set_name_highlighted(True)

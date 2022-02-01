@@ -66,7 +66,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="margin-left">15</property>
-                <property name="label" translatable="yes">Alt+1</property>
+                <property name="label" translatable="yes"></property>
                 <property name="justify">right</property>
                 <style>
                   <class name="item-shortcut"/>
