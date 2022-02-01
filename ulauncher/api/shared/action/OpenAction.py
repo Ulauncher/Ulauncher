@@ -1,5 +1,5 @@
-import subprocess
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.utils.launch_detached import launch_detached
 
 
 class OpenAction(BaseAction):
@@ -16,4 +16,4 @@ class OpenAction(BaseAction):
         return False
 
     def run(self):
-        subprocess.Popen(['xdg-open', self.item])
+        launch_detached(['xdg-open', self.item])
