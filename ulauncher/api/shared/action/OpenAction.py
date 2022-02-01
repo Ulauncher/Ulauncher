@@ -12,8 +12,5 @@ class OpenAction(BaseAction):
     def __init__(self, item):
         self.item = item
 
-    def keep_app_open(self):
-        return False
-
     def run(self):
         launch_detached(['xdg-open', self.item])
