@@ -27,7 +27,7 @@ from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.utils.display import get_current_screen_geometry, get_primary_screen_geometry, get_scaling_factor
+from ulauncher.utils.display import get_monitor_geometry, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
@@ -236,16 +236,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def position_window(self):
         window_width = self.get_size()[0]
-        screen = get_current_screen_geometry()
-
-        if self.settings.get_property('render-on-screen') == "default-monitor":
-            screen = get_primary_screen_geometry()
+        geo = get_monitor_geometry(self.settings.get_property('render-on-screen') != "default-monitor")
 
         # The topmost pixel of the window should be at 1/5 of the current screen's height
         # Window should be positioned in the center horizontally
         # Also, add offset x and y, in order to move window to the current screen
-        self.move(screen['width'] / 2 - window_width / 2 + screen['x'],
-                  screen['height'] / 5 + screen['y'])
+        self.move(geo.width / 2 - window_width / 2 + geo.x, geo.height / 5 + geo.y)
 
     def show_window(self):
         # works only when the following methods are called in that exact order

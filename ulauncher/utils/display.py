@@ -11,33 +11,23 @@ from gi.repository import Gdk, GdkX11, Gio
 logger = logging.getLogger(__name__)
 
 
-def get_current_screen(window=None):
+def get_monitor_geometry(use_mouse_position=True):
     """
     :rtype int:
     """
     default_screen = Gdk.Screen.get_default()
-    try:
-        if window:
-            screen = default_screen.get_monitor_at_window(window.get_window())
-        else:
-            disp = GdkX11.X11Display.get_default()
-            dm = Gdk.Display.get_device_manager(disp)
-            pntr_device = dm.get_client_pointer()
-            (_, x, y) = pntr_device.get_position()
-            screen = default_screen.get_monitor_at_point(x, y)
-    # pylint: disable=broad-except
-    except Exception as e:
-        logger.exception("Unexpected exception: %s", e)
-        screen = 0
+    monitor_nr = default_screen.get_primary_monitor()
+    if use_mouse_position:
+        try:
+            (_, x, y) = GdkX11.X11Display.get_default().get_default_seat().get_pointer().get_position()
+            monitor_nr = default_screen.get_monitor_at_point(x, y)
+        # pylint: disable=broad-except
+        except Exception as e:
+            logger.exception("Unexpected exception: %s", e)
 
-    return screen
-
-
-def get_primary_screen_geometry():
-    """
-    :returns: dict with keys: x, y, width, height
-    """
-    return get_screens()[Gdk.Screen.get_default().get_primary_monitor()]
+    geo = default_screen.get_monitor_geometry(monitor_nr)
+    logger.debug("Monitor %s - X: %s, Y: %s, W: %s, H: %s", monitor_nr, geo.x, geo.y, geo.width, geo.height)
+    return geo
 
 
 def get_scaling_factor() -> int:
@@ -47,34 +37,3 @@ def get_scaling_factor() -> int:
     monitor_scaling = Gdk.Display.get_default().get_primary_monitor().get_scale_factor()
     text_scaling = Gio.Settings.new("org.gnome.desktop.interface").get_double('text-scaling-factor')
     return monitor_scaling * text_scaling
-
-
-def get_current_screen_geometry(window=None):
-    """
-    :returns: dict with keys: x, y, width, height
-    """
-    return get_screens()[get_current_screen(window)]
-
-
-def get_screens():
-    """
-    :returns: a list of screen geometries
-    :raises RuntimeError:
-    """
-
-    screens = []
-    try:
-        default_screen = Gdk.Screen.get_default()
-        logger.debug("Found %s monitor(s)", default_screen.get_n_monitors())
-
-        for i in range(default_screen.get_n_monitors()):
-            rect = default_screen.get_monitor_geometry(i)
-            logger.debug("  Monitor %s - X: %s, Y: %s, W: %s, H: %s", i, rect.x, rect.y, rect.width, rect.height)
-            screens.append({"x": rect.x,
-                            "y": rect.y,
-                            "width": rect.width,
-                            "height": rect.height})
-    except Exception as err:
-        raise RuntimeError(f"Unable to find any video sources: {err}") from err
-
-    return screens
