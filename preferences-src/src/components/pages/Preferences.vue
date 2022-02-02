@@ -5,10 +5,23 @@
     <table>
       <tr>
         <td>
+          <label for="autostart">Launch at login</label>
+        </td>
+        <td>
+          <b-form-checkbox
+            :disabled="!prefs.autostart_allowed"
+            id="autostart"
+            v-model="autostart_enabled"
+          ></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="hotkey-show-app">Hotkey</label>
         </td>
         <td>
-          <b-form-input
+          <b-form-input style="min-width:380px"
             id="hotkey-show-app"
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
@@ -32,10 +45,10 @@
 
       <tr>
         <td>
-          <label for="theme-name">Color Theme</label>
+          <label for="theme-name">Color theme</label>
         </td>
         <td>
-          <b-form-select
+          <b-form-select style="min-width:380px"
             id="theme-name"
             class="theme-select"
             :options="prefs.available_themes"
@@ -46,14 +59,15 @@
 
       <tr>
         <td>
-          <label for="autostart">Launch at Login</label>
+          <label for="render-on-screen">Screen to show on</label>
         </td>
         <td>
-          <b-form-checkbox
-            :disabled="!prefs.autostart_allowed"
-            id="autostart"
-            v-model="autostart_enabled"
-          ></b-form-checkbox>
+          <b-form-select style="min-width:380px"
+            id="render-on-screen"
+            class="render-on-screen-select"
+            :options="renderOnScreenOptions"
+            v-model="render_on_screen"
+          ></b-form-select>
         </td>
       </tr>
 
@@ -62,30 +76,16 @@
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-input style="width:250px" id="show-recent-apps" v-model="show_recent_apps"></b-form-input>
+          <b-form-input style="width:380px" id="show-recent-apps" v-model="show_recent_apps"></b-form-input>
         </td>
       </tr>
 
       <tr>
         <td>
-          <label for="clear_previous_query">Clear Input on Hide</label>
+          <label for="clear_previous_query">Start each session with a blank query</label>
         </td>
         <td>
           <b-form-checkbox id="clear_previous_query" v-model="clear_previous_query"></b-form-checkbox>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <label for="render-on-screen">Render On</label>
-        </td>
-        <td>
-          <b-form-select
-            id="render-on-screen"
-            class="render-on-screen-select"
-            :options="renderOnScreenOptions"
-            v-model="render_on_screen"
-          ></b-form-select>
         </td>
       </tr>
 
@@ -104,7 +104,33 @@
     <table>
       <tr>
         <td>
-          <label for="disable_window_shadow">No window shadow</label>
+          <label for="show-indicator-icon">Show icon in the panel</label>
+          <small>
+            <p>Requires optional dependency gir1.2-ayatanaappindicator3 or equivalent</p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <label for="disable-desktop-filters">Show all apps</label>
+          <small>
+            <p>
+              Display all applications, even if they are configured to not show in the current desktop environment.
+            </p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="disable-desktop-filters" v-model="disable_desktop_filters"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <label for="disable-window-shadow">Disable window shadow</label>
           <small>
             <p>
               Try this if you see a box or border instead of shadows.
@@ -115,38 +141,25 @@
           </small>
         </td>
         <td>
-          <b-form-checkbox id="disable_window_shadow" v-model="disable_window_shadow"></b-form-checkbox>
+          <b-form-checkbox id="disable-window-shadow" v-model="disable_window_shadow"></b-form-checkbox>
         </td>
       </tr>
 
       <tr>
         <td>
-          <label for="show-indicator-icon">Show Indicator Icon</label>
+          <label for="jump-keys">Jump keys</label>
           <small>
-            <p>It's supported only if gir1.2-ayatanaappindicator3-0.1 or an equivalent is installed</p>
-          </small>
-        </td>
-        <td>
-          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <label for="jump-keys">Jump Keys</label>
-          <small>
-            <p>
-              Set the keys use for quickly jumping to results
-            </p>
+            <p>Set the keys to use for quickly jumping to results</p>
           </small>
         </td>
         <td>
           <b-form-input style="width:500px" id="jump-keys" v-model="jump_keys"></b-form-input>
         </td>
       </tr>
+
       <tr>
         <td>
-          <label for="terminal-exec">Terminal Command</label>
+          <label for="terminal-exec">Terminal command</label>
           <small>
             <p>
               Overrides terminal for apps that are configured to be run from a terminal.
@@ -156,19 +169,6 @@
         </td>
         <td>
           <b-form-input style="width:500px" id="terminal-exec" v-model="terminal_command"></b-form-input>
-        </td>
-      </tr>
-      <tr>
-        <td class="pull-top">
-          <label for="disable-desktop-filters">Show All Apps</label>
-          <small>
-            <p>
-              Display all applications, even if they are configured to not show in the current desktop environment.
-            </p>
-          </small>
-        </td>
-        <td class="pull-top">
-          <b-form-checkbox id="disable-desktop-filters" v-model="disable_desktop_filters"></b-form-checkbox>
         </td>
       </tr>
     </table>
@@ -198,8 +198,8 @@ export default {
     return {
       changed : {},
       renderOnScreenOptions: {
-        'mouse-pointer-monitor': 'Monitor with a mouse pointer',
-        'default-monitor': 'Default monitor'
+        'mouse-pointer-monitor': 'The screen with the mouse pointer',
+        'default-monitor': 'The default screen'
       }
     }
   },
@@ -268,9 +268,6 @@ table {
   width: 100%;
   margin: 25px 15px 15px 40px;
 }
-.pull-top {
-  vertical-align: top;
-}
 h1 {
   margin: 30px 0 0 25px;
   font-size: 110%;
@@ -279,10 +276,11 @@ h1 {
 }
 td:first-child {
   box-sizing: border-box;
-  width: 220px;
-  padding-right: 20px;
+  width: 260px;
+  padding-right: 30px;
 }
 td {
+  vertical-align: top;
   padding-bottom: 20px;
 }
 tr:last-child td {
