@@ -5,7 +5,6 @@
   <requires lib="ulauncher_window" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
   <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="width-request">604</property>
     <property name="can-focus">False</property>
     <property name="has-focus">True</property>
     <property name="title">Ulauncher - Application Launcher</property>
@@ -84,22 +83,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="result_box">
+          <object class="GtkScrolledWindow" id="result_box_scroll_container">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
+            <property name="can-focus">True</property>
+            <property name="hscrollbar-policy">never</property>
+            <property name="shadow-type">in</property>
+            <property name="max-content-height">500</property>
+            <property name="propagate-natural-height">True</property>
             <child>
-              <placeholder/>
+              <object class="GtkViewport" id="result_box_viewport">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkBox" id="result_box">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <style>
+                      <class name="result-box"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <style>
-              <class name="result-box"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>

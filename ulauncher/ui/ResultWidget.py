@@ -68,10 +68,22 @@ class ResultWidget(Gtk.EventBox):
     def select(self):
         self.set_name_highlighted(True)
         self.item_box.get_style_context().add_class('selected')
+        self.scroll_to_focus()
 
     def deselect(self):
         self.set_name_highlighted(False)
         self.item_box.get_style_context().remove_class('selected')
+
+    def scroll_to_focus(self):
+        viewport = self.item_box.get_ancestor(Gtk.Viewport)
+        viewport_height = viewport.get_allocation().height
+        scroll_y = viewport.get_vadjustment().get_value()
+        allocation = self.get_allocation()
+        bottom = allocation.y + allocation.height
+        if scroll_y > allocation.y:  # Scroll up if the widget is above visible area
+            viewport.set_vadjustment(Gtk.Adjustment(allocation.y, 0, 2**32, 1, 10, 0))
+        elif viewport_height + scroll_y < bottom:  # Scroll down if the widget is below visible area
+            viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
     def set_icon(self, icon):
         """
@@ -104,7 +116,9 @@ class ResultWidget(Gtk.EventBox):
         self.get_toplevel().enter_result(alt=alt_enter)
 
     def on_mouse_hover(self, widget, event):
-        self.get_toplevel().select_result(self.index, onHover=True)
+        # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
+        if event.time:
+            self.get_toplevel().select_result(self.index, onHover=True)
 
     def set_description(self, description):
         description_obj = self.builder.get_object('item-descr')
