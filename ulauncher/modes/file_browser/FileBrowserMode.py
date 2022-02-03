@@ -14,7 +14,7 @@ from ulauncher.modes.file_browser.FileQueries import FileQueries
 
 
 class FileBrowserMode(BaseMode):
-    LIMIT = 17
+    LIMIT = 50
 
     def __init__(self):
         self._file_queries = FileQueries.get_instance()  # type: FileQueries

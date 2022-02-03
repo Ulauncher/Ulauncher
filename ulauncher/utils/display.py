@@ -25,9 +25,7 @@ def get_monitor_geometry(use_mouse_position=True):
         except Exception as e:
             logger.exception("Unexpected exception: %s", e)
 
-    geo = default_screen.get_monitor_geometry(monitor_nr)
-    logger.debug("Monitor %s - X: %s, Y: %s, W: %s, H: %s", monitor_nr, geo.x, geo.y, geo.width, geo.height)
-    return geo
+    return default_screen.get_monitor_geometry(monitor_nr)
 
 
 def get_scaling_factor() -> int:

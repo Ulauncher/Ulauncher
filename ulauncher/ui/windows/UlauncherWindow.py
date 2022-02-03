@@ -235,13 +235,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # destroy command moved into dialog to allow for a help button
 
     def position_window(self):
-        window_width = self.get_size()[0]
         geo = get_monitor_geometry(self.settings.get_property('render-on-screen') != "default-monitor")
-
-        # The topmost pixel of the window should be at 1/5 of the current screen's height
-        # Window should be positioned in the center horizontally
-        # Also, add offset x and y, in order to move window to the current screen
-        self.move(geo.width / 2 - window_width / 2 + geo.x, geo.height / 5 + geo.y)
+        max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
+        window_width = 500 * get_scaling_factor()
+        self.set_property('width-request', window_width)
+        self.ui["result_box_scroll_container"].set_property('max-content-height', max_height)
+        self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
 
     def show_window(self):
         # works only when the following methods are called in that exact order
@@ -328,6 +327,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
+        limit = len(self.settings.get_jump_keys()) or 25
         show_recent_apps = self.settings.get_property('show-recent-apps')
         recent_apps_number = int(show_recent_apps) if show_recent_apps.isnumeric() else 0
         if not self.input.get_text() and recent_apps_number > 0:
@@ -337,7 +337,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         if results:
             self._results_render_time = time.time()
-            for item in results:
+            for item in results[:limit]:
                 self.result_box.add(item)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())

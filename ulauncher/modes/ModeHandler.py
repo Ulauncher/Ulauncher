@@ -61,7 +61,7 @@ class ModeHandler:
                 return mode
         return None
 
-    def search(self, query, min_score=50, limit=9):
+    def search(self, query, min_score=50, limit=50):
         searchables = []
         for mode in self.modes:
             searchables.extend(list(mode.get_searchable_items()))
