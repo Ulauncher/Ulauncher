@@ -308,7 +308,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav.select(index)
 
     def enter_result(self, index=None, alt=False):
-        if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
+        if self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
