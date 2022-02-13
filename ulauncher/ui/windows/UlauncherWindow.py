@@ -27,7 +27,7 @@ from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.utils.display import get_monitor_geometry, get_scaling_factor
+from ulauncher.utils.display import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.wayland import is_wayland_compatibility_on
@@ -235,7 +235,8 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # destroy command moved into dialog to allow for a help button
 
     def position_window(self):
-        geo = get_monitor_geometry(self.settings.get_property('render-on-screen') != "default-monitor")
+        monitor = get_monitor(self.settings.get_property('render-on-screen') != "default-monitor")
+        geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 500 * get_scaling_factor()
         self.set_property('width-request', window_width)
