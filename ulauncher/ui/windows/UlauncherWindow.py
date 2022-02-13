@@ -68,6 +68,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
+        self.scroll_container = self.ui["result_box_scroll_container"]
 
         self.input.connect('changed', self.on_input_changed)
         self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
@@ -350,13 +351,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())
 
-            self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
             self.apply_css(self.result_box)
+            self.scroll_container.show_all()
         else:
-            self.result_box.set_margin_bottom(0)
-            self.result_box.set_margin_top(0)
+            # Hide the scroll container when there are no results since it normally takes up a
+            # minimum amount of space even if it is empty.
+            self.scroll_container.hide()
         logger.debug('render %s results', len(results))
 
     def _render_prefs_icon(self):
