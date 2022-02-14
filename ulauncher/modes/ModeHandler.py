@@ -43,8 +43,8 @@ class ModeHandler:
         else:
             # No mode selected, which means search
             results = self.search(query)
-            # If the search result is empty, add the default items for all other modes (only shotcuts currently)
-            if not results:
+            # If the search result is empty, add the default items for all other modes (only shortcuts currently)
+            if not results and query:
                 for mode in self.modes:
                     results.extend(mode.get_fallback_results())
             RenderResultListAction(results).run()

@@ -70,6 +70,6 @@ class ItemNavigation:
             if isinstance(action, list):
                 action = RenderResultListAction(action)
             action.run()
-            return action.keep_app_open()
+            return not action.keep_app_open()
 
         return None

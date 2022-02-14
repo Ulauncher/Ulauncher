@@ -68,6 +68,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.input = self.ui['input']
         self.prefs_btn = self.ui['prefs_btn']
         self.result_box = self.ui["result_box"]
+        self.scroll_container = self.ui["result_box_scroll_container"]
 
         self.input.connect('changed', self.on_input_changed)
         self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
@@ -153,7 +154,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         Triggered by user input
         """
-        ModeHandler.get_instance().on_query_change(self._get_user_query())
+        query = self._get_user_query()
+        # This might seem odd, but this makes sure any normalization done in get_user_query() is
+        # reflected in the input box. In particular, stripping out the leading white-space.
+        self.input.set_text(query)
+        ModeHandler.get_instance().on_query_change(query)
 
     # pylint: disable=inconsistent-return-statements
     def on_input_key_press_event(self, widget, event):
@@ -250,7 +255,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         if not is_wayland_compatibility_on():
             self.present_with_time(Keybinder.get_current_event_time())
 
-        if not self.input.get_text():
+        if not self._get_input_text():
             # make sure frequent apps are shown if necessary
             self.show_results([])
         elif self.settings.get_property('clear-previous-query'):
@@ -291,8 +296,11 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             display_name = Gtk.accelerator_get_label(key, mode)
             show_notification("Ulauncher", f"Hotkey is set to {display_name}")
 
+    def _get_input_text(self):
+        return self.input.get_text().lstrip()
+
     def _get_user_query(self):
-        return Query(self.input.get_text().lstrip())
+        return Query(self._get_input_text())
 
     def select_result(self, index, onHover=False):
         if time.time() - self._results_render_time > 0.1:
@@ -300,7 +308,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav.select(index)
 
     def enter_result(self, index=None, alt=False):
-        if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
+        if self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
@@ -343,13 +351,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self._get_user_query())
 
-            self.result_box.show_all()
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
             self.apply_css(self.result_box)
+            self.scroll_container.show_all()
         else:
-            self.result_box.set_margin_bottom(0)
-            self.result_box.set_margin_top(0)
+            # Hide the scroll container when there are no results since it normally takes up a
+            # minimum amount of space even if it is empty.
+            self.scroll_container.hide()
         logger.debug('render %s results', len(results))
 
     def _render_prefs_icon(self):
