@@ -1,13 +1,15 @@
 import logging
 import gi
 gi.require_versions({
-    'Gdk': '3.0',
-    'GdkX11': '3.0',
+    "Gdk": "3.0",
+    "GdkX11": "3.0",
+    "Wnck": "3.0",
 })
 # pylint: disable=wrong-import-position
-from gi.repository import Gdk, GdkX11, Gio
+from gi.repository import Gdk, GdkX11, Gio, Wnck
 
 logger = logging.getLogger(__name__)
+wnck_screen = Wnck.Screen.get_default()
 
 
 def get_monitor(use_mouse_position=False):
@@ -36,3 +38,12 @@ def get_scaling_factor() -> int:
     monitor_scaling = get_monitor().get_scale_factor()
     text_scaling = Gio.Settings.new("org.gnome.desktop.interface").get_double('text-scaling-factor')
     return monitor_scaling * text_scaling
+
+
+def get_windows_stacked():
+    wnck_screen.force_update()
+    return reversed(wnck_screen.get_windows_stacked())
+
+
+def get_xserver_time():
+    return GdkX11.x11_get_server_time(Gdk.get_default_root_window())

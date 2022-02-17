@@ -1,9 +1,12 @@
 import logging
 import re
 import shlex
+from os.path import basename
 from gi.repository import Gio
+from ulauncher.utils.environment import IS_WAYLAND
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.launch_detached import launch_detached
+from ulauncher.utils.wm import get_windows_stacked, get_xserver_time
 
 logger = logging.getLogger(__name__)
 settings = Settings.get_instance()
@@ -11,22 +14,30 @@ settings = Settings.get_instance()
 
 def launch_app(app_id):
     app = Gio.DesktopAppInfo.new(app_id)
-    app_exec = app.get_commandline()
+    # strip field codes %f, %F, %u, %U, etc
+    app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app.get_commandline()).strip()
+    app_wm_id = (app.get_string("StartupWMClass") or basename(app_exec)).lower()
+    if app_exec and not IS_WAYLAND and settings.get_property('raise-if-started') or app.get_boolean('SingleMainWindow'):
+        for win in get_windows_stacked():
+            win_app_wm_id = win.get_class_group_name().lower()
+            if win_app_wm_id == app_wm_id:
+                logger.info("Raising application %s", app_wm_id)
+                win.activate(get_xserver_time())
+                return
+
     if app.get_boolean('DBusActivatable'):
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
         exec = ['gapplication', 'launch', app_id.replace('.desktop', '')]
     elif app_exec:
-        # strip field codes %f, %F, %u, %U, etc
-        stripped_app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app_exec).rstrip()
         if app.get_boolean('Terminal'):
             terminal_exec = settings.get_property('terminal-command')
             if terminal_exec:
                 logger.info('Will run command in preferred terminal (%s)', terminal_exec)
-                exec = shlex.split(terminal_exec) + [stripped_app_exec]
+                exec = shlex.split(terminal_exec) + [app_exec]
             else:
                 exec = ['gtk-launch', app_id]
         else:
-            exec = shlex.split(stripped_app_exec)
+            exec = shlex.split(app_exec)
 
     if not exec:
         logger.error("No command to run %s", app_id)

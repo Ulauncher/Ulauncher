@@ -6,7 +6,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.display import get_scaling_factor
+from ulauncher.utils.wm import get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
 from ulauncher.modes.Query import Query

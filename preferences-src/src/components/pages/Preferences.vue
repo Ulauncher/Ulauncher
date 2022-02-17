@@ -26,7 +26,7 @@
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
           ></b-form-input>
-          <div v-if="prefs.env.is_wayland" class="hotkey-warning">
+          <div v-if="prefs.env.is_wayland" class="wayland-warning">
             <b-alert show variant="warning">
               <small>
                 Global hotkeys is unsupported in Wayland.<br>See our 
@@ -84,6 +84,22 @@
         </td>
         <td>
           <b-form-checkbox id="clear_previous_query" v-model="clear_previous_query"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <label for="raise-if-started">Switch to application if it's already running</label>
+        </td>
+        <td>
+          <b-form-checkbox id="raise-if-started" v-model="raise_if_started"></b-form-checkbox>
+          <div v-if="prefs.env.is_wayland" class="wayland-warning">
+            <b-alert show variant="warning">
+              <small>
+                This feature can only be supported with the X11 Display Server, but you are using Wayland.
+              </small>
+            </b-alert>
+          </div>
         </td>
       </tr>
 
@@ -217,6 +233,7 @@ export default {
       'disable_window_shadow',
       'grab_mouse_pointer',
       'jump_keys',
+      'raise_if_started',
       'render_on_screen',
       'show_indicator_icon',
       'show_recent_apps',
@@ -298,10 +315,10 @@ label + small {
   cursor: pointer;
   width: 200px;
 }
-.hotkey-warning {
+.wayland-warning {
   width: 550px;
 }
-.hotkey-warning .alert {
+.wayland-warning .alert {
   margin: 10px 0 0 0;
   padding: 0.4em 0.7em;
   line-height: 95%;

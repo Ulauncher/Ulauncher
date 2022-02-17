@@ -27,7 +27,7 @@ from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.utils.display import get_monitor, get_scaling_factor
+from ulauncher.utils.wm import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.environment import IS_X11_BACKEND
