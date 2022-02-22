@@ -29,6 +29,12 @@ class WindowHelper:
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
 
+    def set_cursor(self, cursor_name):
+        # pylint: disable=no-member
+        window_ = self.get_window()
+        cursor = Gdk.Cursor.new_from_name(window_.get_display(), cursor_name)
+        window_.set_cursor(cursor)
+
     ##############################################################
     # GTK mouse event handlers (attach to signals)               #
     # self.connect('button-press-event', self.mouse_down_event)  #
@@ -42,6 +48,7 @@ class WindowHelper:
         """
         # Only on left click
         if event.button == 1:
+            self.set_cursor("grab")
             self.drag_start_coords = {'x': event.x, 'y': event.y}
 
     def mouse_up_event(self, *_):
@@ -49,6 +56,7 @@ class WindowHelper:
         Clear drag to move event data
         """
         self.drag_start_coords = None
+        self.set_cursor("default")
 
     def mouse_move_event(self, _, event):
         """

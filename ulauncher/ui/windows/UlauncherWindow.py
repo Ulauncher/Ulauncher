@@ -275,6 +275,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         """
         # Only on left clicks and not on the results
         if event.button == 1 and event.y < 100:
+            self.set_cursor("grab")
             self.drag_start_coords = {'x': event.x, 'y': event.y}
 
     def bind_hotkey(self, accel_name):
