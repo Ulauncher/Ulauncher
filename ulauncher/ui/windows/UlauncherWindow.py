@@ -169,7 +169,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         jump_keys = self.settings.get_jump_keys()
         ModeHandler.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
-        if self.results_nav:
+        if keyname == 'Escape':
+            self.hide()
+
+        elif ctrl and keyname == 'comma':
+            self.activate_preferences()
+
+        elif self.results_nav:
             if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
                 self.results_nav.go_up()
                 return True
@@ -187,11 +193,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 except IndexError:
                     # selected non-existing result item
                     pass
-            elif ctrl and keyname == 'comma':
-                self.activate_preferences()
-
-        if keyname == 'Escape':
-            self.hide()
 
     ######################################
     # Helpers
