@@ -6,5 +6,6 @@ Categories=GNOME;GTK;Utility;
 TryExec=ulauncher
 Exec=env GDK_BACKEND=x11 ulauncher --no-window
 Icon=ulauncher
+SingleMainWindow=true
 Terminal=false
 Type=Application
