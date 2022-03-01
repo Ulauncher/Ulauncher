@@ -1,4 +1,4 @@
-Ulauncher was created in Ukraine 🇺🇦 [Stand by Ukraine](https://www.stopputin.net/)
+Ulauncher was created in Ukraine 🇺🇦 [Stand with Ukraine](https://www.stopputin.net/)
 
 [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
