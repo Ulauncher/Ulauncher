@@ -7,10 +7,6 @@ from functools import partial
 import ulauncher.utils.xinit  # noqa: F401
 
 import gi
-
-# Fixes issue #488
-sys.path.append('/usr/lib/python3.8/site-packages')
-
 gi.require_version('Gtk', '3.0')
 gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
