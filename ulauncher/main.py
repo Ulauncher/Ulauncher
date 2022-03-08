@@ -2,51 +2,24 @@ import sys
 import signal
 import logging
 from functools import partial
-import dbus
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
-from ulauncher.config import API_VERSION, VERSION, get_options
-
-# Start DBus loop
-options = get_options()
-logger = logging.getLogger('ulauncher')
-DBUS_SERVICE = 'net.launchpad.ulauncher'
-DBUS_PATH = '/net/launchpad/ulauncher'
-DBusGMainLoop(set_as_default=True)
-bus = dbus.SessionBus()
-instance = bus.request_name(DBUS_SERVICE)
-
-if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-    if options.no_window:
-        logger.warning("Ulauncher is already running")
-    else:
-        dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")()
-    sys.exit(0)
-
-# This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
+# This module also starts the dbus main loop and handles if the app is already running.
+from ulauncher.utils.dbus import UlauncherDbusService
+# This xinit import must happen before any GUI libraries are initialized.
 import ulauncher.utils.xinit  # noqa: F401
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, GLib
+from ulauncher.config import API_VERSION, VERSION, get_options
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
 
-
-class UlauncherDbusService(dbus.service.Object):
-    def __init__(self, window):
-        self.window = window
-        bus_name = dbus.service.BusName(DBUS_SERVICE, bus=dbus.SessionBus())
-        super().__init__(bus_name, DBUS_PATH)
-
-    @dbus.service.method(DBUS_SERVICE)
-    def toggle_window(self):
-        self.window.toggle_window()
+logger = logging.getLogger('ulauncher')
 
 
 def reload_config(win):
@@ -66,6 +39,7 @@ def main():
     Main function that starts everything
     """
 
+    options = get_options()
     setup_logging(options)
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
