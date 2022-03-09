@@ -97,7 +97,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.show_all()
 
     def handle_no_window_shadow(self):
-        if get_options().no_window_shadow:
+        if self.settings.get_property('disable-window-shadow'):
             self.ui['window_wrapper'].get_style_context().add_class('no-window-shadow')
 
     def _init_webview(self):
