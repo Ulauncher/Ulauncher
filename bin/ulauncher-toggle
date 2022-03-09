@@ -1,13 +1,4 @@
 #!/bin/sh
-
-dbus-send \
-    --session \
-    --print-reply \
-    --dest=net.launchpad.ulauncher \
-    /net/launchpad/ulauncher \
-    net.launchpad.ulauncher.toggle_window
-
-# dbus-send is asynchronous and sometimes it takes a bit of time for Ulauncher window to be presented
-sleep 0.03
+ulauncher
 
 wmctrl -a "Ulauncher - Application Launcher"
