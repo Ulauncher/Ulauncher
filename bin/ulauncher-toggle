@@ -1,4 +1,2 @@
 #!/bin/sh
 ulauncher
-
-wmctrl -a "Ulauncher - Application Launcher"

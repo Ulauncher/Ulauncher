@@ -42,7 +42,7 @@ class UlauncherApp(Gtk.Application):
             AppIndicator.get_instance().show()
 
     def do_activate(self, *args, **kwargs):
-        self.window.show()
+        self.window.show_window()
 
     def do_command_line(self, *args, **kwargs):
         # This is where we handle "--no-window" which we need to get from the remote call
