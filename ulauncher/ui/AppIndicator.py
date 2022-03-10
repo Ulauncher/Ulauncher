@@ -58,7 +58,7 @@ class AppIndicator:
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
         indicator.add_menu_item(window.on_mnu_about_activate, "About")
         indicator.add_seperator()
-        indicator.add_menu_item(Gtk.main_quit, "Exit")
+        indicator.add_menu_item(lambda *_: window.get_application().quit(), "Exit")
         return indicator
 
     def __init__(self, iconname):
