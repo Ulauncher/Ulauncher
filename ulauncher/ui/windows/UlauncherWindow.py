@@ -264,12 +264,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         else:
             self.input.grab_focus()
 
-    def toggle_window(self, key=None):
-        if self.is_visible():
-            self.hide()
-        else:
-            self.show_window()
-
     def mouse_down_event(self, _, event):
         """
         Prepare moving the window if the user drags
@@ -291,7 +285,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
             self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, self.toggle_window)
+        Keybinder.bind(accel_name, self.show_window)
         self._current_accel_name = accel_name
         if FIRST_RUN:
             (key, mode) = Gtk.accelerator_parse(accel_name)
