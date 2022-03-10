@@ -38,6 +38,7 @@ class UlauncherApp(Gtk.Application):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         from ulauncher.ui.AppIndicator import AppIndicator
         self.window = UlauncherWindow.get_instance()
+        self.window.set_application(self)
         if Settings.get_instance().get_property('show-indicator-icon'):
             AppIndicator.get_instance().show()
 

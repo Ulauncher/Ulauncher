@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
-class UlauncherWindow(Gtk.Window, WindowHelper):
+class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
     __gtype_name__ = "UlauncherWindow"
 
     _current_accel_name = None
