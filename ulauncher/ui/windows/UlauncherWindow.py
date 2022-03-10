@@ -18,6 +18,7 @@ from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
 from ulauncher.config import get_asset, get_options, FIRST_RUN
+from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -88,6 +89,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         self.connect('button-press-event', self.mouse_down_event)
         self.connect('button-release-event', self.mouse_up_event)
         self.connect('motion_notify_event', self.mouse_move_event)
+
+        if self.settings.get_property('show-indicator-icon'):
+            AppIndicator.get_instance(self).show()
 
         if not is_wayland_compatibility_on():
             # bind hotkey

@@ -49,10 +49,7 @@ class AppIndicator:
 
     @classmethod
     @singleton
-    def get_instance(cls):
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        window = UlauncherWindow.get_instance()
+    def get_instance(cls, window):
         indicator = cls("ulauncher")
         indicator.set_icon('ulauncher-indicator')
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")

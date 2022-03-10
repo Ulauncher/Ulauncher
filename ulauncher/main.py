@@ -12,7 +12,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, VERSION, get_options
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
-from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
 
 
@@ -36,11 +35,8 @@ class UlauncherApp(Gtk.Application):
         # These modules are very heavy, so we don't want to load them in the remote
         # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        from ulauncher.ui.AppIndicator import AppIndicator
         self.window = UlauncherWindow.get_instance()
         self.window.set_application(self)
-        if Settings.get_instance().get_property('show-indicator-icon'):
-            AppIndicator.get_instance().show()
 
     def do_activate(self, *args, **kwargs):
         self.window.show_window()
