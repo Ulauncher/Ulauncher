@@ -2,8 +2,6 @@
 import os
 import time
 import logging
-import subprocess
-from shutil import which
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -32,7 +30,7 @@ from ulauncher.utils.timer import timer
 from ulauncher.utils.display import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
-from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
+from ulauncher.utils.wayland import is_wayland_compatibility_on
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
 from ulauncher.ui.windows.Builder import GladeObjectFactory
@@ -265,9 +263,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.input.set_text('')
         else:
             self.input.grab_focus()
-
-        if is_wayland and which("wmctrl"):
-            subprocess.run(["wmctrl", "-a", '"Ulauncher - Application Launcher"'], check=False)
 
     def toggle_window(self, key=None):
         if self.is_visible():
