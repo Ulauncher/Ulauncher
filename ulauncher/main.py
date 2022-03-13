@@ -1,54 +1,65 @@
 import sys
+import argparse
 import signal
 import logging
 from functools import partial
 # This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
-
 import gi
 gi.require_version('Gtk', '3.0')
-gi.require_version('GLib', '2.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gtk, GLib
-import dbus
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
-
+from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, VERSION, get_options
 from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
-from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-from ulauncher.ui.AppIndicator import AppIndicator
-from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
+
+
+class UlauncherApp(Gtk.Application):
+    # Gtk.Applications check if the app is already registered and if so,
+    # new instances sends the signals to the registered one
+    # So all methods except __init__ runs on the main app
+    window = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            application_id="net.launchpad.ulauncher",
+            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
+            **kwargs
+        )
+        self.connect("startup", self.setup)  # runs only once on the main instance
+
+    def setup(self, _):
+        self.hold()  # Keep the app running even without a window
+        # These modules are very heavy, so we don't want to load them in the remote
+        # pylint: disable=import-outside-toplevel
+        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        self.window = UlauncherWindow.get_instance()
+        self.window.set_application(self)
+
+    def do_activate(self, *args, **kwargs):
+        self.window.show_window()
+
+    def do_command_line(self, *args, **kwargs):
+        # This is where we handle "--no-window" which we need to get from the remote call
+        # All other aguments are persistent and handled in config.get_options()
+        parser = argparse.ArgumentParser(prog='gui')
+        parser.add_argument("--no-window", action="store_true")
+        args, _ = parser.parse_known_args(args[0].get_arguments()[1:])
+
+        if not args.no_window:
+            self.activate()
+
+        return 0
+
 
 logger = logging.getLogger('ulauncher')
 
-DBUS_SERVICE = 'net.launchpad.ulauncher'
-DBUS_PATH = '/net/launchpad/ulauncher'
 
-
-class UlauncherDbusService(dbus.service.Object):
-    def __init__(self, window):
-        self.window = window
-        bus_name = dbus.service.BusName(DBUS_SERVICE, bus=dbus.SessionBus())
-        super().__init__(bus_name, DBUS_PATH)
-
-    @dbus.service.method(DBUS_SERVICE)
-    def toggle_window(self):
-        self.window.toggle_window()
-
-
-def reload_config(win):
+def reload_config(app):
     logger.info("Reloading config")
-    win.init_theme()
-
-
-def graceful_exit(data):
-    logger.info("Exiting gracefully nesting level %s: %s", Gtk.main_level(), data)
-    # ExtensionServer.get_instance().stop()
-    # Gtk.main_quit()
-    sys.exit(0)
+    app.window.init_theme()
 
 
 def main():
@@ -74,43 +85,23 @@ def main():
         # --no-window flag prevents the app from starting.
         sys.exit("The --hide-window argument has been renamed to --no-window")
 
-    # start DBus loop
-    DBusGMainLoop(set_as_default=True)
-    bus = dbus.SessionBus()
-    instance = bus.request_name(DBUS_SERVICE)
-
-    if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        print(
-            "DBus name already taken. Ulauncher is probably backgrounded. Did you mean `ulauncher-toggle`?",
-            file=sys.stderr
-        )
-        toggle_window = dbus.SessionBus().get_object(DBUS_SERVICE, DBUS_PATH).get_dbus_method("toggle_window")
-        toggle_window()
-        return
-
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
         logger.error("Uncaught exception", exc_info=(exctype, value, tb))
 
     sys.excepthook = except_hook
 
-    window = UlauncherWindow.get_instance()
-    UlauncherDbusService(window)
-    if not options.no_window:
-        window.show()
-
-    if Settings.get_instance().get_property('show-indicator-icon'):
-        AppIndicator.get_instance().show()
+    app = UlauncherApp()
 
     GLib.unix_signal_add(
         GLib.PRIORITY_DEFAULT,
         signal.SIGHUP,
-        partial(reload_config, window),
+        partial(reload_config, app),
         None
     )
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, graceful_exit, None)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
 
     try:
-        Gtk.main()
+        app.run(sys.argv)
     except KeyboardInterrupt:
         logger.warning('On KeyboardInterrupt')

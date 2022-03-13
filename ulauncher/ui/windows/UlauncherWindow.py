@@ -18,6 +18,7 @@ from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
 from ulauncher.config import get_asset, get_options, FIRST_RUN
+from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
-class UlauncherWindow(Gtk.Window, WindowHelper):
+class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
     __gtype_name__ = "UlauncherWindow"
 
     _current_accel_name = None
@@ -89,6 +90,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.connect('button-release-event', self.mouse_up_event)
         self.connect('motion_notify_event', self.mouse_move_event)
 
+        if self.settings.get_property('show-indicator-icon'):
+            AppIndicator.get_instance(self).show()
+
         if not is_wayland_compatibility_on():
             # bind hotkey
             Keybinder.init()
@@ -114,11 +118,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def on_mnu_preferences_activate(self, widget, data=None):
         """Display the preferences window for ulauncher."""
         self.activate_preferences(page='preferences')
-
-    def on_destroy(self, widget, data=None):
-        """Called when the UlauncherWindow is closed."""
-        # Clean up code for saving application state should be added here.
-        Gtk.main_quit()
 
     def on_preferences_dialog_destroyed(self, widget, data=None):
         '''only affects GUI
@@ -264,12 +263,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         else:
             self.input.grab_focus()
 
-    def toggle_window(self, key=None):
-        if self.is_visible():
-            self.hide()
-        else:
-            self.show_window()
-
     def mouse_down_event(self, _, event):
         """
         Prepare moving the window if the user drags
@@ -291,7 +284,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, self.toggle_window)
+        Keybinder.bind(accel_name, self.show_window)
         self._current_accel_name = accel_name
         if FIRST_RUN:
             (key, mode) = Gtk.accelerator_parse(accel_name)

@@ -28,6 +28,3 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 
 `gir1.2-appindicator3-0.1 <https://lazka.github.io/pgi-docs/#AppIndicator3-0.1>`_
   Allow applications to export a menu into the panel
-
-`python-dbus <https://github.com/LEW21/pydbus>`_
-  Python DBus library.

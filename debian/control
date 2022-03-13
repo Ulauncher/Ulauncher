@@ -25,9 +25,7 @@ Depends: ${misc:Depends},
  gir1.2-notify-0.7,
  gir1.2-gdkpixbuf-2.0,
  python3-gi,
- python3-dbus,
- python3-levenshtein,
- wmctrl
+ python3-levenshtein
 Recommends: gir1.2-ayatanaappindicator3-0.1
 Description: Application launcher for Linux
  See https://ulauncher.io for more information
