@@ -11,5 +11,4 @@ config.read('setup.cfg')
 # __assets_dir__ is by default `<ulauncher_path>/../data/` in trunk
 # and `/usr/share/ulauncher` in an installed version
 __assets_dir__ = f'{Path(__file__).resolve().parent.parent}/data'
-__is_dev__ = True
 __version__ = config['metadata']['version']
