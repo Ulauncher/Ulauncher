@@ -6,7 +6,7 @@ Documentation=https://ulauncher.io/
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=env GDK_BACKEND=x11 /usr/bin/ulauncher --no-window
+ExecStart=/usr/bin/ulauncher --no-window
 
 [Install]
 WantedBy=graphical-session.target

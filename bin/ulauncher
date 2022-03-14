@@ -24,6 +24,9 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, 'ulauncher')) and PROJEC
 if python_path:
     os.putenv('PYTHONPATH', "%s:%s" % (os.getenv('PYTHONPATH', ''), ':'.join(python_path)))  # for subprocesses
 
+if not os.environ.get("GDK_BACKEND"):
+    os.environ.update({"GDK_BACKEND": "x11"})
+
 from ulauncher import __is_dev__
 from ulauncher.main import main
 
