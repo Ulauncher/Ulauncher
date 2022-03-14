@@ -71,7 +71,7 @@ Please note that no more releases are planned for Ulauncher v5 unless they are c
 1. Fork the repo, check out the v6 branch and clone your fork locally.
 1. Create a new branch for your PR
 1. Make your changes to the code
-1. If you have Ulauncher running, make sure you stop it. For systemd this will do it: `systemctl --user stop ulauncher.service`
+1. If you have Ulauncher running, make sure you stop it. For systemd this will do it: `systemctl --user stop ulauncher`
 1. `./bin/ulauncher -v` runs the app from the git root directory (`-v` turns on verbose logging), so you can test it.
 1. Create a pull request (provide the relevant information suggested by the template)
 
