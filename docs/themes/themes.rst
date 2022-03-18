@@ -28,7 +28,7 @@ You can only change colors in themes. Changing element sizes is not possible due
 #. Press ``Ctrl+Space`` (or your hotkey) to check the result
 #. Repeat 6 - 8 until you get a desired result
 
-You might find these two wiki entries on GTK+ CSS useful:
+You might find these two pages on GTK+ CSS useful:
 
 * https://developer.gnome.org/gtk3/stable/chap-css-overview.html
 * https://developer.gnome.org/gtk3/stable/chap-css-properties.html

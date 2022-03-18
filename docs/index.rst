@@ -6,10 +6,6 @@
 `Ulauncher <https://ulauncher.io>`_ |version| (Extension API v2.0.0)
 ====================================================================
 
-Here you can find only docs on extensions and color themes.
-Everything else is on
-`Github Wiki <https://github.com/Ulauncher/Ulauncher/wiki/>`_.
-
 .. NOTE::
   To find out how to migrate your extension from API v1 to v2 navigate to :doc:`extensions/migration`
 
