@@ -24,13 +24,9 @@ systemctl --user enable --now ulauncher
 If not, then you can open Ulauncher and enable "Launch at Login" in the preferences.
 
 
-### Known Issues and workarounds
+### Troubleshooting
 
-* If you get a black box or border a border around the Ulauncher window, it's likely because your compositor or desktop environment doesn't support shadows. Try turning them off from the settings. For Sway in particular you may need to follow [these instructions](https://github.com/Ulauncher/Ulauncher/issues/230#issuecomment-570736422)
-* [Can't map the keys to ALT+SPACE](https://github.com/Ulauncher/Ulauncher/issues/100)
-* [Hotkey doesn't work in Wayland when is triggered from certain apps](https://github.com/Ulauncher/Ulauncher/issues/183)
-* [Pass custom environment variable to Ulauncher](https://github.com/Ulauncher/Ulauncher/issues/780#issuecomment-912982174)
-
+Please read our discussion page [Troubleshooting - Quirks and workaround](https://github.com/Ulauncher/Ulauncher/discussions/991) if you run into issues, and also check our outher discussions and issues if you still need help after this.
 
 ### Code Contributions
 

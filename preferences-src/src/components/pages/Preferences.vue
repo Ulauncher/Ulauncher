@@ -29,14 +29,12 @@
           <div v-if="prefs.env.is_wayland" class="hotkey-warning">
             <b-alert show variant="warning">
               <small>
-                It appears that your are in Wayland session.
-                This hotkey may not work all the time.
-                <br />Check
+                Global hotkeys is unsupported in Wayland.<br>See our 
                 <a
                   href
-                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')"
-                >this</a>
-                to get better user experience
+                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/discussions/991')"
+                >Troubleshooting</a>
+                for how to work around this.
               </small>
             </b-alert>
           </div>
