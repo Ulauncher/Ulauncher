@@ -30,9 +30,9 @@ body:
     id: communication-guidelines
     attributes:
       label: Communication guidelines
-      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/dev/CODE_OF_CONDUCT.md#general-communication-guidelines)?
+      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/dev/CODE_OF_CONDUCT.md#general-communication-guidelines) and [troubleshooting page](https://github.com/Ulauncher/Ulauncher/discussions/991)?
       options:
-        - label: I have read and agree with Ulauncher's communication guidelines.
+        - label: I have read and agree with Ulauncher's communication guidelines and checked the troubleshooting page for self-help.
           required: true
   - type: checkboxes
     id: no-extension
