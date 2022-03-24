@@ -1,10 +1,10 @@
 """
 Simple module to call XInitThreads() to properly support multi-threaded X11 applications.
 """
-from ulauncher.utils.wayland import is_wayland_compatibility_on
+from ulauncher.utils.environment import IS_X11_BACKEND
 
 
-if not is_wayland_compatibility_on():
+if IS_X11_BACKEND:
     from ctypes import cdll
 
     # Using libX11.so.6 may seem a bit hard-coded, but a quick search on the Internet indicates

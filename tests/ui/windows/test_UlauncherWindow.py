@@ -17,8 +17,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.init_styles')
 
     @pytest.fixture(autouse=True)
-    def is_wayland_compatibility_on(self, mocker):
-        wayland_compat = mocker.patch('ulauncher.ui.windows.UlauncherWindow.is_wayland_compatibility_on')
+    def is_x11_backend(self, mocker):
+        wayland_compat = mocker.patch('ulauncher.ui.windows.UlauncherWindow.IS_X11_BACKEND')
         wayland_compat.return_value = False
         return wayland_compat
 

@@ -11,7 +11,7 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, VERSION, get_options
-from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
+from ulauncher.utils.environment import IS_WAYLAND, IS_X11_BACKEND
 from ulauncher.utils.setup_logging import setup_logging
 
 
@@ -72,8 +72,8 @@ def main():
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
-    logger.info("Is Wayland: %s", is_wayland())
-    logger.info("Wayland compatibility: %s", ('on' if is_wayland_compatibility_on() else 'off'))
+    logger.info("Is Wayland: %s", IS_WAYLAND)
+    logger.info("X11 backend: %s", ('yes' if IS_X11_BACKEND else 'no'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         logger.error("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
     if options.no_window_shadow:
