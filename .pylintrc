@@ -15,7 +15,7 @@ ignore-patterns=docs,data,scripts
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+init-hook='import gi; gi.require_version("Gtk", "3.0");'
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
