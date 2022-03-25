@@ -1,8 +1,5 @@
 import pathlib
 import pytest
-import gi
-gi.require_version('Gio', '2.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gio
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.modes.apps.AppResult import AppResult

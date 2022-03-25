@@ -6,7 +6,6 @@ import logging
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
 # pylint: disable=wrong-import-position, unused-argument

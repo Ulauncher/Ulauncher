@@ -1,10 +1,4 @@
 import math
-import gi
-
-gi.require_versions({
-    "GLib": "2.0",
-})
-# pylint: disable=wrong-import-position
 from gi.repository import GLib
 
 

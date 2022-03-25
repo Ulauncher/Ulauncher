@@ -2,15 +2,6 @@ import logging
 import pickle
 from struct import pack, unpack_from
 from collections import deque
-
-import gi
-
-gi.require_versions({
-    "Gio": "2.0",
-    "GLib": "2.0",
-    "GObject": "2.0",
-})
-# pylint: disable=wrong-import-position
 from gi.repository import GLib, Gio, GObject
 
 INTSZ = 4

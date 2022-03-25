@@ -1,14 +1,6 @@
 import logging
 import os
 import os.path
-
-import gi
-
-gi.require_versions({
-    "Gio": "2.0",
-    "GObject": "2.0",
-})
-# pylint: disable=wrong-import-position
 from gi.repository import Gio, GObject
 
 from ulauncher.modes.extensions.ExtensionController import ExtensionController

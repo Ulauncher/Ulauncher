@@ -8,7 +8,6 @@ import logging
 from xml.etree.cElementTree import ElementTree
 
 import gi
-gi.require_version('GObject', '2.0')
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position, wrong-import-order
 from gi.repository import GObject, Gtk

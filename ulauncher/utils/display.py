@@ -1,7 +1,6 @@
 import logging
 import gi
 gi.require_versions({
-    'Gio': '2.0',
     'Gdk': '3.0',
     'GdkX11': '3.0',
 })

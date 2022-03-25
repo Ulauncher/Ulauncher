@@ -7,14 +7,6 @@ from functools import partial
 from typing import Dict, Optional
 from time import time
 from enum import Enum
-
-import gi
-
-gi.require_versions({
-    "Gio": "2.0",
-    "GLib": "2.0",
-})
-# pylint: disable=wrong-import-position
 from gi.repository import Gio, GLib
 
 from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options

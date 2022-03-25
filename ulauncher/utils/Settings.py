@@ -1,9 +1,6 @@
 import os
 import json
 import logging
-import gi
-gi.require_version('GObject', '2.0')
-# pylint: disable=wrong-import-position
 from gi.repository import GObject
 
 from ulauncher.utils.decorator.singleton import singleton

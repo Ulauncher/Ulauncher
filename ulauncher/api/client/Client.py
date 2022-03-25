@@ -3,13 +3,6 @@ import sys
 import logging
 import traceback
 from functools import partial
-import gi
-
-gi.require_versions({
-    "GLib": "2.0",
-    "Gio": "2.0",
-})
-# pylint: disable=wrong-import-position
 from gi.repository import GLib, Gio
 
 from ulauncher.api.shared.event import SystemExitEvent, RegisterEvent

@@ -1,6 +1,3 @@
-import gi
-gi.require_version('Gio', '2.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gio
 from ulauncher.utils.Settings import Settings
 from ulauncher.modes.BaseMode import BaseMode

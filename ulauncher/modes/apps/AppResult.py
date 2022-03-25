@@ -1,7 +1,4 @@
 from os.path import basename, join
-import gi
-gi.require_version('Gio', '2.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gio
 from ulauncher.config import STATE_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb

@@ -1,10 +1,6 @@
 import logging
 import os
 from shutil import which
-import gi
-
-gi.require_version("GLib", "2.0")
-# pylint: disable=wrong-import-position
 from gi.repository import GLib
 
 logger = logging.getLogger(__name__)
