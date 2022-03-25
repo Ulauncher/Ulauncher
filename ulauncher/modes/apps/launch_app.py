@@ -20,6 +20,9 @@ def launch_app(app_id):
     if app_exec and not IS_WAYLAND and settings.get_property('raise-if-started') or app.get_boolean('SingleMainWindow'):
         for win in get_windows_stacked():
             win_app_wm_id = win.get_class_group_name().lower()
+            if win_app_wm_id == "thunar" and win.get_name().startswith("Bulk Rename"):
+                # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
+                win_app_wm_id = "thunar --bulk-rename"
             if win_app_wm_id == app_wm_id:
                 logger.info("Raising application %s", app_wm_id)
                 win.activate(get_xserver_time())
