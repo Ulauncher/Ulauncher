@@ -60,7 +60,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
     def finish_initializing(self, ui):
         # pylint: disable=attribute-defined-outside-init
         self.ui = ui
-        self.PreferencesDialog = None  # class
         self.preferences_dialog = None  # instance
 
         self.results_nav = None
@@ -75,7 +74,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
 
         self.set_keep_above(True)
 
-        self.PreferencesDialog = PreferencesUlauncherDialog
         self.settings = Settings.get_instance()
 
         self.fix_window_width()
@@ -231,9 +229,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         if self.preferences_dialog is not None:
             logger.debug('show existing preferences_dialog')
             self.preferences_dialog.present(page=page)
-        elif self.PreferencesDialog is not None:
+        else:
             logger.debug('create new preferences_dialog')
-            self.preferences_dialog = self.PreferencesDialog()  # pylint: disable=E1102
+            self.preferences_dialog = PreferencesUlauncherDialog()
             self.preferences_dialog.connect('destroy', self.on_preferences_dialog_destroyed)
             self.preferences_dialog.show(page=page)
         # destroy command moved into dialog to allow for a help button
