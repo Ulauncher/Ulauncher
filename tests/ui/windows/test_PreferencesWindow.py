@@ -1,17 +1,17 @@
 import pytest
 import mock
-from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
+from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 
-class TestPreferencesUlauncherDialog:
+class TestPreferencesWindow:
 
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.Settings.get_instance').return_value
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.Settings.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def indicator(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.AppIndicator.get_instance').return_value
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.AppIndicator.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
@@ -19,36 +19,31 @@ class TestPreferencesUlauncherDialog:
 
     @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.AutostartPreference').return_value
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.AutostartPreference').return_value
 
     @pytest.fixture(autouse=True)
     def webview(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.WebKit2.WebView').return_value
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.WebKit2.WebView').return_value
 
     @pytest.fixture(autouse=True)
     def hotkey_dialog(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.HotkeyDialog').return_value
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.HotkeyDialog').return_value
 
     @pytest.fixture(autouse=True)
     def idle_add(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.GLib.idle_add')
-
-    @pytest.fixture
-    def builder(self):
-        return mock.MagicMock()
+        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.GLib.idle_add')
 
     # pylint: disable=too-many-arguments
     @pytest.fixture
-    def dialog(self, builder, mocker, settings, webview, autostart_pref, hotkey_dialog):
-        mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.PreferencesUlauncherDialog.finish_initializing')
-        dialog = PreferencesUlauncherDialog()
-        dialog.settings = settings
-        dialog.webview = webview
-        dialog.autostart_pref = autostart_pref
-        dialog.hotkey_dialog = hotkey_dialog
-        dialog.ui = mock.MagicMock()
-        dialog.builder = builder
-        return dialog
+    def dialog(self, mocker, settings, webview, autostart_pref, hotkey_dialog):
+        mocker.patch('ulauncher.ui.windows.PreferencesWindow.PreferencesWindow._init_webview')
+        win = PreferencesWindow()
+        win.settings = settings
+        win.webview = webview
+        win.autostart_pref = autostart_pref
+        win.hotkey_dialog = hotkey_dialog
+        win.ui = mock.MagicMock()
+        return win
 
     # pylint: disable=too-many-arguments
     def test_prefs_set_show_indicator_icon(self, dialog, settings, indicator, idle_add):
