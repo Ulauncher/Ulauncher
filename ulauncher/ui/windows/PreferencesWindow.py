@@ -7,16 +7,15 @@ from typing import List, Optional, cast
 import traceback
 
 import gi
+gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gtk, WebKit2, GLib
+from gi.repository import Gio, Gdk, Gtk, WebKit2, GLib
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
-from ulauncher.ui.windows.WindowHelper import WindowHelper
-from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
@@ -68,42 +67,41 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
 })
 
 
-# pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
-class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
-    __gtype_name__ = "PreferencesUlauncherDialog"
-
-    _hotkey_name = None
-
-    # Python's GTK API seems to requires non-standard workarounds like this.
-    # Use finish_initializing instead of __init__.
-    def __new__(cls):
-        return GladeObjectFactory(cls.__name__, "preferences_ulauncher_dialog")
-
-    def finish_initializing(self, ui):
-        # pylint: disable=attribute-defined-outside-init
-        self.ui = ui
-        # unnecessary action area can be removed only manually, like this
-        self.ui['dialog_action_area'].destroy()
-
+# pylint: disable=too-many-public-methods, attribute-defined-outside-init
+class PreferencesWindow(Gtk.ApplicationWindow):
+    def __init__(self):
+        super().__init__(
+            title="Ulauncher Preferences",
+            window_position=Gtk.WindowPosition.CENTER,
+        )
+        self.connect("key-press-event", self.on_key_press)
+        self.connect("delete-event", self.on_delete)
+        self.set_default_size(1000, 600)
         self.settings = Settings.get_instance()
         self._init_webview()
-        self.init_styles(get_asset('styles/preferences.css'))
-        self.handle_no_window_shadow()
         self.autostart_pref = AutostartPreference()
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
         self.show_all()
 
-    def handle_no_window_shadow(self):
-        if self.settings.get_property('disable-window-shadow'):
-            self.ui['window_wrapper'].get_style_context().add_class('no-window-shadow')
+    def on_key_press(self, _, event):
+        keyval = event.get_keyval()
+        keyname = Gdk.keyval_name(keyval[1])
+
+        if keyname == 'Escape':
+            self.hide()
+
+    def on_delete(self, *_):
+        # Override default event when the user presses the close button in the menubar
+        self.hide()
+        return True
 
     def _init_webview(self):
         """
         Initialize preferences WebView
         """
         self.webview = WebKit2.WebView()
-        self.ui['scrolled_window'].add(self.webview)
+        self.add(self.webview)
         opts = get_options()
         self._load_prefs_html()
 
@@ -115,9 +113,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
         self.webview.connect('context-menu', self.webview_on_context_menu)
-        self.webview.connect('button-press-event', self.mouse_down_event)
-        self.webview.connect('button-release-event', self.mouse_up_event)
-        self.webview.connect('motion_notify_event', self.mouse_move_event)
 
         inspector = self.webview.get_inspector()
         inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
@@ -138,14 +133,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
     # GTK event handlers
     ######################################
-
-    # Override the default event so we can customize it
-    def mouse_down_event(self, _, event):
-        window_width = self.get_size()[0]
-        # Only on right click and not on the rightmost side where the scrollbar is
-        if event.button == 1 and event.x < window_width - 100 and event.y < 75:
-            # 20 is the margin. self.get_margin_left() and self.get_margin_top() should work, but they don't
-            self.drag_start_coords = {'x': event.x + 20, 'y': event.y + 20}
 
     def webview_on_context_menu(self, *args):
         return bool(not get_options().dev)
@@ -309,11 +296,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         url = query['url']
         logger.info('Open Web URL %s', url)
         OpenAction(url).run()
-
-    @rt.route('/close')
-    def prefs_close(self, query):
-        logger.info('Close preferences')
-        self.hide()
 
     @rt.route('/shortcut/get-all')
     def prefs_shortcut_get_all(self, query):

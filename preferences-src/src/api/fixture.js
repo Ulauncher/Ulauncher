@@ -72,7 +72,7 @@ export default function(url, params) {
         //   type: 'Exception',
         //   errorName: 'UnhandledError',
         //   stacktrace:
-        //     'Traceback (most recent call last):\n  File "PreferencesUlauncherDialog.py", line 192, in on_scheme_callback\n    resp = rt.dispatch...'
+        //     'Traceback (most recent call last):\n  File "PreferencesWindow.py", line 192, in on_scheme_callback\n    resp = rt.dispatch...'
         // })
         resolve(_getExtensions())
       }, 0)

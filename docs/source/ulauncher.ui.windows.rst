@@ -20,10 +20,10 @@ ulauncher\.ui\.windows\.HotkeyDialog module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.windows\.PreferencesUlauncherDialog module
+ulauncher\.ui\.windows\.PreferencesWindow module
 ---------------------------------------------------------
 
-.. automodule:: ulauncher.ui.windows.PreferencesUlauncherDialog
+.. automodule:: ulauncher.ui.windows.PreferencesWindow
     :members:
     :undoc-members:
     :show-inheritance:

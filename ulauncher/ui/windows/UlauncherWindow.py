@@ -35,7 +35,7 @@ from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
 from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.ui.windows.WindowHelper import WindowHelper
-from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
+from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
     def finish_initializing(self, ui):
         # pylint: disable=attribute-defined-outside-init
         self.ui = ui
-        self.preferences_dialog = None  # instance
+        self.preferences = None  # instance
 
         self.results_nav = None
         self.window_body = self.ui['body']
@@ -116,14 +116,14 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         """Display the preferences window for ulauncher."""
         self.activate_preferences(page='preferences')
 
-    def on_preferences_dialog_destroyed(self, widget, data=None):
+    def on_preferences_destroyed(self, widget, data=None):
         '''only affects GUI
 
         logically there is no difference between the user closing,
         minimizing or ignoring the preferences dialog'''
-        logger.debug('on_preferences_dialog_destroyed')
-        # to determine whether to create or present preferences_dialog
-        self.preferences_dialog = None
+        logger.debug('on_preferences_destroyed')
+        # to determine whether to create or present preferences
+        self.preferences = None
 
     def on_focus_out_event(self, widget, event):
         # apparently Gtk doesn't provide a mechanism to tell if window is in focus
@@ -217,23 +217,17 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         self.init_styles(theme.compile_css())
 
     def activate_preferences(self, page='preferences'):
-        """
-        From the PyGTK Reference manual
-        Say for example the preferences dialog is currently open,
-        and the user chooses Preferences from the menu a second time;
-        use the present() method to move the already-open dialog
-        where the user can see it.
-        """
         self.hide()
 
-        if self.preferences_dialog is not None:
-            logger.debug('show existing preferences_dialog')
-            self.preferences_dialog.present(page=page)
+        if self.preferences is not None:
+            logger.debug('Show existing preferences window')
+            self.preferences.present(page=page)
         else:
-            logger.debug('create new preferences_dialog')
-            self.preferences_dialog = PreferencesUlauncherDialog()
-            self.preferences_dialog.connect('destroy', self.on_preferences_dialog_destroyed)
-            self.preferences_dialog.show(page=page)
+            logger.debug('Create new preferences window')
+            self.preferences = PreferencesWindow()
+            self.preferences.set_application(self.get_application())
+            self.preferences.connect('destroy', self.on_preferences_destroyed)
+            self.preferences.show(page=page)
         # destroy command moved into dialog to allow for a help button
 
     def position_window(self):
