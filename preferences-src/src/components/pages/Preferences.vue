@@ -227,7 +227,7 @@ export default {
         return this.prefs[name]
       },
       set(value) {
-        return jsonp('prefs:///set', {property: name.replace('_', '-'), value}).then(
+        return jsonp('prefs:///set', {property: name.replace(/_/g, '-'), value}).then(
           () => {
             this.setPrefs({[name]: value})
             this.changed[name] = true

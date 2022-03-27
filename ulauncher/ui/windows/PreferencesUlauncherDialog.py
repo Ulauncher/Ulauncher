@@ -237,7 +237,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.settings.set_property(property, value)
 
         if property == 'show-indicator-icon':
-            GLib.idle_add(AppIndicator.get_instance().switch, value)
+            # pylint: disable=import-outside-toplevel
+            from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+            ulauncher_window = UlauncherWindow.get_instance()
+            GLib.idle_add(AppIndicator.get_instance(ulauncher_window).switch, value)
         if property == 'theme-name':
             self.prefs_apply_theme()
 
