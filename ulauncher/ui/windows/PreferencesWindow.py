@@ -29,7 +29,7 @@ from ulauncher.utils.Theme import themes, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
-from ulauncher.utils.environment import IS_WAYLAND
+from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
@@ -207,7 +207,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
                 'version': VERSION,
                 'api_version': API_VERSION,
                 'user_home': os.path.expanduser('~'),
-                'is_wayland': IS_WAYLAND,
+                'is_x11': IS_X11,
             }
         })
         return settings

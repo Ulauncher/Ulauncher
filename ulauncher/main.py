@@ -11,7 +11,7 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, VERSION, get_options
-from ulauncher.utils.environment import XDG_SESSION_TYPE, IS_X11_BACKEND
+from ulauncher.utils.environment import XDG_SESSION_TYPE, IS_X11_COMPATIBLE
 from ulauncher.utils.setup_logging import setup_logging
 
 
@@ -74,7 +74,7 @@ def main():
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("Session type: %s", XDG_SESSION_TYPE)
     if XDG_SESSION_TYPE != "x11":
-        logger.info("X11 backend: %s", ('Yes' if IS_X11_BACKEND else 'No'))
+        logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         logger.error("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
     if options.no_window_shadow:

@@ -26,7 +26,7 @@
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
           ></b-form-input>
-          <div v-if="prefs.env.is_wayland" class="wayland-warning">
+          <div v-if="!prefs.env.is_x11" class="wayland-warning">
             <b-alert show variant="warning">
               <small>
                 Global hotkeys is unsupported in Wayland.<br>See our 
@@ -93,7 +93,7 @@
         </td>
         <td>
           <b-form-checkbox id="raise-if-started" v-model="raise_if_started"></b-form-checkbox>
-          <div v-if="prefs.env.is_wayland" class="wayland-warning">
+          <div v-if="!prefs.env.is_x11" class="wayland-warning">
             <b-alert show variant="warning">
               <small>
                 This feature can only be supported with the X11 Display Server, but you are using Wayland.

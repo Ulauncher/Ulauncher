@@ -23,7 +23,7 @@ export default function(url, params) {
           version: '1.2.3',
           api_version: '2.1.0',
           user_home: '/home/username',
-          is_wayland: true,
+          is_x11: false,
         }
       })
       // preventDefault doesn't work unless resolution is done in the next event loop

@@ -30,7 +30,7 @@ from ulauncher.utils.timer import timer
 from ulauncher.utils.wm import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.desktop.notification import show_notification
-from ulauncher.utils.environment import IS_X11_BACKEND
+from ulauncher.utils.environment import IS_X11, IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
 from ulauncher.ui.windows.Builder import GladeObjectFactory
@@ -90,7 +90,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         if self.settings.get_property('show-indicator-icon'):
             AppIndicator.get_instance(self).show()
 
-        if IS_X11_BACKEND:
+        if IS_X11:
             # bind hotkey
             Keybinder.init()
             accel_name = self.settings.get_property('hotkey-show-app')
@@ -243,7 +243,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         # works only when the following methods are called in that exact order
         self.present()
         self.position_window()
-        if IS_X11_BACKEND:
+        if IS_X11_COMPATIBLE:
             self.present_with_time(Keybinder.get_current_event_time())
 
         if not self._get_input_text():
@@ -264,10 +264,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
             self.drag_start_coords = {'x': event.x, 'y': event.y}
 
     def bind_hotkey(self, accel_name):
-        if not IS_X11_BACKEND:
-            return
-
-        if self._current_accel_name == accel_name:
+        if not IS_X11 or self._current_accel_name == accel_name:
             return
 
         if self._current_accel_name:

@@ -9,6 +9,6 @@ import os
 
 GDK_BACKEND = os.environ.get('GDK_BACKEND', '').lower()
 XDG_SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE', '').lower()
-IS_WAYLAND = XDG_SESSION_TYPE == 'wayland'
+IS_X11 = XDG_SESSION_TYPE == 'x11'
 # This means either X11 or XWayland
-IS_X11_BACKEND = not IS_WAYLAND and GDK_BACKEND and not GDK_BACKEND.startswith('wayland')
+IS_X11_COMPATIBLE = IS_X11 or GDK_BACKEND and GDK_BACKEND.startswith('x11')
