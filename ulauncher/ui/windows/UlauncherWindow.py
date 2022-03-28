@@ -34,18 +34,18 @@ from ulauncher.utils.environment import IS_X11, IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
 from ulauncher.ui.windows.Builder import GladeObjectFactory
-from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 logger = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
-class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
+class UlauncherWindow(Gtk.ApplicationWindow):
     __gtype_name__ = "UlauncherWindow"
-
     _current_accel_name = None
     _results_render_time = 0
+    _css_provider = None
+    _drag_start_coords = None
 
     @classmethod
     @singleton
@@ -205,6 +205,29 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         width, height = self.get_size_request()
         self.set_size_request(width + 2, height)
 
+    def init_styles(self, path):
+        if not self._css_provider:
+            self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_path(path)
+        self.apply_css(self)
+        # pylint: disable=no-member
+        visual = self.get_screen().get_rgba_visual()
+        if visual:
+            self.set_visual(visual)
+
+    def apply_css(self, widget):
+        Gtk.StyleContext.add_provider(widget.get_style_context(),
+                                      self._css_provider,
+                                      Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        if isinstance(widget, Gtk.Container):
+            widget.forall(self.apply_css)
+
+    def set_cursor(self, cursor_name):
+        # pylint: disable=no-member
+        window_ = self.get_window()
+        cursor = Gdk.Cursor.new_from_name(window_.get_display(), cursor_name)
+        window_.set_cursor(cursor)
+
     def init_theme(self):
         load_available_themes()
         theme = Theme.get_current()
@@ -261,7 +284,25 @@ class UlauncherWindow(Gtk.ApplicationWindow, WindowHelper):
         # Only on left clicks and not on the results
         if event.button == 1 and event.y < 100:
             self.set_cursor("grab")
-            self.drag_start_coords = {'x': event.x, 'y': event.y}
+            self._drag_start_coords = {'x': event.x, 'y': event.y}
+
+    def mouse_up_event(self, *_):
+        """
+        Clear drag to move event data
+        """
+        self._drag_start_coords = None
+        self.set_cursor("default")
+
+    def mouse_move_event(self, _, event):
+        """
+        Move window if cursor is held
+        """
+        start = self._drag_start_coords
+        if start and event.state == Gdk.ModifierType.BUTTON1_MASK:
+            self.move(
+                event.x_root - start['x'],
+                event.y_root - start['y']
+            )
 
     def bind_hotkey(self, accel_name):
         if not IS_X11 or self._current_accel_name == accel_name:

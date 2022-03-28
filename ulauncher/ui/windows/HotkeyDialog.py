@@ -6,7 +6,6 @@ gi.require_version('Gdk', '3.0')
 from gi.repository import Gtk, Gdk, GObject
 
 from ulauncher.ui.windows.Builder import GladeObjectFactory
-from ulauncher.ui.windows.WindowHelper import WindowHelper
 
 
 logger = logging.getLogger('ulauncher')
@@ -16,7 +15,7 @@ FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', '
                         'Escape', 'Tab', 'Insert')
 
 
-class HotkeyDialog(Gtk.Dialog, WindowHelper):
+class HotkeyDialog(Gtk.Dialog):
     __gtype_name__ = "HotkeyDialog"
 
     __gsignals__ = {

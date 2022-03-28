@@ -36,14 +36,6 @@ ulauncher\.ui\.windows\.UlauncherWindow module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.windows\.WindowHelper module
--------------------------------------------
-
-.. automodule:: ulauncher.ui.windows.WindowHelper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
