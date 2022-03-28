@@ -10,7 +10,7 @@ from ulauncher.modes.calc.CalcResult import CalcResult
 # supported operators
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
-             ast.USub: op.neg}
+             ast.USub: op.neg, ast.Mod: op.mod}
 
 
 def eval_expr(expr):
@@ -45,7 +45,7 @@ def _eval(node):
 
 
 class CalcMode(BaseMode):
-    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
+    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\%\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
         return bool(re.match(self.RE_CALC, query))

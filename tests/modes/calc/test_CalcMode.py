@@ -16,6 +16,7 @@ class TestCalcMode:
         assert mode.is_enabled('(5/0')
         assert mode.is_enabled('0.5/0')
         assert mode.is_enabled('0.5e3+ (11**3+-2^3)')
+        assert mode.is_enabled('5%2')
 
         assert not mode.is_enabled('+2')
         assert not mode.is_enabled(')+3')
@@ -35,6 +36,7 @@ class TestCalcMode:
         assert mode.handle_query('3+2')[0].result == 5
         assert mode.handle_query('3+2*')[0].result == 5
         assert mode.handle_query('2-2')[0].result == 0
+        assert mode.handle_query('5%2')[0].result == 1
 
     def test_handle_query__invalid_expr(self, mode):
         [invalid_result] = mode.handle_query('3++')
