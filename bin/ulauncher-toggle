@@ -1,2 +1,6 @@
 #!/bin/sh
-exec ulauncher
+gdbus call --session \
+  --dest net.launchpad.ulauncher \
+  --object-path /net/launchpad/ulauncher \
+  --method org.gtk.Application.Activate \
+  {}
