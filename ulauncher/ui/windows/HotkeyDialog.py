@@ -34,7 +34,6 @@ class HotkeyDialog(Gtk.Dialog):
     def finish_initializing(self, ui):
         # pylint: disable=attribute-defined-outside-init
         self.ui = ui
-        self.ui['hotkey_dialog_action_area'].destroy()
 
     def on_delete_event(self, *args):
         # don't delete. Hide instead
