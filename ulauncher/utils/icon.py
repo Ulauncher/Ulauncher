@@ -13,6 +13,7 @@ from ulauncher.config import get_asset
 icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger(__name__)
 
+DEFAULT_EXE_ICON = "icons/executable.png"
 
 def get_icon_path(icon, size=32, base_path=""):
     """
@@ -33,7 +34,7 @@ def get_icon_path(icon, size=32, base_path=""):
     except Exception as e:
         logger.info('Could not load icon path %s. E: %s', icon, e)
 
-    return get_asset('icons/executable.png')
+    return get_asset(DEFAULT_EXE_ICON)
 
 
 @lru_cache(maxsize=50)
@@ -43,5 +44,10 @@ def load_icon(icon, size):
     :param int size:
     :rtype: :class:`GtkPixbuf`
     """
-    icon_path = get_icon_path(icon, size)
-    return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, size, size)
+    try:
+        icon_path = get_icon_path(icon, size)
+        return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, size, size)
+    except Exception as e:
+        logger.warning("Could not load icon %s, using default: %s", icon, e)
+        icon_path = get_asset(DEFAULT_EXE_ICON)
+        return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, size, size)
