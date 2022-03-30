@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_EXE_ICON = "icons/executable.png"
 
+
 def get_icon_path(icon, size=32, base_path=""):
     """
     :param str icon:
