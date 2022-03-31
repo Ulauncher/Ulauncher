@@ -11,6 +11,9 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 `gir1.2-gtk-3.0 <https://lazka.github.io/pgi-docs/>`_
   GTK+ 3.0
 
+`gir1.2-wnck-3.0` <https://lazka.github.io/pgi-docs/#Wnck-3.0>
+  Library to manage X windows and workspaces
+
 `gir1.2-keybinder-3.0 <https://lazka.github.io/pgi-docs/#Keybinder-3.0>`_
   Library for registering global key bindings for gtk-based applications in X11.
 

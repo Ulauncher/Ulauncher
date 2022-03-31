@@ -33,10 +33,8 @@ For the v6 branch you need the the following to setup the local build environmen
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
-  sudo apt-get install \
-    gobject-introspection libgtk-3-0 libkeybinder-3.0-0 \
-    gir1.2-{glib-2.0,gtk-3.0,gdkpixbuf-2.0,notify-0.7,webkit2-4.0,keybinder-3.0,ayatanaappindicator3-0.1} \
-    python3-{all,gi,levenshtein}
+  sudo apt-get install python3-{all,gi,levenshtein} gobject-introspection \
+    gir1.2-{glib-2.0,gtk-3.0,notify-0.7,webkit2-4.0,wnck-3.0,keybinder-3.0,ayatanaappindicator3-0.1}    
   ```
 
 </details>
@@ -60,7 +58,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo pacman -Syu --needed \
-    gtk3 webkit2gtk libappindicator-gtk3 libnotify libkeybinder3 python-{gobject,levenshtein}
+    gtk3 webkit2gtk libappindicator-gtk3 libnotify libkeybinder3 libwnck3 python-{gobject,levenshtein}
   ```
 </details>
 
