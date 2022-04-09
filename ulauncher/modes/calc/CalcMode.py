@@ -26,6 +26,7 @@ constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
 
 regex = r'^(?:[\d\*+\/\%\-\.,e\(\)\^ ]|' + "|".join(functions.keys()) + "|" + "|".join(constants.keys()) + r')+$'
 
+
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
@@ -39,7 +40,7 @@ def eval_expr(expr):
     """
     expr = expr.replace("^", "**").replace(",", ".")
     try:
-        return _eval(ast.parse(expr, mode='eval').body)
+        return _eval(ast.parse(expr, mode='eval').body).quantize(Decimal("1e-15"))
     # pylint: disable=broad-except
     except Exception:
         # if failed, try without the last symbol
@@ -53,10 +54,10 @@ def _eval(node):
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return operators[type(node.op)](_eval(node.operand))
-    if isinstance(node, ast.Name): # <name>
+    if isinstance(node, ast.Name):  # <name>
         if node.id in constants:
             return constants[node.id]
-    if isinstance(node, ast.Call): # <func>(<args>)
+    if isinstance(node, ast.Call):  # <func>(<args>)
         if node.func.id in functions:
             value = functions[node.func.id](_eval(node.args[0]))
             if isinstance(value, float):
