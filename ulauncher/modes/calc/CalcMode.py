@@ -23,7 +23,10 @@ functions = {"sqrt": Decimal.sqrt, "exp": Decimal.exp,
              "erf": math.erf, "erfc": math.erfc, "gamma": math.gamma,
              "lgamma": math.lgamma}
 
-regex = r'^(?:[\d\*+\/\%\-\.,e\(\)\^ ]|' + "|".join(functions.keys()) + r')+$'
+constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
+
+regex = r'^(?:[\d\*+\/\%\-\.,e\(\)\^ ]|' + "|".join(functions.keys()) + "|" + "|".join(constants.keys()) + r')+$'
+
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
 def normalize_expr(expr):
@@ -66,7 +69,10 @@ def _eval(node):
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return operators[type(node.op)](_eval(node.operand))
-    if isinstance(node, ast.Call): # <func>(<args>)
+    if isinstance(node, ast.Name):  # <name>
+        if node.id in constants:
+            return constants[node.id]
+    if isinstance(node, ast.Call):  # <func>(<args>)
         if node.func.id in functions:
             value = functions[node.func.id](_eval(node.args[0]))
             if isinstance(value, float):
