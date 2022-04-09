@@ -29,11 +29,8 @@ class ShortcutsDb(KeyValueJsonDb):
             shortcut['icon'] = fold_user_path(shortcut['icon'])
         super().commit()
 
-    def get_sorted_records(self):
-        return sorted(self.get_records().values(), key=lambda rec: rec['added'])
-
     def get_shortcuts(self):
-        return self.get_records().values()
+        return list(self.get_records().values())
 
     # pylint: disable=too-many-arguments
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, run_without_argument, id=None):

@@ -301,7 +301,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def prefs_shortcut_get_all(self, query):
         logger.info('Handling /shortcut/get-all')
         shortcuts = ShortcutsDb.get_instance()
-        return shortcuts.get_sorted_records()
+        return shortcuts.get_shortcuts()
 
     @rt.route('/shortcut/update')
     @rt.route('/shortcut/add')

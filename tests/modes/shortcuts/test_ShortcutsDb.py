@@ -20,11 +20,6 @@ class TestShortcutsDb:
         db.put_shortcut('google music', 'm', 'https://music.google', 'icon', True, False)
         return db
 
-    def test_get_sorted_records(self, db):
-        records = db.get_sorted_records()
-        assert records[0]['name'] == 'google'
-        assert records[3]['name'] == 'google music'
-
     def test_put_shortcut(self, db):
         assert db.put_shortcut('googleplay', 'p', 'https://play.google', 'icon', True, False)
         assert db.put_shortcut('googleplay', 'p', 'https://play.google', 'icon', True, False, id='uuid123') == 'uuid123'
