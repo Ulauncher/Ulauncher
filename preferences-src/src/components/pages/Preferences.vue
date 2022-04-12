@@ -211,10 +211,10 @@ export default {
   data() {
     return {
       changed : {},
-      renderOnScreenOptions: {
-        'mouse-pointer-monitor': 'The screen with the mouse pointer',
-        'default-monitor': 'The default screen'
-      }
+      renderOnScreenOptions: [
+        { value: 'mouse-pointer-monitor', text: 'The screen with the mouse pointer' },
+        { value: 'default-monitor', text: 'The default screen' },
+      ]
     }
   },
 
