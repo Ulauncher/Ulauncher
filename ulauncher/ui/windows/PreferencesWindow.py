@@ -111,6 +111,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
+        self.webview.get_context().register_uri_scheme('file2', self.serve_file)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
@@ -140,6 +141,20 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     ######################################
     # WebView communication methods
     ######################################
+
+    @run_async
+    def serve_file(self, scheme_request):
+        """
+        Serves file with custom file2:// protocol because file:// breaks for some
+        """
+        # pylint: disable=broad-except
+        try:
+            params = urlparse(scheme_request.get_uri())
+            stream = Gio.file_new_for_path(params.path).read()
+            scheme_request.finish(stream, -1)
+        except Exception as e:
+            logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
+            return
 
     @run_async
     def on_scheme_callback(self, scheme_request):
@@ -426,7 +441,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         }
 
     def _load_prefs_html(self, page=''):
-        self.webview.load_uri(f"file://{get_asset('preferences', 'index.html')}#/{page}")
+        self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
 
     def _get_available_themes(self):
         load_available_themes()
