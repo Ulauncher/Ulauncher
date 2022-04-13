@@ -2,6 +2,7 @@
 import os
 import logging
 import json
+import mimetypes
 from urllib.parse import unquote, urlparse
 from typing import List, Optional, cast
 import traceback
@@ -150,8 +151,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         # pylint: disable=broad-except
         try:
             params = urlparse(scheme_request.get_uri())
+            [mime_type, _] = mimetypes.guess_type(params.path)
             stream = Gio.file_new_for_path(params.path).read()
-            scheme_request.finish(stream, -1)
+            scheme_request.finish(stream, -1, mime_type)
         except Exception as e:
             logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
             return
