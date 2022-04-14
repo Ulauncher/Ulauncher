@@ -2,6 +2,7 @@
 import os
 import logging
 import json
+import mimetypes
 from urllib.parse import unquote
 from typing import List, Optional, cast
 import traceback
@@ -141,6 +142,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
+        self.webview.get_context().register_uri_scheme('file2', self.serve_file)
         self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
         self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
@@ -182,6 +184,22 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     ######################################
     # WebView communication methods
     ######################################
+
+    @run_async
+    def serve_file(self, scheme_request):
+        """
+        Serves file with custom file2:// protocol because file:// breaks for some
+        """
+        # pylint: disable=broad-except
+        try:
+            params = get_url_params(scheme_request.get_uri())
+            file_path = params['path'].split("#", 1)[0]
+            mime_type = mimetypes.guess_type(file_path)[0]
+            stream = Gio.file_new_for_path(file_path).read()
+            scheme_request.finish(stream, -1, mime_type)
+        except Exception as e:
+            logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
+            return
 
     @run_async
     def on_scheme_callback(self, scheme_request):
@@ -542,7 +560,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         }
 
     def _load_prefs_html(self, page=''):
-        uri = "file://%s#/%s" % (get_data_file('preferences', 'dist', 'index.html'), page)
+        uri = "file2://%s#/%s" % (get_data_file('preferences/dist/index.html'), page)
         self.webview.load_uri(uri)
 
     def _get_bool(self, str_val):
