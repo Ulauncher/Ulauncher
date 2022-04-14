@@ -70,7 +70,11 @@ export default {
       return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     edit (item) {
-      this.$router.push({path: 'edit-shortcut', query: item})
+      // Workaround because otherwise Vue converts bools to strings "true" or "false",
+      // then evaluate both to "true" on the other side.
+      item.is_default_search = item.is_default_search ? true : undefined;
+      item.run_without_argument = item.run_without_argument ? true : undefined;
+      this.$router.push({path: 'edit-shortcut', query: item, params: item})
     },
     remove (item) {
       jsonp('prefs:///shortcut/remove', {id: item.id}).then(() => {
