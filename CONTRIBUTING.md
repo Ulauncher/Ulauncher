@@ -64,7 +64,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
 ### How to build, run and contribute
 
-Please note that no more releases are planned for Ulauncher v5 unless they are critical bug fixes. All the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the v6 branch as the base branch and target for new Pull requests, and check that your contributions haven't already been fixed.
+Use the v6 branch as the base branch and target for new Pull requests, and check that your contributions haven't already been fixed.
 
 1. Fork the repo, check out the v6 branch and clone your fork locally.
 1. Create a new branch for your PR
@@ -75,6 +75,6 @@ Please note that no more releases are planned for Ulauncher v5 unless they are c
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
 
-There are more some helpful developer and maintainer commands provided by the `ul` wrapper. `./ul` lists all of them, but most of them are only useful to the maintainers and/or requires docker/podman.
+There are some more helpful developer and maintainer commands provided by the `ul` wrapper. `./ul` lists all of them, but most of them are only useful to the maintainers and/or requires docker/podman.
 
 If you have any questions, feel free to ask in a our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.
