@@ -57,7 +57,7 @@ class ShortcutResult(SearchableResult):
             command = command.replace('%s', argument)
 
         if argument or self.run_without_argument:
-            return OpenAction(command) if self._is_url() else RunScriptAction(command)
+            return OpenAction(command) if self._is_url() else RunScriptAction(command, argument)
 
         return SetUserQueryAction(f'{self.keyword} ')
 

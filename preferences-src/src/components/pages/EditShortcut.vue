@@ -21,20 +21,20 @@
         <b-form-textarea class="cmd" :rows="3" v-model="localCmd"></b-form-textarea>
         <small class="form-text text-muted">
           <p>
-            Use
-            <code>%s</code> as a placeholder for a query in URL or write a script in a language of your choice.
+            Use <code>%s</code> as the placeholder for the query.
             <a
               @click.prevent="cmdDescriptionExpanded = !cmdDescriptionExpanded"
               href
             >(show script example)</a>
           </p>
           <div v-if="cmdDescriptionExpanded">
-            <pre class="selectable"><code>#!/usr/bin/env node
-// scripts must start with a shebang string ^
-//
-// query params will be passed as arguments
-// Ulauncher doesn't replace %s in scripts
-console.log("Arguments:", process.argv);</code></pre>
+            <pre class="selectable"><code>#!/bin/bash
+# Scripts must start with a shebang string ^
+# Run Ulauncher in verbose mode to log the output of the script (for debugging)
+# %s is supported for scripts as of Ulauncher v6
+# You can also use shell arguments
+echo "You wrote: %s"
+echo "This also works: $@"</code></pre>
           </div>
         </small>
       </b-form-fieldset>
