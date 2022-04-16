@@ -19,6 +19,7 @@ class AppResult(SearchableResult):
         self.name = app_info.get_display_name()
         self.icon = app_info.get_string('Icon')
         self.description = app_info.get_description() or app_info.get_generic_name()
+        self.keywords = app_info.get_keywords()
         self._app_id = app_info.get_id()
         # TryExec is what we actually want (name of/path to exec), but it's often not specified
         # get_executable uses Exec, which is always specified, but it will return the actual executable.
@@ -54,9 +55,11 @@ class AppResult(SearchableResult):
     def search_score(self, query):
         # Also use the executable name, such as "baobab" or "nautilus", but score that lower
         return max(
+            [
             get_score(query, self.name),
             get_score(query, self._executable) * .8,
             get_score(query, self.description) * .7
+            ] + [ get_score(query, k) * .6 for k in self.keywords ]
         )
 
     def on_enter(self, _):
