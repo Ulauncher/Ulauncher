@@ -2,6 +2,7 @@ import re
 import ast
 from decimal import Decimal
 import operator as op
+from functools import lru_cache
 
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcResult import CalcResult
@@ -26,6 +27,7 @@ def normalize_expr(expr):
     return expr
 
 
+@lru_cache(maxsize=1000)
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
