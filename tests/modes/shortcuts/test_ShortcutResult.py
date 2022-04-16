@@ -62,4 +62,5 @@ class TestShortcutResult:
     def test_on_enter__run_file(self, RunScriptAction):
         item = ShortcutResult('kw', 'name', '/usr/bin/something/%s', 'icon_path')
         item.on_enter(Query('kw query'))
-        RunScriptAction.assert_called_once_with('/usr/bin/something/query')
+        # Scripts should support both %s and arguments
+        RunScriptAction.assert_called_once_with('/usr/bin/something/query', 'query')
