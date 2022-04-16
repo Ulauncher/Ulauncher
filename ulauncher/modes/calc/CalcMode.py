@@ -13,6 +13,19 @@ operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.USub: op.neg, ast.Mod: op.mod}
 
 
+# Show a friendlier output for incomplete queries, instead of "Invalid"
+def normalize_expr(expr):
+    # Dot is the Python notation for decimals
+    expr = expr.replace(",", ".")
+    # ^ means xor in Python. ** is the Python notation for pow
+    expr = expr.replace("^", "**")
+    # Strip trailing operator
+    expr = re.sub(r"\s*[\.\+\-\*/%\(]\*?\s*$", "", expr)
+    # Complete unfinished brackets
+    expr = expr + ")" * (expr.count("(") - expr.count(")"))
+    return expr
+
+
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
@@ -24,13 +37,9 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = expr.replace("^", "**").replace(",", ".")
-    try:
-        return _eval(ast.parse(expr, mode='eval').body)
-    # pylint: disable=broad-except
-    except Exception:
-        # if failed, try without the last symbol
-        return _eval(ast.parse(expr[:-1], mode='eval').body)
+    expr = normalize_expr(expr)
+    tree = ast.parse(expr, mode='eval').body
+    return _eval(tree)
 
 
 def _eval(node):
