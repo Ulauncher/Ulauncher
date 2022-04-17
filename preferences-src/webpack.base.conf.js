@@ -21,11 +21,6 @@ module.exports = {
         loader: 'vue-loader'
       },
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        include: [resolve(__dirname, 'src')]
-      },
-      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
         options: {
