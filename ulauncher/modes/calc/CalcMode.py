@@ -41,7 +41,11 @@ def eval_expr(expr):
     """
     expr = normalize_expr(expr)
     tree = ast.parse(expr, mode='eval').body
-    return _eval(tree)
+    result = _eval(tree).quantize(Decimal("1e-15"))
+    int_result = int(result)
+    if result == int_result:
+        return int_result
+    return result.normalize()  # Strip trailing zeros from decimal
 
 
 def _eval(node):
@@ -66,11 +70,6 @@ class CalcMode(BaseMode):
             result = eval_expr(query)
             if result is None:
                 raise ValueError()
-
-            # fixes issue with division where result is represented as a float (e.g., 1.0)
-            # although it is an integer (1)
-            if int(result) == result:
-                result = int(result)
 
             result = CalcResult(result=result)
         # pylint: disable=broad-except

@@ -24,8 +24,13 @@ class TestCalcMode:
         assert not mode.is_enabled('a+b')
 
     def test_eval_expr_no_floating_point_errors(self):
-        assert eval_expr('110 / 3') == Decimal('36.66666666666666666666666667')
+        assert eval_expr('110 / 3') == Decimal('36.666666666666667')
         assert eval_expr('1.1 + 2.2') == Decimal('3.3')
+
+    def test_eval_expr_rounding(self):
+        assert str(eval_expr('3.300 + 7.1')) == '10.4'
+        assert str(eval_expr('5.5 + 3.50')) == '9'
+        assert str(eval_expr('10 / 3.0')) == '3.333333333333333'
 
     def test_eval_expr_syntax_variation(self):
         assert eval_expr('5.5 * 10') == Decimal('55')
