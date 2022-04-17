@@ -55,6 +55,16 @@ class TestCalcMode:
         assert eval_expr('7+') == eval_expr('7 **') == eval_expr('(7') == Decimal('7')
         assert eval_expr('sqrt(2)**2') == Decimal('2')
         assert eval_expr('gamma(6)') == Decimal('120')
+        assert eval_expr('lgamma(3)') == eval_expr('ln(gamma(3))') == Decimal('0.693147180559945')
+        # Nonsense expressions probably. I justed wanted to cover all methods
+        assert eval_expr('pi * 2 + exp(4)') == Decimal('60.881335340323825')
+        assert eval_expr('log10(e) / cos(5)') == Decimal('1.531027060212625')
+        assert eval_expr('cos(tanh(tan(2') == Decimal('0.561155145812412')
+        assert eval_expr('atan(sin(erf(8') == Decimal('0.69952164434852')
+        assert eval_expr('cosh(erfc(1.2))') == Decimal('1.004024487774208')
+        assert eval_expr('asin(acosh(1.2))') == Decimal('0.671757384841459')
+        assert eval_expr('sinh(acos(0.4') == Decimal('1.436961780213685')
+        assert eval_expr('asinh(6) + atanh(0.9) + ln(0.7)') == Decimal('3.6073243982894')
 
     def test_handle_query(self, mode):
         assert mode.handle_query('3+2')[0].result == 5
