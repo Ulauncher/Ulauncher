@@ -2,6 +2,7 @@ import re
 import ast
 from decimal import Decimal
 import operator as op
+from functools import lru_cache
 
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcResult import CalcResult
@@ -13,6 +14,20 @@ operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.USub: op.neg, ast.Mod: op.mod}
 
 
+# Show a friendlier output for incomplete queries, instead of "Invalid"
+def normalize_expr(expr):
+    # Dot is the Python notation for decimals
+    expr = expr.replace(",", ".")
+    # ^ means xor in Python. ** is the Python notation for pow
+    expr = expr.replace("^", "**")
+    # Strip trailing operator
+    expr = re.sub(r"\s*[\.\+\-\*/%\(]\*?\s*$", "", expr)
+    # Complete unfinished brackets
+    expr = expr + ")" * (expr.count("(") - expr.count(")"))
+    return expr
+
+
+@lru_cache(maxsize=1000)
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
@@ -24,13 +39,13 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = expr.replace("^", "**").replace(",", ".")
-    try:
-        return _eval(ast.parse(expr, mode='eval').body)
-    # pylint: disable=broad-except
-    except Exception:
-        # if failed, try without the last symbol
-        return _eval(ast.parse(expr[:-1], mode='eval').body)
+    expr = normalize_expr(expr)
+    tree = ast.parse(expr, mode='eval').body
+    result = _eval(tree).quantize(Decimal("1e-15"))
+    int_result = int(result)
+    if result == int_result:
+        return int_result
+    return result.normalize()  # Strip trailing zeros from decimal
 
 
 def _eval(node):
@@ -55,11 +70,6 @@ class CalcMode(BaseMode):
             result = eval_expr(query)
             if result is None:
                 raise ValueError()
-
-            # fixes issue with division where result is represented as a float (e.g., 1.0)
-            # although it is an integer (1)
-            if int(result) == result:
-                result = int(result)
 
             result = CalcResult(result=result)
         # pylint: disable=broad-except
