@@ -1,5 +1,6 @@
 import re
 import ast
+import math
 from decimal import Decimal
 import operator as op
 from functools import lru_cache
@@ -12,6 +13,17 @@ from ulauncher.modes.calc.CalcResult import CalcResult
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
              ast.USub: op.neg, ast.Mod: op.mod}
+
+functions = {"sqrt": Decimal.sqrt, "exp": Decimal.exp,
+             "ln": Decimal.ln, "log10": Decimal.log10,
+             "sin": math.sin, "cos": math.cos, "tan": math.tan,
+             "asin": math.asin, "acos": math.acos, "atan": math.atan,
+             "sinh": math.sinh, "cosh": math.cosh, "tanh": math.tanh,
+             "asinh": math.asinh, "acosh": math.acosh, "atanh": math.atanh,
+             "erf": math.erf, "erfc": math.erfc, "gamma": math.gamma,
+             "lgamma": math.lgamma}
+
+constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
 
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
@@ -48,6 +60,30 @@ def eval_expr(expr):
     return result.normalize()  # Strip trailing zeros from decimal
 
 
+@lru_cache(maxsize=1000)
+def _is_enabled(query):
+    query = normalize_expr(query)
+    try:
+        node = ast.parse(query, mode='eval').body
+        if isinstance(node, ast.Num):
+            return True
+        if isinstance(node, ast.BinOp):
+            # Check that left and right are valid constants if they are strings
+            if isinstance(node.left, ast.Name) and node.left.id not in constants:
+                return False
+            if isinstance(node.right, ast.Name) and node.right.id not in constants:
+                return False
+            return True  # Allow any other variant
+        if isinstance(node, ast.UnaryOp):
+            # Allow for minus, but no other operators
+            return isinstance(node.op, ast.USub)
+        if isinstance(node, ast.Call):
+            return node.func.id in functions
+    except SyntaxError:
+        pass
+    return False
+
+
 def _eval(node):
     if isinstance(node, ast.Num):  # <number>
         return Decimal(str(node.n))
@@ -55,15 +91,22 @@ def _eval(node):
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return operators[type(node.op)](_eval(node.operand))
+    if isinstance(node, ast.Name):  # <name>
+        if node.id in constants:
+            return constants[node.id]
+    if isinstance(node, ast.Call):  # <func>(<args>)
+        if node.func.id in functions:
+            value = functions[node.func.id](_eval(node.args[0]))
+            if isinstance(value, float):
+                value = Decimal(value)
+            return value
 
     raise TypeError(node)
 
 
 class CalcMode(BaseMode):
-    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\%\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
-
     def is_enabled(self, query):
-        return bool(re.match(self.RE_CALC, query))
+        return _is_enabled(query)
 
     def handle_query(self, query):
         try:
