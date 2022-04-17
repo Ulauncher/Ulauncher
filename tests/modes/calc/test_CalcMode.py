@@ -11,7 +11,6 @@ class TestCalcMode:
 
     def test_is_enabled(self, mode):
         assert mode.is_enabled('5')
-        assert mode.is_enabled('+2')
         assert mode.is_enabled('-5')
         assert mode.is_enabled('5+')
         assert mode.is_enabled('(5/0')
@@ -20,9 +19,23 @@ class TestCalcMode:
         assert mode.is_enabled('5%2')
         assert mode.is_enabled('sqrt(2)')
         assert mode.is_enabled('1+sin(pi/2)')
+        assert mode.is_enabled('pi * 2')
+        assert mode.is_enabled('sqrt()+1')
 
         assert not mode.is_enabled('a+b')
-        assert not mode.is_enabled('sqr()+1')
+        assert not mode.is_enabled('Add/Remove')
+        assert not mode.is_enabled('+2')
+        assert not mode.is_enabled(')+3')
+        assert not mode.is_enabled('asdf()')
+        assert not mode.is_enabled('pi')
+        assert not mode.is_enabled('e')
+        assert not mode.is_enabled('exp')
+        assert not mode.is_enabled('cos')
+        assert not mode.is_enabled('tan')
+        assert not mode.is_enabled('pi e')
+        assert not mode.is_enabled('pie')
+        assert not mode.is_enabled('pi2')
+        assert not mode.is_enabled('cospitanagamma')
 
     def test_eval_expr_no_floating_point_errors(self):
         assert eval_expr('110 / 3') == Decimal('36.666666666666667')
@@ -54,3 +67,7 @@ class TestCalcMode:
         assert invalid_result.name == 'Error!'
         assert invalid_result.description == 'Invalid expression'
         assert mode.handle_query('6 2')[0].name == 'Error!'
+        assert mode.handle_query('()*2')[0].name == 'Error!'
+        assert mode.handle_query('a+b')[0].name == 'Error!'
+        assert mode.handle_query('sqrt()+1')[0].name == 'Error!'
+        assert mode.handle_query('2pi')[0].name == 'Error!'

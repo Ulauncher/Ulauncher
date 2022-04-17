@@ -25,8 +25,6 @@ functions = {"sqrt": Decimal.sqrt, "exp": Decimal.exp,
 
 constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
 
-regex = r'^(?:[\d\*+\/\%\-\.,e\(\)\^ ]|' + "|".join(functions.keys()) + "|" + "|".join(constants.keys()) + r')+$'
-
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
 def normalize_expr(expr):
@@ -62,6 +60,30 @@ def eval_expr(expr):
     return result.normalize()  # Strip trailing zeros from decimal
 
 
+@lru_cache(maxsize=1000)
+def _is_enabled(query):
+    query = normalize_expr(query)
+    try:
+        node = ast.parse(query, mode='eval').body
+        if isinstance(node, ast.Num):
+            return True
+        if isinstance(node, ast.BinOp):
+            # Check that left and right are valid constants if they are strings
+            if isinstance(node.left, ast.Name) and node.left.id not in constants:
+                return False
+            if isinstance(node.right, ast.Name) and node.right.id not in constants:
+                return False
+            return True  # Allow any other variant
+        if isinstance(node, ast.UnaryOp):
+            # Allow for minus, but no other operators
+            return isinstance(node.op, ast.USub)
+        if isinstance(node, ast.Call):
+            return node.func.id in functions
+    except SyntaxError:
+        pass
+    return False
+
+
 def _eval(node):
     if isinstance(node, ast.Num):  # <number>
         return Decimal(str(node.n))
@@ -83,10 +105,8 @@ def _eval(node):
 
 
 class CalcMode(BaseMode):
-    RE_CALC = re.compile(regex, flags=re.IGNORECASE)
-
     def is_enabled(self, query):
-        return bool(re.match(self.RE_CALC, query))
+        return _is_enabled(query)
 
     def handle_query(self, query):
         try:
