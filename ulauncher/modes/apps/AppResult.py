@@ -54,13 +54,11 @@ class AppResult(SearchableResult):
 
     def search_score(self, query):
         # Also use the executable name, such as "baobab" or "nautilus", but score that lower
-        return max(
-            [
+        return max([
             get_score(query, self.name),
             get_score(query, self._executable) * .8,
             get_score(query, self.description) * .7
-            ] + [ get_score(query, k) * .6 for k in self.keywords ]
-        )
+        ] + [get_score(query, k) * .6 for k in self.keywords])
 
     def on_enter(self, _):
         count = _app_starts._records.get(self._app_id, 0)
