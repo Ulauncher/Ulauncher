@@ -95,6 +95,8 @@ launchpad_upload() {
     else
         PPA="agornostal/ulauncher"
     fi
+    
+    jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     impish="PPA=$PPA RELEASE=impish ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
     bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
@@ -107,6 +109,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $impish && $focal && $bionic"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $jammy && $impish && $focal && $bionic"
     set +x
 }
