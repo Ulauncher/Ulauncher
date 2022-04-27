@@ -17,7 +17,7 @@ class ExtensionMode(BaseMode):
         :param ~ulauncher.modes.Query.Query query:
         :rtype: `True` if mode should be enabled for a query
         """
-        return bool(self._get_controller_by_keyword(query.get_keyword())) and " " in query
+        return bool(self.extensionServer.get_controller_by_keyword(query.get_keyword())) and " " in query
 
     def on_query_change(self, query):
         """
@@ -32,18 +32,12 @@ class ExtensionMode(BaseMode):
         :param ~ulauncher.modes.Query.Query query:
         :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
         """
-        controller = self._get_controller_by_keyword(query.get_keyword())
+        controller = self.extensionServer.get_controller_by_keyword(query.get_keyword())
 
         if not controller:
             raise Exception("Controller not found. (This line shouldn't be entered)")
 
         return controller.handle_query(query)
-
-    def _get_controller_by_keyword(self, kw):
-        """
-        :param str kw: Keyword
-        """
-        return self.extensionServer.get_controller_by_keyword(kw)
 
     def get_searchable_items(self):
         """
