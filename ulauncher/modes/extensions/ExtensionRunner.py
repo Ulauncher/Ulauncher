@@ -14,7 +14,6 @@ from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.modes.extensions.extension_finder import find_extensions
 
@@ -44,13 +43,12 @@ class ExtensionRunner:
     @classmethod
     @singleton
     def get_instance(cls) -> 'ExtensionRunner':
-        return cls(ExtensionServer.get_instance())
+        return cls()
 
-    def __init__(self, extension_server):
+    def __init__(self):
         self.extensions_dir = EXTENSIONS_DIR  # type: str
         self.extension_errors = {}  # type: Dict[str, ExtRunError]
         self.extension_procs = {}
-        self.extension_server = extension_server
         self.dont_run_extensions = get_options().no_extensions
         self.verbose = get_options().verbose
 

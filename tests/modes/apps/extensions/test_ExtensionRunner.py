@@ -11,14 +11,10 @@ from ulauncher.api.shared.errors import ErrorName
 class TestExtensionRunner:
 
     @pytest.fixture
-    def runner(self, ext_server):
-        thisrunner = ExtensionRunner(ext_server)
+    def runner(self):
+        thisrunner = ExtensionRunner()
         thisrunner.dont_run_extensions = False
         return thisrunner
-
-    @pytest.fixture
-    def ext_server(self):
-        return mock.create_autospec(ExtensionServer)
 
     @pytest.fixture(autouse=True)
     def find_extensions(self, mocker):
