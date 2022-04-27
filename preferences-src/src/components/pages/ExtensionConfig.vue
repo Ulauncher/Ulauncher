@@ -41,14 +41,6 @@
       <div v-html="extension.instructions"></div>
     </details>
 
-    <div class="error-wrapper" v-if="extension.runtime_error">
-      <ext-runtime-error
-        :extUrl="extension.url"
-        :errorMessage="extension.runtime_error.message"
-        :errorName="extension.runtime_error.name"
-      />
-    </div>
-
     <div class="error-wrapper" v-if="extension.error">
       <ext-error-explanation
         is-updatable
@@ -68,7 +60,7 @@
       </small>
     </b-alert>
 
-    <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
+    <div class="ext-form" v-if="!extension.error" ref="ext-form">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
           :key="pref.id"
@@ -223,8 +215,7 @@ export default {
     },
     canSave() {
       const { preferences } = this.$props.extension
-      const isRunning = this.$props.extension.is_running
-      return isRunning && !this.$props.extension.error && preferences && !!preferences.length
+      return !this.$props.extension.error && preferences && !!preferences.length
     },
     canCheckUpdates() {
       return !!this.$props.extension.url

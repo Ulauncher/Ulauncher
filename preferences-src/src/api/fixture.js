@@ -144,7 +144,6 @@ function _getExtensions() {
     generateExtensionRecord({
       extId: 'ext.stopped',
       name: 'Stopped because of --no-extensions flag',
-      isRunning: false,
       runtimeError: {
         name: 'NoExtensionsFlag',
         message: 'bash exec /file --no-things abc | script > null /python/path/env/var EXEC_ONLY=true /bin/bash ulauncher'
@@ -153,7 +152,6 @@ function _getExtensions() {
     generateExtensionRecord({
       extId: 'ext.crashed',
       name: 'Crashed on start',
-      isRunning: false,
       runtimeError: {
         name: 'ExitedInstantly',
         message: 'Extension "ext.crashed" exited instantly with code 123'
@@ -224,9 +222,7 @@ function generateExtensionRecord(config) {
     last_commit: 'abc234fd23425234a2',
     last_commit_time: '2017-07-21T20:50:44',
     preferences: prefs,
-    error: config.error,
-    is_running: config.isRunning !== undefined ? config.isRunning : true,
-    runtime_error: config.runtimeError
+    error: config.error
   }
 }
 
