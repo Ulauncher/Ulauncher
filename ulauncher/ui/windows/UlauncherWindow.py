@@ -19,6 +19,7 @@ from ulauncher.config import get_asset
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
@@ -252,6 +253,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.get_property('grab-mouse-pointer'):
             self.get_pointer_device().ungrab(0)
+        ExtensionRunner.get_instance().stop_all()
+
         super().hide(*args, **kwargs)
 
     def get_pointer_device(self):

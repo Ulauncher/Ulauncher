@@ -4,6 +4,7 @@ import os.path
 from gi.repository import Gio, GObject
 
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.api.shared.event import RegisterEvent
 from ulauncher.utils.decorator.singleton import singleton
@@ -24,6 +25,7 @@ class ExtensionServer:
         self.socket_path = get_socket_path()
         self.controllers = {}
         self.pending = {}
+        self.queries = {}
 
     def start(self):
         """
@@ -65,7 +67,13 @@ class ExtensionServer:
             if pended:
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
-            ExtensionController(self.controllers, framer, event.extension_id)
+            controller = ExtensionController(self.controllers, framer, event.extension_id)
+            query = self.queries.get(event.extension_id)
+            if query:
+                action = controller.handle_query(query)
+                if isinstance(action, list):
+                    action = RenderResultListAction(action)
+                action.run()
         else:
             logger.debug("Unhandled message received: %s", event)
 
@@ -92,16 +100,12 @@ class ExtensionServer:
         """
         return self.controllers.values()
 
-    def get_controller_by_keyword(self, keyword):
+    def get_controller(self, id):
         """
-        :param str keyword:
+        :param str id:
         :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
         """
-        for _, ctl in self.controllers.items():
-            if keyword in ctl.preferences.get_active_keywords():
-                return ctl
-
-        return None
+        return self.controllers.get(id)
 
 
 class ServerIsRunningError(RuntimeError):
@@ -110,10 +114,3 @@ class ServerIsRunningError(RuntimeError):
 
 class ServerIsNotRunningError(RuntimeError):
     pass
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-
-    server = ExtensionServer.get_instance()
-    server.start()
