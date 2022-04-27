@@ -16,7 +16,6 @@ from gi.repository import Gio, Gtk, WebKit2
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
-from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
@@ -350,10 +349,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         logger.info('Update extension preferences: %s', query)
         controller = ExtensionServer.get_instance().controllers.get(query['id'])
         for pref_id, value in query['data'].items():
-            old_value = controller.preferences.get(pref_id)['value']
             controller.preferences.set(pref_id, value)
-            if value != old_value:
-                controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
     @rt.route('/extension/check-updates')
     def prefs_extension_check_updates(self, query):

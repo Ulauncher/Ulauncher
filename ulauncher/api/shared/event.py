@@ -95,21 +95,8 @@ class UnloadEvent(BaseEvent):
 
 class PreferencesUpdateEvent(BaseEvent):
     """
-    Is triggered when user updates preference through Preferences window
-
-    :param str id:
-    :param str old_value:
-    :param str new_value:
+    PreferencesUpdateEvent is removed. Exists only for backward compatibility
     """
-
-    id = None
-    old_value = None
-    new_value = None
-
-    def __init__(self, id, old_value, new_value):
-        self.id = id
-        self.old_value = old_value
-        self.new_value = new_value
 
 
 class PreferencesEvent(BaseEvent):

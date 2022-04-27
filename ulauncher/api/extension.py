@@ -6,8 +6,7 @@ from inspect import signature
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, PreferencesUpdateEvent, UnloadEvent
-from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, UnloadEvent
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.setup_logging import setup_logging, get_extension_name
 
@@ -39,8 +38,6 @@ class Extension:
             self.subscribe(ItemEnterEvent, self, 'on_item_enter')
         if self.__class__.on_unload is not Extension.on_unload:
             self.subscribe(UnloadEvent, self, 'on_unload')
-        if self.__class__.on_preferences_update is not Extension.on_preferences_update:
-            self.subscribe(PreferencesUpdateEvent, self, 'on_preferences_update')
 
     def subscribe(self, event_type, event_listener, method='on_event'):
         """
@@ -84,7 +81,6 @@ class Extension:
         """
         Subscribes to events and connects to Ulauncher socket server
         """
-        self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self._client.connect()
 
     def on_query_change(self, event):
@@ -93,15 +89,5 @@ class Extension:
     def on_item_enter(self, event):
         pass
 
-    def on_preferences_update(self, event):
-        pass
-
     def on_unload(self, event):
         pass
-
-
-# pylint: disable=too-few-public-methods
-class PreferencesUpdateEventListener(EventListener):
-
-    def on_event(self, event, extension):
-        extension.preferences[event.id] = event.new_value
