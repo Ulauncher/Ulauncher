@@ -359,12 +359,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     @rt.route('/extension/update-prefs')
     def prefs_extension_update_prefs(self, query):
-        ext_id = query['id']
         logger.info('Update extension preferences: %s', query)
-        prefix = 'pref.'
-        controller = ExtensionServer.get_instance().controllers.get(ext_id)
-        preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
-        for pref_id, value in preferences:
+        controller = ExtensionServer.get_instance().controllers.get(query['id'])
+        for pref_id, value in query['data'].items():
             old_value = controller.preferences.get(pref_id)['value']
             controller.preferences.set(pref_id, value)
             if value != old_value:

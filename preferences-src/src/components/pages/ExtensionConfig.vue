@@ -242,18 +242,16 @@ export default {
       this.openUrl(this.extension.url)
     },
     save() {
-      let updates = {
-        id: this.extension.id
-      }
+      let data = {}
       for (let i = 0; i < this.extension.preferences.length; i++) {
         let pref = this.extension.preferences[i]
         let value = this.$refs[pref.id][0].$el.value
         if (pref.type === 'keyword') {
           value = value.trim()
         }
-        updates[`pref.${pref.id}`] = value
+        data[pref.id] = value
       }
-      jsonp('prefs:///extension/update-prefs', updates).then(
+      jsonp('prefs:///extension/update-prefs', {data, id: this.extension.id}).then(
         () => {
           this.showSavedMsg = true
           setTimeout(() => {
