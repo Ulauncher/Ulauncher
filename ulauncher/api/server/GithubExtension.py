@@ -77,7 +77,10 @@ class GithubExtension:
                 "This extension is not compatible with current version Ulauncher extension API (v%s)" % api_version,
                 ErrorName.IncompatibleVersion)
 
-        return self.get_commit(sha_or_branch)
+        try:
+            return self.get_commit(sha_or_branch)
+        except HTTPError as e:
+            raise GithubExtensionError(f'Branch/commit "{sha_or_branch}" does not exist.', ErrorName.InvalidVersionsJson) from e
 
     def get_commit(self, sha_or_branch) -> Commit:
         """
