@@ -2,7 +2,8 @@ import mock
 import pytest
 import signal
 
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunErrorName, ExtensionIsNotRunningError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError, \
+    ExtensionIsNotRunningError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.shared.errors import ExtensionError
 
@@ -75,9 +76,9 @@ class TestExtensionRunner:
         runner.run.assert_any_call('id_3')
 
     def test_set_extension_error(self, runner):
-        runner.set_extension_error('id_1', ExtRunErrorName.Terminated, 'message')
+        runner.set_extension_error('id_1', ExtensionRuntimeError.Terminated, 'message')
         error = runner.get_extension_error('id_1')
-        assert error['name'] == ExtRunErrorName.Terminated.value
+        assert error['name'] == ExtensionRuntimeError.Terminated.value
         assert error['message'] == 'message'
 
     def test_read_stderr_line(self, runner, DataInputStream):
