@@ -8,8 +8,8 @@ from ulauncher.api import Extension
 class TestClient:
 
     @pytest.fixture(autouse=True)
-    def SystemExitEvent(self, mocker):
-        return mocker.patch('ulauncher.api.client.Client.SystemExitEvent')
+    def UnloadEvent(self, mocker):
+        return mocker.patch('ulauncher.api.client.Client.UnloadEvent')
 
     @pytest.fixture(autouse=True)
     def sock_client(self, mocker):
@@ -50,9 +50,9 @@ class TestClient:
         client.on_message(mock.Mock(), {'hello': 'world'})
         extension.trigger_event.assert_called_with({'hello': 'world'})
 
-    def test_on_close__SystemExitEvent__is_triggered(self, client, extension, SystemExitEvent):
+    def test_on_close__UnloadEvent__is_triggered(self, client, extension, UnloadEvent):
         client.on_close(mock.Mock())
-        extension.trigger_event.assert_called_with(SystemExitEvent.return_value)
+        extension.trigger_event.assert_called_with(UnloadEvent.return_value)
 
     def test_send__ws_send__is_called(self, client):
         client.send({'hello': 'world'})

@@ -5,7 +5,7 @@ import traceback
 from functools import partial
 from gi.repository import GLib, Gio
 
-from ulauncher.api.shared.event import SystemExitEvent, RegisterEvent
+from ulauncher.api.shared.event import RegisterEvent, UnloadEvent
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.utils.framer import PickleFramer
 from ulauncher.utils.timer import timer
@@ -63,12 +63,12 @@ class Client:
         """
         Terminates extension process on client disconnect.
 
-        Triggers :class:`~ulauncher.api.shared.event.SystemExitEvent` for graceful shutdown
+        Triggers :class:`~ulauncher.api.shared.event.UnloadEvent` for graceful shutdown
 
         :param ulauncher.utils.framer.PickleFramer framer:
         """
         logger.warning("Connection closed. Exiting")
-        self.extension.trigger_event(SystemExitEvent())
+        self.extension.trigger_event(UnloadEvent())
         # extension has 0.5 sec to save it's state, after that it will be terminated
         timer(0.5, partial(os._exit, 0))
 

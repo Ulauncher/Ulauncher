@@ -84,9 +84,9 @@ class ItemEnterEvent(BaseEvent):
         return loads(self._data)
 
 
-class SystemExitEvent(BaseEvent):
+class UnloadEvent(BaseEvent):
     """
-    Is triggered when extension is about to be terminated.
+    Is triggered when extension is about to be unloaded (terminated).
 
     Your extension has 300ms to handle this event and shut down properly.
     After that it will be terminated with SIGKILL
@@ -123,3 +123,7 @@ class PreferencesEvent(BaseEvent):
 
     def __init__(self, preferences):
         self.preferences = preferences
+
+
+# Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
+SystemExitEvent = UnloadEvent

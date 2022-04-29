@@ -18,14 +18,6 @@ ItemEnterEvent
   :undoc-members:
 
 
-SystemExitEvent
----------------
-
-.. autoclass:: ulauncher.api.shared.event.SystemExitEvent
-  :members:
-  :undoc-members:
-
-
 PreferencesUpdateEvent
 ----------------------
 
@@ -38,5 +30,13 @@ PreferencesEvent
 ----------------
 
 .. autoclass:: ulauncher.api.shared.event.PreferencesEvent
+  :members:
+  :undoc-members:
+
+
+UnloadEvent
+---------------
+
+.. autoclass:: ulauncher.api.shared.event.UnloadEvent
   :members:
   :undoc-members:
