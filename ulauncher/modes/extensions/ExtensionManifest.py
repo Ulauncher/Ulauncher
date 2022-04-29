@@ -84,7 +84,7 @@ class ExtensionManifest:
     def get_preferences(self) -> List[ManifestPreferenceItem]:
         return self.manifest.get('preferences', [])
 
-    def get_instructions(self) -> str:
+    def get_instructions(self) -> Optional[str]:
         return self.manifest.get('instructions')
 
     def get_preference(self, id) -> Optional[ManifestPreferenceItem]:
