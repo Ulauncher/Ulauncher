@@ -79,6 +79,7 @@ Create :file:`manifest.json` using the following template::
     "description": "Extension Description",
     "developer_name": "John Doe",
     "icon": "images/icon.png",
+    "instructions": "You need to install <code>examplecommand</code> to run this extension",
     "options": {
       "query_debounce": 0.1
     },
@@ -97,11 +98,12 @@ Create :file:`manifest.json` using the following template::
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
 * ``options`` - dictionary of optional parameters. See available options below
+* ``instructions`` - optional installation instructions to be shown in the extension preferences.
 * ``preferences`` - list of preferences available for users to override.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
 
-.. NOTE:: All fields except ``options`` are required and cannot be empty.
+.. NOTE:: All fields except ``options`` and ``instructions`` are required and cannot be empty.
 
 
 Available Options

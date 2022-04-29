@@ -53,6 +53,11 @@
       />
     </div>
 
+    <details class="installation-instructions" v-if="extension.instructions">
+      <summary>Installation instructions</summary>
+      <div v-html="extension.instructions"></div>
+    </details>
+
     <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifestJson'">
       <small>
         To find out how to migrate extension from API v1 to v2 see
@@ -378,6 +383,14 @@ export default {
 .menu-button a {
   outline: none;
 }
+.installation-instructions {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.installation-instructions summary {
+  font-weight: 500;
+}
+
 .ext-form {
   padding-top: 15px;
 }
