@@ -3,25 +3,22 @@
     <b-alert show :variant="alertVariant()">
       <small>
         <p
-          v-if="errorName === 'InvalidGithubUrl'"
+          v-if="errorName === 'InvalidUrl'"
         >The URL must look like this: https://github.com/userName/projectName</p>
         <p
-          v-else-if="errorName === 'IncompatibleVersion'"
-        >The author of this extension does not provide a version compatible with your Ulauncher version.</p>
-        <p
-          v-else-if="errorName === 'VersionsJsonNotFound'"
-        >It looks like this extension is not compatible with the new version of Ulauncher.</p>
-        <p v-else-if="errorName === 'InvalidVersionsJson'">
+          v-else-if="errorName === 'MissingVersionDeclaration'"
+        >This extension does not provide a version compatible with your Ulauncher version.</p>
+        <p v-else-if="errorName === 'InvalidVersionDeclaration'">
           There's an error in versions.json:
           <br>
           <b>{{ errorMessage }}</b>
         </p>
-        <p v-else-if="errorName === 'InvalidManifestJson'">
+        <p v-else-if="errorName === 'InvalidManifest'">
           There's an error in manifest.json:
           <br>
           <b>{{ errorMessage }}</b>
         </p>
-        <div v-else-if="errorName === 'ExtensionCompatibilityError'">
+        <div v-else-if="errorName === 'Incompatible'">
           <p>
             Version incompatibility error:
             <br>
@@ -37,10 +34,7 @@
           </p>
         </div>
         <p
-          v-else-if="errorName === 'GithubApiError'"
-        >It looks like there's an issue with Github API. Please try again later.</p>
-        <p
-          v-else-if="errorName === 'ExtensionAlreadyAdded'"
+          v-else-if="errorName === 'AlreadyAdded'"
         >You've already installed this extension.</p>
         <p v-else>
           An unexpected error occurred.
@@ -79,14 +73,14 @@ export default {
     extUrl: String
   },
   data: () => ({
-    reportableErrors: ['IncompatibleVersion', 'VersionsJsonNotFound', 'InvalidVersionsJson', 'InvalidManifestJson']
+    reportableErrors: ['MissingVersionDeclaration', 'Incompatible', 'InvalidVersionDeclaration', 'InvalidManifest']
   }),
   methods: {
     openUrlInBrowser(url) {
       jsonp('prefs:///open/web-url', { url: url })
     },
     alertVariant() {
-      if (this.errorName === 'UnexpectedError') {
+      if (this.errorName === 'Other') {
         return 'danger'
       }
       return 'warning'

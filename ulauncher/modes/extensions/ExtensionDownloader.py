@@ -70,7 +70,7 @@ class ExtensionDownloader:
         if os.path.exists(ext_path) and self.ext_runner.is_running(ext_id):
             raise ExtensionDownloaderError(
                 f'Extension with URL "{url}" is already added',
-                ExtensionError.ExtensionAlreadyAdded
+                ExtensionError.AlreadyAdded
             )
 
         # 2. get last commit info
@@ -168,7 +168,7 @@ class ExtensionDownloader:
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.find(ext_id)
         if not ext:
-            raise ExtensionDownloaderError("Extension not found", ExtensionError.UnexpectedError)
+            raise ExtensionDownloaderError("Extension not found", ExtensionError.Other)
         return ext
 
 

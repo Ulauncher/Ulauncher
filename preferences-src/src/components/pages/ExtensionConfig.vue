@@ -58,7 +58,7 @@
       />
     </div>
 
-    <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifestJson'">
+    <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifest'">
       <small>
         To find out how to migrate extension from API v1 to v2 see
         <a

@@ -193,7 +193,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             err_meta = json.dumps({
                 'message': str(e),
                 'type': type(e).__name__,
-                'errorName': ExtensionError.UnhandledError.value,
+                'errorName': ExtensionError.Other.value,
                 'stacktrace': traceback.format_exc()
             })
             callback = f'{callback_name}(null, {err_meta});'
@@ -412,7 +412,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             except Exception as e:
                 error = cast(ExtError, {
                     'message': str(e),
-                    'errorName': ExtensionError.UnexpectedError.value
+                    'errorName': ExtensionError.Other.value
                 })
             extensions.append(self._get_extension_info(ext_id, prefs, error))
 

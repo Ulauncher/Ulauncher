@@ -70,7 +70,7 @@ export default function(url, params) {
         // reject({
         //   message: 'Something went wrong',
         //   type: 'Exception',
-        //   errorName: 'UnhandledError',
+        //   errorName: 'Other',
         //   stacktrace:
         //     'Traceback (most recent call last):\n  File "PreferencesWindow.py", line 192, in on_scheme_callback\n    resp = rt.dispatch...'
         // })
@@ -89,7 +89,7 @@ export default function(url, params) {
           reject({
             message: 'Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"',
             type: 'GithubExtensionError',
-            errorName: 'VersionsJsonNotFound',
+            errorName: 'MissingVersionDeclaration',
             stacktrace: 'Traceback (most recent call last):\n  File "ulauncher/ulauncher/modes/extensions/GithubExtension.py", line 101, in _read_json\n    return json.loads(urlopen(url).read().decode(\'utf-8\'))\n  File "request.py", line 223, in urlopen\n    return opener.open(url, data, timeout)'
           })
         } else {
@@ -105,7 +105,7 @@ export default function(url, params) {
         if (params.url.includes('reject')) {
           reject({
             message: 'Could not load extension',
-            errorName: 'UnexpectedError',
+            errorName: 'Other',
             stacktrace: 'stacktrace\nabc\nxyz',
             type: 'ClassName'
           })
@@ -165,7 +165,7 @@ function _getExtensions() {
       numOfPrefs: 0,
       error: {
         message: "'required_api_version' is not provided",
-        errorName: 'InvalidManifestJson'
+        errorName: 'InvalidManifest'
       }
     })
   ]

@@ -54,7 +54,7 @@ class TestExtensionRunner:
 
     def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
         manifest.check_compatibility.side_effect = ExtensionManifestError(
-            'message', ExtensionError.ExtensionCompatibilityError)
+            'message', ExtensionError.Incompatible)
         with pytest.raises(ExtensionManifestError):
             runner.run('id')
 
