@@ -36,6 +36,11 @@
       </div>
     </div>
 
+    <details class="installation-instructions" v-if="extension.instructions" :open="extension.runtime_error">
+      <summary>Installation instructions</summary>
+      <div v-html="extension.instructions"></div>
+    </details>
+
     <div class="error-wrapper" v-if="extension.runtime_error">
       <ext-runtime-error
         :extUrl="extension.url"
@@ -52,11 +57,6 @@
         :errorName="extension.error.errorName"
       />
     </div>
-
-    <details class="installation-instructions" v-if="extension.instructions">
-      <summary>Installation instructions</summary>
-      <div v-html="extension.instructions"></div>
-    </details>
 
     <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifestJson'">
       <small>
