@@ -198,13 +198,10 @@ export default {
     },
     onModalOk(e) {
       let input = this.$refs.githubUrl.$el
-      if (!input.value) {
-        return e.cancel()
+      if (input.value) {
+        this.addExtension(input)
       }
-
-      this.addExtension(input)
-
-      return e.cancel()
+      return e.preventDefault()
     },
     onUrlSubmit() {
       let input = this.$refs.githubUrl.$el
