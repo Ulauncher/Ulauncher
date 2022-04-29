@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ErrorName(Enum):
+class ExtensionError(Enum):
     InvalidGithubUrl = 'InvalidGithubUrl'
     IncompatibleVersion = 'IncompatibleVersion'
     VersionsJsonNotFound = 'VersionsJsonNotFound'
@@ -17,6 +17,6 @@ class ErrorName(Enum):
 class UlauncherAPIError(Exception):
     error_name = None  # type: str
 
-    def __init__(self, message: str, error_name: ErrorName = ErrorName.UnexpectedError):
+    def __init__(self, message: str, error_name: ExtensionError = ExtensionError.UnexpectedError):
         super().__init__(message)
         self.error_name = error_name.value

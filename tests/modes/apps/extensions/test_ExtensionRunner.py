@@ -4,7 +4,7 @@ import signal
 
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunErrorName, ExtensionIsNotRunningError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
-from ulauncher.api.shared.errors import ErrorName
+from ulauncher.api.shared.errors import ExtensionError
 
 
 class TestExtensionRunner:
@@ -53,7 +53,7 @@ class TestExtensionRunner:
 
     def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
         manifest.check_compatibility.side_effect = ExtensionManifestError(
-            'message', ErrorName.ExtensionCompatibilityError)
+            'message', ExtensionError.ExtensionCompatibilityError)
         with pytest.raises(ExtensionManifestError):
             runner.run('id')
 

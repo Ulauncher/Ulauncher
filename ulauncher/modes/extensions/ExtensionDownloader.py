@@ -10,7 +10,7 @@ from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
+from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.GithubExtension import GithubExtension
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
@@ -68,8 +68,10 @@ class ExtensionDownloader:
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
         if os.path.exists(ext_path) and self.ext_runner.is_running(ext_id):
-            raise ExtensionDownloaderError(f'Extension with URL "{url}" is already added',
-                                           ErrorName.ExtensionAlreadyAdded)
+            raise ExtensionDownloaderError(
+                f'Extension with URL "{url}" is already added',
+                ExtensionError.ExtensionAlreadyAdded
+            )
 
         # 2. get last commit info
         commit = gh_ext.find_compatible_version()
@@ -166,7 +168,7 @@ class ExtensionDownloader:
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.find(ext_id)
         if not ext:
-            raise ExtensionDownloaderError("Extension not found", ErrorName.UnexpectedError)
+            raise ExtensionDownloaderError("Extension not found", ExtensionError.UnexpectedError)
         return ext
 
 
