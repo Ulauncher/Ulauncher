@@ -80,7 +80,10 @@ class GithubExtension:
         try:
             return self.get_commit(sha_or_branch)
         except HTTPError as e:
-            raise GithubExtensionError(f'Branch/commit "{sha_or_branch}" does not exist.', ErrorName.InvalidVersionsJson) from e
+            raise GithubExtensionError(
+                f'Branch/commit "{sha_or_branch}" does not exist.',
+                ErrorName.InvalidVersionsJson
+            ) from e
 
     def get_commit(self, sha_or_branch) -> Commit:
         """

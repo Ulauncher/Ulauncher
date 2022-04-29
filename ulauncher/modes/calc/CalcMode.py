@@ -61,6 +61,7 @@ def eval_expr(expr):
 
 
 @lru_cache(maxsize=1000)
+# pylint: disable=too-many-return-statements
 def _is_enabled(query):
     query = normalize_expr(query)
     try:

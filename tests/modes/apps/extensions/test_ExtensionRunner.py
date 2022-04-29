@@ -3,7 +3,6 @@ import pytest
 import signal
 
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunErrorName, ExtensionIsNotRunningError
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.shared.errors import ErrorName
 
