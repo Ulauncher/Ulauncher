@@ -1,9 +1,7 @@
-"""
-mypy_extensions cannot be installed via apt or dnf so we need to make sure TypedDict exists at runtime
-"""
-
+# See https://github.com/python/typeshed/issues/3500
+# Ubuntu Bionic only has Py3.6, and there are no system packages for typing_extensions or mypy_extensions
+# In Python>=3.8 we could just do "from typing import TypedDict"
 # pylint: disable=unused-import
-from typing import Any, Callable, Dict  # noqa: F401
 
 
 def _TypedDict(*args, **kw):
