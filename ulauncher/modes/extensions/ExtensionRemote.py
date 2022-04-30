@@ -43,11 +43,11 @@ Commit = TypedDict('Commit', {
 })
 
 
-class GithubExtensionError(UlauncherAPIError):
+class ExtensionRemoteError(UlauncherAPIError):
     pass
 
 
-class GithubExtension:
+class ExtensionRemote:
 
     url_match_pattern = r'^(https:\/\/github.com\/|git@github.com:)(([\w-]+\/[\w-]+))\/?(.git|tree\/master\/?)?$'
     url_file_template = 'https://raw.githubusercontent.com/{project_path}/{branch}/{file_path}'
@@ -58,14 +58,14 @@ class GithubExtension:
 
     def validate_url(self):
         if not re.match(self.url_match_pattern, self.url, re.I):
-            raise GithubExtensionError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
+            raise ExtensionRemoteError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
 
     def find_compatible_version(self) -> Commit:
         """
         Finds maximum version that is compatible with current version of Ulauncher
         and returns a commit or branch/tag name
 
-        :raises ulauncher.modes.extensions.GithubExtension.InvalidVersionDeclaration:
+        :raises ulauncher.modes.extensions.ExtensionRemote.InvalidVersionDeclaration:
         """
         sha_or_branch = ""
         for ver in self.read_versions():
@@ -73,14 +73,14 @@ class GithubExtension:
                 sha_or_branch = ver['commit']
 
         if not sha_or_branch:
-            raise GithubExtensionError(
+            raise ExtensionRemoteError(
                 f"This extension is not compatible with current version Ulauncher extension API (v{API_VERSION})",
                 ExtensionError.Incompatible)
 
         try:
             return self.get_commit(sha_or_branch)
         except HTTPError as e:
-            raise GithubExtensionError(
+            raise ExtensionRemoteError(
                 f'Branch/commit "{sha_or_branch}" does not exist.',
                 ExtensionError.InvalidVersionDeclaration
             ) from e
@@ -108,11 +108,11 @@ class GithubExtension:
         except HTTPError as e:
             logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
             if e.code == 404:
-                raise GithubExtensionError(
+                raise ExtensionRemoteError(
                     f'Could not find versions.json file using URL "{url}"',
                     ExtensionError.MissingVersionDeclaration
                 ) from e
-            raise GithubExtensionError(
+            raise ExtensionRemoteError(
                 f'Could not read versions.json file using URL "{url}"',
                 ExtensionError.InvalidVersionDeclaration
             ) from e
@@ -121,23 +121,23 @@ class GithubExtension:
         versions = self._read_json('master', 'versions.json')
 
         if not isinstance(versions, list):
-            raise GithubExtensionError(
+            raise ExtensionRemoteError(
                 'versions.json should contain a list',
                 ExtensionError.InvalidVersionDeclaration
             )
         for ver in versions:
             if not isinstance(ver, dict):
-                raise GithubExtensionError(
+                raise ExtensionRemoteError(
                     'versions.json should contain a list of objects',
                     ExtensionError.InvalidVersionDeclaration
                 )
             if not isinstance(ver.get('required_api_version'), str):
-                raise GithubExtensionError(
+                raise ExtensionRemoteError(
                     'versions.json: required_api_version should be a string',
                     ExtensionError.InvalidVersionDeclaration
                 )
             if not isinstance(ver.get('commit'), str):
-                raise GithubExtensionError(
+                raise ExtensionRemoteError(
                     'versions.json: commit should be a string',
                     ExtensionError.InvalidVersionDeclaration
                 )
@@ -149,7 +149,7 @@ class GithubExtension:
             except Exception:
                 pass
             if not valid:
-                raise GithubExtensionError(
+                raise ExtensionRemoteError(
                     f"versions.json: invalid range '{ver['required_api_version']}'",
                     ExtensionError.InvalidVersionDeclaration
                 )
@@ -180,6 +180,6 @@ class GithubExtension:
         """
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise GithubExtensionError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
+            raise ExtensionRemoteError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
 
         return match.group(2)

@@ -5,7 +5,7 @@ import pytest
 from urllib.error import HTTPError
 
 from ulauncher.utils.date import iso_to_datetime
-from ulauncher.modes.extensions.GithubExtension import GithubExtension, GithubExtensionError
+from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, ExtensionRemoteError
 
 
 manifest_example = {'required_api_version': '1',
@@ -20,25 +20,25 @@ manifest_example = {'required_api_version': '1',
                                      'type': 'keyword'}]}
 
 
-class TestGithubExtension:
+class TestExtensionRemote:
 
     @pytest.fixture
-    def gh_ext(self) -> GithubExtension:
-        return GithubExtension('https://github.com/Ulauncher/ulauncher-timer')
+    def gh_ext(self) -> ExtensionRemote:
+        return ExtensionRemote('https://github.com/Ulauncher/ulauncher-timer')
 
-    def test_read_json(self, gh_ext: GithubExtension, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
+    def test_read_json(self, gh_ext: ExtensionRemote, mocker):
+        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
         urlopen.return_value.read.return_value = dumps(manifest_example).encode('utf-8')
         actual = gh_ext._read_json('master', 'manifest.json')
         assert actual == manifest_example
 
-    def test_read_json__HTTPError__raises(self, gh_ext: GithubExtension, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
+    def test_read_json__HTTPError__raises(self, gh_ext: ExtensionRemote, mocker):
+        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
         urlopen.side_effect = HTTPError('https://url', 404, 'urlopen error', {}, None)  # type: ignore
-        with pytest.raises(GithubExtensionError) as e:
+        with pytest.raises(ExtensionRemoteError) as e:
             gh_ext._read_json('master', 'manifest.json')
 
-        assert e.type == GithubExtensionError
+        assert e.type == ExtensionRemoteError
         assert e.value.error_name == 'MissingVersionDeclaration'
 
     def test_read_versions(self, gh_ext, mocker):
@@ -55,7 +55,7 @@ class TestGithubExtension:
     def test_read_versions__content_is_array__throws_error(self, gh_ext, mocker):
         mocker.patch.object(gh_ext, '_read_json')
         gh_ext._read_json.return_value = ["^1.0.0", "^2.0.0"]
-        with pytest.raises(GithubExtensionError):
+        with pytest.raises(ExtensionRemoteError):
             gh_ext.read_versions()
 
     def test_read_versions__value_is_number__throws_error(self, gh_ext, mocker):
@@ -65,7 +65,7 @@ class TestGithubExtension:
             {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "^2.3.1", "commit": 1234}
         ]
-        with pytest.raises(GithubExtensionError):
+        with pytest.raises(ExtensionRemoteError):
             gh_ext.read_versions()
 
     def test_read_versions__version_mismatch__raises(self, gh_ext, mocker):
@@ -74,7 +74,7 @@ class TestGithubExtension:
             {"required_api_version": "^1.0.0", "commit": "master"}
         ]
         expected_message = r'This extension is not compatible with current version Ulauncher extension API.*'
-        with pytest.raises(GithubExtensionError, match=expected_message):
+        with pytest.raises(ExtensionRemoteError, match=expected_message):
             gh_ext.find_compatible_version()
 
     def test_read_manifest(self, gh_ext, mocker):
@@ -91,17 +91,17 @@ class TestGithubExtension:
     def test_validate_url(self, gh_ext):
         assert gh_ext.validate_url() is None
 
-        with pytest.raises(GithubExtensionError):
-            GithubExtension('http://github.com/Ulauncher/ulauncher-timer').validate_url()
+        with pytest.raises(ExtensionRemoteError):
+            ExtensionRemote('http://github.com/Ulauncher/ulauncher-timer').validate_url()
 
-        with pytest.raises(GithubExtensionError):
-            GithubExtension('git@github.com/Ulauncher/ulauncher-timer/').validate_url()
+        with pytest.raises(ExtensionRemoteError):
+            ExtensionRemote('git@github.com/Ulauncher/ulauncher-timer/').validate_url()
 
     def test_get_download_url(self, gh_ext):
         assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
 
     def test_get_commit(self, gh_ext, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.GithubExtension.urlopen')
+        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
         urlopen.return_value = io.BytesIO(dumps({
             'sha': '64e106c57ad90f9f02e9941dfa9780846b7457b9',
             'commit': {

@@ -24,7 +24,7 @@ class TestExtensionDownloader:
 
     @pytest.fixture(autouse=True)
     def gh_ext(self, mocker):
-        gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.GithubExtension').return_value
+        gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.ExtensionRemote').return_value
         gh_ext.get_ext_id.return_value = 'com.github.ulauncher.ulauncher-timer'
         gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
         gh_ext.get_last_commit.return_value = {
@@ -43,8 +43,8 @@ class TestExtensionDownloader:
         return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.download_tarball')
 
     @pytest.fixture(autouse=True)
-    def GithubExtension(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.GithubExtension')
+    def ExtensionRemote(self, mocker):
+        return mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.ExtensionRemote')
 
     @pytest.fixture(autouse=True)
     def untar(self, mocker):

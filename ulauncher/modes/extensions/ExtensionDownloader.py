@@ -12,7 +12,7 @@ from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
-from ulauncher.modes.extensions.GithubExtension import GithubExtension
+from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
 from ulauncher.modes.extensions.extension_finder import find_extensions
 
@@ -59,7 +59,7 @@ class ExtensionDownloader:
         :returns: Extension ID
         :raises AlreadyDownloadedError:
         """
-        gh_ext = GithubExtension(url)
+        gh_ext = ExtensionRemote(url)
         gh_ext.validate_url()
 
         # 1. check if ext already exists
@@ -134,7 +134,7 @@ class ExtensionDownloader:
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        gh_ext = GithubExtension(ext['url'])
+        gh_ext = ExtensionRemote(ext['url'])
         filename = download_tarball(gh_ext.get_download_url(commit['last_commit']))
         untar(filename, ext_path)
 
@@ -154,7 +154,7 @@ class ExtensionDownloader:
         """
         ext = self._find_extension(ext_id)
         url = ext['url']
-        gh_ext = GithubExtension(url)
+        gh_ext = ExtensionRemote(url)
         commit = gh_ext.find_compatible_version()
         need_update = ext['last_commit'] != commit['sha']
         if not need_update:
