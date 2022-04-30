@@ -24,7 +24,7 @@ from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
-from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
+from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import themes, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
@@ -193,7 +193,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             err_meta = json.dumps({
                 'message': str(e),
                 'type': type(e).__name__,
-                'errorName': ErrorName.UnhandledError.value,
+                'errorName': ExtensionError.Other.value,
                 'stacktrace': traceback.format_exc()
             })
             callback = f'{callback_name}(null, {err_meta});'
@@ -412,7 +412,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             except Exception as e:
                 error = cast(ExtError, {
                     'message': str(e),
-                    'errorName': ErrorName.UnexpectedError.value
+                    'errorName': ExtensionError.Other.value
                 })
             extensions.append(self._get_extension_info(ext_id, prefs, error))
 

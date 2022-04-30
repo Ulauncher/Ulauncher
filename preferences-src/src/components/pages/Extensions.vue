@@ -141,11 +141,11 @@ export default {
       addingExtensionError: null,
       extensions: [],
       hideCopyErrorDetails: [
-        'InvalidGithubUrl',
-        'IncompatibleVersion',
-        'VersionsJsonNotFound',
-        'InvalidVersionsJson',
-        'InvalidManifestJson'
+        'MissingVersionDeclaration',
+        'Incompatible',
+        'InvalidManifest',
+        'InvalidUrl',
+        'InvalidVersionDeclaration'
       ]
     }
   },

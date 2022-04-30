@@ -10,7 +10,7 @@ from ulauncher.config import API_VERSION
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.date import iso_to_datetime
 from ulauncher.utils.version import satisfies, valid_range
-from ulauncher.api.shared.errors import ErrorName, UlauncherAPIError
+from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 
 DEFAULT_GITHUB_BRANCH = 'master'
 
@@ -58,14 +58,14 @@ class GithubExtension:
 
     def validate_url(self):
         if not re.match(self.url_match_pattern, self.url, re.I):
-            raise GithubExtensionError(f'Invalid GithubUrl: {self.url}', ErrorName.InvalidGithubUrl)
+            raise GithubExtensionError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
 
     def find_compatible_version(self) -> Commit:
         """
         Finds maximum version that is compatible with current version of Ulauncher
         and returns a commit or branch/tag name
 
-        :raises ulauncher.modes.extensions.GithubExtension.InvalidVersionsFileError:
+        :raises ulauncher.modes.extensions.GithubExtension.InvalidVersionDeclaration:
         """
         sha_or_branch = ""
         for ver in self.read_versions():
@@ -75,14 +75,14 @@ class GithubExtension:
         if not sha_or_branch:
             raise GithubExtensionError(
                 f"This extension is not compatible with current version Ulauncher extension API (v{API_VERSION})",
-                ErrorName.IncompatibleVersion)
+                ExtensionError.Incompatible)
 
         try:
             return self.get_commit(sha_or_branch)
         except HTTPError as e:
             raise GithubExtensionError(
                 f'Branch/commit "{sha_or_branch}" does not exist.',
-                ErrorName.InvalidVersionsJson
+                ExtensionError.InvalidVersionDeclaration
             ) from e
 
     def get_commit(self, sha_or_branch) -> Commit:
@@ -108,24 +108,39 @@ class GithubExtension:
         except HTTPError as e:
             logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
             if e.code == 404:
-                raise GithubExtensionError(f'Could not find versions.json file using URL "{url}"',
-                                           ErrorName.VersionsJsonNotFound) from e
-            raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError) from e
+                raise GithubExtensionError(
+                    f'Could not find versions.json file using URL "{url}"',
+                    ExtensionError.MissingVersionDeclaration
+                ) from e
+            raise GithubExtensionError(
+                f'Could not read versions.json file using URL "{url}"',
+                ExtensionError.InvalidVersionDeclaration
+            ) from e
 
     def read_versions(self) -> List[Dict[str, str]]:
         versions = self._read_json('master', 'versions.json')
 
         if not isinstance(versions, list):
-            raise GithubExtensionError('versions.json should contain a list', ErrorName.InvalidVersionsJson)
+            raise GithubExtensionError(
+                'versions.json should contain a list',
+                ExtensionError.InvalidVersionDeclaration
+            )
         for ver in versions:
             if not isinstance(ver, dict):
-                raise GithubExtensionError('versions.json should contain a list of objects',
-                                           ErrorName.InvalidVersionsJson)
+                raise GithubExtensionError(
+                    'versions.json should contain a list of objects',
+                    ExtensionError.InvalidVersionDeclaration
+                )
             if not isinstance(ver.get('required_api_version'), str):
                 raise GithubExtensionError(
-                    'versions.json: required_api_version should be a string', ErrorName.InvalidVersionsJson)
+                    'versions.json: required_api_version should be a string',
+                    ExtensionError.InvalidVersionDeclaration
+                )
             if not isinstance(ver.get('commit'), str):
-                raise GithubExtensionError('versions.json: commit should be a string', ErrorName.InvalidVersionsJson)
+                raise GithubExtensionError(
+                    'versions.json: commit should be a string',
+                    ExtensionError.InvalidVersionDeclaration
+                )
 
             valid = False
             try:
@@ -134,8 +149,10 @@ class GithubExtension:
             except Exception:
                 pass
             if not valid:
-                raise GithubExtensionError(f"versions.json: invalid range '{ver['required_api_version']}'",
-                                           ErrorName.InvalidVersionsJson)
+                raise GithubExtensionError(
+                    f"versions.json: invalid range '{ver['required_api_version']}'",
+                    ExtensionError.InvalidVersionDeclaration
+                )
 
         return versions
 
@@ -163,6 +180,6 @@ class GithubExtension:
         """
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise GithubExtensionError(f'Invalid GithubUrl: {self.url}', ErrorName.InvalidGithubUrl)
+            raise GithubExtensionError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
 
         return match.group(2)

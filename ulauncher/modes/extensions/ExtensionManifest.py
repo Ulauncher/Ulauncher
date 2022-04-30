@@ -2,7 +2,7 @@ import os
 from json import load
 from typing import cast, Optional, List, Union
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR
-from ulauncher.api.shared.errors import UlauncherAPIError, ErrorName
+from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.icon import get_icon_path
@@ -117,9 +117,9 @@ class ExtensionManifest:
                     assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
                     assert p.get('options'), 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
-            raise ExtensionManifestError(str(e), ErrorName.InvalidManifestJson) from e
+            raise ExtensionManifestError(str(e), ExtensionError.InvalidManifest) from e
         except KeyError as e:
-            raise ExtensionManifestError(f'{e} is not provided', ErrorName.InvalidManifestJson) from e
+            raise ExtensionManifestError(f'{e} is not provided', ExtensionError.InvalidManifest) from e
 
     def check_compatibility(self):
         if not satisfies(API_VERSION, self.get_required_api_version()):
@@ -127,7 +127,7 @@ class ExtensionManifest:
                 f'Extension "{self.extension_id}" requires API version {self.get_required_api_version()}, '
                 f'but the current API version is: {API_VERSION})'
             )
-            raise ExtensionManifestError(err_msg, ErrorName.ExtensionCompatibilityError)
+            raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
 
 def read_manifest(extension_id, extensions_dir):

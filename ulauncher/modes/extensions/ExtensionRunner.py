@@ -29,7 +29,7 @@ ExtensionProc = namedtuple("ExtensionProc", (
 ))
 
 
-class ExtRunErrorName(Enum):
+class ExtensionRuntimeError(Enum):
     NoExtensionsFlag = 'NoExtensionsFlag'
     Terminated = 'Terminated'
     ExitedInstantly = 'ExitedInstantly'
@@ -88,7 +88,7 @@ class ExtensionRunner:
             run_cmd = 'VERBOSE={} PYTHONPATH={} {} {}'.format(*args)
             logger.warning('Copy and run the following command to start %s', extension_id)
             logger.warning(run_cmd)
-            self.set_extension_error(extension_id, ExtRunErrorName.NoExtensionsFlag, run_cmd)
+            self.set_extension_error(extension_id, ExtensionRuntimeError.NoExtensionsFlag, run_cmd)
             return
 
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
@@ -136,7 +136,7 @@ class ExtensionRunner:
             code = subprocess.get_term_sig()
             error_msg = f'Extension "{extension_id}" was terminated with code {code}'
             logger.error(error_msg)
-            self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
+            self.set_extension_error(extension_id, ExtensionRuntimeError.Terminated, error_msg)
             self.extension_procs.pop(extension_id, None)
             return
 
@@ -150,7 +150,7 @@ class ExtensionRunner:
         if runtime < 1:
             error_msg = f'Extension "{extension_id}" exited instantly with code {code}'
             logger.error(error_msg)
-            self.set_extension_error(extension_id, ExtRunErrorName.ExitedInstantly, error_msg)
+            self.set_extension_error(extension_id, ExtensionRuntimeError.ExitedInstantly, error_msg)
             lasterr = b"\n".join(extproc.recent_errors).decode()
             error_info = ProcessErrorExtractor(lasterr)
             logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
@@ -160,15 +160,15 @@ class ExtensionRunner:
                     logger.error('Extension tried to import Ulauncher modules which have been moved or removed. '
                                  'This is likely Ulauncher internals which were not part of the extension API. '
                                  'Extensions importing these can break at any Ulauncher release.')
-                    self.set_extension_error(extension_id, ExtRunErrorName.Incompatible, error_msg)
+                    self.set_extension_error(extension_id, ExtensionRuntimeError.Incompatible, error_msg)
                 elif package_name:
-                    self.set_extension_error(extension_id, ExtRunErrorName.MissingModule, package_name)
+                    self.set_extension_error(extension_id, ExtensionRuntimeError.MissingModule, package_name)
 
             self.extension_procs.pop(extension_id, None)
             return
 
         error_msg = f'Extension "{extension_id}" exited with code {code} after {runtime} seconds. Restarting...'
-        self.set_extension_error(extension_id, ExtRunErrorName.Exited, error_msg)
+        self.set_extension_error(extension_id, ExtensionRuntimeError.Exited, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(extension_id, None)
         self.run(extension_id)
@@ -199,7 +199,7 @@ class ExtensionRunner:
     def is_running(self, extension_id: str) -> bool:
         return extension_id in self.extension_procs
 
-    def set_extension_error(self, extension_id: str, errorName: ExtRunErrorName, message: str):
+    def set_extension_error(self, extension_id: str, errorName: ExtensionRuntimeError, message: str):
         self.extension_errors[extension_id] = {
             'name': errorName.value,
             'message': message

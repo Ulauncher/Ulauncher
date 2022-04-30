@@ -39,7 +39,7 @@ class TestGithubExtension:
             gh_ext._read_json('master', 'manifest.json')
 
         assert e.type == GithubExtensionError
-        assert e.value.error_name == 'VersionsJsonNotFound'
+        assert e.value.error_name == 'MissingVersionDeclaration'
 
     def test_read_versions(self, gh_ext, mocker):
         mocker.patch.object(gh_ext, '_read_json')
