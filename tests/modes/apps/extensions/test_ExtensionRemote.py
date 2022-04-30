@@ -98,7 +98,7 @@ class TestExtensionRemote:
             ExtensionRemote('git@github.com/Ulauncher/ulauncher-timer/').validate_url()
 
     def test_get_download_url(self, gh_ext):
-        assert gh_ext.get_download_url() == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
+        assert gh_ext.get_download_url('master') == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
 
     def test_get_commit(self, gh_ext, mocker):
         urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')

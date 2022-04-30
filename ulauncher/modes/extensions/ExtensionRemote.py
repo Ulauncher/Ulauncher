@@ -12,8 +12,6 @@ from ulauncher.utils.date import iso_to_datetime
 from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 
-DEFAULT_GITHUB_BRANCH = 'master'
-
 logger = logging.getLogger(__name__)
 
 ManifestPreference = TypedDict('ManifestPreference', {
@@ -159,7 +157,7 @@ class ExtensionRemote:
     def read_manifest(self, commit) -> Manifest:
         return cast(Manifest, self._read_json(commit, 'manifest.json'))
 
-    def get_download_url(self, commit: str = DEFAULT_GITHUB_BRANCH) -> str:
+    def get_download_url(self, commit) -> str:
         """
         >>> Ulauncher/ulauncher-timer
         <<< https://github.com/Ulauncher/ulauncher-timer/tarball/master
