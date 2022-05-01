@@ -178,22 +178,19 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         try:
             resp = rt.dispatch(self, scheme_request.get_uri())
             callback = f'{callback_name}({json.dumps(resp)});'
-        except UlauncherAPIError as e:
+        except Exception as e:
             error_type = type(e).__name__
-            logger.error('%s: %s', error_type, e)
+            error_name = ExtensionError.Other.value
+            if isinstance(e, UlauncherAPIError):
+                logger.error('%s: %s', error_type, e)
+                error_name = e.error_name
+            else:
+                logger.exception('Unexpected API error. %s: %s', error_type, e)
+
             err_meta = json.dumps({
                 'message': str(e),
                 'type': error_type,
-                'errorName': e.error_name,
-                'stacktrace': traceback.format_exc()
-            })
-            callback = f'{callback_name}(null, {err_meta});'
-        except Exception as e:
-            logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
-            err_meta = json.dumps({
-                'message': str(e),
-                'type': type(e).__name__,
-                'errorName': ExtensionError.Other.value,
+                'errorName': error_name,
                 'stacktrace': traceback.format_exc()
             })
             callback = f'{callback_name}(null, {err_meta});'
