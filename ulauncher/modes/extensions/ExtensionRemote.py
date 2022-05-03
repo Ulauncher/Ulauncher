@@ -37,11 +37,9 @@ class ExtensionRemote:
         if not match:
             raise ExtensionRemoteError(f'Invalid URL: {url}', ExtensionError.InvalidUrl)
 
-        self.host = match.group("host")
-        # Support Gitea/Codeberg apis also
-        self.host_api = "https://api.github.com" if self.host == "github.com" else f"https://{self.host}/api/v1"
         self.user = match.group("user")
         self.repo = match.group("repo")
+        self.host = match.group("host")
 
         if "." not in self.host:
             self.extension_id = f"{self.host}.{self.user}.{self.repo}"
@@ -49,18 +47,32 @@ class ExtensionRemote:
             domain, tld = self.host.rsplit(".", 1)
             self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
 
+        if self.host == "github.com":
+            self.host_api = "https://api.github.com"
+        elif self.host == "gitlab.com":
+            self.host_api = "https://gitlab.com/api/v4"
+            projects, err = json_fetch(f"{self.host_api}/users/{self.user}/projects?search={self.repo}")
+            if err:
+                raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from err
+            project = next((p for p in projects if p["name"] == self.repo), None)
+            self.gitlab_default_branch = project["default_branch"]
+            self.gitlab_project_id = project["id"]
+        else:
+            self.host_api = f"https://{self.host}/api/v1"
+
     def get_download_url(self, commit: str) -> str:
-        """
-        Override this method if needed (it works for GitHub and Codeberg)
-        """
+        if self.host == "gitlab.com":
+            return f'https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz'
         return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
 
     def get_versions(self) -> List:
-        """
-        Override this method if needed (it works for GitHub and Codeberg)
-        """
         # This saves us a request compared to using the "raw" file API that needs to know the branch
         versions_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/versions.json"
+        if self.host == "gitlab.com":
+            versions_url = (
+                f"{self.host_api}/projects/{self.gitlab_project_id}"
+                f"/repository/files/versions.json?ref={self.gitlab_default_branch}"
+            )
         file_data, err = json_fetch(versions_url)
 
         if err:
@@ -81,25 +93,27 @@ class ExtensionRemote:
         # Gitea/Codeberg only supports commit hashes so we have to use the branches API
         api = "commits" if self.host == "github.com" else "branches"
         url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{branch_name}"
+        if self.host == "gitlab.com":
+            url = f"{self.host_api}/projects/{self.gitlab_project_id}/repository/commits/{branch_name}"
+
         branch, err = json_fetch(url)
 
         if err:
             raise err
 
-        if self.host == "github.com":
-            try:
+        try:
+            if self.host == "github.com":
                 id = branch["sha"]
                 commit_time = iso_to_datetime(branch["commit"]["committer"]["date"])
-                return id, commit_time
-            except (KeyError, TypeError):
-                pass
-        else:
-            try:
+            elif self.host == "gitlab.com":
+                id = branch["id"]
+                commit_time = datetime.strptime(branch["committed_date"][0:19], '%Y-%m-%dT%H:%M:%S')
+            else:
                 id = branch["commit"]["id"]
                 commit_time = iso_to_datetime(branch["commit"]["timestamp"], False)
-                return id, commit_time
-            except (KeyError, TypeError):
-                pass
+            return id, commit_time
+        except (KeyError, TypeError):
+            pass
 
         raise ExtensionRemoteError(
             f'Invalid metadata for commit url "{url}"',
