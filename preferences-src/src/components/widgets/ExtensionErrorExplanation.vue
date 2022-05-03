@@ -4,10 +4,11 @@
       <small>
         <p
           v-if="errorName === 'InvalidUrl'"
-        >The URL must look like this: https://github.com/userName/projectName</p>
+        >The URL should be a GitHub or Gitea-compatible extension repository link.
+        <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
         <p
           v-else-if="errorName === 'MissingVersionDeclaration'"
-        >This extension does not provide a version compatible with your Ulauncher version.</p>
+        >This repository does not provide a Ulauncher extension version declaration. It is probably not a Ulauncher extension</p>
         <p v-else-if="errorName === 'InvalidVersionDeclaration'">
           There's an error in versions.json:
           <br>
@@ -26,11 +27,11 @@
           </p>
           <p v-if="extUrl">
             Please make sure that you are running the latest version of Ulauncher app.
-            If problem persists, report this issue to the author of the extension via
+            If problem persists, report this issue on the
             <a
               href
               @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
-            >Github issues</a>.
+            >extension issue page</a>.
           </p>
         </div>
         <p
@@ -50,11 +51,11 @@
             <b>updating</b> the extension. If the doesn't help let
           </span>
           <span v-else>Let</span>
-          the author know about this problem via
+          the author know about this problem on the
           <a
             href
             @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
-          >Github issues</a>.
+          >extension issue page</a>.
         </p>
       </small>
     </b-alert>

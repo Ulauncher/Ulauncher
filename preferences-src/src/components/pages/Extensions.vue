@@ -62,8 +62,8 @@
 
         <b-form @submit.prevent="onUrlSubmit">
           <b-form-input
-            class="github-url-input"
-            ref="githubUrl"
+            class="repo-url-input"
+            ref="repoUrl"
             type="text"
             placeholder="https://github.com/org-name/project-name"
           ></b-form-input>
@@ -163,7 +163,7 @@ export default {
       )
     },
     onAddExtFormShown() {
-      this.$nextTick(() => this.$refs.githubUrl.focus())
+      this.$nextTick(() => this.$refs.repoUrl.focus())
       this.addingExtensionError = null
     },
     addExtDialog() {
@@ -197,14 +197,14 @@ export default {
       }
     },
     onModalOk(e) {
-      let input = this.$refs.githubUrl.$el
+      let input = this.$refs.repoUrl.$el
       if (input.value) {
         this.addExtension(input)
       }
       return e.preventDefault()
     },
     onUrlSubmit() {
-      let input = this.$refs.githubUrl.$el
+      let input = this.$refs.repoUrl.$el
       if (input.value) {
         this.addExtension(input)
       }
