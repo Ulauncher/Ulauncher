@@ -89,7 +89,7 @@ class ExtensionRemote:
         return []
 
     def get_commit(self, branch_name: str) -> Commit:
-        # GitHub supports accessing commits via other references like branch names
+        # GitHub and GitLab supports accessing commits via other references like branch names
         # Gitea/Codeberg only supports commit hashes so we have to use the branches API
         api = "commits" if self.host == "github.com" else "branches"
         url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{branch_name}"

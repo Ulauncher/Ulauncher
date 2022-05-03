@@ -4,7 +4,7 @@
       <small>
         <p
           v-if="errorName === 'InvalidUrl'"
-        >The URL should be a GitHub or Gitea-compatible extension repository link.
+        >The URL should be a GitHub, GitLab or Gitea-compatible extension repository link.
         <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
         <p
           v-else-if="errorName === 'MissingVersionDeclaration'"
