@@ -43,8 +43,11 @@ class ExtensionRemote:
         self.user = match.group("user")
         self.repo = match.group("repo")
 
-        domain, tld = self.host.rsplit(".", 1)
-        self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
+        if "." not in self.host:
+            self.extension_id = f"{self.host}.{self.user}.{self.repo}"
+        else:
+            domain, tld = self.host.rsplit(".", 1)
+            self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
 
     def get_download_url(self, commit: str) -> str:
         """
