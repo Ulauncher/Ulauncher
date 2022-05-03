@@ -312,6 +312,11 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         logger.info('Open Web URL %s', url)
         OpenAction(url).run()
 
+    @rt.route('/open/extensions-dir')
+    def prefs_open_extensions_dir(self, _):
+        logger.info('Open extensions directory "%s" in default file manager.', EXTENSIONS_DIR)
+        OpenAction(EXTENSIONS_DIR).run()
+
     @rt.route('/shortcut/get-all')
     def prefs_shortcut_get_all(self, query):
         logger.info('Handling /shortcut/get-all')
