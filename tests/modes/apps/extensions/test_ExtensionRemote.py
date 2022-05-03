@@ -1,12 +1,7 @@
-import io
-from json import dumps
-
 import pytest
-from urllib.error import HTTPError
 
 from ulauncher.utils.date import iso_to_datetime
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, ExtensionRemoteError
-
 
 manifest_example = {'required_api_version': '1',
                     'description': 'Countdown timer with notifications',
@@ -21,117 +16,89 @@ manifest_example = {'required_api_version': '1',
 
 
 class TestExtensionRemote:
+    @pytest.fixture
+    def json_fetch(self, mocker):
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRemote.json_fetch')
 
     @pytest.fixture
-    def gh_ext(self) -> ExtensionRemote:
+    def remote(self) -> ExtensionRemote:
         return ExtensionRemote('https://github.com/Ulauncher/ulauncher-timer')
 
-    def test_read_json(self, gh_ext: ExtensionRemote, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
-        urlopen.return_value.read.return_value = dumps(manifest_example).encode('utf-8')
-        actual = gh_ext._read_json('master', 'manifest.json')
-        assert actual == manifest_example
+    def test_validate_versions(self, remote):
+        with pytest.raises(ExtensionRemoteError, match="Could not retrieve versions.json"):
+            assert remote.validate_versions(None)
+            assert remote.validate_versions([])
+        with pytest.raises(ExtensionRemoteError, match="should contain a list"):
+            assert remote.validate_versions(True)
+            assert remote.validate_versions(1)
+        with pytest.raises(ExtensionRemoteError, match="should contain a list of objects"):
+            assert remote.validate_versions(["^1.0.0", "^2.0.0"])
+        with pytest.raises(ExtensionRemoteError, match="commit should be a string"):
+            assert remote.validate_versions([{}, {}])
+            assert remote.validate_versions([{"required_api_version": "3"}])
+            assert remote.validate_versions([{"commit": 1234}])
+        with pytest.raises(ExtensionRemoteError, match="required_api_version should be a string"):
+            assert remote.validate_versions([{"commit": "asdf", "required_api_version": 1}])
+            assert remote.validate_versions([{"commit": "asdf", "required_api_version": 3.1}])
+        with pytest.raises(ExtensionRemoteError, match="Invalid range"):
+            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "4-1"}])
+            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "2 to 3"}])
+            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "four"}])
 
-    def test_read_json__HTTPError__raises(self, gh_ext: ExtensionRemote, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
-        urlopen.side_effect = HTTPError('https://url', 404, 'urlopen error', {}, None)  # type: ignore
-        with pytest.raises(ExtensionRemoteError) as e:
-            gh_ext._read_json('master', 'manifest.json')
+        assert remote.validate_versions([{"required_api_version": "2 - 3", "commit": "main"}])
 
-        assert e.type == ExtensionRemoteError
-        assert e.value.error_name == 'MissingVersionDeclaration'
-
-    def test_read_versions(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, '_read_json')
-        expected = [
-            {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
-            {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
-            {"required_api_version": "^2.3.1", "commit": "master"}
-        ]
-        gh_ext._read_json.return_value = expected
-        actual = gh_ext.read_versions()
-        assert actual == expected
-
-    def test_read_versions__content_is_array__throws_error(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, '_read_json')
-        gh_ext._read_json.return_value = ["^1.0.0", "^2.0.0"]
-        with pytest.raises(ExtensionRemoteError):
-            gh_ext.read_versions()
-
-    def test_read_versions__value_is_number__throws_error(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, '_read_json')
-        gh_ext._read_json.return_value = [
-            {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
-            {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
-            {"required_api_version": "^2.3.1", "commit": 1234}
-        ]
-        with pytest.raises(ExtensionRemoteError):
-            gh_ext.read_versions()
-
-    def test_read_versions__version_mismatch__raises(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, 'read_versions')
-        gh_ext.read_versions.return_value = [
+    def test_get_versions__version_mismatch__raises(self, remote, mocker):
+        mocker.patch.object(remote, 'get_versions')
+        remote.get_versions.return_value = [
             {"required_api_version": "^1.0.0", "commit": "master"}
         ]
-        expected_message = r'This extension is not compatible with current version Ulauncher extension API.*'
-        with pytest.raises(ExtensionRemoteError, match=expected_message):
-            gh_ext.find_compatible_version()
+        with pytest.raises(ExtensionRemoteError, match="not compatible with your Ulauncher API version"):
+            remote.find_compatible_version()
 
-    def test_read_manifest(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, '_read_json')
-        gh_ext._read_json.return_value = manifest_example
-        manifest = gh_ext.read_manifest('abc123')
-        assert manifest['required_api_version'] == '1'
-        assert manifest['options']['query_debounce'] == 0.1
-        assert manifest['preferences'][0]['type'] == 'keyword'
+    def test_ext_id(self, remote):
+        assert remote.extension_id == 'com.github.ulauncher.ulauncher-timer'
 
-    def test_get_ext_id(self, gh_ext):
-        assert gh_ext.get_ext_id() == 'com.github.ulauncher.ulauncher-timer'
-
-    def test_validate_url(self, gh_ext):
-        assert gh_ext.validate_url() is None
+    def test_invalid_urls(self):
+        with pytest.raises(ExtensionRemoteError):
+            ExtensionRemote('http://github.com/Ulauncher/ulauncher-timer')
 
         with pytest.raises(ExtensionRemoteError):
-            ExtensionRemote('http://github.com/Ulauncher/ulauncher-timer').validate_url()
+            ExtensionRemote('git@github.com/Ulauncher')
 
-        with pytest.raises(ExtensionRemoteError):
-            ExtensionRemote('git@github.com/Ulauncher/ulauncher-timer/').validate_url()
+    def test_get_download_url(self, remote):
+        assert remote.get_download_url('master') == 'https://github.com/ulauncher/ulauncher-timer/archive/master.tar.gz'
 
-    def test_get_download_url(self, gh_ext):
-        assert gh_ext.get_download_url('master') == 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
-
-    def test_get_commit(self, gh_ext, mocker):
-        urlopen = mocker.patch('ulauncher.modes.extensions.ExtensionRemote.urlopen')
-        urlopen.return_value = io.BytesIO(dumps({
+    def test_get_commit(self, remote, json_fetch):
+        json_fetch.return_value = ({
             'sha': '64e106c57ad90f9f02e9941dfa9780846b7457b9',
             'commit': {
                 'committer': {
                     'date': '2017-05-01T07:30:39Z'
                 }
             }
-        }).encode('utf-8'))
-        commit = gh_ext.get_commit('64e106c57')
-        assert commit['sha'] == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
-        assert commit['time'] == iso_to_datetime('2017-05-01T07:30:39Z')
+        }, None)
+        commit_sha, commit_time = remote.get_commit('64e106c57')
+        assert commit_sha == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
+        assert commit_time == iso_to_datetime('2017-05-01T07:30:39Z')
 
-    def test_find_compatible_version(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, 'read_versions')
-        mocker.patch.object(gh_ext, 'get_commit')
-        gh_ext.read_versions.return_value = [
+    def test_find_compatible_version(self, remote, mocker):
+        mocker.patch.object(remote, 'get_versions')
+        mocker.patch.object(remote, 'get_commit')
+        remote.get_versions.return_value = [
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
             {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "^2.3.1", "commit": "master"}
         ]
-        gh_ext.find_compatible_version()
-        gh_ext.get_commit.assert_called_with("release-for-api-v2")
+        remote.find_compatible_version()
+        remote.get_commit.assert_called_with("release-for-api-v2")
 
-    def test_find_compatible_version__mult_compatible(self, gh_ext, mocker):
-        mocker.patch.object(gh_ext, 'read_versions')
-        mocker.patch.object(gh_ext, 'get_commit')
-        gh_ext.read_versions.return_value = [
+    def test_find_compatible_version__mult_compatible(self, remote, mocker):
+        mocker.patch.object(remote, 'get_versions')
+        mocker.patch.object(remote, 'get_commit')
+        remote.get_versions.return_value = [
             {"required_api_version": "2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "~1.3.1", "commit": "master"},
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"}
         ]
-        gh_ext.find_compatible_version()
-        gh_ext.get_commit.assert_called_with("release-for-api-v2")
+        remote.find_compatible_version()
+        remote.get_commit.assert_called_with("release-for-api-v2")

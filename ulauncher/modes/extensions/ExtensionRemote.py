@@ -1,44 +1,27 @@
-import re
+import codecs
 import json
+import re
 import logging
 from datetime import datetime
 from urllib.request import urlopen
-from urllib.error import HTTPError
-from typing import Dict, List, cast
+from urllib.error import URLError
+from typing import List, Tuple
 
 from ulauncher.config import API_VERSION
-from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.date import iso_to_datetime
 from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 
 logger = logging.getLogger(__name__)
 
-ManifestPreference = TypedDict('ManifestPreference', {
-    'default_value': str,
-    'id': str,
-    'name': str,
-    'type': str
-})
+Commit = Tuple[str, datetime]
 
-ManifestOptions = TypedDict('ManifestOptions', {
-    'query_debounce': float
-})
 
-Manifest = TypedDict('Manifest', {
-    'required_api_version': str,
-    'description': str,
-    'developer_name': str,
-    'icon': str,
-    'name': str,
-    'options': ManifestOptions,
-    'preferences': List[ManifestPreference]
-})
-
-Commit = TypedDict('Commit', {
-    'sha': str,
-    'time': datetime
-})
+def json_fetch(url):
+    try:
+        return (json.loads(urlopen(url).read()), None)
+    except Exception as e:
+        return (None, e)
 
 
 class ExtensionRemoteError(UlauncherAPIError):
@@ -46,138 +29,129 @@ class ExtensionRemoteError(UlauncherAPIError):
 
 
 class ExtensionRemote:
-
-    url_match_pattern = r'^(https:\/\/github.com\/|git@github.com:)(([\w-]+\/[\w-]+))\/?(.git|tree\/master\/?)?$'
-    url_file_template = 'https://raw.githubusercontent.com/{project_path}/{branch}/{file_path}'
-    url_commit_template = 'https://api.github.com/repos/{project_path}/commits/{commit}'
+    url_match_pattern = r"^(?:git@|https:\/\/)(?P<host>[^\/]+)\/(?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
 
     def __init__(self, url):
-        self.url = url
+        self.url = url.lower()
+        match = re.match(self.url_match_pattern, self.url, re.I)
+        if not match:
+            raise ExtensionRemoteError(f'Invalid URL: {url}', ExtensionError.InvalidUrl)
 
-    def validate_url(self):
-        if not re.match(self.url_match_pattern, self.url, re.I):
-            raise ExtensionRemoteError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
+        self.host = match.group("host")
+        # Support Gitea/Codeberg apis also
+        self.host_api = "https://api.github.com" if self.host == "github.com" else f"https://{self.host}/api/v1"
+        self.user = match.group("user")
+        self.repo = match.group("repo")
+
+        domain, tld = self.host.rsplit(".", 1)
+        self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
+
+    def get_download_url(self, commit: str) -> str:
+        """
+        Override this method if needed (it works for GitHub and Codeberg)
+        """
+        return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
+
+    def get_versions(self) -> List:
+        """
+        Override this method if needed (it works for GitHub and Codeberg)
+        """
+        # This saves us a request compared to using the "raw" file API that needs to know the branch
+        versions_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/versions.json"
+        file_data, err = json_fetch(versions_url)
+
+        if err:
+            raise err
+
+        if file_data:
+            return json.loads(
+                codecs.decode(
+                    file_data["content"].encode(),
+                    file_data["encoding"]
+                )
+            )
+
+        return []
+
+    def get_commit(self, branch_name: str) -> Commit:
+        # GitHub supports accessing commits via other references like branch names
+        # Gitea/Codeberg only supports commit hashes so we have to use the branches API
+        api = "commits" if self.host == "github.com" else "branches"
+        url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{branch_name}"
+        branch, err = json_fetch(url)
+
+        if err:
+            raise err
+
+        if self.host == "github.com":
+            try:
+                id = branch["sha"]
+                commit_time = iso_to_datetime(branch["commit"]["committer"]["date"])
+                return id, commit_time
+            except (KeyError, TypeError):
+                pass
+        else:
+            try:
+                id = branch["commit"]["id"]
+                commit_time = iso_to_datetime(branch["commit"]["timestamp"], False)
+                return id, commit_time
+            except (KeyError, TypeError):
+                pass
+
+        raise ExtensionRemoteError(
+            f'Invalid metadata for commit url "{url}"',
+            ExtensionError.InvalidVersionDeclaration
+        )
 
     def find_compatible_version(self) -> Commit:
         """
-        Finds maximum version that is compatible with current version of Ulauncher
-        and returns a commit or branch/tag name
-
-        :raises ulauncher.modes.extensions.ExtensionRemote.InvalidVersionDeclaration:
+        Finds first version that is compatible with users Ulauncher version.
+        Returns a commit or branch/tag name and datetime.
         """
-        sha_or_branch = ""
-        for ver in self.read_versions():
-            if satisfies(API_VERSION, ver['required_api_version']):
-                sha_or_branch = ver['commit']
 
-        if not sha_or_branch:
-            raise ExtensionRemoteError(
-                f"This extension is not compatible with current version Ulauncher extension API (v{API_VERSION})",
-                ExtensionError.Incompatible)
+        versions = None
 
         try:
-            return self.get_commit(sha_or_branch)
-        except HTTPError as e:
-            raise ExtensionRemoteError(
-                f'Branch/commit "{sha_or_branch}" does not exist.',
-                ExtensionError.InvalidVersionDeclaration
-            ) from e
+            versions = self.get_versions()
+            self.validate_versions(versions)
+            branch_name = next(
+                (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version'])),
+                None
+            )
 
-    def get_commit(self, sha_or_branch) -> Commit:
-        """
-        Github response example: https://api.github.com/repos/Ulauncher/Ulauncher/commits/a1304f5a
-        """
-
-        project_path = self._get_project_path()
-        url = self.url_commit_template.format(project_path=project_path, commit=sha_or_branch)
-        resp = json.loads(urlopen(url).read().decode('utf-8'))
-
-        return {
-            'sha': resp['sha'],
-            'time': iso_to_datetime(resp['commit']['committer']['date'])
-        }
-
-    def _read_json(self, commit, file_path) -> Dict:
-        project_path = self._get_project_path()
-        url = self.url_file_template.format(project_path=project_path, branch=commit, file_path=file_path)
-
-        try:
-            return json.loads(urlopen(url).read().decode('utf-8'))
-        except HTTPError as e:
-            logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
-            if e.code == 404:
+            if not branch_name:
                 raise ExtensionRemoteError(
-                    f'Could not find versions.json file using URL "{url}"',
-                    ExtensionError.MissingVersionDeclaration
-                ) from e
-            raise ExtensionRemoteError(
-                f'Could not read versions.json file using URL "{url}"',
-                ExtensionError.InvalidVersionDeclaration
-            ) from e
+                    f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})",
+                    ExtensionError.Incompatible
+                )
 
-    def read_versions(self) -> List[Dict[str, str]]:
-        versions = self._read_json('master', 'versions.json')
+            return self.get_commit(branch_name)
+        except URLError as e:
+            if not versions:
+                raise ExtensionRemoteError("Could not access repository", ExtensionError.Other) from e
+            if getattr(e, "code") == 404:
+                message = f'Invalid branch "{branch_name}" in version declaration.'
+                raise ExtensionRemoteError(message, ExtensionError.InvalidVersionDeclaration) from e
+            message = f'Could not fetch repository "{branch_name}".'
+            raise ExtensionRemoteError(message, ExtensionError.Other) from e
+
+    def validate_versions(self, versions) -> bool:
+        missing = ExtensionError.MissingVersionDeclaration
+        invalid = ExtensionError.InvalidVersionDeclaration
+
+        if not versions:
+            raise ExtensionRemoteError("Could not retrieve versions.json", missing)
 
         if not isinstance(versions, list):
-            raise ExtensionRemoteError(
-                'versions.json should contain a list',
-                ExtensionError.InvalidVersionDeclaration
-            )
+            raise ExtensionRemoteError("versions.json should contain a list", invalid)
         for ver in versions:
             if not isinstance(ver, dict):
-                raise ExtensionRemoteError(
-                    'versions.json should contain a list of objects',
-                    ExtensionError.InvalidVersionDeclaration
-                )
-            if not isinstance(ver.get('required_api_version'), str):
-                raise ExtensionRemoteError(
-                    'versions.json: required_api_version should be a string',
-                    ExtensionError.InvalidVersionDeclaration
-                )
-            if not isinstance(ver.get('commit'), str):
-                raise ExtensionRemoteError(
-                    'versions.json: commit should be a string',
-                    ExtensionError.InvalidVersionDeclaration
-                )
+                raise ExtensionRemoteError("versions.json should contain a list of objects", invalid)
+            if not isinstance(ver.get("commit"), str):
+                raise ExtensionRemoteError("versions.json: commit should be a string", invalid)
+            if not isinstance(ver.get("required_api_version"), str):
+                raise ExtensionRemoteError("versions.json: required_api_version should be a string", invalid)
+            if not valid_range(ver["required_api_version"]):
+                raise ExtensionRemoteError(f'versions.json: Invalid range "{ver["required_api_version"]}"', invalid)
 
-            valid = False
-            try:
-                valid = valid_range(ver['required_api_version'])
-            # pylint: disable=broad-except
-            except Exception:
-                pass
-            if not valid:
-                raise ExtensionRemoteError(
-                    f"versions.json: invalid range '{ver['required_api_version']}'",
-                    ExtensionError.InvalidVersionDeclaration
-                )
-
-        return versions
-
-    def read_manifest(self, commit) -> Manifest:
-        return cast(Manifest, self._read_json(commit, 'manifest.json'))
-
-    def get_download_url(self, commit) -> str:
-        """
-        >>> Ulauncher/ulauncher-timer
-        <<< https://github.com/Ulauncher/ulauncher-timer/tarball/master
-        """
-        return f'https://github.com/{self._get_project_path()}/tarball/{commit}'
-
-    def get_ext_id(self) -> str:
-        """
-        >>> https://github.com/Ulauncher/ulauncher-timer
-        <<< com.github.ulauncher.ulauncher-timer
-        """
-        return f"com.github.{self._get_project_path().replace('/', '.').lower()}"
-
-    def _get_project_path(self) -> str:
-        """
-        >>> https://github.com/Ulauncher/ulauncher-timer
-        <<< Ulauncher/ulauncher-timer
-        """
-        match = re.match(self.url_match_pattern, self.url, re.I)
-        if not match:
-            raise ExtensionRemoteError(f'Invalid Extension url: {self.url}', ExtensionError.InvalidUrl)
-
-        return match.group(2)
+        return True

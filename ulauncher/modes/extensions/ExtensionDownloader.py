@@ -59,38 +59,36 @@ class ExtensionDownloader:
         :returns: Extension ID
         :raises AlreadyDownloadedError:
         """
-        gh_ext = ExtensionRemote(url)
-        gh_ext.validate_url()
+        remote = ExtensionRemote(url)
 
         # 1. check if ext already exists
-        ext_id = gh_ext.get_ext_id()
-        ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
+        ext_path = os.path.join(EXTENSIONS_DIR, remote.extension_id)
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
-        if os.path.exists(ext_path) and self.ext_runner.is_running(ext_id):
+        if os.path.exists(ext_path) and self.ext_runner.is_running(remote.extension_id):
             raise ExtensionDownloaderError(
                 f'Extension with URL "{url}" is already added',
                 ExtensionError.AlreadyAdded
             )
 
         # 2. get last commit info
-        commit = gh_ext.find_compatible_version()
+        commit_sha, commit_time = remote.find_compatible_version()
 
         # 3. download & untar
-        filename = download_tarball(gh_ext.get_download_url(commit['sha']))
+        filename = download_tarball(remote.get_download_url(commit_sha))
         untar(filename, ext_path)
 
         # 4. add to the db
-        self.ext_db.put(ext_id, {
-            'id': ext_id,
+        self.ext_db.put(remote.extension_id, {
+            'id': remote.extension_id,
             'url': url,
             'updated_at': datetime.now().isoformat(),
-            'last_commit': commit['sha'],
-            'last_commit_time': commit['time'].isoformat()
+            'last_commit': commit_sha,
+            'last_commit_time': commit_time.isoformat()
         })
         self.ext_db.commit()
 
-        return ext_id
+        return remote.extension_id
 
     @run_async(daemon=True)
     def download_missing(self) -> None:
@@ -134,8 +132,8 @@ class ExtensionDownloader:
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        gh_ext = ExtensionRemote(ext['url'])
-        filename = download_tarball(gh_ext.get_download_url(commit['last_commit']))
+        remote = ExtensionRemote(ext['url'])
+        filename = download_tarball(remote.get_download_url(commit['last_commit']))
         untar(filename, ext_path)
 
         ext['updated_at'] = datetime.now().isoformat()
@@ -154,15 +152,15 @@ class ExtensionDownloader:
         """
         ext = self._find_extension(ext_id)
         url = ext['url']
-        gh_ext = ExtensionRemote(url)
-        commit = gh_ext.find_compatible_version()
-        need_update = ext['last_commit'] != commit['sha']
+        remote = ExtensionRemote(url)
+        commit_sha, commit_time = remote.find_compatible_version()
+        need_update = ext['last_commit'] != commit_sha
         if not need_update:
             raise ExtensionIsUpToDateError('Extension is up to date')
 
         return {
-            'last_commit': commit['sha'],
-            'last_commit_time': commit['time'].isoformat()
+            'last_commit': commit_sha,
+            'last_commit_time': commit_time.isoformat()
         }
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:

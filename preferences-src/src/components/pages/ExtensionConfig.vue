@@ -19,11 +19,11 @@
           @click="onDropdownClick"
           :text="(canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
         >
-          <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check Updates</b-dropdown-item>
+          <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
-          <b-dropdown-item v-if="extension.url" @click="reportIssue">Report Issue</b-dropdown-item>
-          <b-dropdown-item v-if="extension.url" @click="openGithub">Open Github</b-dropdown-item>
+          <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
+          <b-dropdown-item v-if="extension.url" @click="reportIssue">Report issue</b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-calendar fa-fw"></i>
             {{ lastCommitDate }}
@@ -227,9 +227,6 @@ export default {
       let date = new Date(isoDate)
       return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     },
-    githubProjectPath(githubUrl) {
-      return githubUrl.split('.com/')[1]
-    },
     onDropdownClick() {
       switch (true) {
         case this.canSave:
@@ -243,7 +240,7 @@ export default {
     reportIssue() {
       this.openUrl(`${this.extension.url}/issues`)
     },
-    openGithub() {
+    openRepo() {
       this.openUrl(this.extension.url)
     },
     save() {

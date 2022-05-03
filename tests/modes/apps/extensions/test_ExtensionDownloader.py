@@ -25,16 +25,16 @@ class TestExtensionDownloader:
     @pytest.fixture(autouse=True)
     def gh_ext(self, mocker):
         gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.ExtensionRemote').return_value
-        gh_ext.get_ext_id.return_value = 'com.github.ulauncher.ulauncher-timer'
-        gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/tarball/master'
+        gh_ext.extension_id = 'com.github.ulauncher.ulauncher-timer'
+        gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.tar.gz'
         gh_ext.get_last_commit.return_value = {
             'last_commit': '64e106c',
             'last_commit_time': '2017-05-01T07:30:39'
         }
-        gh_ext.find_compatible_version.return_value = {
-            'sha': '64e106c',
-            'time': iso_to_datetime('2017-05-01T07:30:39Z')
-        }
+        gh_ext.find_compatible_version.return_value = (
+            '64e106c',
+            iso_to_datetime('2017-05-01T07:30:39Z')
+        )
 
         return gh_ext
 
