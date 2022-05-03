@@ -37,6 +37,17 @@
         <p
           v-else-if="errorName === 'AlreadyAdded'"
         >You've already installed this extension.</p>
+        <p
+          v-else-if="errorName === 'Network'"
+        >
+          A network error occurred: <b>{{ errorMessage }}</b>
+          <br><br>Please check that your network is ok, that the repository is not private, and that the extension has all the required files.
+          <br><br>You can also install extensions manually by adding them to 
+          <a
+            href
+            @click.prevent="openExtensionsDir()"
+          >your extension directory</a>.
+        </p>
         <p v-else>
           An unexpected error occurred.
           <br>Please copy the technical details and report this problem via
@@ -79,6 +90,9 @@ export default {
   methods: {
     openUrlInBrowser(url) {
       jsonp('prefs:///open/web-url', { url: url })
+    },
+    openExtensionsDir() {
+      jsonp('prefs:///open/extensions-dir')
     },
     alertVariant() {
       if (this.errorName === 'Other') {

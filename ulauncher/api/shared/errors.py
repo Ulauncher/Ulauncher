@@ -8,6 +8,7 @@ class ExtensionError(Enum):
     InvalidUrl = 'InvalidUrl'
     InvalidVersionDeclaration = 'InvalidVersionDeclaration'
     MissingVersionDeclaration = 'MissingVersionDeclaration'
+    Network = 'Network'
     Other = 'Other'
 
 

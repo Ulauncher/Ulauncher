@@ -55,6 +55,7 @@
         hide-header-close
         no-fade
         no-auto-focus
+        size="lg"
         @shown="onAddExtFormShown"
         @ok="onModalOk"
       >

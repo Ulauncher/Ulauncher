@@ -131,12 +131,12 @@ class ExtensionRemote:
             return self.get_commit(branch_name)
         except URLError as e:
             if not versions:
-                raise ExtensionRemoteError("Could not access repository", ExtensionError.Other) from e
+                raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from e
             if getattr(e, "code") == 404:
                 message = f'Invalid branch "{branch_name}" in version declaration.'
                 raise ExtensionRemoteError(message, ExtensionError.InvalidVersionDeclaration) from e
             message = f'Could not fetch repository "{branch_name}".'
-            raise ExtensionRemoteError(message, ExtensionError.Other) from e
+            raise ExtensionRemoteError(message, ExtensionError.Network) from e
 
     def validate_versions(self, versions) -> bool:
         missing = ExtensionError.MissingVersionDeclaration
