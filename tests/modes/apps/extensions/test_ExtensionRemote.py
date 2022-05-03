@@ -1,3 +1,5 @@
+import codecs
+import json
 import pytest
 
 from ulauncher.utils.date import iso_to_datetime
@@ -13,6 +15,11 @@ manifest_example = {'required_api_version': '1',
                                      'id': 'keyword',
                                      'name': 'My Timer',
                                      'type': 'keyword'}]}
+
+
+def base64_file_attachment(data):
+    content = codecs.encode(data.encode(), "base64").decode()
+    return {"content": content, "encoding": "base64"}
 
 
 class TestExtensionRemote:
@@ -47,13 +54,11 @@ class TestExtensionRemote:
 
         assert remote.validate_versions([{"required_api_version": "2 - 3", "commit": "main"}])
 
-    def test_get_versions__version_mismatch__raises(self, remote, mocker):
-        mocker.patch.object(remote, 'get_versions')
-        remote.get_versions.return_value = [
-            {"required_api_version": "^1.0.0", "commit": "master"}
-        ]
+    def test_get_compatible_ref_from_versions_json_mismatch__raises(self, remote, mocker):
+        mocker.patch.object(remote, 'get_compatible_ref_from_versions_json')
+        remote.get_compatible_ref_from_versions_json.return_value = None
         with pytest.raises(ExtensionRemoteError, match="not compatible with your Ulauncher API version"):
-            remote.find_compatible_version()
+            remote.get_latest_compatible_commit()
 
     def test_ext_id(self, remote):
         assert remote.extension_id == 'com.github.ulauncher.ulauncher-timer'
@@ -81,24 +86,18 @@ class TestExtensionRemote:
         assert commit_sha == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
         assert commit_time == iso_to_datetime('2017-05-01T07:30:39Z')
 
-    def test_find_compatible_version(self, remote, mocker):
-        mocker.patch.object(remote, 'get_versions')
-        mocker.patch.object(remote, 'get_commit')
-        remote.get_versions.return_value = [
+    def test_get_compatible_ref_from_versions_json(self, remote, json_fetch):
+        json_fetch.return_value = (base64_file_attachment(json.dumps([
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
             {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "^2.3.1", "commit": "master"}
-        ]
-        remote.find_compatible_version()
-        remote.get_commit.assert_called_with("release-for-api-v2")
+        ])), None)
+        assert remote.get_compatible_ref_from_versions_json() == "release-for-api-v2"
 
-    def test_find_compatible_version__mult_compatible(self, remote, mocker):
-        mocker.patch.object(remote, 'get_versions')
-        mocker.patch.object(remote, 'get_commit')
-        remote.get_versions.return_value = [
+    def test_get_compatible_ref_from_versions_json__mult_compatible(self, remote, json_fetch):
+        json_fetch.return_value = (base64_file_attachment(json.dumps([
             {"required_api_version": "2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "~1.3.1", "commit": "master"},
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"}
-        ]
-        remote.find_compatible_version()
-        remote.get_commit.assert_called_with("release-for-api-v2")
+        ])), None)
+        assert remote.get_compatible_ref_from_versions_json() == "release-for-api-v2"

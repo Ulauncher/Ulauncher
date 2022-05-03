@@ -72,7 +72,7 @@ class ExtensionDownloader:
             )
 
         # 2. get last commit info
-        commit_sha, commit_time = remote.find_compatible_version()
+        commit_sha, commit_time = remote.get_latest_compatible_commit()
 
         # 3. download & untar
         filename = download_tarball(remote.get_download_url(commit_sha))
@@ -153,7 +153,7 @@ class ExtensionDownloader:
         ext = self._find_extension(ext_id)
         url = ext['url']
         remote = ExtensionRemote(url)
-        commit_sha, commit_time = remote.find_compatible_version()
+        commit_sha, commit_time = remote.get_latest_compatible_commit()
         need_update = ext['last_commit'] != commit_sha
         if not need_update:
             raise ExtensionIsUpToDateError('Extension is up to date')

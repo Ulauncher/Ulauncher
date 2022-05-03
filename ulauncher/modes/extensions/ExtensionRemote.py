@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from urllib.request import urlopen
 from urllib.error import URLError
-from typing import List, Tuple
+from typing import Optional, Tuple
 
 from ulauncher.config import API_VERSION
 from ulauncher.utils.date import iso_to_datetime
@@ -50,13 +50,13 @@ class ExtensionRemote:
         if self.host == "github.com":
             self.host_api = "https://api.github.com"
         elif self.host == "gitlab.com":
-            self.host_api = "https://gitlab.com/api/v4"
-            projects, err = json_fetch(f"{self.host_api}/users/{self.user}/projects?search={self.repo}")
+            host_api = "https://gitlab.com/api/v4"
+            projects, err = json_fetch(f"{host_api}/users/{self.user}/projects?search={self.repo}")
             if err:
                 raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from err
             project = next((p for p in projects if p["name"] == self.repo), None)
-            self.gitlab_default_branch = project["default_branch"]
-            self.gitlab_project_id = project["id"]
+
+            self.host_api = f"{host_api}/projects/{project['id']}/repository"
         else:
             self.host_api = f"https://{self.host}/api/v1"
 
@@ -65,36 +65,31 @@ class ExtensionRemote:
             return f'https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz'
         return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
 
-    def get_versions(self) -> List:
+    def get_compatible_ref_from_versions_json(self) -> Optional[str]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch
         versions_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/versions.json"
         if self.host == "gitlab.com":
-            versions_url = (
-                f"{self.host_api}/projects/{self.gitlab_project_id}"
-                f"/repository/files/versions.json?ref={self.gitlab_default_branch}"
-            )
+            versions_url = f"{self.host_api}/files/versions.json?ref=HEAD"
         file_data, err = json_fetch(versions_url)
+        versions = []
 
         if err:
             raise err
 
         if file_data:
-            return json.loads(
-                codecs.decode(
-                    file_data["content"].encode(),
-                    file_data["encoding"]
-                )
-            )
+            versions = json.loads(codecs.decode(file_data["content"].encode(), file_data["encoding"]))
+            self.validate_versions(versions)
 
-        return []
+        versions_filter = (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version']))
+        return next(versions_filter, None)
 
-    def get_commit(self, branch_name: str) -> Commit:
+    def get_commit(self, ref: str) -> Commit:
         # GitHub and GitLab supports accessing commits via other references like branch names
         # Gitea/Codeberg only supports commit hashes so we have to use the branches API
         api = "commits" if self.host == "github.com" else "branches"
-        url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{branch_name}"
+        url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{ref}"
         if self.host == "gitlab.com":
-            url = f"{self.host_api}/projects/{self.gitlab_project_id}/repository/commits/{branch_name}"
+            url = f"{self.host_api}/commits/{ref}"
 
         branch, err = json_fetch(url)
 
@@ -120,36 +115,29 @@ class ExtensionRemote:
             ExtensionError.InvalidVersionDeclaration
         )
 
-    def find_compatible_version(self) -> Commit:
+    def get_latest_compatible_commit(self) -> Commit:
         """
         Finds first version that is compatible with users Ulauncher version.
         Returns a commit or branch/tag name and datetime.
         """
 
-        versions = None
+        ref = None
 
         try:
-            versions = self.get_versions()
-            self.validate_versions(versions)
-            branch_name = next(
-                (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version'])),
-                None
-            )
+            ref = self.get_compatible_ref_from_versions_json()
 
-            if not branch_name:
-                raise ExtensionRemoteError(
-                    f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})",
-                    ExtensionError.Incompatible
-                )
+            if not ref:
+                message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
+                raise ExtensionRemoteError(message, ExtensionError.Incompatible)
 
-            return self.get_commit(branch_name)
+            return self.get_commit(ref)
         except URLError as e:
-            if not versions:
+            if not ref:
                 raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from e
             if getattr(e, "code") == 404:
-                message = f'Invalid branch "{branch_name}" in version declaration.'
+                message = f'Invalid reference "{ref}" in version declaration.'
                 raise ExtensionRemoteError(message, ExtensionError.InvalidVersionDeclaration) from e
-            message = f'Could not fetch repository "{branch_name}".'
+            message = f'Could not fetch reference "{ref}".'
             raise ExtensionRemoteError(message, ExtensionError.Network) from e
 
     def validate_versions(self, versions) -> bool:

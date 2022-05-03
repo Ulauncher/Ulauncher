@@ -31,7 +31,7 @@ class TestExtensionDownloader:
             'last_commit': '64e106c',
             'last_commit_time': '2017-05-01T07:30:39'
         }
-        gh_ext.find_compatible_version.return_value = (
+        gh_ext.get_latest_compatible_commit.return_value = (
             '64e106c',
             iso_to_datetime('2017-05-01T07:30:39Z')
         )
