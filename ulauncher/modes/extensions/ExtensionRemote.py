@@ -65,6 +65,26 @@ class ExtensionRemote:
             return f'https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz'
         return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
 
+    def get_compatible_ref_from_tags(self) -> Optional[str]:
+        tags = {}
+        # pagination is only implemented for GitHub (default 30, max 100)
+        tags_url = f"{self.host_api}/repos/{self.user}/{self.repo}/tags?per_page=100"
+        if self.host == "gitlab.com":
+            tags_url = f"{self.host_api}/tags?search=^apiv"
+        tags_data, _ = json_fetch(tags_url)
+
+        try:
+            for tag in tags_data or []:
+                if tag["name"].startswith("apiv") and satisfies(API_VERSION, tag["name"][4:]):
+                    commit = tag["commit"]
+                    verion = tag["name"][4:]
+                    id = commit.get("sha", commit["id"])  # id fallback is needed for GitLab
+                    tags[verion] = id
+        except (KeyError, TypeError):
+            pass
+
+        return tags[max(tags)] if tags else None
+
     def get_compatible_ref_from_versions_json(self) -> Optional[str]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch
         versions_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/versions.json"
@@ -124,7 +144,7 @@ class ExtensionRemote:
         ref = None
 
         try:
-            ref = self.get_compatible_ref_from_versions_json()
+            ref = self.get_compatible_ref_from_tags() or self.get_compatible_ref_from_versions_json()
 
             if not ref:
                 message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
