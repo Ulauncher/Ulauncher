@@ -4,6 +4,7 @@
 import subprocess
 import sys
 from pathlib import Path
+from shutil import which
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
 from ulauncher import __version__
@@ -61,7 +62,8 @@ class build_preferences(Command):
             print("Detected no changes to Preferences since last build.")
             return
 
-        subprocess.run(["sh", "-c", "cd preferences-src; yarn; yarn build"], check=True)
+        yarnbin = which("yarn") or which("yarnpkg")
+        subprocess.run(["sh", "-c", f"cd preferences-src; {yarnbin}; {yarnbin} build"], check=True)
 
 
 class build_wrapper(build_py, Command):
