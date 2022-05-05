@@ -45,8 +45,8 @@ body:
   - type: checkboxes
     id: latest
     attributes:
-      label: Latest version
-      description: You must test with the [latest Ulauncher release](https://github.com/Ulauncher/Ulauncher/releases) to make sure the bug hasn't already been fixed.
+      label: Ulauncher v6
+      description: Please test with the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure the bug hasn't already been fixed. Ulauncher v6 doesn't have a release yet, but it's miles ahead of v5.
       options:
-        - label: I am using the latest Ulauncher release.
+        - label: I have made sure the bug isn't already fixed in v6.
           required: true
