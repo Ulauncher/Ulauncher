@@ -17,7 +17,7 @@ For the v6 branch you need the the following to setup the local build environmen
 * Git
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-setuptools (if you have pip, you have it already)
-* Application runtime dependencies (if you already installed Ulauncher you should have these)
+* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but  wnck is new for v6)
 
 #### Distro specific instructions
 
