@@ -8,7 +8,6 @@ from urllib.error import URLError
 from typing import Optional, Tuple
 
 from ulauncher.config import API_VERSION
-from ulauncher.utils.date import iso_to_datetime
 from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 
@@ -30,6 +29,7 @@ class ExtensionRemoteError(UlauncherAPIError):
 
 class ExtensionRemote:
     url_match_pattern = r"^(?:git@|https:\/\/)(?P<host>[^\/]+)\/(?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
+    date_format = '%Y-%m-%dT%H:%M:%S%z'
 
     def __init__(self, url):
         self.url = url.lower()
@@ -49,6 +49,7 @@ class ExtensionRemote:
 
         if self.host == "github.com":
             self.host_api = "https://api.github.com"
+            self.date_format = '%Y-%m-%dT%H:%M:%SZ'
         elif self.host == "gitlab.com":
             host_api = "https://gitlab.com/api/v4"
             projects, err = json_fetch(f"{host_api}/users/{self.user}/projects?search={self.repo}")
@@ -57,6 +58,7 @@ class ExtensionRemote:
             project = next((p for p in projects if p["name"] == self.repo), None)
 
             self.host_api = f"{host_api}/projects/{project['id']}/repository"
+            self.date_format = '%Y-%m-%dT%H:%M:%S.%f%z'
         else:
             self.host_api = f"https://{self.host}/api/v1"
 
@@ -119,14 +121,14 @@ class ExtensionRemote:
         try:
             if self.host == "github.com":
                 id = branch["sha"]
-                commit_time = iso_to_datetime(branch["commit"]["committer"]["date"])
+                commit_time = branch["commit"]["committer"]["date"]
             elif self.host == "gitlab.com":
                 id = branch["id"]
-                commit_time = datetime.strptime(branch["committed_date"][0:19], '%Y-%m-%dT%H:%M:%S')
+                commit_time = branch["committed_date"]
             else:
                 id = branch["commit"]["id"]
-                commit_time = iso_to_datetime(branch["commit"]["timestamp"], False)
-            return id, commit_time
+                commit_time = branch["commit"]["timestamp"]
+            return id, datetime.strptime(commit_time, self.date_format)
         except (KeyError, TypeError):
             pass
 

@@ -1,7 +1,7 @@
+from datetime import datetime
 import mock
 import pytest
 
-from ulauncher.utils.date import iso_to_datetime
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import (
@@ -33,7 +33,7 @@ class TestExtensionDownloader:
         }
         gh_ext.get_latest_compatible_commit.return_value = (
             '64e106c',
-            iso_to_datetime('2017-05-01T07:30:39Z')
+            datetime(2017, 5, 1, 7, 30, 39)
         )
 
         return gh_ext
