@@ -67,6 +67,21 @@ class ExtensionRemote:
             return f'https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz'
         return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
 
+    def fetch_file(self, file_path) -> Optional[str]:
+        # This saves us a request compared to using the "raw" file API that needs to know the branch
+        file_api_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/{file_path}"
+        if self.host == "gitlab.com":
+            file_api_url = f"{self.host_api}/files/{file_path}?ref=HEAD"
+        file_data, err = json_fetch(file_api_url)
+
+        if err:
+            raise err
+
+        if file_data and file_data.get("content") and file_data.get("encoding"):
+            return codecs.decode(file_data["content"].encode(), file_data["encoding"]).decode()
+
+        return None
+
     def get_compatible_ref_from_tags(self) -> Optional[str]:
         tags = {}
         # pagination is only implemented for GitHub (default 30, max 100)
@@ -89,18 +104,8 @@ class ExtensionRemote:
 
     def get_compatible_ref_from_versions_json(self) -> Optional[str]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch
-        versions_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/versions.json"
-        if self.host == "gitlab.com":
-            versions_url = f"{self.host_api}/files/versions.json?ref=HEAD"
-        file_data, err = json_fetch(versions_url)
-        versions = []
-
-        if err:
-            raise err
-
-        if file_data:
-            versions = json.loads(codecs.decode(file_data["content"].encode(), file_data["encoding"]))
-            self.validate_versions(versions)
+        versions = json.loads(self.fetch_file("versions.json") or "[]")
+        self.validate_versions(versions)
 
         versions_filter = (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version']))
         return next(versions_filter, None)
