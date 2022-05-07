@@ -55,8 +55,10 @@ class TestExtensionRemote:
         assert remote.validate_versions([{"required_api_version": "2 - 3", "commit": "main"}])
 
     def test_get_compatible_ref_from_versions_json_mismatch__raises(self, remote, mocker):
-        mocker.patch.object(remote, 'get_compatible_ref_from_versions_json')
-        remote.get_compatible_ref_from_versions_json.return_value = None
+        mocker.patch.object(remote, 'get_compatible_commit_from_versions_json')
+        mocker.patch.object(remote, 'fetch_file')
+        remote.fetch_file.return_value = "{}"
+        remote.get_compatible_commit_from_versions_json.return_value = None
         with pytest.raises(ExtensionRemoteError, match="not compatible with your Ulauncher API version"):
             remote.get_latest_compatible_commit()
 
@@ -86,18 +88,22 @@ class TestExtensionRemote:
         assert commit_sha == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
         assert commit_time == datetime(2017, 5, 1, 7, 30, 39)
 
-    def test_get_compatible_ref_from_versions_json(self, remote, json_fetch):
+    def test_get_compatible_ref_from_versions_json(self, remote, json_fetch, mocker):
+        mocker.patch.object(remote, 'get_commit')
         json_fetch.return_value = (base64_file_attachment(json.dumps([
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
             {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "^2.3.1", "commit": "master"}
         ])), None)
-        assert remote.get_compatible_ref_from_versions_json() == "release-for-api-v2"
+        remote.get_compatible_commit_from_versions_json()
+        remote.get_commit.assert_called_with("release-for-api-v2")
 
-    def test_get_compatible_ref_from_versions_json__mult_compatible(self, remote, json_fetch):
+    def test_get_compatible_ref_from_versions_json__mult_compatible(self, remote, json_fetch, mocker):
+        mocker.patch.object(remote, 'get_commit')
         json_fetch.return_value = (base64_file_attachment(json.dumps([
             {"required_api_version": "2.0.0", "commit": "release-for-api-v2"},
             {"required_api_version": "~1.3.1", "commit": "master"},
             {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"}
         ])), None)
-        assert remote.get_compatible_ref_from_versions_json() == "release-for-api-v2"
+        remote.get_compatible_commit_from_versions_json()
+        remote.get_commit.assert_called_with("release-for-api-v2")

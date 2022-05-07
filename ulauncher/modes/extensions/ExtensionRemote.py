@@ -82,11 +82,16 @@ class ExtensionRemote:
 
         return None
 
-    def get_compatible_ref_from_tags(self) -> Optional[str]:
+    def get_compatible_commit_from_tags(self) -> Optional[Commit]:
+        """
+        This method is new for v6, but intentionally undocumented because we still want extension
+        devs to use the old way until Ulauncher 5/apiv2 is fully phased out
+        """
         tags = {}
         # pagination is only implemented for GitHub (default 30, max 100)
         tags_url = f"{self.host_api}/repos/{self.user}/{self.repo}/tags?per_page=100"
         if self.host == "gitlab.com":
+            # GitLab's API allows to filter out tags starting with our prefix
             tags_url = f"{self.host_api}/tags?search=^apiv"
         tags_data, _ = json_fetch(tags_url)
 
@@ -96,43 +101,50 @@ class ExtensionRemote:
                     commit = tag["commit"]
                     verion = tag["name"][4:]
                     id = commit.get("sha", commit["id"])  # id fallback is needed for GitLab
-                    tags[verion] = id
+                    commit_time = commit.get("created", commit.get("created_at"))
+                    tags[verion] = (id, commit_time)
         except (KeyError, TypeError):
             pass
 
-        return tags[max(tags)] if tags else None
+        if tags:
+            id, commit_time = tags[max(tags)]
+            if id and self.host == "github.com":  # GitHub's tag API doesn't give any dates
+                commit_data, _ = json_fetch(f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{id}")
+                commit_time = commit_data["commiter"]["date"]
+            if id and commit_time:
+                return id, datetime.strptime(commit_time, self.date_format)
 
-    def get_compatible_ref_from_versions_json(self) -> Optional[str]:
+        return None
+
+    def get_compatible_commit_from_versions_json(self) -> Optional[Commit]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch
         versions = json.loads(self.fetch_file("versions.json") or "[]")
         self.validate_versions(versions)
 
         versions_filter = (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version']))
-        return next(versions_filter, None)
+        ref = next(versions_filter, None)
+        return self.get_commit(ref) if ref else None
 
-    def get_commit(self, ref: str) -> Commit:
-        # GitHub and GitLab supports accessing commits via other references like branch names
-        # Gitea/Codeberg only supports commit hashes so we have to use the branches API
-        api = "commits" if self.host == "github.com" else "branches"
-        url = f"{self.host_api}/repos/{self.user}/{self.repo}/{api}/{ref}"
+    def get_commit(self, ref: str = "HEAD") -> Commit:
         if self.host == "gitlab.com":
             url = f"{self.host_api}/commits/{ref}"
+        elif self.host == "github.com":
+            url = f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{ref}"
+        else:
+            # Gitea/Codeberg API differs from GitHub here, but has the same API
+            url = f"{self.host_api}/repos/{self.user}/{self.repo}/git/commits/{ref}"
 
-        branch, err = json_fetch(url)
+        response, err = json_fetch(url)
 
         if err:
-            raise err
+            if getattr(err, "code") == 404:
+                message = f'Invalid reference "{ref}" in version declaration.'
+                raise ExtensionRemoteError(message, ExtensionError.InvalidVersionDeclaration) from err
+            raise ExtensionRemoteError(f'Could not fetch reference "{ref}".', ExtensionError.Network) from err
 
         try:
-            if self.host == "github.com":
-                id = branch["sha"]
-                commit_time = branch["commit"]["committer"]["date"]
-            elif self.host == "gitlab.com":
-                id = branch["id"]
-                commit_time = branch["committed_date"]
-            else:
-                id = branch["commit"]["id"]
-                commit_time = branch["commit"]["timestamp"]
+            id = response.get("sha") or response.get("id")
+            commit_time = response.get("created_at") or response["commit"]["committer"]["date"]
             return id, datetime.strptime(commit_time, self.date_format)
         except (KeyError, TypeError):
             pass
@@ -145,27 +157,22 @@ class ExtensionRemote:
     def get_latest_compatible_commit(self) -> Commit:
         """
         Finds first version that is compatible with users Ulauncher version.
-        Returns a commit or branch/tag name and datetime.
+        Returns a commit hash and datetime.
         """
-
-        ref = None
-
         try:
-            ref = self.get_compatible_ref_from_tags() or self.get_compatible_ref_from_versions_json()
-
-            if not ref:
-                message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
-                raise ExtensionRemoteError(message, ExtensionError.Incompatible)
-
-            return self.get_commit(ref)
+            manifest = json.loads(self.fetch_file("manifest.json") or "{}")
         except URLError as e:
-            if not ref:
-                raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from e
-            if getattr(e, "code") == 404:
-                message = f'Invalid reference "{ref}" in version declaration.'
-                raise ExtensionRemoteError(message, ExtensionError.InvalidVersionDeclaration) from e
-            message = f'Could not fetch reference "{ref}".'
-            raise ExtensionRemoteError(message, ExtensionError.Network) from e
+            raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from e
+
+        if satisfies(API_VERSION, manifest.get("required_api_version")):
+            return self.get_commit("HEAD")
+
+        commit = self.get_compatible_commit_from_tags() or self.get_compatible_commit_from_versions_json()
+        if not commit:
+            message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
+            raise ExtensionRemoteError(message, ExtensionError.Incompatible)
+
+        return commit
 
     def validate_versions(self, versions) -> bool:
         missing = ExtensionError.MissingVersionDeclaration

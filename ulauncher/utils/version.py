@@ -23,7 +23,7 @@ def unpack_range(range_string):
 def valid_range(range):
     try:
         (min_version, max_version) = unpack_range(range)
-    except ValueError:
+    except (ValueError, TypeError):
         return False
     if min_version[1] is None or max_version[1] is None:
         return min_version[0] <= max_version[0]
