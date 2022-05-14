@@ -1,5 +1,4 @@
-Ulauncher was created in Ukraine 🇺🇦 [Stand with Ukraine](https://www.stopputin.net/)
-
+[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
 [![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 
 
