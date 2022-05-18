@@ -4,11 +4,11 @@ Please read our General communication guidelines [here](CODE_OF_CONDUCT.md#Gener
 
 ## Code contributions
 
-Thank you for you interest in contributing to Ulauncher! We much appreciate it.
+Thank you for you interest in contributing to Ulauncher! We very much appreciate it.
 
 Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straight forward to implement. Other issues may require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
 
-There are no more releases planned for Ulauncher v5 unless we discover critical bugs and fix these. All the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the [v6 branch](https://github.com/Ulauncher/Ulauncher/tree/v6) as the base branch and target for new pull requests, and check that your contributions haven't already been fixed there.
+Although there are no releases for it yet as of writing this, all the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the v6 (default) branch as the base branch and target for new pull requests, and check that your contributions haven't already been fixed there.
 
 ### Setup Development Environment
 
@@ -17,7 +17,7 @@ For the v6 branch you need the the following to setup the local build environmen
 * Git
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-setuptools (if you have pip, you have it already)
-* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but  wnck is new for v6)
+* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **wnck is new for v6**)
 
 #### Distro specific instructions
 
@@ -66,11 +66,12 @@ For the v6 branch you need the the following to setup the local build environmen
 
 Use the v6 branch as the base branch and target for new Pull requests, and check that your contributions haven't already been fixed.
 
-1. Fork the repo, check out the v6 branch and clone your fork locally.
+1. Fork the repo here and clone your fork locally.
 1. Create a new branch for your PR
 1. Make your changes to the code
 1. If you have Ulauncher running, make sure you stop it. For systemd this will do it: `systemctl --user stop ulauncher`
-1. `./bin/ulauncher -v` runs the app from the git root directory (`-v` turns on verbose logging), so you can test it.
+1. `./bin/ulauncher -v` runs the app from the git directory (`-v` turns on verbose logging), so you can test it.
+1. Commit and push your changes. When possible, try to make your changes so that each commit changes just one thing.
 1. Create a pull request (provide the relevant information suggested by the template)
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
