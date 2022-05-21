@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 import pytest
 import mock
 from gi.repository import GdkPixbuf
@@ -99,13 +98,6 @@ class TestResultWidget:
         result_wgt.on_click(None, event)
         mock_get_toplevel.return_value.select_result.assert_called_with(3)
         mock_get_toplevel.return_value.enter_result.assert_called_with(alt=True)
-
-    def test_on_mouse_hover(self, mocker, result_wgt):
-        mock_get_toplevel = mocker.patch.object(result_wgt, 'get_toplevel')
-
-        result_wgt.set_index(4)
-        result_wgt.on_mouse_hover(None, SimpleNamespace(time=1111111111))
-        mock_get_toplevel.return_value.select_result.assert_called_with(4, onHover=True)
 
     def test_set_description(self, result_wgt, builder):
         result_wgt.set_description('test description')

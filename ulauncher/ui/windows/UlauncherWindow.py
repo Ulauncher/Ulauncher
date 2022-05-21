@@ -43,7 +43,6 @@ logger = logging.getLogger(__name__)
 class UlauncherWindow(Gtk.ApplicationWindow):
     __gtype_name__ = "UlauncherWindow"
     _current_accel_name = None
-    _results_render_time = 0
     _css_provider = None
     _drag_start_coords = None
 
@@ -326,10 +325,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def _get_user_query(self):
         return Query(self._get_input_text())
 
-    def select_result(self, index, onHover=False):
-        if time.time() - self._results_render_time > 0.1:
-            # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
-            self.results_nav.select(index)
+    def select_result(self, index):
+        self.results_nav.select(index)
 
     def enter_result(self, index=None, alt=False):
         if self.results_nav.enter(self._get_user_query(), index, alt=alt):
@@ -369,7 +366,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         results = self.create_item_widgets(results, self._get_user_query())
 
         if results:
-            self._results_render_time = time.time()
             for item in results[:limit]:
                 self.result_box.add(item)
             self.results_nav = ItemNavigation(self.result_box.get_children())

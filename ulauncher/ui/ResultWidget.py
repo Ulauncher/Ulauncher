@@ -118,7 +118,7 @@ class ResultWidget(Gtk.EventBox):
     def on_mouse_hover(self, widget, event):
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
-            self.get_toplevel().select_result(self.index, onHover=True)
+            self.get_toplevel().select_result(self.index)
 
     def set_description(self, description):
         description_obj = self.builder.get_object('item-descr')
