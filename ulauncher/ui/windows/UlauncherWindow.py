@@ -69,7 +69,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.scroll_container = self.ui["result_box_scroll_container"]
 
         self.input.connect('changed', self.on_input_changed)
-        self.prefs_btn.connect('clicked', self.on_mnu_preferences_activate)
+        self.prefs_btn.connect('clicked', lambda *_: self.show_preferences())
 
         self.set_keep_above(True)
 
@@ -105,15 +105,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
     # GTK Signal Handlers
     ######################################
-
-    # pylint: disable=unused-argument
-    def on_mnu_about_activate(self, widget, data=None):
-        """Display the about page for ulauncher."""
-        self.activate_preferences(page='about')
-
-    def on_mnu_preferences_activate(self, widget, data=None):
-        """Display the preferences window for ulauncher."""
-        self.activate_preferences(page='preferences')
 
     def on_preferences_destroyed(self, widget, data=None):
         '''only affects GUI
@@ -168,7 +159,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.hide()
 
         elif ctrl and keyname == 'comma':
-            self.activate_preferences()
+            self.show_preferences()
 
         elif self.results_nav:
             if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
@@ -238,7 +229,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self._render_prefs_icon()
         self.init_styles(theme.compile_css())
 
-    def activate_preferences(self, page='preferences'):
+    def show_preferences(self, page='preferences'):
         self.hide()
 
         if self.preferences is not None:

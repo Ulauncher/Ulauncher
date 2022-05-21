@@ -52,8 +52,8 @@ class AppIndicator:
     def get_instance(cls, window):
         indicator = cls("ulauncher")
         indicator.set_icon('ulauncher-indicator')
-        indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
-        indicator.add_menu_item(window.on_mnu_about_activate, "About")
+        indicator.add_menu_item(lambda *_: window.show_preferences(), "Preferences")
+        indicator.add_menu_item(lambda *_: window.show_preferences("about"), "About")
         indicator.add_seperator()
         indicator.add_menu_item(lambda *_: window.get_application().quit(), "Exit")
         return indicator
