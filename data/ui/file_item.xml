@@ -1,7 +1,0 @@
-<glade-catalog name="small_result" domain="glade-3"
-               depends="gtk+" version="1.0">
-  <glade-widget-classes>
-    <glade-widget-class title="Small Item Widget" name="SmallResultWidget"
-                        generic-name="SmallResultWidget" parent="GtkEventBox"/>
-  </glade-widget-classes>
-</glade-catalog>
