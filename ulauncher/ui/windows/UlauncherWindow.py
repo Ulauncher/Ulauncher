@@ -146,7 +146,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.set_text(query)
         ModeHandler.get_instance().on_query_change(query)
 
-    # pylint: disable=inconsistent-return-statements
     def on_input_key_press_event(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
@@ -179,6 +178,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 except IndexError:
                     # selected non-existing result item
                     pass
+
+        return False
 
     ######################################
     # Helpers
