@@ -9,11 +9,9 @@ from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 class TestHotkeyDialog:
 
     @pytest.fixture
-    def dialog(self, mocker):
-        mocker.patch('ulauncher.ui.windows.HotkeyDialog.HotkeyDialog.finish_initializing')
+    def dialog(self):
         dialog = HotkeyDialog()
-        dialog.ui = mock.MagicMock()
-        dialog.builder = mock.MagicMock()
+        dialog._hotkey_input = mock.MagicMock()
         return dialog
 
     @pytest.fixture
@@ -29,29 +27,29 @@ class TestHotkeyDialog:
         mocker.patch.object(dialog, 'emit')
         return dialog.emit
 
-    def test_on_hotkey_input_key_press_event__invalid_hotkey(self, dialog, widget, event):
+    def test_on_key_press__invalid_hotkey(self, dialog, widget, event):
         (key, mode) = Gtk.accelerator_parse('BackSpace')
         event.keyval = key
         event.state = mode
 
-        dialog.on_hotkey_input_key_press_event(widget, event)
-        assert not dialog.ui['hotkey_input'].set_text.called
+        dialog.on_key_press(widget, event)
+        assert not dialog._hotkey_input.set_text.called
 
     @pytest.mark.with_display
-    def test_on_hotkey_input_key_press_event__valid_hotkey(self, dialog, widget, event, emit):
+    def test_on_key_press__valid_hotkey(self, dialog, widget, event, emit):
         accel_name = '<Primary><Alt>g'
         (key, mode) = Gtk.accelerator_parse(accel_name)
         event.keyval = key
         event.state = mode
 
-        dialog.on_hotkey_input_key_press_event(widget, event)
-        dialog.ui['hotkey_input'].set_text.assert_called_with('Ctrl+Alt+G')
+        dialog.on_key_press(widget, event)
+        dialog._hotkey_input.set_text.assert_called_with('Ctrl+Alt+G')
 
         # hit Return
         return_accel_name = 'Return'
         (key, mode) = Gtk.accelerator_parse(return_accel_name)
         event.keyval = key
         event.state = mode
-        dialog.on_hotkey_input_key_press_event(widget, event)
+        dialog.on_key_press(widget, event)
 
         emit.assert_called_with('hotkey-set', accel_name, 'Ctrl+Alt+G')
