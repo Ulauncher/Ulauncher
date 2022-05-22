@@ -106,6 +106,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             enable_developer_extras=bool(get_options().dev),
             enable_write_console_messages_to_stdout=True,
             enable_xss_auditor=False,
+            hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
         )
 
         context = WebKit2.WebContext()
