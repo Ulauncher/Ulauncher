@@ -102,19 +102,20 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         """
         Initialize preferences WebView
         """
-        self.webview = WebKit2.WebView()
+        settings = WebKit2.Settings(
+            enable_developer_extras=bool(get_options().dev),
+            enable_write_console_messages_to_stdout=True,
+            enable_xss_auditor=False,
+        )
+
+        context = WebKit2.WebContext()
+        context.register_uri_scheme('prefs', self.on_scheme_callback)
+        context.register_uri_scheme('file2', self.serve_file)
+        context.set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
+
+        self.webview = WebKit2.WebView(settings=settings, web_context=context)
         self.add(self.webview)
-        opts = get_options()
         self._load_prefs_html()
-
-        web_settings = self.webview.get_settings()
-        web_settings.set_enable_developer_extras(bool(opts.dev))
-        web_settings.set_enable_xss_auditor(False)
-        web_settings.set_enable_write_console_messages_to_stdout(True)
-
-        self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
-        self.webview.get_context().register_uri_scheme('file2', self.serve_file)
-        self.webview.get_context().set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
         inspector = self.webview.get_inspector()
