@@ -37,6 +37,7 @@ class UlauncherApp(Gtk.Application):
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
         self.window = UlauncherWindow.get_instance()
         self.window.set_application(self)
+        self.window.finish_initializing()
 
     def do_activate(self, *args, **kwargs):
         self.window.show_window()

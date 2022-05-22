@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
-  <requires lib="ulauncher_window" version="1.0"/>
   <!-- interface-local-resource-path ../media -->
-  <object class="UlauncherWindow" id="ulauncher_window">
-    <property name="can-focus">False</property>
+  <template class="UlauncherWindow" parent="GtkApplicationWindow">
     <property name="has-focus">True</property>
     <property name="title">Ulauncher - Application Launcher</property>
     <property name="resizable">False</property>
@@ -16,11 +13,16 @@
     <property name="urgency-hint">True</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
+    <signal name="focus_in_event" handler="on_focus_in" />
+    <signal name="focus_out_event" handler="on_focus_out" />
+    <signal name="button-press-event" handler="on_mouse_down" />
+    <signal name="button-release-event" handler="on_mouse_up" />
+    <signal name="motion_notify_event" handler="on_mouse_move" />
+    <signal name="destroy" handler="on_destroy" />
     <child>
       <object class="GtkBox" id="body">
         <property name="visible">True</property>
         <property name="app-paintable">True</property>
-        <property name="can-focus">False</property>
         <property name="margin-start">20</property>
         <property name="margin-end">20</property>
         <property name="margin-top">20</property>
@@ -29,7 +31,6 @@
         <child>
           <object class="GtkBox" id="input-box">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <child>
               <object class="GtkEntry" id="input">
                 <property name="height-request">30</property>
@@ -46,12 +47,9 @@
                 <style>
                   <class name="input"/>
                 </style>
+                <signal name="changed" handler="on_input_changed" />
+                <signal name="key_press_event" handler="on_input_key_press" />
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkButton" id="prefs_btn">
@@ -59,7 +57,6 @@
                 <property name="width-request">24</property>
                 <property name="height-request">24</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <property name="receives-default">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
@@ -67,20 +64,13 @@
                 <style>
                   <class name="prefs-btn"/>
                 </style>
+                <signal name="clicked" handler="show_preferences" />
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
                 <property name="pack-type">end</property>
-                <property name="position">1</property>
               </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="result_box_scroll_container">
@@ -93,11 +83,9 @@
             <child>
               <object class="GtkViewport" id="result_box_viewport">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkBox" id="result_box">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <style>
                       <class name="result-box"/>
@@ -107,16 +95,11 @@
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <style>
           <class name="app"/>
         </style>
       </object>
     </child>
-  </object>
+  </template>
 </interface>

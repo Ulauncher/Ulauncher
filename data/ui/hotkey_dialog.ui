@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.22"/>
+  <template class="HotkeyDialog" parent="GtkWindow">
+    <property name="title">New Hotkey</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="type-hint">dialog</property>
+    <signal name="destroy" handler="on_destroy" />
+    <signal name="key-press-event" handler="on_key_press"/>
+    <child>
+      <object class="GtkBox" id="dialog_box">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="hotkey_label">
+            <property name="visible">True</property>
+            <property name="valign">baseline</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="label">Set a new hotkey and press Enter</property>
+            <property name="single-line-mode">True</property>
+            <attributes>
+              <attribute name="style" value="italic"/>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="hotkey_input">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="editable">False</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -4,8 +4,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk, GObject
-
-from ulauncher.ui.windows.Builder import GladeObjectFactory
+from ulauncher.config import get_asset
 
 
 logger = logging.getLogger('ulauncher')
@@ -15,32 +14,25 @@ FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', '
                         'Escape', 'Tab', 'Insert')
 
 
-class HotkeyDialog(Gtk.Dialog):
+@Gtk.Template(filename=get_asset("ui/hotkey_dialog.ui"))
+class HotkeyDialog(Gtk.Window):
     __gtype_name__ = "HotkeyDialog"
-
+    _accel_name = None
+    _display_name = None
     __gsignals__ = {
         # parameters: <hotkey-value (str)>, <hotkey-display-value (str)>
         'hotkey-set': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
     }
+    _hotkey_input: Gtk.Entry  # Have to be declared on a separate line for some reason
+    _hotkey_input = Gtk.Template.Child("hotkey_input")
 
-    _accel_name = None
-    _display_name = None
-
-    # Python's GTK API seems to requires non-standard workarounds like this.
-    # Use finish_initializing instead of __init__.
-    def __new__(cls):
-        return GladeObjectFactory(cls.__name__, "hotkey_dialog")
-
-    def finish_initializing(self, ui):
-        # pylint: disable=attribute-defined-outside-init
-        self.ui = ui
-
-    def on_delete_event(self, *args):
-        # don't delete. Hide instead
+    @Gtk.Template.Callback()
+    def on_destroy(self, *args):
         self.hide()
         return True
 
-    def on_hotkey_input_key_press_event(self, _, event):
+    @Gtk.Template.Callback()
+    def on_key_press(self, _, event):
         # remove GDK_MOD2_MASK, because it seems unnecessary
         mask = event.state
         if mask & Gdk.ModifierType.MOD2_MASK:
@@ -67,8 +59,7 @@ class HotkeyDialog(Gtk.Dialog):
 
         self._accel_name = accel_name
         self._display_name = display_name
-
-        self.ui['hotkey_input'].set_text(display_name)
+        self._hotkey_input.set_text(display_name)
 
     def is_valid_hotkey(self, label, accel_name):
         """

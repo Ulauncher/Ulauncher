@@ -33,15 +33,29 @@ from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.utils.environment import IS_X11, IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
-from ulauncher.ui.windows.Builder import GladeObjectFactory
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 logger = logging.getLogger(__name__)
 
 
-# pylint: disable=too-many-instance-attributes, too-many-public-methods, attribute-defined-outside-init
+@Gtk.Template(filename=get_asset("ui/ulauncher_window.ui"))
 class UlauncherWindow(Gtk.ApplicationWindow):
     __gtype_name__ = "UlauncherWindow"
+    input: Gtk.Entry  # These have to be declared on a separate line for some reason
+    prefs_btn: Gtk.Button
+    result_box: Gtk.Box
+    scroll_container: Gtk.ScrolledWindow
+    window_body: Gtk.Box
+
+    input = Gtk.Template.Child("input")
+    prefs_btn = Gtk.Template.Child("prefs_btn")
+    result_box = Gtk.Template.Child("result_box")
+    scroll_container = Gtk.Template.Child("result_box_scroll_container")
+    window_body = Gtk.Template.Child("body")
+    preferences = None  # type: PreferencesWindow
+    results_nav = None
+    settings = Settings.get_instance()
+    is_focused = False
     _current_accel_name = None
     _css_provider = None
     _drag_start_coords = None
@@ -51,40 +65,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def get_instance(cls):
         return cls()
 
-    # Python's GTK API seems to requires non-standard workarounds like this.
-    # Use finish_initializing instead of __init__.
-    def __new__(cls):
-        return GladeObjectFactory(cls.__name__, "ulauncher_window")
-
-    def finish_initializing(self, ui):
-        # pylint: disable=attribute-defined-outside-init
-        self.ui = ui
-        self.preferences = None  # instance
-
-        self.results_nav = None
-        self.window_body = self.ui['body']
-        self.input = self.ui['input']
-        self.prefs_btn = self.ui['prefs_btn']
-        self.result_box = self.ui["result_box"]
-        self.scroll_container = self.ui["result_box_scroll_container"]
-
-        self.input.connect('changed', self.on_input_changed)
-        self.prefs_btn.connect('clicked', lambda *_: self.show_preferences())
-
+    def finish_initializing(self):
         self.set_keep_above(True)
-
-        self.settings = Settings.get_instance()
-
         self.fix_window_width()
         self.position_window()
         self.init_theme()
 
         # this will trigger to show frequent apps if necessary
         self.show_results([])
-
-        self.connect('button-press-event', self.mouse_down_event)
-        self.connect('button-release-event', self.mouse_up_event)
-        self.connect('motion_notify_event', self.mouse_move_event)
 
         if self.settings.get_property('show-indicator-icon'):
             AppIndicator.get_instance(self).show()
@@ -115,14 +103,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # to determine whether to create or present preferences
         self.preferences = None
 
-    def on_focus_out_event(self, widget, event):
+    @Gtk.Template.Callback()
+    def on_focus_out(self, widget, event):
         # apparently Gtk doesn't provide a mechanism to tell if window is in focus
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
         timer(0.07, lambda: self.is_focused or self.hide())
 
-    def on_focus_in_event(self, *args):
+    @Gtk.Template.Callback()
+    def on_focus_in(self, *args):
         if self.settings.get_property('grab-mouse-pointer'):
             ptr_dev = self.get_pointer_device()
             result = ptr_dev.grab(
@@ -136,6 +126,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             logger.debug("Focus in event, grabbing pointer: %s", result)
         self.is_focused = True
 
+    @Gtk.Template.Callback()
     def on_input_changed(self, entry):
         """
         Triggered by user input
@@ -146,7 +137,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.set_text(query)
         ModeHandler.get_instance().on_query_change(query)
 
-    def on_input_key_press_event(self, widget, event):
+    @Gtk.Template.Callback()
+    def on_input_key_press(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
         alt = event.state & Gdk.ModifierType.MOD1_MASK
@@ -230,8 +222,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self._render_prefs_icon()
         self.init_styles(theme.compile_css())
 
-    def show_preferences(self, page='preferences'):
+    @Gtk.Template.Callback()
+    def show_preferences(self, page=None):
         self.hide()
+        if not str or not isinstance(page, str):
+            page = 'preferences'
 
         if self.preferences is not None:
             logger.debug('Show existing preferences window')
@@ -250,7 +245,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 500 * get_scaling_factor()
         self.set_property('width-request', window_width)
-        self.ui["result_box_scroll_container"].set_property('max-content-height', max_height)
+        self.scroll_container.set_property('max-content-height', max_height)
         self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
 
     def show_window(self):
@@ -268,7 +263,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         else:
             self.input.grab_focus()
 
-    def mouse_down_event(self, _, event):
+    @Gtk.Template.Callback()
+    def on_mouse_down(self, _, event):
         """
         Prepare moving the window if the user drags
         """
@@ -277,14 +273,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_cursor("grab")
             self._drag_start_coords = {'x': event.x, 'y': event.y}
 
-    def mouse_up_event(self, *_):
+    @Gtk.Template.Callback()
+    def on_mouse_up(self, *_):
         """
         Clear drag to move event data
         """
         self._drag_start_coords = None
         self.set_cursor("default")
 
-    def mouse_move_event(self, _, event):
+    @Gtk.Template.Callback()
+    def on_mouse_move(self, _, event):
         """
         Move window if cursor is held
         """
