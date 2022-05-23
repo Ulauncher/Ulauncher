@@ -181,7 +181,8 @@ def untar(filename: str, ext_path: str) -> None:
 
     temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
 
-    tarfile.open(filename, mode="r").extractall(temp_ext_path)
+    with tarfile.open(filename, mode="r") as archive:
+        archive.extractall(temp_ext_path)
 
     for dir in os.listdir(temp_ext_path):
         move(os.path.join(temp_ext_path, dir), ext_path)
