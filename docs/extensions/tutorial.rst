@@ -130,12 +130,13 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
   Key that is used to retrieve value for a certain preference
 
 ``type`` (required)
-  Can be "keyword", "input", "text", or "select"
+  Can be "keyword", "checkbox", "input", "text", or "select"
 
   * keyword - define keyword that user has to type in in order to use your extension
-  * input - rendered as ``<input>``
-  * text - rendered as ``<textarea>``
-  * select - rendered as ``<select>`` with a list of options
+  * checkbox - rendered as a checkbox
+  * input - rendered as a single line text input
+  * text - rendered as a multiple line text input
+  * select - rendered as list of options to choose from
 
   .. NOTE:: At least one preference with type "keyword" must be defined.
 

@@ -91,6 +91,16 @@
 
         <b-form-fieldset
           :key="pref.id"
+          v-if="pref.type == 'checkbox'"
+          :description="pref.description"
+        >
+          <b-form-checkbox :ref="pref.id" :checked="pref.value">
+            {{ pref.name }}
+          </b-form-checkbox>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'text'"
           :label="pref.name"
           :description="pref.description"
@@ -251,7 +261,11 @@ export default {
       let data = {}
       for (let i = 0; i < this.extension.preferences.length; i++) {
         let pref = this.extension.preferences[i]
-        let value = this.$refs[pref.id][0].$el.value
+        let { $el } = this.$refs[pref.id][0]
+        let value = $el.value
+        if (pref.type === 'checkbox') {
+          value = $el.firstChild.checked
+        }
         if (pref.type === 'keyword') {
           value = value.trim()
         }

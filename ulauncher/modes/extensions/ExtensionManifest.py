@@ -108,11 +108,16 @@ class ExtensionManifest:
             for p in self.get_preferences():
                 assert p.get('id'), 'Preferences error. Id cannot be empty'
                 assert p.get('type'), 'Preferences error. Type cannot be empty'
-                assert p.get('type') in ["keyword", "input", "text", "select"], \
-                    'Preferences error. Type can be "keyword", "input", "text", or "select"'
+                assert p.get('type') in ["keyword", "checkbox", "input", "select", "text"], \
+                    'Preferences error. Type can be "keyword", "input", "checkbox", "select" or "text"'
                 assert p.get('name'), 'Preferences error. Name cannot be empty'
                 if p['type'] == 'keyword':
-                    assert p.get('default_value'), 'Preferences error. Default value cannot be empty for keyword'
+                    assert p.get('default_value'), 'Preferences error. Keyword default value cannot be empty'
+                    assert isinstance(p.get('default_value'), str), \
+                        'Preferences error. Keyword default value must be a string'
+                if p['type'] == 'checkbox' and p.get('default_value'):
+                    assert isinstance(p.get('default_value'), bool), \
+                        'Preferences error. Checkbox default value must be a boolean'
                 if p['type'] == 'select':
                     assert isinstance(p.get('options'), list), 'Preferences error. Options must be a list'
                     assert p.get('options'), 'Preferences error. Option list cannot be empty'
