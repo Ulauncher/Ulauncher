@@ -92,7 +92,7 @@
           :label="pref.name"
           :description="pref.description"
         >
-          <b-form-input textarea :ref="pref.id" :value="pref.value" :rows="3"></b-form-input>
+          <b-form-textarea :ref="pref.id" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
         </b-form-fieldset>
 
         <b-form-fieldset
