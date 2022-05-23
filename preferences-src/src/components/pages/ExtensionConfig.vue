@@ -71,6 +71,7 @@
     <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'keyword'"
           :label="`${pref.name} keyword`"
           class="keyword-input"
@@ -80,6 +81,7 @@
         </b-form-fieldset>
 
         <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'input'"
           :label="pref.name"
           :description="pref.description"
@@ -88,6 +90,7 @@
         </b-form-fieldset>
 
         <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'text'"
           :label="pref.name"
           :description="pref.description"
@@ -96,6 +99,7 @@
         </b-form-fieldset>
 
         <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'select'"
           :label="pref.name"
           :description="pref.description"
