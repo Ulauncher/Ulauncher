@@ -60,7 +60,7 @@
 
     <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifest'">
       <small>
-        To find out how to migrate extension from API v1 to v2 see
+        To find out how to migrate Ulauncher extensions to the latest API version, see
         <a
           href
           @click.prevent="openUrl('https://docs.ulauncher.io/en/latest/extensions/migration.html')"
