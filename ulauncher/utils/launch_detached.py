@@ -4,18 +4,20 @@ from shutil import which
 from gi.repository import GLib
 
 logger = logging.getLogger(__name__)
-has_systemd = which("systemctl") and which("systemd-run")
-runs_in_systemd = has_systemd and os.system('systemctl --user is-active --quiet ulauncher') == 0
+use_systemd_run = which("systemd-run") and os.system("systemd-run --user --scope true  2> /dev/null") == 0
+
+if not use_systemd_run:
+    logger.warning(
+        "Your system does not support launching applications in isolated scopes.\n"
+        "This may result in applications launched by Ulauncher to depend on the main\n"
+        "process (Ulauncher) and forced to exit prematurely if Ulauncher exits or crashes.\n"
+        "Most likely this is caused by using an outdated or or misconfigured system.\n\n"
+        "For more details see https://github.com/Ulauncher/Ulauncher/discussions/991"
+    )
 
 
 def launch_detached(cmd):
-    if runs_in_systemd:
-        logger.warning(
-            "Will attempt to launch the app using systemd-run with --scope argument"
-            "This prevents the apps from terminating if Ulauncher crashes or is restarted."
-            "On some systems with outdated systemd or incorrect permissions this doesn't work."
-            "If this happens to you, don't run Ulauncher from systemd."
-        )
+    if use_systemd_run:
         cmd = ['systemd-run', '--user', '--scope'] + cmd
 
     env = dict(os.environ.items())
