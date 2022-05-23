@@ -7,7 +7,6 @@ class ExtensionError(Enum):
     InvalidManifest = 'InvalidManifest'
     InvalidUrl = 'InvalidUrl'
     InvalidVersionDeclaration = 'InvalidVersionDeclaration'
-    MissingVersionDeclaration = 'MissingVersionDeclaration'
     Network = 'Network'
     Other = 'Other'
 

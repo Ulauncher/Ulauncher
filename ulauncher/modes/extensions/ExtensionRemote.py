@@ -118,7 +118,12 @@ class ExtensionRemote:
 
     def get_compatible_commit_from_versions_json(self) -> Optional[Commit]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch
-        versions = json.loads(self.fetch_file("versions.json") or "[]")
+        versions = []
+        try:
+            versions = json.loads(self.fetch_file("versions.json") or "[]")
+        except URLError:
+            pass
+
         self.validate_versions(versions)
 
         versions_filter = (v['commit'] for v in versions if satisfies(API_VERSION, v['required_api_version']))
@@ -175,11 +180,7 @@ class ExtensionRemote:
         return commit
 
     def validate_versions(self, versions) -> bool:
-        missing = ExtensionError.MissingVersionDeclaration
         invalid = ExtensionError.InvalidVersionDeclaration
-
-        if not versions:
-            raise ExtensionRemoteError("Could not retrieve versions.json", missing)
 
         if not isinstance(versions, list):
             raise ExtensionRemoteError("versions.json should contain a list", invalid)

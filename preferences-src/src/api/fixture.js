@@ -89,7 +89,7 @@ export default function(url, params) {
           reject({
             message: 'Could not find versions.json file using URL "https://raw.githubusercontent.com/Ulauncher/ulauncher-kill/master/versions.json"',
             type: 'ExtensionRemoteError',
-            errorName: 'MissingVersionDeclaration',
+            errorName: 'Incompatible',
             stacktrace: 'Traceback (most recent call last):\n  File "ulauncher/ulauncher/asdf/xyz.py", line 101, in method\n    return json.loads(urlopen(url).read().decode(\'utf-8\'))\n  File "request.py", line 223, in urlopen\n    return opener.open(url, data, timeout)'
           })
         } else {

@@ -6,9 +6,6 @@
           v-if="errorName === 'InvalidUrl'"
         >The URL should be a GitHub, GitLab or Gitea-compatible extension repository link.
         <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
-        <p
-          v-else-if="errorName === 'MissingVersionDeclaration'"
-        >This repository does not provide a Ulauncher extension version declaration. It is probably not a Ulauncher extension</p>
         <p v-else-if="errorName === 'InvalidVersionDeclaration'">
           There's an error in versions.json:
           <br>
@@ -25,13 +22,8 @@
             <br>
             <b>{{ errorMessage }}</b>
           </p>
-          <p v-if="extUrl">
+          <p>
             Please make sure that you are running the latest version of Ulauncher app.
-            If problem persists, report this issue on the
-            <a
-              href
-              @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
-            >extension issue page</a>.
           </p>
         </div>
         <p
@@ -57,6 +49,7 @@
           >Github issues</a>.
         </p>
         <p v-if="extUrl && reportableErrors.indexOf(errorName) > -1">
+          <br />
           <span v-if="isUpdatable">
             Try
             <b>updating</b> the extension. If the doesn't help let
@@ -85,7 +78,7 @@ export default {
     extUrl: String
   },
   data: () => ({
-    reportableErrors: ['MissingVersionDeclaration', 'Incompatible', 'InvalidVersionDeclaration', 'InvalidManifest']
+    reportableErrors: ['Incompatible', 'InvalidVersionDeclaration', 'InvalidManifest']
   }),
   methods: {
     openUrlInBrowser(url) {
