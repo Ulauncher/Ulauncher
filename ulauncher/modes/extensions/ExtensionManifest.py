@@ -28,8 +28,10 @@ ManifestPreferenceItem = TypedDict(
         'name': str,
         'description': str,
         'default_value': str,
+        'min': Optional[int],
+        'max': Optional[int],
         'options': OptionItems,
-        'icon': str,
+        'icon': Optional[str]
     })
 ManifestJson = TypedDict('ManifestJson', {
     'required_api_version': str,

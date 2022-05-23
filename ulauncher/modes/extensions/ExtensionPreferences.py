@@ -14,11 +14,13 @@ PreferenceItem = TypedDict('PreferenceItem', {
     'type': str,
     'name': str,
     'description': str,
-    'options': OptionItems,
     'default_value': str,
+    'min': Optional[int],
+    'max': Optional[int],
+    'options': OptionItems,
+    'icon': Optional[str],
     'user_value': str,
     'value': str,
-    'icon': Optional[str]
 })
 PreferenceItems = List[PreferenceItem]
 
