@@ -101,6 +101,15 @@
 
         <b-form-fieldset
           :key="pref.id"
+          v-if="pref.type == 'number'"
+          :label="pref.name"
+          :description="pref.description"
+        >
+          <b-form-input :ref="pref.id" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          :key="pref.id"
           v-if="pref.type == 'text'"
           :label="pref.name"
           :description="pref.description"

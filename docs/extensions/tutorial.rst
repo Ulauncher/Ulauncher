@@ -130,10 +130,11 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
   Key that is used to retrieve value for a certain preference
 
 ``type`` (required)
-  Can be "keyword", "checkbox", "input", "text", or "select"
+  Can be "keyword", "checkbox", "number", "input", "text", or "select"
 
   * keyword - define keyword that user has to type in in order to use your extension
   * checkbox - rendered as a checkbox
+  * number - rendered as a single line number input
   * input - rendered as a single line text input
   * text - rendered as a multiple line text input
   * select - rendered as list of options to choose from
@@ -151,6 +152,9 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
 
 ``icon``
   Optional per-keyword icon (path or themed icon). If not specificed it will use the extension icon
+
+``min`` and ``max``
+  Optional for type "number". Must be a non-decimal number
 
 ``options``
   Required for type "select". Must be a list of strings or objects like: ``{"value": "...", "text": "..."}``
