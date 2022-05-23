@@ -50,6 +50,9 @@
                 <signal name="changed" handler="on_input_changed" />
                 <signal name="key_press_event" handler="on_input_key_press" />
               </object>
+              <packing>
+                <property name="expand">True</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="prefs_btn">
