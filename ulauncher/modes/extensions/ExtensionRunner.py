@@ -46,7 +46,6 @@ class ExtensionRunner:
         return cls()
 
     def __init__(self):
-        self.extensions_dir = EXTENSIONS_DIR  # type: str
         self.extension_errors = {}  # type: Dict[str, ExtRunError]
         self.extension_procs = {}
         self.dont_run_extensions = get_options().no_extensions
@@ -56,7 +55,7 @@ class ExtensionRunner:
         """
         Finds all extensions in `EXTENSIONS_DIR` and runs them
         """
-        for ex_id, _ in find_extensions(self.extensions_dir):
+        for ex_id, _ in find_extensions(EXTENSIONS_DIR):
             try:
                 self.run(ex_id)
             # pylint: disable=broad-except
@@ -74,8 +73,9 @@ class ExtensionRunner:
         manifest = ExtensionManifest.open(extension_id)
         manifest.validate()
         manifest.check_compatibility()
+        extension_dir = f"{EXTENSIONS_DIR}/{extension_id}"
 
-        cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
+        cmd = [sys.executable, f"{extension_dir}/main.py"]
         env = {}
         env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
 
