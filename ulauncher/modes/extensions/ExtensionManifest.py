@@ -27,7 +27,7 @@ ManifestPreferenceItem = TypedDict(
         'type': str,
         'name': str,
         'description': str,
-        'default_value': str,
+        'default_value': Union[str, int],  # Bool is a subclass of int
         'min': Optional[int],
         'max': Optional[int],
         'options': OptionItems,

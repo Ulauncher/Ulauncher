@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional, Dict
+from typing import cast, List, Optional, Dict, Union
 from functools import lru_cache
 from ulauncher.config import EXT_PREFERENCES_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
@@ -9,18 +9,19 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, Opti
 
 logger = logging.getLogger(__name__)
 
+ValueType = Union[str, int]  # Bool is a subclass of int
 PreferenceItem = TypedDict('PreferenceItem', {
     'id': str,
     'type': str,
     'name': str,
     'description': str,
-    'default_value': str,
+    'default_value': ValueType,
     'min': Optional[int],
     'max': Optional[int],
     'options': OptionItems,
     'icon': Optional[str],
-    'user_value': str,
-    'value': str,
+    'user_value': ValueType,
+    'value': ValueType,
 })
 PreferenceItems = List[PreferenceItem]
 
@@ -72,7 +73,7 @@ class ExtensionPreferences:
 
         return items
 
-    def get_dict(self) -> Dict[str, str]:
+    def get_dict(self) -> Dict[str, ValueType]:
         """
         :rtype: dict(id=value, id2=value2, ...)
         """
@@ -96,7 +97,7 @@ class ExtensionPreferences:
         """
         Filters items by type "keyword"
         """
-        return [p['value'] for p in self.get_items(type='keyword') if p['value']]
+        return [cast(str, p['value']) for p in self.get_items(type='keyword') if p['value']]
 
     def set(self, id: str, value: str):
         """
