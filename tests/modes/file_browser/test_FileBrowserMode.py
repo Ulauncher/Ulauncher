@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import pytest
 from gi.repository import Gdk
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode

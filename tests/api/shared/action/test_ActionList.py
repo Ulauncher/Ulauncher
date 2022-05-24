@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 
 from ulauncher.api.shared.action.ActionList import ActionList
 from ulauncher.api.shared.action.BaseAction import BaseAction

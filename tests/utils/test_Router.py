@@ -1,6 +1,6 @@
 import json
 from urllib.parse import quote
-import mock
+from unittest import mock
 import pytest
 from ulauncher.utils.Router import Router, RoutePathEmpty, RouteNotFound
 

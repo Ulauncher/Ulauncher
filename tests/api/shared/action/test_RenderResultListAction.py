@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import pytest
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction

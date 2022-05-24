@@ -1,6 +1,6 @@
 import os
+from unittest import mock
 import pytest
-import mock
 from ulauncher.utils.Settings import Settings
 
 

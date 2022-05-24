@@ -1,6 +1,5 @@
+from unittest import mock
 import pytest
-import mock
-
 import gi
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position

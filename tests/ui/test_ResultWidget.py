@@ -1,5 +1,5 @@
+from unittest import mock
 import pytest
-import mock
 from gi.repository import GdkPixbuf
 
 from ulauncher.api import Result

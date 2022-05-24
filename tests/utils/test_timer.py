@@ -1,5 +1,5 @@
+from unittest import mock
 import pytest
-import mock
 from ulauncher.utils.timer import timer
 
 
