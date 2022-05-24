@@ -32,9 +32,6 @@ class TestExtensionRemote:
         return ExtensionRemote('https://github.com/Ulauncher/ulauncher-timer')
 
     def test_validate_versions(self, remote):
-        with pytest.raises(ExtensionRemoteError, match="Could not retrieve versions.json"):
-            assert remote.validate_versions(None)
-            assert remote.validate_versions([])
         with pytest.raises(ExtensionRemoteError, match="should contain a list"):
             assert remote.validate_versions(True)
             assert remote.validate_versions(1)
