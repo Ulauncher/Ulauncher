@@ -151,6 +151,9 @@ export default {
 .keyword {
   width: 400px;
 }
+.cmd {
+  font-family: monospace;
+}
 .save,
 .cancel {
   margin-right: 20px;
