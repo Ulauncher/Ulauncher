@@ -14,6 +14,10 @@ class TestExtension:
     def response(self, mocker):
         return mocker.patch('ulauncher.api.extension.Response').return_value
 
+    @pytest.fixture(autouse=True)
+    def load_preferences(self, mocker):
+        return mocker.patch('ulauncher.api.extension.Extension.load_preferences', return_value={})
+
     @pytest.fixture
     def extension(self):
         return Extension()

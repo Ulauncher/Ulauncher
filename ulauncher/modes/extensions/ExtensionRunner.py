@@ -9,7 +9,7 @@ from time import time
 from enum import Enum
 from gi.repository import Gio, GLib
 
-from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
+from ulauncher.config import EXTENSIONS_DIR, EXT_PREFERENCES_DIR, ULAUNCHER_APP_DIR, get_options
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
@@ -92,6 +92,9 @@ class ExtensionRunner:
             return
 
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
+
+        launcher.setenv("EXTENSION_DIR", extension_dir, True)
+        launcher.setenv("EXT_PREFERENCES_DIR", EXT_PREFERENCES_DIR, True)
         for env_name, env_value in env.items():
             launcher.setenv(env_name, env_value, True)
 

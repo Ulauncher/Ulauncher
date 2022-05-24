@@ -97,6 +97,7 @@ class ExtensionController:
         self.controllers[self.extension_id] = self
         self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
 
+        # Deprecated and candidate for future removal
         self._send_event(PreferencesEvent(self.preferences.get_dict()))
 
     # pylint: disable=unused-argument

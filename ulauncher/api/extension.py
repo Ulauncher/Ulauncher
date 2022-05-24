@@ -1,11 +1,13 @@
+import os
+import json
 import logging
 from collections import defaultdict
 from inspect import signature
+from pathlib import Path
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, \
-    PreferencesEvent, PreferencesUpdateEvent, UnloadEvent
+from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, PreferencesUpdateEvent, UnloadEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.setup_logging import setup_logging, get_extension_name
@@ -20,7 +22,7 @@ class Extension:
         self.extension_id = get_extension_name()
         self._listeners = defaultdict(list)
         self._client = Client(self)
-        self.preferences = {}
+        self.preferences = self.load_preferences()
         self.logger = logging.getLogger(__name__)
         setup_logging()
         # subscribe with methods if user has added their own
@@ -30,16 +32,33 @@ class Extension:
             self.subscribe(ItemEnterEvent, self, 'on_item_enter')
         if self.__class__.on_unload is not Extension.on_unload:
             self.subscribe(UnloadEvent, self, 'on_unload')
-        if self.__class__.on_preferences is not Extension.on_preferences:
-            self.subscribe(PreferencesEvent, self, 'on_preferences')
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
             self.subscribe(PreferencesUpdateEvent, self, 'on_preferences_update')
+
+    def load_preferences(self):
+        preferences = {}
+        user_prefs = {}
+        manifest_path = Path(os.environ["EXTENSION_DIR"], "manifest.json").resolve()
+        manifest = json.loads(manifest_path.read_text())
+
+        try:
+            user_prefs_path = Path(os.environ["EXT_PREFERENCES_DIR"], f"{self.extension_id}.json").resolve()
+            user_prefs = json.loads(user_prefs_path.read_text())
+        except FileNotFoundError:  # This file won't always exist
+            pass
+
+        for pref in manifest.get("preferences", []):
+            default_fallback = {"number": 0, "checkbox": False}.get(pref["type"], "")
+            default_value = pref.get("default_value", default_fallback)
+            preferences[pref["id"]] = user_prefs.get(pref['id'], default_value)
+
+        return preferences
 
     def subscribe(self, event_type, event_listener, method='on_event'):
         """
         Example:
 
-            extension.subscribe(PreferencesEvent, PreferencesEventListener())
+            extension.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
         :param type event_type:
         :param ~ulauncher.api.client.EventListener.EventListener event_listener:
@@ -75,9 +94,8 @@ class Extension:
 
     def run(self):
         """
-        Subscribes to events and connects to Ulauncher WS server
+        Subscribes to events and connects to Ulauncher socket server
         """
-        self.subscribe(PreferencesEvent, PreferencesEventListener())
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self._client.connect()
 
@@ -85,9 +103,6 @@ class Extension:
         pass
 
     def on_item_enter(self, event):
-        pass
-
-    def on_preferences(self, event):
         pass
 
     def on_preferences_update(self, event):
@@ -98,12 +113,6 @@ class Extension:
 
 
 # pylint: disable=too-few-public-methods
-class PreferencesEventListener(EventListener):
-
-    def on_event(self, event, extension):
-        extension.preferences.update(event.preferences)
-
-
 class PreferencesUpdateEventListener(EventListener):
 
     def on_event(self, event, extension):
