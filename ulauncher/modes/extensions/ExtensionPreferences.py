@@ -56,7 +56,8 @@ class ExtensionPreferences:
             if type and type != p['type']:
                 continue
 
-            default_value = p.get('default_value', '')
+            default_fallback = {'number': 0, 'checkbox': False}.get(p['type'], '')
+            default_value = p.get("default_value", default_fallback)
             items.append({
                 'id': p['id'],
                 'type': p['type'],
