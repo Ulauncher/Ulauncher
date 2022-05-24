@@ -129,6 +129,7 @@ button { cursor: pointer }
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      font-family: monospace;
 }
 
 .cmd .actions {
