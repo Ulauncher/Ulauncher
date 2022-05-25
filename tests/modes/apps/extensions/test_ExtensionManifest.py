@@ -24,12 +24,6 @@ class TestExtensionManifest:
         manifest = ExtensionManifest.open('test_extension', ext_dir)
         assert manifest.get_name() == "Test Extension"
 
-    def test_refresh__name__is_reloaded(self, ext_dir):
-        manifest = ExtensionManifest('test_extension', {'name': 'Old'}, ext_dir)
-        assert manifest.get_name() == 'Old'
-        manifest.refresh()
-        assert manifest.get_name() == "Test Extension"
-
     def test_validate__name_empty__exception_raised(self, ext_dir):
         manifest = ExtensionManifest('test_extension', {'required_api_version': '1'}, ext_dir)
         with pytest.raises(ExtensionManifestError) as e:

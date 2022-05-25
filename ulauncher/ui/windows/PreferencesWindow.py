@@ -405,7 +405,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         extensions = []
         for ext_id, _ in find_extensions(EXTENSIONS_DIR):
             prefs = ExtensionPreferences.create_instance(ext_id)  # type: ExtensionPreferences
-            prefs.manifest.refresh()
             error = None
             try:
                 prefs.manifest.validate()

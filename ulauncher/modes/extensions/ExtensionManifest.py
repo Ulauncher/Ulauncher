@@ -1,6 +1,6 @@
 import os
 from json import load
-from typing import cast, Optional, List, Union
+from typing import Optional, List, Union
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.version import satisfies
@@ -61,9 +61,6 @@ class ExtensionManifest:
         self.extensions_dir = extensions_dir
         self.extension_id = extension_id
         self.manifest = manifest
-
-    def refresh(self):
-        self.manifest = cast(ManifestJson, read_manifest(self.extension_id, self.extensions_dir))
 
     def get_name(self) -> str:
         return self.manifest['name']
