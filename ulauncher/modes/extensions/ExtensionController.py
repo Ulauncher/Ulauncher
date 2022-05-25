@@ -4,7 +4,7 @@ from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,26 @@ class ExtensionController:
     _debounced_send_event = None
 
     def __init__(self, controllers, framer, extension_id):
+        if not extension_id:
+            raise RuntimeError("No extension_id provided")
         self.controllers = controllers
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
-        self.configure(extension_id)
+        self.extension_id = extension_id
+        self.preferences = ExtensionPreferences.create_instance(extension_id)
+        self.manifest = self.preferences.manifest
+        try:
+            self.manifest.validate()
+        except ExtensionManifestError as e:
+            logger.warning("Couldn't connect '%s'. %s: %s", extension_id, type(e).__name__, e)
+            self.framer.close()
+            return
+
+        self.controllers[extension_id] = self
+        self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
+
+        self._send_event(PreferencesEvent(self.preferences.get_dict()))
+        logger.info('Extension "%s" connected', extension_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
 
@@ -72,32 +88,6 @@ class ExtensionController:
                      type(response.action).__name__,
                      self.extension_id)
         self.result_renderer.handle_response(response, self)
-
-    def configure(self, extension_id):
-        """
-        * Adds itself to the controllers dict
-        * Validates manifest file.
-        * Sends :class:`PreferencesEvent` to extension
-        """
-        self.extension_id = extension_id
-        if not self.extension_id:
-            raise RuntimeError("No extension_id provided")
-
-        logger.info('Extension "%s" connected', self.extension_id)
-
-        self.manifest = ExtensionManifest.open(self.extension_id)
-        try:
-            self.manifest.validate()
-        except ExtensionManifestError as e:
-            logger.warning("Couldn't connect '%s'. %s: %s", self.extension_id, type(e).__name__, e)
-            self.framer.close()
-            return
-
-        self.preferences = ExtensionPreferences.create_instance(self.extension_id)
-        self.controllers[self.extension_id] = self
-        self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
-
-        self._send_event(PreferencesEvent(self.preferences.get_dict()))
 
     # pylint: disable=unused-argument
     def handle_close(self, framer):

@@ -53,10 +53,6 @@ class TestExtensionController:
         controller.manifest.validate.assert_called_once()
         controller.framer.send.assert_called_with(PreferencesEvent.return_value)
 
-    def test_configure__invalid_extension_id__raises(self, controller):
-        with pytest.raises(RuntimeError):
-            controller.configure(None)
-
     def test_trigger_event__send__is_called(self, controller):
         event = object()
         controller.trigger_event(event)
