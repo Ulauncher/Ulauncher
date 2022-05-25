@@ -88,13 +88,6 @@ class ExtensionManifest:
     def get_instructions(self) -> Optional[str]:
         return self.manifest.get('instructions')
 
-    def get_preference(self, id) -> Optional[ManifestPreferenceItem]:
-        for p in self.get_preferences():
-            if p['id'] == id:
-                return p
-
-        return None
-
     def get_option(self, name, default=None):
         return self.manifest.get('options', {}).get(name, default)
 

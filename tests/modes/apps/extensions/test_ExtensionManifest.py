@@ -94,28 +94,6 @@ class TestExtensionManifest:
         manifest = ExtensionManifest('test_extension', {'required_api_version': '2'}, ext_dir)
         manifest.check_compatibility()
 
-    def test_get_preference(self, ext_dir):
-        manifest_dict = {
-            'preferences': [
-                {'id': 'myid', 'type': 'keyword', 'default_value': 'mi', 'name': "Mimimi", 'icon': 'images/icon.png'},
-                {'id': 'newid', 'type': 'input', 'default_value': 'ni'}
-            ]
-        }
-        manifest = ExtensionManifest('test_extension', manifest_dict, ext_dir)
-        assert manifest.get_preference('newid') == {
-            'id': 'newid',
-            'type': 'input',
-            'default_value': 'ni',
-        }
-
-        assert manifest.get_preference('myid') == {
-            'id': 'myid',
-            'type': 'keyword',
-            'default_value': 'mi',
-            'name': 'Mimimi',
-            'icon': 'images/icon.png'
-        }
-
     def test_get_option__option_exists__value_returned(self, ext_dir):
         manifest_dict = {
             'options': {'query_debounce': 0.5}
