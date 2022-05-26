@@ -1,6 +1,28 @@
 #!/bin/sh
+QUERY={}
+
+# Parse optional parameters
+
+die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
+needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
+
+while getopts q:-: OPT; do
+  # portable support long options: https://stackoverflow.com/a/28466267/519360
+  if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
+    OPT="${OPTARG%%=*}"       # extract long option name
+    OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
+    OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+  fi
+  case "$OPT" in
+    q | query )  needs_arg; QUERY="{'query': <'$OPTARG'>}" ;;
+    ??* )          die "Illegal option --$OPT" ;;  # bad long option
+    ? )            exit 2 ;;  # bad short option (error reported via getopts)
+  esac
+done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
 gdbus call --session \
   --dest net.launchpad.ulauncher \
   --object-path /net/launchpad/ulauncher \
   --method org.gtk.Application.Activate \
-  {}
+  "$QUERY"
