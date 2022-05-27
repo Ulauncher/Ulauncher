@@ -8,13 +8,11 @@ from datetime import datetime
 from ulauncher.utils.mypy_extensions import TypedDict
 
 from ulauncher.config import EXTENSIONS_DIR
-from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
-from ulauncher.modes.extensions.extension_finder import find_extensions
 
 
 logger = logging.getLogger(__name__)
@@ -89,21 +87,6 @@ class ExtensionDownloader:
         self.ext_db.commit()
 
         return remote.extension_id
-
-    @run_async(daemon=True)
-    def download_missing(self) -> None:
-        already_downloaded = {id for id, _ in find_extensions(EXTENSIONS_DIR)}
-        for id, ext in self.ext_db.get_records().items():
-            if id in already_downloaded:
-                continue
-
-            logger.info('Downloading missing extension %s', id)
-            try:
-                ext_id = self.download(ext['url'])
-                self.ext_runner.run(ext_id)
-            # pylint: disable=broad-except
-            except Exception as e:
-                logger.error('%s: %s', type(e).__name__, e)
 
     def remove(self, ext_id: str) -> None:
         try:
