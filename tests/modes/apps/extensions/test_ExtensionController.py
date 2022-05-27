@@ -34,11 +34,6 @@ class TestExtensionController:
         return mocker.patch(
             'ulauncher.modes.extensions.ExtensionController.ExtensionPreferences.create_instance').return_value
 
-    @pytest.fixture(autouse=True)
-    def manifest(self, mocker):
-        return mocker.patch(
-            'ulauncher.modes.extensions.ExtensionController.ExtensionManifest.open').return_value
-
     @pytest.fixture
     def controller(self, controllers, mocker):
         controller = ExtensionController(controllers, mock.Mock(), TEST_EXT_ID)
