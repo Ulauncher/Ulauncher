@@ -39,10 +39,10 @@ class UlauncherApp(Gtk.Application):
         self.window.set_application(self)
         self.window.finish_initializing()
 
-    def do_before_emit(self, data ):
+    def do_before_emit(self, data):
         query = data.lookup_value("query",  GLib.VariantType("s"))
         if query:      
-           self.window.initial_query = query.unpack() + " "
+           self.window.initial_query = query.unpack()
 
     def do_activate(self, *args, **kwargs):
         self.window.show_window()
