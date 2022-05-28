@@ -12,7 +12,7 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 
 
 logger = logging.getLogger(__name__)
@@ -89,11 +89,7 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        try:
-            self.ext_runner.stop(ext_id)
-        except ExtensionIsNotRunningError:
-            pass
-
+        self.ext_runner.stop(ext_id)
         rmtree(os.path.join(EXTENSIONS_DIR, ext_id))
         self.ext_db.remove(ext_id)
         self.ext_db.commit()

@@ -68,47 +68,45 @@ class ExtensionRunner:
         * Validates manifest
         * Runs extension in a new process
         """
-        if self.is_running(extension_id):
-            raise ExtensionIsRunningError(f"Extension ID: {extension_id}")
+        if not self.is_running(extension_id):
+            manifest = ExtensionManifest.open(extension_id)
+            manifest.validate()
+            manifest.check_compatibility()
 
-        manifest = ExtensionManifest.open(extension_id)
-        manifest.validate()
-        manifest.check_compatibility()
+            cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
+            env = {}
+            env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
 
-        cmd = [sys.executable, os.path.join(self.extensions_dir, extension_id, 'main.py')]
-        env = {}
-        env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
+            if self.verbose:
+                env['VERBOSE'] = '1'
 
-        if self.verbose:
-            env['VERBOSE'] = '1'
+            if self.dont_run_extensions:
+                args = [env.get('VERBOSE', ''), env['PYTHONPATH']]
+                args.extend(cmd)
+                run_cmd = 'VERBOSE={} PYTHONPATH={} {} {}'.format(*args)
+                logger.warning('Copy and run the following command to start %s', extension_id)
+                logger.warning(run_cmd)
+                self.set_extension_error(extension_id, ExtensionRuntimeError.NoExtensionsFlag, run_cmd)
+                return
 
-        if self.dont_run_extensions:
-            args = [env.get('VERBOSE', ''), env['PYTHONPATH']]
-            args.extend(cmd)
-            run_cmd = 'VERBOSE={} PYTHONPATH={} {} {}'.format(*args)
-            logger.warning('Copy and run the following command to start %s', extension_id)
-            logger.warning(run_cmd)
-            self.set_extension_error(extension_id, ExtensionRuntimeError.NoExtensionsFlag, run_cmd)
-            return
+            launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
+            for env_name, env_value in env.items():
+                launcher.setenv(env_name, env_value, True)
 
-        launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
-        for env_name, env_value in env.items():
-            launcher.setenv(env_name, env_value, True)
+            t_start = time()
+            subproc = launcher.spawnv(cmd)
+            error_line_str = Gio.DataInputStream.new(subproc.get_stderr_pipe())
+            self.extension_procs[extension_id] = ExtensionProc(
+                extension_id=extension_id,
+                subprocess=subproc,
+                start_time=t_start,
+                error_stream=error_line_str,
+                recent_errors=deque(maxlen=1)
+            )
+            logger.debug("Launched %s using Gio.Subprocess", extension_id)
 
-        t_start = time()
-        subproc = launcher.spawnv(cmd)
-        error_line_str = Gio.DataInputStream.new(subproc.get_stderr_pipe())
-        self.extension_procs[extension_id] = ExtensionProc(
-            extension_id=extension_id,
-            subprocess=subproc,
-            start_time=t_start,
-            error_stream=error_line_str,
-            recent_errors=deque(maxlen=1)
-        )
-        logger.debug("Launched %s using Gio.Subprocess", extension_id)
-
-        subproc.wait_async(None, self.handle_wait, extension_id)
-        self.read_stderr_line(self.extension_procs[extension_id])
+            subproc.wait_async(None, self.handle_wait, extension_id)
+            self.read_stderr_line(self.extension_procs[extension_id])
 
     def read_stderr_line(self, extproc):
         extproc.error_stream.read_line_async(
@@ -177,16 +175,14 @@ class ExtensionRunner:
         """
         Terminates extension
         """
-        if not self.is_running(extension_id):
-            raise ExtensionIsNotRunningError(f"Extension ID: {extension_id}")
+        if self.is_running(extension_id):
+            logger.info('Terminating extension "%s"', extension_id)
+            extproc = self.extension_procs[extension_id]
+            self.extension_procs.pop(extension_id, None)
 
-        logger.info('Terminating extension "%s"', extension_id)
-        extproc = self.extension_procs[extension_id]
-        self.extension_procs.pop(extension_id, None)
+            extproc.subprocess.send_signal(signal.SIGTERM)
 
-        extproc.subprocess.send_signal(signal.SIGTERM)
-
-        timer(0.5, partial(self.confirm_termination, extproc))
+            timer(0.5, partial(self.confirm_termination, extproc))
 
     def confirm_termination(self, extproc):
         if extproc.subprocess.get_identifier():
@@ -207,11 +203,3 @@ class ExtensionRunner:
 
     def get_extension_error(self, extension_id: str) -> Optional[ExtRunError]:
         return self.extension_errors.get(extension_id)
-
-
-class ExtensionIsRunningError(RuntimeError):
-    pass
-
-
-class ExtensionIsNotRunningError(RuntimeError):
-    pass

@@ -2,8 +2,7 @@ from unittest import mock
 import pytest
 import signal
 
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError, \
-    ExtensionIsNotRunningError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.api.shared.errors import ExtensionError
 
@@ -158,9 +157,6 @@ class TestExtensionRunner:
 
     def test_stop(self, runner, timer, SubprocessLauncher, DataInputStream):
         extid = "id"
-
-        with pytest.raises(ExtensionIsNotRunningError):
-            runner.stop(extid)
 
         runner.run(extid)
         extproc = runner.extension_procs[extid]
