@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import (
     ExtensionDownloader, ExtensionDownloaderError, ExtensionIsUpToDateError)
 
@@ -15,12 +14,8 @@ class TestExtensionDownloader:
         return mock.create_autospec(ExtensionDb)
 
     @pytest.fixture
-    def ext_runner(self):
-        return mock.create_autospec(ExtensionRunner)
-
-    @pytest.fixture
-    def downloader(self, ext_db, ext_runner):
-        return ExtensionDownloader(ext_db, ext_runner)
+    def downloader(self, ext_db):
+        return ExtensionDownloader(ext_db)
 
     @pytest.fixture(autouse=True)
     def gh_ext(self, mocker):
@@ -71,7 +66,7 @@ class TestExtensionDownloader:
         })
 
     # pylint: disable=unused-argument
-    def test_download_raises_AlreadyDownloadedError(self, downloader, ext_db, ext_runner, mocker):
+    def test_download_raises_AlreadyDownloadedError(self, downloader, ext_db, mocker):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.find.return_value = {
             'id': ext_id,
@@ -86,7 +81,7 @@ class TestExtensionDownloader:
         with pytest.raises(ExtensionDownloaderError):
             assert downloader.download('https://github.com/Ulauncher/ulauncher-timer')
 
-    def test_update(self, downloader, ext_db, ext_runner, gh_ext, download_tarball, untar, datetime):
+    def test_update(self, downloader, ext_db, gh_ext, download_tarball, untar, datetime):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.find.return_value = {
             'id': ext_id,
@@ -95,14 +90,11 @@ class TestExtensionDownloader:
             'last_commit': 'aDbc',
             'last_commit_time': '2017-01-01'
         }
-        ext_runner.is_running.return_value = True
 
         assert downloader.update(ext_id)
 
         download_tarball.assert_called_with(gh_ext.get_download_url.return_value)
         untar.assert_called_with(download_tarball.return_value, mock.ANY)
-        ext_runner.stop.assert_called_with(ext_id)
-        ext_runner.run.assert_called_with(ext_id)
         ext_db.put.assert_called_with(ext_id, {
             'id': ext_id,
             'url': 'https://github.com/Ulauncher/ulauncher-timer',
@@ -124,7 +116,7 @@ class TestExtensionDownloader:
         with pytest.raises(ExtensionIsUpToDateError):
             downloader.get_new_version(ext_id)
 
-    def test_get_new_version__returns_new_version(self, downloader, ext_db, ext_runner, gh_ext):
+    def test_get_new_version__returns_new_version(self, downloader, ext_db, gh_ext):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.find.return_value = {
             'id': ext_id,

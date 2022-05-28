@@ -12,7 +12,6 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 
 
 logger = logging.getLogger(__name__)
@@ -38,13 +37,11 @@ class ExtensionDownloader:
     @singleton
     def get_instance(cls) -> 'ExtensionDownloader':
         ext_db = ExtensionDb.get_instance()
-        ext_runner = ExtensionRunner.get_instance()
-        return cls(ext_db, ext_runner)
+        return cls(ext_db)
 
-    def __init__(self, ext_db: ExtensionDb, ext_runner: ExtensionRunner):
+    def __init__(self, ext_db: ExtensionDb):
         super().__init__()
         self.ext_db = ext_db
-        self.ext_runner = ext_runner
 
     def download(self, url: str) -> str:
         """
@@ -63,7 +60,7 @@ class ExtensionDownloader:
         ext_path = os.path.join(EXTENSIONS_DIR, remote.extension_id)
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
-        if os.path.exists(ext_path) and self.ext_runner.is_running(remote.extension_id):
+        if os.path.exists(ext_path):
             raise ExtensionDownloaderError(
                 f'Extension with URL "{url}" is already added',
                 ExtensionError.AlreadyAdded
@@ -89,7 +86,6 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        self.ext_runner.stop(ext_id)
         rmtree(os.path.join(EXTENSIONS_DIR, ext_id))
         self.ext_db.remove(ext_id)
         self.ext_db.commit()
@@ -106,9 +102,6 @@ class ExtensionDownloader:
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
                     ext['last_commit'][:8], commit['last_commit'][:8])
 
-        if self.ext_runner.is_running(ext_id):
-            self.ext_runner.stop(ext_id)
-
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
         remote = ExtensionRemote(ext['url'])
@@ -120,8 +113,6 @@ class ExtensionDownloader:
         ext['last_commit_time'] = commit['last_commit_time']
         self.ext_db.put(ext_id, ext)
         self.ext_db.commit()
-
-        self.ext_runner.run(ext_id)
 
         return True
 

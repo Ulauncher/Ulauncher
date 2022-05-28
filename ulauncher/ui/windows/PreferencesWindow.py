@@ -384,18 +384,22 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     @rt.route('/extension/update-ext')
     def prefs_extension_update_ext(self, query):
-        logger.info('Update extension: %s', query['id'])
-        downloader = ExtensionDownloader.get_instance()
+        ext_id = query['id']
+        logger.info('Update extension: %s', ext_id)
         try:
-            downloader.update(query['id'])
+            runner = ExtensionRunner.get_instance()
+            runner.stop(ext_id)
+            ExtensionDownloader.get_instance().update(ext_id)
+            runner.run(ext_id)
         except ExtensionManifestError as e:
             raise PrefsApiError(e) from e
 
     @rt.route('/extension/remove')
     def prefs_extension_remove(self, query):
-        logger.info('Remove extension: %s', query['id'])
-        downloader = ExtensionDownloader.get_instance()
-        downloader.remove(query['id'])
+        ext_id = query['id']
+        logger.info('Remove extension: %s', ext_id)
+        ExtensionRunner.get_instance().stop(ext_id)
+        ExtensionDownloader.get_instance().remove(ext_id)
 
     ######################################
     # Helpers
