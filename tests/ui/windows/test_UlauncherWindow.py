@@ -26,10 +26,6 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Theme')
 
     @pytest.fixture(autouse=True)
-    def get_options(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_options')
-
-    @pytest.fixture(autouse=True)
     def load_available_themes(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
 
@@ -58,10 +54,6 @@ class TestUlauncherWindow:
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
-
-    @pytest.fixture(autouse=True)
-    def extDownloader(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionDownloader.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def extRunner(self, mocker):

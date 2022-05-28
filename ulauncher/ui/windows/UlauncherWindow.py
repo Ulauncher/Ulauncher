@@ -16,14 +16,13 @@ from gi.repository import Gtk, Gdk, GLib, Keybinder
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_asset, get_options, FIRST_RUN
+from ulauncher.config import get_asset, FIRST_RUN
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
@@ -87,8 +86,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
-        if not get_options().no_extensions:
-            ExtensionDownloader.get_instance().download_missing()
 
     ######################################
     # GTK Signal Handlers
