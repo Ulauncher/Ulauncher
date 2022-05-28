@@ -247,7 +247,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.initial_query:
             self.input.set_text(self.initial_query)
             self.input.set_position(len(self.initial_query))
-            self.initial_query=None
+            self.initial_query = None
         elif not self._get_input_text():
             # make sure frequent apps are shown if necessary
             self.show_results([])
