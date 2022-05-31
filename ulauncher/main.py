@@ -10,9 +10,27 @@ import gi
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gio, GLib, Gtk
-from ulauncher.config import API_VERSION, VERSION, get_options
+from ulauncher.config import API_VERSION, STATE_DIR, VERSION, get_options
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
-from ulauncher.utils.setup_logging import setup_logging
+from ulauncher.utils.logging import ColoredFormatter, log_format
+
+options = get_options()
+
+# Set up global logging for stdout and file
+root_log_handler = logging.getLogger()
+root_log_handler.setLevel(logging.DEBUG)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
+stream_handler.setFormatter(ColoredFormatter(log_format))
+root_log_handler.addHandler(stream_handler)
+
+file_handler = logging.FileHandler(f"{STATE_DIR}/last.log", mode='w+')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(logging.Formatter(log_format))
+root_log_handler.addHandler(file_handler)
+# Logger for actual use in this file
+logger = logging.getLogger('ulauncher')
 
 
 class UlauncherApp(Gtk.Application):
@@ -60,9 +78,6 @@ class UlauncherApp(Gtk.Application):
         return 0
 
 
-logger = logging.getLogger('ulauncher')
-
-
 def reload_config(app):
     logger.info("Reloading config")
     app.window.init_theme()
@@ -72,9 +87,6 @@ def main():
     """
     Main function that starts everything
     """
-
-    options = get_options()
-    setup_logging(options)
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
