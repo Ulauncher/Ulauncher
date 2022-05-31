@@ -40,6 +40,7 @@ class ExtensionController:
         self.controllers[extension_id] = self
         self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
 
+        # PreferencesEvent is candidate for future removal
         self._send_event(PreferencesEvent(self.preferences.get_dict()))
         logger.info('Extension "%s" connected', extension_id)
         self.framer.connect("message_parsed", self.handle_response)

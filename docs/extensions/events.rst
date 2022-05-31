@@ -25,15 +25,6 @@ PreferencesUpdateEvent
   :members:
   :undoc-members:
 
-
-PreferencesEvent
-----------------
-
-.. autoclass:: ulauncher.api.shared.event.PreferencesEvent
-  :members:
-  :undoc-members:
-
-
 UnloadEvent
 ---------------
 

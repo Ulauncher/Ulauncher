@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -13,7 +14,7 @@ from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.modes.extensions.extension_finder import find_extensions
 
@@ -68,9 +69,9 @@ class ExtensionRunner:
         * Runs extension in a new process
         """
         if not self.is_running(extension_id):
-            manifest = ExtensionManifest.open(extension_id)
-            manifest.validate()
-            manifest.check_compatibility()
+            preferences = ExtensionPreferences.create_instance(extension_id)
+            preferences.manifest.validate()
+            preferences.manifest.check_compatibility()
 
             cmd = [sys.executable, f"{EXTENSIONS_DIR}/{extension_id}/main.py"]
             env = {}
@@ -89,6 +90,7 @@ class ExtensionRunner:
                 return
 
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
+            launcher.setenv("EXTENSION_PREFERENCES", json.dumps(preferences.get_dict()), True)
             for env_name, env_value in env.items():
                 launcher.setenv(env_name, env_value, True)
 
