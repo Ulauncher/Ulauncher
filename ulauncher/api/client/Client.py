@@ -24,7 +24,6 @@ class Client:
         self.socket_path = get_socket_path()
         self.extension = extension
         self.client = Gio.SocketClient()
-        self.unix_client = None
         self.conn = None
         self.framer = None
 

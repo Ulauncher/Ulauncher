@@ -73,9 +73,6 @@ class ExtensionController:
     def get_manifest(self):
         return self.manifest
 
-    def get_extension_id(self):
-        return self.extension_id
-
     # pylint: disable=unused-argument
     def handle_response(self, framer, response):
         """
