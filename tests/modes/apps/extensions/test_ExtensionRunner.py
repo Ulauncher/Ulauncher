@@ -3,8 +3,6 @@ import pytest
 import signal
 
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
-from ulauncher.api.shared.errors import ExtensionError
 
 
 class TestExtensionRunner:
@@ -28,12 +26,12 @@ class TestExtensionRunner:
         return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.get_options')
 
     @pytest.fixture(autouse=True)
-    def ExtensionManifest(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest')
+    def ExtensionPreferences(self, mocker):
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionPreferences')
 
-    @pytest.fixture
-    def manifest(self, ExtensionManifest):
-        return ExtensionManifest.open.return_value
+    @pytest.fixture(autouse=True)
+    def json_dumps(self, mocker):
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.json.dumps', return_value="{}")
 
     @pytest.fixture
     def SubprocessLauncher(self, mocker):
@@ -51,16 +49,10 @@ class TestExtensionRunner:
     def time(self, mocker):
         return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.time')
 
-    def test_run__incompatible_version__exception_is_raised(self, runner, manifest):
-        manifest.check_compatibility.side_effect = ExtensionManifestError(
-            'message', ExtensionError.Incompatible)
-        with pytest.raises(ExtensionManifestError):
-            runner.run('id')
-
-    def test_run__basic_execution__is_called(self, runner, ExtensionManifest, SubprocessLauncher, DataInputStream):
+    def test_run__basic_execution__is_called(self, runner, ExtensionPreferences, SubprocessLauncher, DataInputStream):
         extid = 'id'
         runner.run(extid)
-        ExtensionManifest.open.assert_called_with(extid)
+        ExtensionPreferences.create_instance.assert_called_with(extid)
         SubprocessLauncher.new.assert_called_once()
         extproc = runner.extension_procs[extid]
         extproc.subprocess.wait_async.assert_called_once()
