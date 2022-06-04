@@ -13,7 +13,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gdk, Gtk, WebKit2, GLib
+from gi.repository import Gio, Gdk, Gtk, WebKit2
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
@@ -34,7 +34,6 @@ from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router
 from ulauncher.utils.AutostartPreference import AutostartPreference
-from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_asset, get_options, API_VERSION, VERSION, EXTENSIONS_DIR
 
@@ -243,10 +242,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.settings.set_property(property, value)
 
         if property == 'show-indicator-icon':
-            # pylint: disable=import-outside-toplevel
-            from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-            ulauncher_window = UlauncherWindow.get_instance()
-            GLib.idle_add(AppIndicator.get_instance(ulauncher_window).switch, value)
+            self.get_application().toggle_appindicator(value)
         if property == 'theme-name':
             self.prefs_apply_theme()
 
@@ -261,20 +257,14 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             raise PrefsApiError(f'Caught an error while switching "autostart": {err}') from err
 
     def prefs_apply_theme(self):
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        ulauncher_window = UlauncherWindow.get_instance()
-        ulauncher_window.init_theme()
+        self.get_application().window.init_theme()
 
     @rt.route('/set/hotkey-show-app')
     @glib_idle_add
     def prefs_set_hotkey_show_app(self, query):
         hotkey = query['value']
         # Bind a new key
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        ulauncher_window = UlauncherWindow.get_instance()
-        ulauncher_window.bind_hotkey(hotkey)
+        self.get_application().bind_hotkey(hotkey)
         self.settings.set_property('hotkey-show-app', hotkey)
 
     @rt.route('/show/hotkey-dialog')

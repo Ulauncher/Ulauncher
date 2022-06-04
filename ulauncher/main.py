@@ -1,5 +1,4 @@
 import sys
-import argparse
 import signal
 import logging
 from functools import partial
@@ -9,76 +8,14 @@ import ulauncher.utils.xinit  # noqa: F401
 import gi
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gio, GLib, Gtk
+from gi.repository import GLib, Gtk
 from ulauncher.config import API_VERSION, STATE_DIR, VERSION, get_options
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
 from ulauncher.utils.logging import ColoredFormatter, log_format
-
-options = get_options()
-
-# Set up global logging for stdout and file
-root_log_handler = logging.getLogger()
-root_log_handler.setLevel(logging.DEBUG)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
-stream_handler.setFormatter(ColoredFormatter(log_format))
-root_log_handler.addHandler(stream_handler)
-
-file_handler = logging.FileHandler(f"{STATE_DIR}/last.log", mode='w+')
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(logging.Formatter(log_format))
-root_log_handler.addHandler(file_handler)
-# Logger for actual use in this file
-logger = logging.getLogger('ulauncher')
+from ulauncher.ui.UlauncherApp import UlauncherApp
 
 
-class UlauncherApp(Gtk.Application):
-    # Gtk.Applications check if the app is already registered and if so,
-    # new instances sends the signals to the registered one
-    # So all methods except __init__ runs on the main app
-    window = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            *args,
-            application_id="net.launchpad.ulauncher",
-            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
-            **kwargs
-        )
-        self.connect("startup", self.setup)  # runs only once on the main instance
-
-    def setup(self, _):
-        self.hold()  # Keep the app running even without a window
-        # These modules are very heavy, so we don't want to load them in the remote
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        self.window = UlauncherWindow.get_instance()
-        self.window.set_application(self)
-        self.window.finish_initializing()
-
-    def do_before_emit(self, data):
-        query = data.lookup_value("query", GLib.VariantType("s"))
-        if query:
-            self.window.initial_query = query.unpack()
-
-    def do_activate(self, *args, **kwargs):
-        self.window.show_window()
-
-    def do_command_line(self, *args, **kwargs):
-        # This is where we handle "--no-window" which we need to get from the remote call
-        # All other aguments are persistent and handled in config.get_options()
-        parser = argparse.ArgumentParser(prog='gui')
-        parser.add_argument("--no-window", action="store_true")
-        args, _ = parser.parse_known_args(args[0].get_arguments()[1:])
-
-        if not args.no_window:
-            self.activate()
-
-        return 0
-
-
-def reload_config(app):
+def reload_config(app, logger):
     logger.info("Reloading config")
     app.window.init_theme()
 
@@ -87,10 +24,30 @@ def main():
     """
     Main function that starts everything
     """
+    options = get_options()
+
+    # Set up global logging for stdout and file
+    root_log_handler = logging.getLogger()
+    root_log_handler.setLevel(logging.DEBUG)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
+    stream_handler.setFormatter(ColoredFormatter(log_format))
+    root_log_handler.addHandler(stream_handler)
+
+    file_handler = logging.FileHandler(f"{STATE_DIR}/last.log", mode='w+')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(log_format))
+    root_log_handler.addHandler(file_handler)
+
+    # Logger for actual use in this file
+    logger = logging.getLogger('ulauncher')
+
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
+
     if XDG_SESSION_TYPE != "X11":
         logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
@@ -115,7 +72,7 @@ def main():
     GLib.unix_signal_add(
         GLib.PRIORITY_DEFAULT,
         signal.SIGHUP,
-        partial(reload_config, app),
+        partial(reload_config, app, logger),
         None
     )
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
