@@ -35,7 +35,6 @@ class TestHotkeyDialog:
         dialog.on_key_press(widget, event)
         assert not dialog._hotkey_input.set_text.called
 
-    @pytest.mark.with_display
     def test_on_key_press__valid_hotkey(self, dialog, widget, event, emit):
         accel_name = '<Primary><Alt>g'
         (key, mode) = Gtk.accelerator_parse(accel_name)

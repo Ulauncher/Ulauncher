@@ -81,7 +81,6 @@ class TestPreferencesWindow:
         preferences_window.prefs_set({'property': 'grab-mouse-pointer', 'value': True})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
 
-    @pytest.mark.with_display
     def test_get_app_hotkey(self, preferences_window, settings):
         settings.get_property.return_value = '<Primary>B'
         assert preferences_window.get_app_hotkey() == 'Ctrl+B'
