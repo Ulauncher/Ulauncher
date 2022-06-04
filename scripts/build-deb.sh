@@ -28,16 +28,13 @@ build-deb () {
     fi
 
     src_dir=$(pwd)
-    name="ulauncher"
-    tmpdir="/tmp"
-    tmpsrc="$tmpdir/$name"
+    tmpdir="/tmp/ulauncher"
 
     info "Building Preferences UI"
-    ./setup.py build_prefs
+    ./setup.py build_prefs --force
 
     info "Copying src to a temp dir"
     rm -rf $tmpdir/* || true
-    mkdir -p $tmpsrc || true
     rsync -aq --progress \
         AUTHORS \
         bin \
@@ -50,20 +47,20 @@ build-deb () {
         ulauncher \
         ulauncher.desktop \
         ulauncher.service \
-        $tmpsrc \
+        $tmpdir \
         --exclude-from=.gitignore
 
     # This is only needed because data/preferences is in .gitignore
     cp -r data/preferences $tmpdir/data/preferences
 
-    cd $tmpsrc
+    cd $tmpdir
 
     if [ "$1" = "--deb" ]; then
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
         sed -i "s/%RELEASE%/bionic/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
-        success "ulauncher_${version}_all.deb saved to $tmpdir"
+        success "ulauncher_${version}_all.deb saved to /tmp"
     elif [ "$1" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
             error "RELEASE env var is not supplied"
@@ -93,7 +90,10 @@ build-deb () {
         info "Uploading to launchpad"
         dput ppa:$PPA $tmpdir/*.changes
     else
-        error "Second argument must be either --deb or --upload"
-        exit 1
+        sed -i "s/%VERSION%/$deb_version/g" debian/changelog
+        sed -i "s/%RELEASE%/bionic/g" debian/changelog
+        info "Building deb package"
+        dpkg-buildpackage -tc --no-sign
+        success "ulauncher_${version}_all.deb saved to /tmp"
     fi
 }

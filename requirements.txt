@@ -1,6 +1,6 @@
-pytest==5.2.0
-pytest-mock==3.3.1
-pylint==2.3.1
-mypy==0.701
-mypy_extensions==0.4.1
-flake8==3.7.7
+pytest~=7.0.0
+pytest-mock~=3.6.0
+pylint~=2.13.0
+mypy==0.960
+mypy_extensions~=0.4.0
+flake8~=3.9.0
