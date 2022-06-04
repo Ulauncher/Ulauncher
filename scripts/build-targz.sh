@@ -16,7 +16,6 @@ build-targz () {
     ./setup.py build_prefs --force
 
     rm -rf $tmpdir || true
-    mkdir -p $tmpdir || true
     rsync -aq --progress \
         AUTHORS \
         bin \
