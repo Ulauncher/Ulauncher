@@ -44,24 +44,12 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_icon')
 
     @pytest.fixture(autouse=True)
-    def show_notification(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.show_notification')
-
-    @pytest.fixture(autouse=True)
     def AppResult(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppResult.get_most_frequent').return_value
 
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
-
-    @pytest.fixture(autouse=True)
-    def extRunner(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionRunner.get_instance').return_value
-
-    @pytest.fixture(autouse=True)
-    def extServer(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionServer.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def get_scr_geometry(self, mocker):

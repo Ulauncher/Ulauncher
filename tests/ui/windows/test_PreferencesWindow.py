@@ -1,5 +1,6 @@
 from unittest import mock
 import pytest
+from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 
@@ -8,10 +9,6 @@ class TestPreferencesWindow:
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesWindow.Settings.get_instance').return_value
-
-    @pytest.fixture(autouse=True)
-    def indicator(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.AppIndicator.get_instance').return_value
 
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
@@ -29,36 +26,39 @@ class TestPreferencesWindow:
     def hotkey_dialog(self, mocker):
         return mocker.patch('ulauncher.ui.windows.PreferencesWindow.HotkeyDialog').return_value
 
-    @pytest.fixture(autouse=True)
-    def idle_add(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.PreferencesWindow.GLib.idle_add')
-
     # pylint: disable=too-many-arguments
     @pytest.fixture
-    def preferences_window(self, mocker, settings, webview, autostart_pref, hotkey_dialog):
+    def preferences_window(self, mocker, settings, webview, autostart_pref, hotkey_dialog, ulauncherWindow):
         mocker.patch('ulauncher.ui.windows.PreferencesWindow.PreferencesWindow._init_webview')
+        app = UlauncherApp()
+        app.window = ulauncherWindow
+        app.toggle_appindicator = mock.MagicMock()
+        app.bind_hotkey = mock.MagicMock()
         win = PreferencesWindow()
         win.settings = settings
         win.webview = webview
         win.autostart_pref = autostart_pref
         win.hotkey_dialog = hotkey_dialog
+        win.set_application(app)
         win.ui = mock.MagicMock()
         return win
 
     # pylint: disable=too-many-arguments
-    def test_prefs_set_show_indicator_icon(self, preferences_window, settings, indicator, idle_add):
+    def test_prefs_set_show_indicator_icon(self, preferences_window, settings):
         preferences_window.prefs_set({'property': 'show-indicator-icon', 'value': True})
-        idle_add.assert_called_with(indicator.switch, True)
+        app = preferences_window.get_application()
+        app.toggle_appindicator.assert_called_with(True)
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
         preferences_window.prefs_set({'property': 'show-indicator-icon', 'value': False})
-        idle_add.assert_called_with(indicator.switch, False)
+        app.toggle_appindicator.assert_called_with(False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
 
-    def test_prefs_set_hotkey_show_app(self, preferences_window, ulauncherWindow, settings):
+    def test_prefs_set_hotkey_show_app(self, preferences_window, settings):
+        app = preferences_window.get_application()
         hotkey = '<Primary>space'
         preferences_window.prefs_set_hotkey_show_app.original(preferences_window, {'value': hotkey})
-        ulauncherWindow.bind_hotkey.assert_called_with(hotkey)
+        app.bind_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
 
     def test_prefs_set_autostart(self, preferences_window, autostart_pref):

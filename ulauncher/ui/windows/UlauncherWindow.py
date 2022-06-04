@@ -1,6 +1,5 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 import os
-import time
 import logging
 
 import gi
@@ -9,30 +8,25 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('Keybinder', '3.0')
 
 # pylint: disable=wrong-import-position, unused-argument
-from gi.repository import Gtk, Gdk, GLib, Keybinder
+from gi.repository import Gtk, Gdk, Keybinder
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_asset, FIRST_RUN
-from ulauncher.ui.AppIndicator import AppIndicator
+from ulauncher.config import get_asset
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.utils.wm import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
-from ulauncher.utils.desktop.notification import show_notification
-from ulauncher.utils.environment import IS_X11, IS_X11_COMPATIBLE
+from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
-from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +45,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     result_box = Gtk.Template.Child("result_box")
     scroll_container = Gtk.Template.Child("result_box_scroll_container")
     window_body = Gtk.Template.Child("body")
-    preferences = None  # type: PreferencesWindow
     results_nav = None
     settings = Settings.get_instance()
     is_focused = False
     initial_query = None
-    _current_accel_name = None
     _css_provider = None
     _drag_start_coords = None
 
@@ -65,40 +57,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def get_instance(cls):
         return cls()
 
-    def finish_initializing(self):
-        self.set_keep_above(True)
-        self.position_window()
-        self.init_theme()
-
-        # this will trigger to show frequent apps if necessary
-        self.show_results([])
-
-        if self.settings.get_property('show-indicator-icon'):
-            AppIndicator.get_instance(self).show()
-
-        if IS_X11:
-            # bind hotkey
-            Keybinder.init()
-            accel_name = self.settings.get_property('hotkey-show-app')
-            # bind in the main thread
-            GLib.idle_add(self.bind_hotkey, accel_name)
-
-        ExtensionServer.get_instance().start()
-        time.sleep(0.01)
-        ExtensionRunner.get_instance().run_all()
-
     ######################################
     # GTK Signal Handlers
     ######################################
-
-    def on_preferences_destroyed(self, widget, data=None):
-        '''only affects GUI
-
-        logically there is no difference between the user closing,
-        minimizing or ignoring the preferences dialog'''
-        logger.debug('on_preferences_destroyed')
-        # to determine whether to create or present preferences
-        self.preferences = None
 
     @Gtk.Template.Callback()
     def on_focus_out(self, widget, event):
@@ -212,21 +173,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.init_styles(theme.compile_css())
 
     @Gtk.Template.Callback()
-    def show_preferences(self, page=None):
-        self.hide()
-        if not str or not isinstance(page, str):
-            page = 'preferences'
-
-        if self.preferences is not None:
-            logger.debug('Show existing preferences window')
-            self.preferences.present(page=page)
-        else:
-            logger.debug('Create new preferences window')
-            self.preferences = PreferencesWindow()
-            self.preferences.set_application(self.get_application())
-            self.preferences.connect('destroy', self.on_preferences_destroyed)
-            self.preferences.show(page=page)
-        # destroy command moved into dialog to allow for a help button
+    def show_preferences(self, *_):
+        self.get_application().show_preferences()
 
     def position_window(self):
         monitor = get_monitor(self.settings.get_property('render-on-screen') != "default-monitor")
@@ -285,22 +233,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 event.x_root - start['x'],
                 event.y_root - start['y']
             )
-
-    def bind_hotkey(self, accel_name):
-        if not IS_X11 or self._current_accel_name == accel_name:
-            return
-
-        if self._current_accel_name:
-            Keybinder.unbind(self._current_accel_name)
-            self._current_accel_name = None
-
-        logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, self.show_window)
-        self._current_accel_name = accel_name
-        if FIRST_RUN:
-            (key, mode) = Gtk.accelerator_parse(accel_name)
-            display_name = Gtk.accelerator_get_label(key, mode)
-            show_notification("Ulauncher", f"Hotkey is set to {display_name}")
 
     def _get_input_text(self):
         return self.input.get_text().lstrip()
