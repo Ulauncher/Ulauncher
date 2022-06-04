@@ -35,7 +35,7 @@ class TestPreferencesWindow:
 
     # pylint: disable=too-many-arguments
     @pytest.fixture
-    def dialog(self, mocker, settings, webview, autostart_pref, hotkey_dialog):
+    def preferences_window(self, mocker, settings, webview, autostart_pref, hotkey_dialog):
         mocker.patch('ulauncher.ui.windows.PreferencesWindow.PreferencesWindow._init_webview')
         win = PreferencesWindow()
         win.settings = settings
@@ -46,42 +46,42 @@ class TestPreferencesWindow:
         return win
 
     # pylint: disable=too-many-arguments
-    def test_prefs_set_show_indicator_icon(self, dialog, settings, indicator, idle_add):
-        dialog.prefs_set({'property': 'show-indicator-icon', 'value': True})
+    def test_prefs_set_show_indicator_icon(self, preferences_window, settings, indicator, idle_add):
+        preferences_window.prefs_set({'property': 'show-indicator-icon', 'value': True})
         idle_add.assert_called_with(indicator.switch, True)
         settings.set_property.assert_called_with('show-indicator-icon', True)
 
-        dialog.prefs_set({'property': 'show-indicator-icon', 'value': False})
+        preferences_window.prefs_set({'property': 'show-indicator-icon', 'value': False})
         idle_add.assert_called_with(indicator.switch, False)
         settings.set_property.assert_called_with('show-indicator-icon', False)
 
-    def test_prefs_set_hotkey_show_app(self, dialog, ulauncherWindow, settings):
+    def test_prefs_set_hotkey_show_app(self, preferences_window, ulauncherWindow, settings):
         hotkey = '<Primary>space'
-        dialog.prefs_set_hotkey_show_app.original(dialog, {'value': hotkey})
+        preferences_window.prefs_set_hotkey_show_app.original(preferences_window, {'value': hotkey})
         ulauncherWindow.bind_hotkey.assert_called_with(hotkey)
         settings.set_property.assert_called_with('hotkey-show-app', hotkey)
 
-    def test_prefs_set_autostart(self, dialog, autostart_pref):
-        dialog.prefs_set_autostart(True)
+    def test_prefs_set_autostart(self, preferences_window, autostart_pref):
+        preferences_window.prefs_set_autostart(True)
         autostart_pref.switch.assert_called_with(True)
 
-        dialog.prefs_set_autostart(False)
+        preferences_window.prefs_set_autostart(False)
         autostart_pref.switch.assert_called_with(False)
 
-    def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
-        dialog.prefs_set({'property': 'theme-name', 'value': 'light'})
+    def test_prefs_set_theme_name(self, preferences_window, settings, ulauncherWindow):
+        preferences_window.prefs_set({'property': 'theme-name', 'value': 'light'})
         settings.set_property.assert_called_with('theme-name', 'light')
         ulauncherWindow.init_theme.assert_called_with()
 
-    def test_prefs_showhotkey_dialog(self, dialog, hotkey_dialog):
-        dialog.prefs_showhotkey_dialog.original(dialog, {'name': 'hotkey-name'})
+    def test_prefs_showhotkey_dialog(self, preferences_window, hotkey_dialog):
+        preferences_window.prefs_showhotkey_dialog.original(preferences_window, {'name': 'hotkey-name'})
         hotkey_dialog.present.assert_called_with()
 
-    def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
-        dialog.prefs_set({'property': 'grab-mouse-pointer', 'value': True})
+    def test_prefs_set_grab_mouse_pointer(self, preferences_window, settings):
+        preferences_window.prefs_set({'property': 'grab-mouse-pointer', 'value': True})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
 
     @pytest.mark.with_display
-    def test_get_app_hotkey(self, dialog, settings):
+    def test_get_app_hotkey(self, preferences_window, settings):
         settings.get_property.return_value = '<Primary>B'
-        assert dialog.get_app_hotkey() == 'Ctrl+B'
+        assert preferences_window.get_app_hotkey() == 'Ctrl+B'
