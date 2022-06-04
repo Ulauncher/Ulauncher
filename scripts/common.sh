@@ -14,7 +14,7 @@ tan=$'\e[91m'
 cyan=$'\e[96m'
 white=$'\e[97m'
 
-BUILD_IMAGE=ulauncher/build-image:5.0
+BUILD_IMAGE=ulauncher/build-image:6.0
 FEDORA_BUILD_IMAGE=ulauncher/fedora:5.0-32
 FEDORA_33_BUILD_IMAGE=ulauncher/fedora:5.0-33
 ARCH_BUILD_IMAGE=ulauncher/arch:5.0
