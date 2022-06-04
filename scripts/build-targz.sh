@@ -13,7 +13,7 @@ build-targz () {
     echo "###################################"
 
     set -ex
-    ./setup.py build_prefs
+    ./setup.py build_prefs --force
 
     rm -rf $tmpdir || true
     mkdir -p $tmpdir || true

@@ -7,7 +7,7 @@ run-ci () {
     step2="pip install Levenshtein"
     step3="cd docs && sphinx-apidoc -d 5 -o source ../ulauncher && make html && cd .."
     step4="./ul test"
-    step5="./setup.py build_prefs --verify 1"
+    step5="./setup.py build_prefs --force"
 
     exec docker run \
         --rm \
