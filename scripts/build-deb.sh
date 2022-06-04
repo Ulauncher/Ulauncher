@@ -90,7 +90,10 @@ build-deb () {
         info "Uploading to launchpad"
         dput ppa:$PPA $tmpdir/*.changes
     else
-        error "Second argument must be either --deb or --upload"
-        exit 1
+        sed -i "s/%VERSION%/$deb_version/g" debian/changelog
+        sed -i "s/%RELEASE%/bionic/g" debian/changelog
+        info "Building deb package"
+        dpkg-buildpackage -tc --no-sign
+        success "ulauncher_${version}_all.deb saved to /tmp"
     fi
 }
