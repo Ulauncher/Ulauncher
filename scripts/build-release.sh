@@ -13,6 +13,10 @@ build-release() {
         exit 1
     fi
 
+    # Ensure the types and unit tests are ok, but don't bother with linting
+    ./ul test-mypy
+    ./ul test-pytest
+
     info "Releasing Ulauncher $VERSION"
 
     set -e

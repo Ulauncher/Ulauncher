@@ -1,4 +1,5 @@
 #!/usr/bin/make -f
+export DEB_BUILD_OPTIONS=nocheck
 # Enable this export to get more detailed information about what debhelper does during the build process.
 #export DH_VERBOSE = 1
 
