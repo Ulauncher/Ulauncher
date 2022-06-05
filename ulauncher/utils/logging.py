@@ -2,7 +2,7 @@ import logging
 
 # Great reference for terminal colors: https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
 
-log_format = "%(asctime)s | %(levelname)s | %(message)s | %(name)s: %(funcName)s():%(lineno)s"
+log_format = "%(asctime)s | %(levelname)s | %(message)s | %(name)s.%(funcName)s():%(lineno)s"
 
 
 def mkcolor(color, bold=False):
@@ -29,6 +29,8 @@ class ColoredFormatter(logging.Formatter):
 
     def format(self, record):
         symbol, color = self.formats.get(record.levelno, ("", 0))
-        colorized_fmt = color_highlight(self._fmt, "| %(levelname)s |", color, True, symbol, "%(levelname)s")
-        formatter = logging.Formatter(colorized_fmt)
+        fmt_colorized_level = color_highlight(self._fmt, "| %(levelname)s |", color, True, symbol, "%(levelname)s")
+        fmt_colorized = color_highlight(fmt_colorized_level, "%(name)s.%(funcName)s():%(lineno)s", 2)  # 2 means faded
+
+        formatter = logging.Formatter(fmt_colorized)
         return formatter.format(record)
