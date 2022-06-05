@@ -51,7 +51,8 @@ def main():
     if XDG_SESSION_TYPE != "X11":
         logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
-        logger.error("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
+        logger.critical("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
+        sys.exit()
     if options.no_window_shadow:
         logger.warning("The --no-window-shadow argument has been moved to a user setting")
     if options.hide_window:
@@ -59,7 +60,8 @@ def main():
         # it was implemented using XDG autostart. To prevent files created the old way
         # from starting a second Ulauncher background process we have to make sure the
         # --no-window flag prevents the app from starting.
-        sys.exit("The --hide-window argument has been renamed to --no-window")
+        logger.critical("The --hide-window argument has been renamed to --no-window")
+        sys.exit()
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
