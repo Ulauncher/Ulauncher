@@ -46,12 +46,20 @@ def main():
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
+    logger.info("PyGobject+ %i.%i.%i", *gi.version_info)
+
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
 
     if XDG_SESSION_TYPE != "X11":
         logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         logger.critical("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
+        sys.exit()
+    if gi.version_info < (3, 30, 0):
+        logger.critical(
+            "Ulauncher requires PyGobject version 3.30 or newer. "
+            "See https://github.com/Ulauncher/Ulauncher/issues/1051 for infos how to update."
+        )
         sys.exit()
     if options.no_window_shadow:
         logger.warning("The --no-window-shadow argument has been moved to a user setting")
