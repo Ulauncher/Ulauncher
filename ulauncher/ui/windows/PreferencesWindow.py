@@ -8,12 +8,11 @@ from typing import List, Optional, cast
 import traceback
 
 import gi
-gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gdk, Gtk, WebKit2
+from gi.repository import Gio, Gtk, WebKit2
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
@@ -75,7 +74,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             title="Ulauncher Preferences",
             window_position=Gtk.WindowPosition.CENTER,
         )
-        self.connect("key-press-event", self.on_key_press)
         self.connect("delete-event", self.on_delete)
         self.set_default_size(1000, 600)
         self.settings = Settings.get_instance()
@@ -84,13 +82,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.hotkey_dialog = HotkeyDialog()
         self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
         self.show_all()
-
-    def on_key_press(self, _, event):
-        keyval = event.get_keyval()
-        keyname = Gdk.keyval_name(keyval[1])
-
-        if keyname == 'Escape':
-            self.hide()
 
     def on_delete(self, *_):
         # Override default event when the user presses the close button in the menubar
