@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from random import randint
+import random
 
 from ulauncher.utils.logging import color_highlight, ColoredFormatter, log_format
 
@@ -10,7 +10,8 @@ def setup_logging():
     root = logging.getLogger()
 
     ext_name = get_extension_name()
-    colorized_ext_name = color_highlight(ext_name, ext_name, randint(32, 37), True)
+    random.seed(ext_name)
+    colorized_ext_name = color_highlight(ext_name, ext_name, random.randint(32, 37), True)
     handler = logging.StreamHandler()
     handler.setFormatter(ColoredFormatter(log_format.replace("%(message)s", f"{colorized_ext_name} %(message)s")))
 
