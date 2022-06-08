@@ -7,7 +7,7 @@ from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, OptionItems
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 ValueType = Union[str, int]  # Bool is a subclass of int
 PreferenceItem = TypedDict('PreferenceItem', {

@@ -8,7 +8,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.wm import get_windows_stacked, get_xserver_time
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 settings = Settings.get_instance()
 
 

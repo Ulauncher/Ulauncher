@@ -1,3 +1,4 @@
+import sys
 import os
 import json
 import logging
@@ -9,7 +10,7 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, PreferencesUpdateEvent, UnloadEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
-from ulauncher.api.client.setup_logging import setup_logging, get_extension_name
+from ulauncher.api.client.setup_logging import setup_logging
 
 
 class Extension:
@@ -19,8 +20,8 @@ class Extension:
 
     def __init__(self):
         setup_logging()
-        self.logger = logging.getLogger(__name__)
-        self.extension_id = get_extension_name()
+        self.extension_id = os.path.basename(os.path.dirname(sys.argv[0]))
+        self.logger = logging.getLogger(self.extension_id)
         self._listeners = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}

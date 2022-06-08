@@ -18,7 +18,7 @@ from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.modes.extensions.extension_finder import find_extensions
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 ExtRunError = TypedDict('ExtRunError', {
     'name': str,

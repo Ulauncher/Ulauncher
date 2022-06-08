@@ -28,7 +28,7 @@ from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.modes.Query import Query
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 @Gtk.Template(filename=get_asset("ui/ulauncher_window.ui"))

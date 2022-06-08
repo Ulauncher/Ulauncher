@@ -3,7 +3,7 @@ import os
 from shutil import which
 from gi.repository import GLib
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 use_systemd_run = which("systemd-run") and os.system("systemd-run --user --scope true  2> /dev/null") == 0
 
 if not use_systemd_run:

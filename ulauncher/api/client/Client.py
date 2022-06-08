@@ -10,7 +10,7 @@ from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.utils.framer import PickleFramer
 from ulauncher.utils.timer import timer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class Client:

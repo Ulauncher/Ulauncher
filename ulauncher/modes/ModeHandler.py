@@ -9,7 +9,7 @@ from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.utils.decorator.singleton import singleton
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class ModeHandler:

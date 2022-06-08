@@ -36,7 +36,7 @@ from ulauncher.utils.AutostartPreference import AutostartPreference
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_asset, get_options, API_VERSION, VERSION, EXTENSIONS_DIR
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 rt = Router()
 
 

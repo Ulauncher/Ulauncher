@@ -9,7 +9,7 @@ from ulauncher.api.shared.event import RegisterEvent
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.framer import PickleFramer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class ExtensionServer:

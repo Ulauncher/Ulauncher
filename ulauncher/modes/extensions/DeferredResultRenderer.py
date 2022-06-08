@@ -7,7 +7,7 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 
-logger = logging.getLogger('DeferredResultRenderer')
+logger = logging.getLogger()
 
 
 class DeferredResultRenderer:

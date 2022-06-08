@@ -7,7 +7,7 @@ from gi.repository import Gtk, Gdk, GObject
 from ulauncher.config import get_asset
 
 
-logger = logging.getLogger('ulauncher')
+logger = logging.getLogger()
 
 FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', 'Down', 'Left', 'Right', 'Return',
                         'BackSpace', 'Alt_L', 'Alt_R', 'Shift_L', 'Shift_R', 'Control_L', 'Control_R', 'space',
