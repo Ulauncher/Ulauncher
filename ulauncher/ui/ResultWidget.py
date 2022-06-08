@@ -11,7 +11,7 @@ from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
 from ulauncher.modes.Query import Query
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class ResultWidget(Gtk.EventBox):

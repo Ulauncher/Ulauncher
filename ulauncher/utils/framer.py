@@ -6,7 +6,7 @@ from gi.repository import GLib, Gio, GObject
 
 INTSZ = 4
 
-log = logging.getLogger(__name__)
+log = logging.getLogger()
 
 
 class InvalidStateError(RuntimeError):

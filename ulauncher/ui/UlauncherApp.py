@@ -18,7 +18,7 @@ from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 
-logger = logging.getLogger('ulauncher')
+logger = logging.getLogger()
 
 
 class UlauncherApp(Gtk.Application):

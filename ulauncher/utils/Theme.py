@@ -8,7 +8,7 @@ from ulauncher.config import ASSETS_DIR, CONFIG_DIR, CACHE_DIR
 from ulauncher.utils.Settings import Settings
 
 themes = {}  # type: Dict[str, Any]
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
 
 

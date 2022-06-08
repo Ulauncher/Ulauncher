@@ -6,7 +6,7 @@ import tempfile
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.utils.decorator.run_async import run_async
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class RunScriptAction(BaseAction):

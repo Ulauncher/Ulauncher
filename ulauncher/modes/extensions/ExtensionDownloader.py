@@ -14,7 +14,7 @@ from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class ExtensionDownloaderError(UlauncherAPIError):

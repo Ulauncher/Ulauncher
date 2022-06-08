@@ -6,7 +6,7 @@ from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRend
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class ExtensionController:

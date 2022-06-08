@@ -5,7 +5,7 @@ gi.require_version('Notify', '0.7')
 from gi.repository import Notify
 
 Notify.init('ulauncher')
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def show_notification(summary, body, icon='ulauncher'):

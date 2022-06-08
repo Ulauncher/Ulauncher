@@ -6,7 +6,7 @@ from gi.repository import GObject
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 GPROPERTIES = {
     "hotkey-show-app": (str,  # type

@@ -11,7 +11,7 @@ from ulauncher.config import API_VERSION
 from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 Commit = Tuple[str, datetime]
 

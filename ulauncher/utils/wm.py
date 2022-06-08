@@ -8,7 +8,7 @@ gi.require_versions({
 # pylint: disable=wrong-import-position
 from gi.repository import Gdk, GdkX11, Gio, Wnck
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 wnck_screen = Wnck.Screen.get_default()
 
 

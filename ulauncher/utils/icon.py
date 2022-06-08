@@ -11,7 +11,7 @@ from gi.repository import Gtk, GdkPixbuf
 from ulauncher.config import get_asset
 
 icon_theme = Gtk.IconTheme.get_default()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 DEFAULT_EXE_ICON = get_asset("icons/executable.png")
 
