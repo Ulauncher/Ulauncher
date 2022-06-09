@@ -13,11 +13,6 @@
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
           <b-badge v-if="ext.error" variant="warning">Error</b-badge>
-          <b-badge
-            v-else-if="!ext.is_running && ext.runtime_error && ext.runtime_error.name !== 'NoExtensionsFlag'"
-            variant="warning"
-          >Crashed</b-badge>
-          <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
           <span>{{ ext.name }}</span>
         </li>
         <li class="link" @click="addExtDialog">

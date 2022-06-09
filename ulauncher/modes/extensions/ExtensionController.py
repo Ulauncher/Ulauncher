@@ -1,7 +1,7 @@
 import logging
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
@@ -63,11 +63,7 @@ class ExtensionController:
         """
         Triggers event for an extension
         """
-        # don't debounce events that are triggered by updates in preferences
-        if isinstance(event, PreferencesUpdateEvent):
-            self._send_event(event)
-        else:
-            self._debounced_send_event(event)
+        self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
 
     def get_manifest(self):

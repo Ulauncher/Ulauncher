@@ -1,4 +1,3 @@
-import time
 import argparse
 import logging
 # This xinit import must happen before any GUI libraries are initialized.
@@ -15,8 +14,6 @@ from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 
 logger = logging.getLogger()
 
@@ -81,10 +78,6 @@ class UlauncherApp(Gtk.Application):
             accel_name = self.settings.get_property('hotkey-show-app')
             # bind in the main thread
             GLib.idle_add(self.bind_hotkey, accel_name)
-
-        ExtensionServer.get_instance().start()
-        time.sleep(0.01)
-        ExtensionRunner.get_instance().run_all()
 
     def toggle_appindicator(self, enable):
         if not self.appindicator:

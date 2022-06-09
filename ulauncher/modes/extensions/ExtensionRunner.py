@@ -16,7 +16,6 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
-from ulauncher.modes.extensions.extension_finder import find_extensions
 
 logger = logging.getLogger()
 
@@ -40,7 +39,6 @@ class ExtensionRuntimeError(Enum):
 
 
 class ExtensionRunner:
-
     @classmethod
     @singleton
     def get_instance(cls) -> 'ExtensionRunner':
@@ -52,26 +50,12 @@ class ExtensionRunner:
         self.dont_run_extensions = get_options().no_extensions
         self.verbose = get_options().verbose
 
-    def run_all(self):
-        """
-        Finds all extensions in `EXTENSIONS_DIR` and runs them
-        """
-        for ex_id, _ in find_extensions(EXTENSIONS_DIR):
-            try:
-                self.run(ex_id)
-            # pylint: disable=broad-except
-            except Exception as e:
-                logger.error("Couldn't run '%s'. %s: %s", ex_id, type(e).__name__, e)
-
     def run(self, extension_id):
         """
-        * Validates manifest
         * Runs extension in a new process
         """
         if not self.is_running(extension_id):
             preferences = ExtensionPreferences.create_instance(extension_id)
-            preferences.manifest.validate()
-            preferences.manifest.check_compatibility()
 
             cmd = [sys.executable, f"{EXTENSIONS_DIR}/{extension_id}/main.py"]
             env = {}
@@ -133,11 +117,12 @@ class ExtensionRunner:
         subprocess.wait_finish(result)
         if subprocess.get_if_signaled():
             code = subprocess.get_term_sig()
-            error_msg = f'Extension "{extension_id}" was terminated with code {code}'
-            logger.error(error_msg)
-            self.set_extension_error(extension_id, ExtensionRuntimeError.Terminated, error_msg)
-            self.extension_procs.pop(extension_id, None)
-            return
+            if code != signal.SIGTERM:
+                error_msg = f'Extension "{extension_id}" was terminated with code {code}'
+                logger.error(error_msg)
+                self.set_extension_error(extension_id, ExtensionRuntimeError.Terminated, error_msg)
+                self.extension_procs.pop(extension_id, None)
+                return
 
         extproc = self.extension_procs.get(extension_id)
         if not extproc or id(extproc.subprocess) != id(subprocess):
@@ -184,6 +169,11 @@ class ExtensionRunner:
             extproc.subprocess.send_signal(signal.SIGTERM)
 
             timer(0.5, partial(self.confirm_termination, extproc))
+
+    def stop_all(self):
+        while len(self.extension_procs):
+            ext_id = list(self.extension_procs)[0]
+            self.stop(ext_id)
 
     def confirm_termination(self, extproc):
         if extproc.subprocess.get_identifier():

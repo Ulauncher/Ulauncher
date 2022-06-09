@@ -16,15 +16,12 @@ from gi.repository import Gio, Gtk, WebKit2
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
-from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import themes, load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.mypy_extensions import TypedDict
@@ -60,8 +57,6 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
     'description': str,
     'developer_name': str,
     'instructions': Optional[str],
-    'is_running': bool,
-    'runtime_error': Optional[ExtRunError],
     'preferences': PreferenceItems,
     'error': Optional[ExtError]
 })
@@ -339,21 +334,15 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def prefs_extension_add(self, query):
         url = query['url']
         logger.info('Add extension: %s', url)
-        downloader = ExtensionDownloader.get_instance()
-        ext_id = downloader.download(url)
-        ExtensionRunner.get_instance().run(ext_id)
-
+        ExtensionDownloader.get_instance().download(url)
         return self._get_all_extensions()
 
     @rt.route('/extension/update-prefs')
     def prefs_extension_update_prefs(self, query):
         logger.info('Update extension preferences: %s', query)
-        controller = ExtensionServer.get_instance().controllers.get(query['id'])
+        prefs = ExtensionPreferences.create_instance(query['id'])
         for pref_id, value in query['data'].items():
-            old_value = controller.preferences.get(pref_id)['value']
-            controller.preferences.set(pref_id, value)
-            if value != old_value:
-                controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
+            prefs.set(pref_id, value)
 
     @rt.route('/extension/check-updates')
     def prefs_extension_check_updates(self, query):
@@ -368,10 +357,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         ext_id = query['id']
         logger.info('Update extension: %s', ext_id)
         try:
-            runner = ExtensionRunner.get_instance()
-            runner.stop(ext_id)
             ExtensionDownloader.get_instance().update(ext_id)
-            runner.run(ext_id)
         except ExtensionManifestError as e:
             raise PrefsApiError(e) from e
 
@@ -379,7 +365,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def prefs_extension_remove(self, query):
         ext_id = query['id']
         logger.info('Remove extension: %s', ext_id)
-        ExtensionRunner.get_instance().stop(ext_id)
         ExtensionDownloader.get_instance().remove(ext_id)
 
     ######################################
@@ -410,9 +395,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
         ext_db = ExtensionDb.get_instance()
-        is_connected = ext_id in ExtensionServer.get_instance().controllers
-        ext_runner = ExtensionRunner.get_instance()
-        is_running = is_connected or ext_runner.is_running(ext_id)
         ext_db_record = ext_db.find(ext_id, {})
         return {
             'id': ext_id,
@@ -426,9 +408,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             'developer_name': prefs.manifest.get_developer_name(),
             'instructions': prefs.manifest.get_instructions(),
             'preferences': prefs.get_items(),
-            'error': error,
-            'is_running': is_running,
-            'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
+            'error': error
         }
 
     def _load_prefs_html(self, page=''):
