@@ -2,6 +2,7 @@ import logging
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.modes.Query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
@@ -56,7 +57,13 @@ class ExtensionController:
 
         :returns: :class:`BaseAction` object
         """
-        event = KeywordQueryEvent(query, self.preferences)
+        # Normalize the query to the extension default keyword, not the custom user keyword
+        user_keyword = query.get_keyword()
+        for pref in self.preferences.get_items():
+            if pref['type'] == "keyword" and pref['value'] == user_keyword:
+                query = Query(query.replace(pref['value'], pref['default_value'], 1))
+
+        event = KeywordQueryEvent(query)
         return self.trigger_event(event)
 
     def trigger_event(self, event):

@@ -24,30 +24,14 @@ class KeywordQueryEvent(BaseEvent):
     Is triggered when user enters query that starts with your keyword + Space
 
     :param ~ulauncher.modes.Query.Query query:
-    :param ~ulauncher.modes.extensions.ExtensionPreferences preferences:
     """
 
-    def __init__(self, query, preferences):
+    def __init__(self, query):
         self.query = query
-        self.preferences = preferences
-
-    def get_keyword_id(self):
-        """
-        :rtype: str
-        :returns: the keyword id, as specified in the manifest
-        """
-        keyword = self.query.get_keyword()
-        keyword_id = ""
-
-        for pref in self.preferences.get_items():
-            if pref['type'] == "keyword" and pref['value'] == keyword:
-                keyword_id = pref['id']
-        return keyword_id
 
     def get_keyword(self):
         """
         :rtype: str
-        :returns: the keyword the user entered (you likely want the get_keyword_id() instead)
         """
         return self.query.get_keyword()
 
