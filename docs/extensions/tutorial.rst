@@ -1,4 +1,4 @@
-Development Tutorial
+Extension Development Tutorial
 ====================
 
 Creating a Project
