@@ -67,7 +67,8 @@ disable=broad-except,         # Try/except catching all exceptionds instead of s
         protected-access,     # Referencing _something
         redefined-builtin,    # Shadowing python internals
         too-many-boolean-expressions,
-        unspecified-encoding  # Only needed for Windows
+        unspecified-encoding,  # Only needed for Windows
+        unrecognized-option, unknown-option-value,  # Pylint 2.14 config sanity check (not backwards compatible)
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
