@@ -49,7 +49,7 @@ class TestDeferredResultRenderer:
 
     def test_handle_response__action__is_ran(self, renderer, controller):
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'), {})
+        response.event = KeywordQueryEvent(Query('test'))
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
@@ -58,7 +58,7 @@ class TestDeferredResultRenderer:
     def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, mocker):
         UlauncherWindow = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'), {})
+        response.event = KeywordQueryEvent(Query('test'))
         response.action.keep_app_open.return_value = False
         renderer.active_event = response.event
         renderer.active_controller = controller
