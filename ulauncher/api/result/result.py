@@ -62,7 +62,7 @@ class Result:
         """
         if query and self.highlightable:
             return highlight_text(
-                query if not self.keyword else query.get_argument(''),
+                query if not self.keyword else query.argument,
                 self.name,
                 open_tag=f'<span foreground="{color}">',
                 close_tag='</span>'

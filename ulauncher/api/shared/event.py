@@ -36,7 +36,7 @@ class KeywordQueryEvent(BaseEvent):
         """
         :rtype: str
         """
-        return self.query.get_keyword()
+        return self.query.keyword
 
     def get_query(self):
         """
@@ -49,7 +49,7 @@ class KeywordQueryEvent(BaseEvent):
         :rtype: str
         :returns: None if arguments were not specified
         """
-        return self.query.get_argument()
+        return self.query.argument
 
 
 # pylint: disable=too-few-public-methods

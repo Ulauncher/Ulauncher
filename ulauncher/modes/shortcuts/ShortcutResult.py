@@ -20,7 +20,7 @@ class ShortcutResult(SearchableResult):
 
     def get_name_highlighted(self, query, color):
         # highlight only if we did not enter Web search item keyword
-        if query.get_keyword() == self.keyword and query.get_argument():
+        if query.keyword == self.keyword and query.argument:
             return None
 
         return super().get_name_highlighted(query, color)
@@ -35,18 +35,18 @@ class ShortcutResult(SearchableResult):
         if self.is_default_search:
             return description.replace('%s', query)
 
-        if query.get_keyword() == self.keyword and query.get_argument():
-            return description.replace('%s', query.get_argument())
-        if query.get_keyword() == self.keyword and self.run_without_argument:
+        if query.keyword == self.keyword and query.argument:
+            return description.replace('%s', query.argument)
+        if query.keyword == self.keyword and self.run_without_argument:
             return 'Press Enter to run the shortcut'
-        if query.get_keyword() == self.keyword and not query.get_argument():
+        if query.keyword == self.keyword and not query.argument:
             return 'Type in your query and press Enter...'
 
         return description.replace('%s', '...')
 
     def on_enter(self, query):
-        if query.get_keyword() == self.keyword and query.get_argument():
-            argument = query.get_argument()
+        if query.keyword == self.keyword and query.argument:
+            argument = query.argument
         elif self.is_default_search:
             argument = query
         else:

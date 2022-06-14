@@ -58,9 +58,8 @@ class ExtensionController:
         :returns: :class:`BaseAction` object
         """
         # Normalize the query to the extension default keyword, not the custom user keyword
-        user_keyword = query.get_keyword()
         for pref in self.preferences.get_items():
-            if pref['type'] == "keyword" and pref['value'] == user_keyword:
+            if pref['type'] == "keyword" and pref['value'] == query.keyword:
                 query = Query(query.replace(pref['value'], pref['default_value'], 1))
 
         event = KeywordQueryEvent(query)
