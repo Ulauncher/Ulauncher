@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import signal
+import shlex
 from collections import namedtuple, deque
 from functools import partial
 from typing import Dict, Optional
@@ -74,23 +75,20 @@ class ExtensionRunner:
             preferences.manifest.check_compatibility()
 
             cmd = [sys.executable, f"{EXTENSIONS_DIR}/{extension_id}/main.py"]
-            env = {}
-            env['PYTHONPATH'] = ':'.join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv('PYTHONPATH')]))
-
-            if self.verbose:
-                env['VERBOSE'] = '1'
+            env = {
+                "VERBOSE": str(int(self.verbose)),
+                "PYTHONPATH": ":".join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv("PYTHONPATH")])),
+                "EXTENSION_PREFERENCES": json.dumps(preferences.get_dict(), separators=(',', ':'))
+            }
 
             if self.dont_run_extensions:
-                args = [env.get('VERBOSE', ''), env['PYTHONPATH']]
-                args.extend(cmd)
-                run_cmd = 'VERBOSE={} PYTHONPATH={} {} {}'.format(*args)
+                run_cmd = " ".join(f"{k}={shlex.quote(v)}" for k, v in env.items()) + " " + " ".join(cmd)
                 logger.warning('Copy and run the following command to start %s', extension_id)
                 logger.warning(run_cmd)
                 self.set_extension_error(extension_id, ExtensionRuntimeError.NoExtensionsFlag, run_cmd)
                 return
 
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
-            launcher.setenv("EXTENSION_PREFERENCES", json.dumps(preferences.get_dict()), True)
             for env_name, env_value in env.items():
                 launcher.setenv(env_name, env_value, True)
 
