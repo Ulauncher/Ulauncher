@@ -173,7 +173,7 @@ Copy the following code to ``main.py``::
 
   class DemoExtension(Extension):
 
-      def on_query_change(self, event):
+      def on_query_change(self, query):
           items = []
           for i in range(5):
               items.append(ExtensionResult(
@@ -216,8 +216,8 @@ Basic API Concepts
 
     class DemoExtension(Extension):
 
-        def on_query_change(self, event):
-            # `event` will be an instance of :class:`KeywordQueryEvent`
+        def on_query_change(self, query):
+            # `query` will be an instance of :class:`Query`
 
             ...
 
@@ -232,7 +232,7 @@ Basic API Concepts
   ::
 
     class DemoExtension(Extension):
-        def on_query_change(self, event):
+        def on_query_change(self, query):
             items = []
             for i in range(5):
                 items.append(ExtensionResult(
@@ -285,14 +285,12 @@ Custom Action on Item Enter
 
     class DemoExtension(Extension):
 
-        def on_query_change(self, event):
+        def on_query_change(self, query):
             ...
 
-        def on_item_enter(self, event):
-            # event is instance of ItemEnterEvent
-
-            data = event.get_data()
-            # do additional actions here...
+        def on_item_enter(self, data):
+            # data is whatever you passed as the first argument to ExtensionCustomAction
+            # do any additional actions here...
 
             # you may want to return another list of results
             return [ExtensionResult(

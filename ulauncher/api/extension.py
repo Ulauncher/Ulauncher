@@ -64,8 +64,8 @@ class Extension:
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
             # We can use method_name to determine if listener was added the old way or the new class method way
-            # When method_name is None, we should also pass self for backwards compatibility
-            action = method(event) if method_name else method(event, self)
+            # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
+            action = method(*event.args) if method_name else method(event, self)
             if action:
                 assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
                 self._client.send(Response(event, action))
@@ -77,16 +77,16 @@ class Extension:
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_query_change(self, event):
+    def on_query_change(self, query):
         pass
 
-    def on_item_enter(self, event):
+    def on_item_enter(self, data):
         pass
 
-    def on_preferences_update(self, event):
+    def on_preferences_update(self, id, value, previous_value):
         pass
 
-    def on_unload(self, event):
+    def on_unload(self):
         pass
 
 

@@ -1,7 +1,9 @@
 from pickle import loads, dumps
+from typing import Any, List
 
 
 class BaseEvent:
+    args: List[Any] = []
 
     def __eq__(self, other):
         return dumps(self) == dumps(other)
@@ -28,6 +30,7 @@ class KeywordQueryEvent(BaseEvent):
 
     def __init__(self, query):
         self.query = query
+        self.args = [query]
 
     def get_keyword(self):
         """
@@ -60,6 +63,7 @@ class ItemEnterEvent(BaseEvent):
 
     def __init__(self, data):
         self._data = data
+        self.args = [data]
 
     def get_data(self):
         """
@@ -90,10 +94,11 @@ class PreferencesUpdateEvent(BaseEvent):
     old_value = None
     new_value = None
 
-    def __init__(self, id, old_value, new_value):
+    def __init__(self, id, previous_value, value):
         self.id = id
-        self.old_value = old_value
-        self.new_value = new_value
+        self.old_value = previous_value
+        self.new_value = value
+        self.args = [id, value, previous_value]
 
 
 class PreferencesEvent(BaseEvent):
@@ -107,6 +112,7 @@ class PreferencesEvent(BaseEvent):
 
     def __init__(self, preferences):
         self.preferences = preferences
+        self.args = [preferences]
 
 
 # Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
