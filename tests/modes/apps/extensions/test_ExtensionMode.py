@@ -1,6 +1,6 @@
 from unittest import mock
 import pytest
-from ulauncher.modes.Query import Query
+from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 

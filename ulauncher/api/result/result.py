@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.modes.Query import Query
+from ulauncher.api.shared.query import Query
 from ulauncher.utils.text_highlighter import highlight_text
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]

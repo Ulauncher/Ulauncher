@@ -3,7 +3,7 @@ import pytest
 from gi.repository import Gio
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.modes.Query import Query
+from ulauncher.api.shared.query import Query
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None

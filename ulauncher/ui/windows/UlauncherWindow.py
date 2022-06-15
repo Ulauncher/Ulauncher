@@ -26,7 +26,7 @@ from ulauncher.utils.wm import get_monitor, get_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
-from ulauncher.modes.Query import Query
+from ulauncher.api.shared.query import Query
 
 logger = logging.getLogger()
 

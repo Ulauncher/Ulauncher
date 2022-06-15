@@ -2,7 +2,7 @@ import logging
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
-from ulauncher.modes.Query import Query
+from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
