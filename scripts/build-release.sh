@@ -23,9 +23,6 @@ build-release() {
 
     create_deb
 
-    # RPMs deactivated for now
-    # create_rpms
-
     # Upload if tag doesn't contain "test"
     if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
         launchpad_upload
@@ -54,30 +51,10 @@ create_deb() {
     docker rm ulauncher-deb
 }
 
-create_rpms() {
-    # RPMs are tricky because different distros have different Python3 versions
-    # We know that
-    #   Fedora 32 has Python 3.8
-    #   Fedora 33 has Python 3.9
-    # This means that we should use separate docker images to build different RPM packages
-
-    h1 "Creating .rpm"
-
-    set -ex
-    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_BUILD_IMAGE \
-        bash -c "./ul build-rpm fedora"
-    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora.rpm .
-    docker rm ulauncher-rpm
-
-    docker run -v $(pwd):/root/ulauncher --name ulauncher-rpm $FEDORA_33_BUILD_IMAGE \
-        bash -c "./ul build-rpm fedora fedora33"
-    docker cp ulauncher-rpm:/tmp/ulauncher_${VERSION}_fedora33.rpm .
-    docker rm ulauncher-rpm
-
-    set +x
-}
-
 aur_update() {
+    # Note that this script does not need to run with Docker in any specific
+    # environment/distro, but it was written that way and it works,
+    # so it still does use Docker and https://hub.docker.com/r/ulauncher/arch
     h1 "Push new PKGBUILD to AUR stable channel"
     workdir=/home/notroot/ulauncher
     chmod 600 scripts/aur_key
@@ -88,7 +65,7 @@ aur_update() {
         -u notroot \
         -w $workdir \
         -v $(pwd):$workdir \
-        $ARCH_BUILD_IMAGE \
+        ulauncher/arch:5.0 \
         bash -c "./ul aur-update $VERSION"
 }
 

@@ -6,13 +6,9 @@ help () {
   ${bold}./ul run
     ${dim}Alias for './bin/ulauncher -v --dev'${normal}
 
-  ${bold}./ul dev-container [IMAGE_NAME]
-    ${dim}Takes you into a Docker container from which you can run tests and build binary packages
+  ${bold}./ul dev-container
+    ${dim}Takes you into an Ubuntu Docker container from which you can run tests and build binary packages
     This is added for convenience so developers won't be required to install all the build and test dependencies locally
-
-    IMAGE_NAME is an optional argument.
-    If not set, an image based on ubuntu image will be used.
-    Other possible options: ${normal}${bold}fedora, fedora33, arch${normal}
 
   ${bold}./ul rm-python-cache
     ${dim}Removes .pyc, .pyo, __pycache__${normal}
