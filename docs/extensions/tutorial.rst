@@ -1,5 +1,5 @@
 Extension Development Tutorial
-====================
+==============================
 
 Creating a Project
 ------------------
@@ -33,7 +33,7 @@ The file contains a list with supported versions of Ulauncher API. ``commit`` fi
 
 ``required_api_version`` specifies the minimum supported API version or a lower and upper version. You can find the current version number on the About page of Ulauncher preferences or the log output if you run `ulauncher -v` from a terminal.
 
-Some examples of how to target a range of versions:
+Some examples of how to target a range of versions::
 * ``2`` matches any versions that starts with ``2.``. It is the same as ``2.x`` and ``2.0``
 * ``2.1`` matches Ulauncher's API version 2.1 or higher, but lower than 3.0
 * ``2.1 - 5`` will match version 2.1 and higher up to version 5.9999... but not version 6.x. Make sure you specify the separator exactly like this `` - ``, as it is intentionally "picky" to be backward compatible.
