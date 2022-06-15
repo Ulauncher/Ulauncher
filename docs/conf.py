@@ -18,6 +18,7 @@
 #
 import os
 import sys
+from datetime import date
 from typing import Dict
 import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('..'))
@@ -49,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Ulauncher'
-copyright = '2018, Aleksandr Gornostal'
+copyright = f'2017-{date.today().year}, Aleksandr Gornostal'
 author = 'Aleksandr Gornostal'
 
 # The version info for the project you're documenting, acts as replacement for
