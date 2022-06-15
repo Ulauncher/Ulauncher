@@ -8,12 +8,10 @@ class RenderResultListAction(BaseAction):
 
     :param list result_list: list of :class:`~ulauncher.api.Result` objects
     """
+    keep_app_open = True
 
     def __init__(self, result_list):
         self.result_list = result_list
-
-    def keep_app_open(self):
-        return True
 
     def run(self):
         # pylint: disable=import-outside-toplevel

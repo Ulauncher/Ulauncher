@@ -59,7 +59,7 @@ class TestDeferredResultRenderer:
         UlauncherWindow = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')
         response = mock.Mock()
         response.event = KeywordQueryEvent(Query('test'))
-        response.action.keep_app_open.return_value = False
+        response.action.keep_app_open = False
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)

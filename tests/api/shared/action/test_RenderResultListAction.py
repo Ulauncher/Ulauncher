@@ -19,7 +19,7 @@ class TestRenderResultListAction:
         return RenderResultListAction(result_list)
 
     def test_keep_app_open(self, action):
-        assert action.keep_app_open()
+        assert action.keep_app_open
 
     def test_run(self, action, mocker, result_list, GLib):
         UlauncherWindow = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')

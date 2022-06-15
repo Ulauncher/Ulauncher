@@ -61,7 +61,7 @@ class DeferredResultRenderer:
         if isinstance(action, list):
             action = RenderResultListAction(action)
         action.run()
-        if not action.keep_app_open():
+        if not action.keep_app_open:
             self._hide_window()
 
     def on_query_change(self):

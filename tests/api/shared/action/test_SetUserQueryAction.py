@@ -15,7 +15,7 @@ class TestSetUserQueryAction:
         return SetUserQueryAction('new query')
 
     def test_keep_app_open(self, action):
-        assert action.keep_app_open()
+        assert action.keep_app_open
 
     def test_update_query(self, action, window):
         action._update_query()

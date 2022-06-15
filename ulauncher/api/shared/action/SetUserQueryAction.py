@@ -7,15 +7,11 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 class SetUserQueryAction(BaseAction):
     """
     Changes query string to a new one
-
-    :param str new_query:
     """
+    keep_app_open = True
 
-    def __init__(self, new_query):
+    def __init__(self, new_query: str):
         self.new_query = new_query
-
-    def keep_app_open(self):
-        return True
 
     def run(self):
         GLib.idle_add(self._update_query)

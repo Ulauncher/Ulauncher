@@ -16,10 +16,7 @@ class ExtensionCustomAction(BaseAction):
 
     def __init__(self, data, keep_app_open=False):
         self._data = pickle.dumps(data)
-        self._keep_app_open = keep_app_open
-
-    def keep_app_open(self):
-        return self._keep_app_open
+        self.keep_app_open = keep_app_open
 
     def run(self):
         """

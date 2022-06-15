@@ -1,11 +1,5 @@
 class BaseAction:
-
-    def keep_app_open(self):
-        """
-        :rtype: bool
-        :returns: True if Ulauncher window should remain open once all actions are done
-        """
-        return False
+    keep_app_open = False
 
     def run(self):
         """

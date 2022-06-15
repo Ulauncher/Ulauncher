@@ -10,11 +10,9 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 class CopyToClipboardAction(BaseAction):
     """
     Copy text to the clipboard
-
-    :param str text: text to copy
     """
 
-    def __init__(self, text):
+    def __init__(self, text: str):
         self.text = text
 
     def run(self):
