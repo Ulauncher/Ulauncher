@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 # Run this to build this image:
-# docker build -t ulauncher/build-image:6.0 .
+# source scripts/common.sh && docker build -t $BUILD_IMAGE .
 
 LABEL maintainer="ulauncher.app@gmail.com"
 
