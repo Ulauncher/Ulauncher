@@ -46,11 +46,3 @@ bold() {
 note() {
     printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
 }
-
-warn-if-not-in-docker () {
-    if [ ! -f /.dockerenv -a ! -f /run/.containerenv ]; then
-        echo
-        echo "${yellow}WARNING: It's recommended to run tests in a docker container to be sure they will also pass in CI${normal}"
-        echo
-    fi
-}
