@@ -82,6 +82,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.autostart_pref = AutostartPreference()
         self.show_all()
 
+    def load_page(self, page=''):
+        self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
+
     def on_delete(self, *_):
         # Override default event when the user presses the close button in the menubar
         self.hide()
@@ -107,7 +110,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         self.webview = WebKit2.WebView(settings=settings, web_context=context)
         self.add(self.webview)
-        self._load_prefs_html()
+        self.load_page()
         # Show right click menu if running with --dev flag
         self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
@@ -120,11 +123,11 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     # pylint: disable=arguments-differ
     def present(self, page):
-        self._load_prefs_html(page)
+        self.load_page(page)
         super().present()
 
     def show(self, page):
-        self._load_prefs_html(page)
+        self.load_page(page)
         super().show()
 
     ######################################
@@ -437,6 +440,3 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             'is_running': is_running,
             'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
         }
-
-    def _load_prefs_html(self, page=''):
-        self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
