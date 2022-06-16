@@ -199,7 +199,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     ######################################
 
     @rt.route('/get/all')
-    def prefs_get_all(self, query):
+    def get_all(self, query):
         logger.info('API call /get/all')
         themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
         settings = self.settings.get_all()
@@ -218,12 +218,12 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         return settings
 
     @rt.route('/set')
-    def prefs_set(self, query):
+    def apply_settings(self, query):
         property = query['property']
         value = query['value']
         # This setting is not stored to the config
         if property == 'autostart-enabled':
-            self.prefs_set_autostart(value)
+            self.apply_autostart(value)
             return
 
         self.settings.set_property(property, value)
@@ -231,9 +231,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         if property == 'show-indicator-icon':
             self.get_application().toggle_appindicator(value)
         if property == 'theme-name':
-            self.prefs_apply_theme()
+            self.apply_theme()
 
-    def prefs_set_autostart(self, is_enabled):
+    def apply_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
             raise PrefsApiError("Unable to turn on autostart preference")
@@ -243,12 +243,12 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         except Exception as err:
             raise PrefsApiError(f'Caught an error while switching "autostart": {err}') from err
 
-    def prefs_apply_theme(self):
+    def apply_theme(self):
         self.get_application().window.init_theme()
 
     @rt.route('/set/hotkey-show-app')
     @glib_idle_add
-    def prefs_set_hotkey_show_app(self, query):
+    def set_hotkey_show_app(self, query):
         hotkey = query['value']
         # Bind a new key
         self.get_application().bind_hotkey(hotkey)
@@ -288,25 +288,25 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         dialog.destroy()
 
     @rt.route('/open/web-url')
-    def prefs_open_url(self, query):
+    def open_url(self, query):
         url = query['url']
         logger.info('Open Web URL %s', url)
         OpenAction(url).run()
 
     @rt.route('/open/extensions-dir')
-    def prefs_open_extensions_dir(self, _):
+    def open_extensions_dir(self, _):
         logger.info('Open extensions directory "%s" in default file manager.', EXTENSIONS_DIR)
         OpenAction(EXTENSIONS_DIR).run()
 
     @rt.route('/shortcut/get-all')
-    def prefs_shortcut_get_all(self, query):
+    def shortcut_get_all(self, query):
         logger.info('Handling /shortcut/get-all')
         shortcuts = ShortcutsDb.get_instance()
         return shortcuts.get_shortcuts()
 
     @rt.route('/shortcut/update')
     @rt.route('/shortcut/add')
-    def prefs_shortcut_update(self, query):
+    def shortcut_update(self, query):
         logger.info('Add/Update shortcut: %s', json.dumps(query))
         shortcuts = ShortcutsDb.get_instance()
         id = shortcuts.put_shortcut(query['name'],
@@ -320,19 +320,19 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         return {'id': id}
 
     @rt.route('/shortcut/remove')
-    def prefs_shortcut_remove(self, query):
+    def shortcut_remove(self, query):
         logger.info('Remove shortcut: %s', json.dumps(query))
         shortcuts = ShortcutsDb.get_instance()
         shortcuts.remove(query['id'])
         shortcuts.commit()
 
     @rt.route('/extension/get-all')
-    def prefs_extension_get_all(self, query):
+    def extension_get_all(self, query):
         logger.info('Handling /extension/get-all')
         return self._get_all_extensions()
 
     @rt.route('/extension/add')
-    def prefs_extension_add(self, query):
+    def extension_add(self, query):
         url = query['url']
         logger.info('Add extension: %s', url)
         downloader = ExtensionDownloader.get_instance()
@@ -342,7 +342,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         return self._get_all_extensions()
 
     @rt.route('/extension/update-prefs')
-    def prefs_extension_update_prefs(self, query):
+    def extension_update_prefs(self, query):
         logger.info('Update extension preferences: %s', query)
         controller = ExtensionServer.get_instance().controllers.get(query['id'])
         for pref_id, value in query['data'].items():
@@ -352,7 +352,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
     @rt.route('/extension/check-updates')
-    def prefs_extension_check_updates(self, query):
+    def extension_check_updates(self, query):
         logger.info('Handling /extension/check-updates')
         try:
             return ExtensionDownloader.get_instance().get_new_version(query['id'])
@@ -360,7 +360,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             return None
 
     @rt.route('/extension/update-ext')
-    def prefs_extension_update_ext(self, query):
+    def extension_update_ext(self, query):
         ext_id = query['id']
         logger.info('Update extension: %s', ext_id)
         try:
@@ -372,7 +372,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             raise PrefsApiError(e) from e
 
     @rt.route('/extension/remove')
-    def prefs_extension_remove(self, query):
+    def extension_remove(self, query):
         ext_id = query['id']
         logger.info('Remove extension: %s', ext_id)
         ExtensionRunner.get_instance().stop(ext_id)
