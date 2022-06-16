@@ -311,8 +311,8 @@ class PreferencesWindow(Gtk.ApplicationWindow):
                                     query['keyword'],
                                     query['cmd'],
                                     query.get('icon') or None,
-                                    str_to_bool(query['is_default_search']),
-                                    str_to_bool(query['run_without_argument']),
+                                    query['is_default_search'],
+                                    query['run_without_argument'],
                                     query.get('id'))
         shortcuts.commit()
         return {'id': id}
@@ -447,7 +447,3 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             'value': hotkey_val,
             'displayValue': hotkey_display_val
         })
-
-
-def str_to_bool(value):
-    return value in [1, 'true', 'True']
