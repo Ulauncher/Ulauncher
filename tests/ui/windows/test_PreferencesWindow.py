@@ -79,7 +79,3 @@ class TestPreferencesWindow:
     def test_set_grab_mouse_pointer(self, preferences_window, settings):
         preferences_window.apply_settings({'property': 'grab-mouse-pointer', 'value': True})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
-
-    def test_get_app_hotkey(self, preferences_window, settings):
-        settings.get_property.return_value = '<Primary>B'
-        assert preferences_window.get_app_hotkey() == 'Ctrl+B'

@@ -103,8 +103,7 @@ class UlauncherApp(Gtk.Application):
         Keybinder.bind(accel_name, lambda _: self.window.show_window())
         self._current_accel_name = accel_name
         if FIRST_RUN:
-            (key, mode) = Gtk.accelerator_parse(accel_name)
-            display_name = Gtk.accelerator_get_label(key, mode)
+            display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(accel_name))
             show_notification("Ulauncher", f"Hotkey is set to {display_name}")
 
     def show_preferences(self, page=None):

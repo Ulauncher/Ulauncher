@@ -199,13 +199,22 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     @rt.route('/get/all')
     def get_all(self, query):
         logger.info('API call /get/all')
-        themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
         settings = self.settings.get_all()
+        themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
+
+        hotkey_accelerator = settings.get('hotkey_show_app')
+        hotkey_caption = "Ctrl+Space"
+        try:
+            hotkey_caption = Gtk.accelerator_get_label(*Gtk.accelerator_parse(hotkey_accelerator))
+        # pylint: disable=broad-except
+        except Exception:
+            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', hotkey_accelerator)
+
         settings.update({
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_enabled(),
             'available_themes': themes,
-            'hotkey_show_app': self.get_app_hotkey(),
+            'hotkey_show_app': hotkey_caption,
             'env': {
                 'version': VERSION,
                 'api_version': API_VERSION,
@@ -431,13 +440,3 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _load_prefs_html(self, page=''):
         self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
-
-    def get_app_hotkey(self):
-        app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')
-        try:
-            (key, mode) = Gtk.accelerator_parse(app_hotkey_current_accel_name)
-        # pylint: disable=broad-except
-        except Exception:
-            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', app_hotkey_current_accel_name)
-            (key, mode) = Gtk.accelerator_parse("<Primary>space")
-        return Gtk.accelerator_get_label(key, mode)
