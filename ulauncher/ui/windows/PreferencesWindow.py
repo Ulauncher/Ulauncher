@@ -191,7 +191,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         except Exception as e:
             logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
 
-    def send_webview_notification(self, name, data):
+    def notify_webview(self, name, data):
         self.webview.run_javascript(f'onNotification("{name}", {json.dumps(data)})')
 
     ######################################
@@ -284,7 +284,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             data['value'] = dialog.get_filename()
 
         logger.debug('%s %s', file_browser_name, data)
-        self.send_webview_notification(file_browser_name, data)
+        self.notify_webview(file_browser_name, data)
         dialog.destroy()
 
     @rt.route('/open/web-url')
@@ -441,7 +441,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         return Gtk.accelerator_get_label(key, mode)
 
     def on_hotkey_set(self, widget, hotkey_val, hotkey_display_val):
-        self.send_webview_notification(self._hotkey_name, {
+        self.notify_webview(self._hotkey_name, {
             'value': hotkey_val,
             'displayValue': hotkey_display_val
         })
