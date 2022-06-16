@@ -67,6 +67,53 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
 })
 
 
+def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
+    ext_db = ExtensionDb.get_instance()
+    is_connected = ext_id in ExtensionServer.get_instance().controllers
+    ext_runner = ExtensionRunner.get_instance()
+    is_running = is_connected or ext_runner.is_running(ext_id)
+    ext_db_record = ext_db.find(ext_id, {})
+    return {
+        'id': ext_id,
+        'url': ext_db_record.get('url'),
+        'updated_at': ext_db_record.get('updated_at'),
+        'last_commit': ext_db_record.get('last_commit'),
+        'last_commit_time': ext_db_record.get('last_commit_time'),
+        'name': prefs.manifest.get_name(),
+        'icon': prefs.manifest.get_icon_path(),
+        'description': prefs.manifest.get_description(),
+        'developer_name': prefs.manifest.get_developer_name(),
+        'instructions': prefs.manifest.get_instructions(),
+        'preferences': prefs.get_items(),
+        'error': error,
+        'is_running': is_running,
+        'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
+    }
+
+
+def get_all_extensions() -> List[ExtensionInfo]:
+    extensions = []
+    for ext_id, _ in find_extensions(EXTENSIONS_DIR):
+        prefs = ExtensionPreferences.create_instance(ext_id)  # type: ExtensionPreferences
+        error = None
+        try:
+            prefs.manifest.validate()
+            prefs.manifest.check_compatibility()
+        except UlauncherAPIError as e:
+            error = cast(ExtError, {
+                'message': str(e),
+                'errorName': e.error_name
+            })
+        except Exception as e:
+            error = cast(ExtError, {
+                'message': str(e),
+                'errorName': ExtensionError.Other.value
+            })
+        extensions.append(get_extension_info(ext_id, prefs, error))
+
+    return extensions
+
+
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
 class PreferencesWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs):
@@ -196,7 +243,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.run_javascript(f'onNotification("{name}", {json.dumps(data)})')
 
     ######################################
-    # Request handlers
+    # Route handlers
     ######################################
 
     @rt.route('/get/all')
@@ -343,7 +390,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     @rt.route('/extension/get-all')
     def extension_get_all(self, query):
         logger.info('Handling /extension/get-all')
-        return self._get_all_extensions()
+        return get_all_extensions()
 
     @rt.route('/extension/add')
     def extension_add(self, query):
@@ -353,7 +400,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         ext_id = downloader.download(url)
         ExtensionRunner.get_instance().run(ext_id)
 
-        return self._get_all_extensions()
+        return get_all_extensions()
 
     @rt.route('/extension/update-prefs')
     def extension_update_prefs(self, query):
@@ -391,52 +438,3 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         logger.info('Remove extension: %s', ext_id)
         ExtensionRunner.get_instance().stop(ext_id)
         ExtensionDownloader.get_instance().remove(ext_id)
-
-    ######################################
-    # Helpers
-    ######################################
-
-    def _get_all_extensions(self) -> List[ExtensionInfo]:
-        extensions = []
-        for ext_id, _ in find_extensions(EXTENSIONS_DIR):
-            prefs = ExtensionPreferences.create_instance(ext_id)  # type: ExtensionPreferences
-            error = None
-            try:
-                prefs.manifest.validate()
-                prefs.manifest.check_compatibility()
-            except UlauncherAPIError as e:
-                error = cast(ExtError, {
-                    'message': str(e),
-                    'errorName': e.error_name
-                })
-            except Exception as e:
-                error = cast(ExtError, {
-                    'message': str(e),
-                    'errorName': ExtensionError.Other.value
-                })
-            extensions.append(self._get_extension_info(ext_id, prefs, error))
-
-        return extensions
-
-    def _get_extension_info(self, ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
-        ext_db = ExtensionDb.get_instance()
-        is_connected = ext_id in ExtensionServer.get_instance().controllers
-        ext_runner = ExtensionRunner.get_instance()
-        is_running = is_connected or ext_runner.is_running(ext_id)
-        ext_db_record = ext_db.find(ext_id, {})
-        return {
-            'id': ext_id,
-            'url': ext_db_record.get('url'),
-            'updated_at': ext_db_record.get('updated_at'),
-            'last_commit': ext_db_record.get('last_commit'),
-            'last_commit_time': ext_db_record.get('last_commit_time'),
-            'name': prefs.manifest.get_name(),
-            'icon': prefs.manifest.get_icon_path(),
-            'description': prefs.manifest.get_description(),
-            'developer_name': prefs.manifest.get_developer_name(),
-            'instructions': prefs.manifest.get_instructions(),
-            'preferences': prefs.get_items(),
-            'error': error,
-            'is_running': is_running,
-            'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
-        }
