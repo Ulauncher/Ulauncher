@@ -108,7 +108,7 @@ export default {
       return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     selectIcon() {
-      jsonp('prefs:///show/file-browser', { type: 'image', name: shortcutIconEventName }).then(null, err =>
+      jsonp('prefs:///show/file-chooser', { type: 'image', name: shortcutIconEventName }).then(null, err =>
         bus.$emit('error', err)
       )
     },

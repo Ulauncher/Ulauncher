@@ -42,8 +42,8 @@ export default function(url, params) {
       setTimeout(function() {
         window.onNotification(params.name, { displayValue: 'Ctrl+Alt+Space', value: '<Ctrl>+<Alt>+<Space>' })
       }, 300)
-    } else if (isMatch(url, '/show/file-browser')) {
-      console.log('/show/file-browser', params)
+    } else if (isMatch(url, '/show/file-chooser')) {
+      console.log('/show/file-chooser', params)
       setTimeout(resolve, 0)
       setTimeout(function() {
         window.onNotification(params.name, { value: placeholderImage })

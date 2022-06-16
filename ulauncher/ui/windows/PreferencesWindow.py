@@ -260,9 +260,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         logger.info('Show hotkey-dialog for %s', self._hotkey_name)
         self.hotkey_dialog.present()
 
-    @rt.route('/show/file-browser')
+    @rt.route('/show/file-chooser')
     @glib_idle_add
-    def prefs_show_file_browser(self, query):
+    def show_file_chooser(self, query):
         """
         Request params: type=(image|all), name=(str)
         """
