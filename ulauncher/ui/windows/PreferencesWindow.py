@@ -69,10 +69,11 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
 
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
 class PreferencesWindow(Gtk.ApplicationWindow):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             title="Ulauncher Preferences",
             window_position=Gtk.WindowPosition.CENTER,
+            **kwargs
         )
         self.connect("delete-event", self.on_delete)
         self.set_default_size(1000, 600)

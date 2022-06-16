@@ -117,8 +117,7 @@ class UlauncherApp(Gtk.Application):
             self.preferences.present(page=page)
         else:
             logger.debug('Create new preferences window')
-            self.preferences = PreferencesWindow()
-            self.preferences.set_application(self)
+            self.preferences = PreferencesWindow(application=self)
             self.preferences.connect('destroy', self.on_preferences_destroyed)
             self.preferences.show(page=page)
         # destroy command moved into dialog to allow for a help button

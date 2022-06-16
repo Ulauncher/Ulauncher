@@ -34,12 +34,11 @@ class TestPreferencesWindow:
         app.window = ulauncherWindow
         app.toggle_appindicator = mock.MagicMock()
         app.bind_hotkey = mock.MagicMock()
-        win = PreferencesWindow()
+        win = PreferencesWindow(application=app)
         win.settings = settings
         win.webview = webview
         win.autostart_pref = autostart_pref
         win.hotkey_dialog = hotkey_dialog
-        win.set_application(app)
         win.ui = mock.MagicMock()
         return win
 
