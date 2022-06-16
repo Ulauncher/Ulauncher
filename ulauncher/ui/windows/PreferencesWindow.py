@@ -25,7 +25,7 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.utils.Theme import themes, load_available_themes
+from ulauncher.utils.Theme import load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
@@ -201,11 +201,12 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     @rt.route('/get/all')
     def prefs_get_all(self, query):
         logger.info('API call /get/all')
+        themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
         settings = self.settings.get_all()
         settings.update({
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_enabled(),
-            'available_themes': self._get_available_themes(),
+            'available_themes': themes,
             'hotkey_show_app': self.get_app_hotkey(),
             'env': {
                 'version': VERSION,
@@ -428,10 +429,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _load_prefs_html(self, page=''):
         self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
-
-    def _get_available_themes(self):
-        load_available_themes()
-        return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
 
     def get_app_hotkey(self):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')

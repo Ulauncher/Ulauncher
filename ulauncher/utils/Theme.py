@@ -30,6 +30,8 @@ def load_available_themes():
                 continue
             themes[theme.get_name()] = theme
 
+    return themes
+
 
 class Theme:
 
