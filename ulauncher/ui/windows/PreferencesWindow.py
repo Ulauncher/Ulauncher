@@ -109,7 +109,8 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview = WebKit2.WebView(settings=settings, web_context=context)
         self.add(self.webview)
         self._load_prefs_html()
-        self.webview.connect('context-menu', self.webview_on_context_menu)
+        # Show right click menu if running with --dev flag
+        self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
         inspector = self.webview.get_inspector()
         inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
@@ -126,13 +127,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def show(self, page):
         self._load_prefs_html(page)
         super().show()
-
-    ######################################
-    # GTK event handlers
-    ######################################
-
-    def webview_on_context_menu(self, *args):
-        return bool(not get_options().dev)
 
     ######################################
     # WebView communication methods
