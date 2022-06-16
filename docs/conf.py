@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Ulauncher'
-copyright = f'2017-{date.today().year}, Aleksandr Gornostal'
+copyright = f'2015-{date.today().year}, Aleksandr Gornostal'
 author = 'Aleksandr Gornostal'
 
 # The version info for the project you're documenting, acts as replacement for
