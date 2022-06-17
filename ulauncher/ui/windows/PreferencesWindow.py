@@ -1,3 +1,4 @@
+import os
 import gi
 gi.require_versions({"Gtk": "3.0", "WebKit2": "4.0"})
 # pylint: disable=wrong-import-position,unused-argument
@@ -16,7 +17,8 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         self.set_default_size(1000, 600)
         self._init_webview()
-        self.connect("delete-event", self.on_delete)
+        # Kill the child WebKitNetworkProcess when the window is closed (there's no clean way to do this)
+        self.connect("delete-event", lambda *_: os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}"))
 
     def _init_webview(self):
         settings = WebKit2.Settings(
@@ -42,11 +44,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def load_page(self, page=''):
         self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
-
-    def on_delete(self, *_):
-        # Override default event when the user presses the close button in the menubar
-        self.hide()
-        return True
 
     # pylint: disable=arguments-differ
     def present(self, page):
