@@ -80,8 +80,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.settings = Settings.get_instance()
         self._init_webview()
         self.autostart_pref = AutostartPreference()
-        self.hotkey_dialog = HotkeyDialog()
-        self.hotkey_dialog.connect('hotkey-set', self.on_hotkey_set)
         self.show_all()
 
     def on_delete(self, *_):
@@ -256,10 +254,14 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     @rt.route('/show/hotkey-dialog')
     @glib_idle_add
-    def prefs_showhotkey_dialog(self, query):
-        self._hotkey_name = query['name']
-        logger.info('Show hotkey-dialog for %s', self._hotkey_name)
-        self.hotkey_dialog.present()
+    def show_hotkey_dialog(self, _):
+        logger.info("Show hotkey-dialog")
+        hotkey_dialog = HotkeyDialog()
+        hotkey_dialog.connect(
+            "hotkey-set",
+            lambda _, val, caption: self.notify_webview("hotkey-show-app", {"value": val, "caption": caption})
+        )
+        hotkey_dialog.present()
 
     @rt.route('/show/file-chooser')
     @glib_idle_add
@@ -439,9 +441,3 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', app_hotkey_current_accel_name)
             (key, mode) = Gtk.accelerator_parse("<Primary>space")
         return Gtk.accelerator_get_label(key, mode)
-
-    def on_hotkey_set(self, widget, hotkey_val, hotkey_display_val):
-        self.notify_webview(self._hotkey_name, {
-            'value': hotkey_val,
-            'displayValue': hotkey_display_val
-        })

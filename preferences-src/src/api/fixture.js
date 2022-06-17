@@ -40,7 +40,7 @@ export default function(url, params) {
       console.log('/show/hotkey-dialog', params)
       setTimeout(resolve, 0)
       setTimeout(function() {
-        window.onNotification(params.name, { displayValue: 'Ctrl+Alt+Space', value: '<Ctrl>+<Alt>+<Space>' })
+        window.onNotification(params.name, { caption: 'Ctrl+Alt+Space', value: '<Ctrl>+<Alt>+<Space>' })
       }, 300)
     } else if (isMatch(url, '/show/file-chooser')) {
       console.log('/show/file-chooser', params)

@@ -263,13 +263,13 @@ export default {
     },
 
     showHotkeyDialog(e) {
-      jsonp('prefs:///show/hotkey-dialog', { name: hotkeyEventName })
+      jsonp('prefs:///show/hotkey-dialog')
       e.target.blur()
     },
 
     onHotkeySet(e) {
       jsonp('prefs:///set/hotkey-show-app', { value: e.value }).then(
-        () => this.setPrefs({ hotkey_show_app: e.displayValue }),
+        () => this.setPrefs({ hotkey_show_app: e.caption }),
         err => bus.$emit('error', err)
       )
     }

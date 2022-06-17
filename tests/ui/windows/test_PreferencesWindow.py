@@ -72,8 +72,8 @@ class TestPreferencesWindow:
         settings.set_property.assert_called_with('theme-name', 'light')
         ulauncherWindow.init_theme.assert_called_with()
 
-    def test_prefs_showhotkey_dialog(self, preferences_window, hotkey_dialog):
-        preferences_window.prefs_showhotkey_dialog.original(preferences_window, {'name': 'hotkey-name'})
+    def test_show_hotkey_dialog(self, preferences_window, hotkey_dialog):
+        preferences_window.show_hotkey_dialog.original(preferences_window, {})
         hotkey_dialog.present.assert_called_with()
 
     def test_set_grab_mouse_pointer(self, preferences_window, settings):
