@@ -70,7 +70,7 @@
 
     <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
       <template v-for="pref in extension.preferences">
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'keyword'"
           :label="`${pref.name} keyword`"
@@ -78,18 +78,18 @@
           :description="pref.description"
         >
           <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
-        </b-form-fieldset>
+        </b-form-group>
 
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'input'"
           :label="pref.name"
           :description="pref.description"
         >
           <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
-        </b-form-fieldset>
+        </b-form-group>
 
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'checkbox'"
           :description="pref.description"
@@ -97,34 +97,34 @@
           <b-form-checkbox :ref="pref.id" :checked="pref.value">
             {{ pref.name }}
           </b-form-checkbox>
-        </b-form-fieldset>
+        </b-form-group>
 
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'number'"
           :label="pref.name"
           :description="pref.description"
         >
           <b-form-input :ref="pref.id" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
-        </b-form-fieldset>
+        </b-form-group>
 
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'text'"
           :label="pref.name"
           :description="pref.description"
         >
           <b-form-textarea :ref="pref.id" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
-        </b-form-fieldset>
+        </b-form-group>
 
-        <b-form-fieldset
+        <b-form-group
           :key="pref.id"
           v-if="pref.type == 'select'"
           :label="pref.name"
           :description="pref.description"
         >
           <b-form-select :ref="pref.id" :value="pref.value" :options="pref.options"></b-form-select>
-        </b-form-fieldset>
+        </b-form-group>
       </template>
     </div>
 

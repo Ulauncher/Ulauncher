@@ -9,15 +9,15 @@
         <img v-if="localIcon" :src="expandUserPath(localIcon)" />
       </div>
 
-      <b-form-fieldset label="Name" :state="nameState">
+      <b-form-group label="Name" :state="nameState">
         <b-form-input class="name" v-model="localName"></b-form-input>
-      </b-form-fieldset>
+      </b-form-group>
 
-      <b-form-fieldset label="Keyword" :state="keywordState">
+      <b-form-group label="Keyword" :state="keywordState">
         <b-form-input class="keyword" v-model="localKeyword"></b-form-input>
-      </b-form-fieldset>
+      </b-form-group>
 
-      <b-form-fieldset label="Query or Script" :state="cmdState">
+      <b-form-group label="Query or Script" :state="cmdState">
         <b-form-textarea class="cmd" :rows="3" v-model="localCmd"></b-form-textarea>
         <small class="form-text text-muted">
           <p>
@@ -37,21 +37,21 @@ echo "You wrote: %s"
 echo "This also works: $@"</code></pre>
           </div>
         </small>
-      </b-form-fieldset>
+      </b-form-group>
 
-      <b-form-fieldset>
+      <b-form-group>
         <b-form-checkbox v-model="localIsDefaultSearch">Default search</b-form-checkbox>
         <small class="form-text text-muted">
           <p>Suggest this shortcut when no results found</p>
         </small>
-      </b-form-fieldset>
+      </b-form-group>
 
-      <b-form-fieldset>
+      <b-form-group>
         <b-form-checkbox v-model="localRunWithoutArgument">Run without arguments</b-form-checkbox>
         <small class="form-text text-muted">
           <p>Allows you to type in a keyword and press Enter to run a shortcut</p>
         </small>
-      </b-form-fieldset>
+      </b-form-group>
 
       <b-button-toolbar>
         <b-button class="save" variant="primary" href @click="save">Save</b-button>
