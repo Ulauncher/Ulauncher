@@ -26,7 +26,6 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     settings = Settings.get_instance()
-    preferences = None  # type: PreferencesWindow
     window = None  # type: UlauncherWindow
     appindicator = None  # type: AppIndicator
     _current_accel_name = None
@@ -111,21 +110,4 @@ class UlauncherApp(Gtk.Application):
         if not str or not isinstance(page, str):
             page = 'preferences'
 
-        if self.preferences is not None:
-            logger.debug('Show existing preferences window')
-            self.preferences.present(page=page)
-        else:
-            logger.debug('Create new preferences window')
-            self.preferences = PreferencesWindow(application=self)
-            self.preferences.connect('destroy', self.on_preferences_destroyed)
-            self.preferences.show(page=page)
-        # destroy command moved into dialog to allow for a help button
-
-    def on_preferences_destroyed(self, *_):
-        '''only affects GUI
-
-        logically there is no difference between the user closing,
-        minimizing or ignoring the preferences dialog'''
-        logger.debug('on_preferences_destroyed')
-        # to determine whether to create or present preferences
-        self.preferences = None
+        PreferencesWindow(application=self).show(page=page)
