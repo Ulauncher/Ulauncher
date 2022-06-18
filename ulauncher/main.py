@@ -57,7 +57,7 @@ def main():
     if gi.version_info < (3, 30, 0):
         logger.critical(
             "Ulauncher requires PyGobject version 3.30 or newer. "
-            "See https://github.com/Ulauncher/Ulauncher/issues/1051 for infos how to update."
+            "See https://github.com/Ulauncher/Ulauncher/issues/1051 for PyGobject upgrade instructions."
         )
         sys.exit()
     if options.no_window_shadow:
