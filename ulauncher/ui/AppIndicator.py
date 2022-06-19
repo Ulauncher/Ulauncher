@@ -30,6 +30,8 @@ class AppIndicator:
 
     def __init__(self, app):
         if AppIndicator3:
+            show_menu_item = create_menu_item("Show Ulauncher", lambda *_: app.do_activate())
+            self.menu.append(show_menu_item)    
             self.menu.append(create_menu_item("Preferences", lambda *_: app.show_preferences()))
             self.menu.append(create_menu_item("About", lambda *_: app.show_preferences("about")))
             self.menu.append(Gtk.SeparatorMenuItem())
@@ -41,6 +43,7 @@ class AppIndicator:
                 AppIndicator3.IndicatorCategory.APPLICATION_STATUS
             )
             self.indicator.set_menu(self.menu)
+            self.indicator.set_secondary_activate_target(show_menu_item)
 
     def switch(self, enable=False):
         if AppIndicator3:
