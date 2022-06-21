@@ -25,24 +25,24 @@ def create_menu_item(label, command):
 
 
 class AppIndicator:
-    menu = Gtk.Menu()
     indicator = None
 
     def __init__(self, app):
         if AppIndicator3:
             show_menu_item = create_menu_item("Show Ulauncher", lambda *_: app.do_activate())
-            self.menu.append(show_menu_item)
-            self.menu.append(create_menu_item("Preferences", lambda *_: app.show_preferences()))
-            self.menu.append(create_menu_item("About", lambda *_: app.show_preferences("about")))
-            self.menu.append(Gtk.SeparatorMenuItem())
-            self.menu.append(create_menu_item("Exit", lambda *_: app.quit()))
-            self.menu.show_all()
+            menu = Gtk.Menu()
+            menu.append(show_menu_item)
+            menu.append(create_menu_item("Preferences", lambda *_: app.show_preferences()))
+            menu.append(create_menu_item("About", lambda *_: app.show_preferences("about")))
+            menu.append(Gtk.SeparatorMenuItem())
+            menu.append(create_menu_item("Exit", lambda *_: app.quit()))
+            menu.show_all()
             self.indicator = AppIndicator3.Indicator.new(
                 "ulauncher",
                 "ulauncher-indicator",
                 AppIndicator3.IndicatorCategory.APPLICATION_STATUS
             )
-            self.indicator.set_menu(self.menu)
+            self.indicator.set_menu(menu)
             self.indicator.set_secondary_activate_target(show_menu_item)
 
     def switch(self, enable=False):
