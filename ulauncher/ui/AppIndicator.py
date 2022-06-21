@@ -18,8 +18,8 @@ except (ImportError, ValueError):
 from gi.repository import Gtk
 
 
-def create_menu_item(title, command):
-    menu_item = Gtk.MenuItem(title)
+def create_menu_item(label, command):
+    menu_item = Gtk.MenuItem(label=label)
     menu_item.connect("activate", command)
     return menu_item
 
