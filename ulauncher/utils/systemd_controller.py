@@ -12,7 +12,7 @@ def systemctl_unit_run(*args):
         return False
 
 
-class AutostartPreference:
+class UlauncherSystemdController:
     def is_allowed(self):
         """
         :returns: True if autostart can be controlled by Ulauncher

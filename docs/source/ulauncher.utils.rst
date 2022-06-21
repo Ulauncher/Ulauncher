@@ -13,10 +13,10 @@ Subpackages
 Submodules
 ----------
 
-ulauncher.utils.AutostartPreference module
+ulauncher.utils.systemd_controller module
 ------------------------------------------
 
-.. automodule:: ulauncher.utils.AutostartPreference
+.. automodule:: ulauncher.utils.systemd_controller
     :members:
     :undoc-members:
     :show-inheritance:

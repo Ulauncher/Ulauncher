@@ -30,7 +30,7 @@ from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router
-from ulauncher.utils.AutostartPreference import AutostartPreference
+from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import API_VERSION, VERSION, EXTENSIONS_DIR
 
@@ -131,7 +131,7 @@ class PreferencesContextServer():
 
     def __init__(self, application):
         self.application = application
-        self.autostart_pref = AutostartPreference()
+        self.autostart_pref = UlauncherSystemdController()
         self.settings = Settings.get_instance()
         self.context = WebKit2.WebContext()
         self.context.register_uri_scheme('prefs', self.on_scheme_callback)

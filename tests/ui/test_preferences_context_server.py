@@ -16,7 +16,7 @@ class TestPreferencesContextServer:
 
     @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):
-        return mocker.patch('ulauncher.ui.preferences_context_server.AutostartPreference').return_value
+        return mocker.patch('ulauncher.ui.preferences_context_server.UlauncherSystemdController').return_value
 
     @pytest.fixture(autouse=True)
     def webview(self, mocker):
