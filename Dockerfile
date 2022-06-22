@@ -38,7 +38,6 @@ RUN apt install -y gir1.2-gtk-3.0
 RUN apt install -y gir1.2-wnck-3.0
 RUN apt install -y gir1.2-notify-0.7
 RUN apt install -y gir1.2-webkit2-4.0
-RUN apt install -y gir1.2-ayatanaappindicator3-0.1
 RUN apt install -y gir1.2-keybinder-3.0
 
 # Upgrade python3-gi on 18.04 (skip this section if you upgrade the Dockerfile to 20.04+)
