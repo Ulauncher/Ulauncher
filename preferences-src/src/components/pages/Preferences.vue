@@ -120,7 +120,7 @@
         <td>
           <label for="show-indicator-icon">Show icon in the panel</label>
           <small>
-            <p>Requires optional dependency gir1.2-ayatanaappindicator3 or equivalent</p>
+            <p>Requires optional dependency XApp (recommended), AppIndicator3 or AyatanaAppindicator3</p>
           </small>
         </td>
         <td>
