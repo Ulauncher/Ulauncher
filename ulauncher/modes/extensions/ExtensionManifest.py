@@ -21,8 +21,8 @@ OptionItems = List[OptionItem]
 Options = TypedDict('Options', {
     'query_debounce': float
 })
-ManifestPreferenceItem = TypedDict(
-    'ManifestPreferenceItem', {
+ManifestPreference = TypedDict(
+    'ManifestPreference', {
         'id': str,
         'type': str,
         'name': str,
@@ -41,7 +41,7 @@ ManifestJson = TypedDict('ManifestJson', {
     'min': Optional[int],
     'max': Optional[int],
     'options': Optional[Options],
-    'preferences': List[ManifestPreferenceItem]
+    'preferences': List[ManifestPreference]
 })
 
 
@@ -80,7 +80,7 @@ class ExtensionManifest:
     def get_developer_name(self) -> str:
         return self.manifest['developer_name']
 
-    def get_preferences(self) -> List[ManifestPreferenceItem]:
+    def get_preferences(self) -> List[ManifestPreference]:
         return self.manifest.get('preferences', [])
 
     def get_instructions(self) -> Optional[str]:
