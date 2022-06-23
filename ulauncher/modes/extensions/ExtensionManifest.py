@@ -29,6 +29,8 @@ ManifestPreference = TypedDict(
         'description': str,
         'default_value': Union[str, int],  # Bool is a subclass of int
         'options': OptionItems,
+        'min': Optional[int],
+        'max': Optional[int],
         'icon': Optional[str]
     })
 ManifestJson = TypedDict('ManifestJson', {
@@ -38,8 +40,6 @@ ManifestJson = TypedDict('ManifestJson', {
     'developer_name': str,
     'icon': str,
     'instructions': Optional[str],
-    'min': Optional[int],
-    'max': Optional[int],
     'options': Optional[Options],
     'preferences': List[ManifestPreference]
 })
