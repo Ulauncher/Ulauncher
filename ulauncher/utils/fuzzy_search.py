@@ -1,9 +1,9 @@
+import logging
 from functools import lru_cache
-from logging import getLogger
 from difflib import SequenceMatcher
 from ulauncher.utils.string import remove_accents
 
-logger = getLogger(__name__)
+logger = logging.getLogger()
 
 
 def _get_matching_blocks_native(query, text):

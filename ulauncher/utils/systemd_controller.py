@@ -1,8 +1,8 @@
+import logging
 from shutil import which
 from subprocess import check_output, run
-from logging import getLogger
 
-logger = getLogger(__name__)
+logger = logging.getLogger()
 
 
 def systemctl_unit_run(*args):

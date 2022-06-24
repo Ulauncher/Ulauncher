@@ -1,13 +1,13 @@
 import json
+import logging
 from pathlib import Path
 from typing import Dict, TypeVar, Generic, Optional
-from logging import getLogger
 
 Key = TypeVar('Key')
 Value = TypeVar('Value')
 Records = Dict[Key, Value]
 
-logger = getLogger(__name__)
+logger = logging.getLogger()
 
 
 class KeyValueJsonDb(Generic[Key, Value]):
