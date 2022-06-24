@@ -1,5 +1,5 @@
 import os
-from json import load
+import json
 from typing import Optional, List, Union
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
@@ -150,4 +150,4 @@ class ExtensionManifest:
 
 def read_manifest(extension_id, extensions_dir):
     with open(os.path.join(extensions_dir, extension_id, 'manifest.json'), 'r') as f:
-        return load(f)
+        return json.load(f)

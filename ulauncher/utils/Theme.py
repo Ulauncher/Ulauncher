@@ -1,6 +1,6 @@
 import os
 import logging
-from json import load
+import json
 from typing import Dict, Any
 from shutil import copytree, rmtree
 
@@ -79,7 +79,7 @@ class Theme:
             return self.theme_dict
 
         with open(os.path.join(self.path, 'manifest.json'), 'r') as f:
-            self.theme_dict = load(f)
+            self.theme_dict = json.load(f)
 
         return self.theme_dict
 
