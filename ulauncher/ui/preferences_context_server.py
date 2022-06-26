@@ -137,7 +137,7 @@ class PreferencesContextServer():
     def __init__(self, application):
         self.application = application
         self.autostart_pref = UlauncherSystemdController()
-        self.settings = Settings.get_instance()
+        self.settings = Settings.load()
         self.context = WebKit2.WebContext()
         self.context.register_uri_scheme('prefs', self.on_scheme_callback)
         self.context.register_uri_scheme('file2', self.serve_file)
@@ -211,18 +211,17 @@ class PreferencesContextServer():
     @rt.route('/get/all')
     def get_all(self, _):
         logger.info('API call /get/all')
-        settings = self.settings.get_all()
+        export_settings = self.settings.copy()
         themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
 
-        hotkey_accelerator = settings.get('hotkey_show_app')
         hotkey_caption = "Ctrl+Space"
         try:
-            hotkey_caption = Gtk.accelerator_get_label(*Gtk.accelerator_parse(hotkey_accelerator))
+            hotkey_caption = Gtk.accelerator_get_label(*Gtk.accelerator_parse(self.settings.hotkey_show_app))
         # pylint: disable=broad-except
         except Exception:
-            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', hotkey_accelerator)
+            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', self.settings.hotkey_show_app)
 
-        settings.update({
+        export_settings.update({
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_enabled(),
             'available_themes': themes,
@@ -234,22 +233,23 @@ class PreferencesContextServer():
                 'is_x11': IS_X11,
             }
         })
-        return settings
+        return export_settings
 
     @rt.route('/set')
     def apply_settings(self, query):
         property = query['property']
         value = query['value']
+        logger.info('Setting %s to %s', property, value)
         # This setting is not stored to the config
         if property == 'autostart-enabled':
             self.apply_autostart(value)
             return
 
-        self.settings.set_property(property, value)
+        self.settings.save({property: value})
 
-        if property == 'show-indicator-icon':
+        if property == 'show_indicator_icon':
             self.application.toggle_appindicator(value)
-        if property == 'theme-name':
+        if property == 'theme_name':
             self.apply_theme()
 
     def apply_autostart(self, is_enabled):
@@ -271,7 +271,7 @@ class PreferencesContextServer():
         hotkey = query['value']
         # Bind a new key
         self.application.bind_hotkey(hotkey)
-        self.settings.set_property('hotkey-show-app', hotkey)
+        self.settings.save(hotkey_show_app=hotkey)
 
     @rt.route('/show/hotkey-dialog')
     @glib_idle_add

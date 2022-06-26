@@ -49,7 +49,7 @@ class TestUlauncherWindow:
 
     @pytest.fixture(autouse=True)
     def settings(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.get_instance').return_value
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Settings.load').return_value
 
     @pytest.fixture(autouse=True)
     def get_scr_geometry(self, mocker):
