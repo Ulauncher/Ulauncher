@@ -1,12 +1,12 @@
-from os.path import basename, join
+from os.path import basename
 from gi.repository import Gio
 from ulauncher.config import STATE_DIR
-from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
+from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.api import SearchableResult
 
-_app_starts = KeyValueJsonDb(join(STATE_DIR, 'app_starts.json')).open()
+app_starts = JsonData.new_from_file(f"{STATE_DIR}/app_starts.json")
 
 
 class AppResult(SearchableResult):
@@ -48,7 +48,7 @@ class AppResult(SearchableResult):
         :param int limit: limit
         :rtype: class:`ResultList`
         """
-        sorted_tuples = sorted(_app_starts._records.items(), key=lambda rec: rec[1], reverse=True)
+        sorted_tuples = sorted(app_starts.items(), key=lambda rec: rec[1], reverse=True)
         sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
         return list(filter(None, map(AppResult.from_id, sorted_app_ids)))[:limit]
 
@@ -61,7 +61,6 @@ class AppResult(SearchableResult):
         ] + [get_score(query, k) * .6 for k in self.keywords])
 
     def on_enter(self, _):
-        count = _app_starts._records.get(self._app_id, 0)
-        _app_starts._records[self._app_id] = count + 1
-        _app_starts.commit()
+        starts = app_starts.get(self._app_id, 0)
+        app_starts.save({self._app_id: starts + 1})
         return launch_app(self._app_id)
