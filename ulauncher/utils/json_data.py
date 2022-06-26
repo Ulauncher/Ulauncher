@@ -2,11 +2,12 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict
+from typing import cast, Callable, Dict, TypeVar
 
-
-_file_instances: Dict[Path, dict] = {}
+_file_instances: Dict[Path, "JsonData"] = {}
 logger = logging.getLogger()
+# Optimally use "TypeVar('T', bound=JsonData"), but it requires py3.7 see https://stackoverflow.com/a/63237226/633921
+T = TypeVar("T")
 
 
 """
@@ -49,7 +50,7 @@ class JsonData(dict):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(key)  # pylint: disable=raise-missing-from
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'") from None
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -57,8 +58,11 @@ class JsonData(dict):
     def __delattr__(self, name):
         del self[name]
 
+    def __dir__(self):  # For IDE autocompletion
+        return dir(type(self)) + list(self.keys())
+
     @classmethod
-    def new_from_file(cls, path):
+    def new_from_file(cls: T, path) -> T:
         data = {}
         file_path = Path(path).resolve()
         if file_path.is_file():
@@ -68,10 +72,10 @@ class JsonData(dict):
                 logger.error("Error '%s' opening JSON file %s: %s", type(e).__name__, file_path, e)
                 logger.warning("Ignoring invalid JSON file (%s)", file_path)
 
-        instance = _file_instances.get(file_path, cls())
+        instance = _file_instances.get(file_path, cast(Callable, cls)())
         instance.update(data)
         _file_instances[file_path] = instance
-        return instance
+        return cast(T, instance)
 
     def stringify(self, indent=4, sort_keys=True):
         return json.dumps(self, indent=indent, sort_keys=sort_keys)
