@@ -1,5 +1,5 @@
-import os
 import json
+from pathlib import Path
 from typing import Optional, List, Union
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
@@ -52,11 +52,11 @@ class ExtensionManifest:
 
     @classmethod
     def open(cls, extension_id, extensions_dir=EXTENSIONS_DIR):
-        return cls(extension_id, read_manifest(extension_id, extensions_dir), extensions_dir)
+        manifest_path = Path(extensions_dir, extension_id, "manifest.json").resolve()
+        manifest = json.loads(manifest_path.read_text())
+        return cls(manifest)
 
-    def __init__(self, extension_id: str, manifest: ManifestJson, extensions_dir: str = EXTENSIONS_DIR):
-        self.extensions_dir = extensions_dir
-        self.extension_id = extension_id
+    def __init__(self, manifest: ManifestJson):
         self.manifest = manifest
 
     def get_name(self) -> str:
@@ -90,6 +90,7 @@ class ExtensionManifest:
             assert self.get_description(), 'description is not provided'
             assert self.get_developer_name(), 'developer_name is not provided'
             assert self.get_icon(), 'icon is not provided'
+            assert self.get_preferences(), 'preferences is not provided'
 
             for p in self.get_preferences():
                 default = p.get('default_value')
@@ -136,12 +137,7 @@ class ExtensionManifest:
     def check_compatibility(self):
         if not satisfies(API_VERSION, self.get_required_api_version()):
             err_msg = (
-                f'Extension "{self.extension_id}" requires API version {self.get_required_api_version()}, '
+                f'Extension "{self.get_name()}" requires API version {self.get_required_api_version()}, '
                 f'but the current API version is: {API_VERSION})'
             )
             raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
-
-
-def read_manifest(extension_id, extensions_dir):
-    with open(os.path.join(extensions_dir, extension_id, 'manifest.json'), 'r') as f:
-        return json.load(f)
