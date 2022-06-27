@@ -10,14 +10,10 @@ from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.file_browser.FileBrowserResult import FileBrowserResult
-from ulauncher.modes.file_browser.FileQueries import FileQueries
 
 
 class FileBrowserMode(BaseMode):
     LIMIT = 50
-
-    def __init__(self):
-        self._file_queries = FileQueries.get_instance()  # type: FileQueries
 
     def is_enabled(self, query: str) -> bool:
         """
@@ -28,19 +24,17 @@ class FileBrowserMode(BaseMode):
         """
         return f'{query.lstrip()} '[0] in ('~', '/', '$')
 
-    def list_files(self, path_str: str, sort_by_usage: bool = False) -> List[str]:
-        files = os.listdir(path_str)
-
-        def get_last_used_time(file: str) -> float:
-            return self._file_queries.find(os.path.join(path_str, file)) or 0
-
-        if sort_by_usage:
-            return sorted(files, reverse=True, key=get_last_used_time)
-
-        return sorted(files)
+    def list_files(self, path_str: str, sort_by_atime: bool = False) -> List[str]:
+        paths = sorted(
+            os.scandir(path_str),
+            reverse=sort_by_atime,
+            key=lambda p: p.stat().st_atime if sort_by_atime else p.name.lower()
+        )
+        paths.sort(key=lambda p: p.is_file())
+        return [p.name for p in paths]
 
     def filter_dot_files(self, file_list: List[str]) -> List[str]:
-        return list(filter(lambda f: not f.startswith('.'), file_list))
+        return [f for f in file_list if not f.startswith('.')]
 
     def handle_query(self, query: str) -> List[FileBrowserResult]:
         try:
@@ -54,7 +48,7 @@ class FileBrowserMode(BaseMode):
                 raise RuntimeError(f'Invalid path "{path}"')
 
             if not remainder:
-                file_names = self.list_files(str(path), sort_by_usage=True)
+                file_names = self.list_files(str(path), sort_by_atime=True)
                 for name in self.filter_dot_files(file_names)[:self.LIMIT]:
                     file = os.path.join(closest_parent, name)
                     results.append(FileBrowserResult(file))
