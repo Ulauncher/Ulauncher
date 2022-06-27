@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict
 
@@ -41,7 +42,7 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 
 class JsonData(dict):
     def __init__(self, *args, **kwargs):
-        super().__init__(getattr(self, "__default_props__", {}))
+        super().__init__(deepcopy(getattr(self, "__default_props__", {})))
         super().update(*args, **kwargs)
 
     def __getattr__(self, key):

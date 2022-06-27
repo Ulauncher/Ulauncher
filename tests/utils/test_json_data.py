@@ -92,3 +92,13 @@ class TestJsonData:
         assert inst.sum() == 3
         assert inst.get("sum") == 4
         assert SubclassWDefault().stringify(indent=None) == '{"a": 1, "b": 2, "c": 3}'
+
+    def test_constructor_is_cloned(self):
+        @json_data_class
+        class ClassWDict(JsonData):
+            subdict = {}
+
+        inst = ClassWDict()
+        inst.subdict["k"] = "v"
+        assert ClassWDict().subdict.get("k") is None
+        assert inst.subdict.get("k") == "v"
