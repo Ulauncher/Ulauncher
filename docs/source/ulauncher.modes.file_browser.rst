@@ -27,15 +27,6 @@ ulauncher\.modes\.file\_browser\.FileBrowserResult module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.file\_browser\.FileQueries module
-----------------------------------------------------
-
-.. automodule:: ulauncher.modes.file_browser.FileQueries
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 

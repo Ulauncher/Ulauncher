@@ -1,28 +1,42 @@
+from types import SimpleNamespace
 from unittest import mock
 import pytest
 from gi.repository import Gdk
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
-from ulauncher.modes.file_browser.FileQueries import FileQueries
+
+
+class MockDirEntry:
+    def __init__(self, name, atime, is_file=True):
+        self.name = name
+        self._atime = atime
+        self._is_file = is_file
+
+    def is_file(self):
+        return self._is_file
+
+    def stat(self):
+        return SimpleNamespace(st_atime=self._atime)
 
 
 class TestFileBrowserMode:
 
-    @pytest.fixture
-    def listdir(self, mocker):
-        return mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.os.listdir')
-
-    @pytest.fixture
-    def file_queries(self):
-        return mock.create_autospec(FileQueries)
+    @pytest.fixture(autouse=True)
+    def scandir(self, mocker):
+        sd = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.os.scandir')
+        sd.return_value = [
+            MockDirEntry("a", 1655837759),
+            MockDirEntry("D", 1655839002),
+            MockDirEntry("B", 1655839892),
+            MockDirEntry("c", 1655837959)
+        ]
+        return sd
 
     @pytest.fixture
     def SetUserQueryAction(self, mocker):
         return mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.SetUserQueryAction')
 
     @pytest.fixture
-    def mode(self, file_queries, mocker):
-        FileQueriesMock = mocker.patch('ulauncher.modes.file_browser.FileBrowserMode.FileQueries')
-        FileQueriesMock.get_instance.return_value = file_queries
+    def mode(self):
         return FileBrowserMode()
 
     def test_is_enabled(self, mode):
@@ -37,19 +51,16 @@ class TestFileBrowserMode:
         assert not mode.is_enabled('+')
         assert not mode.is_enabled(' ')
 
-    def test_list_files(self, mode, listdir, file_queries):
-        listdir.return_value = ['a', 'd', 'b', 'c']
-        file_queries.find.side_effect = lambda i: i
-        assert mode.list_files('path') == sorted(listdir.return_value)
-        assert mode.list_files('path', sort_by_usage=True) == sorted(listdir.return_value, reverse=True)
+    def test_list_files(self, mode):
+        assert mode.list_files('path') == ["a", "B", "c", "D"]
+        assert mode.list_files('path', sort_by_atime=True) == ["B", "D", "c", "a"]
 
     def test_filter_dot_files(self, mode):
         assert mode.filter_dot_files(['a', '.b', 'c', '.d']) == ['a', 'c']
 
-    def test_handle_query__path_from_q_exists__dir_listing_rendered(self, listdir):
-        listdir.return_value = ['a', 'd', 'b', 'c']
+    def test_handle_query__path_from_q_exists__dir_listing_rendered(self):
         flattened_results = list(map(lambda r: str(r.path), FileBrowserMode().handle_query('/tmp/')))
-        assert flattened_results == ['/tmp/a', '/tmp/d', '/tmp/b', '/tmp/c']
+        assert flattened_results == ['/tmp/B', '/tmp/D', '/tmp/c', '/tmp/a']
 
     def test_handle_query__invalid_path__empty_list_rendered(self, mode):
         assert mode.handle_query('~~') == []
