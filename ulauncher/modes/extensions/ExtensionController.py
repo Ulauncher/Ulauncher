@@ -1,11 +1,13 @@
 import logging
+from ulauncher.config import EXTENSIONS_DIR
+from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 
 logger = logging.getLogger()
 
@@ -18,7 +20,7 @@ class ExtensionController:
     """
 
     extension_id = None
-    manifest = None
+    manifest: ExtensionManifest
     preferences = None
     _debounced_send_event = None
 
@@ -78,6 +80,12 @@ class ExtensionController:
 
     def get_manifest(self):
         return self.manifest
+
+    def get_icon_path(self, path=None) -> str:
+        return get_icon_path(
+            path or self.manifest.get_icon(),
+            base_path=f"{EXTENSIONS_DIR}/{self.extension_id}"
+        )
 
     # pylint: disable=unused-argument
     def handle_response(self, framer, response):

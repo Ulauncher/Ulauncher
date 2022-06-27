@@ -28,6 +28,7 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
@@ -66,11 +67,15 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
 
 
 def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
+    controllers = ExtensionServer.get_instance().controllers
     ext_db = ExtensionDb.get_instance()
-    is_connected = ext_id in ExtensionServer.get_instance().controllers
+    is_connected = ext_id in controllers
     ext_runner = ExtensionRunner.get_instance()
     is_running = is_connected or ext_runner.is_running(ext_id)
     ext_db_record = ext_db.find(ext_id, {})
+    # Controller method `get_icon_path` would work, but only running extensions have controllers
+    icon = get_icon_path(prefs.manifest.get_icon(), base_path=f"{EXTENSIONS_DIR}/{ext_id}")
+
     return {
         'id': ext_id,
         'url': ext_db_record.get('url'),
@@ -78,7 +83,7 @@ def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError
         'last_commit': ext_db_record.get('last_commit'),
         'last_commit_time': ext_db_record.get('last_commit_time'),
         'name': prefs.manifest.get_name(),
-        'icon': prefs.manifest.get_icon_path(),
+        'icon': icon,
         'description': prefs.manifest.get_description(),
         'developer_name': prefs.manifest.get_developer_name(),
         'instructions': prefs.manifest.get_instructions(),

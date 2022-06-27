@@ -5,7 +5,6 @@ from ulauncher.config import API_VERSION, EXTENSIONS_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
-from ulauncher.utils.icon import get_icon_path
 
 
 class ExtensionManifestError(UlauncherAPIError):
@@ -68,11 +67,6 @@ class ExtensionManifest:
 
     def get_icon(self) -> str:
         return self.manifest['icon']
-
-    def get_icon_path(self, path=None) -> str:
-        icon = path or self.get_icon()
-        base_path = os.path.join(self.extensions_dir, self.extension_id)
-        return get_icon_path(icon, base_path=base_path)
 
     def get_required_api_version(self) -> str:
         return self.manifest['required_api_version']

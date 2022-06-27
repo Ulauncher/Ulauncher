@@ -50,5 +50,5 @@ class ExtensionMode(BaseMode):
                         name=html.escape(pref['name']),
                         description=html.escape(pref['description']),
                         keyword=pref['value'],
-                        icon=controller.manifest.get_icon_path(path=pref['icon'])
+                        icon=controller.get_icon_path(path=pref['icon'])
                     )
