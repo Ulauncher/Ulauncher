@@ -36,7 +36,7 @@ class ExtensionDownloader:
     @classmethod
     @singleton
     def get_instance(cls) -> 'ExtensionDownloader':
-        ext_db = ExtensionDb.get_instance()
+        ext_db = ExtensionDb.load()
         return cls(ext_db)
 
     def __init__(self, ext_db: ExtensionDb):
@@ -74,21 +74,20 @@ class ExtensionDownloader:
         untar(filename, ext_path)
 
         # 4. add to the db
-        self.ext_db.put(remote.extension_id, {
+        self.ext_db.save({remote.extension_id: {
             'id': remote.extension_id,
             'url': url,
             'updated_at': datetime.now().isoformat(),
             'last_commit': commit_sha,
             'last_commit_time': commit_time.isoformat()
-        })
-        self.ext_db.commit()
+        }})
 
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
         rmtree(os.path.join(EXTENSIONS_DIR, ext_id))
-        self.ext_db.remove(ext_id)
-        self.ext_db.commit()
+        del self.ext_db[ext_id]
+        self.ext_db.save()
 
     def update(self, ext_id: str) -> bool:
         """
@@ -100,19 +99,21 @@ class ExtensionDownloader:
         ext = self._find_extension(ext_id)
 
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
-                    ext['last_commit'][:8], commit['last_commit'][:8])
+                    ext.last_commit[:8], commit['last_commit'][:8])
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
-        remote = ExtensionRemote(ext['url'])
+        remote = ExtensionRemote(ext.url)
         filename = download_tarball(remote.get_download_url(commit['last_commit']))
         untar(filename, ext_path)
 
-        ext['updated_at'] = datetime.now().isoformat()
-        ext['last_commit'] = commit['last_commit']
-        ext['last_commit_time'] = commit['last_commit_time']
-        self.ext_db.put(ext_id, ext)
-        self.ext_db.commit()
+        ext.update(
+            updated_at=datetime.now().isoformat(),
+            last_commit=commit['last_commit'],
+            last_commit_time=commit['last_commit_time']
+        )
+
+        self.ext_db.save({ext_id: ext})
 
         return True
 
@@ -121,10 +122,9 @@ class ExtensionDownloader:
         Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
         """
         ext = self._find_extension(ext_id)
-        url = ext['url']
-        remote = ExtensionRemote(url)
+        remote = ExtensionRemote(ext.url)
         commit_sha, commit_time = remote.get_latest_compatible_commit()
-        need_update = ext['last_commit'] != commit_sha
+        need_update = ext.last_commit != commit_sha
         if not need_update:
             raise ExtensionIsUpToDateError('Extension is up to date')
 
@@ -134,7 +134,7 @@ class ExtensionDownloader:
         }
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
-        ext = self.ext_db.find(ext_id)
+        ext = self.ext_db.get(ext_id)
         if not ext:
             raise ExtensionDownloaderError("Extension not found", ExtensionError.Other)
         return ext

@@ -68,20 +68,20 @@ ExtensionInfo = TypedDict('ExtensionInfo', {
 
 def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
     controllers = ExtensionServer.get_instance().controllers
-    ext_db = ExtensionDb.get_instance()
+    ext_db = ExtensionDb.load()
     is_connected = ext_id in controllers
     ext_runner = ExtensionRunner.get_instance()
     is_running = is_connected or ext_runner.is_running(ext_id)
-    ext_db_record = ext_db.find(ext_id, {})
+    ext_db_record = ext_db.get(ext_id)
     # Controller method `get_icon_path` would work, but only running extensions have controllers
     icon = get_icon_path(prefs.manifest.get_icon(), base_path=f"{EXTENSIONS_DIR}/{ext_id}")
 
     return {
         'id': ext_id,
-        'url': ext_db_record.get('url'),
-        'updated_at': ext_db_record.get('updated_at'),
-        'last_commit': ext_db_record.get('last_commit'),
-        'last_commit_time': ext_db_record.get('last_commit_time'),
+        'url': ext_db_record.url,
+        'updated_at': ext_db_record.updated_at,
+        'last_commit': ext_db_record.last_commit,
+        'last_commit_time': ext_db_record.last_commit_time,
         'name': prefs.manifest.get_name(),
         'icon': icon,
         'description': prefs.manifest.get_description(),
