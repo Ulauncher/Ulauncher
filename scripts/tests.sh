@@ -33,6 +33,7 @@ test-pytest () {
         fi
     fi
 
+    # Not really needed with conftest.py in the root
     export PYTHONPATH=`pwd`
 
     set -e
