@@ -161,12 +161,12 @@
           New version is available:
           &nbsp;&nbsp;&nbsp;
           <i class="fa fa-code-fork"></i>
-          {{ newVersionInfo.last_commit.substring(0, 7) }}
+          {{ newVersionInfo.last_commit.slice(0, 7) }}
           &nbsp;&nbsp;&nbsp;
           <i
             class="fa fa-calendar"
           ></i>
-          {{ isoDateToHumanDate(newVersionInfo.last_commit_time) }}
+          {{ newVersionInfo.last_commit_time.slice(0, 10) }}
         </p>
       </div>
       <div v-if="updateState == 'no-updates'">No new updates are available</div>
@@ -212,8 +212,7 @@ export default {
   },
   computed: {
     lastCommitDate() {
-      let isoDate = this.$props.extension.last_commit_time
-      return isoDate ? this.isoDateToHumanDate(isoDate) : ''
+      return  (this.$props.extension.last_commit_time || '').slice(0, 10)
     },
     canSave() {
       const { preferences } = this.$props.extension
@@ -240,10 +239,6 @@ export default {
     }
   },
   methods: {
-    isoDateToHumanDate(isoDate) {
-      let date = new Date(isoDate)
-      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-    },
     onDropdownClick() {
       switch (true) {
         case this.canSave:
