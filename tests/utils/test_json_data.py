@@ -102,3 +102,14 @@ class TestJsonData:
         inst.subdict["k"] = "v"
         assert ClassWDict().subdict.get("k") is None
         assert inst.subdict.get("k") == "v"
+
+    def test_setitem_always_used(self):
+        class UnderscorePrefix(JsonData):
+            def __setitem__(self, key, value):
+                super().__setitem__("_" + key, value)
+
+        data = UnderscorePrefix({"one": 1})
+        data.update(({"two": 2}))
+        data.three = 3
+        data["four"] = 4
+        assert data.stringify(indent=None, sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'

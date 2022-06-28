@@ -44,7 +44,7 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 class JsonData(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(deepcopy(getattr(self, "__default_props__", {})))
-        super().update(*args, **kwargs)
+        self.update(*args, **kwargs)
 
     def __getattr__(self, key):
         try:
@@ -60,6 +60,11 @@ class JsonData(dict):
 
     def __dir__(self):  # For IDE autocompletion
         return dir(type(self)) + list(self.keys())
+
+    # Make sure everything flows hrough __setitem__ except __default_props__
+    def update(self, *args, **kwargs):
+        for k, v in dict(*args, **kwargs).items():
+            self[k] = v
 
     @classmethod
     def new_from_file(cls: T, path) -> T:
