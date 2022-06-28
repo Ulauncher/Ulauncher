@@ -1,7 +1,8 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.modes.QueryHistoryDb import QueryHistoryDb
+from ulauncher.config import STATE_DIR
+from ulauncher.utils.json_data import JsonData
 
-query_history = QueryHistoryDb.get_instance()
+query_history = JsonData.new_from_file(f"{STATE_DIR}/query_history.json")
 
 
 class ItemNavigation:
@@ -20,7 +21,7 @@ class ItemNavigation:
         """
         Gets the index of the result that should be selected (0 by default)
         """
-        previous_pick = query_history.find(query)
+        previous_pick = query_history.get(query)
 
         for index, widget in enumerate(self.result_widgets):
             if widget.result.searchable and widget.result.get_name() == previous_pick:
@@ -61,8 +62,8 @@ class ItemNavigation:
 
         if self.selected is not None:
             result = self.result_widgets[self.selected].result
-            if not alt and result.searchable:
-                query_history.save_query(str(query), result.get_name())
+            if query and not alt and result.searchable:
+                query_history.save({str(query): result.get_name()})
 
             action = result.on_enter(query) if not alt else result.on_alt_enter(query)
             if not action:
