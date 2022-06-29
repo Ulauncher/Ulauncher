@@ -39,9 +39,9 @@ class TestJsonData:
         assert jd2.a == 1
 
     def test_stringify(self):
-        assert JsonData(a=1, b=2).stringify() == '{\n    "a": 1,\n    "b": 2\n}'
-        assert JsonData(a=1, c=3, b=2).stringify(indent=None) == '{"a": 1, "b": 2, "c": 3}'
-        assert JsonData(a=1, c=3, b=2).stringify(indent=None, sort_keys=False) == '{"a": 1, "c": 3, "b": 2}'
+        assert JsonData(a=1, c=3, b=2).stringify() == '{"a": 1, "b": 2, "c": 3}'
+        assert JsonData(a=1, c=3, b=2).stringify(sort_keys=False) == '{"a": 1, "c": 3, "b": 2}'
+        assert JsonData(a=1, b=2).stringify(indent=4) == '{\n    "a": 1,\n    "b": 2\n}'
 
     def test_save_as(self):
         # Check that JsonData initiated w or w/o path saves to the path specified,
@@ -91,7 +91,7 @@ class TestJsonData:
         inst.sum = 4  # pylint: disable=all
         assert inst.sum() == 3
         assert inst.get("sum") == 4
-        assert SubclassWDefault().stringify(indent=None) == '{"a": 1, "b": 2, "c": 3}'
+        assert SubclassWDefault().stringify() == '{"a": 1, "b": 2, "c": 3}'
 
     def test_constructor_is_cloned(self):
         @json_data_class
@@ -112,4 +112,4 @@ class TestJsonData:
         data.update(({"two": 2}))
         data.three = 3
         data["four"] = 4
-        assert data.stringify(indent=None, sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'
+        assert data.stringify(sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'

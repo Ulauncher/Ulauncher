@@ -82,7 +82,7 @@ class JsonData(dict):
         _file_instances[file_path] = instance
         return cast(T, instance)
 
-    def stringify(self, indent=4, sort_keys=True):
+    def stringify(self, indent=None, sort_keys=True):
         return json.dumps(self, indent=indent, sort_keys=sort_keys)
 
     def save(self, *args, **kwargs) -> bool:
@@ -98,7 +98,7 @@ class JsonData(dict):
             try:
                 # Ensure parent dir first
                 file_path.parent.mkdir(parents=True, exist_ok=True)
-                file_path.write_text(self.stringify())
+                file_path.write_text(self.stringify(indent=4))
                 return True
             except Exception as e:
                 logger.error("Error '%s' writing to JSON file %s: %s.", type(e).__name__, file_path, e)
