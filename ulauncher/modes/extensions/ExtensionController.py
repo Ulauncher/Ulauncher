@@ -41,7 +41,7 @@ class ExtensionController:
             return
 
         self.controllers[extension_id] = self
-        self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
+        self._debounced_send_event = debounce(self.manifest.options.get('query_debounce', 0.05))(self._send_event)
 
         # PreferencesEvent is candidate for future removal
         self._send_event(PreferencesEvent(self.preferences.get_dict()))
@@ -83,7 +83,7 @@ class ExtensionController:
 
     def get_icon_path(self, path=None) -> str:
         return get_icon_path(
-            path or self.manifest.get_icon(),
+            path or self.manifest.icon,
             base_path=f"{EXTENSIONS_DIR}/{self.extension_id}"
         )
 

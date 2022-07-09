@@ -44,7 +44,7 @@ class TestExtensionPreferences:
     @pytest.fixture
     def manifest(self, manifest_prefs):
         manifest = mock.create_autospec(ExtensionManifest)
-        manifest.get_preferences.return_value = manifest_prefs
+        manifest.preferences = manifest_prefs
         return manifest
 
     @pytest.fixture

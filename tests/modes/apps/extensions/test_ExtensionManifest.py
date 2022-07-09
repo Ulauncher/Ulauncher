@@ -24,8 +24,8 @@ class TestExtensionManifest:
 
     def test_open__manifest_file__is_read(self):
         ext_dir = os.path.dirname(os.path.abspath(__file__))
-        manifest = ExtensionManifest.open('test_extension', ext_dir)
-        assert manifest.get_name() == "Test Extension"
+        manifest = ExtensionManifest.new_from_file(f"{ext_dir}/test_extension/manifest.json")
+        assert manifest.name == "Test Extension"
 
     def test_validate__name_empty__exception_raised(self):
         manifest = ExtensionManifest({"required_api_version": "1"})
@@ -97,8 +97,8 @@ class TestExtensionManifest:
 
     def test_get_option__option_exists__value_returned(self):
         manifest = ExtensionManifest({"options": {"query_debounce": 0.5}})
-        assert manifest.get_option("query_debounce") == 0.5
+        assert manifest.options.get("query_debounce") == 0.5
 
     def test_get_option__option_doesnt_exist__default_returned(self):
         manifest = ExtensionManifest({"options": {}})
-        assert manifest.get_option('query_debounce', 0.4) == 0.4
+        assert manifest.options.get("query_debounce", 0.4) == 0.4

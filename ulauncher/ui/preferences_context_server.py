@@ -74,7 +74,7 @@ def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError
     is_running = is_connected or ext_runner.is_running(ext_id)
     ext_db_record = ext_db.get(ext_id)
     # Controller method `get_icon_path` would work, but only running extensions have controllers
-    icon = get_icon_path(prefs.manifest.get_icon(), base_path=f"{EXTENSIONS_DIR}/{ext_id}")
+    icon = get_icon_path(prefs.manifest.icon, base_path=f"{EXTENSIONS_DIR}/{ext_id}")
 
     return {
         'id': ext_id,
@@ -82,11 +82,11 @@ def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError
         'updated_at': ext_db_record.updated_at,
         'last_commit': ext_db_record.last_commit,
         'last_commit_time': ext_db_record.last_commit_time,
-        'name': prefs.manifest.get_name(),
+        'name': prefs.manifest.name,
         'icon': icon,
-        'description': prefs.manifest.get_description(),
-        'developer_name': prefs.manifest.get_developer_name(),
-        'instructions': prefs.manifest.get_instructions(),
+        'description': prefs.manifest.description,
+        'developer_name': prefs.manifest.developer_name,
+        'instructions': prefs.manifest.instructions,
         'preferences': prefs.get_items(),
         'error': error,
         'is_running': is_running,

@@ -1,8 +1,7 @@
-import json
-from pathlib import Path
-from typing import Optional, List, Union
-from ulauncher.config import API_VERSION, EXTENSIONS_DIR
+from typing import Any, Optional, List, Union
+from ulauncher.config import API_VERSION
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
+from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
 
@@ -11,88 +10,47 @@ class ExtensionManifestError(UlauncherAPIError):
     pass
 
 
-OptionItemExtended = TypedDict('OptionItemExtended', {
-    'value': str,
-    'text': str
-})
+OptionItemExtended = TypedDict('OptionItemExtended', {"value": str, "text": str})
 OptionItem = Union[str, OptionItemExtended]
 OptionItems = List[OptionItem]
-Options = TypedDict('Options', {
-    'query_debounce': float
-})
-ManifestPreference = TypedDict(
-    'ManifestPreference', {
-        'id': str,
-        'type': str,
-        'name': str,
-        'description': str,
-        'default_value': Union[str, int],  # Bool is a subclass of int
-        'options': OptionItems,
-        'min': Optional[int],
-        'max': Optional[int],
-        'icon': Optional[str]
-    })
-ManifestJson = TypedDict('ManifestJson', {
-    'required_api_version': str,
+Options = TypedDict("Options", {"query_debounce": float})
+ManifestPreference = TypedDict('ManifestPreference', {
+    'id': str,
+    'type': str,
     'name': str,
     'description': str,
-    'developer_name': str,
-    'icon': str,
-    'instructions': Optional[str],
-    'options': Optional[Options],
-    'preferences': List[ManifestPreference]
+    'default_value': Union[str, int],  # Bool is a subclass of int
+    'options': OptionItems,
+    'min': Optional[int],
+    'max': Optional[int],
+    'icon': Optional[str]
 })
 
 
-class ExtensionManifest:
-    """
-    Reads `manifest.json`
-    """
-    manifest = None  # type: ManifestJson
+@json_data_class
+class ExtensionManifest(JsonData):
+    name = ""
+    description = ""
+    developer_name = ""
+    icon = ""
+    required_api_version = ""
+    preferences: List[ManifestPreference] = []
+    instructions: Optional[str] = None
+    options: Optional[Options] = {"query_debounce": 0.0}
+    # Filter out the empty values we use as defaults so they're not saved to the JSON
+    __json_value_blacklist__: List[Any] = [[], {}, None, ""]  # pylint: disable=dangerous-default-value
 
-    @classmethod
-    def open(cls, extension_id, extensions_dir=EXTENSIONS_DIR):
-        manifest_path = Path(extensions_dir, extension_id, "manifest.json").resolve()
-        manifest = json.loads(manifest_path.read_text())
-        return cls(manifest)
-
-    def __init__(self, manifest: ManifestJson):
-        self.manifest = manifest
-
-    def get_name(self) -> str:
-        return self.manifest['name']
-
-    def get_description(self) -> str:
-        return self.manifest['description']
-
-    def get_icon(self) -> str:
-        return self.manifest['icon']
-
-    def get_required_api_version(self) -> str:
-        return self.manifest['required_api_version']
-
-    def get_developer_name(self) -> str:
-        return self.manifest['developer_name']
-
-    def get_preferences(self) -> List[ManifestPreference]:
-        return self.manifest.get('preferences', [])
-
-    def get_instructions(self) -> Optional[str]:
-        return self.manifest.get('instructions')
-
-    def get_option(self, name, default=None):
-        return self.manifest.get('options', {}).get(name, default)
 
     def validate(self):
         try:
-            assert self.get_required_api_version(), "required_api_version is not provided"
-            assert self.get_name(), 'name is not provided'
-            assert self.get_description(), 'description is not provided'
-            assert self.get_developer_name(), 'developer_name is not provided'
-            assert self.get_icon(), 'icon is not provided'
-            assert self.get_preferences(), 'preferences is not provided'
+            assert self.required_api_version, "required_api_version is not provided"
+            assert self.name, "name is not provided"
+            assert self.description, "description is not provided"
+            assert self.developer_name, "developer_name is not provided"
+            assert self.icon, "icon is not provided"
+            assert self.preferences, "preferences is not provided"
 
-            for p in self.get_preferences():
+            for p in self.preferences:
                 default = p.get('default_value')
                 type = p.get('type')
                 min = p.get('min')
@@ -135,9 +93,9 @@ class ExtensionManifest:
             raise ExtensionManifestError(f'{e} is not provided', ExtensionError.InvalidManifest) from e
 
     def check_compatibility(self):
-        if not satisfies(API_VERSION, self.get_required_api_version()):
+        if not satisfies(API_VERSION, self.required_api_version):
             err_msg = (
-                f'Extension "{self.get_name()}" requires API version {self.get_required_api_version()}, '
+                f'Extension "{self.name}" requires API version {self.required_api_version}, '
                 f'but the current API version is: {API_VERSION})'
             )
             raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)

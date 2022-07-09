@@ -2,7 +2,7 @@ import os
 import logging
 from typing import cast, List, Optional, Dict, Union
 from functools import lru_cache
-from ulauncher.config import EXT_PREFERENCES_DIR
+from ulauncher.config import EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, OptionItems
@@ -35,7 +35,8 @@ class ExtensionPreferences:
     @classmethod
     @lru_cache(maxsize=1000)
     def create_instance(cls, ext_id):
-        return cls(ext_id, ExtensionManifest.open(ext_id))
+        manifest = ExtensionManifest.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
+        return cls(ext_id, manifest)
 
     def __init__(self, ext_id: str, manifest: ExtensionManifest, ext_preferences_dir: str = EXT_PREFERENCES_DIR):
         self.db_path = os.path.join(ext_preferences_dir, f'{ext_id}.json')
@@ -51,7 +52,7 @@ class ExtensionPreferences:
         self._open_db()
 
         items = []  # type: PreferenceItems
-        for p in self.manifest.get_preferences():
+        for p in self.manifest.preferences:
             if type and type != p['type']:
                 continue
 
@@ -62,8 +63,8 @@ class ExtensionPreferences:
                 'type': p['type'],
                 'name': p.get('name', ''),
                 'description': p.get('description', ''),
-                'min': cast(int, p.get('min', 0)),
-                'max': cast(Optional[int], p.get('max', None)),
+                'min': p.get('min', 0),
+                'max': p.get('max', None),
                 'options': p.get('options', []),
                 'default_value': default_value,
                 'value': self.db.find(p['id']) or default_value,
