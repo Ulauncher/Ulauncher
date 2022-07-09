@@ -178,7 +178,6 @@ function generateExtensionRecord(config) {
       type: 'keyword',
       name: 'My Timer',
       default_value: 'ti',
-      user_value: 't',
       value: 't'
     },
     {
@@ -187,7 +186,6 @@ function generateExtensionRecord(config) {
       name: 'Max Number of Posts',
       default_value: '5',
       description: 'This is description',
-      user_value: null,
       value: '5'
     },
     {
@@ -196,7 +194,6 @@ function generateExtensionRecord(config) {
       name: 'Size',
       default_value: 'M',
       description: 'This is description',
-      user_value: null,
       options: ['S', 'M', 'L', 'XL'],
       value: 'M'
     },
@@ -206,7 +203,6 @@ function generateExtensionRecord(config) {
       name: 'Default Message',
       default_value: '',
       description: 'Should open link in browser <a href="https://example.com">here</a>',
-      user_value: 'Hello Steve!',
       value: 'Hello Steve!'
     }
   ]

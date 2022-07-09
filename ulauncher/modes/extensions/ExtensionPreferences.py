@@ -20,7 +20,6 @@ PreferenceItem = TypedDict('PreferenceItem', {
     'max': Optional[int],
     'options': OptionItems,
     'icon': Optional[str],
-    'user_value': ValueType,
     'value': ValueType,
 })
 PreferenceItems = List[PreferenceItem]
@@ -47,7 +46,7 @@ class ExtensionPreferences:
     def get_items(self, type: str = None) -> PreferenceItems:
         """
         :param str type:
-        :rtype: list of dicts: [{id: .., type: .., defalut_value: .., user_value: ..., value: ..., description}, ...]
+        :rtype: list of dicts: [{id: .., type: .., defalut_value: .., value: ..., description}, ...]
         """
         self._open_db()
 
@@ -67,7 +66,6 @@ class ExtensionPreferences:
                 'max': cast(Optional[int], p.get('max', None)),
                 'options': p.get('options', []),
                 'default_value': default_value,
-                'user_value': self.db.find(p['id']) or '',
                 'value': self.db.find(p['id']) or default_value,
                 'icon': p.get('icon', None)
             })
