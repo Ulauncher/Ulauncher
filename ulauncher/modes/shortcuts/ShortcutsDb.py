@@ -1,52 +1,47 @@
-import os
 from uuid import uuid4
 from time import time
+from pathlib import Path
 from ulauncher.config import CONFIG_DIR, get_default_shortcuts
 from ulauncher.utils.fold_user_path import fold_user_path
-from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
-from ulauncher.utils.decorator.singleton import singleton
+from ulauncher.utils.json_data import JsonData, json_data_class
 
 
-class ShortcutsDb(KeyValueJsonDb):
+@json_data_class
+class Shortcut(JsonData):
+    added = 0.0
+    cmd = ""
+    keyword = ""
+    name = ""
+    icon = ""
+    id = ""
+    is_default_search = False
+    run_without_argument = False
+
+
+class ShortcutsDb(JsonData):
+    # Coerce all values to Shortcuts instead of dict and fold the icon path
+    def __setitem__(self, key, value):
+        if hasattr(value, "icon"):
+            value.icon = fold_user_path(value.icon)
+        super().__setitem__(key, Shortcut(value))
+
+    def add(self, shortcut):
+        shortcut = Shortcut(shortcut)
+        if not shortcut.id:
+            shortcut.id = str(uuid4())
+
+        if not self.get(shortcut.id):
+            self[shortcut.id] = {"added": time()}
+
+        self[shortcut.id].update(shortcut)
+
+        return shortcut.id
 
     @classmethod
-    @singleton
-    def get_instance(cls):
-        db_path = os.path.join(CONFIG_DIR, 'shortcuts.json')
-        is_first_run = not os.path.exists(db_path)
-        db = cls(db_path)
-        db.open()
+    def load(cls):
+        file_path = f"{CONFIG_DIR}/shortcuts.json"
+        instance = cls.new_from_file(file_path)
+        if not Path(file_path).exists():
+            instance.save(get_default_shortcuts())
 
-        if is_first_run:
-            db.set_records(get_default_shortcuts())
-
-        db.commit()
-
-        return db
-
-    def commit(self):
-        for shortcut in self.get_shortcuts():
-            shortcut['icon'] = fold_user_path(shortcut['icon'])
-        super().commit()
-
-    def get_shortcuts(self):
-        return list(self.get_records().values())
-
-    # pylint: disable=too-many-arguments
-    def put_shortcut(self, name, keyword, cmd, icon, is_default_search, run_without_argument, id=None):
-        """
-        If id is not provided it will be generated using uuid4() function
-        """
-        id = id or str(uuid4())
-        self._records[id] = {
-            "id": id,
-            "name": name,
-            "keyword": keyword,
-            "cmd": cmd,
-            "icon": icon,
-            "is_default_search": bool(is_default_search),
-            "run_without_argument": bool(run_without_argument),
-            # use previously added time if record with the same id exists
-            "added": self._records.get(id, {"added": time()})["added"]
-        }
-        return id
+        return instance

@@ -324,30 +324,23 @@ class PreferencesContextServer():
     @rt.route('/shortcut/get-all')
     def shortcut_get_all(self, query):
         logger.info('Handling /shortcut/get-all')
-        shortcuts = ShortcutsDb.get_instance()
-        return shortcuts.get_shortcuts()
+        return list(ShortcutsDb.load().values())
 
     @rt.route('/shortcut/update')
     @rt.route('/shortcut/add')
     def shortcut_update(self, query):
         logger.info('Add/Update shortcut: %s', json.dumps(query))
-        shortcuts = ShortcutsDb.get_instance()
-        id = shortcuts.put_shortcut(query['name'],
-                                    query['keyword'],
-                                    query['cmd'],
-                                    query.get('icon') or None,
-                                    query['is_default_search'],
-                                    query['run_without_argument'],
-                                    query.get('id'))
-        shortcuts.commit()
+        shortcuts = ShortcutsDb.load()
+        id = shortcuts.add(query)
+        shortcuts.save()
         return {'id': id}
 
     @rt.route('/shortcut/remove')
     def shortcut_remove(self, query):
         logger.info('Remove shortcut: %s', json.dumps(query))
-        shortcuts = ShortcutsDb.get_instance()
-        shortcuts.remove(query['id'])
-        shortcuts.commit()
+        shortcuts = ShortcutsDb.load()
+        del shortcuts[query['id']]
+        shortcuts.save()
 
     @rt.route('/extension/get-all')
     def extension_get_all(self, query):
