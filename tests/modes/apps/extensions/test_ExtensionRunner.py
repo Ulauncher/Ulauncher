@@ -26,8 +26,8 @@ class TestExtensionRunner:
         return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.get_options')
 
     @pytest.fixture(autouse=True)
-    def ExtensionPreferences(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionPreferences')
+    def ExtensionManifest(self, mocker):
+        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest')
 
     @pytest.fixture(autouse=True)
     def json_dumps(self, mocker):
@@ -49,10 +49,9 @@ class TestExtensionRunner:
     def time(self, mocker):
         return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.time')
 
-    def test_run__basic_execution__is_called(self, runner, ExtensionPreferences, SubprocessLauncher, DataInputStream):
+    def test_run__basic_execution__is_called(self, runner, SubprocessLauncher, DataInputStream):
         extid = 'id'
         runner.run(extid)
-        ExtensionPreferences.create_instance.assert_called_with(extid)
         SubprocessLauncher.new.assert_called_once()
         extproc = runner.extension_procs[extid]
         extproc.subprocess.wait_async.assert_called_once()

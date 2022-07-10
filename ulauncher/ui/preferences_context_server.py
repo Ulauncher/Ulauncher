@@ -3,7 +3,6 @@ import logging
 import json
 import mimetypes
 from urllib.parse import unquote, urlparse
-from typing import List, Optional, cast
 import traceback
 
 import gi
@@ -15,17 +14,15 @@ from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
-from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences, PreferenceItems
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtRunError
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
@@ -43,30 +40,7 @@ class PrefsApiError(UlauncherAPIError):
     pass
 
 
-ExtError = TypedDict('ExtError', {
-    'errorName': str,
-    'message': str
-})
-
-ExtensionInfo = TypedDict('ExtensionInfo', {
-    'id': str,
-    'url': str,
-    'updated_at': str,
-    'last_commit': str,
-    'last_commit_time': str,
-    'name': str,
-    'icon': str,
-    'description': str,
-    'developer_name': str,
-    'instructions': Optional[str],
-    'is_running': bool,
-    'runtime_error': Optional[ExtRunError],
-    'preferences': PreferenceItems,
-    'error': Optional[ExtError]
-})
-
-
-def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError = None) -> ExtensionInfo:
+def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = None, error_name: str = None):
     controllers = ExtensionServer.get_instance().controllers
     ext_db = ExtensionDb.load()
     is_connected = ext_id in controllers
@@ -74,7 +48,7 @@ def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError
     is_running = is_connected or ext_runner.is_running(ext_id)
     ext_db_record = ext_db.get(ext_id)
     # Controller method `get_icon_path` would work, but only running extensions have controllers
-    icon = get_icon_path(prefs.manifest.icon, base_path=f"{EXTENSIONS_DIR}/{ext_id}")
+    icon = get_icon_path(manifest.icon, base_path=f"{EXTENSIONS_DIR}/{ext_id}")
 
     return {
         'id': ext_id,
@@ -82,37 +56,34 @@ def get_extension_info(ext_id: str, prefs: ExtensionPreferences, error: ExtError
         'updated_at': ext_db_record.updated_at,
         'last_commit': ext_db_record.last_commit,
         'last_commit_time': ext_db_record.last_commit_time,
-        'name': prefs.manifest.name,
+        'name': manifest.name,
         'icon': icon,
-        'description': prefs.manifest.description,
-        'developer_name': prefs.manifest.developer_name,
-        'instructions': prefs.manifest.instructions,
-        'preferences': prefs.get_items(),
-        'error': error,
+        'description': manifest.description,
+        'developer_name': manifest.developer_name,
+        'instructions': manifest.instructions,
+        'preferences': manifest.preferences,
+        'error': {'message': error, 'errorName': error_name} if error else None,
         'is_running': is_running,
         'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
     }
 
 
-def get_all_extensions() -> List[ExtensionInfo]:
+def get_all_extensions():
     extensions = []
     for ext_id, _ in find_extensions(EXTENSIONS_DIR):
-        prefs = ExtensionPreferences.create_instance(ext_id)  # type: ExtensionPreferences
+        manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
+        error_name = None
         try:
-            prefs.manifest.validate()
-            prefs.manifest.check_compatibility()
+            manifest.validate()
+            manifest.check_compatibility()
         except UlauncherAPIError as e:
-            error = cast(ExtError, {
-                'message': str(e),
-                'errorName': e.error_name
-            })
+            error = str(e)
+            error_name = e.error_name
         except Exception as e:
-            error = cast(ExtError, {
-                'message': str(e),
-                'errorName': ExtensionError.Other.value
-            })
-        extensions.append(get_extension_info(ext_id, prefs, error))
+            error = str(e)
+            error_name = ExtensionError.Other.value
+        extensions.append(get_extension_info(ext_id, manifest, error, error_name))
 
     return extensions
 
@@ -362,8 +333,10 @@ class PreferencesContextServer():
         logger.info('Update extension preferences: %s', query)
         controller = ExtensionServer.get_instance().controllers.get(query['id'])
         for pref_id, value in query['data'].items():
-            old_value = controller.preferences.get(pref_id)['value']
-            controller.preferences.set(pref_id, value)
+            preference = controller.manifest.get_preference(id=pref_id)
+            old_value = preference.value
+            preference.value = value
+            controller.manifest.save_user_preferences(query['id'])
             if value != old_value:
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 

@@ -84,15 +84,3 @@ class TestExtensionServer:
         assert not server.is_running()
         assert service.stop.call_count == 1
         assert service.close.call_count == 1
-
-    def test_get_controller_by_keyword__keyword_found__controller_returned(self, server):
-        controller = mock.Mock()
-        controller.preferences.get_active_keywords.return_value = ['yt', 'af']
-        server.controllers['test_extension'] = controller
-        assert server.get_controller_by_keyword('yt') == controller
-
-    def test_get_controller_by_keyword__keyword_not_found__None_returned(self, server):
-        controller = mock.Mock()
-        controller.preferences.get_active_keywords.return_value = ['yt', 'af']
-        server.controllers['test_extension'] = controller
-        assert server.get_controller_by_keyword('fw') is None
