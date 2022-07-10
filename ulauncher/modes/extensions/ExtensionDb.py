@@ -1,27 +1,21 @@
-import os
-from typing import Type
-from ulauncher.utils.mypy_extensions import TypedDict
-
 from ulauncher.config import CONFIG_DIR
-from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
-from ulauncher.utils.decorator.singleton import singleton
-
-ExtensionRecord = TypedDict('ExtensionRecord', {
-    'id': str,
-    'url': str,
-    'updated_at': str,
-    'last_commit': str,
-    'last_commit_time': str
-})
+from ulauncher.utils.json_data import JsonData, json_data_class
 
 
-class ExtensionDb(KeyValueJsonDb[str, ExtensionRecord]):
+@json_data_class
+class ExtensionRecord(JsonData):
+    id = ""
+    url = ""
+    updated_at = ""
+    last_commit = ""
+    last_commit_time = ""
+
+
+class ExtensionDb(JsonData):
+    # Ensure all values are ExtensionRecords
+    def __setitem__(self, key, value):
+        super().__setitem__(key, ExtensionRecord(value))
 
     @classmethod
-    @singleton
-    def get_instance(cls: Type['ExtensionDb']) -> 'ExtensionDb':
-        db_path = os.path.join(CONFIG_DIR, 'extensions.json')
-        db = cls(db_path)
-        db.open()
-
-        return db
+    def load(cls):
+        return cls.new_from_file(f"{CONFIG_DIR}/extensions.json")

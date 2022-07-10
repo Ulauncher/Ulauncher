@@ -24,8 +24,8 @@ class TestExtensionManifest:
 
     def test_open__manifest_file__is_read(self):
         ext_dir = os.path.dirname(os.path.abspath(__file__))
-        manifest = ExtensionManifest.open('test_extension', ext_dir)
-        assert manifest.get_name() == "Test Extension"
+        manifest = ExtensionManifest.new_from_file(f"{ext_dir}/test_extension/manifest.json")
+        assert manifest.name == "Test Extension"
 
     def test_validate__name_empty__exception_raised(self):
         manifest = ExtensionManifest({"required_api_version": "1"})
@@ -79,26 +79,43 @@ class TestExtensionManifest:
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
 
-    def test_check_compatibility__required_api_version_2__exception_raised(self):
+    def test_check_compatibility__manifest_version_3__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "3"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
-    def test_check_compatibility__manifest_version_12__exception_raised(self):
+    def test_check_compatibility__manifest_version_0__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "0"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
-    def test_check_compatibility__required_api_version_1__no_exceptions(self):
+    def test_check_compatibility__api_version__no_exceptions(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "2"})
         manifest.check_compatibility()
 
     def test_get_option__option_exists__value_returned(self):
-        manifest = ExtensionManifest({"options": {"query_debounce": 0.5}})
-        assert manifest.get_option("query_debounce") == 0.5
+        manifest = ExtensionManifest({"query_debounce": 0.5})
+        assert manifest.query_debounce == 0.5
 
-    def test_get_option__option_doesnt_exist__default_returned(self):
-        manifest = ExtensionManifest({"options": {}})
-        assert manifest.get_option('query_debounce', 0.4) == 0.4
+    def test_defaults_not_included_in_stringify(self):
+        # Ensure defaults don't leak
+        assert ExtensionManifest().stringify() == "{}"
+        assert ExtensionManifest(preferences=[{"name": "asdf"}]).stringify() == '{"preferences": [{"name": "asdf"}]}'
+
+    def test_get_preference(self):
+        manifest = ExtensionManifest(preferences=[
+            {"name": "my_text", "type": "text"},
+            {"name": "my_number", "type": "number", "min": 0, "max": None}
+        ])
+        assert manifest.get_preference(name="my_text").type == "text"
+        assert manifest.get_preference(type="number").name == "my_number"
+        assert manifest.get_preference(min=0, max=None).type == "number"
+
+    def test_get_user_preferences(self):
+        manifest = ExtensionManifest(preferences=[
+            {"id": "text_id", "type": "text", "value": "asdf"},
+            {"id": "number_id", "type": "number", "value": 11}
+        ])
+        assert manifest.get_preferences_dict() == {"text_id": "asdf", "number_id": 11}

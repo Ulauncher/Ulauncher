@@ -28,14 +28,6 @@ ulauncher\.modes\.extensions\.ExtensionManifest module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.extensions\.ExtensionPreferences module
----------------------------------------------------
-
-.. automodule:: ulauncher.modes.extensions.ExtensionPreferences
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.modes\.extensions\.ExtensionRunner module
 ----------------------------------------------
 

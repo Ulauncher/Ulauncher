@@ -6,7 +6,6 @@ from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionPreferences import ExtensionPreferences
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 
 logger = logging.getLogger()
@@ -21,7 +20,6 @@ class ExtensionController:
 
     extension_id = None
     manifest: ExtensionManifest
-    preferences = None
     _debounced_send_event = None
 
     def __init__(self, controllers, framer, extension_id):
@@ -31,8 +29,7 @@ class ExtensionController:
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
         self.extension_id = extension_id
-        self.preferences = ExtensionPreferences.create_instance(extension_id)
-        self.manifest = self.preferences.manifest
+        self.manifest = ExtensionManifest.load_from_extension_id(extension_id)
         try:
             self.manifest.validate()
         except ExtensionManifestError as e:
@@ -41,10 +38,11 @@ class ExtensionController:
             return
 
         self.controllers[extension_id] = self
-        self._debounced_send_event = debounce(self.manifest.get_option('query_debounce', 0.05))(self._send_event)
+        # Use default if unspecified or 0.
+        self._debounced_send_event = debounce(self.manifest.query_debounce or 0.05)(self._send_event)
 
         # PreferencesEvent is candidate for future removal
-        self._send_event(PreferencesEvent(self.preferences.get_dict()))
+        self._send_event(PreferencesEvent(self.manifest.get_preferences_dict()))
         logger.info('Extension "%s" connected', extension_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
@@ -60,9 +58,9 @@ class ExtensionController:
         :returns: :class:`BaseAction` object
         """
         # Normalize the query to the extension default keyword, not the custom user keyword
-        for pref in self.preferences.get_items():
-            if pref['type'] == "keyword" and pref['value'] == query.keyword:
-                query = Query(query.replace(pref['value'], pref['default_value'], 1))
+        for pref in self.manifest.preferences:
+            if pref.type == "keyword" and pref.value == query.keyword:
+                query = Query(query.replace(pref.value, pref.default_value, 1))
 
         event = KeywordQueryEvent(query)
         return self.trigger_event(event)
@@ -83,7 +81,7 @@ class ExtensionController:
 
     def get_icon_path(self, path=None) -> str:
         return get_icon_path(
-            path or self.manifest.get_icon(),
+            path or self.manifest.icon,
             base_path=f"{EXTENSIONS_DIR}/{self.extension_id}"
         )
 

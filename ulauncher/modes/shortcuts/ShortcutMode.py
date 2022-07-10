@@ -6,7 +6,7 @@ from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
 class ShortcutMode(BaseMode):
 
     def __init__(self):
-        self.shortcutsDb = ShortcutsDb.get_instance()
+        self.shortcutsDb = ShortcutsDb.load()
 
     def is_enabled(self, query):
         """
@@ -15,10 +15,9 @@ class ShortcutMode(BaseMode):
         return bool(self._get_active_shortcut(query))
 
     def _get_active_shortcut(self, query):
-        for shortcut in self.shortcutsDb.get_shortcuts():
-            keyword = shortcut.get('keyword')
-            if query.startswith(f"{keyword} ") or (query == keyword and shortcut.get('run_without_argument')):
-                return shortcut
+        for s in self.shortcutsDb.values():
+            if query.startswith(f"{s.keyword} ") or (query == s.keyword and s.run_without_argument):
+                return s
 
         return None
 
@@ -36,8 +35,8 @@ class ShortcutMode(BaseMode):
         return [ShortcutResult(**shortcut)]
 
     def get_fallback_results(self):
-        return self._create_items([s for s in self.shortcutsDb.get_shortcuts() if s['is_default_search']],
+        return self._create_items([s for s in self.shortcutsDb.values() if s['is_default_search']],
                                   default_search=True)
 
     def get_searchable_items(self):
-        return self._create_items(self.shortcutsDb.get_shortcuts())
+        return self._create_items(list(self.shortcutsDb.values()))

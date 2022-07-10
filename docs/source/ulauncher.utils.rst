@@ -93,14 +93,6 @@ ulauncher.utils.icon module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.mypy\_extensions module
----------------------------------------
-
-.. automodule:: ulauncher.utils.mypy_extensions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.named\_tuple\_from\_dict module
 -----------------------------------------------
 

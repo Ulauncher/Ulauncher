@@ -25,7 +25,7 @@ class UlauncherApp(Gtk.Application):
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
-    settings = Settings.get_instance()
+    settings = Settings.load()
     window = None  # type: UlauncherWindow
     appindicator = None  # type: AppIndicator
     _current_accel_name = None
@@ -70,16 +70,15 @@ class UlauncherApp(Gtk.Application):
         # this will trigger to show frequent apps if necessary
         window.show_results([])
 
-        if self.settings.get_property('show-indicator-icon'):
+        if self.settings.show_indicator_icon:
             self.appindicator = AppIndicator(self)
             self.appindicator.switch(True)
 
         if IS_X11:
             # bind hotkey
             Keybinder.init()
-            accel_name = self.settings.get_property('hotkey-show-app')
             # bind in the main thread
-            GLib.idle_add(self.bind_hotkey, accel_name)
+            GLib.idle_add(self.bind_hotkey, self.settings.hotkey_show_app)
 
         ExtensionServer.get_instance().start()
         time.sleep(0.01)

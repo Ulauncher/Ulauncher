@@ -30,9 +30,9 @@ class TestExtensionController:
             'ulauncher.modes.extensions.ExtensionController.DeferredResultRenderer.get_instance').return_value
 
     @pytest.fixture(autouse=True)
-    def extPrefs(self, mocker):
+    def manifest(self, mocker):
         return mocker.patch(
-            'ulauncher.modes.extensions.ExtensionController.ExtensionPreferences.create_instance').return_value
+            'ulauncher.modes.extensions.ExtensionController.ExtensionManifest.load_from_extension_id').return_value
 
     @pytest.fixture
     def controller(self, controllers, mocker):
@@ -40,9 +40,9 @@ class TestExtensionController:
         controller._debounced_send_event = controller._send_event
         return controller
 
-    def test_configure__typical(self, controller, controllers, extPrefs, PreferencesEvent):
+    def test_configure__typical(self, controller, controllers, manifest, PreferencesEvent):
         # configure() is called implicitly when constructing the controller.
-        extPrefs.get_dict.return_value = {}
+        manifest.get_preferences_dict.return_value = {}
         assert controller.extension_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
         controller.manifest.validate.assert_called_once()

@@ -80,9 +80,6 @@ Create :file:`manifest.json` using the following template::
     "developer_name": "John Doe",
     "icon": "images/icon.png",
     "instructions": "You need to install <code>examplecommand</code> to run this extension",
-    "options": {
-      "query_debounce": 0.1
-    },
     "preferences": [
       {
         "id": "demo_kw",
@@ -97,28 +94,13 @@ Create :file:`manifest.json` using the following template::
 * ``required_api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
-* ``options`` - dictionary of optional parameters. See available options below
 * ``instructions`` - optional installation instructions to be shown in the extension preferences.
+* ``query_debounce`` - Default: ``0.05``. Delay (in seconds) to avoid running queries while the user is typing. Raise to higher values like ``1`` for slow I/O operations like network requests.
 * ``preferences`` - list of preferences available for users to override.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
 
 .. NOTE:: All fields except ``options`` and ``instructions`` are required and cannot be empty.
-
-
-Available Options
-^^^^^^^^^^^^^^^^^
-
-``query_debounce``
-  Default ``0.05``. Delay in seconds between event is created and sent to your extension.
-
-  If a new event is created during that period, previous one is skipped.
-  Debounce helps to prevent redundant events caused by user typing too fast or maybe some other reasons
-  when you may not want to process events each time they are triggered.
-
-  If your extension is super responsive (i.e, doesn't wait for I/O operations like network requests, file read/writes,
-  and doesn't load CPU, you may want to set a lower value like ``0.05`` or ``0.1``.
-  Otherwise it's recommended to set value to ``1`` or higher.
 
 
 Preference Object Fields

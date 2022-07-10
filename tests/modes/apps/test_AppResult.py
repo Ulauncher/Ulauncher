@@ -1,7 +1,7 @@
 import pathlib
 import pytest
 from gi.repository import Gio
-from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
+from ulauncher.utils.json_data import JsonData
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.api.shared.query import Query
 
@@ -32,10 +32,10 @@ class TestAppResult:
         return AppResult.from_id('falseapp.desktop')
 
     @pytest.fixture(autouse=True)
-    def _app_starts(self, mocker):
-        db = KeyValueJsonDb('/tmp/mock.json').open()
-        db.set_records({'falseapp.desktop': 3000, 'trueapp.desktop': 765})
-        return mocker.patch("ulauncher.modes.apps.AppResult._app_starts", new=db)
+    def app_starts(self, mocker):
+        app_starts = JsonData.new_from_file('/tmp/ulauncher-test/app_starts.json')
+        app_starts.update({'falseapp.desktop': 3000, 'trueapp.desktop': 765})
+        return mocker.patch("ulauncher.modes.apps.AppResult.app_starts", new=app_starts)
 
     def test_get_name(self, app1):
         assert app1.name == 'TrueApp - Full Name'
@@ -49,11 +49,11 @@ class TestAppResult:
     def test_search_score(self, app1):
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_on_enter(self, app1, mocker, _app_starts):
+    def test_on_enter(self, app1, mocker, app_starts):
         launch_app = mocker.patch('ulauncher.modes.apps.AppResult.launch_app')
         assert app1.on_enter(Query('query')) is launch_app.return_value
         launch_app.assert_called_with('trueapp.desktop')
-        assert _app_starts._records.get('trueapp.desktop') == 766
+        assert app_starts.get('trueapp.desktop') == 766
 
     def test_get_most_frequent(self):
         assert len(AppResult.get_most_frequent()) == 2

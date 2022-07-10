@@ -46,7 +46,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     scroll_container = Gtk.Template.Child("result_box_scroll_container")
     window_body = Gtk.Template.Child("body")
     results_nav = None
-    settings = Settings.get_instance()
+    settings = Settings.load()
     is_focused = False
     initial_query = None
     _css_provider = None
@@ -71,7 +71,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @Gtk.Template.Callback()
     def on_focus_in(self, *args):
-        if self.settings.get_property('grab-mouse-pointer'):
+        if self.settings.grab_mouse_pointer:
             ptr_dev = self.get_pointer_device()
             result = ptr_dev.grab(
                 self.get_window(),
@@ -166,7 +166,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         theme = Theme.get_current()
         theme.clear_cache()
 
-        if self.settings.get_property('disable-window-shadow'):
+        if self.settings.disable_window_shadow:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
         self._render_prefs_icon()
@@ -177,7 +177,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.get_application().show_preferences()
 
     def position_window(self):
-        monitor = get_monitor(self.settings.get_property('render-on-screen') != "default-monitor")
+        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 500 * get_scaling_factor()
@@ -199,7 +199,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         elif not self._get_input_text():
             # make sure frequent apps are shown if necessary
             self.show_results([])
-        elif self.settings.get_property('clear-previous-query'):
+        elif self.settings.clear_previous_query:
             self.input.set_text('')
         else:
             self.input.grab_focus()
@@ -250,7 +250,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def hide(self, *args, **kwargs):
         """Override the hide method to ensure the pointer grab is released."""
-        if self.settings.get_property('grab-mouse-pointer'):
+        if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
         super().hide(*args, **kwargs)
 
@@ -273,8 +273,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.result_box.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
-        show_recent_apps = self.settings.get_property('show-recent-apps')
-        recent_apps_number = int(show_recent_apps) if show_recent_apps.isnumeric() else 0
+        recent_apps_number = int(self.settings.show_recent_apps) if self.settings.show_recent_apps.isnumeric() else 0
         if not self.input.get_text() and recent_apps_number > 0:
             results = AppResult.get_most_frequent(recent_apps_number)
 

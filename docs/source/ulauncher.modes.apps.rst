@@ -4,14 +4,6 @@ ulauncher\.modes\.apps package
 Submodules
 ----------
 
-ulauncher\.modes\.QueryHistoryDb module
-----------------------------------------
-
-.. automodule:: ulauncher.modes.QueryHistoryDb
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.modes\.apps\.AppResult module
 ---------------------------------------------
 
