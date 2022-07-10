@@ -2,7 +2,16 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import cast, Callable, Dict, TypeVar
+from typing import Any, cast, Callable, Dict, List, TypeVar
+
+
+def filter_recursive(data, blacklist):
+    if isinstance(data, dict):
+        return {k: filter_recursive(v, blacklist) for k, v in data.items() if v not in blacklist}
+    if isinstance(data, list):
+        return [filter_recursive(v, blacklist) for v in data]
+    return data
+
 
 _file_instances: Dict[Path, "JsonData"] = {}
 logger = logging.getLogger()
@@ -42,6 +51,8 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 
 
 class JsonData(dict):
+    __json_value_blacklist__: List[Any] = [[], {}, None]  # pylint: disable=dangerous-default-value
+
     def __init__(self, *args, **kwargs):
         super().__init__(deepcopy(getattr(self, "__default_props__", {})))
         self.update(*args, **kwargs)
@@ -83,7 +94,10 @@ class JsonData(dict):
         return cast(T, instance)
 
     def stringify(self, indent=None, sort_keys=True):
-        return json.dumps(self, indent=indent, sort_keys=sort_keys)
+        # When serializing to JSON, filter out common empty default values like None, empty list or dict
+        # These are needed in Python for typing consistency and hints, but they are not actual data
+        data = filter_recursive(self, self.__json_value_blacklist__)
+        return json.dumps(data, indent=indent, sort_keys=sort_keys)
 
     def save(self, *args, **kwargs) -> bool:
         self.update(*args, **kwargs)

@@ -42,6 +42,12 @@ class TestJsonData:
         assert JsonData(a=1, c=3, b=2).stringify() == '{"a": 1, "b": 2, "c": 3}'
         assert JsonData(a=1, c=3, b=2).stringify(sort_keys=False) == '{"a": 1, "c": 3, "b": 2}'
         assert JsonData(a=1, b=2).stringify(indent=4) == '{\n    "a": 1,\n    "b": 2\n}'
+        assert JsonData(a=None, b=[], c={}, d=1).stringify() == '{"d": 1}'
+
+        class UnfilteredJSONData(JsonData):
+            __json_value_blacklist__ = []
+
+        assert UnfilteredJSONData(a=None, b=[], c={}).stringify() == '{"a": null, "b": [], "c": {}}'
 
     def test_save_as(self):
         # Check that JsonData initiated w or w/o path saves to the path specified,
