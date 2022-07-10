@@ -1,11 +1,13 @@
-from typing import Any, Optional, List, Union
-from ulauncher.config import API_VERSION
+from typing import Any, cast, Optional, List, Union
+
+from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.mypy_extensions import TypedDict
 
 OptionItem = TypedDict('OptionItem', {"value": str, "text": str})
+ValueType = Union[str, int]  # Bool is a subclass of int
 
 
 class ExtensionManifestError(UlauncherAPIError):
@@ -13,12 +15,13 @@ class ExtensionManifestError(UlauncherAPIError):
 
 
 @json_data_class
-class ManifestPreference(JsonData):
+class Preference(JsonData):
     id = ""
     name = ""
     type = ""
     description = ""
-    default_value: Union[str, int] = ""  # Bool is a subclass of int
+    default_value: ValueType = ""
+    value: Optional[ValueType] = None
     options: List[OptionItem] = []
     max: Optional[int] = None
     min: Optional[int] = None
@@ -32,7 +35,7 @@ class ExtensionManifest(JsonData):
     developer_name = ""
     icon = ""
     required_api_version = ""
-    preferences: List[ManifestPreference] = []
+    preferences: List[Preference] = []
     instructions: Optional[str] = None
     query_debounce: Optional[float] = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
@@ -45,12 +48,15 @@ class ExtensionManifest(JsonData):
             value = value and value.get("query_debounce")
             if value is None:
                 return
-        # Coerce preferences to ManifestPreference
+        # Coerce preferences to Preference
         if key == "preferences":
-            value = [ManifestPreference(pref) for pref in value]
+            value = [Preference(pref) for pref in value]
         super().__setitem__(key, value)
 
     def validate(self):
+        """
+        Ensure that the manifest is valid (or raise error)
+        """
         try:
             assert self.required_api_version, "required_api_version is not provided"
             assert self.name, "name is not provided"
@@ -99,9 +105,42 @@ class ExtensionManifest(JsonData):
             raise ExtensionManifestError(f'{e} is not provided', ExtensionError.InvalidManifest) from e
 
     def check_compatibility(self):
+        """
+        Ensure the extension is compatible with the Ulauncher API (or raise error)
+        """
         if not satisfies(API_VERSION, self.required_api_version):
             err_msg = (
                 f'Extension "{self.name}" requires API version {self.required_api_version}, '
                 f'but the current API version is: {API_VERSION})'
             )
             raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
+
+    def get_preference(self, **kwargs) -> Optional[Preference]:
+        """
+        Get the first preference matching the arguments
+        Ex manifest.get_preference(type="number", name="my_number")
+        """
+        for pref in self.preferences:
+            if {**pref, **kwargs} == pref:
+                return pref
+        return None
+
+    def get_preferences_dict(self):
+        """
+        Get the preferences as an id-value dict
+        """
+        return {p.id: p.value for p in self.preferences}
+
+    def save_user_preferences(self, ext_id: str):
+        path = f"{EXT_PREFERENCES_DIR}/{ext_id}.json"
+        JsonData.new_from_file(path).save(self.get_preferences_dict())
+
+    @classmethod
+    def load_from_extension_id(cls, ext_id: str):
+        manifest = cls.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
+        user_prefs = cast(JsonData, JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json"))
+        for pref in manifest.preferences:
+            if user_prefs.get(pref.id):
+                pref.value = user_prefs.get(pref.id)
+
+        return manifest

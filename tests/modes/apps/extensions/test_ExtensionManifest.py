@@ -98,3 +98,24 @@ class TestExtensionManifest:
     def test_get_option__option_exists__value_returned(self):
         manifest = ExtensionManifest({"query_debounce": 0.5})
         assert manifest.query_debounce == 0.5
+
+    def test_defaults_not_included_in_stringify(self):
+        # Ensure defaults don't leak
+        assert ExtensionManifest().stringify() == "{}"
+        assert ExtensionManifest(preferences=[{"name": "asdf"}]).stringify() == '{"preferences": [{"name": "asdf"}]}'
+
+    def test_get_preference(self):
+        manifest = ExtensionManifest(preferences=[
+            {"name": "my_text", "type": "text"},
+            {"name": "my_number", "type": "number", "min": 0, "max": None}
+        ])
+        assert manifest.get_preference(name="my_text").type == "text"
+        assert manifest.get_preference(type="number").name == "my_number"
+        assert manifest.get_preference(min=0, max=None).type == "number"
+
+    def test_get_user_preferences(self):
+        manifest = ExtensionManifest(preferences=[
+            {"id": "text_id", "type": "text", "value": "asdf"},
+            {"id": "number_id", "type": "number", "value": 11}
+        ])
+        assert manifest.get_preferences_dict() == {"text_id": "asdf", "number_id": 11}
