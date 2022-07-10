@@ -6,13 +6,11 @@ import signal
 import shlex
 from collections import namedtuple, deque
 from functools import partial
-from typing import Dict, Optional
 from time import time
 from enum import Enum
 from gi.repository import Gio, GLib
 
 from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
-from ulauncher.utils.mypy_extensions import TypedDict
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -20,11 +18,6 @@ from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtract
 from ulauncher.modes.extensions.extension_finder import find_extensions
 
 logger = logging.getLogger()
-
-ExtRunError = TypedDict('ExtRunError', {
-    'name': str,
-    'message': str
-})
 
 ExtensionProc = namedtuple("ExtensionProc", (
     "extension_id", "subprocess", "start_time", "error_stream", "recent_errors"
@@ -48,7 +41,7 @@ class ExtensionRunner:
         return cls()
 
     def __init__(self):
-        self.extension_errors = {}  # type: Dict[str, ExtRunError]
+        self.extension_errors = {}
         self.extension_procs = {}
         self.dont_run_extensions = get_options().no_extensions
         self.verbose = get_options().verbose
@@ -200,5 +193,5 @@ class ExtensionRunner:
             'message': message
         }
 
-    def get_extension_error(self, extension_id: str) -> Optional[ExtRunError]:
+    def get_extension_error(self, extension_id: str):
         return self.extension_errors.get(extension_id)

@@ -5,7 +5,7 @@ from urllib.request import urlretrieve
 from tempfile import mktemp, mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
-from ulauncher.utils.mypy_extensions import TypedDict
+from typing import Tuple
 
 from ulauncher.config import EXTENSIONS_DIR
 from ulauncher.utils.decorator.singleton import singleton
@@ -23,12 +23,6 @@ class ExtensionDownloaderError(UlauncherAPIError):
 
 class ExtensionIsUpToDateError(Exception):
     pass
-
-
-LastCommit = TypedDict('LastCommit', {
-    'last_commit': str,
-    'last_commit_time': str
-})
 
 
 class ExtensionDownloader:
@@ -95,29 +89,29 @@ class ExtensionDownloader:
         :rtype: boolean
         :returns: False if already up-to-date, True if was updated
         """
-        commit = self.get_new_version(ext_id)
+        commit_sha, commit_date = self.get_new_version(ext_id)
         ext = self._find_extension(ext_id)
 
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
-                    ext.last_commit[:8], commit['last_commit'][:8])
+                    ext.last_commit[:8], commit_sha[:8])
 
         ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
 
         remote = ExtensionRemote(ext.url)
-        filename = download_tarball(remote.get_download_url(commit['last_commit']))
+        filename = download_tarball(remote.get_download_url(commit_sha))
         untar(filename, ext_path)
 
         ext.update(
             updated_at=datetime.now().isoformat(),
-            last_commit=commit['last_commit'],
-            last_commit_time=commit['last_commit_time']
+            last_commit=commit_sha,
+            last_commit_time=commit_date
         )
 
         self.ext_db.save({ext_id: ext})
 
         return True
 
-    def get_new_version(self, ext_id: str) -> LastCommit:
+    def get_new_version(self, ext_id: str) -> Tuple[str, str]:
         """
         Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
         """
@@ -128,10 +122,7 @@ class ExtensionDownloader:
         if not need_update:
             raise ExtensionIsUpToDateError('Extension is up to date')
 
-        return {
-            'last_commit': commit_sha,
-            'last_commit_time': commit_time.isoformat()
-        }
+        return commit_sha, commit_time.isoformat()
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)

@@ -4,9 +4,7 @@ from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
-from ulauncher.utils.mypy_extensions import TypedDict
 
-OptionItem = TypedDict('OptionItem', {"value": str, "text": str})
 ValueType = Union[str, int]  # Bool is a subclass of int
 
 
@@ -22,7 +20,7 @@ class Preference(JsonData):
     description = ""
     default_value: ValueType = ""
     value: Optional[ValueType] = None
-    options: List[OptionItem] = []
+    options: List[dict] = []
     max: Optional[int] = None
     min: Optional[int] = None
     icon: Optional[str] = None
