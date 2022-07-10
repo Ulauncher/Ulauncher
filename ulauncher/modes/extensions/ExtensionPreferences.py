@@ -5,7 +5,7 @@ from functools import lru_cache
 from ulauncher.config import EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.utils.db.KeyValueJsonDb import KeyValueJsonDb
 from ulauncher.utils.mypy_extensions import TypedDict
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, OptionItems
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, OptionItem
 
 logger = logging.getLogger()
 
@@ -18,7 +18,7 @@ PreferenceItem = TypedDict('PreferenceItem', {
     'default_value': ValueType,
     'min': Optional[int],
     'max': Optional[int],
-    'options': OptionItems,
+    'options': List[OptionItem],
     'icon': Optional[str],
     'value': ValueType,
 })

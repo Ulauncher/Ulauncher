@@ -79,26 +79,22 @@ class TestExtensionManifest:
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
 
-    def test_check_compatibility__required_api_version_2__exception_raised(self):
+    def test_check_compatibility__manifest_version_3__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "3"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
-    def test_check_compatibility__manifest_version_12__exception_raised(self):
+    def test_check_compatibility__manifest_version_0__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "0"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
-    def test_check_compatibility__required_api_version_1__no_exceptions(self):
+    def test_check_compatibility__api_version__no_exceptions(self):
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "2"})
         manifest.check_compatibility()
 
     def test_get_option__option_exists__value_returned(self):
-        manifest = ExtensionManifest({"options": {"query_debounce": 0.5}})
-        assert manifest.options.get("query_debounce") == 0.5
-
-    def test_get_option__option_doesnt_exist__default_returned(self):
-        manifest = ExtensionManifest({"options": {}})
-        assert manifest.options.get("query_debounce", 0.4) == 0.4
+        manifest = ExtensionManifest({"query_debounce": 0.5})
+        assert manifest.query_debounce == 0.5
