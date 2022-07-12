@@ -6,7 +6,6 @@ import pytest
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, ExtensionRemoteError
 
 manifest_example = {'required_api_version': '1',
-                    'description': 'Countdown timer with notifications',
                     'developer_name': 'Aleksandr Gornostal',
                     'icon': 'images/timer.png',
                     'name': 'Timer',

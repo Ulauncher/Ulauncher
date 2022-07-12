@@ -29,7 +29,6 @@ class Preference(JsonData):
 @json_data_class
 class ExtensionManifest(JsonData):
     name = ""
-    description = ""
     developer_name = ""
     icon = ""
     required_api_version = ""
@@ -58,7 +57,6 @@ class ExtensionManifest(JsonData):
         try:
             assert self.required_api_version, "required_api_version is not provided"
             assert self.name, "name is not provided"
-            assert self.description, "description is not provided"
             assert self.developer_name, "developer_name is not provided"
             assert self.icon, "icon is not provided"
             assert self.preferences, "preferences is not provided"

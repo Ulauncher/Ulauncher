@@ -214,7 +214,6 @@ function generateExtensionRecord(config) {
     name: config.name,
     updated_at: '2017-07-21T20:50:44.850738',
     icon: placeholderImage,
-    description: 'My extension description',
     developer_name: 'John Doe',
     version: '1.2.3',
     last_commit: 'abc234fd23425234a2',

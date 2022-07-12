@@ -58,7 +58,6 @@ def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = No
         'last_commit_time': ext_db_record.last_commit_time,
         'name': manifest.name,
         'icon': icon,
-        'description': manifest.description,
         'developer_name': manifest.developer_name,
         'instructions': manifest.instructions,
         'preferences': manifest.preferences,

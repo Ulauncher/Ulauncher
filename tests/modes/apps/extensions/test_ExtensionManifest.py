@@ -11,7 +11,6 @@ class TestExtensionManifest:
         return {
             "required_api_version": "1",
             "name": "Timer",
-            "description": "Countdown timer with notifications",
             "developer_name": "Aleksandr Gornostal",
             "icon": "images/timer.png",
             "preferences": [{
