@@ -92,15 +92,15 @@ Create :file:`manifest.json` using the following template::
   }
 
 * ``required_api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
-* ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
+* ``name``, ``description`` and ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
-* ``instructions`` - optional installation instructions to be shown in the extension preferences.
-* ``query_debounce`` - Default: ``0.05``. Delay (in seconds) to avoid running queries while the user is typing. Raise to higher values like ``1`` for slow I/O operations like network requests.
 * ``preferences`` - list of preferences available for users to override.
+* ``instructions`` - Optional installation instructions that is shown in the extension preferences view.
+* ``query_debounce`` - Default: ``0.05``. Delay (in seconds) to avoid running queries while the user is typing. Raise to higher values like ``1`` for slow I/O operations like network requests.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
 
-.. NOTE:: All fields except ``options`` and ``instructions`` are required and cannot be empty.
+.. NOTE:: All fields except ``instructions`` and ``query_debounce`` are required and cannot be empty.
 
 
 Preference Object Fields
@@ -126,7 +126,7 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
 ``name`` (required)
   Name of your preference. If type is "keyword" name will show up as a name of item in a list of results
 
-``default_value``
+``default_value`` (required)
   Default value
 
 ``description``
@@ -140,9 +140,6 @@ The values of the preferences are forwarded to the ``on_event`` method of the ``
 
 ``options``
   Required for type "select". Must be a list of strings or objects like: ``{"value": "...", "text": "..."}``
-
-.. NOTE:: All fields except ``description`` are required and cannot be empty.
-
 
 main.py
 -------
