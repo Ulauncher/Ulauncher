@@ -5,9 +5,9 @@ from ulauncher.utils.json_data import JsonData, json_data_class
 json_file = "/tmp/ulauncher-test/jsondata.json"
 
 
-def check_json_prop(name, file=json_file):
+def load_json(file=json_file):
     with open(file) as f:
-        return json.load(f).get(name)
+        return json.load(f)
 
 
 class TestJsonData:
@@ -55,21 +55,21 @@ class TestJsonData:
         file_path = "/tmp/ulauncher-test/jsondata_save_as.json"
         jd_static = JsonData(abc=123)
         jd_static.save_as(file_path)
-        assert check_json_prop("abc", file_path) == 123
+        assert load_json(file_path).get("abc") == 123
         jd = JsonData.new_from_file(json_file)
         jd.bcd = 234
         jd.save_as(file_path)
-        assert check_json_prop("abc", json_file) is None
-        assert check_json_prop("abc", file_path) is None
-        assert check_json_prop("bcd", file_path) == 234
+        assert load_json(json_file).get("abc") is None
+        assert load_json(file_path).get("abc") is None
+        assert load_json(file_path).get("bcd") == 234
 
     def test_save(self):
         jd = JsonData.new_from_file(json_file)
         jd.asdf = "xyz"
         jd.save()
-        assert check_json_prop("asdf") == "xyz"
+        assert load_json().get("asdf") == "xyz"
         jd.save(asdf="zyx")
-        assert check_json_prop("asdf") == "zyx"
+        assert load_json().get("asdf") == "zyx"
 
     def test_cannot_override_method(self):
         jd = JsonData()
