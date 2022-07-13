@@ -80,8 +80,8 @@ class TestJsonData:
     def test_class_decorator(self):
         @json_data_class
         class ClassWDefault(JsonData):
-            a = 1
-            b = 2
+            b = 1
+            a = 2
 
             def sum(self):
                 return self.a + self.b
@@ -90,14 +90,19 @@ class TestJsonData:
         class SubclassWDefault(ClassWDefault):
             c = 3
 
-        assert ClassWDefault().a == 1
-        assert ClassWDefault(a=2).a == 2
-        assert ClassWDefault(b=9).sum() == 10
+        assert ClassWDefault().b == 1
+        assert ClassWDefault(b=2).b == 2
+        assert ClassWDefault(a=9).sum() == 10
         inst = ClassWDefault()
         inst.sum = 4  # pylint: disable=all
         assert inst.sum() == 3
         assert inst.get("sum") == 4
-        assert SubclassWDefault().stringify() == '{"a": 1, "b": 2, "c": 3}'
+        assert SubclassWDefault().stringify() == '{"a": 2, "b": 1, "c": 3}'
+
+        json_ko_file = "/tmp/ulauncher-test/jsondata-key-order.json"
+        inst = ClassWDefault.new_from_file(json_ko_file)
+        inst.save()
+        assert list(load_json(json_ko_file).keys()) == ["b", "a", "c"]
 
     def test_constructor_is_cloned(self):
         @json_data_class

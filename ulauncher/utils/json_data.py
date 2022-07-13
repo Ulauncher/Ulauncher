@@ -51,6 +51,7 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 
 
 class JsonData(dict):
+    __json_sort_keys__ = True
     __json_value_blacklist__: List[Any] = [[], {}, None]  # pylint: disable=dangerous-default-value
 
     def __init__(self, *args, **kwargs):
@@ -112,7 +113,7 @@ class JsonData(dict):
             try:
                 # Ensure parent dir first
                 file_path.parent.mkdir(parents=True, exist_ok=True)
-                file_path.write_text(self.stringify(indent=4))
+                file_path.write_text(self.stringify(indent=4, sort_keys=self.__json_sort_keys__))
                 return True
             except Exception as e:
                 logger.error("Error '%s' writing to JSON file %s: %s.", type(e).__name__, file_path, e)
@@ -120,6 +121,8 @@ class JsonData(dict):
 
 
 def json_data_class(cls):
+    # Perserve the class order
+    cls.__json_sort_keys__ = False
     # Moves the class props to __default_props__ (JsonData handles this)
     if not hasattr(cls, "__default_props__"):
         cls.__default_props__ = {}
