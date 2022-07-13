@@ -2,7 +2,7 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, cast, Callable, Dict, List, TypeVar
+from typing import Any, cast, Dict, List, Type, TypeVar
 
 
 def filter_recursive(data, blacklist):
@@ -16,7 +16,7 @@ def filter_recursive(data, blacklist):
 _file_instances: Dict[Path, "JsonData"] = {}
 logger = logging.getLogger()
 # Optimally use "TypeVar('T', bound=JsonData"), but it requires py3.7 see https://stackoverflow.com/a/63237226/633921
-T = TypeVar("T")
+T = TypeVar("T", bound="JsonData")
 
 
 """
@@ -78,7 +78,7 @@ class JsonData(dict):
             self[k] = v
 
     @classmethod
-    def new_from_file(cls: T, path) -> T:
+    def new_from_file(cls: Type[T], path) -> T:
         data = {}
         file_path = Path(path).resolve()
         if file_path.is_file():
@@ -88,7 +88,7 @@ class JsonData(dict):
                 logger.error("Error '%s' opening JSON file %s: %s", type(e).__name__, file_path, e)
                 logger.warning("Ignoring invalid JSON file (%s)", file_path)
 
-        instance = _file_instances.get(file_path, cast(Callable, cls)())
+        instance = _file_instances.get(file_path, cls())
         instance.update(data)
         _file_instances[file_path] = instance
         return cast(T, instance)

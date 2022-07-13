@@ -1,4 +1,4 @@
-from typing import Any, cast, Optional, List, Union
+from typing import Any, Optional, List, Union
 
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
@@ -134,7 +134,7 @@ class ExtensionManifest(JsonData):
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
         manifest = cls.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
-        user_prefs = cast(JsonData, JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json"))
+        user_prefs = JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json")
         for pref in manifest.preferences:
             if user_prefs.get(pref.id):
                 pref.value = user_prefs.get(pref.id)
