@@ -11,62 +11,15 @@ Create a new directory there (name it as you wish) with the following structure:
   .
   ├── images
   │   └── icon.png
-  ├── versions.json
   ├── manifest.json
   └── main.py
 
-* :file:`versions.json` contains mapping of Ulauncher Extension API to branch name of the extension
 * :file:`manifest.json` contains all necessary metadata
 * :file:`main.py` is an entry point for your extension
 * :file:`images/` contains at least an icon of you extension
 
 
 Check out :doc:`debugging` to learn how to test and debug your extension.
-
-
-versions.json
--------------
-
-The file contains a list with supported versions of Ulauncher API. ``commit`` field may be either a commit id, branch name, or git tag where the code for that required version is located
-
-``versions.json`` must be checked in to the **root** dir of **master** branch.
-
-``required_api_version`` specifies the minimum supported API version or a lower and upper version. You can find the current version number on the About page of Ulauncher preferences or the log output if you run `ulauncher -v` from a terminal.
-
-Some examples of how to target a range of versions::
-* ``2`` matches any versions that starts with ``2.``. It is the same as ``2.x`` and ``2.0``
-* ``2.1`` matches Ulauncher's API version 2.1 or higher, but lower than 3.0
-* ``2.1 - 5`` will match version 2.1 and higher up to version 5.9999... but not version 6.x. Make sure you specify the separator exactly like this `` - ``, as it is intentionally "picky" to be backward compatible.
-
-Ulauncher will update the major version number (before the dot) when we have to introduce changes that can't be made backward compatible. The minor version number (after the dot) will update when we add new features.
-
-Previously Ulauncher used semver for the API version. We simplified this by dropping the "patch" version and a third party dependency. But we made sure that the previous documented way of specifying the version still works for new extensions and vice versa.
-
-
-Let's take this example::
-
-  [
-    {"required_api_version": "2.1", "commit": "release-for-api-v2"},
-    {"required_api_version": "3", "commit": "release-for-api-v3"},
-    {"required_api_version": "3.3 - 5", "commit": "master"}
-  ]
-
-``release-for-api-v1`` is a branch name (or may be a git tag in this case too). You can choose branch/tag names whatever you like.
-
-With this example Ulauncher will install the extension from the branch ``release-for-api-v2`` if if the API version is 2.1 or 2.9999
-If instead the API version is ``3.5``, this satisfies both the second and third criterias. Then Ulauncher will use the version specified last.
-
-.. TODO: add a screenshot
-
-**What problem does versions.json solve?**
-
-We want to minimize the amount of code and infrastructure components that are needed to have a flexible extension ecosystem. For that reason we want to rely on Github as much as possible as a storage of extensions. We also want to allow extension developers to release extensions for previous versions of Ulauncher (for bug fixes for example). That's why ``versions.json`` will be used to track all releases of a certain extension.
-
-**How does Ulauncher use this file?**
-
-| First, Ulauncher will download ``versions.json`` from the master branch of the extension repo.
-| Then it will find a required API version that matches current API version.
-| After that it will download extension code using a branch/tag/commit name.
 
 manifest.json
 -------------
