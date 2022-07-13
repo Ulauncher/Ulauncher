@@ -44,7 +44,7 @@ class ExtensionMode(BaseMode):
         :rtype: Iterable[:class:`~ulauncher.api.Result`]
         """
         for controller in self.extensionServer.get_controllers():
-            for pref in controller.manifest.preferences:
+            for pref in controller.manifest.preferences.values():
                 if pref.type == "keyword" and pref.value:
                     yield ExtensionKeywordResult(
                         name=html.escape(pref.name),
