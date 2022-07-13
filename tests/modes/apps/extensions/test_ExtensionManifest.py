@@ -94,10 +94,6 @@ class TestExtensionManifest:
         manifest = ExtensionManifest({"name": "Test", "required_api_version": "2"})
         manifest.check_compatibility()
 
-    def test_get_option__option_exists__value_returned(self):
-        manifest = ExtensionManifest({"query_debounce": 0.5})
-        assert manifest.query_debounce == 0.5
-
     def test_defaults_not_included_in_stringify(self):
         # Ensure defaults don't leak
         assert ExtensionManifest().stringify() == "{}"
