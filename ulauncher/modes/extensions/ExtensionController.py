@@ -42,7 +42,7 @@ class ExtensionController:
         self._debounced_send_event = debounce(self.manifest.query_debounce or 0.05)(self._send_event)
 
         # PreferencesEvent is candidate for future removal
-        self._send_event(PreferencesEvent(self.manifest.get_preferences_dict()))
+        self._send_event(PreferencesEvent(self.manifest.get_user_preferences()))
         logger.info('Extension "%s" connected', extension_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
@@ -58,7 +58,7 @@ class ExtensionController:
         :returns: :class:`BaseAction` object
         """
         # Normalize the query to the extension default keyword, not the custom user keyword
-        for pref in self.manifest.preferences:
+        for pref in self.manifest.preferences.values():
             if pref.type == "keyword" and pref.value == query.keyword:
                 query = Query(query.replace(pref.value, pref.default_value, 1))
 

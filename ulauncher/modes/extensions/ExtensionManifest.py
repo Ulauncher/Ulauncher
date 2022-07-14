@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, Union
+from typing import Any, Dict, Optional, List, Union
 
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
@@ -14,7 +14,6 @@ class ExtensionManifestError(UlauncherAPIError):
 
 @json_data_class
 class Preference(JsonData):
-    id = ""
     name = ""
     type = ""
     description = ""
@@ -32,7 +31,7 @@ class ExtensionManifest(JsonData):
     developer_name = ""
     icon = ""
     required_api_version = ""
-    preferences: List[Preference] = []
+    preferences: Dict[str, Preference] = {}
     instructions: Optional[str] = None
     query_debounce: Optional[float] = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
@@ -47,7 +46,10 @@ class ExtensionManifest(JsonData):
                 return
         # Coerce preferences to Preference
         if key == "preferences":
-            value = [Preference(pref) for pref in value]
+            if isinstance(value, list):
+                value = {pref.get("id"): Preference(pref, id=None) for pref in value}
+            else:
+                value = {id: Preference(pref) for id, pref in value.items()}
         super().__setitem__(key, value)
 
     def validate(self):
@@ -61,9 +63,8 @@ class ExtensionManifest(JsonData):
             assert self.icon, "icon is not provided"
             assert self.preferences, "preferences is not provided"
 
-            for p in self.preferences:
+            for p in self.preferences.values():
                 default = p.default_value
-                assert p.id, 'Preferences error. Id cannot be empty'
                 assert p.type, 'Preferences error. Type cannot be empty'
                 assert p.type in ["keyword", "checkbox", "number", "input", "select", "text"], \
                     'Preferences error. Type can be "keyword", "input", "number", "checkbox", "select" or "text"'
@@ -111,32 +112,22 @@ class ExtensionManifest(JsonData):
             )
             raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
-    def get_preference(self, **kwargs) -> Optional[Preference]:
-        """
-        Get the first preference matching the arguments
-        Ex manifest.get_preference(type="number", name="my_number")
-        """
-        for pref in self.preferences:
-            if {**pref, **kwargs} == pref:
-                return pref
-        return None
-
-    def get_preferences_dict(self):
+    def get_user_preferences(self) -> Dict[str, Any]:
         """
         Get the preferences as an id-value dict
         """
-        return {p.id: p.value for p in self.preferences}
+        return {id: pref.value for id, pref in self.preferences.items()}
 
     def save_user_preferences(self, ext_id: str):
         path = f"{EXT_PREFERENCES_DIR}/{ext_id}.json"
-        JsonData.new_from_file(path).save(self.get_preferences_dict())
+        JsonData.new_from_file(path).save(self.get_user_preferences())
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
         manifest = cls.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
         user_prefs = JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json")
-        for pref in manifest.preferences:
-            if user_prefs.get(pref.id):
-                pref.value = user_prefs.get(pref.id)
+        for id, pref in manifest.preferences.items():
+            if user_prefs.get(id):
+                pref.value = user_prefs.get(id)
 
         return manifest

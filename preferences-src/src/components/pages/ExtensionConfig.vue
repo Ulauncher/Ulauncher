@@ -69,15 +69,15 @@
     </b-alert>
 
     <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
-      <template v-for="pref in extension.preferences">
+      <template v-for="(pref, id) in extension.preferences">
         <b-form-group
-          :key="pref.id"
+          :key="id"
           v-if="pref.type == 'keyword'"
           :label="`${pref.name} keyword`"
           class="keyword-input"
           :description="pref.description"
         >
-          <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
+          <b-form-input :ref="id" :value="pref.value"></b-form-input>
         </b-form-group>
 
         <b-form-group
@@ -217,7 +217,7 @@ export default {
     canSave() {
       const { preferences } = this.$props.extension
       const isRunning = this.$props.extension.is_running
-      return isRunning && !this.$props.extension.error && preferences && !!preferences.length
+      return isRunning && !this.$props.extension.error && preferences && !!Object.keys(preferences).length
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
@@ -257,9 +257,8 @@ export default {
     },
     save() {
       let data = {}
-      for (let i = 0; i < this.extension.preferences.length; i++) {
-        let pref = this.extension.preferences[i]
-        let { $el } = this.$refs[pref.id][0]
+      Object.entries(this.extension.preferences).forEach(([id, pref]) => {
+        let { $el } = this.$refs[id][0]
         let value = $el.value
         if (pref.type === 'checkbox') {
           value = $el.firstChild.checked
@@ -267,8 +266,8 @@ export default {
         if (pref.type === 'keyword') {
           value = value.trim()
         }
-        data[pref.id] = value
-      }
+        data[id] = value
+      })
       jsonp('prefs:///extension/update-prefs', {data, id: this.extension.id}).then(
         () => {
           this.showSavedMsg = true

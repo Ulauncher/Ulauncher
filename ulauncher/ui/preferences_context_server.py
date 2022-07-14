@@ -332,7 +332,7 @@ class PreferencesContextServer():
         logger.info('Update extension preferences: %s', query)
         controller = ExtensionServer.get_instance().controllers.get(query['id'])
         for pref_id, value in query['data'].items():
-            preference = controller.manifest.get_preference(id=pref_id)
+            preference = controller.manifest.preferences.get(pref_id)
             old_value = preference.value
             preference.value = value
             controller.manifest.save_user_preferences(query['id'])

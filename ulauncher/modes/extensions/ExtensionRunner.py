@@ -71,7 +71,7 @@ class ExtensionRunner:
             env = {
                 "VERBOSE": str(int(self.verbose)),
                 "PYTHONPATH": ":".join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv("PYTHONPATH")])),
-                "EXTENSION_PREFERENCES": json.dumps(manifest.get_preferences_dict(), separators=(',', ':'))
+                "EXTENSION_PREFERENCES": json.dumps(manifest.get_user_preferences(), separators=(',', ':'))
             }
 
             if self.dont_run_extensions:

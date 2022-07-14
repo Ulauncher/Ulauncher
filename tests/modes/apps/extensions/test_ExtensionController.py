@@ -42,7 +42,7 @@ class TestExtensionController:
 
     def test_configure__typical(self, controller, controllers, manifest, PreferencesEvent):
         # configure() is called implicitly when constructing the controller.
-        manifest.get_preferences_dict.return_value = {}
+        manifest.get_user_preferences.return_value = {}
         assert controller.extension_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
         controller.manifest.validate.assert_called_once()
