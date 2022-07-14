@@ -22,24 +22,17 @@ class RunScriptAction(BaseAction):
         self.args = args
 
     def run(self):
-        file = tempfile.NamedTemporaryFile(prefix='ulauncher_RunScript_', delete=False)
-
+        file_path = f"{tempfile.gettempdir()}/ulauncher_run_script_{time.time()}"
+        with open(file_path, 'w') as file:
+            file.write(self.script)
         try:
-            file.write(self.script.encode())
-        except Exception:
-            file.close()
-            raise
-        else:
-            file.close()
-
-        try:
-            os.chmod(file.name, 0o777)
-            logger.debug('Running a script from %s', file.name)
-            output = subprocess.check_output([f"{file.name} {self.args}"], shell=True).decode('utf-8')
+            os.chmod(file_path, 0o777)
+            logger.debug('Running a script from %s', file_path)
+            output = subprocess.check_output([f"{file_path} {self.args}"], shell=True).decode('utf-8')
             logger.debug("Script action output:\n%s", output)
-            self.remove_temp_file(file.name)
+            self.remove_temp_file(file_path)
         except Exception:
-            self.remove_temp_file(file.name)
+            self.remove_temp_file(file_path)
             raise
 
     @run_async(daemon=True)

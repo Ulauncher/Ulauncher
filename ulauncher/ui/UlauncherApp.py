@@ -39,8 +39,8 @@ class UlauncherApp(Gtk.Application):
         )
         self.connect("startup", self.setup)  # runs only once on the main instance
 
-    def do_before_emit(self, data):
-        query = data.lookup_value("query", GLib.VariantType("s"))
+    def do_before_emit(self, *args, **kwargs):
+        query = args[0].lookup_value("query", GLib.VariantType("s"))
         if query:
             self.window.initial_query = query.unpack()
 

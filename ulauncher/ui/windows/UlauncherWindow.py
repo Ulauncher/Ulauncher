@@ -248,11 +248,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
-    def hide(self, *args, **kwargs):
+    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
+    def hide(self):
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
-        super().hide(*args, **kwargs)
+        super().hide()
 
     def get_pointer_device(self):
         return (self
