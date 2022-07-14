@@ -87,19 +87,19 @@ class TestExtensionRemote:
     def test_get_compatible_ref_from_versions_json(self, remote, json_fetch, mocker):
         mocker.patch.object(remote, 'get_commit')
         json_fetch.return_value = (base64_file_attachment(json.dumps([
-            {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
-            {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
-            {"required_api_version": "^2.3.1", "commit": "master"}
+            {"required_api_version": "^2.0.0", "commit": "release-for-api-v1"},
+            {"required_api_version": "3.0", "commit": "release-for-api-v3"},
+            {"required_api_version": "3.3", "commit": "master"}
         ])), None)
         remote.get_compatible_commit_from_versions_json()
-        remote.get_commit.assert_called_with("release-for-api-v2")
+        remote.get_commit.assert_called_with("release-for-api-v3")
 
     def test_get_compatible_ref_from_versions_json__mult_compatible(self, remote, json_fetch, mocker):
         mocker.patch.object(remote, 'get_commit')
         json_fetch.return_value = (base64_file_attachment(json.dumps([
-            {"required_api_version": "2.0.0", "commit": "release-for-api-v2"},
-            {"required_api_version": "~1.3.1", "commit": "master"},
-            {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"}
+            {"required_api_version": "3.0", "commit": "release-for-api-v3"},
+            {"required_api_version": "~2.3.1", "commit": "master"},
+            {"required_api_version": "^2.0.0", "commit": "release-for-api-v1"}
         ])), None)
         remote.get_compatible_commit_from_versions_json()
-        remote.get_commit.assert_called_with("release-for-api-v2")
+        remote.get_commit.assert_called_with("release-for-api-v3")

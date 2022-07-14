@@ -173,7 +173,14 @@ class ExtensionRemote:
         if satisfies(API_VERSION, manifest.api_version):
             return self.get_commit("HEAD")
 
-        commit = self.get_compatible_commit_from_tags() or self.get_compatible_commit_from_versions_json()
+        commit = self.get_compatible_commit_from_tags()
+        if not commit:
+            if satisfies("2.0", manifest.api_version):
+                logger.warning("Falling back on using API 2.0 version for %s.", self.repo)
+                return self.get_commit("HEAD")
+
+            commit = self.get_compatible_commit_from_versions_json()
+
         if not commit:
             message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
             raise ExtensionRemoteError(message, ExtensionError.Incompatible)

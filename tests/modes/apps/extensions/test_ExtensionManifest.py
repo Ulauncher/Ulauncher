@@ -72,12 +72,6 @@ class TestExtensionManifest:
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
 
-    def test_check_compatibility__manifest_version_3__exception_raised(self):
-        manifest = ExtensionManifest({"name": "Test", "api_version": "3"})
-        with pytest.raises(ExtensionManifestError) as e:
-            manifest.check_compatibility()
-        assert e.value.error_name == ExtensionError.Incompatible.value
-
     def test_check_compatibility__manifest_version_0__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
         with pytest.raises(ExtensionManifestError) as e:
@@ -85,7 +79,7 @@ class TestExtensionManifest:
         assert e.value.error_name == ExtensionError.Incompatible.value
 
     def test_check_compatibility__api_version__no_exceptions(self):
-        manifest = ExtensionManifest({"name": "Test", "api_version": "2"})
+        manifest = ExtensionManifest({"name": "Test", "api_version": "3"})
         manifest.check_compatibility()
 
     def test_defaults_not_included_in_stringify(self):

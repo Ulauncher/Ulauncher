@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, Optional, List, Union
 
 from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
@@ -5,6 +6,7 @@ from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 
+logger = logging.getLogger()
 ValueType = Union[str, int]  # Bool is a subclass of int
 
 
@@ -110,10 +112,14 @@ class ExtensionManifest(JsonData):
         """
         if not satisfies(API_VERSION, self.api_version):
             err_msg = (
-                f'Extension "{self.name}" requires API version {self.api_version}, '
-                f'but the current API version is: {API_VERSION})'
+                f'Extension "{self.name}" supports API version {self.api_version}, '
+                f'but the Ulauncher version you are running is using extension API v:{API_VERSION}).'
             )
-            raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
+            if satisfies("2.0", self.api_version):
+                # Show a warning for v2 -> v3 instead of aborting. Most v2 extensions run in v3.
+                logger.warning(err_msg)
+            else:
+                raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
     def get_user_preferences(self) -> Dict[str, Any]:
         """
