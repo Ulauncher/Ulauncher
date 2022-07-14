@@ -130,7 +130,7 @@ class ExtensionManifest(JsonData):
         manifest = cls.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
         user_prefs = JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json")
         for id, pref in manifest.preferences.items():
-            if user_prefs.get(id):
-                pref.value = user_prefs.get(id)
+            user_value = user_prefs.get(id)
+            pref.value = pref.default_value if user_value is None else user_value
 
         return manifest
