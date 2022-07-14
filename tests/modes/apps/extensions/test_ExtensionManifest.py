@@ -9,7 +9,7 @@ class TestExtensionManifest:
     @pytest.fixture
     def valid_manifest(self):
         return {
-            "required_api_version": "1",
+            "api_version": "1",
             "name": "Timer",
             "developer_name": "Aleksandr Gornostal",
             "icon": "images/timer.png",
@@ -28,7 +28,7 @@ class TestExtensionManifest:
         assert manifest.name == "Test Extension"
 
     def test_validate__name_empty__exception_raised(self):
-        manifest = ExtensionManifest({"required_api_version": "1"})
+        manifest = ExtensionManifest({"api_version": "1"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.validate()
         assert e.value.error_name == ExtensionError.InvalidManifest.value
@@ -73,19 +73,19 @@ class TestExtensionManifest:
         manifest.validate()
 
     def test_check_compatibility__manifest_version_3__exception_raised(self):
-        manifest = ExtensionManifest({"name": "Test", "required_api_version": "3"})
+        manifest = ExtensionManifest({"name": "Test", "api_version": "3"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
     def test_check_compatibility__manifest_version_0__exception_raised(self):
-        manifest = ExtensionManifest({"name": "Test", "required_api_version": "0"})
+        manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
         with pytest.raises(ExtensionManifestError) as e:
             manifest.check_compatibility()
         assert e.value.error_name == ExtensionError.Incompatible.value
 
     def test_check_compatibility__api_version__no_exceptions(self):
-        manifest = ExtensionManifest({"name": "Test", "required_api_version": "2"})
+        manifest = ExtensionManifest({"name": "Test", "api_version": "2"})
         manifest.check_compatibility()
 
     def test_defaults_not_included_in_stringify(self):
@@ -101,6 +101,15 @@ class TestExtensionManifest:
         assert manifest.get_user_preferences() == {"txt": "asdf", "num": 11}
 
     def test_manifest_backwards_compatibility(self):
-        em = ExtensionManifest(options={"query_debounce": 5}, preferences=[{"id": "asdf", "name": "ghjk"}])
-        assert em.query_debounce == 5
+        em = ExtensionManifest(
+            required_api_version="3",
+            manifest_version="1",
+            description="asdf",
+            options={"query_debounce": 0.555},
+            preferences=[{"id": "asdf", "name": "ghjk"}]
+        )
+        assert em.get("options") is None
+        assert em.get("required_api_version") is None
+        assert em.api_version == "3"
+        assert em.query_debounce == 0.555
         assert em.preferences.get("asdf").name == "ghjk"

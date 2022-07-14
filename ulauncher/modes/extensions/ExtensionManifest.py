@@ -27,10 +27,10 @@ class Preference(JsonData):
 
 @json_data_class
 class ExtensionManifest(JsonData):
+    api_version = ""
     name = ""
     developer_name = ""
     icon = ""
-    required_api_version = ""
     preferences: Dict[str, Preference] = {}
     instructions: Optional[str] = None
     query_debounce: Optional[float] = None
@@ -38,6 +38,9 @@ class ExtensionManifest(JsonData):
     __json_value_blacklist__: List[Any] = [[], {}, None, ""]  # pylint: disable=dangerous-default-value
 
     def __setitem__(self, key, value):
+        # Rename "required_api_version" back to "api_version"
+        if key == "required_api_version":
+            key = "api_version"
         # Flatten manifest v2 API "options"
         if key == "options":
             key = "query_debounce"
@@ -57,7 +60,7 @@ class ExtensionManifest(JsonData):
         Ensure that the manifest is valid (or raise error)
         """
         try:
-            assert self.required_api_version, "required_api_version is not provided"
+            assert self.api_version, "api_version is not provided"
             assert self.name, "name is not provided"
             assert self.developer_name, "developer_name is not provided"
             assert self.icon, "icon is not provided"
@@ -105,9 +108,9 @@ class ExtensionManifest(JsonData):
         """
         Ensure the extension is compatible with the Ulauncher API (or raise error)
         """
-        if not satisfies(API_VERSION, self.required_api_version):
+        if not satisfies(API_VERSION, self.api_version):
             err_msg = (
-                f'Extension "{self.name}" requires API version {self.required_api_version}, '
+                f'Extension "{self.name}" requires API version {self.api_version}, '
                 f'but the current API version is: {API_VERSION})'
             )
             raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)

@@ -27,7 +27,7 @@ manifest.json
 Create :file:`manifest.json` using the following template::
 
   {
-    "required_api_version": "2",
+    "api_version": "3",
     "name": "Demo extension",
     "developer_name": "John Doe",
     "icon": "images/icon.png",
@@ -42,7 +42,7 @@ Create :file:`manifest.json` using the following template::
     }
   }
 
-* ``required_api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
+* ``api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
 * ``name`` and ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
 * ``preferences`` - Preferences available for users to override (see below for details).

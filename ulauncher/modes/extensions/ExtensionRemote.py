@@ -10,6 +10,7 @@ from typing import Optional, Tuple
 from ulauncher.config import API_VERSION
 from ulauncher.utils.version import satisfies, valid_range
 from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger()
 
@@ -165,11 +166,11 @@ class ExtensionRemote:
         Returns a commit hash and datetime.
         """
         try:
-            manifest = json.loads(self.fetch_file("manifest.json") or "{}")
+            manifest = ExtensionManifest(json.loads(self.fetch_file("manifest.json") or "{}"))
         except URLError as e:
             raise ExtensionRemoteError("Could not access repository", ExtensionError.Network) from e
 
-        if satisfies(API_VERSION, manifest.get("required_api_version")):
+        if satisfies(API_VERSION, manifest.api_version):
             return self.get_commit("HEAD")
 
         commit = self.get_compatible_commit_from_tags() or self.get_compatible_commit_from_versions_json()
