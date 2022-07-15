@@ -89,4 +89,4 @@ def main():
     try:
         app.run(sys.argv)
     except KeyboardInterrupt:
-        logger.warning('On KeyboardInterrupt')
+        pass
