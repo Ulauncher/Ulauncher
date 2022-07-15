@@ -64,7 +64,7 @@ class ModeHandler:
     def search(self, query, min_score=50, limit=50):
         searchables = []
         for mode in self.modes:
-            searchables.extend(list(mode.get_searchable_items()))
+            searchables.extend(list(mode.get_triggers()))
 
         # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
         sorted_ = sorted(searchables, key=lambda i: i.search_score(query), reverse=True)[:limit]

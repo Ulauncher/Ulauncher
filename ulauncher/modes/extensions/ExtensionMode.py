@@ -31,7 +31,7 @@ class ExtensionMode(BaseMode):
 
         return controller.handle_query(query)
 
-    def get_searchable_items(self):
+    def get_triggers(self):
         """
         :rtype: Iterable[:class:`~ulauncher.api.Result`]
         """

@@ -38,5 +38,5 @@ class ShortcutMode(BaseMode):
         return self._create_items([s for s in self.shortcutsDb.values() if s['is_default_search']],
                                   default_search=True)
 
-    def get_searchable_items(self):
+    def get_triggers(self):
         return self._create_items(list(self.shortcutsDb.values()))
