@@ -112,12 +112,16 @@ class ExtensionManifest(JsonData):
         """
         if not satisfies(API_VERSION, self.api_version):
             err_msg = (
-                f'Extension "{self.name}" supports API version {self.api_version}, '
+                f'Extension "{self.name}" supports API version(s) {self.api_version}, '
                 f'but the Ulauncher version you are running is using extension API v:{API_VERSION}).'
             )
             if satisfies("2.0", self.api_version):
                 # Show a warning for v2 -> v3 instead of aborting. Most v2 extensions run in v3.
-                logger.warning(err_msg)
+                logger.warning(
+                    "Extension %s has not yet been updated to support API v%s. There might be compatibility issues.",
+                    self.name,
+                    API_VERSION
+                )
             else:
                 raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
