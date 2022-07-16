@@ -27,13 +27,20 @@ from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.Router import Router
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import API_VERSION, VERSION, EXTENSIONS_DIR
 
 logger = logging.getLogger()
-rt = Router()
+routes = {}
+
+
+def route(path: str):
+    def decorator(handler):
+        routes[path] = handler
+        return handler
+
+    return decorator
 
 
 class PrefsApiError(UlauncherAPIError):
@@ -109,67 +116,63 @@ class PreferencesServer():
         self.autostart_pref = UlauncherSystemdController()
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
-        self.context.register_uri_scheme('prefs', self.on_scheme_callback)
-        self.context.register_uri_scheme('file2', self.serve_file)
+        self.context.register_uri_scheme('prefs', self.request_listener)
         self.context.set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
 
     @run_async
-    def serve_file(self, scheme_request):
+    def request_listener(self, scheme_request):
         """
-        Serves file with custom file2:// protocol because file:// breaks for some
+        Handle requests using custom prefs:// protocol
+        To avoid CORS issues both files and api requests has to go through here and you have to use
+        the same domain (or skip the domain like now) for all urls, making all urls start with prefs:///
+        (In addition some users has had issues with webkit directly loading files from file:///)
         """
-        # pylint: disable=broad-except
-        try:
-            params = urlparse(scheme_request.get_uri())
-            [mime_type, _] = mimetypes.guess_type(params.path)
-            stream = Gio.file_new_for_path(params.path).read()
-            scheme_request.finish(stream, -1, mime_type)
-        except Exception as e:
-            logger.warning('Unable to send file. %s: %s', type(e).__name__, e)
+        uri = scheme_request.get_uri()
+        params = urlparse(uri)
+        route_handler = routes.get(params.path)
+
+        if route_handler:
+            # WebKit.URISchemeRequest is very primitive as a server:
+            # * It can only read the URL (not the body of a post request)
+            # * It can either send data with status 200 or an error with no data.
+            # So we have to invent our own ways to handle errors and passing data:
+            # 1. Data is sent to the server as URL encoded JSON in the URL query string.
+            # (because actual URL params is an old, terrible and lossy standard).
+            # 2. The response is sent as an array "[data, error]".
+            # pylint: disable=broad-except
+            try:
+                query = json.loads(unquote(params.query)) if params.query else {}
+                data = json.dumps([route_handler(self, query)])
+            except Exception as e:
+                error_type = type(e).__name__
+                error_name = ExtensionError.Other.value
+                if isinstance(e, UlauncherAPIError):
+                    logger.error('%s: %s', error_type, e)
+                    error_name = e.error_name
+                else:
+                    logger.exception('Unexpected API error. %s: %s', error_type, e)
+                data = json.dumps([None, {
+                    'message': str(e),
+                    'type': error_type,
+                    'errorName': error_name,
+                    'stacktrace': traceback.format_exc()
+                }])
+
+            stream = Gio.MemoryInputStream.new_from_data(data.encode())
+            scheme_request.finish(stream, -1, "application/json")
             return
 
-    @run_async
-    def on_scheme_callback(self, scheme_request):
-        """
-        Handles Javascript-to-Python calls
-        """
+        if os.path.isfile(params.path):
+            # pylint: disable=broad-except
+            try:
+                [mime_type, _] = mimetypes.guess_type(params.path)
+                stream = Gio.file_new_for_path(params.path).read()
+                scheme_request.finish(stream, -1, mime_type)
+                return
+            except Exception as e:
+                logger.warning("Couldn't handle file request from '%s' (%s: %s)", uri, type(e).__name__, e)
 
-        # pylint: disable=broad-except
-        try:
-            params = urlparse(scheme_request.get_uri())
-            query = json.loads(unquote(params.query))
-            callback_name = query['callback']
-            assert callback_name
-        except Exception as e:
-            logger.exception('API call failed. %s: %s', type(e).__name__, e)
-            return
-
-        try:
-            resp = rt.dispatch(self, scheme_request.get_uri())
-            callback = f'{callback_name}({json.dumps(resp)});'
-        except Exception as e:
-            error_type = type(e).__name__
-            error_name = ExtensionError.Other.value
-            if isinstance(e, UlauncherAPIError):
-                logger.error('%s: %s', error_type, e)
-                error_name = e.error_name
-            else:
-                logger.exception('Unexpected API error. %s: %s', error_type, e)
-
-            err_meta = json.dumps({
-                'message': str(e),
-                'type': error_type,
-                'errorName': error_name,
-                'stacktrace': traceback.format_exc()
-            })
-            callback = f'{callback_name}(null, {err_meta});'
-
-        try:
-            stream = Gio.MemoryInputStream.new_from_data(callback.encode())
-            # send response
-            scheme_request.finish(stream, -1, 'text/javascript')
-        except Exception as e:
-            logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
+        logger.warning("Unhandled request from '%s'.", uri)
 
     def notify_client(self, name, data):
         self.client.run_javascript(f'onNotification("{name}", {json.dumps(data)})')
@@ -178,7 +181,7 @@ class PreferencesServer():
     # Route handlers
     ######################################
 
-    @rt.route('/get/all')
+    @route('/get/all')
     def get_all(self, _):
         logger.info('API call /get/all')
         export_settings = self.settings.copy()
@@ -205,7 +208,7 @@ class PreferencesServer():
         })
         return export_settings
 
-    @rt.route('/set')
+    @route('/set')
     def apply_settings(self, query):
         property = query['property']
         value = query['value']
@@ -235,7 +238,7 @@ class PreferencesServer():
     def apply_theme(self):
         self.application.window.init_theme()
 
-    @rt.route('/set/hotkey-show-app')
+    @route('/set/hotkey-show-app')
     @glib_idle_add
     def set_hotkey_show_app(self, query):
         hotkey = query['value']
@@ -243,7 +246,7 @@ class PreferencesServer():
         self.application.bind_hotkey(hotkey)
         self.settings.save(hotkey_show_app=hotkey)
 
-    @rt.route('/show/hotkey-dialog')
+    @route('/show/hotkey-dialog')
     @glib_idle_add
     def show_hotkey_dialog(self, _):
         logger.info("Show hotkey-dialog")
@@ -254,7 +257,7 @@ class PreferencesServer():
         )
         hotkey_dialog.present()
 
-    @rt.route('/show/file-chooser')
+    @route('/show/file-chooser')
     @glib_idle_add
     def show_file_chooser(self, query):
         """
@@ -280,24 +283,24 @@ class PreferencesServer():
         self.notify_client(file_browser_name, data)
         dialog.destroy()
 
-    @rt.route('/open/web-url')
+    @route('/open/web-url')
     def open_url(self, query):
         url = query['url']
         logger.info('Open Web URL %s', url)
         OpenAction(url).run()
 
-    @rt.route('/open/extensions-dir')
+    @route('/open/extensions-dir')
     def open_extensions_dir(self, _):
         logger.info('Open extensions directory "%s" in default file manager.', EXTENSIONS_DIR)
         OpenAction(EXTENSIONS_DIR).run()
 
-    @rt.route('/shortcut/get-all')
+    @route('/shortcut/get-all')
     def shortcut_get_all(self, query):
         logger.info('Handling /shortcut/get-all')
         return list(ShortcutsDb.load().values())
 
-    @rt.route('/shortcut/update')
-    @rt.route('/shortcut/add')
+    @route('/shortcut/update')
+    @route('/shortcut/add')
     def shortcut_update(self, query):
         logger.info('Add/Update shortcut: %s', json.dumps(query))
         shortcuts = ShortcutsDb.load()
@@ -305,19 +308,19 @@ class PreferencesServer():
         shortcuts.save()
         return {'id': id}
 
-    @rt.route('/shortcut/remove')
+    @route('/shortcut/remove')
     def shortcut_remove(self, query):
         logger.info('Remove shortcut: %s', json.dumps(query))
         shortcuts = ShortcutsDb.load()
         del shortcuts[query['id']]
         shortcuts.save()
 
-    @rt.route('/extension/get-all')
+    @route('/extension/get-all')
     def extension_get_all(self, query):
         logger.info('Handling /extension/get-all')
         return get_all_extensions()
 
-    @rt.route('/extension/add')
+    @route('/extension/add')
     def extension_add(self, query):
         url = query['url']
         logger.info('Add extension: %s', url)
@@ -327,7 +330,7 @@ class PreferencesServer():
 
         return get_all_extensions()
 
-    @rt.route('/extension/update-prefs')
+    @route('/extension/update-prefs')
     def extension_update_prefs(self, query):
         logger.info('Update extension preferences: %s', query)
         controller = ExtensionServer.get_instance().controllers.get(query['id'])
@@ -339,7 +342,7 @@ class PreferencesServer():
             if value != old_value:
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
-    @rt.route('/extension/check-updates')
+    @route('/extension/check-updates')
     def extension_check_updates(self, query):
         logger.info('Handling /extension/check-updates')
         try:
@@ -347,7 +350,7 @@ class PreferencesServer():
         except ExtensionIsUpToDateError:
             return None
 
-    @rt.route('/extension/update-ext')
+    @route('/extension/update-ext')
     def extension_update_ext(self, query):
         ext_id = query['id']
         logger.info('Update extension: %s', ext_id)
@@ -359,7 +362,7 @@ class PreferencesServer():
         except ExtensionManifestError as e:
             raise PrefsApiError(e) from e
 
-    @rt.route('/extension/remove')
+    @route('/extension/remove')
     def extension_remove(self, query):
         ext_id = query['id']
         logger.info('Remove extension: %s', ext_id)

@@ -1,59 +1,15 @@
-/**
- * THIS file has been heavily modified for Ulauncher's needs
- * We need this library due to working with very the very restricted Webkit register_uri_scheme()
- * Original author: alexbardas
- * https://github.com/alexbardas/jsonp-promise
- * MIT license
- */
-
-// Callback index.
-var count = 1
-
-/**
- * JSONP handler
- *
- * @param {String} url
- * @param {Object} [params]  dictionary with query parameters
- * @return {Object} Returns a response promise and a cancel handler.
- */
-export default function fetchData (url, params = {}) {
-  var script
-
-  // Generate a unique id for the request.
-  var id = `__jp${count}`
-  count += 1
-
-  function cleanup () {
-    // Remove the script tag.
-    if (script && script.parentNode) {
-      script.parentNode.removeChild(script)
-    }
-
-    window[id] = () => {}
+// WebKit.URISchemeRequest is very primitive as a server:
+// * It can only read the URL (not the body of a post request)
+// * It can either send data with status 200 or an error with no data.
+// So we have to invent our own ways to handle errors and passing data:
+// 1. Data is sent to the server as URL encoded JSON in the URL query string.
+// (because actual URL params is an old, terrible and lossy standard).
+// 2. The response is sent as an array "[data, error]".
+export default async function fetchData (url, data = {}) {
+  const response = await fetch(`${url}?${encodeURIComponent(JSON.stringify(data))}`);
+  const [payload, error] = await response.json();
+  if (error) {
+    throw error; // Sorry, but this is more helpful than an actual error
   }
-
-
-  return new Promise((resolve, reject) => {
-
-    window[id] = function (data, error) {
-      cleanup()
-      if (error) {
-        reject(error)
-      } else {
-        resolve(data)
-      }
-    }
-
-    // Add querystring component
-    params['callback'] = id
-    // This is a hacky, nonstandard way to send data that we resort to because of heavy
-    // limitation in the GTKWebKit APIs
-    url += `?${encodeURIComponent(JSON.stringify(params))}`
-
-    // Create script.
-    script = document.createElement('script')
-    script.src = url
-    let target = document.getElementsByTagName('script')[0] || document.head
-    target.parentNode.insertBefore(script, target)
-  })
+  return payload;
 }

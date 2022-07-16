@@ -40,7 +40,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
     def load_page(self, page=''):
-        self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
+        self.webview.load_uri(f"prefs://{get_asset('preferences/index.html')}#/{page}")
 
     # pylint: disable=arguments-differ
     def present(self, page):
