@@ -39,9 +39,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         # Show right click menu if running with --dev flag
         self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
-        inspector = self.webview.get_inspector()
-        inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
-
     def load_page(self, page=''):
         self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
 
