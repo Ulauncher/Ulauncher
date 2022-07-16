@@ -192,7 +192,7 @@
 <script>
 import { mapState, mapMutations, mapGetters } from 'vuex'
 
-import jsonp from '@/api'
+import fetchData from '@/api'
 import bus from '@/event-bus'
 
 const hotkeyEventName = 'hotkey-show-app'
@@ -244,7 +244,7 @@ export default {
         return this.prefs[name]
       },
       set(value) {
-        return jsonp('prefs:///set', {property: name, value}).then(
+        return fetchData('prefs:///set', {property: name, value}).then(
           () => {
             this.setPrefs({[name]: value})
             this.changed[name] = true
@@ -259,16 +259,16 @@ export default {
     ...mapMutations(['setPrefs']),
 
     openUrlInBrowser(url) {
-      jsonp('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', { url: url })
     },
 
     showHotkeyDialog(e) {
-      jsonp('prefs:///show/hotkey-dialog')
+      fetchData('prefs:///show/hotkey-dialog')
       e.target.blur()
     },
 
     onHotkeySet(e) {
-      jsonp('prefs:///set/hotkey-show-app', { value: e.value }).then(
+      fetchData('prefs:///set/hotkey-show-app', { value: e.value }).then(
         () => this.setPrefs({ hotkey_show_app: e.caption }),
         err => bus.$emit('error', err)
       )

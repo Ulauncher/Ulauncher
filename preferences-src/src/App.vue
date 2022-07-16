@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import jsonp from '@/api'
+import fetchData from '@/api'
 import bus from '@/event-bus'
 import NavBar from '@/components/NavBar'
 
@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     openUrlInBrowser(url) {
-      jsonp('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', { url: url })
     },
     onError(err) {
       this.error = err

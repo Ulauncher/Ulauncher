@@ -16,7 +16,7 @@ var count = 1
  * @param {Object} [params]  dictionary with query parameters
  * @return {Object} Returns a response promise and a cancel handler.
  */
-export default function jsonp (url, params = {}) {
+export default function fetchData (url, params = {}) {
   var script
 
   // Generate a unique id for the request.

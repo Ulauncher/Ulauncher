@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import jsonp from '@/api'
+import fetchData from '@/api'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
 import defaultIcon from '../../assets/executable-icon.png'
@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     fetchData () {
-      jsonp('prefs:///shortcut/get-all').then((data) => {
+      fetchData('prefs:///shortcut/get-all').then((data) => {
         this.items = data
       })
     },
@@ -77,7 +77,7 @@ export default {
       this.$router.push({path: 'edit-shortcut', query: item, params: item})
     },
     remove (item) {
-      jsonp('prefs:///shortcut/remove', {id: item.id}).then(() => {
+      fetchData('prefs:///shortcut/remove', {id: item.id}).then(() => {
         this.items = this.items.filter((i) => item.id === i.id ? null : i)
       }, (err) => bus.$emit('error', err))
     },

@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import jsonp from '@/api'
+import fetchData from '@/api'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
 import ExtensionConfig from '@/components/pages/ExtensionConfig'
@@ -152,7 +152,7 @@ export default {
   },
   methods: {
     fetchData() {
-      jsonp('prefs:///extension/get-all').then(
+      fetchData('prefs:///extension/get-all').then(
         data => {
           this.extensions = data
           this.activeExt = data[0]
@@ -175,7 +175,7 @@ export default {
       this.fetchData()
     },
     openUrlInBrowser(url) {
-      jsonp('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', { url: url })
     },
     selectExtension(ext) {
       this.activeExt = ext
@@ -214,7 +214,7 @@ export default {
       this.extUrlToDownload = input.value
       this.addingExtension = true
       this.addingExtensionError = null
-      jsonp('prefs:///extension/add', { url: input.value }).then(
+      fetchData('prefs:///extension/add', { url: input.value }).then(
         data => {
           this.extensions = data
           this.addingExtension = false
