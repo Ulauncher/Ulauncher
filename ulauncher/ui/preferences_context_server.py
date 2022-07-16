@@ -125,7 +125,7 @@ class PreferencesContextServer():
             stream = Gio.file_new_for_path(params.path).read()
             scheme_request.finish(stream, -1, mime_type)
         except Exception as e:
-            logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
+            logger.warning('Unable to send file. %s: %s', type(e).__name__, e)
             return
 
     @run_async
