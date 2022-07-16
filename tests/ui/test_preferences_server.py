@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.UlauncherApp import UlauncherApp
-from ulauncher.ui.preferences_context_server import PreferencesContextServer
+from ulauncher.ui.preferences_server import PreferencesServer
 
 settings_file = '/tmp/ulauncher-test/pref-ctx-settings.json'
 
@@ -21,15 +21,15 @@ class TestPreferencesContextServer:
 
     @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):
-        return mocker.patch('ulauncher.ui.preferences_context_server.UlauncherSystemdController').return_value
+        return mocker.patch('ulauncher.ui.preferences_server.UlauncherSystemdController').return_value
 
     @pytest.fixture(autouse=True)
     def webview(self, mocker):
-        return mocker.patch('ulauncher.ui.preferences_context_server.WebKit2.WebView').return_value
+        return mocker.patch('ulauncher.ui.preferences_server.WebKit2.WebView').return_value
 
     @pytest.fixture(autouse=True)
     def hotkey_dialog(self, mocker):
-        return mocker.patch('ulauncher.ui.preferences_context_server.HotkeyDialog').return_value
+        return mocker.patch('ulauncher.ui.preferences_server.HotkeyDialog').return_value
 
     # pylint: disable=too-many-arguments
     @pytest.fixture
@@ -38,7 +38,7 @@ class TestPreferencesContextServer:
         app.window = ulauncherWindow
         app.toggle_appindicator = mock.MagicMock()
         app.bind_hotkey = mock.MagicMock()
-        server = PreferencesContextServer(app)
+        server = PreferencesServer(app)
         server.autostart_pref = autostart_pref
         server.settings = Settings.new_from_file(settings_file)
         server.client = webview

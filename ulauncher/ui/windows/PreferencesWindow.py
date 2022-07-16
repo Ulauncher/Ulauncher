@@ -4,7 +4,7 @@ gi.require_versions({"Gtk": "3.0", "WebKit2": "4.0"})
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gtk, WebKit2
 from ulauncher.config import get_asset, get_options
-from ulauncher.ui.preferences_context_server import PreferencesContextServer
+from ulauncher.ui.preferences_server import PreferencesServer
 
 
 class PreferencesWindow(Gtk.ApplicationWindow):
@@ -30,7 +30,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
         )
 
-        server = PreferencesContextServer.get_instance(self.get_application())
+        server = PreferencesServer.get_instance(self.get_application())
         self.webview = WebKit2.WebView(settings=settings, web_context=server.context)
         server.client = self.webview
         self.add(self.webview)

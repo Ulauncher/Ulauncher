@@ -88,7 +88,7 @@ def get_all_extensions():
 
 
 # pylint: disable=too-many-public-methods
-class PreferencesContextServer():
+class PreferencesServer():
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
