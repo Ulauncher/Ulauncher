@@ -4,8 +4,6 @@
 # pylint: disable=deprecated-module
 import argparse
 import os
-from uuid import uuid4
-from time import time
 from functools import lru_cache
 from gettext import gettext
 from ulauncher import __version__ as VERSION, __assets_dir__ as ASSETS_DIR
@@ -89,42 +87,3 @@ def get_options():
         help=argparse.SUPPRESS)
 
     return parser.parse_args()
-
-
-def get_default_shortcuts():
-    google = {
-        "id": str(uuid4()),
-        "name": "Google Search",
-        "keyword": "g",
-        "cmd": "https://google.com/search?q=%s",
-        "icon": get_asset('icons/google-search.png'),
-        "is_default_search": True,
-        "run_without_argument": False,
-        "added": time()
-    }
-    stackoverflow = {
-        "id": str(uuid4()),
-        "name": "Stack Overflow",
-        "keyword": "so",
-        "cmd": "https://stackoverflow.com/search?q=%s",
-        "icon": get_asset('icons/stackoverflow.svg'),
-        "is_default_search": True,
-        "run_without_argument": False,
-        "added": time()
-    }
-    wikipedia = {
-        "id": str(uuid4()),
-        "name": "Wikipedia",
-        "keyword": "wiki",
-        "cmd": "https://en.wikipedia.org/wiki/%s",
-        "icon": get_asset('icons/wikipedia.png'),
-        "is_default_search": True,
-        "run_without_argument": False,
-        "added": time()
-    }
-
-    return {
-        google['id']: google,
-        stackoverflow['id']: stackoverflow,
-        wikipedia['id']: wikipedia,
-    }

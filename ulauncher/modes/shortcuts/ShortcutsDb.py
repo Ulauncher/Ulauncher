@@ -1,21 +1,27 @@
 from uuid import uuid4
 from time import time
 from pathlib import Path
-from ulauncher.config import CONFIG_DIR, get_default_shortcuts
+from ulauncher.config import get_asset, CONFIG_DIR
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 
 @json_data_class
 class Shortcut(JsonData):
-    added = 0.0
-    cmd = ""
-    keyword = ""
     name = ""
+    keyword = ""
+    cmd = ""
     icon = ""
-    id = ""
-    is_default_search = False
+    is_default_search = True
     run_without_argument = False
+    added = 0.0
+    id = ""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()  # Sets class defaults
+        self.added = time()
+        self.id = str(uuid4())
+        self.update(*args, **kwargs)
 
 
 class ShortcutsDb(JsonData):
@@ -27,21 +33,35 @@ class ShortcutsDb(JsonData):
 
     def add(self, shortcut):
         shortcut = Shortcut(shortcut)
-        if not shortcut.id:
-            shortcut.id = str(uuid4())
-
-        if not self.get(shortcut.id):
-            self[shortcut.id] = {"added": time()}
-
-        self[shortcut.id].update(shortcut)
+        self[shortcut.id] = shortcut
 
         return shortcut.id
 
     @classmethod
     def load(cls):
-        file_path = f"{CONFIG_DIR}/shortcuts.json"
+        file_path = Path(f"{CONFIG_DIR}/shortcuts.json")
         instance = cls.new_from_file(file_path)
-        if not Path(file_path).exists():
-            instance.save(get_default_shortcuts())
+        if not file_path.exists():
+            keywords = [
+                Shortcut(
+                    keyword="g",
+                    name="Google Search",
+                    cmd="https://google.com/search?q=%s",
+                    icon=get_asset("icons/google-search.png")
+                ),
+                Shortcut(
+                    keyword="so",
+                    name="Stack Overflow",
+                    cmd="https://stackoverflow.com/search?q=%s",
+                    icon=get_asset("icons/stackoverflow.svg")
+                ),
+                Shortcut(
+                    keyword="wiki",
+                    name="Wikipedia",
+                    cmd="https://en.wikipedia.org/wiki/%s",
+                    icon=get_asset("icons/wikipedia.png")
+                ),
+            ]
+            instance.save({keyword.id: keyword for keyword in keywords})
 
         return instance
