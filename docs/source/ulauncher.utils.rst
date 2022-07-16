@@ -21,14 +21,6 @@ ulauncher.utils.systemd_controller module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.Path module
----------------------------
-
-.. automodule:: ulauncher.utils.Path
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.Router module
 -----------------------------
 

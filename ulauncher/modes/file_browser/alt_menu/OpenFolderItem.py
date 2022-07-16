@@ -3,12 +3,8 @@ from ulauncher.api.shared.action.OpenAction import OpenAction
 
 
 class OpenFolderItem(SmallResult):
-    """
-    :param ~ulauncher.utils.Path.Path path:
-    """
-
     # pylint: disable=super-init-not-called
-    def __init__(self, path, name='Open Folder'):
+    def __init__(self, path: str, name='Open Folder'):
         self.path = path
         self.name = name
         self.icon = 'system-file-manager'
