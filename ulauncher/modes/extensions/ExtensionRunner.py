@@ -65,7 +65,7 @@ class ExtensionRunner:
         if not self.is_running(extension_id):
             manifest = ExtensionManifest.load_from_extension_id(extension_id)
             manifest.validate()
-            manifest.check_compatibility()
+            manifest.check_compatibility(verbose=True)
 
             cmd = [sys.executable, f"{EXTENSIONS_DIR}/{extension_id}/main.py"]
             env = {

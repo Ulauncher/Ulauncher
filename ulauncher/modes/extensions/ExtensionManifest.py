@@ -106,7 +106,7 @@ class ExtensionManifest(JsonData):
         except KeyError as e:
             raise ExtensionManifestError(f'{e} is not provided', ExtensionError.InvalidManifest) from e
 
-    def check_compatibility(self):
+    def check_compatibility(self, verbose=False):
         """
         Ensure the extension is compatible with the Ulauncher API (or raise error)
         """
@@ -117,11 +117,13 @@ class ExtensionManifest(JsonData):
             )
             if satisfies("2.0", self.api_version):
                 # Show a warning for v2 -> v3 instead of aborting. Most v2 extensions run in v3.
-                logger.warning(
-                    "Extension %s has not yet been updated to support API v%s. There might be compatibility issues.",
-                    self.name,
-                    API_VERSION
-                )
+                if verbose:
+                    logger.warning(
+                        "Extension %s has not yet been updated to support API v%s. "
+                        "It might fail to start or not be fully functional.",
+                        self.name,
+                        API_VERSION
+                    )
             else:
                 raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
