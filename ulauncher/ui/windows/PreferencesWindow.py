@@ -4,7 +4,7 @@ gi.require_versions({"Gtk": "3.0", "WebKit2": "4.0"})
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gtk, WebKit2
 from ulauncher.config import get_asset, get_options
-from ulauncher.ui.preferences_context_server import PreferencesContextServer
+from ulauncher.ui.preferences_server import PreferencesServer
 
 
 class PreferencesWindow(Gtk.ApplicationWindow):
@@ -30,7 +30,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
         )
 
-        server = PreferencesContextServer.get_instance(self.get_application())
+        server = PreferencesServer.get_instance(self.get_application())
         self.webview = WebKit2.WebView(settings=settings, web_context=server.context)
         server.client = self.webview
         self.add(self.webview)
@@ -39,11 +39,8 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         # Show right click menu if running with --dev flag
         self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
-        inspector = self.webview.get_inspector()
-        inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
-
     def load_page(self, page=''):
-        self.webview.load_uri(f"file2://{get_asset('preferences', 'index.html')}#/{page}")
+        self.webview.load_uri(f"prefs://{get_asset('preferences/index.html')}#/{page}")
 
     # pylint: disable=arguments-differ
     def present(self, page):

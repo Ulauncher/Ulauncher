@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import jsonp from '@/api'
+import fetchData from '@/api'
 
 export default {
   name: 'help',
@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     openUrlInBrowser(url) {
-      jsonp('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', { url: url })
     }
   }
 }

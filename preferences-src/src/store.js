@@ -1,5 +1,5 @@
 import Vuex from 'vuex'
-import jsonp from '@/api'
+import fetchData from '@/api'
 import bus from '@/event-bus'
 
 export default function createStore() {
@@ -22,7 +22,7 @@ export default function createStore() {
 
     actions: {
       getAllPrefs: ({ commit }) => {
-        jsonp('prefs:///get/all').then(
+        fetchData('prefs:///get/all').then(
           data => commit('setPrefs', data),
           err => bus.$emit('error', err)
         )

@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import jsonp from '@/api'
+import fetchData from '@/api'
 
 export default {
   name: 'ext-error-explanation',
@@ -82,10 +82,10 @@ export default {
   }),
   methods: {
     openUrlInBrowser(url) {
-      jsonp('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', { url: url })
     },
     openExtensionsDir() {
-      jsonp('prefs:///open/extensions-dir')
+      fetchData('prefs:///open/extensions-dir')
     },
     alertVariant() {
       if (this.errorName === 'Other') {
