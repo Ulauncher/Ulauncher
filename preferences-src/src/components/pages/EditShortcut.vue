@@ -108,7 +108,8 @@ export default {
       return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     selectIcon() {
-      fetchData('prefs:///show/file-chooser', { type: 'image', name: shortcutIconEventName }).then(null, err =>
+      const filter = {'Image files': 'image/*'}
+      fetchData('prefs:///show/file-chooser', [shortcutIconEventName, filter]).then(null, err =>
         bus.$emit('error', err)
       )
     },

@@ -260,28 +260,22 @@ class PreferencesServer():
     @route('/show/file-chooser')
     @glib_idle_add
     def show_file_chooser(self, query):
-        """
-        Request params: type=(image|all), name=(str)
-        """
-        file_browser_name = query['name']
-        logger.info('Show file browser dialog for %s', file_browser_name)
-        dialog = Gtk.FileChooserDialog("Please choose a file", self, Gtk.FileChooserAction.OPEN,
-                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
-        filter_images = Gtk.FileFilter()
-        filter_images.set_name("Image files")
-        filter_images.add_mime_type("image/*")
-        dialog.add_filter(filter_images)
-
-        response = dialog.run()
-        data = {
-            'value': None
-        }
-        if response == Gtk.ResponseType.OK:
-            data['value'] = dialog.get_filename()
-
-        logger.debug('%s %s', file_browser_name, data)
-        self.notify_client(file_browser_name, data)
-        dialog.destroy()
+        name, mime_filter = query
+        logger.info('Show file browser dialog for %s', name)
+        dialog = Gtk.FileChooserDialog(
+            "Please choose a file",
+            self.client.get_toplevel(),
+            Gtk.FileChooserAction.OPEN,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        )
+        if mime_filter and isinstance(mime_filter, dict):
+            filter = Gtk.FileFilter()
+            for filter_name, filter_mime in mime_filter.items():
+                filter.set_name(filter_name)
+                filter.add_mime_type(filter_mime)
+            dialog.add_filter(filter)
+        value = dialog.get_filename() if dialog.run() == Gtk.ResponseType.OK else None
+        self.notify_client(name, {"value": value})
 
     @route('/open/web-url')
     def open_url(self, query):
