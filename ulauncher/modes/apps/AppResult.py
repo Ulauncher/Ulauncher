@@ -1,12 +1,12 @@
 from os.path import basename
 from gi.repository import Gio
-from ulauncher.config import STATE_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.api import SearchableResult
 
-app_starts = JsonData.new_from_file(f"{STATE_DIR}/app_starts.json")
+app_starts = JsonData.new_from_file(f"{PATHS.STATE}/app_starts.json")
 
 
 class AppResult(SearchableResult):

@@ -1,13 +1,14 @@
 import logging
 from typing import Any, Dict, Optional, List, Union
 
-from ulauncher.config import API_VERSION, EXTENSIONS_DIR, EXT_PREFERENCES_DIR
+from ulauncher.config import API_VERSION, PATHS
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
 ValueType = Union[str, int]  # Bool is a subclass of int
+EXT_PREFERENCES_DIR = f"{PATHS.CONFIG}/ext_preferences"
 
 
 class ExtensionManifestError(UlauncherAPIError):
@@ -139,7 +140,7 @@ class ExtensionManifest(JsonData):
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
-        manifest = cls.new_from_file(f"{EXTENSIONS_DIR}/{ext_id}/manifest.json")
+        manifest = cls.new_from_file(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
         user_prefs = JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json")
         for id, pref in manifest.preferences.items():
             user_value = user_prefs.get(id)

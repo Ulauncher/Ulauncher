@@ -1,8 +1,8 @@
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.config import STATE_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 
-query_history = JsonData.new_from_file(f"{STATE_DIR}/query_history.json")
+query_history = JsonData.new_from_file(f"{PATHS.STATE}/query_history.json")
 
 
 class ItemNavigation:

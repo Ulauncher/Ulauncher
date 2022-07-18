@@ -29,7 +29,7 @@ from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.config import API_VERSION, VERSION, EXTENSIONS_DIR
+from ulauncher.config import API_VERSION, VERSION, PATHS
 
 logger = logging.getLogger()
 routes = {}
@@ -55,7 +55,7 @@ def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = No
     is_running = is_connected or ext_runner.is_running(ext_id)
     ext_db_record = ext_db.get(ext_id)
     # Controller method `get_icon_path` would work, but only running extensions have controllers
-    icon = get_icon_path(manifest.icon, base_path=f"{EXTENSIONS_DIR}/{ext_id}")
+    icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
 
     return {
         'id': ext_id,
@@ -76,7 +76,7 @@ def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = No
 
 def get_all_extensions():
     extensions = []
-    for ext_id, _ in find_extensions(EXTENSIONS_DIR):
+    for ext_id, _ in find_extensions(PATHS.EXTENSIONS):
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         error_name = None
@@ -285,8 +285,8 @@ class PreferencesServer():
 
     @route('/open/extensions-dir')
     def open_extensions_dir(self, _):
-        logger.info('Open extensions directory "%s" in default file manager.', EXTENSIONS_DIR)
-        OpenAction(EXTENSIONS_DIR).run()
+        logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
+        OpenAction(PATHS.EXTENSIONS).run()
 
     @route('/shortcut/get-all')
     def shortcut_get_all(self, query):

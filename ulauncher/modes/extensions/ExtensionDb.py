@@ -1,4 +1,4 @@
-from ulauncher.config import CONFIG_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 
@@ -18,4 +18,4 @@ class ExtensionDb(JsonData):
 
     @classmethod
     def load(cls):
-        return cls.new_from_file(f"{CONFIG_DIR}/extensions.json")
+        return cls.new_from_file(f"{PATHS.CONFIG}/extensions.json")

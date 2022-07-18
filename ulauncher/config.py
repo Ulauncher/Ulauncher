@@ -1,63 +1,45 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: Bind a new key
-# Where your project will look for your data (for instance, images and ui
-# files). By default, this is ../data, relative your trunk layout
-# pylint: disable=deprecated-module
 import argparse
 import os
 from functools import lru_cache
 from gettext import gettext
-from ulauncher import __version__ as VERSION, __assets_dir__ as ASSETS_DIR
+from ulauncher import __assets_dir__, __version__ as VERSION
 
-_HOME = os.path.expanduser('~')
-_XDG_STATE_HOME = os.environ.get('XDG_STATE_HOME') or os.path.join(_HOME, '.local', 'state')
-_XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.join(_HOME, '.local', 'share')
-_XDG_CONFIG_HOME = os.environ.get('XDG_CONFIG_HOME') or os.path.join(_HOME, '.config')
-_XDG_CACHE_HOME = os.environ.get('XDG_CACHE_HOME') or os.path.join(_HOME, '.cache')
-
-API_VERSION = '3.0'
-STATE_DIR = os.path.join(_XDG_STATE_HOME, 'ulauncher')
-DATA_DIR = os.path.join(_XDG_DATA_HOME, 'ulauncher')
-# Use ulauncher_cache dir because of the WebKit bug
-# https://bugs.webkit.org/show_bug.cgi?id=151646
-CACHE_DIR = os.path.join(_XDG_CACHE_HOME, 'ulauncher_cache')
-CONFIG_DIR = os.path.join(_XDG_CONFIG_HOME, 'ulauncher')
-SETTINGS_FILE_PATH = os.path.join(CONFIG_DIR, 'settings.json')
+API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
-EXTENSIONS_DIR = os.path.join(DATA_DIR, 'extensions')
-EXT_PREFERENCES_DIR = os.path.join(CONFIG_DIR, 'ext_preferences')
-ULAUNCHER_APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-FIRST_RUN = False
+APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ASSETS = __assets_dir__
+HOME = os.path.expanduser("~")
+CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{HOME}/.cache"), "ulauncher_cache")  # See issue#40
+CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
+DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
+STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
+EXTENSIONS = os.path.join(DATA, "extensions")
 
 
-class AssetsPathNotFoundError(Exception):
-    """Raised when we can't find the Ulauncher assets directory."""
+# Would use SimpleNamespace if that worked with typing and auto-completion.
+# pylint: disable=too-few-public-methods
+class _PATHS_CLASS:
+    APPLICATION = APPLICATION
+    ASSETS = ASSETS
+    HOME = HOME
+    CACHE = CACHE
+    CONFIG = CONFIG
+    DATA = DATA
+    STATE = STATE
+    EXTENSIONS = EXTENSIONS
 
 
-if not os.path.exists(ASSETS_DIR):
-    raise AssetsPathNotFoundError(ASSETS_DIR)
+PATHS = _PATHS_CLASS()
 
-if not os.path.exists(CONFIG_DIR):
-    # If there is no config dir, assume it's the first run
-    FIRST_RUN = True
-    os.makedirs(CONFIG_DIR)
+FIRST_RUN = not os.path.exists(PATHS.CONFIG)  # If there is no config dir, assume it's the first run
 
-if not os.path.exists(STATE_DIR):
-    os.makedirs(STATE_DIR)
+if not os.path.exists(PATHS.ASSETS):
+    raise OSError(PATHS.ASSETS)
 
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
-
-if not os.path.exists(CACHE_DIR):
-    os.makedirs(CACHE_DIR)
-
-
-def get_asset(*path_segments):
-    """Get the full path to a data file.
-
-    :returns: path to a file underneath the data directory (as defined by ASSETS_DIR`).
-              Equivalent to :code:`os.path.join(ASSETS_DIR, *path_segments)`.
-    """
-    return os.path.join(ASSETS_DIR, *path_segments)
+os.makedirs(PATHS.CACHE, exist_ok=True)
+os.makedirs(PATHS.CONFIG, exist_ok=True)
+os.makedirs(PATHS.STATE, exist_ok=True)
+os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
 
 
 @lru_cache()

@@ -71,18 +71,12 @@ class TestUlauncherWindow:
     def os_path_exists(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.os.path.exists')
 
-    @pytest.fixture(autouse=True)
-    def get_asset(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_asset')
-
     @pytest.fixture
     def window(self):
         return UlauncherWindow()
 
-    def test_create_item_widgets(self, window, result, GtkBuilder, get_asset):
+    def test_create_item_widgets(self, window, result, GtkBuilder):
         assert window.create_item_widgets([result], 'test') == [GtkBuilder.return_value.get_object.return_value]
         GtkBuilder.return_value.get_object.assert_called_with('item-frame')
         GtkBuilder.return_value.get_object.return_value.initialize.assert_called_with(
             GtkBuilder.return_value, result, 0, 'test')
-        GtkBuilder.return_value.add_from_file.assert_called_with(get_asset.return_value)
-        get_asset.assert_called_with('ui/%s.ui' % result.UI_FILE)

@@ -7,7 +7,7 @@ from shutil import rmtree, move
 from datetime import datetime
 from typing import Tuple
 
-from ulauncher.config import EXTENSIONS_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
@@ -51,7 +51,7 @@ class ExtensionDownloader:
         remote = ExtensionRemote(url)
 
         # 1. check if ext already exists
-        ext_path = os.path.join(EXTENSIONS_DIR, remote.extension_id)
+        ext_path = os.path.join(PATHS.EXTENSIONS, remote.extension_id)
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
         if os.path.exists(ext_path):
@@ -79,7 +79,7 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        rmtree(os.path.join(EXTENSIONS_DIR, ext_id))
+        rmtree(os.path.join(PATHS.EXTENSIONS, ext_id))
         del self.ext_db[ext_id]
         self.ext_db.save()
 
@@ -95,7 +95,7 @@ class ExtensionDownloader:
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
                     ext.last_commit[:8], commit_sha[:8])
 
-        ext_path = os.path.join(EXTENSIONS_DIR, ext_id)
+        ext_path = os.path.join(PATHS.EXTENSIONS, ext_id)
 
         remote = ExtensionRemote(ext.url)
         filename = download_tarball(remote.get_download_url(commit_sha))

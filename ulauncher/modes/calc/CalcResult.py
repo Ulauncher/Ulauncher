@@ -2,7 +2,7 @@ from decimal import Decimal
 from ulauncher.api import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.config import get_asset
+from ulauncher.config import PATHS
 
 
 class CalcResult(Result):
@@ -13,7 +13,7 @@ class CalcResult(Result):
         self.error = error
         self.name = f'{Decimal(self.result):n}' if self.result is not None else 'Error!'
         self.description = 'Enter to copy to the clipboard' if self.result is not None else error
-        self.icon = get_asset('icons/calculator.png')
+        self.icon = f"{PATHS.ASSETS}/icons/calculator.png"
 
     def on_enter(self, query):
         if self.result is not None:

@@ -10,7 +10,7 @@ from time import time
 from enum import Enum
 from gi.repository import Gio, GLib
 
-from ulauncher.config import EXTENSIONS_DIR, ULAUNCHER_APP_DIR, get_options
+from ulauncher.config import PATHS, get_options
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -48,9 +48,9 @@ class ExtensionRunner:
 
     def run_all(self):
         """
-        Finds all extensions in `EXTENSIONS_DIR` and runs them
+        Finds all extensions in `PATHS.EXTENSIONS` and runs them
         """
-        for ex_id, _ in find_extensions(EXTENSIONS_DIR):
+        for ex_id, _ in find_extensions(PATHS.EXTENSIONS):
             try:
                 self.run(ex_id)
             # pylint: disable=broad-except
@@ -67,10 +67,10 @@ class ExtensionRunner:
             manifest.validate()
             manifest.check_compatibility(verbose=True)
 
-            cmd = [sys.executable, f"{EXTENSIONS_DIR}/{extension_id}/main.py"]
+            cmd = [sys.executable, f"{PATHS.EXTENSIONS}/{extension_id}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
-                "PYTHONPATH": ":".join(filter(bool, [ULAUNCHER_APP_DIR, os.getenv("PYTHONPATH")])),
+                "PYTHONPATH": ":".join(filter(bool, [PATHS.APPLICATION, os.getenv("PYTHONPATH")])),
                 "EXTENSION_PREFERENCES": json.dumps(manifest.get_user_preferences(), separators=(',', ':'))
             }
 

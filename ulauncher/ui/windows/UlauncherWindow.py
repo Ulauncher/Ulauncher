@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gdk, Keybinder
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
 
-from ulauncher.config import get_asset
+from ulauncher.config import PATHS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -31,7 +31,7 @@ from ulauncher.api.shared.query import Query
 logger = logging.getLogger()
 
 
-@Gtk.Template(filename=get_asset("ui/ulauncher_window.ui"))
+@Gtk.Template(filename=f"{PATHS.ASSETS}/ui/ulauncher_window.ui")
 class UlauncherWindow(Gtk.ApplicationWindow):
     __gtype_name__ = "UlauncherWindow"
     input: Gtk.Entry  # These have to be declared on a separate line for some reason
@@ -297,7 +297,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         logger.debug('render %s results', len(results))
 
     def _render_prefs_icon(self):
-        prefs_pixbuf = load_icon(get_asset('icons/gear.svg'), 16 * get_scaling_factor())
+        prefs_pixbuf = load_icon(f"{PATHS.ASSETS}/icons/gear.svg", 16 * get_scaling_factor())
         prefs_image = Gtk.Image.new_from_pixbuf(prefs_pixbuf)
         self.prefs_btn.set_image(prefs_image)
 
@@ -305,7 +305,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def create_item_widgets(items, query):
         results = []
         for index, result in enumerate(items):
-            glade_filename = get_asset(f"ui/{result.UI_FILE}.ui")
+            glade_filename = f"{PATHS.ASSETS}/ui/{result.UI_FILE}.ui"
             if not os.path.exists(glade_filename):
                 glade_filename = None
 

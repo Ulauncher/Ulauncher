@@ -8,12 +8,12 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, GdkPixbuf
-from ulauncher.config import get_asset
+from ulauncher.config import PATHS
 
 icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger()
 
-DEFAULT_EXE_ICON = get_asset("icons/executable.png")
+DEFAULT_EXE_ICON = f"{PATHS.ASSETS}/icons/executable.png"
 
 
 def get_icon_path(icon, size=32, base_path=""):

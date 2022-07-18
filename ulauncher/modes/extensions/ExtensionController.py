@@ -1,5 +1,5 @@
 import logging
-from ulauncher.config import EXTENSIONS_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
@@ -82,7 +82,7 @@ class ExtensionController:
     def get_icon_path(self, path=None) -> str:
         return get_icon_path(
             path or self.manifest.icon,
-            base_path=f"{EXTENSIONS_DIR}/{self.extension_id}"
+            base_path=f"{PATHS.EXTENSIONS}/{self.extension_id}"
         )
 
     # pylint: disable=unused-argument

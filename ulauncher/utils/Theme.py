@@ -4,17 +4,17 @@ import json
 from typing import Dict, Any
 from shutil import copytree, rmtree
 
-from ulauncher.config import ASSETS_DIR, CONFIG_DIR, CACHE_DIR
+from ulauncher.config import PATHS
 from ulauncher.utils.Settings import Settings
 
 themes = {}  # type: Dict[str, Any]
 logger = logging.getLogger()
-user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
+user_theme_dir = f"{PATHS.CONFIG}/user-themes"
 
 
 def load_available_themes():
     themes.clear()
-    ulauncher_theme_dir = os.path.join(ASSETS_DIR, 'themes')
+    ulauncher_theme_dir = f"{PATHS.ASSETS}/themes"
     theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
     if os.path.exists(user_theme_dir):
         theme_dirs.extend([os.path.join(user_theme_dir, d) for d in os.listdir(user_theme_dir)])
@@ -121,7 +121,7 @@ class Theme:
 
         # for ulauncher themes we must save generated.css elsewhere
         # because we don't have write permissions for /usr/share/ulauncher/themes/...
-        new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get_name())
+        new_theme_dir = f"{PATHS.CACHE}/themes/{self.get_name()}"
         if not os.path.exists(new_theme_dir):
             os.makedirs(new_theme_dir)
 

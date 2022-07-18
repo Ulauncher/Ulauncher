@@ -9,7 +9,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import GLib, Gtk
-from ulauncher.config import API_VERSION, STATE_DIR, VERSION, get_options
+from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
 from ulauncher.utils.logging import ColoredFormatter
 from ulauncher.ui.UlauncherApp import UlauncherApp
@@ -27,7 +27,7 @@ def main():
     options = get_options()
 
     # Set up global logging for stdout and file
-    file_handler = logging.FileHandler(f"{STATE_DIR}/last.log", mode='w+')
+    file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode='w+')
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
     stream_handler.setFormatter(ColoredFormatter())

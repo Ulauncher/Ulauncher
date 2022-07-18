@@ -3,7 +3,7 @@ import gi
 gi.require_versions({"Gtk": "3.0", "WebKit2": "4.0"})
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gtk, WebKit2
-from ulauncher.config import get_asset, get_options
+from ulauncher.config import PATHS, get_options
 from ulauncher.ui.preferences_server import PreferencesServer
 
 
@@ -40,7 +40,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.connect('context-menu', lambda *_: not get_options().dev)
 
     def load_page(self, page=''):
-        self.webview.load_uri(f"prefs://{get_asset('preferences/index.html')}#/{page}")
+        self.webview.load_uri(f"prefs://{PATHS.ASSETS}/preferences/index.html#/{page}")
 
     # pylint: disable=arguments-differ
     def present(self, page):

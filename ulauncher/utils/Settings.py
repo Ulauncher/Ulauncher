@@ -1,4 +1,4 @@
-from ulauncher.config import SETTINGS_FILE_PATH
+from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 
@@ -27,4 +27,4 @@ class Settings(JsonData):
 
     @classmethod
     def load(cls):
-        return cls.new_from_file(SETTINGS_FILE_PATH)
+        return cls.new_from_file(f"{PATHS.CONFIG}/settings.json")

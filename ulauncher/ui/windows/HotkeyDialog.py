@@ -4,7 +4,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk, GObject
-from ulauncher.config import get_asset
+from ulauncher.config import PATHS
 
 
 logger = logging.getLogger()
@@ -14,7 +14,7 @@ FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', '
                         'Escape', 'Tab', 'Insert')
 
 
-@Gtk.Template(filename=get_asset("ui/hotkey_dialog.ui"))
+@Gtk.Template(filename=f"{PATHS.ASSETS}/ui/hotkey_dialog.ui")
 class HotkeyDialog(Gtk.Window):
     __gtype_name__ = "HotkeyDialog"
     _accel_name = None
