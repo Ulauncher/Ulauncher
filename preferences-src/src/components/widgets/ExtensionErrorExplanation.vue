@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper selectable">
-    <b-alert show :variant="alertVariant()">
+    <b-alert show :variant="errorName === 'Other' ? 'danger' : 'warning'">
       <small>
         <p
           v-if="errorName === 'InvalidUrl'"
@@ -86,12 +86,6 @@ export default {
     },
     openExtensionsDir() {
       fetchData('prefs:///open/extensions-dir')
-    },
-    alertVariant() {
-      if (this.errorName === 'Other') {
-        return 'danger'
-      }
-      return 'warning'
     }
   }
 }
