@@ -109,7 +109,7 @@ export default {
     },
     selectIcon() {
       const filter = {'Image files': 'image/*'}
-      fetchData('prefs:///show/file-chooser', [shortcutIconEventName, filter]).then(null, err =>
+      fetchData('prefs:///show/file-chooser', shortcutIconEventName, filter).then(null, err =>
         bus.$emit('error', err)
       )
     },

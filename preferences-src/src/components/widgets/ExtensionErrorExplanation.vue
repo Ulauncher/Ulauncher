@@ -82,7 +82,7 @@ export default {
   }),
   methods: {
     openUrlInBrowser(url) {
-      fetchData('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', url)
     },
     openExtensionsDir() {
       fetchData('prefs:///open/extensions-dir')

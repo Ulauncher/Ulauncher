@@ -268,7 +268,7 @@ export default {
         }
         data[id] = value
       })
-      fetchData('prefs:///extension/update-prefs', {data, id: this.extension.id}).then(
+      fetchData('prefs:///extension/set-prefs', this.extension.id, data).then(
         () => {
           this.showSavedMsg = true
           setTimeout(() => {
@@ -292,7 +292,7 @@ export default {
       }
     },
     remove() {
-      fetchData('prefs:///extension/remove', { id: this.extension.id }).then(
+      fetchData('prefs:///extension/remove', this.extension.id).then(
         () => {
           this.$emit('removed', this.extension.id)
         },
@@ -306,7 +306,7 @@ export default {
       this.updateExtModal = true
       this.newVersionInfo = null
       this.updateState = 'checking-updates'
-      fetchData('prefs:///extension/check-updates', { id: this.extension.id }).then(
+      fetchData('prefs:///extension/check-updates', this.extension.id).then(
         data => {
           if (data) {
             this.newVersionInfo = data
@@ -324,7 +324,7 @@ export default {
     update() {
       this.updateError = null
       this.updateState = 'updating'
-      fetchData('prefs:///extension/update-ext', { id: this.extension.id }).then(
+      fetchData('prefs:///extension/update-ext', this.extension.id).then(
         () => {
           this.updateState = 'updated'
           bus.$emit('extension/get-all')
@@ -336,7 +336,7 @@ export default {
       )
     },
     openUrl(url) {
-      fetchData('prefs:///open/web-url', { url })
+      fetchData('prefs:///open/web-url', url)
     },
   }
 }

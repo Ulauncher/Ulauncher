@@ -5,8 +5,11 @@
 // 1. Data is sent to the server as URL encoded JSON in the URL query string.
 // (because actual URL params is an old, terrible and lossy standard).
 // 2. The response is sent as an array "[data, error]".
-export default async function fetchData (url, data = {}) {
-  const response = await fetch(`${url}?${encodeURIComponent(JSON.stringify(data))}`);
+export default async function fetchData (url, ...args) {
+  if (args.length) {
+    url = `${url}?${encodeURIComponent(JSON.stringify(args))}`
+  }
+  const response = await fetch(url);
   const [payload, error] = await response.json();
   if (error) {
     throw error; // Sorry, but this is more helpful than an actual error

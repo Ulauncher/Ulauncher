@@ -244,7 +244,7 @@ export default {
         return this.prefs[name]
       },
       set(value) {
-        return fetchData('prefs:///set', {property: name, value}).then(
+        return fetchData('prefs:///set', name, value).then(
           () => {
             this.setPrefs({[name]: value})
             this.changed[name] = true
@@ -259,7 +259,7 @@ export default {
     ...mapMutations(['setPrefs']),
 
     openUrlInBrowser(url) {
-      fetchData('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', url)
     },
 
     showHotkeyDialog(e) {
@@ -268,7 +268,7 @@ export default {
     },
 
     onHotkeySet(e) {
-      fetchData('prefs:///set/hotkey-show-app', { value: e.value }).then(
+      fetchData('prefs:///set/hotkey-show-app', e.value).then(
         () => this.setPrefs({ hotkey_show_app: e.caption }),
         err => bus.$emit('error', err)
       )

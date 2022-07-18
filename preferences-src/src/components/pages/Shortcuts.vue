@@ -77,7 +77,7 @@ export default {
       this.$router.push({path: 'edit-shortcut', query: item, params: item})
     },
     remove (item) {
-      fetchData('prefs:///shortcut/remove', {id: item.id}).then(() => {
+      fetchData('prefs:///shortcut/remove', item.id).then(() => {
         this.items = this.items.filter((i) => item.id === i.id ? null : i)
       }, (err) => bus.$emit('error', err))
     },

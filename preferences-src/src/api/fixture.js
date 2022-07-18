@@ -76,8 +76,8 @@ export default function(url, params) {
         // })
         resolve(_getExtensions())
       }, 0)
-    } else if (isMatch(url, '/extension/update-prefs')) {
-      console.log('/extension/update-prefs', params)
+    } else if (isMatch(url, '/extension/set-prefs')) {
+      console.log('/extension/set-prefs', params)
       setTimeout(resolve, 0)
     } else if (isMatch(url, '/extension/update-ext')) {
       console.log('/extension/update-ext', params)

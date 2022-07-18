@@ -175,7 +175,7 @@ export default {
       this.fetchData()
     },
     openUrlInBrowser(url) {
-      fetchData('prefs:///open/web-url', { url: url })
+      fetchData('prefs:///open/web-url', url)
     },
     selectExtension(ext) {
       this.activeExt = ext
@@ -214,7 +214,7 @@ export default {
       this.extUrlToDownload = input.value
       this.addingExtension = true
       this.addingExtensionError = null
-      fetchData('prefs:///extension/add', { url: input.value }).then(
+      fetchData('prefs:///extension/add', input.value).then(
         data => {
           this.extensions = data
           this.addingExtension = false

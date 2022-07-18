@@ -141,8 +141,8 @@ class PreferencesServer():
             # 2. The response is sent as an array "[data, error]".
             # pylint: disable=broad-except
             try:
-                query = json.loads(unquote(params.query)) if params.query else {}
-                data = json.dumps([route_handler(self, query)])
+                args = json.loads(unquote(params.query)) if params.query else []
+                data = json.dumps([route_handler(self, *args)])
             except Exception as e:
                 error_type = type(e).__name__
                 error_name = ExtensionError.Other.value
@@ -182,7 +182,7 @@ class PreferencesServer():
     ######################################
 
     @route('/get/all')
-    def get_all(self, _):
+    def get_all(self):
         logger.info('API call /get/all')
         export_settings = self.settings.copy()
         themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
@@ -209,9 +209,7 @@ class PreferencesServer():
         return export_settings
 
     @route('/set')
-    def apply_settings(self, query):
-        property = query['property']
-        value = query['value']
+    def apply_settings(self, property, value):
         logger.info('Setting %s to %s', property, value)
         # This setting is not stored to the config
         if property == 'autostart-enabled':
@@ -240,15 +238,13 @@ class PreferencesServer():
 
     @route('/set/hotkey-show-app')
     @glib_idle_add
-    def set_hotkey_show_app(self, query):
-        hotkey = query['value']
-        # Bind a new key
+    def set_hotkey_show_app(self, hotkey):
         self.application.bind_hotkey(hotkey)
         self.settings.save(hotkey_show_app=hotkey)
 
     @route('/show/hotkey-dialog')
     @glib_idle_add
-    def show_hotkey_dialog(self, _):
+    def show_hotkey_dialog(self):
         logger.info("Show hotkey-dialog")
         hotkey_dialog = HotkeyDialog()
         hotkey_dialog.connect(
@@ -259,8 +255,7 @@ class PreferencesServer():
 
     @route('/show/file-chooser')
     @glib_idle_add
-    def show_file_chooser(self, query):
-        name, mime_filter = query
+    def show_file_chooser(self, name, mime_filter):
         logger.info('Show file browser dialog for %s', name)
         dialog = Gtk.FileChooserDialog(
             "Please choose a file",
@@ -278,45 +273,43 @@ class PreferencesServer():
         self.notify_client(name, {"value": value})
 
     @route('/open/web-url')
-    def open_url(self, query):
-        url = query['url']
+    def open_url(self, url):
         logger.info('Open Web URL %s', url)
         OpenAction(url).run()
 
     @route('/open/extensions-dir')
-    def open_extensions_dir(self, _):
+    def open_extensions_dir(self):
         logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
         OpenAction(PATHS.EXTENSIONS).run()
 
     @route('/shortcut/get-all')
-    def shortcut_get_all(self, query):
+    def shortcut_get_all(self):
         logger.info('Handling /shortcut/get-all')
         return list(ShortcutsDb.load().values())
 
     @route('/shortcut/update')
     @route('/shortcut/add')
-    def shortcut_update(self, query):
-        logger.info('Add/Update shortcut: %s', json.dumps(query))
+    def shortcut_update(self, shortcut):
+        logger.info('Add/Update shortcut: %s', json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
-        id = shortcuts.add(query)
+        id = shortcuts.add(shortcut)
         shortcuts.save()
         return {'id': id}
 
     @route('/shortcut/remove')
-    def shortcut_remove(self, query):
-        logger.info('Remove shortcut: %s', json.dumps(query))
+    def shortcut_remove(self, shortcut_id):
+        logger.info('Remove shortcut: %s', json.dumps(shortcut_id))
         shortcuts = ShortcutsDb.load()
-        del shortcuts[query['id']]
+        del shortcuts[shortcut_id]
         shortcuts.save()
 
     @route('/extension/get-all')
-    def extension_get_all(self, query):
+    def extension_get_all(self):
         logger.info('Handling /extension/get-all')
         return get_all_extensions()
 
     @route('/extension/add')
-    def extension_add(self, query):
-        url = query['url']
+    def extension_add(self, url):
         logger.info('Add extension: %s', url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
@@ -324,41 +317,39 @@ class PreferencesServer():
 
         return get_all_extensions()
 
-    @route('/extension/update-prefs')
-    def extension_update_prefs(self, query):
-        logger.info('Update extension preferences: %s', query)
-        controller = ExtensionServer.get_instance().controllers.get(query['id'])
-        for pref_id, value in query['data'].items():
+    @route('/extension/set-prefs')
+    def extension_update_prefs(self, extension_id, data):
+        logger.info('Update extension preferences %s to %s', extension_id, data)
+        controller = ExtensionServer.get_instance().controllers.get(extension_id)
+        for pref_id, value in data.items():
             preference = controller.manifest.preferences.get(pref_id)
             old_value = preference.value
             preference.value = value
-            controller.manifest.save_user_preferences(query['id'])
+            controller.manifest.save_user_preferences(extension_id)
             if value != old_value:
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
     @route('/extension/check-updates')
-    def extension_check_updates(self, query):
+    def extension_check_updates(self, extension_id):
         logger.info('Handling /extension/check-updates')
         try:
-            return ExtensionDownloader.get_instance().get_new_version(query['id'])
+            return ExtensionDownloader.get_instance().get_new_version(extension_id)
         except ExtensionIsUpToDateError:
             return None
 
     @route('/extension/update-ext')
-    def extension_update_ext(self, query):
-        ext_id = query['id']
-        logger.info('Update extension: %s', ext_id)
+    def extension_update_ext(self, extension_id):
+        logger.info('Update extension: %s', extension_id)
         try:
             runner = ExtensionRunner.get_instance()
-            runner.stop(ext_id)
-            ExtensionDownloader.get_instance().update(ext_id)
-            runner.run(ext_id)
+            runner.stop(extension_id)
+            ExtensionDownloader.get_instance().update(extension_id)
+            runner.run(extension_id)
         except ExtensionManifestError as e:
             raise PrefsApiError(e) from e
 
     @route('/extension/remove')
-    def extension_remove(self, query):
-        ext_id = query['id']
-        logger.info('Remove extension: %s', ext_id)
-        ExtensionRunner.get_instance().stop(ext_id)
-        ExtensionDownloader.get_instance().remove(ext_id)
+    def extension_remove(self, extension_id):
+        logger.info('Remove extension: %s', extension_id)
+        ExtensionRunner.get_instance().stop(extension_id)
+        ExtensionDownloader.get_instance().remove(extension_id)

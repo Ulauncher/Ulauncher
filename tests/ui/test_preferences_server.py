@@ -46,19 +46,19 @@ class TestPreferencesContextServer:
 
     # pylint: disable=too-many-arguments
     def test_apply_settings_show_indicator_icon(self, prefs_server):
-        prefs_server.apply_settings({'property': 'show_indicator_icon', 'value': True})
+        prefs_server.apply_settings('show_indicator_icon', True)
         prefs_server.application.toggle_appindicator.assert_called_with(True)
         assert prefs_server.settings.show_indicator_icon is True
         assert check_json_prop("show_indicator_icon") is True
 
-        prefs_server.apply_settings({'property': 'show_indicator_icon', 'value': False})
+        prefs_server.apply_settings('show_indicator_icon', False)
         prefs_server.application.toggle_appindicator.assert_called_with(False)
         assert prefs_server.settings.show_indicator_icon is False
         assert check_json_prop("show_indicator_icon") is False
 
     def test_set_hotkey_show_app(self, prefs_server):
         hotkey = '<Primary>space'
-        prefs_server.set_hotkey_show_app.original(prefs_server, {'value': hotkey})
+        prefs_server.set_hotkey_show_app.original(prefs_server, hotkey)
         prefs_server.application.bind_hotkey.assert_called_with(hotkey)
         assert prefs_server.settings.hotkey_show_app == hotkey
         assert check_json_prop("hotkey_show_app") == hotkey
@@ -71,16 +71,16 @@ class TestPreferencesContextServer:
         autostart_pref.switch.assert_called_with(False)
 
     def test_set_theme_name(self, prefs_server, ulauncherWindow):
-        prefs_server.apply_settings({'property': 'theme_name', 'value': 'lime'})
+        prefs_server.apply_settings('theme_name', 'lime')
         assert prefs_server.settings.theme_name == 'lime'
         assert check_json_prop("theme_name") == 'lime'
         ulauncherWindow.init_theme.assert_called_with()
 
     def test_show_hotkey_dialog(self, prefs_server, hotkey_dialog):
-        prefs_server.show_hotkey_dialog.original(prefs_server, {})
+        prefs_server.show_hotkey_dialog.original(prefs_server)
         hotkey_dialog.present.assert_called_with()
 
     def test_set_grab_mouse_pointer_dash_underscore_conversion(self, prefs_server):
-        prefs_server.apply_settings({'property': 'grab-mouse-pointer', 'value': True})
+        prefs_server.apply_settings('grab-mouse-pointer', True)
         # Verify that setting with dash character is converted to underscore
         assert check_json_prop("grab_mouse_pointer") is True
