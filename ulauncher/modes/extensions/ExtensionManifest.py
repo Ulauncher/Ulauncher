@@ -110,10 +110,6 @@ class ExtensionManifest(JsonData):
         Ensure the extension is compatible with the Ulauncher API (or raise error)
         """
         if not satisfies(API_VERSION, self.api_version):
-            err_msg = (
-                f'Extension "{self.name}" supports API version(s) {self.api_version}, '
-                f'but the Ulauncher version you are running is using extension API v:{API_VERSION}).'
-            )
             if satisfies("2.0", self.api_version):
                 # Show a warning for v2 -> v3 instead of aborting. Most v2 extensions run in v3.
                 if verbose:
@@ -124,6 +120,7 @@ class ExtensionManifest(JsonData):
                         API_VERSION
                     )
             else:
+                err_msg = f'{self.name} does not support Ulauncher API v{API_VERSION}.'
                 raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
 
     def get_user_preferences(self) -> Dict[str, Any]:

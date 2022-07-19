@@ -184,7 +184,7 @@ class ExtensionRemote:
             commit = self.get_compatible_commit_from_versions_json()
 
         if not commit:
-            message = f"This extension is not compatible with your Ulauncher API version (v{API_VERSION})."
+            message = f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
             raise ExtensionRemoteError(message, ExtensionError.Incompatible)
 
         return commit
