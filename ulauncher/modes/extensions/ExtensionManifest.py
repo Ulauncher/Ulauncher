@@ -104,8 +104,6 @@ class ExtensionManifest(JsonData):
                     assert p.options, 'Preferences error. Option list cannot be empty'
         except AssertionError as e:
             raise ExtensionManifestError(str(e), ExtensionError.InvalidManifest) from e
-        except KeyError as e:
-            raise ExtensionManifestError(f'{e} is not provided', ExtensionError.InvalidManifest) from e
 
     def check_compatibility(self, verbose=False):
         """
