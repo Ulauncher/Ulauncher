@@ -306,20 +306,21 @@ export default {
       this.updateExtModal = true
       this.newVersionInfo = null
       this.updateState = 'checking-updates'
-      fetchData('prefs:///extension/check-updates', this.extension.id).then(
-        data => {
-          if (data) {
-            this.newVersionInfo = data
-            this.updateState = 'update-available'
-          } else {
-            this.updateState = 'no-updates'
+      fetchData('prefs:///extension/check-update', this.extension.id)
+        .then(
+          ([has_update, last_commit, last_commit_time]) => {
+            if (has_update) {
+              this.newVersionInfo = {last_commit, last_commit_time}
+              this.updateState = 'update-available'
+            } else {
+              this.updateState = 'no-updates'
+            }
+          },
+          err => {
+            this.updateState = null
+            this.updateError = err
           }
-        },
-        err => {
-          this.updateState = null
-          this.updateError = err
-        }
-      )
+        )
     },
     update() {
       this.updateError = null

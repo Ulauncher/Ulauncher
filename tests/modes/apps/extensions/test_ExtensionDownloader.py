@@ -3,7 +3,7 @@ import pytest
 
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionDownloader import (
-    ExtensionDownloader, ExtensionDownloaderError, ExtensionIsUpToDateError)
+    ExtensionDownloader, ExtensionDownloaderError)
 
 
 class TestExtensionDownloader:
@@ -21,9 +21,7 @@ class TestExtensionDownloader:
         gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.ExtensionRemote').return_value
         gh_ext.extension_id = 'com.github.ulauncher.ulauncher-timer'
         gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.tar.gz'
-        commit_data = ('64e106c', '2017-05-01T07:30:39')
-        gh_ext.get_last_commit.return_value = commit_data
-        gh_ext.get_latest_compatible_commit.return_value = commit_data
+        gh_ext.get_latest_compatible_commit.return_value = ('64e106c', '2017-05-01T07:30:39')
         return gh_ext
 
     @pytest.fixture(autouse=True)
@@ -96,20 +94,7 @@ class TestExtensionDownloader:
             'last_commit_time': '2017-05-01T07:30:39'
         }})
 
-    def test_get_new_version_raises_ExtensionIsUpToDateError(self, downloader, ext_db):
-        ext_id = 'com.github.ulauncher.ulauncher-timer'
-        ext_db.get.return_value = ExtensionRecord(
-            id=ext_id,
-            url='https://github.com/Ulauncher/ulauncher-timer',
-            updated_at='2017-01-01',
-            last_commit='64e106c',
-            last_commit_time='2017-05-01T07:30:39Z'
-        )
-
-        with pytest.raises(ExtensionIsUpToDateError):
-            downloader.get_new_version(ext_id)
-
-    def test_get_new_version__returns_new_version(self, downloader, ext_db, gh_ext):
+    def test_check_update__returns_new_version(self, downloader, ext_db, gh_ext):
         ext_id = 'com.github.ulauncher.ulauncher-timer'
         ext_db.get.return_value = ExtensionRecord(
             id=ext_id,
@@ -119,4 +104,4 @@ class TestExtensionDownloader:
             last_commit_time='2017-01-01'
         )
 
-        assert downloader.get_new_version(ext_id) == gh_ext.get_last_commit.return_value
+        assert downloader.check_update(ext_id) == (True, '64e106c', '2017-05-01T07:30:39')

@@ -17,7 +17,7 @@ from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionDownloader import (ExtensionDownloader, ExtensionIsUpToDateError)
+from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import load_available_themes
@@ -329,13 +329,10 @@ class PreferencesServer():
             if value != old_value:
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
-    @route('/extension/check-updates')
-    def extension_check_updates(self, extension_id):
-        logger.info('Handling /extension/check-updates')
-        try:
-            return ExtensionDownloader.get_instance().get_new_version(extension_id)
-        except ExtensionIsUpToDateError:
-            return None
+    @route('/extension/check-update')
+    def extension_check_update(self, extension_id):
+        logger.info('Checking if extension has an update')
+        return ExtensionDownloader.get_instance().check_update(extension_id)
 
     @route('/extension/update-ext')
     def extension_update_ext(self, extension_id):

@@ -21,10 +21,6 @@ class ExtensionDownloaderError(UlauncherAPIError):
     pass
 
 
-class ExtensionIsUpToDateError(Exception):
-    pass
-
-
 class ExtensionDownloader:
 
     @classmethod
@@ -89,7 +85,9 @@ class ExtensionDownloader:
         :rtype: boolean
         :returns: False if already up-to-date, True if was updated
         """
-        commit_sha, commit_date = self.get_new_version(ext_id)
+        has_update, commit_sha, commit_date = self.check_update(ext_id)
+        if not has_update:
+            return False
         ext = self._find_extension(ext_id)
 
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
@@ -111,18 +109,14 @@ class ExtensionDownloader:
 
         return True
 
-    def get_new_version(self, ext_id: str) -> Tuple[str, str]:
+    def check_update(self, ext_id: str) -> Tuple[bool, str, str]:
         """
-        Returns dict with commit info about a new version or raises ExtensionIsUpToDateError
+        Returns tuple with commit info about a new version
         """
         ext = self._find_extension(ext_id)
-        remote = ExtensionRemote(ext.url)
-        commit_sha, commit_time = remote.get_latest_compatible_commit()
-        need_update = ext.last_commit != commit_sha
-        if not need_update:
-            raise ExtensionIsUpToDateError('Extension is up to date')
-
-        return commit_sha, commit_time
+        commit_sha, commit_time = ExtensionRemote(ext.url).get_latest_compatible_commit()
+        can_update = ext.last_commit != commit_sha
+        return can_update, commit_sha, commit_time
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)
