@@ -188,7 +188,7 @@
 </template>
 
 <script>
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 import ExtensionErrorExplanation from '@/components/widgets/ExtensionErrorExplanation'
 import ExtensionRuntimeError from '@/components/widgets/ExtensionRuntimeError'

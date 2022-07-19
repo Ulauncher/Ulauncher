@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 
 export default {
   name: 'ext-error-explanation',
