@@ -44,51 +44,33 @@ def route(path: str):
     return decorator
 
 
-def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = None, error_name: str = None):
-    controllers = ExtensionServer.get_instance().controllers
-    ext_db = ExtensionDb.load()
-    is_connected = ext_id in controllers
+def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
-    is_running = is_connected or ext_runner.is_running(ext_id)
-    ext_db_record = ext_db.get(ext_id)
-    # Controller method `get_icon_path` would work, but only running extensions have controllers
-    icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
-
-    return {
-        'id': ext_id,
-        'url': ext_db_record.url,
-        'updated_at': ext_db_record.updated_at,
-        'last_commit': ext_db_record.last_commit,
-        'last_commit_time': ext_db_record.last_commit_time,
-        'name': manifest.name,
-        'icon': icon,
-        'developer_name': manifest.developer_name,
-        'instructions': manifest.instructions,
-        'preferences': manifest.preferences,
-        'error': {'message': error, 'errorName': error_name} if error else None,
-        'is_running': is_running,
-        'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
-    }
-
-
-def get_all_extensions():
-    extensions = []
     for ext_id, _ in find_extensions(PATHS.EXTENSIONS):
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
-        error_name = None
         try:
             manifest.validate()
             manifest.check_compatibility()
-        except UlauncherAPIError as e:
-            error = str(e)
-            error_name = e.error_name
         except Exception as e:
-            error = str(e)
-            error_name = ExtensionError.Other.value
-        extensions.append(get_extension_info(ext_id, manifest, error, error_name))
+            error_name = e.error_name if isinstance(e, UlauncherAPIError) else ExtensionError.Other.value
+            error = {'message': str(e), 'errorName': error_name}
 
-    return extensions
+        is_running = ext_runner.is_running(ext_id)
+        # Controller method `get_icon_path` would work, but only running extensions have controllers
+        icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
+
+        yield {
+            **ExtensionDb.load().get(ext_id),
+            'name': manifest.name,
+            'icon': icon,
+            'developer_name': manifest.developer_name,
+            'instructions': manifest.instructions,
+            'preferences': manifest.preferences,
+            'error': error,
+            'is_running': is_running,
+            'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
+        }
 
 
 # pylint: disable=too-many-public-methods
@@ -308,7 +290,7 @@ class PreferencesServer():
     @route('/extension/get-all')
     def extension_get_all(self):
         logger.info('Handling /extension/get-all')
-        return get_all_extensions()
+        return list(get_extensions())
 
     @route('/extension/add')
     def extension_add(self, url):
@@ -316,8 +298,7 @@ class PreferencesServer():
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
         ExtensionRunner.get_instance().run(ext_id)
-
-        return get_all_extensions()
+        return list(get_extensions())
 
     @route('/extension/set-prefs')
     def extension_update_prefs(self, extension_id, data):
