@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-`Ulauncher <https://ulauncher.io>`_ |version| (Extension API v2.0.0)
+`Ulauncher <https://ulauncher.io>`_ |version| (Extension API v3.0)
 ====================================================================
 
 .. NOTE::
