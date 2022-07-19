@@ -54,7 +54,7 @@ class TestExtensionRemote:
         mocker.patch.object(remote, 'fetch_file')
         remote.fetch_file.return_value = "{}"
         remote.get_compatible_commit_from_versions_json.return_value = None
-        with pytest.raises(ExtensionRemoteError, match="not compatible with your Ulauncher API version"):
+        with pytest.raises(ExtensionRemoteError, match="does not support"):
             remote.get_latest_compatible_commit()
 
     def test_ext_id(self, remote):
