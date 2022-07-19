@@ -93,11 +93,9 @@ class ExtensionDownloader:
         logger.info('Updating extension "%s" from commit %s to %s', ext_id,
                     ext.last_commit[:8], commit_sha[:8])
 
-        ext_path = os.path.join(PATHS.EXTENSIONS, ext_id)
-
         remote = ExtensionRemote(ext.url)
         filename = download_tarball(remote.get_download_url(commit_sha))
-        untar(filename, ext_path)
+        untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}")
 
         ext.update(
             updated_at=datetime.now().isoformat(),

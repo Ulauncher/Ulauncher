@@ -14,7 +14,7 @@ from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.modes.extensions.extension_finder import find_extensions
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
@@ -42,10 +42,6 @@ def route(path: str):
         return handler
 
     return decorator
-
-
-class PrefsApiError(UlauncherAPIError):
-    pass
 
 
 def get_extension_info(ext_id: str, manifest: ExtensionManifest, error: str = None, error_name: str = None):
@@ -232,12 +228,12 @@ class PreferencesServer():
     def apply_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
-            raise PrefsApiError("Unable to turn on autostart preference")
+            raise UlauncherAPIError("Unable to turn on autostart preference")
 
         try:
             self.autostart_pref.switch(is_enabled)
         except Exception as err:
-            raise PrefsApiError(f'Caught an error while switching "autostart": {err}') from err
+            raise UlauncherAPIError(f'Caught an error while switching "autostart": {err}') from err
 
     def apply_theme(self):
         self.application.window.init_theme()
@@ -343,13 +339,10 @@ class PreferencesServer():
     @route('/extension/update-ext')
     def extension_update_ext(self, extension_id):
         logger.info('Update extension: %s', extension_id)
-        try:
-            runner = ExtensionRunner.get_instance()
-            runner.stop(extension_id)
-            ExtensionDownloader.get_instance().update(extension_id)
-            runner.run(extension_id)
-        except ExtensionManifestError as e:
-            raise PrefsApiError(e) from e
+        runner = ExtensionRunner.get_instance()
+        runner.stop(extension_id)
+        ExtensionDownloader.get_instance().update(extension_id)
+        runner.run(extension_id)
 
     @route('/extension/remove')
     def extension_remove(self, extension_id):
