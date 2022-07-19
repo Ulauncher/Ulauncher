@@ -2,12 +2,11 @@ import argparse
 import os
 from functools import lru_cache
 from gettext import gettext
-from ulauncher import __assets_dir__, __version__ as VERSION
+from ulauncher import ASSETS, VERSION
 
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ASSETS = __assets_dir__
 HOME = os.path.expanduser("~")
 CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{HOME}/.cache"), "ulauncher_cache")  # See issue#40
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")

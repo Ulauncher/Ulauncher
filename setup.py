@@ -7,7 +7,7 @@ from pathlib import Path
 from shutil import rmtree, which
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
-from ulauncher import __version__
+from ulauncher import VERSION
 
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
@@ -78,8 +78,8 @@ class build_wrapper(build_py, Command):
         build_py.run(self)
         print("Overwriting the namespace package with fixed values")
         Path(self.build_lib + "/ulauncher/__init__.py").write_text("\n".join([
-            f"__assets_dir__ = '{sys.prefix}/share/ulauncher'",
-            f"__version__ = '{__version__}'"
+            f"ASSETS = '{sys.prefix}/share/ulauncher'",
+            f"VERSION = '{VERSION}'"
         ]))
 
 
