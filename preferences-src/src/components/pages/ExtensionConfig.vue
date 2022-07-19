@@ -54,11 +54,11 @@
         is-updatable
         :extUrl="extension.url"
         :errorMessage="extension.error.message"
-        :errorName="extension.error.errorName"
+        :errorName="extension.error.name"
       />
     </div>
 
-    <b-alert variant="dark" show v-if="extension.error && extension.error.errorName === 'InvalidManifest'">
+    <b-alert variant="dark" show v-if="extension.error && extension.error.name === 'InvalidManifest'">
       <small>
         To find out how to migrate Ulauncher extensions to the latest API version, see
         <a
@@ -181,7 +181,7 @@
         v-if="updateError"
         :extUrl="extension.url"
         :errorMessage="updateError.message"
-        :errorName="updateError.errorName"
+        :errorName="updateError.name"
       />
     </b-modal>
   </div>

@@ -34,7 +34,7 @@
             class="text-muted"
             href
             @click.prevent
-            v-clipboard:copy="errorDetails"
+            v-clipboard:copy="error && error.details"
           >Copy error details to clipboard</a>
         </small>
       </div>
@@ -63,15 +63,6 @@ export default {
   },
   beforeDestroy() {
     bus.$off('error', this.onError)
-  },
-  computed: {
-    errorDetails() {
-      if (!this.error) {
-        return ''
-      }
-      const { message, errorName, stacktrace, type } = this.error
-      return `Message: ${message}\nError Name: ${errorName}\nType: ${type}\n\nStacktrace:\n\`\`\`\n${stacktrace}\n\`\`\``
-    }
   },
   methods: {
     openUrlInBrowser(url) {

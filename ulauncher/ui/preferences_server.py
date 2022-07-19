@@ -26,6 +26,7 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
+from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
@@ -144,19 +145,24 @@ class PreferencesServer():
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
+                error = JsonData(name=ExtensionError.Other.value, message=str(e))
                 error_type = type(e).__name__
-                error_name = ExtensionError.Other.value
+                include_details = True
                 if isinstance(e, UlauncherAPIError):
                     logger.error('%s: %s', error_type, e)
-                    error_name = e.error_name
+                    error.name = e.error_name
+                    include_details = error.name in ['AlreadyAdded', 'Network', 'Other']
                 else:
                     logger.exception('Unexpected API error. %s: %s', error_type, e)
-                data = json.dumps([None, {
-                    'message': str(e),
-                    'type': error_type,
-                    'errorName': error_name,
-                    'stacktrace': traceback.format_exc()
-                }])
+
+                if include_details:
+                    additionals = {
+                        "type": error_type,
+                        "stack trace": f"```\n{traceback.format_exc()}\n```"
+                    }
+                    error.details = "\n".join([f"{k}: {v}" for k, v in {**error, **additionals}.items()])
+
+                data = json.dumps([None, error])
 
             stream = Gio.MemoryInputStream.new_from_data(data.encode())
             scheme_request.finish(stream, -1, "application/json")

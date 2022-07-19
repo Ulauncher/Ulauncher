@@ -74,23 +74,21 @@
           <i class="fa fa-spinner fa-spin"></i> Downloading extension...
         </div>
 
-        <div class="error-wrapper" v-if="addingExtensionError && addingExtensionError.errorName">
+        <div class="error-wrapper" v-if="error && error.name">
           <ext-error-explanation
             :extUrl="extUrlToDownload"
-            :errorMessage="addingExtensionError.message"
-            :errorName="addingExtensionError.errorName"
+            :errorMessage="error.message"
+            :errorName="error.name"
           />
         </div>
 
-        <small
-          v-if="addingExtensionError && hideCopyErrorDetails.indexOf(addingExtensionError.errorName) === -1"
-        >
+        <small v-if="error && error.details">
           <i class="fa fa-copy"></i>
           <a
             class="text-muted"
             href
             @click.prevent
-            v-clipboard:copy="errorDetails"
+            v-clipboard:copy="error.details"
           >Copy error details to clipboard</a>
         </small>
       </b-modal>
@@ -124,14 +122,7 @@ export default {
   },
   computed: {
     ...mapState(['prefs']),
-    ...mapGetters(['prefsLoaded']),
-    errorDetails() {
-      if (!this.addingExtensionError) {
-        return ''
-      }
-      const { message, errorName, stacktrace, type } = this.addingExtensionError
-      return `Message: ${message}\nError Name: ${errorName}\nType: ${type}\n\nStacktrace:\n\`\`\`\n${stacktrace}\n\`\`\``
-    }
+    ...mapGetters(['prefsLoaded'])
   },
   data() {
     return {
@@ -139,15 +130,8 @@ export default {
       activeExt: null,
       addingExtension: false,
       reloading: false,
-      addingExtensionError: null,
-      extensions: [],
-      hideCopyErrorDetails: [
-        'MissingVersionDeclaration',
-        'Incompatible',
-        'InvalidManifest',
-        'InvalidUrl',
-        'InvalidVersionDeclaration'
-      ]
+      error: null,
+      extensions: []
     }
   },
   methods: {
@@ -165,7 +149,7 @@ export default {
     },
     onAddExtFormShown() {
       this.$nextTick(() => this.$refs.repoUrl.focus())
-      this.addingExtensionError = null
+      this.error = null
     },
     addExtDialog() {
       this.$refs.addExtForm.show()
@@ -213,7 +197,7 @@ export default {
     addExtension(input) {
       this.extUrlToDownload = input.value
       this.addingExtension = true
-      this.addingExtensionError = null
+      this.error = null
       fetchData('prefs:///extension/add', input.value).then(
         data => {
           this.extensions = data
@@ -224,7 +208,7 @@ export default {
         },
         err => {
           this.addingExtension = false
-          this.addingExtensionError = err
+          this.error = err
         }
       )
     }
