@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 import NavBar from '@/components/NavBar'
 

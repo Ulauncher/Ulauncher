@@ -192,7 +192,7 @@
 <script>
 import { mapState, mapMutations, mapGetters } from 'vuex'
 
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 
 const hotkeyEventName = 'hotkey-show-app'

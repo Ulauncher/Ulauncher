@@ -63,7 +63,7 @@ echo "This also works: $@"</code></pre>
 
 
 <script>
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
 

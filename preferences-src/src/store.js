@@ -1,5 +1,5 @@
 import Vuex from 'vuex'
-import fetchData from '@/api'
+import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 
 export default function createStore() {
