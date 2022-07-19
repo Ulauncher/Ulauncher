@@ -73,7 +73,7 @@ class ExtensionDownloader:
             'url': url,
             'updated_at': datetime.now().isoformat(),
             'last_commit': commit_sha,
-            'last_commit_time': commit_time.isoformat()
+            'last_commit_time': commit_time
         }})
 
         return remote.extension_id
@@ -122,7 +122,7 @@ class ExtensionDownloader:
         if not need_update:
             raise ExtensionIsUpToDateError('Extension is up to date')
 
-        return commit_sha, commit_time.isoformat()
+        return commit_sha, commit_time
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)

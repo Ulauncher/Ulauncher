@@ -1,4 +1,3 @@
-from datetime import datetime
 import codecs
 import json
 import pytest
@@ -82,7 +81,7 @@ class TestExtensionRemote:
         }, None)
         commit_sha, commit_time = remote.get_commit('64e106c57')
         assert commit_sha == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
-        assert commit_time == datetime(2017, 5, 1, 7, 30, 39)
+        assert commit_time == '2017-05-01T07:30:39'
 
     def test_get_compatible_ref_from_versions_json(self, remote, json_fetch, mocker):
         mocker.patch.object(remote, 'get_commit')

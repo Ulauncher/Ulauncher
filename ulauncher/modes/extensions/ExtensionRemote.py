@@ -14,7 +14,7 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger()
 
-Commit = Tuple[str, datetime]
+Commit = Tuple[str, str]
 
 
 def json_fetch(url):
@@ -113,7 +113,8 @@ class ExtensionRemote:
                 commit_data, _ = json_fetch(f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{id}")
                 commit_time = commit_data["commiter"]["date"]
             if id and commit_time:
-                return id, datetime.strptime(commit_time, self.date_format)
+                date = datetime.strptime(commit_time, self.date_format)
+                return id, date.isoformat()
 
         return None
 
@@ -151,7 +152,8 @@ class ExtensionRemote:
         try:
             id = response.get("sha") or response.get("id")
             commit_time = response.get("created_at") or response["commit"]["committer"]["date"]
-            return id, datetime.strptime(commit_time, self.date_format)
+            date = datetime.strptime(commit_time, self.date_format)
+            return id, date.isoformat()
         except (KeyError, TypeError):
             pass
 

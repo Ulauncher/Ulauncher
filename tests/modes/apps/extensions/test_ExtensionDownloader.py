@@ -1,4 +1,3 @@
-from datetime import datetime
 from unittest import mock
 import pytest
 
@@ -22,12 +21,9 @@ class TestExtensionDownloader:
         gh_ext = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.ExtensionRemote').return_value
         gh_ext.extension_id = 'com.github.ulauncher.ulauncher-timer'
         gh_ext.get_download_url.return_value = 'https://github.com/Ulauncher/ulauncher-timer/archive/master.tar.gz'
-        gh_ext.get_last_commit.return_value = ('64e106c', '2017-05-01T07:30:39')
-        gh_ext.get_latest_compatible_commit.return_value = (
-            '64e106c',
-            datetime(2017, 5, 1, 7, 30, 39)
-        )
-
+        commit_data = ('64e106c', '2017-05-01T07:30:39')
+        gh_ext.get_last_commit.return_value = commit_data
+        gh_ext.get_latest_compatible_commit.return_value = commit_data
         return gh_ext
 
     @pytest.fixture(autouse=True)
