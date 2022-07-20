@@ -70,12 +70,13 @@ disable=broad-except,         # Try/except catching all exceptionds instead of s
         unspecified-encoding,  # Only needed for Windows
         # Ignore Pylint 2.14 config sanity check (breaking behavior otherwise)
         unrecognized-option, useless-option-value,
+        c-extension-no-member,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once). See also the "--disable" option for examples.
-enable=c-extension-no-member
+enable=
 
 
 [REPORTS]
