@@ -17,7 +17,7 @@ Submodules
 ----------
 
 ulauncher\.modes\.BaseMode module
-----------------------------------------
+---------------------------------
 
 .. automodule:: ulauncher.modes.BaseMode
     :members:
@@ -25,17 +25,9 @@ ulauncher\.modes\.BaseMode module
     :show-inheritance:
 
 ulauncher\.modes\.ModeHandler module
--------------------------------
+------------------------------------
 
 .. automodule:: ulauncher.modes.ModeHandler
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ulauncher\.modes\.Query module
---------------------------------
-
-.. automodule:: ulauncher.modes.Query
     :members:
     :undoc-members:
     :show-inheritance:
