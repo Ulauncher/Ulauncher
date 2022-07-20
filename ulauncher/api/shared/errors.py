@@ -6,7 +6,6 @@ class ExtensionError(Enum):
     Incompatible = 'Incompatible'
     InvalidManifest = 'InvalidManifest'
     InvalidUrl = 'InvalidUrl'
-    InvalidVersionDeclaration = 'InvalidVersionDeclaration'
     Network = 'Network'
     Other = 'Other'
 

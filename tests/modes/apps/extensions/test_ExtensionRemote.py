@@ -1,5 +1,4 @@
 import codecs
-import json
 import pytest
 
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, ExtensionRemoteError
@@ -29,34 +28,6 @@ class TestExtensionRemote:
     def remote(self) -> ExtensionRemote:
         return ExtensionRemote('https://github.com/Ulauncher/ulauncher-timer')
 
-    def test_validate_versions(self, remote):
-        with pytest.raises(ExtensionRemoteError, match="should contain a list"):
-            assert remote.validate_versions(True)
-            assert remote.validate_versions(1)
-        with pytest.raises(ExtensionRemoteError, match="should contain a list of objects"):
-            assert remote.validate_versions(["^1.0.0", "^2.0.0"])
-        with pytest.raises(ExtensionRemoteError, match="commit should be a string"):
-            assert remote.validate_versions([{}, {}])
-            assert remote.validate_versions([{"required_api_version": "3"}])
-            assert remote.validate_versions([{"commit": 1234}])
-        with pytest.raises(ExtensionRemoteError, match="required_api_version should be a string"):
-            assert remote.validate_versions([{"commit": "asdf", "required_api_version": 1}])
-            assert remote.validate_versions([{"commit": "asdf", "required_api_version": 3.1}])
-        with pytest.raises(ExtensionRemoteError, match="Invalid range"):
-            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "4-1"}])
-            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "2 to 3"}])
-            assert remote.validate_versions([{"commit": "asdf", "required_api_version": "four"}])
-
-        assert remote.validate_versions([{"required_api_version": "2 - 3", "commit": "main"}])
-
-    def test_get_compatible_ref_from_versions_json_mismatch__raises(self, remote, mocker):
-        mocker.patch.object(remote, 'get_compatible_commit_from_versions_json')
-        mocker.patch.object(remote, 'fetch_file')
-        remote.fetch_file.return_value = "{}"
-        remote.get_compatible_commit_from_versions_json.return_value = None
-        with pytest.raises(ExtensionRemoteError, match="does not support"):
-            remote.get_latest_compatible_commit()
-
     def test_ext_id(self, remote):
         assert remote.extension_id == 'com.github.ulauncher.ulauncher-timer'
 
@@ -71,34 +42,14 @@ class TestExtensionRemote:
         assert remote.get_download_url('master') == 'https://github.com/ulauncher/ulauncher-timer/archive/master.tar.gz'
 
     def test_get_commit(self, remote, json_fetch):
-        json_fetch.return_value = ({
+        json_fetch.return_value = {
             'sha': '64e106c57ad90f9f02e9941dfa9780846b7457b9',
             'commit': {
                 'committer': {
                     'date': '2017-05-01T07:30:39Z'
                 }
             }
-        }, None)
+        }
         commit_sha, commit_time = remote.get_commit('64e106c57')
         assert commit_sha == '64e106c57ad90f9f02e9941dfa9780846b7457b9'
         assert commit_time == '2017-05-01T07:30:39'
-
-    def test_get_compatible_ref_from_versions_json(self, remote, json_fetch, mocker):
-        mocker.patch.object(remote, 'get_commit')
-        json_fetch.return_value = (base64_file_attachment(json.dumps([
-            {"required_api_version": "^2.0.0", "commit": "release-for-api-v1"},
-            {"required_api_version": "3.0", "commit": "release-for-api-v3"},
-            {"required_api_version": "3.3", "commit": "master"}
-        ])), None)
-        remote.get_compatible_commit_from_versions_json()
-        remote.get_commit.assert_called_with("release-for-api-v3")
-
-    def test_get_compatible_ref_from_versions_json__mult_compatible(self, remote, json_fetch, mocker):
-        mocker.patch.object(remote, 'get_commit')
-        json_fetch.return_value = (base64_file_attachment(json.dumps([
-            {"required_api_version": "3.0", "commit": "release-for-api-v3"},
-            {"required_api_version": "~2.3.1", "commit": "master"},
-            {"required_api_version": "^2.0.0", "commit": "release-for-api-v1"}
-        ])), None)
-        remote.get_compatible_commit_from_versions_json()
-        remote.get_commit.assert_called_with("release-for-api-v3")

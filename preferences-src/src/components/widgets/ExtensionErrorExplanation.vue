@@ -6,11 +6,6 @@
           v-if="errorName === 'InvalidUrl'"
         >The URL should be a GitHub, GitLab or Gitea-compatible extension repository link.
         <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
-        <p v-else-if="errorName === 'InvalidVersionDeclaration'">
-          There's an error in versions.json:
-          <br>
-          <b>{{ errorMessage }}</b>
-        </p>
         <p v-else-if="errorName === 'InvalidManifest'">
           There's an error in manifest.json:
           <br>
@@ -78,7 +73,7 @@ export default {
     extUrl: String
   },
   data: () => ({
-    reportableErrors: ['Incompatible', 'InvalidVersionDeclaration', 'InvalidManifest']
+    reportableErrors: ['Incompatible', 'InvalidManifest']
   }),
   methods: {
     openUrlInBrowser(url) {
