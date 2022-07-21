@@ -18,7 +18,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.set_default_size(1000, 600)
         self._init_webview()
         # Kill the child WebKitNetworkProcess when the window is closed (there's no clean way to do this)
-        self.connect("delete-event", lambda *_: os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}"))
+        self.connect("delete-event", self.on_delete)
 
     def _init_webview(self):
         settings = WebKit2.Settings(
@@ -43,10 +43,17 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.load_uri(f"prefs://{PATHS.ASSETS}/preferences/index.html#/{page}")
 
     # pylint: disable=arguments-differ
-    def present(self, page):
-        self.load_page(page)
+    def present(self, page=None):
+        if page:
+            self.load_page(page)
         super().present()
 
-    def show(self, page):
-        self.load_page(page)
+    def show(self, page=None):
+        if page:
+            self.load_page(page)
         super().show()
+
+    def on_delete(self, *args, **kwargs):
+        del self.get_application().preferences
+        self.destroy()
+        os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}")

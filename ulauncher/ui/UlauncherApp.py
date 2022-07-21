@@ -27,6 +27,7 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     settings = Settings.load()
     window = None  # type: UlauncherWindow
+    preferences = None  # type: PreferencesWindow
     appindicator = None  # type: AppIndicator
     _current_accel_name = None
 
@@ -106,7 +107,9 @@ class UlauncherApp(Gtk.Application):
 
     def show_preferences(self, page=None):
         self.window.hide()
-        if not str or not isinstance(page, str):
-            page = 'preferences'
 
-        PreferencesWindow(application=self).show(page=page)
+        if self.preferences:
+            self.preferences.present(page)
+        else:
+            self.preferences = PreferencesWindow(application=self)
+            self.preferences.show(page)
