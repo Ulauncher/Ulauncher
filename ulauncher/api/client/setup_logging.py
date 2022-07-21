@@ -1,7 +1,7 @@
 import os
 import logging
 
-from ulauncher.utils.logging import ColoredFormatter
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
 def setup_logging():

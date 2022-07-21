@@ -11,7 +11,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
-from ulauncher.utils.logging import ColoredFormatter
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.ui.UlauncherApp import UlauncherApp
 
 
