@@ -30,7 +30,8 @@ def get_icon_path(icon, size=32, base_path=""):
                 return join(base_path, icon)
 
             themed_icon = icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE)
-            return themed_icon.get_filename()
+            if themed_icon:
+                return themed_icon.get_filename()
 
     except Exception as e:
         logger.info('Could not load icon path %s. E: %s', icon, e)
