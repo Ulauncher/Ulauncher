@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from gettext import gettext
 from ulauncher import ASSETS, VERSION
+from ulauncher.utils.migrate import v5_to_v6
 
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
@@ -31,6 +32,7 @@ class _PATHS_CLASS:
 PATHS = _PATHS_CLASS()
 
 FIRST_RUN = not os.path.exists(PATHS.CONFIG)  # If there is no config dir, assume it's the first run
+FIRST_V6_RUN = not os.path.exists(PATHS.STATE)
 
 if not os.path.exists(PATHS.ASSETS):
     raise OSError(PATHS.ASSETS)
@@ -39,6 +41,8 @@ os.makedirs(PATHS.CACHE, exist_ok=True)
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
+
+v5_to_v6(PATHS, FIRST_V6_RUN)
 
 
 @lru_cache()
