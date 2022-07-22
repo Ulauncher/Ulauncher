@@ -2,7 +2,7 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, cast, Dict, List, Type, TypeVar
+from typing import Any, cast, Dict, List, Tuple, Type, TypeVar
 
 
 def filter_recursive(data, blacklist):
@@ -13,7 +13,7 @@ def filter_recursive(data, blacklist):
     return data
 
 
-_file_instances: Dict[Path, "JsonData"] = {}
+_file_instances: Dict[Tuple[Path, Type], "JsonData"] = {}
 logger = logging.getLogger()
 # Optimally use "TypeVar('T', bound=JsonData"), but it requires py3.7 see https://stackoverflow.com/a/63237226/633921
 T = TypeVar("T", bound="JsonData")
@@ -82,16 +82,17 @@ class JsonData(dict):
     def new_from_file(cls: Type[T], path) -> T:
         data = {}
         file_path = Path(path).resolve()
-        if file_path.is_file():
+        key = (file_path, cls)
+        if key not in _file_instances and file_path.is_file():
             try:
                 data = json.loads(file_path.read_text())
             except Exception as e:
                 logger.error("Error '%s' opening JSON file %s: %s", type(e).__name__, file_path, e)
                 logger.warning("Ignoring invalid JSON file (%s)", file_path)
 
-        instance = _file_instances.get(file_path, cls())
+        instance = _file_instances.get(key, cls())
         instance.update(data)
-        _file_instances[file_path] = instance
+        _file_instances[key] = instance
         return cast(T, instance)
 
     def stringify(self, indent=None, sort_keys=True):
@@ -102,7 +103,7 @@ class JsonData(dict):
 
     def save(self, *args, **kwargs) -> bool:
         self.update(*args, **kwargs)
-        file_path = next((f for f, inst in _file_instances.items() if inst == self), None)
+        file_path = next((key[0] for key, inst in _file_instances.items() if inst == self), None)
 
         return self.save_as(file_path)
 

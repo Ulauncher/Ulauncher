@@ -124,3 +124,18 @@ class TestJsonData:
         data.three = 3
         data["four"] = 4
         assert data.stringify(sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'
+
+    def test_file_cache(self):
+        class C1(JsonData):
+            pass
+
+        class C2(JsonData):
+            pass
+
+        c1 = C1.new_from_file(json_file)
+        c2a = C2.new_from_file(json_file)
+        c2b = C2.new_from_file(json_file)
+        c2a.uniqe_cache_key = 1
+        assert not hasattr(c1, "uniqe_cache_key")
+        assert hasattr(c2a, "uniqe_cache_key")
+        assert hasattr(c2b, "uniqe_cache_key")
