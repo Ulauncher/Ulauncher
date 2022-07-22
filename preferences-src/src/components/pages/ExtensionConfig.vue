@@ -69,63 +69,18 @@
     </b-alert>
 
     <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
-      <template v-for="(pref, id) in extension.preferences">
-        <b-form-group
-          :key="id"
-          v-if="pref.type == 'keyword'"
-          :label="`${pref.name} keyword`"
-          class="keyword-input"
-          :description="pref.description"
-        >
-          <b-form-input :ref="id" :value="pref.value"></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          :key="pref.id"
-          v-if="pref.type == 'input'"
-          :label="pref.name"
-          :description="pref.description"
-        >
-          <b-form-input :ref="pref.id" :value="pref.value"></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          :key="pref.id"
-          v-if="pref.type == 'checkbox'"
-          :description="pref.description"
-        >
-          <b-form-checkbox :ref="pref.id" :checked="pref.value">
-            {{ pref.name }}
-          </b-form-checkbox>
-        </b-form-group>
-
-        <b-form-group
-          :key="pref.id"
-          v-if="pref.type == 'number'"
-          :label="pref.name"
-          :description="pref.description"
-        >
-          <b-form-input :ref="pref.id" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          :key="pref.id"
-          v-if="pref.type == 'text'"
-          :label="pref.name"
-          :description="pref.description"
-        >
-          <b-form-textarea :ref="pref.id" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
-        </b-form-group>
-
-        <b-form-group
-          :key="pref.id"
-          v-if="pref.type == 'select'"
-          :label="pref.name"
-          :description="pref.description"
-        >
-          <b-form-select :ref="pref.id" :value="pref.value" :options="pref.options"></b-form-select>
-        </b-form-group>
-      </template>
+      <b-form-group
+        v-for="(pref, id) in extension.preferences"
+        :key="id"
+        :description="pref.description"
+        :label="pref.type === 'checkbox' ? '' : pref.name"
+      >
+        <b-form-input v-if="['keyword', 'input'].includes(pref.type)" :ref="id" :value="pref.value"></b-form-input>
+        <b-form-input v-if="pref.type === 'number'" :ref="id" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
+        <b-form-checkbox v-if="pref.type === 'checkbox'" :ref="id" :checked="pref.value">{{ pref.name }}</b-form-checkbox>
+        <b-form-textarea v-if="pref.type === 'text'" :ref="id" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
+        <b-form-select v-if="pref.type === 'select'" :ref="id" :value="pref.value" :options="pref.options"></b-form-select>
+      </b-form-group>
     </div>
 
     <b-modal
@@ -259,15 +214,17 @@ export default {
       let data = {}
       Object.entries(this.extension.preferences).forEach(([id, pref]) => {
         let { $el } = this.$refs[id][0]
-        let value = $el.value
         if (pref.type === 'checkbox') {
-          value = $el.firstChild.checked
+          pref.value = $el.firstChild.checked
+        } else if (pref.type === 'keyword') {
+          pref.value = $el.value.trim()
+        } else if (pref.type === 'number') {
+          pref.value = $el.valueAsNumber
+        } else {
+          pref.value = $el.value
         }
-        if (pref.type === 'keyword') {
-          value = value.trim()
-        }
-        data[id] = value
-      })
+        data[id] = pref.value
+      });
       fetchData('prefs:///extension/set-prefs', this.extension.id, data).then(
         () => {
           this.showSavedMsg = true
