@@ -97,7 +97,7 @@ class ExtensionServer:
         :param str keyword:
         :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
         """
-        for _, controller in self.controllers.items():
+        for controller in self.controllers.values():
             for pref in controller.manifest.preferences.values():
                 if keyword and pref.type == "keyword" and pref.value == keyword:
                     return controller
