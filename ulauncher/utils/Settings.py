@@ -10,10 +10,10 @@ class Settings(JsonData):
     grab_mouse_pointer = False
     hotkey_show_app = "<Primary>space"
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
+    max_recent_apps = 0
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"
     show_indicator_icon = True
-    show_recent_apps = "0"
     terminal_command = ""
     theme_name = "light"
 

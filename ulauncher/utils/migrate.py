@@ -66,6 +66,17 @@ def v5_to_v6(PATHS, is_first_run):
     _migrate_file(f"{PATHS.DATA}/query_history.db", f"{PATHS.STATE}/query_history.json")
     del sys.modules["ulauncher.search.Query"]  # <-- Don't want this hack to remain in the runtime afterwards
 
+    # Convert show_recent_apps to max_recent_apps
+    # Not using settings class because we don't want to convert the keys
+    # pylint: disable=import-outside-toplevel
+    from ulauncher.utils.json_data import JsonData
+    settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
+    legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
+    if legacy_recent_apps and settings.get("max_recent_apps") is None:
+        # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
+        # If people haven't changed their settings since 2020 it'll be set to 0
+        settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
+
     # Migrate autostart conf from XDG autostart file to systemd
     if is_first_run:
         try:
@@ -97,6 +108,13 @@ def v5_to_v6_destructive(PATHS):
         print("\n".join(map(str, cleanup_list)))
         for file in cleanup_list:
             file.unlink()
+
+    # Delete old preferences
+    # pylint: disable=import-outside-toplevel
+    from ulauncher.utils.json_data import JsonData
+    settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
+    _logger.info("Pruning settings")
+    settings.save({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
 
     # Update icon locations for shortcuts.json generated before v6
     # (v6 created symlinks for them for backwards compatibility, but when v6 comes we should delete the symlinks)

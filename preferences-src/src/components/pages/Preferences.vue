@@ -74,7 +74,7 @@
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-input style="width:380px" id="show-recent-apps" v-model="show_recent_apps"></b-form-input>
+          <b-form-input style="width:380px" id="show-recent-apps" v-model.number="max_recent_apps" type="number" min="0"></b-form-input>
         </td>
       </tr>
 
@@ -225,7 +225,7 @@ export default {
     // Unfortunately there seems to be no way to generate these from the backend data,
     // as we haven't recievened it yet at this point in the runtime
     // A more reasonable approach would probably be to use a wrapper rather than directly accessing these
-    // As in v-model="prefs.show_recent_apps" instead of v-model="show_recent_apps"?
+    // As in v-model="prefs.max_recent_apps" instead of v-model="max_recent_apps"?
     ...Object.fromEntries([
       'autostart_enabled',
       'clear_previous_query',
@@ -236,7 +236,7 @@ export default {
       'raise_if_started',
       'render_on_screen',
       'show_indicator_icon',
-      'show_recent_apps',
+      'max_recent_apps',
       'terminal_command',
       'theme_name',
     ].map(name => ([name, {

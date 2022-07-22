@@ -274,9 +274,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.result_box.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
-        recent_apps_number = int(self.settings.show_recent_apps) if self.settings.show_recent_apps.isnumeric() else 0
-        if not self.input.get_text() and recent_apps_number > 0:
-            results = AppResult.get_most_frequent(recent_apps_number)
+        if not self.input.get_text() and self.settings.max_recent_apps:
+            results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
         results = self.create_item_widgets(results, self._get_user_query())
 
