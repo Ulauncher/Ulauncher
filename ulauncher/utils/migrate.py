@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from configparser import ConfigParser
 from types import ModuleType
+from ulauncher.config import PATHS, FIRST_V6_RUN
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 
 _logger = logging.getLogger()
@@ -49,7 +50,7 @@ def _migrate_app_state(old_format):
     return new_format
 
 
-def v5_to_v6(PATHS, is_first_run):
+def v5_to_v6():
     # Convert extension prefs to JSON
     for file in Path(f"{PATHS.CONFIG}/ext_preferences").iterdir():
         if file.suffix in [".db", ".json"]:
@@ -78,7 +79,7 @@ def v5_to_v6(PATHS, is_first_run):
         settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
 
     # Migrate autostart conf from XDG autostart file to systemd
-    if is_first_run:
+    if FIRST_V6_RUN:
         try:
             systemd_unit = UlauncherSystemdController()
             AUTOSTART_FILE = Path(f"{PATHS.CONFIG}/../autostart/ulauncher.desktop").resolve()
@@ -92,7 +93,7 @@ def v5_to_v6(PATHS, is_first_run):
             _logger.warning("Couldn't migrate autostart: %s", e)
 
 
-def v5_to_v6_destructive(PATHS):
+def v5_to_v6_destructive():
     # Currently optional changes that breaks your conf if you want to revert back to v5 for some reason
     # We probably want to run these later as part of the v7 migration instead.
 

@@ -3,7 +3,6 @@ import os
 from functools import lru_cache
 from gettext import gettext
 from ulauncher import ASSETS, VERSION
-from ulauncher.utils.migrate import v5_to_v6
 
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
@@ -41,8 +40,6 @@ os.makedirs(PATHS.CACHE, exist_ok=True)
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
-
-v5_to_v6(PATHS, FIRST_V6_RUN)
 
 
 @lru_cache()

@@ -10,6 +10,7 @@ gi.require_version('Gtk', '3.0')
 # pylint: disable=wrong-import-position
 from gi.repository import GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
+from ulauncher.utils.migrate import v5_to_v6
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.ui.UlauncherApp import UlauncherApp
@@ -75,6 +76,9 @@ def main():
         logger.error("Uncaught exception", exc_info=(exctype, value, tb))
 
     sys.excepthook = except_hook
+
+    # Migrate user data to v6 compatible
+    v5_to_v6()
 
     app = UlauncherApp()
 
