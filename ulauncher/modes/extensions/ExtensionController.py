@@ -57,13 +57,12 @@ class ExtensionController:
 
         :returns: :class:`BaseAction` object
         """
-        # Normalize the query to the extension default keyword, not the custom user keyword
-        for pref in self.manifest.preferences.values():
-            if pref.type == "keyword" and pref.value == query.keyword:
-                query = Query(query.replace(pref.value, pref.default_value, 1))
+        # Normalize the query to the keyword specified in the manifest, not the custom user keyword
+        for trigger in self.manifest.triggers.values():
+            if trigger.user_keyword == query.keyword:
+                query = Query(query.replace(trigger.user_keyword, trigger.keyword, 1))
 
-        event = KeywordQueryEvent(query)
-        return self.trigger_event(event)
+        return self.trigger_event(KeywordQueryEvent(query))
 
     def trigger_event(self, event):
         """

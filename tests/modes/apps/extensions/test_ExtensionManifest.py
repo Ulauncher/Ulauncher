@@ -13,12 +13,8 @@ class TestExtensionManifest:
             "name": "Timer",
             "authors": "Aleksandr Gornostal",
             "icon": "images/timer.png",
-            "preferences": {
-                "keyword": {
-                    "type": "keyword",
-                    "name": "Timer",
-                    "default_value": "ti"
-                }
+            "triggers": {
+                "keyword": {"name": "Timer", "keyword": "ti"}
             }
         }
 
@@ -62,7 +58,6 @@ class TestExtensionManifest:
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, valid_manifest):
         valid_manifest['preferences'] = {
-            'id': {'type': 'keyword', 'name': 'My Keyword', 'default_value': 'kw'},
             'city': {'type': 'input', 'name': 'City'},
         }
         manifest = ExtensionManifest(valid_manifest)

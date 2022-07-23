@@ -30,9 +30,6 @@ class Extension:
         except Exception:
             pass
 
-        if not self.preferences:
-            self.logger.error("Could not load user preferences")
-
         # subscribe with methods if user has added their own
         if self.__class__.on_query_change is not Extension.on_query_change:
             self.subscribe(KeywordQueryEvent, 'on_query_change')

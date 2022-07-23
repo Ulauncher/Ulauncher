@@ -36,11 +36,11 @@ class ExtensionMode(BaseMode):
         :rtype: Iterable[:class:`~ulauncher.api.Result`]
         """
         for controller in self.extensionServer.get_controllers():
-            for pref in controller.manifest.preferences.values():
-                if pref.type == "keyword" and pref.value:
+            for trigger in controller.manifest.triggers.values():
+                if trigger.user_keyword:
                     yield ExtensionKeywordResult(
-                        name=html.escape(pref.name),
-                        description=html.escape(pref.description),
-                        keyword=pref.value,
-                        icon=controller.get_icon_path(path=pref.icon)
+                        name=html.escape(trigger.name),
+                        description=html.escape(trigger.description),
+                        keyword=trigger.user_keyword,
+                        icon=controller.get_icon_path(path=trigger.icon)
                     )
