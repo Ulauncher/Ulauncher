@@ -61,48 +61,51 @@ class ExtensionManifest(JsonData):
         """
         Ensure that the manifest is valid (or raise error)
         """
+        required_fields = [key for key, val in self.__default_props__.items() if val is not None]
+        missing_fields = [f for f in required_fields if not self.get(f)]
+        if missing_fields:
+            raise ExtensionManifestError(
+                f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"',
+                ExtensionError.InvalidManifest
+            )
         try:
-            assert self.api_version, "api_version is not provided"
-            assert self.name, "name is not provided"
-            assert self.developer_name, "developer_name is not provided"
-            assert self.icon, "icon is not provided"
-            assert self.preferences, "preferences is not provided"
-
-            for p in self.preferences.values():
+            for id, p in self.preferences.items():
+                valid_types = ["keyword", "checkbox", "number", "input", "select", "text"]
                 default = p.default_value
-                assert p.type, 'Preferences error. Type cannot be empty'
-                assert p.type in ["keyword", "checkbox", "number", "input", "select", "text"], \
-                    'Preferences error. Type can be "keyword", "input", "number", "checkbox", "select" or "text"'
-                assert p.name, 'Preferences error. Name cannot be empty'
+                assert p.name, f'"{id}" missing non-optional field "name"'
+                assert p.type, f'"{id}" missing non-optional field "type"'
+                assert p.type in valid_types, \
+                    f'"{id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
                 if p.type == 'keyword':
-                    assert default, 'Preferences error. Keyword default value cannot be empty'
-                    assert isinstance(default, str), \
-                        'Preferences error. Keyword default value must be a string'
+                    assert default, f'"{id}" keyword default value must be a non-empty string'
                 assert p.min is None or p.type == 'number', \
-                    'Preferences error. Only number type supports min'
+                    f'"min" specified for "{id}", which is not a number type'
                 assert p.max is None or p.type == 'number', \
-                    'Preferences error. Only number type supports max'
+                    f'"max" specified for "{id}", which is not a number type'
                 if p.type == 'checkbox' and default:
                     assert isinstance(default, bool), \
-                        'Preferences error. Checkbox default value must be a boolean'
+                        f'"{id}" "default_value" must be a boolean'
                 if p.type == 'number':
                     assert not default or isinstance(default, int), \
-                        'Preferences error. Number default value must be a non-decimal number'
+                        f'"{id}" default_value must be a non-decimal number'
                     assert not p.min or isinstance(p.min, int), \
-                        'Preferences error. Number "min" value must be unspecified or a non-decimal number'
+                        f'"{id}" "min" value must be non-decimal number if specified'
                     assert not p.max or isinstance(p.min, int), \
-                        'Preferences error. Number "max" value must be unspecified or a non-decimal number'
+                        f'"{id}" "max" value must be non-decimal number if specified'
                     assert not p.min or not p.max or p.min < p.max, \
-                        'Preferences error. Number "min" value must be lower than "max" if specified'
+                        f'"{id}" "min" value must be lower than "max" if specified'
                     assert not default or not p.max or default <= p.max, \
-                        'Preferences error. Number default value must not be higher than "max"'
+                        f'"{id}" "default_value" must not be higher than "max"'
                     assert not default or not p.min or default >= p.min, \
-                        'Preferences error. Number "min" value must not be higher than default value'
+                        f'"{id}" "min" value must not be higher than "default_value"'
                 if p.type == 'select':
-                    assert isinstance(p.options, list), 'Preferences error. Options must be a list'
-                    assert p.options, 'Preferences error. Option list cannot be empty'
+                    assert isinstance(p.options, list), f'"{id}" options field must be a list'
+                    assert p.options, f'"{id}" option cannot be empty for select type'
         except AssertionError as e:
-            raise ExtensionManifestError(str(e), ExtensionError.InvalidManifest) from e
+            raise ExtensionManifestError(
+                f"Invalid preferences in Extension manifest: {str(e)}",
+                ExtensionError.InvalidManifest
+            ) from None
 
     def check_compatibility(self, verbose=False):
         """
