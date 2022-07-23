@@ -58,7 +58,7 @@
       />
     </div>
 
-    <b-alert variant="dark" show v-if="extension.error && extension.error.name === 'InvalidManifest'">
+    <b-alert variant="dark" show v-if="extension.error && extension.error.name === 'ExtensionManifestError'">
       <small>
         To find out how to migrate Ulauncher extensions to the latest API version, see
         <a
