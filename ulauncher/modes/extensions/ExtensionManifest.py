@@ -8,7 +8,6 @@ from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
 ValueType = Union[str, int]  # Bool is a subclass of int
-EXT_PREFERENCES_DIR = f"{PATHS.CONFIG}/ext_preferences"
 
 
 class ExtensionManifestError(UlauncherAPIError):
@@ -130,13 +129,13 @@ class ExtensionManifest(JsonData):
         return {id: pref.value for id, pref in self.preferences.items()}
 
     def save_user_preferences(self, ext_id: str):
-        path = f"{EXT_PREFERENCES_DIR}/{ext_id}.json"
+        path = f"{PATHS.CONFIG}/ext_preferences/{ext_id}.json"
         JsonData.new_from_file(path).save(self.get_user_preferences())
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
         manifest = cls.new_from_file(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
-        user_prefs = JsonData.new_from_file(f"{EXT_PREFERENCES_DIR}/{ext_id}.json")
+        user_prefs = JsonData.new_from_file(f"{PATHS.CONFIG}/ext_preferences/{ext_id}.json")
         for id, pref in manifest.preferences.items():
             user_value = user_prefs.get(id)
             pref.value = pref.default_value if user_value is None else user_value
