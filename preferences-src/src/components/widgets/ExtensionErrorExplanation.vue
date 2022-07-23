@@ -1,17 +1,17 @@
 <template>
   <div class="wrapper selectable">
-    <b-alert show :variant="errorName === 'Other' ? 'danger' : 'warning'">
+    <b-alert show variant="warning">
       <small>
         <p
-          v-if="errorName === 'InvalidUrl'"
+          v-if="errorName === 'InvalidExtensionUrlWarning'"
         >The URL should be a GitHub, GitLab or Gitea-compatible extension repository link.
         <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
-        <p v-else-if="errorName === 'InvalidManifest'">
+        <p v-else-if="errorName === 'ExtensionManifestError'">
           There's an error in manifest.json:
           <br>
           <b>{{ errorMessage }}</b>
         </p>
-        <div v-else-if="errorName === 'Incompatible'">
+        <div v-else-if="errorName === 'ExtensionIncompatibleWarning'">
           <p>
             Version incompatibility error:
             <br>
@@ -22,10 +22,10 @@
           </p>
         </div>
         <p
-          v-else-if="errorName === 'AlreadyAdded'"
+          v-else-if="errorName === 'ExtensionAlreadyInstalledWarning'"
         >You've already installed this extension.</p>
         <p
-          v-else-if="errorName === 'Network'"
+          v-else-if="errorName === 'ExtensionNetworkError'"
         >
           A network error occurred: <b>{{ errorMessage }}</b>
           <br><br>Please check that your network is ok, that the repository is not private, and that the extension has all the required files.
@@ -43,7 +43,7 @@
             @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
           >Github issues</a>.
         </p>
-        <p v-if="extUrl && reportableErrors.indexOf(errorName) > -1">
+        <p v-if="extUrl && !errorName.endsWith('Warning')">
           <br />
           <span v-if="isUpdatable">
             Try
@@ -72,9 +72,6 @@ export default {
     errorName: String,
     extUrl: String
   },
-  data: () => ({
-    reportableErrors: ['Incompatible', 'InvalidManifest']
-  }),
   methods: {
     openUrlInBrowser(url) {
       fetchData('prefs:///open/web-url', url)

@@ -1,7 +1,7 @@
 import codecs
 import pytest
 
-from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, ExtensionRemoteError
+from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, InvalidExtensionUrlWarning
 
 manifest_example = {'api_version': '1',
                     'developer_name': 'Aleksandr Gornostal',
@@ -32,10 +32,10 @@ class TestExtensionRemote:
         assert remote.extension_id == 'com.github.ulauncher.ulauncher-timer'
 
     def test_invalid_urls(self):
-        with pytest.raises(ExtensionRemoteError):
+        with pytest.raises(InvalidExtensionUrlWarning):
             ExtensionRemote('http://github.com/Ulauncher/ulauncher-timer')
 
-        with pytest.raises(ExtensionRemoteError):
+        with pytest.raises(InvalidExtensionUrlWarning):
             ExtensionRemote('git@github.com/Ulauncher')
 
     def test_get_download_url(self, remote):

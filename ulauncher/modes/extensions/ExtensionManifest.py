@@ -2,7 +2,6 @@ import logging
 from typing import Any, Dict, Optional, List, Union
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 
@@ -10,7 +9,11 @@ logger = logging.getLogger()
 ValueType = Union[str, int]  # Bool is a subclass of int
 
 
-class ExtensionManifestError(UlauncherAPIError):
+class ExtensionManifestError(Exception):
+    pass
+
+
+class ExtensionIncompatibleWarning(Exception):
     pass
 
 
@@ -64,10 +67,8 @@ class ExtensionManifest(JsonData):
         required_fields = [key for key, val in self.__default_props__.items() if val is not None]
         missing_fields = [f for f in required_fields if not self.get(f)]
         if missing_fields:
-            raise ExtensionManifestError(
-                f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"',
-                ExtensionError.InvalidManifest
-            )
+            err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
+            raise ExtensionManifestError(err_msg)
         try:
             for id, p in self.preferences.items():
                 valid_types = ["keyword", "checkbox", "number", "input", "select", "text"]
@@ -102,10 +103,7 @@ class ExtensionManifest(JsonData):
                     assert isinstance(p.options, list), f'"{id}" options field must be a list'
                     assert p.options, f'"{id}" option cannot be empty for select type'
         except AssertionError as e:
-            raise ExtensionManifestError(
-                f"Invalid preferences in Extension manifest: {str(e)}",
-                ExtensionError.InvalidManifest
-            ) from None
+            raise ExtensionManifestError(f"Invalid preferences in Extension manifest: {str(e)}") from None
 
     def check_compatibility(self, verbose=False):
         """
@@ -122,8 +120,7 @@ class ExtensionManifest(JsonData):
                         API_VERSION
                     )
             else:
-                err_msg = f'{self.name} does not support Ulauncher API v{API_VERSION}.'
-                raise ExtensionManifestError(err_msg, ExtensionError.Incompatible)
+                raise ExtensionIncompatibleWarning(f'{self.name} does not support Ulauncher API v{API_VERSION}.')
 
     def get_user_preferences(self) -> Dict[str, Any]:
         """

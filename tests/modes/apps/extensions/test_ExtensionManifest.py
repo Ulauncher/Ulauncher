@@ -1,7 +1,7 @@
 import os
 import pytest
-from ulauncher.api.shared.errors import ExtensionError
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionManifest import (
+    ExtensionManifest, ExtensionManifestError, ExtensionIncompatibleWarning)
 
 
 class TestExtensionManifest:
@@ -29,9 +29,8 @@ class TestExtensionManifest:
 
     def test_validate__name_empty__exception_raised(self):
         manifest = ExtensionManifest({"api_version": "1"})
-        with pytest.raises(ExtensionManifestError) as e:
+        with pytest.raises(ExtensionManifestError):
             manifest.validate()
-        assert e.value.error_name == ExtensionError.InvalidManifest.value
 
     def test_validate__valid_manifest__no_exceptions_raised(self, valid_manifest):
         manifest = ExtensionManifest(valid_manifest)
@@ -42,27 +41,24 @@ class TestExtensionManifest:
             'id': {'type': 'incorrect'}
         }
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError) as e:
+        with pytest.raises(ExtensionManifestError):
             manifest.validate()
-        assert e.value.error_name == ExtensionError.InvalidManifest.value
 
     def test_validate__type_kw_empty_name__exception_raised(self, valid_manifest):
         valid_manifest['preferences'] = {
             'id': {'type': 'incorrect', 'keyword': 'kw'}
         }
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError) as e:
+        with pytest.raises(ExtensionManifestError):
             manifest.validate()
-        assert e.value.error_name == ExtensionError.InvalidManifest.value
 
     def test_validate__raises_error_if_empty_default_value_for_keyword(self, valid_manifest):
         valid_manifest['preferences'] = {
             'id': {'type': 'keyword', 'name': 'My Keyword'}
         }
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError) as e:
+        with pytest.raises(ExtensionManifestError):
             manifest.validate()
-        assert e.value.error_name == ExtensionError.InvalidManifest.value
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, valid_manifest):
         valid_manifest['preferences'] = {
@@ -74,9 +70,8 @@ class TestExtensionManifest:
 
     def test_check_compatibility__manifest_version_0__exception_raised(self):
         manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
-        with pytest.raises(ExtensionManifestError) as e:
+        with pytest.raises(ExtensionIncompatibleWarning):
             manifest.check_compatibility()
-        assert e.value.error_name == ExtensionError.Incompatible.value
 
     def test_check_compatibility__api_version__no_exceptions(self):
         manifest = ExtensionManifest({"name": "Test", "api_version": "3"})

@@ -8,7 +8,6 @@ from typing import Optional, Tuple
 
 from ulauncher.config import API_VERSION
 from ulauncher.utils.version import satisfies
-from ulauncher.api.shared.errors import ExtensionError, UlauncherAPIError
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger()
@@ -16,7 +15,19 @@ logger = logging.getLogger()
 Commit = Tuple[str, str]
 
 
-class ExtensionRemoteError(UlauncherAPIError):
+class ExtensionRemoteError(Exception):
+    pass
+
+
+class InvalidExtensionUrlWarning(Exception):
+    pass
+
+
+class ExtensionNetworkError(Exception):
+    pass
+
+
+class ExtensionIncompatibleWarning(Exception):
     pass
 
 
@@ -26,8 +37,7 @@ def json_fetch(url):
     except Exception as e:
         # If json.loads fails, treat it as a network error too.
         # It should never happen as all these API endpoint are exclusively JSON
-        err_msg = f'Could not access repository resource "{url}"'
-        raise ExtensionRemoteError(err_msg, ExtensionError.Network) from e
+        raise ExtensionNetworkError(f'Could not access repository resource "{url}"') from e
 
 
 class ExtensionRemote:
@@ -38,7 +48,7 @@ class ExtensionRemote:
         self.url = url.lower()
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise ExtensionRemoteError(f'Invalid URL: {url}', ExtensionError.InvalidUrl)
+            raise InvalidExtensionUrlWarning(f'Invalid URL: {url}')
 
         self.user = match.group("user")
         self.repo = match.group("repo")
@@ -134,8 +144,7 @@ class ExtensionRemote:
             date = datetime.strptime(commit_time, self.date_format)
             return id, date.isoformat()
         except (KeyError, TypeError) as e:
-            err_msg = f'Could not fetch reference "{ref}" for {self.url}.'
-            raise ExtensionRemoteError(err_msg, ExtensionError.Other) from e
+            raise ExtensionRemoteError(f'Could not fetch reference "{ref}" for {self.url}.') from e
 
     def get_latest_compatible_commit(self) -> Commit:
         """
@@ -155,5 +164,4 @@ class ExtensionRemote:
             logger.warning("Falling back on using API 2.0 version for %s.", self.repo)
             return self.get_commit()
 
-        message = f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
-        raise ExtensionRemoteError(message, ExtensionError.Incompatible)
+        raise ExtensionIncompatibleWarning(f"{manifest.name} does not support Ulauncher API v{API_VERSION}.")

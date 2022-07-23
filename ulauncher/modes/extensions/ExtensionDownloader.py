@@ -9,7 +9,6 @@ from typing import Tuple
 
 from ulauncher.config import PATHS
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 
@@ -17,7 +16,11 @@ from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 logger = logging.getLogger()
 
 
-class ExtensionDownloaderError(UlauncherAPIError):
+class ExtensionAlreadyInstalledWarning(Exception):
+    pass
+
+
+class ExtensionDownloaderError(Exception):
     pass
 
 
@@ -51,10 +54,7 @@ class ExtensionDownloader:
         # allow user to re-download an extension if it's not running
         # most likely it has some problems with manifest file if it's not running
         if os.path.exists(ext_path):
-            raise ExtensionDownloaderError(
-                f'Extension with URL "{url}" is already added',
-                ExtensionError.AlreadyAdded
-            )
+            raise ExtensionAlreadyInstalledWarning(f'Extension with URL "{url}" is already installed')
 
         # 2. get last commit info
         commit_sha, commit_time = remote.get_latest_compatible_commit()
@@ -119,7 +119,7 @@ class ExtensionDownloader:
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)
         if not ext:
-            raise ExtensionDownloaderError("Extension not found", ExtensionError.Other)
+            raise ExtensionDownloaderError("Extension not found")
         return ext
 
 

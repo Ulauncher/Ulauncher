@@ -3,7 +3,7 @@ import pytest
 
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionDownloader import (
-    ExtensionDownloader, ExtensionDownloaderError)
+    ExtensionDownloader, ExtensionAlreadyInstalledWarning)
 
 
 class TestExtensionDownloader:
@@ -69,8 +69,8 @@ class TestExtensionDownloader:
         os = mocker.patch('ulauncher.modes.extensions.ExtensionDownloader.os')
         os.path.exists.return_value = True
 
-        with pytest.raises(ExtensionDownloaderError):
-            assert downloader.download('https://github.com/Ulauncher/ulauncher-timer')
+        with pytest.raises(ExtensionAlreadyInstalledWarning):
+            downloader.download('https://github.com/Ulauncher/ulauncher-timer')
 
     def test_update(self, downloader, ext_db, gh_ext, download_tarball, untar, datetime):
         ext_id = 'com.github.ulauncher.ulauncher-timer'

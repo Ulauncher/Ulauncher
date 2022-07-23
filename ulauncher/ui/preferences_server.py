@@ -18,7 +18,6 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
-from ulauncher.api.shared.errors import UlauncherAPIError, ExtensionError
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import load_available_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
@@ -53,8 +52,7 @@ def get_extensions():
             manifest.validate()
             manifest.check_compatibility()
         except Exception as e:
-            error_name = e.error_name if isinstance(e, UlauncherAPIError) else ExtensionError.Other.value
-            error = {'message': str(e), 'errorName': error_name}
+            error = {'message': str(e), 'errorName': type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
@@ -123,21 +121,11 @@ class PreferencesServer():
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
-                error = JsonData(name=ExtensionError.Other.value, message=str(e))
-                error_type = type(e).__name__
-                include_details = True
-                if isinstance(e, UlauncherAPIError):
-                    logger.error('%s: %s', error_type, e)
-                    error.name = e.error_name
-                    include_details = error.name in ['AlreadyAdded', 'Network', 'Other']
-                else:
-                    logger.exception('Unexpected API error. %s: %s', error_type, e)
+                error = JsonData(message=str(e), name=type(e).__name__)
+                logger.error('Preferences server error %s: %s', error.name, e)
 
-                if include_details:
-                    additionals = {
-                        "type": error_type,
-                        "stack trace": f"```\n{traceback.format_exc()}\n```"
-                    }
+                if not error.name.endswith("Warning"):
+                    additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
                     error.details = "\n".join([f"{k}: {v}" for k, v in {**error, **additionals}.items()])
 
                 data = json.dumps([None, error])
@@ -210,12 +198,12 @@ class PreferencesServer():
     def apply_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
-            raise UlauncherAPIError("Unable to turn on autostart preference")
+            raise Exception("Unable to turn on autostart preference")
 
         try:
             self.autostart_pref.switch(is_enabled)
         except Exception as err:
-            raise UlauncherAPIError(f'Caught an error while switching "autostart": {err}') from err
+            raise Exception(f'Caught an error while switching "autostart": {err}') from err
 
     def apply_theme(self):
         self.application.window.init_theme()
