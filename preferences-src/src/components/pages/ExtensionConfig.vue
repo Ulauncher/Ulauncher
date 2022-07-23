@@ -69,17 +69,28 @@
     </b-alert>
 
     <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
+      <template v-for="(trigger, id) in extension.triggers">
+        <b-form-group
+          v-if="trigger.keyword"
+          :key="id"
+          :description="trigger.description"
+          :label="`${trigger.name} keyword`"
+        >
+          <b-form-input :ref="`trigger_keyword_${id}`" :value="trigger.user_keyword"></b-form-input>
+        </b-form-group>
+      </template>
+
       <b-form-group
         v-for="(pref, id) in extension.preferences"
         :key="id"
         :description="pref.description"
         :label="pref.type === 'checkbox' ? '' : pref.name"
       >
-        <b-form-input v-if="['keyword', 'input'].includes(pref.type)" :ref="id" :value="pref.value"></b-form-input>
-        <b-form-input v-if="pref.type === 'number'" :ref="id" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
-        <b-form-checkbox v-if="pref.type === 'checkbox'" :ref="id" :checked="pref.value">{{ pref.name }}</b-form-checkbox>
-        <b-form-textarea v-if="pref.type === 'text'" :ref="id" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
-        <b-form-select v-if="pref.type === 'select'" :ref="id" :value="pref.value" :options="pref.options"></b-form-select>
+        <b-form-input v-if="pref.type === 'input'" :ref="`pref_${id}`" :value="pref.value"></b-form-input>
+        <b-form-input v-if="pref.type === 'number'" :ref="`pref_${id}`" :value="pref.value" type="number" :min="pref.min" :max="pref.max"></b-form-input>
+        <b-form-checkbox v-if="pref.type === 'checkbox'" :ref="`pref_${id}`" :checked="pref.value">{{ pref.name }}</b-form-checkbox>
+        <b-form-textarea v-if="pref.type === 'text'" :ref="`pref_${id}`" :value="pref.value" rows="3" max-rows="5"></b-form-textarea>
+        <b-form-select v-if="pref.type === 'select'" :ref="`pref_${id}`" :value="pref.value" :options="pref.options"></b-form-select>
       </b-form-group>
     </div>
 
@@ -170,8 +181,8 @@ export default {
       return  (this.$props.extension.last_commit_time || '').slice(0, 10)
     },
     canSave() {
-      const { preferences } = this.$props.extension
-      return Boolean(Object.keys(preferences).length)
+      const { preferences, triggers } = this.$props.extension
+      return Boolean(Object.keys(triggers).length || Object.keys(preferences).length)
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
@@ -210,9 +221,17 @@ export default {
       this.openUrl(this.extension.url)
     },
     save() {
-      let data = {}
+      let triggers = {}
+      let preferences = {}
+      Object.entries(this.extension.triggers).forEach(([id, trigger]) => {
+        triggers[id] = {}
+        let { $el } = this.$refs[`trigger_keyword_${id}`][0]
+        if (trigger.keyword) {
+          triggers[id].keyword = trigger.user_keyword = $el.value.trim()
+        }
+      });
       Object.entries(this.extension.preferences).forEach(([id, pref]) => {
-        let { $el } = this.$refs[id][0]
+        let { $el } = this.$refs[`pref_${id}`][0]
         if (pref.type === 'checkbox') {
           pref.value = $el.firstChild.checked
         } else if (pref.type === 'keyword') {
@@ -222,9 +241,10 @@ export default {
         } else {
           pref.value = $el.value
         }
-        data[id] = pref.value
+        preferences[id] = pref.value
       });
-      fetchData('prefs:///extension/set-prefs', this.extension.id, data).then(
+
+      fetchData('prefs:///extension/set-prefs', this.extension.id, {triggers, preferences}).then(
         () => {
           this.showSavedMsg = true
           setTimeout(() => {

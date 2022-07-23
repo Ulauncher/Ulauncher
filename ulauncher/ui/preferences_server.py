@@ -66,6 +66,7 @@ def get_extensions():
             'authors': manifest.authors,
             'instructions': manifest.instructions,
             'preferences': manifest.preferences,
+            'triggers': manifest.triggers,
             'error': error,
             'is_running': is_running,
             'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
@@ -293,13 +294,13 @@ class PreferencesServer():
     def extension_update_prefs(self, extension_id, data):
         logger.info('Update extension preferences %s to %s', extension_id, data)
         controller = ExtensionServer.get_instance().controllers.get(extension_id)
-        for pref_id, value in data.items():
-            preference = controller.manifest.preferences.get(pref_id)
-            old_value = preference.value
-            preference.value = value
-            controller.manifest.save_user_preferences(extension_id)
-            if value != old_value:
-                controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
+        manifest = controller.manifest
+        for id, new_value in data.get("preferences", {}).items():
+            pref = manifest.preferences.get(id)
+            if pref and new_value != pref.value:
+                controller.trigger_event(PreferencesUpdateEvent(id, pref.value, new_value))
+        manifest.apply_user_preferences(data)
+        manifest.save_user_preferences(extension_id)
 
     @route('/extension/check-update')
     def extension_check_update(self, extension_id):
