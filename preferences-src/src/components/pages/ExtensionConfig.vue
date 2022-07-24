@@ -171,8 +171,7 @@ export default {
     },
     canSave() {
       const { preferences } = this.$props.extension
-      const isRunning = this.$props.extension.is_running
-      return isRunning && !this.$props.extension.error && preferences && !!Object.keys(preferences).length
+      return Bool(Object.keys(preferences).length)
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
