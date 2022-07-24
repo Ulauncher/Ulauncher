@@ -66,12 +66,15 @@ class ExtensionRunner:
             manifest = ExtensionManifest.load_from_extension_id(extension_id)
             manifest.validate()
             manifest.check_compatibility(verbose=True)
+            triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
+            # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
+            backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
 
             cmd = [sys.executable, f"{PATHS.EXTENSIONS}/{extension_id}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
                 "PYTHONPATH": ":".join(filter(bool, [PATHS.APPLICATION, os.getenv("PYTHONPATH")])),
-                "EXTENSION_PREFERENCES": json.dumps(manifest.get_user_preferences(), separators=(',', ':'))
+                "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(',', ':'))
             }
 
             if self.dont_run_extensions:
