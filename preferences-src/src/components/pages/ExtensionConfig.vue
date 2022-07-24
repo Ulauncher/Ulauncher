@@ -171,7 +171,7 @@ export default {
     },
     canSave() {
       const { preferences } = this.$props.extension
-      return Bool(Object.keys(preferences).length)
+      return Boolean(Object.keys(preferences).length)
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
