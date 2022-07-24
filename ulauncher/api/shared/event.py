@@ -22,13 +22,30 @@ class RegisterEvent(BaseEvent):
         self.extension_id = extension_id
 
 
+class LaunchTriggerEvent(BaseEvent):
+    """
+    When user activates a launch trigger
+    """
+    def __init__(self, trigger_id: str):
+        self.args = [trigger_id]
+
+
+class InputTriggerEvent(BaseEvent):
+    """
+    When user activates an input trigger, passing the input
+    """
+    def __init__(self, trigger_id: str, input_text: str):
+        self.args = [input_text, trigger_id]
+
+
 class KeywordQueryEvent(BaseEvent):
     """
-    Is triggered when user enters query that starts with your keyword + space
+    Deprecated older variant of InputTriggerEvent
     """
 
-    def __init__(self, query: Query):
+    def __init__(self, query: Query, origin_event=None):
         self.query = query
+        self.origin_event = origin_event
         self.args = [query]
 
     def get_keyword(self) -> str:

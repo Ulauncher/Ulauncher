@@ -4,7 +4,7 @@ import pytest
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import KeywordQueryEvent
+from ulauncher.api.shared.event import InputTriggerEvent
 from ulauncher.api.shared.query import Query
 
 
@@ -57,8 +57,8 @@ class TestExtensionController:
         query = Query('def ulauncher')
         assert controller.handle_query(query) == result_renderer.handle_event.return_value
         keywordEvent = controller.framer.send.call_args_list[1][0][0]
-        assert isinstance(keywordEvent, KeywordQueryEvent)
-        assert keywordEvent.get_query() == 'def ulauncher'
+        assert isinstance(keywordEvent, InputTriggerEvent)
+        assert keywordEvent.args[0] == 'ulauncher'
         result_renderer.handle_event.assert_called_with(keywordEvent, controller)
 
     def test_handle_response__unsupported_data_type__exception_raised(self, controller):
