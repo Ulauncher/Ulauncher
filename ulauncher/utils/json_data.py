@@ -114,7 +114,7 @@ class JsonData(dict):
             try:
                 # Ensure parent dir first
                 file_path.parent.mkdir(parents=True, exist_ok=True)
-                file_path.write_text(self.stringify(indent=4, sort_keys=self.__json_sort_keys__))
+                file_path.write_text(self.stringify(indent=2, sort_keys=self.__json_sort_keys__))
                 return True
             except Exception as e:
                 logger.error("Error '%s' writing to JSON file %s: %s.", type(e).__name__, file_path, e)
