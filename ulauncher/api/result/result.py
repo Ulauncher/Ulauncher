@@ -55,11 +55,6 @@ class Result:
         return self.icon
 
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
-        """
-        :param ~ulauncher.modes.Query.Query query:
-        :param str color:
-        :rtype: str
-        """
         if query and self.highlightable:
             return highlight_text(
                 query if not self.keyword else query.argument,
@@ -72,27 +67,16 @@ class Result:
 
     # pylint: disable=unused-argument
     def get_description(self, query: Query) -> str:
-        """
-        optional
-
-        :param ~ulauncher.modes.Query.Query query:
-        """
         return self.description
 
     def on_enter(self, query: Query) -> Optional[BaseAction]:
         """
-        :param ~ulauncher.modes.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
-                                                    This allows you to create flows with a result item
-        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
+        Handle the main action
         """
         return self._on_enter(query) if callable(self._on_enter) else None
 
     def on_alt_enter(self, query: Query) -> Optional[BaseAction]:
         """
-        Optional alternative enter
-
-        :param ~ulauncher.modes.Query.Query query: it is passed only if :meth:`get_keyword` is implemented.
-                                                    This allows you to create flows with a result item
-        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
+        Handle the optional secondary action (alt+enter)
         """
         return self._on_alt_enter(query) if callable(self._on_alt_enter) else None

@@ -4,6 +4,8 @@ from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRend
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.extensions.ExtensionKeywordResult import ExtensionKeywordResult
+from ulauncher.api.shared.query import Query
+from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class ExtensionMode(BaseMode):
@@ -12,26 +14,16 @@ class ExtensionMode(BaseMode):
         self.extensionServer = ExtensionServer.get_instance()
         self.deferredResultRenderer = DeferredResultRenderer.get_instance()
 
-    def is_enabled(self, query):
-        """
-        :param ~ulauncher.modes.Query.Query query:
-        :rtype: `True` if mode should be enabled for a query
-        """
+    def is_enabled(self, query: Query):
         return bool(self.extensionServer.get_controller_by_keyword(query.keyword)) and " " in query
 
-    def on_query_change(self, query):
+    def on_query_change(self, query: Query):
         """
-        Triggered when user changes a search query
-
-        :param ~ulauncher.modes.Query.Query query:
+        Triggered when user changes the query
         """
         self.deferredResultRenderer.on_query_change()
 
-    def handle_query(self, query):
-        """
-        :param ~ulauncher.modes.Query.Query query:
-        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction`
-        """
+    def handle_query(self, query: Query) -> BaseAction:
         controller = self.extensionServer.get_controller_by_keyword(query.keyword)
 
         if not controller:

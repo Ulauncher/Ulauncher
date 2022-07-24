@@ -19,7 +19,7 @@ class BaseMode:
         """
         :param Gdk.Widget widget:
         :param Gdk.EventKey event:
-        :param ~ulauncher.modes.Query.Query query:
+        :param ~ulauncher.api.shared.query.Query query:
         :rtype: :class:`BaseAction`
         """
         return DoNothingAction()

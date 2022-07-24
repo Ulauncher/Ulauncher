@@ -1,5 +1,6 @@
 from pickle import loads, dumps
 from typing import Any, List
+from ulauncher.api.shared.query import Query
 
 
 class BaseEvent:
@@ -23,28 +24,23 @@ class RegisterEvent(BaseEvent):
 
 class KeywordQueryEvent(BaseEvent):
     """
-    Is triggered when user enters query that starts with your keyword + Space
-
-    :param ~ulauncher.modes.Query.Query query:
+    Is triggered when user enters query that starts with your keyword + space
     """
 
-    def __init__(self, query):
+    def __init__(self, query: Query):
         self.query = query
         self.args = [query]
 
-    def get_keyword(self):
+    def get_keyword(self) -> str:
         """
         :rtype: str
         """
         return self.query.keyword
 
-    def get_query(self):
-        """
-        :rtype: :class:`~ulauncher.modes.Query.Query`
-        """
+    def get_query(self) -> Query:
         return self.query
 
-    def get_argument(self):
+    def get_argument(self) -> str:
         """
         :rtype: str
         :returns: None if arguments were not specified
