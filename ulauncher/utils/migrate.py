@@ -52,7 +52,7 @@ def _migrate_app_state(old_format):
 
 def v5_to_v6():
     # Convert extension prefs to JSON
-    for file in Path(f"{PATHS.CONFIG}/ext_preferences").iterdir():
+    for file in Path(f"{PATHS.EXTENSIONS_CONFIG}").iterdir():
         if file.suffix in [".db", ".json"]:
             _migrate_file(str(file), f"{file.parent}/{file.stem}.json")
 

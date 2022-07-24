@@ -13,6 +13,7 @@ CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ula
 DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
 EXTENSIONS = os.path.join(DATA, "extensions")
+EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
@@ -26,6 +27,7 @@ class _PATHS_CLASS:
     DATA = DATA
     STATE = STATE
     EXTENSIONS = EXTENSIONS
+    EXTENSIONS_CONFIG = EXTENSIONS_CONFIG
 
 
 PATHS = _PATHS_CLASS()
@@ -40,6 +42,7 @@ os.makedirs(PATHS.CACHE, exist_ok=True)
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
+os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
 
 
 @lru_cache()
