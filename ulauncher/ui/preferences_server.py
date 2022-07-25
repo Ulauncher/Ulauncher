@@ -59,7 +59,7 @@ def get_extensions():
         icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
 
         yield {
-            **ExtensionDb.load().get(ext_id),
+            **ExtensionDb.load().get(ext_id, {}),
             'name': manifest.name,
             'icon': icon,
             'developer_name': manifest.developer_name,
