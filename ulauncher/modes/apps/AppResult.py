@@ -2,7 +2,6 @@ from os.path import basename
 from gi.repository import Gio
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
-from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.api import SearchableResult
 
@@ -52,13 +51,13 @@ class AppResult(SearchableResult):
         sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
         return list(filter(None, map(AppResult.from_id, sorted_app_ids)))[:limit]
 
-    def search_score(self, query):
-        # Also use the executable name, such as "baobab" or "nautilus", but score that lower
-        return max([
-            get_score(query, self.name),
-            get_score(query, self._executable) * .8,
-            get_score(query, self.description) * .7
-        ] + [get_score(query, k) * .6 for k in self.keywords])
+    def get_searchable_fields(self):
+        return [
+            (self.name, 1),
+            (self._executable, .8),  # command names, such as "baobab" or "nautilus"
+            (self.description, .7),
+            *[(k, .6) for k in self.keywords]
+        ]
 
     def on_enter(self, _):
         starts = app_starts.get(self._app_id, 0)
