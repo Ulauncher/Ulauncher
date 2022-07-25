@@ -122,7 +122,7 @@ class PreferencesServer():
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
                 error = JsonData(message=str(e), name=type(e).__name__)
-                logger.error('Preferences server error %s: %s', error.name, e)
+                logging.exception('Preferences server error %s: %s', error.name, e)
 
                 if not error.name.endswith("Warning"):
                     additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
