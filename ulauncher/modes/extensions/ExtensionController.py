@@ -76,9 +76,6 @@ class ExtensionController:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
 
-    def get_manifest(self):
-        return self.manifest
-
     def get_icon_path(self, path=None) -> str:
         return get_icon_path(
             path or self.manifest.icon,

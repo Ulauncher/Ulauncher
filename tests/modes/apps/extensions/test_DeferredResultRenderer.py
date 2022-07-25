@@ -28,10 +28,8 @@ class TestDeferredResultRenderer:
         return mock.create_autospec(ExtensionManifest)
 
     @pytest.fixture
-    def controller(self, manifest):
-        controller = mock.create_autospec(ExtensionController)
-        controller.get_manifest.return_value = manifest
-        return controller
+    def controller(self):
+        return mock.create_autospec(ExtensionController)
 
     @pytest.fixture
     def renderer(self):
