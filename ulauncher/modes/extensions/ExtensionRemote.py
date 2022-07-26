@@ -109,16 +109,16 @@ class ExtensionRemote:
             for tag in tags_data or []:
                 if tag["name"].startswith("apiv") and satisfies(API_VERSION, tag["name"][4:]):
                     commit = tag["commit"]
-                    verion = tag["name"][4:]
-                    id = commit.get("sha", commit["id"])  # id fallback is needed for GitLab
+                    version = tag["name"][4:]
+                    id = commit.get("sha", commit.get("id"))  # id fallback is needed for GitLab
                     commit_time = commit.get("created", commit.get("created_at"))
-                    tags[verion] = (id, commit_time)
+                    tags[version] = (id, commit_time)
 
             if tags:
                 id, commit_time = tags[max(tags)]
                 if id and self.host == "github.com":  # GitHub's tag API doesn't give any dates
                     commit_data = json_fetch(f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{id}")
-                    commit_time = commit_data["commiter"]["date"]
+                    commit_time = commit_data["commit"]["committer"]["date"]
                 if id and commit_time:
                     date = datetime.strptime(commit_time, self.date_format)
                     return id, date.isoformat()
