@@ -60,6 +60,7 @@ def get_extensions():
 
         yield {
             **ExtensionDb.load().get(ext_id, {}),
+            'id': ext_id,
             'name': manifest.name,
             'icon': icon,
             'authors': manifest.authors,

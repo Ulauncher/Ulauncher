@@ -76,8 +76,9 @@ class ExtensionDownloader:
 
     def remove(self, ext_id: str) -> None:
         rmtree(os.path.join(PATHS.EXTENSIONS, ext_id))
-        del self.ext_db[ext_id]
-        self.ext_db.save()
+        if ext_id in self.ext_db:
+            del self.ext_db[ext_id]
+            self.ext_db.save()
 
     def update(self, ext_id: str) -> bool:
         """
