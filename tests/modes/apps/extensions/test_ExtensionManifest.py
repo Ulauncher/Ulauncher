@@ -11,7 +11,7 @@ class TestExtensionManifest:
         return {
             "api_version": "1",
             "name": "Timer",
-            "developer_name": "Aleksandr Gornostal",
+            "authors": "Aleksandr Gornostal",
             "icon": "images/timer.png",
             "preferences": {
                 "keyword": {
@@ -92,6 +92,7 @@ class TestExtensionManifest:
     def test_manifest_backwards_compatibility(self):
         em = ExtensionManifest(
             required_api_version="3",
+            developer_name="John",
             manifest_version="1",
             description="asdf",
             options={"query_debounce": 0.555},
@@ -99,6 +100,8 @@ class TestExtensionManifest:
         )
         assert em.get("options") is None
         assert em.get("required_api_version") is None
+        assert em.get("developer_name") is None
         assert em.api_version == "3"
+        assert em.authors == "John"
         assert em.query_debounce == 0.555
         assert em.preferences.get("asdf").name == "ghjk"

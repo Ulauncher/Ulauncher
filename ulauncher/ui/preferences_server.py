@@ -62,7 +62,7 @@ def get_extensions():
             **ExtensionDb.load().get(ext_id, {}),
             'name': manifest.name,
             'icon': icon,
-            'developer_name': manifest.developer_name,
+            'authors': manifest.authors,
             'instructions': manifest.instructions,
             'preferences': manifest.preferences,
             'error': error,

@@ -4,7 +4,7 @@ import pytest
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, InvalidExtensionUrlWarning
 
 manifest_example = {'api_version': '1',
-                    'developer_name': 'Aleksandr Gornostal',
+                    'authors': 'Aleksandr Gornostal',
                     'icon': 'images/timer.png',
                     'name': 'Timer',
                     'query_debounce': 0.1,

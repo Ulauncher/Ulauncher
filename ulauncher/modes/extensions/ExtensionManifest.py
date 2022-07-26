@@ -33,8 +33,8 @@ class Preference(JsonData):
 @json_data_class
 class ExtensionManifest(JsonData):
     api_version = ""
+    authors = ""
     name = ""
-    developer_name = ""
     icon = ""
     preferences: Dict[str, Preference] = {}
     instructions: Optional[str] = None
@@ -46,6 +46,9 @@ class ExtensionManifest(JsonData):
         # Rename "required_api_version" back to "api_version"
         if key == "required_api_version":
             key = "api_version"
+        # Rename "developer_name" to "authors"
+        if key == "developer_name":
+            key = "authors"
         # Flatten manifest v2 API "options"
         if key == "options":
             key = "query_debounce"

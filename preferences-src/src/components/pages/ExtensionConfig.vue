@@ -6,7 +6,7 @@
       </div>
       <div class="ext-info">
         <div class="ext-name">{{ extension.name }}</div>
-        <div class="developer-name">by {{ extension.developer_name }}</div>
+        <div class="authors">by {{ extension.authors }}</div>
       </div>
       <div class="saved-notif">
         <i v-if="showSavedMsg" class="fa fa-check-circle"/>
@@ -320,7 +320,7 @@ export default {
 .header-info .ext-info .ext-name {
       font-size: 1.3em;
 }
-.header-info .ext-info .developer-name {
+.header-info .ext-info .authors {
       font-style: italic;
       opacity: 0.8;
 }
