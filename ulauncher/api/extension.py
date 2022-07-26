@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import logging
-from typing import Type, Union
+from typing import Iterator, Type, Union
 from collections import defaultdict
 
 from ulauncher.api.shared.Response import Response
@@ -67,6 +67,8 @@ class Extension:
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
             action = method(*event.args) if method_name else method(event, self)
             if action:
+                if isinstance(action, Iterator):
+                    action = list(action)
                 assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
                 self._client.send(Response(event, action))
 
