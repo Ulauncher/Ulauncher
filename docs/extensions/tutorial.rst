@@ -104,7 +104,6 @@ Copy the following code to ``main.py``::
       def on_query_change(self, query):
           for i in range(5):
               yield ExtensionResult(
-                  icon='images/icon.png',
                   name='Item %s' % i,
                   description='Item description %s' % i,
                   on_enter=HideWindowAction()
@@ -162,7 +161,6 @@ Basic API Concepts
         def on_query_change(self, query):
             for i in range(5):
                 yield ExtensionResult(
-                    icon='images/icon.png',
                     name='Item %s' % i,
                     description='Item description %s' % i,
                     on_enter=HideWindowAction()
@@ -192,7 +190,6 @@ Custom Action on Item Enter
 
     data = {'new_name': 'Item %s was clicked' % i}
     ExtensionResult(
-        icon='images/icon.png',
         name='Item %s' % i,
         description='Item description %s' % i,
         on_enter=ExtensionCustomAction(data, keep_app_open=True)
@@ -218,7 +215,6 @@ Custom Action on Item Enter
 
             # you may want to return another list of results
             yield ExtensionResult(
-                icon='images/icon.png',
                 name=data['new_name'],
                 on_enter=HideWindowAction()
             )
