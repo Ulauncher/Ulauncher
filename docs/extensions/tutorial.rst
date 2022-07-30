@@ -102,23 +102,22 @@ Copy the following code to ``main.py``::
   class DemoExtension(Extension):
 
       def on_query_change(self, query):
-          items = []
           for i in range(5):
-              items.append(ExtensionResult(
+              yield ExtensionResult(
                   icon='images/icon.png',
                   name='Item %s' % i,
                   description='Item description %s' % i,
                   on_enter=HideWindowAction()
-              ))
-
-          return items
+              )
 
   if __name__ == '__main__':
       DemoExtension().run()
 
-Now restart Ulauncher.
+.. TIP:: If you don't want to use ``yield``, you can also return a list of ExtensionResults.
 
-.. TIP:: Run ``ulauncher -v`` from command line to see verbose output.
+
+Now exit Ulauncher and run ``ulauncher -v`` from command line to see the verbose output.
+
 
 .. figure:: https://i.imgur.com/GlEfHjA.png
   :align: center
@@ -161,16 +160,13 @@ Basic API Concepts
 
     class DemoExtension(Extension):
         def on_query_change(self, query):
-            items = []
             for i in range(5):
-                items.append(ExtensionResult(
+                yield ExtensionResult(
                     icon='images/icon.png',
                     name='Item %s' % i,
                     description='Item description %s' % i,
                     on_enter=HideWindowAction()
-                ))
-
-            return items
+                )
 
 
   :code:`on_enter` is an action that will be ran when item is entered/clicked.
@@ -221,11 +217,11 @@ Custom Action on Item Enter
             # do any additional actions here...
 
             # you may want to return another list of results
-            return [ExtensionResult(
+            yield ExtensionResult(
                 icon='images/icon.png',
                 name=data['new_name'],
                 on_enter=HideWindowAction()
-            )]
+            )
 
 
 
