@@ -114,7 +114,8 @@ class Settings(GObject.GObject):
                 raise IOError("%s exists and is not a file" % filename)
 
             with open(filename, 'r') as f:
-                self._properties = json.load(f)
+                # Convert underscore to dash, in case user migrated to v6, saved settings and reverted
+                self._properties = {key.replace("_", "-"): val for key, val in json.load(f).items()}
         else:
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             self.save_to_file()
