@@ -38,7 +38,7 @@ class ExtensionController:
 
         self.controllers[extension_id] = self
         # Use default if unspecified or 0.
-        self._debounced_send_event = debounce(self.manifest.query_debounce or 0.05)(self._send_event)
+        self._debounced_send_event = debounce(self.manifest.input_debounce or 0.05)(self._send_event)
 
         # PreferencesEvent is candidate for future removal
         self._send_event(PreferencesEvent(self.manifest.get_user_preferences()))

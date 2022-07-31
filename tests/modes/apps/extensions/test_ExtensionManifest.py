@@ -98,5 +98,5 @@ class TestExtensionManifest:
         assert em.get("developer_name") is None
         assert em.api_version == "3"
         assert em.authors == "John"
-        assert em.query_debounce == 0.555
+        assert em.input_debounce == 0.555
         assert em.preferences.get("asdf").name == "ghjk"

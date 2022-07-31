@@ -47,7 +47,7 @@ class ExtensionManifest(JsonData):
     triggers: Dict[str, Trigger] = {}
     preferences: Dict[str, Preference] = {}
     instructions: Optional[str] = None
-    query_debounce: Optional[float] = None
+    input_debounce: Optional[float] = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
     __json_value_blacklist__: List[Any] = [[], {}, None, ""]  # pylint: disable=dangerous-default-value
 
@@ -60,7 +60,7 @@ class ExtensionManifest(JsonData):
             key = "authors"
         # Flatten manifest v2 API "options"
         if key == "options":
-            key = "query_debounce"
+            key = "input_debounce"
             value = value and value.get("query_debounce")
             if value is None:
                 return
