@@ -6,10 +6,8 @@ from urllib.parse import unquote, urlparse
 import traceback
 
 import gi
-gi.require_versions({"Gtk": "3.0", "WebKit2": "4.0"})
-# pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gtk, WebKit2
-
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gio, Gtk
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.api.shared.event import PreferencesUpdateEvent
@@ -29,6 +27,7 @@ from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.utils.WebKit2 import WebKit2
 from ulauncher.config import API_VERSION, VERSION, PATHS
 
 logger = logging.getLogger()
