@@ -7,6 +7,7 @@ import traceback
 
 import gi
 gi.require_version("Gtk", "3.0")
+# pylint: disable=wrong-import-position
 from gi.repository import Gio, Gtk
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
