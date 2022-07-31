@@ -11,7 +11,13 @@ import gi
 gi.require_version('Gio', '2.0')
 gi.require_version('GLib', '2.0')
 gi.require_version('Gtk', '3.0')
-gi.require_version('WebKit2', '4.0')
+try:
+    # On systems with both WebKit2 4.1 and 5.0 specifying 4.0
+    # silently gives you 5.0. So we try to load 4.1 first,
+    # since systems without 4.1 is unlikely to have 5.0
+    gi.require_version('WebKit2', '4.1')
+except ValueError:
+    gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gio, Gtk, WebKit2, GLib
