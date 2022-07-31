@@ -58,7 +58,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo pacman -Syu --needed \
-    gtk3 webkit2gtk libnotify libkeybinder3 libwnck3 python-{gobject,levenshtein}
+    gtk3 webkit2gtk-4.1 libnotify libkeybinder3 libwnck3 python-{gobject,levenshtein}
   ```
 </details>
 
