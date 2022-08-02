@@ -3,11 +3,13 @@ import json
 import os
 import pickle
 import sys
+from functools import partial
 from pathlib import Path
 from configparser import ConfigParser
 from types import ModuleType
 from ulauncher.config import PATHS, FIRST_V6_RUN
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 _logger = logging.getLogger()
 
@@ -32,8 +34,8 @@ def _storeJSON(path, data):
         return False
 
 
-def _migrate_file(from_path, to_path, transform=None):
-    if not os.path.exists(to_path) and os.path.isfile(from_path):
+def _migrate_file(from_path, to_path, transform=None, overwrite=False):
+    if os.path.isfile(from_path) and (overwrite or not os.path.exists(to_path)):
         data = _load_legacy(Path(from_path))
         if data:
             _logger.info('Migrating %s to %s', from_path, to_path)
@@ -50,11 +52,30 @@ def _migrate_app_state(old_format):
     return new_format
 
 
+def _migrate_user_prefs(extension_id, user_prefs):
+    # Check if alreay migrated
+    if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
+        return user_prefs
+    new_prefs = {"preferences": {}, "triggers": {}}
+    manifest = ExtensionManifest.new_from_file(f"{PATHS.EXTENSIONS}/{extension_id}/manifest.json")
+    for id, pref in user_prefs.items():
+        if manifest.triggers.get(id):
+            new_prefs["triggers"][id] = {"keyword": pref}
+        else:
+            new_prefs["preferences"][id] = pref
+    return new_prefs
+
+
 def v5_to_v6():
     # Convert extension prefs to JSON
-    for file in Path(f"{PATHS.EXTENSIONS_CONFIG}").iterdir():
-        if file.suffix in [".db", ".json"]:
-            _migrate_file(str(file), f"{file.parent}/{file.stem}.json")
+    EXT_PREFS = Path(PATHS.EXTENSIONS_CONFIG)
+    # Migrate JSON to JSON first, assuming these are newer
+    for file in EXT_PREFS.rglob("*.json"):
+        _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
+    # Migrate db to JSON without overwrite. So if a JSON file exists it should never be overwritten
+    # with data from a db file
+    for file in EXT_PREFS.rglob("*.db"):
+        _migrate_file(str(file), f"{file.parent}/{file.stem}.json", partial(_migrate_user_prefs, file.stem))
 
     # Convert app_stat.db to JSON and put in STATE_DIR
     _migrate_file(f"{PATHS.DATA}/app_stat_v2.db", f"{PATHS.STATE}/app_starts.json", _migrate_app_state)

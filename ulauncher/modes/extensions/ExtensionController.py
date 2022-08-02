@@ -3,8 +3,7 @@ from ulauncher.config import PATHS
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
-from ulauncher.api.shared.event import KeywordQueryEvent, PreferencesEvent, PreferencesUpdateEvent
-from ulauncher.api.shared.query import Query
+from ulauncher.api.shared.event import InputTriggerEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
 
@@ -39,7 +38,7 @@ class ExtensionController:
 
         self.controllers[extension_id] = self
         # Use default if unspecified or 0.
-        self._debounced_send_event = debounce(self.manifest.query_debounce or 0.05)(self._send_event)
+        self._debounced_send_event = debounce(self.manifest.input_debounce or 0.05)(self._send_event)
 
         # PreferencesEvent is candidate for future removal
         self._send_event(PreferencesEvent(self.manifest.get_user_preferences()))
@@ -54,16 +53,10 @@ class ExtensionController:
     def handle_query(self, query):
         """
         Handles user query with a keyword from this extension
-
         :returns: :class:`BaseAction` object
         """
-        # Normalize the query to the extension default keyword, not the custom user keyword
-        for pref in self.manifest.preferences.values():
-            if pref.type == "keyword" and pref.value == query.keyword:
-                query = Query(query.replace(pref.value, pref.default_value, 1))
-
-        event = KeywordQueryEvent(query)
-        return self.trigger_event(event)
+        trigger_id = self.manifest.find_matching_trigger(user_keyword=query.keyword)
+        return self.trigger_event(InputTriggerEvent(trigger_id, query.argument))
 
     def trigger_event(self, event):
         """

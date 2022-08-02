@@ -7,7 +7,9 @@ from collections import defaultdict
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, ItemEnterEvent, PreferencesUpdateEvent, UnloadEvent
+from ulauncher.api.shared.event import (BaseEvent, KeywordQueryEvent, InputTriggerEvent, ItemEnterEvent,
+                                        LaunchTriggerEvent, PreferencesUpdateEvent, UnloadEvent)
+from ulauncher.api.shared.query import Query
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.setup_logging import setup_logging
@@ -30,12 +32,11 @@ class Extension:
         except Exception:
             pass
 
-        if not self.preferences:
-            self.logger.error("Could not load user preferences")
-
         # subscribe with methods if user has added their own
-        if self.__class__.on_query_change is not Extension.on_query_change:
-            self.subscribe(KeywordQueryEvent, 'on_query_change')
+        if self.__class__.on_input is not Extension.on_input:
+            self.subscribe(InputTriggerEvent, 'on_input')
+        if self.__class__.on_launch is not Extension.on_launch:
+            self.subscribe(LaunchTriggerEvent, 'on_launch')
         if self.__class__.on_item_enter is not Extension.on_item_enter:
             self.subscribe(ItemEnterEvent, 'on_item_enter')
         if self.__class__.on_unload is not Extension.on_unload:
@@ -45,7 +46,7 @@ class Extension:
 
     def subscribe(self, event_type: Type[BaseEvent], listener: Union[str, object]):
         """
-        Example: extension.subscribe(KeywordQueryEvent, "on_query_change")
+        Example: extension.subscribe(InputTriggerEvent, "on_input")
         """
         method_name = None
         if isinstance(listener, str):
@@ -57,9 +58,16 @@ class Extension:
     def trigger_event(self, event: BaseEvent):
         event_type = type(event)
         listeners = self._listeners[event_type]
+
         if not listeners:
-            self.logger.debug('No listeners for event %s', event_type.__name__)
-            return
+            if event_type == InputTriggerEvent and self._listeners[KeywordQueryEvent]:
+                # convert InputTriggerEvent to KeywordQueryEvent for backwards compatibility
+                input_text, trigger_id = event.args
+                keyword = self.preferences[trigger_id]
+                kw_event = KeywordQueryEvent(Query(f"{keyword} {input_text}"), event)
+                self.trigger_event(kw_event)
+            else:
+                self.logger.debug('No listeners for event %s', event_type.__name__)
 
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
@@ -70,7 +78,8 @@ class Extension:
                 if isinstance(action, Iterator):
                     action = list(action)
                 assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
-                self._client.send(Response(event, action))
+                origin_event = getattr(event, "origin_event", event)
+                self._client.send(Response(origin_event, action))
 
     def run(self):
         """
@@ -79,7 +88,10 @@ class Extension:
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_query_change(self, query):
+    def on_input(self, query: str, trigger_id: str):
+        pass
+
+    def on_launch(self, trigger_id: str):
         pass
 
     def on_item_enter(self, data):

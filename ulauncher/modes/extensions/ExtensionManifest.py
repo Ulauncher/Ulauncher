@@ -27,6 +27,14 @@ class Preference(JsonData):
     options: List[dict] = []
     max: Optional[int] = None
     min: Optional[int] = None
+
+
+@json_data_class
+class Trigger(JsonData):
+    name = ""
+    description = ""
+    keyword: Optional[str] = None
+    user_keyword: Optional[str] = None
     icon: Optional[str] = None
 
 
@@ -36,9 +44,10 @@ class ExtensionManifest(JsonData):
     authors = ""
     name = ""
     icon = ""
+    triggers: Dict[str, Trigger] = {}
     preferences: Dict[str, Preference] = {}
     instructions: Optional[str] = None
-    query_debounce: Optional[float] = None
+    input_debounce: Optional[float] = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
     __json_value_blacklist__: List[Any] = [[], {}, None, ""]  # pylint: disable=dangerous-default-value
 
@@ -51,37 +60,58 @@ class ExtensionManifest(JsonData):
             key = "authors"
         # Flatten manifest v2 API "options"
         if key == "options":
-            key = "query_debounce"
+            key = "input_debounce"
             value = value and value.get("query_debounce")
             if value is None:
                 return
-        # Coerce preferences to Preference
+        # Convert triggers dicts to Trigger instances
+        if key == "triggers":
+            value = {id: Trigger(trigger) for id, trigger in value.items()}
+        # Convert preferences dicts to Preference instances (and Triggers if it's old shortcuts)
         if key == "preferences":
-            if isinstance(value, list):
-                value = {pref.get("id"): Preference(pref, id=None) for pref in value}
-            else:
+            if isinstance(value, dict):
                 value = {id: Preference(pref) for id, pref in value.items()}
+            elif isinstance(value, list):  # APIv2 backwards compatibility
+                prefs = {}
+                for p in value:
+                    id = p.get("id")
+                    pref = Preference(p, id=None)
+                    if pref.type != "keyword":
+                        prefs[id] = pref
+                    else:
+                        self.triggers[id] = Trigger(
+                            name=pref.name,
+                            description=pref.description,
+                            keyword=pref.default_value,
+                            icon=pref.get("icon")
+                        )
+                value = prefs
         super().__setitem__(key, value)
 
     def validate(self):
         """
         Ensure that the manifest is valid (or raise error)
         """
-        required_fields = [key for key, val in self.__default_props__.items() if val is not None]
+        required_fields = ["api_version", "authors", "name", "icon", "triggers"]
         missing_fields = [f for f in required_fields if not self.get(f)]
         if missing_fields:
             err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
             raise ExtensionManifestError(err_msg)
+
+        try:
+            for id, t in self.triggers.items():
+                assert t.name, f'"{id}" missing non-optional field "name"'
+        except AssertionError as e:
+            raise ExtensionManifestError(f"Invalid triggers in Extension manifest: {str(e)}") from None
+
         try:
             for id, p in self.preferences.items():
-                valid_types = ["keyword", "checkbox", "number", "input", "select", "text"]
+                valid_types = ["input", "checkbox", "number", "select", "text"]
                 default = p.default_value
                 assert p.name, f'"{id}" missing non-optional field "name"'
                 assert p.type, f'"{id}" missing non-optional field "type"'
                 assert p.type in valid_types, \
                     f'"{id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
-                if p.type == 'keyword':
-                    assert default, f'"{id}" keyword default value must be a non-empty string'
                 assert p.min is None or p.type == 'number', \
                     f'"min" specified for "{id}", which is not a number type'
                 assert p.max is None or p.type == 'number', \
@@ -125,6 +155,13 @@ class ExtensionManifest(JsonData):
             else:
                 raise ExtensionIncompatibleWarning(f'{self.name} does not support Ulauncher API v{API_VERSION}.')
 
+    def find_matching_trigger(self, **kwargs) -> Optional[str]:
+        """
+        Get the first trigger matching the arguments, and returns the id
+        Ex find_matching_trigger(user_keyword='asdf', icon=None)
+        """
+        return next((id for id, t in self.triggers.items() if {**t, **kwargs} == t), None)
+
     def get_user_preferences(self) -> Dict[str, Any]:
         """
         Get the preferences as an id-value dict
@@ -133,14 +170,19 @@ class ExtensionManifest(JsonData):
 
     def save_user_preferences(self, ext_id: str):
         path = f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"
-        JsonData.new_from_file(path).save(self.get_user_preferences())
+        triggers = {id: ({"keyword": t.user_keyword} if t.keyword else {}) for id, t in self.triggers.items()}
+        JsonData.new_from_file(path).save(triggers=triggers, preferences=self.get_user_preferences())
+
+    def apply_user_preferences(self, user_prefs: dict):
+        for id, pref in self.preferences.items():
+            pref.value = user_prefs.get("preferences", {}).get(id, pref.default_value)
+
+        for id, trigger in self.triggers.items():
+            if trigger.keyword:
+                trigger.user_keyword = user_prefs.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
         manifest = cls.new_from_file(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
-        user_prefs = JsonData.new_from_file(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json")
-        for id, pref in manifest.preferences.items():
-            user_value = user_prefs.get(id)
-            pref.value = pref.default_value if user_value is None else user_value
-
+        manifest.apply_user_preferences(JsonData.new_from_file(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
         return manifest

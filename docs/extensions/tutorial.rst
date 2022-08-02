@@ -32,12 +32,11 @@ Create :file:`manifest.json` using the following template::
     "name": "Demo extension",
     "icon": "images/icon.png",
     "instructions": "You need to install <code>examplecommand</code> to run this extension",
-    "preferences": {
-      "main_keyword": {
-        "type": "keyword",
+    "triggers": {
+      "dm": {
         "name": "Demo",
         "description": "Demo extension",
-        "default_value": "dm"
+        "keyword": "dm"
       }
     }
   }
@@ -46,31 +45,43 @@ Create :file:`manifest.json` using the following template::
 * ``authors`` - the name(s) or user name(s) of the extension authors and maintainers
 * ``name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
-* ``preferences`` - Preferences available for users to override (see below for details).
+* ``triggers`` - User triggers to activate your extension (see below for details).
+* ``preferences`` - Optional user preferences (see below for details).
 * ``instructions`` - Optional installation instructions that is shown in the extension preferences view.
-* ``query_debounce`` - Default: ``0.05``. Delay (in seconds) to avoid running queries while the user is typing. Raise to higher values like ``1`` for slow I/O operations like network requests.
+* ``input_debounce`` - Default: ``0.05``. Time to wait while the user is typing before sending the input event to the extenstion. Raise to higher values like ``1`` for slow I/O operations like network requests.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
+.. NOTE:: ``triggers`` and ``preferences`` are key/value objects. The key should be a unique identifier that never changes (if you change it you will break user settings). For triggers the key is also what you use to distinguish which trigger was called in your callback event.
 
-.. NOTE:: All fields except ``instructions`` and ``query_debounce`` are required and cannot be empty.
+
+Triggers
+^^^^^^^^
+``name`` (required)
+  The name of the trigger. This is what users will see if they search for your extension in Ulauncher.
+
+``description``
+  Optional description to go with the name.
+
+``keyword``
+  The extension default keyword (users can override this).
+  Specify a keyword if you want the trigger to be an "input trigger" and ask let the user type text that's passed to your extension's ``on_input``-method (takes two arguments "input_text" and "trigger_id").
+  If you instead want it to be a "launch trigger" and trigger immediately when activated, then leave the keyword out. Then you can listen to it with your extensions ``on_launch``-method (takes only "trigger_id").
+
+``icon``
+  Optional icon (path or themed icon). If not specificed it will use the extension icon
 
 
 Preferences
 ^^^^^^^^^^^
 
-.. NOTE:: The key for the preferences should be a unique identifier that never changes. It's what Ulauncher uses to associate your preferences with user preferences. It was previously named ``id``.
-
 ``type`` (required)
-  Can be "keyword", "checkbox", "number", "input", "text", or "select"
+  Can be "input", "checkbox", "number", "text", or "select"
 
-  * keyword - define keyword that user has to type in in order to use your extension
+  * input - rendered as a single line text input
   * checkbox - rendered as a checkbox
   * number - rendered as a single line number input
-  * input - rendered as a single line text input
   * text - rendered as a multiple line text input
   * select - rendered as list of options to choose from
-
-  .. NOTE:: At least one preference with type "keyword" must be defined.
 
 ``name`` (required)
   Name of your preference. If type is "keyword" name will show up as a name of item in a list of results
@@ -80,9 +91,6 @@ Preferences
 
 ``description``
   Optional description
-
-``icon``
-  Optional per-keyword icon (path or themed icon). If not specificed it will use the extension icon
 
 ``min`` and ``max``
   Optional for type "number". Must be a non-decimal number
@@ -100,8 +108,7 @@ Copy the following code to ``main.py``::
 
 
   class DemoExtension(Extension):
-
-      def on_query_change(self, query):
+      def on_input(self, input_text, trigger_id):
           for i in range(5):
               yield ExtensionResult(
                   name='Item %s' % i,
@@ -122,8 +129,8 @@ Now exit Ulauncher and run ``ulauncher -v`` from command line to see the verbose
   :align: center
 
 
-When you type in "dm " (keyword that you defined) you'll get a list of items.
-This is all your extension can do now -- show a list of 5 items.
+When you type in "dm " (the keyword of the trigger that you defined earlier followed by a space) you'll get a list of items.
+This is all this extension will do for now.
 
 
 Basic API Concepts
@@ -135,19 +142,20 @@ Basic API Concepts
   Message flow
 
 
-**1. Define extension class and the `on_query_change` listener**
+**1. Define extension class and the `on_input` listener**
 
   Create a subclass of :class:`~ulauncher.api.Extension`.
   ::
 
     class DemoExtension(Extension):
 
-        def on_query_change(self, query):
-            # `query` will be an instance of :class:`Query`
+        def on_input(self, input_text, trigger_id):
+            # `input_text` (str) is the user input (after the keyword).
+            # `trigger_id` (str) is the id (key) of the trigger, as specified in the manifest.
 
             ...
 
-  `on_query_change` is new in the V3 API. Previously this was handled by manually binding the events.
+  `on_input` is new for the extension API v3. Previously this was handled by manually binding the events.
 
 **2. Render results**
 
@@ -158,7 +166,7 @@ Basic API Concepts
   ::
 
     class DemoExtension(Extension):
-        def on_query_change(self, query):
+        def on_input(self, input_text, trigger_id):
             for i in range(5):
                 yield ExtensionResult(
                     name='Item %s' % i,
@@ -205,8 +213,7 @@ Custom Action on Item Enter
   ::
 
     class DemoExtension(Extension):
-
-        def on_query_change(self, query):
+        def on_input(self, input_text, trigger_id):
             ...
 
         def on_item_enter(self, data):

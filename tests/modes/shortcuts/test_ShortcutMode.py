@@ -66,8 +66,8 @@ class TestShortcutMode:
 
         assert mode.get_fallback_results() == [ShortcutResult.return_value]
 
-    def test_get_searchable_items(self, mode, shortcuts_db, ShortcutResult):
+    def test_get_triggers(self, mode, shortcuts_db, ShortcutResult):
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
-        assert mode.get_searchable_items() == [ShortcutResult.return_value]
+        assert mode.get_triggers() == [ShortcutResult.return_value]
         ShortcutResult.assert_called_once_with(default_search=False, **shortcut)

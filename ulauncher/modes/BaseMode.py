@@ -30,7 +30,7 @@ class BaseMode:
         """
         return []
 
-    def get_searchable_items(self):
+    def get_triggers(self):
         """
         Returns an iterable of searchable results
         """

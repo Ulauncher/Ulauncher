@@ -5,7 +5,7 @@ from ulauncher.modes.apps.AppResult import AppResult
 
 
 class AppMode(BaseMode):
-    def get_searchable_items(self):
+    def get_triggers(self):
         settings = Settings.load()
 
         for app in Gio.DesktopAppInfo.get_all():

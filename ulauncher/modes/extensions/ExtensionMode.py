@@ -3,9 +3,16 @@ import html
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.extensions.ExtensionKeywordResult import ExtensionKeywordResult
+from ulauncher.api import SearchableResult
+from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+
+
+# bind function to args, ignoring further args on call time
+def bind_final(fn, *args):
+    return lambda *_: fn(*args)
 
 
 class ExtensionMode(BaseMode):
@@ -31,16 +38,22 @@ class ExtensionMode(BaseMode):
 
         return controller.handle_query(query)
 
-    def get_searchable_items(self):
+    def get_triggers(self):
         """
         :rtype: Iterable[:class:`~ulauncher.api.Result`]
         """
-        for controller in self.extensionServer.get_controllers():
-            for pref in controller.manifest.preferences.values():
-                if pref.type == "keyword" and pref.value:
-                    yield ExtensionKeywordResult(
-                        name=html.escape(pref.name),
-                        description=html.escape(pref.description),
-                        keyword=pref.value,
-                        icon=controller.get_icon_path(path=pref.icon)
+        for controller in self.extensionServer.controllers.values():
+            for trigger_id, trigger in controller.manifest.triggers.items():
+                callback = None
+                if trigger.keyword is None:
+                    callback = bind_final(controller.trigger_event, LaunchTriggerEvent(trigger_id))
+                elif trigger.user_keyword:
+                    callback = bind_final(SetUserQueryAction, f'{trigger.user_keyword} ')
+
+                if callback:
+                    yield SearchableResult(
+                        name=html.escape(trigger.name),
+                        description=html.escape(trigger.description),
+                        icon=controller.get_icon_path(path=trigger.icon),
+                        on_enter=callback
                     )
