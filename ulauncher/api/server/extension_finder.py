@@ -19,12 +19,15 @@ def find_extensions(ext_dir):
     for dir in dirs:
         ext_path = os.path.join(ext_dir, dir)
         if os.path.isfile(os.path.join(ext_path, 'manifest.json')):
-            manifest = json.loads(Path(ext_path, 'manifest.json').read_text('utf-8'))
-            api_version_range = manifest.get('required_api_version', manifest.get('api_version'))
-            if satisfies(api_version, api_version_range):
-                yield (dir, ext_path)
-            else:
-                logger.warning(
-                    'Ignoring incompatible extension %s (extension API expected %s, but the current version is %s))',
-                    dir, api_version_range, api_version
-                )
+            try:
+                manifest = json.loads(Path(ext_path, 'manifest.json').read_text('utf-8'))
+                api_version_range = manifest.get('required_api_version', manifest.get('api_version'))
+                if satisfies(api_version, api_version_range):
+                    yield (dir, ext_path)
+                else:
+                    logger.warning(
+                        'Ignoring incompatible extension %s (extension API expected %s, but the current version is %s)',
+                        dir, api_version_range, api_version
+                    )
+            except Exception as e:
+                logger.error('Ignoring extension %s (has a broken manifest.json file): %s', ext_dir, e)
