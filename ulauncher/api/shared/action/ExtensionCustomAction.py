@@ -1,6 +1,4 @@
-import pickle
-
-from ulauncher.api.shared.event import ItemEnterEvent
+from ulauncher.api.shared.event import custom_data_store, ItemEnterEvent
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
@@ -15,7 +13,8 @@ class ExtensionCustomAction(BaseAction):
     """
 
     def __init__(self, data, keep_app_open=False):
-        self._data = pickle.dumps(data)
+        self.ref = id(data)
+        custom_data_store[self.ref] = data
         self.keep_app_open = keep_app_open
 
     def run(self):
@@ -35,4 +34,4 @@ class ExtensionCustomAction(BaseAction):
         renderer = DeferredResultRenderer.get_instance()
         controller = renderer.get_active_controller()
         if controller:
-            controller.trigger_event(ItemEnterEvent(self._data))
+            controller.trigger_event(ItemEnterEvent(self.ref))

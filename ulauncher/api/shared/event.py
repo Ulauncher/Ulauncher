@@ -1,6 +1,11 @@
 import pickle
-from typing import Any, List
+from typing import Any, Dict, List
 from ulauncher.api.shared.query import Query
+
+# This holds references to custom data for use with ExtensionCustomAction
+# This way the data never travels to the Ulauncher app and back. Only a reference to it.
+# So the data can be anything, even if the serialization doesn't handle it
+custom_data_store: Dict[int, Any] = {}
 
 
 class BaseEvent:
@@ -75,7 +80,7 @@ class ItemEnterEvent(BaseEvent):
     """
 
     def __init__(self, data):
-        self._data = data
+        self.ref = data
 
     def args(self):
         return [self.get_data()]
@@ -84,7 +89,9 @@ class ItemEnterEvent(BaseEvent):
         """
         :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
         """
-        return pickle.loads(self._data)
+        data = custom_data_store.get(self.ref)
+        custom_data_store.clear()
+        return data
 
 
 class UnloadEvent(BaseEvent):
