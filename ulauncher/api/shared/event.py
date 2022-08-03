@@ -76,7 +76,9 @@ class ItemEnterEvent(BaseEvent):
 
     def __init__(self, data):
         self._data = data
-        self.args = [data]
+
+    def args(self):
+        return [self.get_data()]
 
     def get_data(self):
         """
