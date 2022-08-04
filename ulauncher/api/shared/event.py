@@ -79,9 +79,10 @@ class ItemEnterEvent(BaseEvent):
     :param str data:
     """
 
-    def __init__(self, data):
-        self.ref = data
+    def __init__(self, ref):
+        self.ref = ref
 
+    @property
     def args(self):
         return [self.get_data()]
 
@@ -90,7 +91,9 @@ class ItemEnterEvent(BaseEvent):
         :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
         """
         data = custom_data_store.get(self.ref)
+        # Remove all entries except the one the user choose, because get_data can be called more than once
         custom_data_store.clear()
+        custom_data_store[self.ref] = data
         return data
 
 

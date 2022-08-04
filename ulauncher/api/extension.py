@@ -73,8 +73,7 @@ class Extension:
             method = getattr(listener, method_name or "on_event")
             # We can use method_name to determine if listener was added the old way or the new class method way
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
-            args = event.args() if callable(event.args) else event.args
-            action = method(*args) if method_name else method(event, self)
+            action = method(*event.args) if method_name else method(event, self)
             if action:
                 if isinstance(action, Iterator):
                     action = list(action)
