@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 class Response:
     """
     :param ~ulauncher.api.shared.event.BaseEvent event:

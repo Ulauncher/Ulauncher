@@ -18,7 +18,6 @@ class BaseEvent:
         return pickle.dumps(self) != pickle.dumps(other)
 
 
-# pylint: disable=too-few-public-methods
 class RegisterEvent(BaseEvent):
     """
     This event is triggered when a new extension connects to the server socket.
@@ -70,7 +69,6 @@ class KeywordQueryEvent(BaseEvent):
         return self.query.argument
 
 
-# pylint: disable=too-few-public-methods
 class ItemEnterEvent(BaseEvent):
     """
     Is triggered when selected item has action of type :class:`~ulauncher.api.shared.action.ExtensionCustomAction`

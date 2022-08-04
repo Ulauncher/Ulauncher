@@ -17,7 +17,6 @@ EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
-# pylint: disable=too-few-public-methods
 class _PATHS_CLASS:
     APPLICATION = APPLICATION
     ASSETS = ASSETS

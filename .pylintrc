@@ -66,6 +66,7 @@ disable=broad-except,         # Try/except catching all exceptionds instead of s
         no-self-use,          # Method that doesn't use self (can still be better as method)
         protected-access,     # Referencing _something
         redefined-builtin,    # Shadowing python internals
+        too-few-public-methods,
         too-many-boolean-expressions,
         unspecified-encoding,  # Only needed for Windows
         # Ignore Pylint 2.14 config sanity check (breaking behavior otherwise)

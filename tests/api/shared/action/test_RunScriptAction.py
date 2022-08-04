@@ -5,7 +5,6 @@ from random import randint
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 
 
-# pylint: disable=too-few-public-methods
 class TestRunScriptAction:
 
     def test_run(self):

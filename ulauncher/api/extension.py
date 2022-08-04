@@ -104,7 +104,6 @@ class Extension:
         pass
 
 
-# pylint: disable=too-few-public-methods
 class PreferencesUpdateEventListener(EventListener):
 
     def on_event(self, event, extension):

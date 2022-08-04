@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 class EventListener:
     """
     Base event listener class

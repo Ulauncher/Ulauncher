@@ -1,7 +1,6 @@
 from ulauncher.api.shared.event import BaseEvent
 
 
-# pylint: disable=too-few-public-methods
 class SampleEvent1(BaseEvent):
     prop1 = 'string'
     prop2 = 12
@@ -10,7 +9,6 @@ class SampleEvent1(BaseEvent):
         self.arg1 = arg1
 
 
-# pylint: disable=too-few-public-methods
 class SampleEvent2(BaseEvent):
     prop1 = 'string'
     prop2 = 12
