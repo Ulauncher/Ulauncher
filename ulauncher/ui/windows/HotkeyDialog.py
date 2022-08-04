@@ -1,8 +1,4 @@
 import logging
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gtk, Gdk, GObject
 from ulauncher.config import PATHS
 

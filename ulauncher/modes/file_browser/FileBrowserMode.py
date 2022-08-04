@@ -1,9 +1,6 @@
 import os
 from pathlib import Path
 from typing import List
-import gi
-gi.require_version('Gdk', '3.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gdk
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction

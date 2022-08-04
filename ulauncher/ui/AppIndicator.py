@@ -1,7 +1,5 @@
 import gi
 
-gi.require_version('Gtk', '3.0')
-
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click
 # pylint: disable=wrong-import-position

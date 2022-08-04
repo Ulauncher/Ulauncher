@@ -1,10 +1,6 @@
 import logging
 from typing import Any
-import gi
-gi.require_version('Gtk', '3.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gtk
-
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.wm import get_text_scaling_factor
 from ulauncher.utils.icon import load_icon_surface

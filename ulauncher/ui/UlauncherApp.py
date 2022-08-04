@@ -1,13 +1,7 @@
 import time
 import argparse
 import logging
-# This xinit import must happen before any GUI libraries are initialized.
-# pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
-import gi
-gi.require_versions({'Gtk': '3.0', 'Keybinder': '3.0'})
-# pylint: disable=wrong-import-position
 from gi.repository import Gio, GLib, Gtk, Keybinder
-
 from ulauncher.config import FIRST_RUN
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
