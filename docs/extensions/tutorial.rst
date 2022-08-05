@@ -203,9 +203,7 @@ Custom Action on Item Enter
         on_enter=ExtensionCustomAction(data, keep_app_open=True)
     )
 
-  ``data`` is any custom data that you want to pass to your callback function.
-
-  .. NOTE:: It can be of any type as long as it's serializable with :meth:`pickle.dumps`
+  ``data`` is passed to your callback function. It can be any type.
 
 
 **2. Define a new listener**
