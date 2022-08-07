@@ -44,7 +44,7 @@ class ExtensionRunner:
         self.extension_errors = {}
         self.extension_procs = {}
         self.dont_run_extensions = get_options().no_extensions
-        self.verbose = get_options().verbose
+        self.verbose = bool(get_options().verbose)
 
     def run_all(self):
         """
