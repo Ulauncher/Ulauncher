@@ -30,8 +30,8 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
 
     @pytest.fixture(autouse=True)
-    def get_scaling_factor(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_scaling_factor')
+    def get_text_scaling_factor(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.get_text_scaling_factor')
 
     @pytest.fixture(autouse=True)
     def new_image_from_surface(self, mocker):

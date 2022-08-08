@@ -22,7 +22,7 @@ from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.utils.wm import get_monitor, get_scaling_factor
+from ulauncher.utils.wm import get_monitor, get_text_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
@@ -180,7 +180,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
-        window_width = 500 * get_scaling_factor()
+        window_width = 750
         self.set_property('width-request', window_width)
         self.scroll_container.set_property('max-content-height', max_height)
         self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
@@ -296,7 +296,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         logger.debug('render %s results', len(results))
 
     def _render_prefs_icon(self):
-        prefs_pixbuf = load_icon(f"{PATHS.ASSETS}/icons/gear.svg", 16 * get_scaling_factor())
+        prefs_pixbuf = load_icon(f"{PATHS.ASSETS}/icons/gear.svg", 16 * get_text_scaling_factor())
         prefs_image = Gtk.Image.new_from_pixbuf(prefs_pixbuf)
         self.prefs_btn.set_image(prefs_image)
 

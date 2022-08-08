@@ -6,7 +6,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.wm import get_scaling_factor
+from ulauncher.utils.wm import get_text_scaling_factor
 from ulauncher.utils.icon import load_icon
 from ulauncher.utils.Theme import Theme
 from ulauncher.api.shared.query import Query
@@ -35,7 +35,7 @@ class ResultWidget(Gtk.EventBox):
         self.result = result
         self.query = query
         self.set_index(index)
-        self.scaling_factor = get_scaling_factor()
+        self.scaling_factor = get_text_scaling_factor()
 
         item_container = builder.get_object('item-container')
         item_name = builder.get_object('name_wrapper')
