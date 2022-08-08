@@ -48,10 +48,10 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo pacman -Syu
   ```
 
-  Install the development dependecies:
+  Install the development and testing dependecies:
 
   ```sh
-  sudo pacman -Syu --needed git yarn python-setuptools
+  sudo pacman -Syu --needed git yarn python-setuptools python-pytest python-pytest-mock python-pylint mypy flake8
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
