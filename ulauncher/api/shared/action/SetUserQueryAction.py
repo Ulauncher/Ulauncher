@@ -26,4 +26,4 @@ class SetUserQueryAction(BaseAction):
         # Ugly hack:
         # Defer set position, because GTK sets position after change event occurs
         sleep(0.002)
-        input.set_position(len(self.new_query))
+        input.set_position(-1)
