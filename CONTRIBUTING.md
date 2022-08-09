@@ -30,6 +30,12 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo apt-get update && sudo apt-get install git yarnpkg python3-setuptools
   ```
 
+  Install the Python testing packages:
+
+  ```sh
+  pip3 install -r requirements.txt
+  ```
+
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
