@@ -52,7 +52,7 @@ class ResultWidget(Gtk.EventBox):
         item_name.set_property('margin-end', 12 * base_scaling * self.scaling_factor)
         item_name.set_property('width-request', 350 * self.scaling_factor)
 
-        self.set_icon(load_icon_surface(result.icon, result.ICON_SIZE, self.scaling_factor))
+        self.set_icon(load_icon_surface(result.icon, result.ICON_SIZE, self.get_scale_factor()))
         self.set_description(result.get_description(query))
         self.set_name_highlighted()
 
