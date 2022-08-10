@@ -7,7 +7,7 @@ from gi.repository import Gtk
 
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.wm import get_text_scaling_factor
-from ulauncher.utils.icon import load_icon
+from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.Theme import Theme
 from ulauncher.api.shared.query import Query
 
@@ -52,7 +52,7 @@ class ResultWidget(Gtk.EventBox):
         item_name.set_property('margin-end', 12 * base_scaling * self.scaling_factor)
         item_name.set_property('width-request', 350 * self.scaling_factor)
 
-        self.set_icon(load_icon(result.icon, result.ICON_SIZE * self.scaling_factor))
+        self.set_icon(load_icon_surface(result.icon, result.ICON_SIZE, self.scaling_factor))
         self.set_description(result.get_description(query))
         self.set_name_highlighted()
 
@@ -90,7 +90,7 @@ class ResultWidget(Gtk.EventBox):
         :param PixBuf icon:
         """
         if icon:
-            self.builder.get_object('item-icon').set_from_pixbuf(icon)
+            self.builder.get_object('item-icon').set_from_surface(icon)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
         colors = Theme.get_current().get_matched_text_hl_colors()

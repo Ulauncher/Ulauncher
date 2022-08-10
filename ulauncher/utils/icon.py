@@ -4,10 +4,11 @@ from os.path import join
 from functools import lru_cache
 
 import gi
+gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gdk, Gtk, GdkPixbuf
 from ulauncher import ASSETS
 
 icon_theme = Gtk.IconTheme.get_default()
@@ -40,18 +41,20 @@ def get_icon_path(icon, size=32, base_path=""):
 
 
 @lru_cache(maxsize=50)
-def load_icon(icon, size):
+def load_icon_surface(icon, size, scaling_factor=1):
     """
     :param str icon:
     :param int size:
     :rtype: :class:`GtkPixbuf`
     """
+    real_size = size * scaling_factor
     try:
-        icon_path = get_icon_path(icon, size) or DEFAULT_EXE_ICON
-        return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, size, size)
+        icon_path = get_icon_path(icon, real_size) or DEFAULT_EXE_ICON
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, real_size, real_size)
+        return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
     except Exception as e:
         if icon_path == DEFAULT_EXE_ICON:
             raise RuntimeError(f"Could not load fallback icon: {icon_path}") from e
 
         logger.warning("Could not load specified icon %s (%s). Will use fallback icon", icon, e)
-        return load_icon(DEFAULT_EXE_ICON, size)
+        return load_icon_surface(DEFAULT_EXE_ICON, size, scaling_factor)

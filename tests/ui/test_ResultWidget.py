@@ -75,7 +75,7 @@ class TestResultWidget:
         builder.get_object.return_value = iconWgt
 
         result_wgt.set_icon(pixbuf)
-        iconWgt.set_from_pixbuf.assert_called_with(pixbuf)
+        iconWgt.set_from_surface.assert_called_with(pixbuf)
 
     def test_set_name(self, result_wgt, builder):
         result_wgt.set_name('test name')

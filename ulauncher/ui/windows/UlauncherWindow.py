@@ -22,8 +22,8 @@ from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
-from ulauncher.utils.wm import get_monitor, get_text_scaling_factor
-from ulauncher.utils.icon import load_icon
+from ulauncher.utils.wm import get_monitor
+from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.api.shared.query import Query
@@ -169,7 +169,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.settings.disable_window_shadow:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
-        self._render_prefs_icon()
+        prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
+        self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
+
         self.init_styles(theme.compile_css())
 
     @Gtk.Template.Callback()
@@ -294,11 +296,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
         logger.debug('render %s results', len(results))
-
-    def _render_prefs_icon(self):
-        prefs_pixbuf = load_icon(f"{PATHS.ASSETS}/icons/gear.svg", 16 * get_text_scaling_factor())
-        prefs_image = Gtk.Image.new_from_pixbuf(prefs_pixbuf)
-        self.prefs_btn.set_image(prefs_image)
 
     @staticmethod
     def create_item_widgets(items, query):
