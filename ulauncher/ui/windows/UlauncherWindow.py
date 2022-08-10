@@ -48,7 +48,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     results_nav = None
     settings = Settings.load()
     is_focused = False
-    initial_query = None
+    initial_query = ""
     _css_provider = None
     _drag_start_coords = None
 
@@ -194,15 +194,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if IS_X11_COMPATIBLE:
             self.present_with_time(Keybinder.get_current_event_time())
 
-        if self.initial_query:
+        if self.initial_query or self.settings.clear_previous_query:
             self.input.set_text(self.initial_query)
-            self.input.set_position(len(self.initial_query))
-            self.initial_query = None
+            self.input.set_position(-1)
+            self.initial_query = ""
         elif not self._get_input_text():
             # make sure frequent apps are shown if necessary
             self.show_results([])
-        elif self.settings.clear_previous_query:
-            self.input.set_text('')
         else:
             self.input.grab_focus()
 
