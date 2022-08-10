@@ -22,4 +22,3 @@ class TestSetUserQueryAction:
 
         input = window.get_input.return_value
         input.set_text.assert_called_with('new query')
-        input.set_position.assert_called_with(len('new query'))
