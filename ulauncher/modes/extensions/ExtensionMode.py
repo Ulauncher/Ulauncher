@@ -54,6 +54,6 @@ class ExtensionMode(BaseMode):
                     yield SearchableResult(
                         name=html.escape(trigger.name),
                         description=html.escape(trigger.description),
-                        icon=controller.get_icon_path(path=trigger.icon),
+                        icon=controller.get_normalized_icon_path(trigger.icon),
                         on_enter=callback
                     )

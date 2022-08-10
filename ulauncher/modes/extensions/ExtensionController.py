@@ -1,6 +1,6 @@
+import os
 import logging
 from ulauncher.config import PATHS
-from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.event import InputTriggerEvent, PreferencesEvent, PreferencesUpdateEvent
@@ -69,11 +69,11 @@ class ExtensionController:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
 
-    def get_icon_path(self, path=None) -> str:
-        return get_icon_path(
-            path or self.manifest.icon,
-            base_path=f"{PATHS.EXTENSIONS}/{self.extension_id}"
-        )
+    def get_normalized_icon_path(self, icon=None) -> str:
+        if not icon:
+            icon = self.manifest.icon
+        expanded_path = icon and f"{PATHS.EXTENSIONS}/{self.extension_id}/{icon}"
+        return expanded_path if os.path.isfile(expanded_path) else icon
 
     # pylint: disable=unused-argument
     def handle_response(self, framer, response):

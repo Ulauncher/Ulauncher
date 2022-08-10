@@ -39,7 +39,7 @@ class DeferredResultRenderer:
 
         :rtype: :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
         """
-        icon = controller.get_icon_path()
+        icon = controller.get_normalized_icon_path()
 
         loading_message = Result(name='Loading...', icon=icon)
 
