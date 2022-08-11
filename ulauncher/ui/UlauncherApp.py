@@ -40,7 +40,7 @@ class UlauncherApp(Gtk.Application):
             self.window.initial_query = query.unpack()
 
     def do_activate(self, *args, **kwargs):
-        self.window.show_window()
+        self.window.show()
 
     def do_command_line(self, *args, **kwargs):
         # This is where we handle "--no-window" which we need to get from the remote call
@@ -93,7 +93,7 @@ class UlauncherApp(Gtk.Application):
             self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, lambda _: self.window.show_window())
+        Keybinder.bind(accel_name, lambda _: self.window.show())
         self._current_accel_name = accel_name
         if FIRST_RUN:
             display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(accel_name))

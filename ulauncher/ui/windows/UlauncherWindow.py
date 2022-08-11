@@ -180,7 +180,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.scroll_container.set_property('max-content-height', max_height)
         self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
 
-    def show_window(self):
+    def show(self):
         # works only when the following methods are called in that exact order
         self.present()
         self.position_window()
@@ -196,6 +196,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.show_results([])
         else:
             self.input.grab_focus()
+
+        super().show()
 
     @Gtk.Template.Callback()
     def on_mouse_down(self, _, event):
