@@ -194,9 +194,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         elif not self._get_input_text():
             # make sure frequent apps are shown if necessary
             self.show_results([])
-        else:
-            self.input.grab_focus()
 
+        self.input.grab_focus()
         super().show()
 
     @Gtk.Template.Callback()
