@@ -31,8 +31,7 @@ def launch_detached(cmd):
             argv=cmd,
             envp=envp,
             flags=GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.SEARCH_PATH,
-            # setsid is really only needed if systemd-run is missing, but doesn't hurt to have.
-            child_setup=os.setsid
+            child_setup=None if use_systemd_run else os.setsid
         )
     except Exception as e:
         logger.error('%s: %s', type(e).__name__, e)
