@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import logging
+import threading
 from typing import Iterator, Type, Union
 from collections import defaultdict
 
@@ -73,13 +74,17 @@ class Extension:
             method = getattr(listener, method_name or "on_event")
             # We can use method_name to determine if listener was added the old way or the new class method way
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
-            action = method(*event.args) if method_name else method(event, self)
-            if action:
-                if isinstance(action, Iterator):
-                    action = list(action)
-                assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
-                origin_event = getattr(event, "origin_event", event)
-                self._client.send(Response(origin_event, action))
+            args = tuple(event.args) if method_name else (event, self)
+            threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
+
+    def run_event_listener(self, event, method, args):
+        action = method(*args)
+        if action:
+            if isinstance(action, Iterator):
+                action = list(action)
+            assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
+            origin_event = getattr(event, "origin_event", event)
+            self._client.send(Response(origin_event, action))
 
     def run(self):
         """
