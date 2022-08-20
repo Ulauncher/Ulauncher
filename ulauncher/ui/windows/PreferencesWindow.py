@@ -1,7 +1,4 @@
 import os
-import gi
-gi.require_version("Gtk", "3.0")
-# pylint: disable=wrong-import-position
 from gi.repository import Gtk
 from ulauncher.config import PATHS, get_options
 from ulauncher.utils.WebKit2 import WebKit2

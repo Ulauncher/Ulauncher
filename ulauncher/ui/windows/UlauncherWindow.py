@@ -1,13 +1,6 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 import os
 import logging
-
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
-gi.require_version('Keybinder', '3.0')
-
-# pylint: disable=wrong-import-position, unused-argument
 from gi.repository import Gtk, Gdk, Keybinder
 
 # pylint: disable=unused-import

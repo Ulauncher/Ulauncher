@@ -6,8 +6,6 @@ from functools import partial
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
 import gi
-gi.require_version('Gtk', '3.0')
-# pylint: disable=wrong-import-position
 from gi.repository import GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
 from ulauncher.utils.migrate import v5_to_v6

@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
+import gi
 
 # This file is overwritten by the build_wrapper script in setup.py
 # IF YOU EDIT THIS FILE make sure your changes are reflected there
@@ -14,3 +15,12 @@ config.read(f"{_PROJECT_ROOT}/setup.cfg")
 ASSETS = f"{_PROJECT_ROOT}/data"
 VERSION = config["metadata"]["version"]
 DESCRIPTION = config["metadata"]["description"]
+
+gi.require_versions({
+    "Gtk": "3.0",
+    "Gdk": "3.0",
+    "GdkX11": "3.0",
+    "GdkPixbuf": "2.0",
+    "Keybinder": "3.0",
+    "Wnck": "3.0",
+})

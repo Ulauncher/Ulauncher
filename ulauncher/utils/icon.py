@@ -2,12 +2,6 @@ import logging
 import mimetypes
 from os.path import join
 from functools import lru_cache
-
-import gi
-gi.require_version('Gdk', '3.0')
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
-# pylint: disable=wrong-import-position
 from gi.repository import Gdk, Gtk, GdkPixbuf
 from ulauncher import ASSETS
 
