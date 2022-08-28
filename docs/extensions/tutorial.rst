@@ -31,7 +31,7 @@ The file contains a list with supported versions of Ulauncher API. ``commit`` fi
 
 ``versions.json`` must be checked in to the **root** dir of **master** branch.
 
-``required_api_version`` must contain a specific version or a range of versions defined using `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format.
+``required_api_version`` must contain a specific version or a range of versions defined using `NPM Semver <https://docs.npmjs.com/cli/v6/using-npm/semver>`_ format.
 
 Let's take this example::
 
