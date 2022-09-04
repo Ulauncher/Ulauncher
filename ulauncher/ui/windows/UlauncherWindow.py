@@ -71,7 +71,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             logger.debug("Focus in event, grabbing pointer: %s", result)
 
     @Gtk.Template.Callback()
-    def on_input_changed(self, entry):
+    def on_input_changed(self, _):
         """
         Triggered by user input
         """
