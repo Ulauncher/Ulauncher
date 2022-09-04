@@ -23,7 +23,7 @@ from typing import Dict
 import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('..'))
 # pylint: disable=wrong-import-position
-from ulauncher import VERSION, DESCRIPTION
+from ulauncher import config, VERSION
 
 # -- General configuration ------------------------------------------------
 
@@ -156,6 +156,6 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'Ulauncher', 'Ulauncher Documentation',
-     author, 'Ulauncher', DESCRIPTION,
+     author, 'Ulauncher', config['metadata'].get('description'),
      'Miscellaneous'),
 ]

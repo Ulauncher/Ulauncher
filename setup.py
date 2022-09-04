@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
+import json
 import subprocess
 import sys
 from pathlib import Path
 from shutil import rmtree, which
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
-from ulauncher import VERSION
+from ulauncher import config, VERSION
 
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
@@ -78,6 +79,8 @@ class build_wrapper(build_py, Command):
         build_py.run(self)
         print("Overwriting the namespace package with fixed values")
         Path(self.build_lib + "/ulauncher/__init__.py").write_text("\n".join([
+            "import gi",
+            f"gi.require_versions({json.dumps(dict(config['gi_versions']))})",
             f"ASSETS = '{sys.prefix}/share/ulauncher'",
             f"VERSION = '{VERSION}'"
         ]))
