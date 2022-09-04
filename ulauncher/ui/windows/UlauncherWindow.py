@@ -141,10 +141,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             widget.forall(self.apply_css)
 
     def set_cursor(self, cursor_name):
-        # pylint: disable=no-member
-        window_ = self.get_window()
-        cursor = Gdk.Cursor.new_from_name(window_.get_display(), cursor_name)
-        window_.set_cursor(cursor)
+        cursor = Gdk.Cursor.new_from_name(self.get_display(), cursor_name)
+        self.get_window().set_cursor(cursor)
 
     def init_theme(self):
         load_available_themes()
