@@ -14,7 +14,6 @@ from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.decorator.singleton import singleton
-from ulauncher.utils.timer import timer
 from ulauncher.utils.wm import get_monitor
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
@@ -40,7 +39,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     window_body = Gtk.Template.Child("body")
     results_nav = None
     settings = Settings.load()
-    is_focused = False
     initial_query = ""
     _css_provider = None
     _drag_start_coords = None
@@ -55,12 +53,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @Gtk.Template.Callback()
-    def on_focus_out(self, widget, event):
-        # apparently Gtk doesn't provide a mechanism to tell if window is in focus
-        # this is a simple workaround to avoid hiding window
-        # when user hits Alt+key combination or changes input source, etc.
-        self.is_focused = False
-        timer(0.07, lambda: self.is_focused or self.hide())
+    def on_focus_out(self, *_):
+        self.hide()
 
     @Gtk.Template.Callback()
     def on_focus_in(self, *args):
@@ -75,7 +69,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 0
             )
             logger.debug("Focus in event, grabbing pointer: %s", result)
-        self.is_focused = True
 
     @Gtk.Template.Callback()
     def on_input_changed(self, entry):
