@@ -132,9 +132,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_visual(visual)
 
     def apply_css(self, widget):
-        Gtk.StyleContext.add_provider(widget.get_style_context(),
-                                      self._css_provider,
-                                      Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        Gtk.StyleContext.add_provider(
+            widget.get_style_context(),
+            self._css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
 
