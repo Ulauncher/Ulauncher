@@ -180,6 +180,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.scroll_container.set_property('max-content-height', max_height)
         self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
 
+    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def show(self):
         # works only when the following methods are called in that exact order
         self.present()
