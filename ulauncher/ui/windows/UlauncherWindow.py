@@ -121,9 +121,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # Helpers
     ######################################
 
-    def get_input(self):
-        return self.input
-
     def init_styles(self, path):
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()

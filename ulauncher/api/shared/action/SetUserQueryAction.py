@@ -19,9 +19,7 @@ class SetUserQueryAction(BaseAction):
     def _update_query(self):
         # pylint: disable=import-outside-toplevel
         from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-
-        input = UlauncherWindow.get_instance().get_input()
-        input.set_text(self.new_query)
+        UlauncherWindow.get_instance().input.set_text(self.new_query)
 
         # Ugly hack:
         # Defer set position, because GTK sets position after change event occurs

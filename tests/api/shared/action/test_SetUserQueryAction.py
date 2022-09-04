@@ -19,6 +19,4 @@ class TestSetUserQueryAction:
 
     def test_update_query(self, action, window):
         action._update_query()
-
-        input = window.get_input.return_value
-        input.set_text.assert_called_with('new query')
+        window.input.set_text.assert_called_with('new query')
