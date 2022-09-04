@@ -1,5 +1,4 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-import os
 import logging
 from gi.repository import Gtk, Gdk, Keybinder
 
@@ -284,13 +283,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def create_item_widgets(items, query):
         results = []
         for index, result in enumerate(items):
-            glade_filename = f"{PATHS.ASSETS}/ui/{result.UI_FILE}.ui"
-            if not os.path.exists(glade_filename):
-                glade_filename = None
-
             builder = Gtk.Builder()
             builder.set_translation_domain('ulauncher')
-            builder.add_from_file(glade_filename)
+            builder.add_from_file(f"{PATHS.ASSETS}/ui/{result.UI_FILE}.ui")
 
             item_frame = builder.get_object('item-frame')
             item_frame.initialize(builder, result, index, query)
