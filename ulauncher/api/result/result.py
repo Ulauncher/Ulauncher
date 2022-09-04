@@ -9,9 +9,7 @@ OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
 # pylint: disable=too-many-instance-attributes
 class Result:
-
-    ICON_SIZE = 40
-    UI_FILE = 'result'
+    compact = False
     name = None  # type: str
     description = None  # type: str
     keyword = None  # type: str

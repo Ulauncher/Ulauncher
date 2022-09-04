@@ -1,4 +1,5 @@
 import logging
+from types import SimpleNamespace
 from typing import Any
 from gi.repository import Gtk
 from ulauncher.utils.Settings import Settings
@@ -19,7 +20,7 @@ class ResultWidget(Gtk.EventBox):
     query = Query('')  # type: Query
     result = None  # type: Any
     item_box = None  # type: Any
-    scaling_factor = 1.0  # type: float
+    compact = False
 
     def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:
         self.builder = builder
@@ -29,27 +30,36 @@ class ResultWidget(Gtk.EventBox):
 
         self.item_box = builder.get_object('item-box')
         self.result = result
+        self.compact = result.compact
         self.query = query
         self.set_index(index)
-        self.scaling_factor = get_text_scaling_factor()
+        text_scaling_factor = get_text_scaling_factor()
 
         item_container = builder.get_object('item-container')
+        item_container.get_style_context().add_class('small-result-item')
         item_name = builder.get_object('name_wrapper')
-        base_scaling = 1.0
 
-        if not item_name:
-            item_name = builder.get_object('item-name')
-            base_scaling = 0.67
-        item_container.set_property('margin-start', 18 * self.scaling_factor)
-        item_container.set_property('margin-end', 18 * self.scaling_factor)
-        item_container.set_property('margin-top', 5 * base_scaling * self.scaling_factor)
-        item_container.set_property('margin-bottom', 5 * base_scaling * self.scaling_factor)
-        item_name.set_property('margin-start', 12 * base_scaling * self.scaling_factor)
-        item_name.set_property('margin-end', 12 * base_scaling * self.scaling_factor)
-        item_name.set_property('width-request', 350 * self.scaling_factor)
+        sizes = SimpleNamespace(
+            icon=40,
+            inner_margin_x=12 * text_scaling_factor,
+            outer_margin_x=18 * text_scaling_factor,
+            margin_y=5 * text_scaling_factor,
+        )
 
-        self.set_icon(load_icon_surface(result.icon, result.ICON_SIZE, self.get_scale_factor()))
-        self.set_description(result.get_description(query))
+        if self.compact:
+            sizes.icon = 25
+            sizes.margin_y = 3 * text_scaling_factor
+
+        item_container.set_property('margin-start', sizes.outer_margin_x)
+        item_container.set_property('margin-end', sizes.outer_margin_x)
+        item_container.set_property('margin-top', sizes.margin_y)
+        item_container.set_property('margin-bottom', sizes.margin_y)
+        item_name.set_property('margin-start', sizes.inner_margin_x)
+        item_name.set_property('margin-end', sizes.inner_margin_x)
+        item_name.set_property('width-request', 350 * text_scaling_factor)
+
+        self.set_icon(load_icon_surface(result.icon, sizes.icon, self.get_scale_factor()))
+        self.set_description(result.get_description(query))  # need to run even if there is no descr
         self.set_name_highlighted()
 
     def set_index(self, index):
@@ -118,14 +128,11 @@ class ResultWidget(Gtk.EventBox):
 
     def set_description(self, description):
         description_obj = self.builder.get_object('item-descr')
-        if not description_obj:
-            return
 
-        if description:
+        if description and not self.compact:
             description_obj.set_text(description)
         else:
             description_obj.destroy()  # remove description label
-            self.builder.get_object('item-name').set_margin_top(8)  # shift name label down to the center
 
     def set_shortcut(self, text):
         self.builder.get_object('item-shortcut').set_text(text)

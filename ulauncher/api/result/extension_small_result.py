@@ -1,5 +1,5 @@
-from ulauncher.api import SmallResult, ExtensionResult
+from ulauncher.api import ExtensionResult
 
 
-class ExtensionSmallResult(ExtensionResult, SmallResult):
-    pass
+class ExtensionSmallResult(ExtensionResult):
+    compact = True

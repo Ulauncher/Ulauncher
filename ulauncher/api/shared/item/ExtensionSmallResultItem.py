@@ -1,3 +1,5 @@
-# flake8: noqa
-# pylint: disable=unused-import
-from ulauncher.api import ExtensionSmallResult as ExtensionSmallResultItem
+from ulauncher.api import ExtensionResult
+
+
+class ExtensionSmallResultItem(ExtensionResult):
+    compact = True

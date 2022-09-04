@@ -160,9 +160,6 @@ Basic API Concepts
 **2. Render results**
 
   Return a list of :class:`~ulauncher.api.ExtensionResult` in order to render results.
-
-  You can also use :class:`~ulauncher.api.ExtensionSmallResult` if you want
-  to render more items. You won't have item description with this type.
   ::
 
     class DemoExtension(Extension):
