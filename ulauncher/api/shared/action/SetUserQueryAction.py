@@ -1,8 +1,5 @@
-import logging
-from gi.repository import Gio, GLib
 from ulauncher.api.shared.action.BaseAction import BaseAction
-
-logger = logging.getLogger()
+from ulauncher.utils.trigger_action import trigger_action
 
 
 class SetUserQueryAction(BaseAction):
@@ -16,12 +13,4 @@ class SetUserQueryAction(BaseAction):
         self.new_query = new_query
 
     def run(self):
-        GLib.idle_add(self._update_query)
-
-    def _update_query(self):
-        app = Gio.Application.get_default()
-
-        if app and hasattr(app, "query"):
-            app.query = self.new_query
-        else:
-            logger.error("SetUserQueryAction.run() should only be called by Ulauncher")
+        trigger_action("set_query", [self.new_query])
