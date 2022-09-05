@@ -60,10 +60,6 @@ class TestUlauncherWindow:
     def result(self):
         return mock.create_autospec(Result)
 
-    @pytest.fixture(autouse=True)
-    def os_path_exists(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.os.path.exists')
-
     @pytest.fixture
     def window(self):
         return UlauncherWindow()
