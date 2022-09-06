@@ -1,0 +1,7 @@
+<node>
+  <interface name="io.ulauncher.Ulauncher.actions">
+    <method name="set_query">
+      <arg name="query" type="s" direction="in" />
+    </method>
+  </interface>
+</node>

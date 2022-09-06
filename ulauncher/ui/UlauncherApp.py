@@ -3,7 +3,7 @@ import logging
 from functools import lru_cache
 from typing import Optional
 from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
-from ulauncher.config import FIRST_RUN
+from ulauncher.config import FIRST_RUN, PATHS
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -84,6 +84,11 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
 
+        with open(f"{PATHS.APPLICATION}/dbus.xml", "r") as file:
+            xml = file.read()
+            (actions,) = Gio.DBusNodeInfo.new_for_xml(xml).interfaces
+            self.get_dbus_connection().register_object("/io/ulauncher/Ulauncher", actions, self.dbus_method_listener)
+
     def bind_hotkey(self, accel_name):
         if not IS_X11 or self._current_accel_name == accel_name:
             return
@@ -117,3 +122,12 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         notification = Gio.Notification.new("Ulauncher")
         notification.set_body(text)
         self.send_notification(id, notification)
+
+    def dbus_method_listener(self, *_args):
+        method, args, invocation, *_ = _args[4:]
+        if method == "set_query":
+            logger.debug('Setting query to "%s"', args[0])
+            self.query = args[0]
+        else:
+            logger.warning("Unknown dbus method '%s'", method)
+        invocation.return_value()
