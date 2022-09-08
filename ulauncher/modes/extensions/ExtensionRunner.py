@@ -69,11 +69,14 @@ class ExtensionRunner:
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
+            extension_path = f"{PATHS.EXTENSIONS}/{extension_id}"
 
-            cmd = [sys.executable, f"{PATHS.EXTENSIONS}/{extension_id}/main.py"]
+            cmd = [sys.executable, f"{extension_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
                 "PYTHONPATH": ":".join(filter(bool, [PATHS.APPLICATION, os.getenv("PYTHONPATH")])),
+                "EXTENSION_ICON": manifest.icon,
+                "EXTENSION_PATH": extension_path,
                 "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(',', ':'))
             }
 

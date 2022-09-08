@@ -103,14 +103,14 @@ main.py
 
 Copy the following code to ``main.py``::
 
-  from ulauncher.api import Extension, ExtensionResult
+  from ulauncher.api import Extension, Result
   from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 
   class DemoExtension(Extension):
       def on_input(self, input_text, trigger_id):
           for i in range(5):
-              yield ExtensionResult(
+              yield Result(
                   name='Item %s' % i,
                   description='Item description %s' % i,
                   on_enter=HideWindowAction()
@@ -119,7 +119,7 @@ Copy the following code to ``main.py``::
   if __name__ == '__main__':
       DemoExtension().run()
 
-.. TIP:: If you don't want to use ``yield``, you can also return a list of ExtensionResults.
+.. TIP:: If you don't want to use ``yield``, you can also return a list of Results.
 
 
 Now exit Ulauncher and run ``ulauncher -v`` from command line to see the verbose output.
@@ -159,13 +159,13 @@ Basic API Concepts
 
 **2. Render results**
 
-  Return a list of :class:`~ulauncher.api.ExtensionResult` in order to render results.
+  Return a list of :class:`~ulauncher.api.Result` in order to render results.
   ::
 
     class DemoExtension(Extension):
         def on_input(self, input_text, trigger_id):
             for i in range(5):
-                yield ExtensionResult(
+                yield Result(
                     name='Item %s' % i,
                     description='Item description %s' % i,
                     on_enter=HideWindowAction()
@@ -188,13 +188,13 @@ Custom Action on Item Enter
 
 **1. Pass custom data with ExtensionCustomAction**
 
-  Instantiate :class:`~ulauncher.api.ExtensionResult`
+  Instantiate :class:`~ulauncher.api.Result`
   with ``on_enter`` that is instance of :class:`~ulauncher.api.shared.action.ExtensionCustomAction.ExtensionCustomAction`
 
   ::
 
     data = {'new_name': 'Item %s was clicked' % i}
-    ExtensionResult(
+    Result(
         name='Item %s' % i,
         description='Item description %s' % i,
         on_enter=ExtensionCustomAction(data, keep_app_open=True)
@@ -216,7 +216,7 @@ Custom Action on Item Enter
             # do any additional actions here...
 
             # you may want to return another list of results
-            yield ExtensionResult(
+            yield Result(
                 name=data['new_name'],
                 on_enter=HideWindowAction()
             )

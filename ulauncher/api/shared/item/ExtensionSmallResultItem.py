@@ -1,5 +1,5 @@
-from ulauncher.api.extension_result import ExtensionResult
+from ulauncher.api.result import Result
 
 
-class ExtensionSmallResultItem(ExtensionResult):
+class ExtensionSmallResultItem(Result):
     compact = True

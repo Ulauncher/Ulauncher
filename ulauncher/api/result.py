@@ -1,3 +1,4 @@
+import os
 from typing import Callable, Optional
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.BaseAction import BaseAction
@@ -46,6 +47,17 @@ class Result:
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
 
+        # This part only runs when initialized from an extensions
+        ext_path = os.environ.get("EXTENSION_PATH")
+        if ext_path:
+            if not self.icon:
+                self.icon = os.environ.get("EXTENSION_ICON")
+            if self.icon and os.path.isfile(f"{ext_path}/{self.icon}"):
+                self.icon = f"{ext_path}/{self.icon}"
+
+            if self._on_enter and not isinstance(self._on_enter, BaseAction):
+                raise Exception("Invalid on_enter argument. Expected BaseAction")
+
     def get_keyword(self) -> str:
         return self.keyword
 
@@ -75,12 +87,16 @@ class Result:
         """
         Handle the main action
         """
+        if isinstance(self._on_enter, BaseAction):  # For extensions
+            return self._on_enter
         return self._on_enter(query) if callable(self._on_enter) else None
 
     def on_alt_enter(self, query: Query) -> Optional[BaseAction]:
         """
         Handle the optional secondary action (alt+enter)
         """
+        if isinstance(self._on_alt_enter, BaseAction):  # For extensions
+            return self._on_alt_enter
         return self._on_alt_enter(query) if callable(self._on_alt_enter) else None
 
     def get_searchable_fields(self):

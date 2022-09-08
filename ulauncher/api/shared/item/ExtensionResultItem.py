@@ -1,5 +1,5 @@
-from ulauncher.api.extension_result import ExtensionResult
+from ulauncher.api.result import Result
 
 
-class ExtensionResultItem(ExtensionResult):
+class ExtensionResultItem(Result):
     pass
