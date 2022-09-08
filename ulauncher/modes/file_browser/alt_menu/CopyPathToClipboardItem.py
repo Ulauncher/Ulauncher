@@ -1,4 +1,4 @@
-from ulauncher.api import SmallResult
+from ulauncher.api.small_result import SmallResult
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
 

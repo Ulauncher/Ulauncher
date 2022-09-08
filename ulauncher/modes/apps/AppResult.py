@@ -3,7 +3,7 @@ from gi.repository import Gio
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 from ulauncher.modes.apps.launch_app import launch_app
-from ulauncher.api import SearchableResult
+from ulauncher.api.searchable_result import SearchableResult
 
 app_starts = JsonData.new_from_file(f"{PATHS.STATE}/app_starts.json")
 

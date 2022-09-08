@@ -3,7 +3,7 @@ import json
 import sys
 from functools import lru_cache
 from pathlib import Path
-from ulauncher.api.result.searchable_result import SearchableResult
+from ulauncher.api.searchable_result import SearchableResult
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 logger = logging.getLogger()

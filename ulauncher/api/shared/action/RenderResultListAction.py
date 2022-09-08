@@ -6,7 +6,7 @@ class RenderResultListAction(BaseAction):
     """
     Renders list of result items
 
-    :param list result_list: list of :class:`~ulauncher.api.Result` objects
+    :param list result_list: list of :class:`~ulauncher.api.result.Result` objects
     """
     keep_app_open = True
 

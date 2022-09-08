@@ -1,7 +1,7 @@
 import os
 import re
 
-from ulauncher.api import SearchableResult
+from ulauncher.api.searchable_result import SearchableResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction

@@ -2,7 +2,7 @@ from unittest import mock
 import pytest
 from gi.repository import GdkPixbuf
 
-from ulauncher.api import Result
+from ulauncher.api.result import Result
 from ulauncher.ui.ResultWidget import ResultWidget
 
 

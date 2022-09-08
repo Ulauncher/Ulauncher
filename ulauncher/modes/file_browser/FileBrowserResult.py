@@ -1,6 +1,6 @@
 from os.path import basename, dirname, isdir, join
 from ulauncher.utils.fold_user_path import fold_user_path
-from ulauncher.api import SmallResult
+from ulauncher.api.small_result import SmallResult
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem

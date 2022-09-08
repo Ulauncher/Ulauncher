@@ -1,7 +1,7 @@
 import logging
 from gi.repository import GLib
 
-from ulauncher.api import Result
+from ulauncher.api.result import Result
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.utils.decorator.singleton import singleton

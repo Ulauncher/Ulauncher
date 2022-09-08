@@ -1,5 +1,5 @@
 from ulauncher.utils.fuzzy_search import get_score
-from .result import Result
+from ulauncher.api.result import Result
 
 
 class SearchableResult(Result):

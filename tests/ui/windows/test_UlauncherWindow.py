@@ -2,7 +2,7 @@ from unittest import mock
 import pytest
 from gi.repository import Gtk
 
-from ulauncher.api import Result
+from ulauncher.api.result import Result
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 
 

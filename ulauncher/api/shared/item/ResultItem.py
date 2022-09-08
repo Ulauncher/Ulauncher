@@ -1,3 +1,3 @@
 # flake8: noqa
 # pylint: disable=unused-import
-from ulauncher.api import Result as ResultItem
+from ulauncher.api.result import Result as ResultItem

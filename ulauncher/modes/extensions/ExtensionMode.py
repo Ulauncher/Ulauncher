@@ -3,7 +3,7 @@ import html
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.api import SearchableResult
+from ulauncher.api.searchable_result import SearchableResult
 from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.api.shared.action.BaseAction import BaseAction
@@ -40,7 +40,7 @@ class ExtensionMode(BaseMode):
 
     def get_triggers(self):
         """
-        :rtype: Iterable[:class:`~ulauncher.api.Result`]
+        :rtype: Iterable[:class:`~ulauncher.api.result.Result`]
         """
         for controller in self.extensionServer.controllers.values():
             for trigger_id, trigger in controller.manifest.triggers.items():
