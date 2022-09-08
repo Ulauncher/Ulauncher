@@ -3,8 +3,8 @@ import json
 import sys
 from functools import lru_cache
 from pathlib import Path
-from ulauncher.api.searchable_result import SearchableResult
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from .result import Result
 
 logger = logging.getLogger()
 
@@ -19,7 +19,7 @@ def get_icon_from_manifest(ext_dir):
         return None
 
 
-class ExtensionResult(SearchableResult):
+class ExtensionResult(Result):
     """
     Should be used in extensions.
 

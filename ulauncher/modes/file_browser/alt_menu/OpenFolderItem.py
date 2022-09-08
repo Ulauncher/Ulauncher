@@ -1,8 +1,10 @@
-from ulauncher.api.small_result import SmallResult
+from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
 
 
-class OpenFolderItem(SmallResult):
+class OpenFolderItem(Result):
+    compact = True
+
     # pylint: disable=super-init-not-called
     def __init__(self, path: str, name='Open Folder'):
         self.path = path

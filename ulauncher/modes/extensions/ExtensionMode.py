@@ -3,7 +3,7 @@ import html
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.api.searchable_result import SearchableResult
+from ulauncher.api.result import Result
 from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.api.shared.action.BaseAction import BaseAction
@@ -51,9 +51,10 @@ class ExtensionMode(BaseMode):
                     callback = bind_final(SetUserQueryAction, f'{trigger.user_keyword} ')
 
                 if callback:
-                    yield SearchableResult(
+                    yield Result(
                         name=html.escape(trigger.name),
                         description=html.escape(trigger.description),
                         icon=controller.get_normalized_icon_path(trigger.icon),
-                        on_enter=callback
+                        on_enter=callback,
+                        searchable=True
                     )

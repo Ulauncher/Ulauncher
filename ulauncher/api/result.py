@@ -1,5 +1,5 @@
 from typing import Callable, Optional
-
+from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.text_highlighter import highlight_text
@@ -27,7 +27,8 @@ class Result:
                  icon: str = None,
                  highlightable: bool = None,
                  on_enter: OnEnterCallback = None,
-                 on_alt_enter: OnEnterCallback = None):
+                 on_alt_enter: OnEnterCallback = None,
+                 searchable: bool = None):
         if not isinstance(name, str):
             raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given')
         if not isinstance(description, str):
@@ -38,6 +39,8 @@ class Result:
         self.description = description
         self.keyword = keyword
         self.icon = icon
+        if searchable is not None:
+            self.searchable = searchable
         if highlightable is not None:
             self.highlightable = highlightable
         self._on_enter = on_enter
@@ -53,7 +56,8 @@ class Result:
         return self.icon
 
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
-        if query and self.highlightable:
+        # Searchable implies highlightable even if it's not set specifically
+        if query and (self.searchable or self.highlightable):
             return highlight_text(
                 query if not self.keyword else query.argument,
                 self.name,
@@ -78,3 +82,11 @@ class Result:
         Handle the optional secondary action (alt+enter)
         """
         return self._on_alt_enter(query) if callable(self._on_alt_enter) else None
+
+    def get_searchable_fields(self):
+        return [(self.name, 1), (self.description, .8)]
+
+    def search_score(self, query):
+        if not self.searchable:
+            return 0
+        return max(get_score(query, field) * weight for field, weight in self.get_searchable_fields() if field)
