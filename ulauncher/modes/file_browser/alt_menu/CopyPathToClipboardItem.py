@@ -1,8 +1,10 @@
-from ulauncher.api import SmallResult
+from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
 
-class CopyPathToClipboardItem(SmallResult):
+class CopyPathToClipboardItem(Result):
+    compact = True
+
     # pylint: disable=super-init-not-called
     def __init__(self, path: str):
         self.path = path

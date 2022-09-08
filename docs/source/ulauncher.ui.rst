@@ -35,14 +35,6 @@ ulauncher\.ui\.ResultWidget module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.ui\.SmallResultWidget module
--------------------------------------------
-
-.. automodule:: ulauncher.ui.SmallResultWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Module contents
 ---------------
 

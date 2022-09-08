@@ -3,12 +3,13 @@ from gi.repository import Gio
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 from ulauncher.modes.apps.launch_app import launch_app
-from ulauncher.api import SearchableResult
+from ulauncher.api.result import Result
 
 app_starts = JsonData.new_from_file(f"{PATHS.STATE}/app_starts.json")
 
 
-class AppResult(SearchableResult):
+class AppResult(Result):
+    searchable = True
     """
     :param Gio.DesktopAppInfo app_info:
     """

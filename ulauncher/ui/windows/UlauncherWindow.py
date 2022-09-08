@@ -5,8 +5,6 @@ from gi.repository import Gtk, Gdk, Keybinder
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
-from ulauncher.ui.SmallResultWidget import SmallResultWidget   # noqa: F401
-
 from ulauncher.config import PATHS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
@@ -285,7 +283,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         for index, result in enumerate(items):
             builder = Gtk.Builder()
             builder.set_translation_domain('ulauncher')
-            builder.add_from_file(f"{PATHS.ASSETS}/ui/{result.UI_FILE}.ui")
+            builder.add_from_file(f"{PATHS.ASSETS}/ui/result.ui")
 
             item_frame = builder.get_object('item-frame')
             item_frame.initialize(builder, result, index, query)

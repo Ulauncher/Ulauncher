@@ -1,13 +1,14 @@
 import os
 import re
 
-from ulauncher.api import SearchableResult
+from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 
 
-class ShortcutResult(SearchableResult):
+class ShortcutResult(Result):
+    searchable = True
 
     # pylint: disable=super-init-not-called, too-many-arguments
     def __init__(self, keyword, name, cmd, icon, default_search=False, run_without_argument=False, **kw):
