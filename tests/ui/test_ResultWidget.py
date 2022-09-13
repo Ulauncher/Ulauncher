@@ -10,8 +10,10 @@ from ulauncher.ui.ResultWidget import ResultWidget
 class TestResultWidget:
 
     @pytest.fixture
-    def item_obj(self):
-        return mock.create_autospec(Result)
+    def result(self):
+        res = mock.create_autospec(Result)
+        res.compact = False
+        return res
 
     @pytest.fixture(autouse=True)
     def Theme(self, mocker):
@@ -22,9 +24,9 @@ class TestResultWidget:
         return mocker.patch('ulauncher.ui.ResultWidget.ResultWidget.scroll_to_focus')
 
     @pytest.fixture
-    def result_wgt(self, builder, item_obj):
+    def result_wgt(self, builder, result):
         result_wgt = ResultWidget()
-        result_wgt.initialize(builder, item_obj, 3, 'query')
+        result_wgt.initialize(builder, result, 3, 'query')
         return result_wgt
 
     @pytest.fixture
@@ -39,20 +41,20 @@ class TestResultWidget:
     def pixbuf(self):
         return mock.Mock(spec=GdkPixbuf.Pixbuf)
 
-    def test_initialize(self, builder, item_obj, mocker):
+    def test_initialize(self, builder, result, mocker):
         result_wgt = ResultWidget()
         set_index = mocker.patch.object(result_wgt, 'set_index')
         set_name = mocker.patch.object(result_wgt, 'set_name')
         set_description = mocker.patch.object(result_wgt, 'set_description')
 
-        result_wgt.initialize(builder, item_obj, 3, 'query')
+        result_wgt.initialize(builder, result, 3, 'query')
 
         builder.get_object.return_value.connect.assert_any_call("button-release-event", result_wgt.on_click)
         builder.get_object.return_value.connect.assert_any_call("enter_notify_event", result_wgt.on_mouse_hover)
         set_index.assert_called_with(3)
-        set_name.assert_called_with(item_obj.get_name_highlighted.return_value)
-        set_description.assert_called_with(item_obj.get_description.return_value)
-        item_obj.get_description.assert_called_with('query')
+        set_name.assert_called_with(result.get_name_highlighted.return_value)
+        set_description.assert_called_with(result.get_description.return_value)
+        result.get_description.assert_called_with('query')
 
     def test_set_index(self, result_wgt, mocker):
         mock_set_shortcut = mocker.patch.object(result_wgt, 'set_shortcut')
@@ -111,5 +113,5 @@ class TestResultWidget:
         result_wgt.set_shortcut('Alt+1')
         builder.get_object.return_value.set_text.assert_called_with('Alt+1')
 
-    def test_keyword(self, result_wgt, item_obj):
-        assert result_wgt.get_keyword() is item_obj.keyword
+    def test_keyword(self, result_wgt, result):
+        assert result_wgt.get_keyword() is result.keyword
