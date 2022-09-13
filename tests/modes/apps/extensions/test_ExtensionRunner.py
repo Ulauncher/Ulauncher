@@ -71,24 +71,24 @@ class TestExtensionRunner:
         assert error['name'] == ExtensionRuntimeError.Terminated.value
         assert error['message'] == 'message'
 
-    def test_read_stderr_line(self, runner, DataInputStream):
-        test_output1 = b"Test Output 1"
-        test_output2 = b"Test Output 2"
+    def test_read_stderr_line(self, runner, SubprocessLauncher, DataInputStream):
+        test_output1 = "Test Output 1"
+        test_output2 = "Test Output 2"
         extid = "id"
-        read_line_finish = mock.Mock()
+        read_line_finish_utf8 = mock.Mock()
 
         runner.run(extid)
         extproc = runner.extension_procs[extid]
-        extproc.error_stream.read_line_finish = read_line_finish
+        extproc.error_stream.read_line_finish_utf8 = read_line_finish_utf8
 
-        read_line_finish.return_value = (test_output1, len(test_output1))
+        read_line_finish_utf8.return_value = (test_output1, len(test_output1))
         runner.handle_stderr(extproc.error_stream, mock.Mock(), extid)
         # Confirm the output is stored in recent_errors and read_line_async is called for the next
         # line.
         assert extproc.recent_errors[0] == test_output1
         assert extproc.error_stream.read_line_async.call_count == 2
 
-        read_line_finish.return_value = (test_output2, len(test_output2))
+        read_line_finish_utf8.return_value = (test_output2, len(test_output2))
         runner.handle_stderr(extproc.error_stream, mock.Mock(), extid)
         # The latest line should replace the previous line
         assert extproc.recent_errors[0] == test_output2

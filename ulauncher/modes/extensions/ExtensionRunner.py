@@ -115,9 +115,9 @@ class ExtensionRunner:
         )
 
     def handle_stderr(self, error_stream, result, extension_id):
-        output, _ = error_stream.read_line_finish(result)
+        output, _ = error_stream.read_line_finish_utf8(result)
         if output:
-            print(output.decode())
+            print(output)
         extproc = self.extension_procs.get(extension_id)
         if not extproc:
             logger.debug("Extension process context for %s no longer present", extension_id)
@@ -147,7 +147,7 @@ class ExtensionRunner:
             error_msg = f'Extension "{extension_id}" exited instantly with code {code}'
             logger.error(error_msg)
             self.set_extension_error(extension_id, ExtensionRuntimeError.ExitedInstantly, error_msg)
-            lasterr = b"\n".join(extproc.recent_errors).decode()
+            lasterr = "\n".join(extproc.recent_errors)
             error_info = ProcessErrorExtractor(lasterr)
             logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
             if error_info.is_import_error():
