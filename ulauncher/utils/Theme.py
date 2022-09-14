@@ -29,7 +29,7 @@ def load_available_themes():
             except ThemeManifestError as e:
                 logger.error('%s: %s', type(e).__name__, e)
                 continue
-            themes[theme.get_name()] = theme
+            themes[theme.get('name')] = theme
 
 
 class Theme:
@@ -46,54 +46,32 @@ class Theme:
 
         return current
 
-    theme_dict = None
+    _data = None
 
     def __init__(self, path):
         self.path = path
 
-    def get_manifest_version(self):
-        return self._read()['manifest_version']
-
-    def get_name(self):
-        return self._read()['name']
-
-    def get_display_name(self):
-        return self._read()['display_name']
-
-    def get_matched_text_hl_colors(self):
-        return self._read()['matched_text_hl_colors']
-
-    def get_extend_theme(self):
-        return self._read()['extend_theme']
-
-    def get_css_file(self):
-        return self._read()['css_file']
-
-    def get_css_file_gtk_3_20(self):
-        return self._read()['css_file_gtk_3.20+']
-
     def clear_cache(self):
-        self.theme_dict = None
+        self._data = None
 
     def _read(self):
-        if self.theme_dict:
-            return self.theme_dict
+        if not self._data:
+            with open(os.path.join(self.path, 'manifest.json'), 'r') as file:
+                self._data = load(file)
 
-        with open(os.path.join(self.path, 'manifest.json'), 'r') as f:
-            self.theme_dict = load(f)
+        return self._data
 
-        return self.theme_dict
+    def get(self, property: str):
+        return self._read().get(property)
 
     def validate(self):
         try:
-            assert self.get_manifest_version() in ['1'], "Supported manifest version is '1'"
-            assert self.get_name(), '"get_name" is empty'
-            assert self.get_display_name(), '"get_display_name" is empty'
-            assert self.get_matched_text_hl_colors(), '"get_matched_text_hl_colors" is empty'
-            assert self.get_css_file(), '"get_css_file" is empty'
-            assert self.get_css_file_gtk_3_20(), '"css_file_gtk_3.20+" is empty'
-            assert os.path.exists(os.path.join(self.path, self.get_css_file())), '"css_file" does not exist'
-            assert os.path.exists(os.path.join(self.path, self.get_css_file_gtk_3_20())), \
+            assert self.get('manifest_version') in ['1'], "Supported manifest version is '1'"
+            for prop in ['name', 'display_name', 'matched_text_hl_colors', 'css_file', 'css_file_gtk_3.20+']:
+                assert self.get(prop), '"%s" is empty' % prop
+
+            assert os.path.exists(os.path.join(self.path, self.get('css_file'))), '"css_file" does not exist'
+            assert os.path.exists(os.path.join(self.path, self.get('css_file_gtk_3.20+'))), \
                 '"css_file_gtk_3.20+" does not exist'
         except AssertionError as e:
             raise ThemeManifestError(e) from e
@@ -101,15 +79,15 @@ class Theme:
     def compile_css(self) -> None:
         # workaround for issue with a caret-color
         # GTK+ < 3.20 doesn't support that prop
-        css_file_name = self.get_css_file_gtk_3_20() if gtk_version_is_gte(3, 20, 0) else self.get_css_file()
+        css_file_name = self.get('css_file_gtk_3.20+') if gtk_version_is_gte(3, 20, 0) else self.get('css_file')
         css_file = os.path.join(self.path, css_file_name)
 
-        if not self.get_extend_theme():
+        if not self.get('extend_theme'):
             return css_file
 
         # if theme extends another one, we must import it in css
         # therefore a new css file (generated.css) is created here
-        extend_theme_name = self.get_extend_theme()
+        extend_theme_name = self.get('extend_theme')
         try:
             extend_theme = themes[extend_theme_name]
         except KeyError:
@@ -130,7 +108,7 @@ class Theme:
 
         # for ulauncher themes we must save generated.css elsewhere
         # because we don't have write permissions for /usr/share/ulauncher/themes/...
-        new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get_name())
+        new_theme_dir = os.path.join(CACHE_DIR, 'themes', self.get('name'))
         if not os.path.exists(new_theme_dir):
             os.makedirs(new_theme_dir)
 

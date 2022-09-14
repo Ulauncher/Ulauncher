@@ -265,7 +265,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             'blacklisted_desktop_dirs': self.settings.get_property('blacklisted-desktop-dirs'),
             'disable_desktop_filters': self.settings.get_property('disable-desktop-filters'),
             'available_themes': self._get_available_themes(),
-            'theme_name': Theme.get_current().get_name(),
+            'theme_name': Theme.get_current().get('name'),
             'render_on_screen': self.settings.get_property('render-on-screen'),
             'is_wayland': is_wayland(),
             'terminal_command': self.settings.get_property('terminal-command'),
@@ -568,7 +568,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
     def _get_available_themes(self):
         load_available_themes()
-        return [dict(value=th.get_name(), text=th.get_display_name()) for th in themes.values()]
+        return [dict(value=th.get('name'), text=th.get('display_name')) for th in themes.values()]
 
     def get_app_hotkey(self):
         app_hotkey_current_accel_name = self.settings.get_property('hotkey-show-app')

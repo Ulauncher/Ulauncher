@@ -11,7 +11,7 @@ class TestTheme:
         with open(os.path.join(str(tmpdir), 'theme.css'), 'w') as f:
             f.write('')
 
-        th.theme_dict = {
+        th._data = {
             "manifest_version": "1",
             "name": "light",
             "display_name": "Elementary Light",
@@ -29,11 +29,11 @@ class TestTheme:
         theme.validate()
 
     def test_validate__raises_on_invalid_manifest_version(self, theme):
-        theme.theme_dict['manifest_version'] = 3
+        theme._data['manifest_version'] = 3
         with pytest.raises(ThemeManifestError):
             theme.validate()
 
     def test_validate__raises_when_css_file_doesnt_exist(self, theme):
-        theme.theme_dict['css_file_gtk_3.20+'] = 'css_file_gtk_3.20.css'
+        theme._data['css_file_gtk_3.20+'] = 'css_file_gtk_3.20.css'
         with pytest.raises(ThemeManifestError):
             theme.validate()
