@@ -16,7 +16,7 @@ from ulauncher.ui.UlauncherApp import UlauncherApp
 
 def reload_config(app, logger):
     logger.info("Reloading config")
-    app.window.init_theme()
+    app.window.apply_theme()
 
 
 def main():

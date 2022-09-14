@@ -190,7 +190,7 @@ class PreferencesServer():
         if property == 'show_indicator_icon':
             self.application.toggle_appindicator(value)
         if property == 'theme_name':
-            self.apply_theme()
+            self.application.window.apply_theme()
 
     def apply_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
@@ -201,9 +201,6 @@ class PreferencesServer():
             self.autostart_pref.switch(is_enabled)
         except Exception as err:
             raise Exception(f'Caught an error while switching "autostart": {err}') from err
-
-    def apply_theme(self):
-        self.application.window.init_theme()
 
     @route('/set/hotkey-show-app')
     @glib_idle_add

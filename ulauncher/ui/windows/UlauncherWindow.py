@@ -118,16 +118,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # Helpers
     ######################################
 
-    def init_styles(self, css: str):
-        if not self._css_provider:
-            self._css_provider = Gtk.CssProvider()
-        self._css_provider.load_from_data(css.encode())
-        self.apply_css(self)
-        # pylint: disable=no-member
-        visual = self.get_screen().get_rgba_visual()
-        if visual:
-            self.set_visual(visual)
-
     def apply_css(self, widget):
         Gtk.StyleContext.add_provider(
             widget.get_style_context(),
@@ -141,15 +131,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         cursor = Gdk.Cursor.new_from_name(self.get_display(), cursor_name)
         self.get_window().set_cursor(cursor)
 
-    def init_theme(self):
-        theme = Theme.load(self.settings.theme_name)
-
+    def apply_theme(self):
         if self.settings.disable_window_shadow:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
         prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
-        self.init_styles(theme.get_css())
+
+        if not self._css_provider:
+            self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
+        self.apply_css(self)
+        # pylint: disable=no-member
+        visual = self.get_screen().get_rgba_visual()
+        if visual:
+            self.set_visual(visual)
 
     @Gtk.Template.Callback()
     def show_preferences(self, *_):
