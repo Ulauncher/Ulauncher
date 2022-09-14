@@ -47,19 +47,19 @@ class TestPreferencesContextServer:
     # pylint: disable=too-many-arguments
     def test_apply_settings_show_indicator_icon(self, prefs_server):
         prefs_server.apply_settings('show_indicator_icon', True)
-        prefs_server.application.toggle_appindicator.assert_called_with(True)
+        prefs_server.app.toggle_appindicator.assert_called_with(True)
         assert prefs_server.settings.show_indicator_icon is True
         assert check_json_prop("show_indicator_icon") is True
 
         prefs_server.apply_settings('show_indicator_icon', False)
-        prefs_server.application.toggle_appindicator.assert_called_with(False)
+        prefs_server.app.toggle_appindicator.assert_called_with(False)
         assert prefs_server.settings.show_indicator_icon is False
         assert check_json_prop("show_indicator_icon") is False
 
     def test_set_hotkey_show_app(self, prefs_server):
         hotkey = '<Primary>space'
         prefs_server.set_hotkey_show_app.original(prefs_server, hotkey)
-        prefs_server.application.bind_hotkey.assert_called_with(hotkey)
+        prefs_server.app.bind_hotkey.assert_called_with(hotkey)
         assert prefs_server.settings.hotkey_show_app == hotkey
         assert check_json_prop("hotkey_show_app") == hotkey
 

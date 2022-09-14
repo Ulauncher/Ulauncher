@@ -87,7 +87,7 @@ class PreferencesServer():
         return cls(application)
 
     def __init__(self, application):
-        self.application = application
+        self.app = application
         self.autostart_pref = UlauncherSystemdController()
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
@@ -188,9 +188,9 @@ class PreferencesServer():
         self.settings.save({property: value})
 
         if property == 'show_indicator_icon':
-            self.application.toggle_appindicator(value)
+            self.app.toggle_appindicator(value)
         if property == 'theme_name':
-            self.application.window.apply_theme()
+            self.app.window.apply_theme()
 
     def apply_autostart(self, is_enabled):
         logger.info('Set autostart-enabled to %s', is_enabled)
@@ -205,7 +205,7 @@ class PreferencesServer():
     @route('/set/hotkey-show-app')
     @glib_idle_add
     def set_hotkey_show_app(self, hotkey):
-        self.application.bind_hotkey(hotkey)
+        self.app.bind_hotkey(hotkey)
         self.settings.save(hotkey_show_app=hotkey)
 
     @route('/show/hotkey-dialog')
