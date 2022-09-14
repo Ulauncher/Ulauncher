@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 import sys
+from shutil import rmtree
 from functools import partial
 from pathlib import Path
 from configparser import ConfigParser
@@ -12,6 +13,7 @@ from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 _logger = logging.getLogger()
+CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{PATHS.HOME}/.cache"), "ulauncher_cache")  # See issue#40
 
 
 def _load_legacy(path: Path):
@@ -121,7 +123,7 @@ def v5_to_v6_destructive():
     # Delete old unused files
     cleanup_list = [
         *Path(PATHS.CONFIG).parent.rglob("autostart/ulauncher.desktop"),
-        *Path(PATHS.CACHE).rglob("*.db"),
+        *Path(CACHE_PATH).rglob("*.db"),
         *Path(PATHS.DATA).rglob("*.db"),
         *Path(PATHS.DATA).rglob("last.log"),
     ]
@@ -130,6 +132,10 @@ def v5_to_v6_destructive():
         print("\n".join(map(str, cleanup_list)))
         for file in cleanup_list:
             file.unlink()
+
+    if Path(CACHE_PATH).is_dir():
+        print(f"Removing deprecated cache directory '{CACHE_PATH}'")
+        rmtree(CACHE_PATH)
 
     # Delete old preferences
     # pylint: disable=import-outside-toplevel

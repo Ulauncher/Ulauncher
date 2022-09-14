@@ -1,139 +1,87 @@
-import os
 import logging
 import json
-from typing import Dict, Any
-from shutil import copytree, rmtree
+import re
+from pathlib import Path
+from typing import Dict
 
 from ulauncher.config import PATHS
-from ulauncher.utils.Settings import Settings
+from ulauncher.utils.json_data import JsonData, json_data_class
 
-themes = {}  # type: Dict[str, Any]
 logger = logging.getLogger()
-user_theme_dir = f"{PATHS.CONFIG}/user-themes"
+DEFAULT_THEME = "light"
 
 
-def load_available_themes():
-    themes.clear()
-    ulauncher_theme_dir = f"{PATHS.ASSETS}/themes"
-    theme_dirs = [os.path.join(ulauncher_theme_dir, d) for d in os.listdir(ulauncher_theme_dir)]
-    if os.path.exists(user_theme_dir):
-        theme_dirs.extend([os.path.join(user_theme_dir, d) for d in os.listdir(user_theme_dir)])
-    theme_dirs = list(filter(os.path.isdir, theme_dirs))
+def get_themes():
+    """
+    Gets a dict with the theme name as the key and theme as the value
+    """
+    themes = {}
+    manifests_paths = [
+        *Path(PATHS.SYSTEM_THEMES).glob("**/manifest.json"),
+        *Path(PATHS.USER_THEMES).glob("**/manifest.json"),
+    ]
 
-    for dir in theme_dirs:
-        if os.path.isfile(os.path.join(dir, 'manifest.json')):
-            theme = Theme(dir)
-            try:
-                theme.validate()
-            except ThemeManifestError as e:
-                logger.error('%s: %s', type(e).__name__, e)
-                continue
-            themes[theme.get_name()] = theme
+    for manifest_path in manifests_paths:
+        try:
+            theme = Theme(json.loads(manifest_path.read_text()), _path=manifest_path.parent)
+            theme.validate()
+            themes[theme.name] = theme
+        except Exception as e:
+            logger.warning("Ignoring invalid or broken theme '%s' (%s): %s", manifest_path, type(e).__name__, e)
 
     return themes
 
 
-class Theme:
+@json_data_class
+class Theme(JsonData):
+    manifest_version = ""
+    name = ""
+    display_name = ""
+    css_file = ""
+    extend_theme = ""
+    matched_text_hl_colors: Dict[str, str] = {}
+    _path = ""  # This should not be stored, but we never overwrite these files anyway
 
-    @classmethod
-    def get_current(cls):
-        default = 'light'
-        current_name = Settings.load().theme_name or default
-        if current_name not in themes:
-            logger.warning('No theme with name %s', current_name)
-            current_name = default
+    def get_css_path(self):
+        # `css_file_gtk_3.20+` is the only supported one if both are specified, otherwise css_file is
+        return Path(self._path, self.get("css_file_gtk_3.20+", self.css_file))
 
-        return themes.get(current_name)
-
-    theme_dict = None
-
-    def __init__(self, path):
-        self.path = path
-
-    def get_manifest_version(self):
-        return self._read()['manifest_version']
-
-    def get_name(self):
-        return self._read()['name']
-
-    def get_display_name(self):
-        return self._read()['display_name']
-
-    def get_matched_text_hl_colors(self):
-        return self._read()['matched_text_hl_colors']
-
-    def get_extend_theme(self):
-        return self._read()['extend_theme']
-
-    def get_css_file(self):
-        manifest = self._read()
-        # If "css_file_gtk_3.20+"" is specified, then "css_file" is for older version.
-        # Otherwise use "css_file"
-        return manifest.get('css_file_gtk_3.20+') or manifest.get('css_file')
-
-    def clear_cache(self):
-        self.theme_dict = None
-
-    def _read(self):
-        if self.theme_dict:
-            return self.theme_dict
-
-        with open(os.path.join(self.path, 'manifest.json'), 'r') as f:
-            self.theme_dict = json.load(f)
-
-        return self.theme_dict
+    def get_css(self):
+        css = self.get_css_path().read_text()
+        # Convert relative links starting with "./", would break if people use links starting with "../",
+        # but they _really_ shouldn't reference other user themes.
+        css = re.sub(r"url\(([\"\'])\.", f'url(\\1{self._path}', css)
+        if self.extend_theme:
+            parent_theme_path = Theme.load(self.extend_theme).get_css_path()
+            if parent_theme_path.is_file():
+                css = f'@import url("{parent_theme_path}");\n\n{css}'
+            else:
+                logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
+        return css
 
     def validate(self):
         try:
-            assert self.get_manifest_version() in ['1'], "Supported manifest version is '1'"
-            assert self.get_name(), '"get_name" is empty'
-            assert self.get_display_name(), '"get_display_name" is empty'
-            assert self.get_matched_text_hl_colors(), '"get_matched_text_hl_colors" is empty'
-            assert self.get_css_file(), '"get_css_file" is empty'
-            assert os.path.exists(os.path.join(self.path, self.get_css_file())), '"css_file" does not exist'
+            assert self.manifest_version == "1", "Supported manifest version is '1'"
+            for prop in ['name', 'display_name', 'matched_text_hl_colors', 'css_file']:
+                assert self.get(prop), f'"{prop}" is empty'
+            assert self.get_css_path().is_file(), f'{self.get_css_path()} is not a file'
         except AssertionError as e:
-            raise ThemeManifestError(e) from e
+            raise ThemeError(e) from e
 
-    def compile_css(self) -> None:
-        css_file_name = self.get_css_file()
-        css_file = os.path.join(self.path, css_file_name)
-        # if theme extends another one, we must import it in css
-        # therefore a new css file (generated.css) is created here
-        extend_theme_name = self.get_extend_theme()
-        extend_theme = themes.get(extend_theme_name)
+    @classmethod
+    def load(cls, theme_name: str):
+        themes = get_themes()
+        if theme_name in themes:
+            return themes[theme_name]
 
-        if not extend_theme:
-            if extend_theme_name:
-                logger.error('Cannot extend theme "%s". It does not exist', extend_theme_name)
-            return css_file
+        logger.warning("Couldn't load theme: '%s'", theme_name)
 
-        generated_css = self._get_path_for_generated_css()
-        with open(generated_css, 'w') as new_css_file:
-            new_css_file.write(f'@import url("{extend_theme.compile_css()}");\n\n')
-            with open(css_file, 'r') as theme_css_file:
-                new_css_file.write(theme_css_file.read())
+        if theme_name != DEFAULT_THEME and DEFAULT_THEME in themes:
+            return themes[DEFAULT_THEME]
 
-        return generated_css
-
-    def _get_path_for_generated_css(self):
-        if user_theme_dir in self.path:
-            return os.path.join(self.path, 'generated.css')
-
-        # for ulauncher themes we must save generated.css elsewhere
-        # because we don't have write permissions for /usr/share/ulauncher/themes/...
-        new_theme_dir = f"{PATHS.CACHE}/themes/{self.get_name()}"
-        if not os.path.exists(new_theme_dir):
-            os.makedirs(new_theme_dir)
-
-        # copy current theme files to this new dir
-        rmtree(new_theme_dir)
-        copytree(self.path, new_theme_dir)
-
-        # ensure correct file permissions
-        os.chmod(new_theme_dir, 0o755)
-
-        return os.path.join(new_theme_dir, 'generated.css')
+        # Return the first on the list if everything else fails
+        return next(iter(themes))
 
 
-class ThemeManifestError(Exception):
+class ThemeError(Exception):
     pass

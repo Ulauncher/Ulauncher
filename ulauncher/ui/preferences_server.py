@@ -14,7 +14,7 @@ from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.utils.Theme import load_available_themes
+from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.decorator.run_async import run_async
@@ -155,7 +155,6 @@ class PreferencesServer():
     def get_all(self):
         logger.info('API call /get/all')
         export_settings = self.settings.copy()
-        themes = [dict(value=th.get_name(), text=th.get_display_name()) for th in load_available_themes().values()]
 
         hotkey_caption = "Ctrl+Space"
         try:
@@ -167,7 +166,7 @@ class PreferencesServer():
         export_settings.update({
             'autostart_allowed': self.autostart_pref.is_allowed(),
             'autostart_enabled': self.autostart_pref.is_enabled(),
-            'available_themes': themes,
+            'available_themes': [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
             'hotkey_show_app': hotkey_caption,
             'env': {
                 'version': VERSION,

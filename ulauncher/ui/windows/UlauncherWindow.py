@@ -14,7 +14,7 @@ from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.wm import get_monitor
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
-from ulauncher.utils.Theme import Theme, load_available_themes
+from ulauncher.utils.Theme import Theme
 from ulauncher.api.shared.query import Query
 
 logger = logging.getLogger()
@@ -118,10 +118,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # Helpers
     ######################################
 
-    def init_styles(self, path):
+    def init_styles(self, css: str):
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        self._css_provider.load_from_path(path)
+        self._css_provider.load_from_data(css.encode())
         self.apply_css(self)
         # pylint: disable=no-member
         visual = self.get_screen().get_rgba_visual()
@@ -142,17 +142,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.get_window().set_cursor(cursor)
 
     def init_theme(self):
-        load_available_themes()
-        theme = Theme.get_current()
-        theme.clear_cache()
+        theme = Theme.load(self.settings.theme_name)
 
         if self.settings.disable_window_shadow:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
         prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
-
-        self.init_styles(theme.compile_css())
+        self.init_styles(theme.get_css())
 
     @Gtk.Template.Callback()
     def show_preferences(self, *_):

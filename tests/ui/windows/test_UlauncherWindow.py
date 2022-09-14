@@ -23,10 +23,6 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Theme')
 
     @pytest.fixture(autouse=True)
-    def load_available_themes(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
-
-    @pytest.fixture(autouse=True)
     def new_image_from_surface(self, mocker):
         mocked = mocker.patch('ulauncher.ui.windows.UlauncherWindow.Gtk.Image.new_from_pixbuf')
         mocked.return_value = Gtk.Image()

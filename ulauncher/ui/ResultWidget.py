@@ -99,8 +99,8 @@ class ResultWidget(Gtk.EventBox):
             self.builder.get_object('item-icon').set_from_surface(icon)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
-        colors = Theme.get_current().get_matched_text_hl_colors()
-        color = colors['when_selected'] if is_selected else colors['when_not_selected']
+        colors = Theme.load(Settings.load().theme_name).matched_text_hl_colors
+        color = colors.get('when_selected' if is_selected else 'when_not_selected')
         self.set_name(self.result.get_name_highlighted(self.query, color) or self.result.get_name())
 
     # pylint: disable=arguments-differ
