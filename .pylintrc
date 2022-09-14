@@ -147,7 +147,24 @@ disable=print-statement,
         duplicate-code,
         cyclic-import,
         broad-except,
-        fixme
+        fixme,
+        consider-using-f-string,
+        unrecognized-option,
+        unspecified-encoding,
+        useless-option-value,
+        unknown-option-value,
+        consider-using-in,
+        consider-using-with,
+        consider-iterating-dictionary,
+        inconsistent-return-statements,
+        no-else-return,
+        deprecated-method,
+        deprecated-module,
+        unnecessary-dunder-call,
+        import-outside-toplevel,
+        raise-missing-from,
+        use-a-generator,
+        unnecessary-comprehension
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

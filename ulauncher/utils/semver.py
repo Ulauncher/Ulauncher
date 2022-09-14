@@ -1,7 +1,4 @@
-# -*- coding:utf-8 -*-
-
-# pylint: disable=too-many-lines,redefined-outer-name,too-many-nested-blocks,no-else-return,too-many-branches
-# pylint: disable=too-many-statements,len-as-condition
+# pylint: skip-file
 
 """
 https://github.com/podhmo/python-semver/blob/master/semver/__init__.py
@@ -21,7 +18,6 @@ class InvalidTypeIncluded(ValueError):
 
 
 class _R:
-    # pylint: disable=redefined-outer-name
     def __init__(self, i):
         self.i = i
 
