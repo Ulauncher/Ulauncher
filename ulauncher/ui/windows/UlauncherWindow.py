@@ -114,70 +114,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         return False
 
-    ######################################
-    # Helpers
-    ######################################
-
-    def apply_css(self, widget):
-        Gtk.StyleContext.add_provider(
-            widget.get_style_context(),
-            self._css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
-        if isinstance(widget, Gtk.Container):
-            widget.forall(self.apply_css)
-
-    def set_cursor(self, cursor_name):
-        cursor = Gdk.Cursor.new_from_name(self.get_display(), cursor_name)
-        self.get_window().set_cursor(cursor)
-
-    def apply_theme(self):
-        if self.settings.disable_window_shadow:
-            self.window_body.get_style_context().add_class('no-window-shadow')
-
-        prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
-        self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
-
-        if not self._css_provider:
-            self._css_provider = Gtk.CssProvider()
-        self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
-        self.apply_css(self)
-        # pylint: disable=no-member
-        visual = self.get_screen().get_rgba_visual()
-        if visual:
-            self.set_visual(visual)
-
     @Gtk.Template.Callback()
     def show_preferences(self, *_):
         self.get_application().show_preferences()
-
-    def position_window(self):
-        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
-        geo = monitor.get_geometry()
-        max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
-        window_width = 750
-        self.set_property('width-request', window_width)
-        self.scroll_container.set_property('max-content-height', max_height)
-        self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
-
-    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
-    def show(self):
-        # works only when the following methods are called in that exact order
-        self.present()
-        self.position_window()
-        if IS_X11_COMPATIBLE:
-            self.present_with_time(Keybinder.get_current_event_time())
-
-        if self.initial_query or self.settings.clear_previous_query:
-            self.input.set_text(self.initial_query)
-            self.input.set_position(-1)
-            self.initial_query = ""
-        elif not self._get_input_text():
-            # make sure frequent apps are shown if necessary
-            self.show_results([])
-
-        self.input.grab_focus()
-        super().show()
 
     @Gtk.Template.Callback()
     def on_mouse_down(self, _, event):
@@ -209,6 +148,74 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 event.y_root - start['y']
             )
 
+    ######################################
+    # Helpers
+    ######################################
+
+    def apply_css(self, widget):
+        Gtk.StyleContext.add_provider(
+            widget.get_style_context(),
+            self._css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        if isinstance(widget, Gtk.Container):
+            widget.forall(self.apply_css)
+
+    def apply_theme(self):
+        if self.settings.disable_window_shadow:
+            self.window_body.get_style_context().add_class('no-window-shadow')
+
+        prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
+        self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
+
+        if not self._css_provider:
+            self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
+        self.apply_css(self)
+        # pylint: disable=no-member
+        visual = self.get_screen().get_rgba_visual()
+        if visual:
+            self.set_visual(visual)
+
+    def position_window(self):
+        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
+        geo = monitor.get_geometry()
+        max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
+        window_width = 750
+        self.set_property('width-request', window_width)
+        self.scroll_container.set_property('max-content-height', max_height)
+        self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
+
+    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
+    def show(self):
+        # works only when the following methods are called in that exact order
+        self.present()
+        self.position_window()
+        if IS_X11_COMPATIBLE:
+            self.present_with_time(Keybinder.get_current_event_time())
+
+        if self.initial_query or self.settings.clear_previous_query:
+            self.input.set_text(self.initial_query)
+            self.input.set_position(-1)
+            self.initial_query = ""
+        elif not self._get_input_text():
+            # make sure frequent apps are shown if necessary
+            self.show_results([])
+
+        self.input.grab_focus()
+        super().show()
+
+    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
+    def hide(self, *args, **kwargs):
+        """Override the hide method to ensure the pointer grab is released."""
+        if self.settings.grab_mouse_pointer:
+            self.get_pointer_device().ungrab(0)
+        super().hide(*args, **kwargs)
+
+    def set_cursor(self, cursor_name):
+        cursor = Gdk.Cursor.new_from_name(self.get_display(), cursor_name)
+        self.get_window().set_cursor(cursor)
+
     def _get_input_text(self):
         return self.input.get_text().lstrip()
 
@@ -222,13 +229,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
-
-    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
-    def hide(self, *args, **kwargs):
-        """Override the hide method to ensure the pointer grab is released."""
-        if self.settings.grab_mouse_pointer:
-            self.get_pointer_device().ungrab(0)
-        super().hide(*args, **kwargs)
 
     def get_pointer_device(self):
         return (self
