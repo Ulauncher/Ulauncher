@@ -9,10 +9,6 @@ from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 class TestUlauncherWindow:
 
     @pytest.fixture(autouse=True)
-    def init_styles(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.init_styles')
-
-    @pytest.fixture(autouse=True)
     def is_x11_compatible(self, mocker):
         wayland_compat = mocker.patch('ulauncher.ui.windows.UlauncherWindow.IS_X11_COMPATIBLE')
         wayland_compat.return_value = False
@@ -21,10 +17,6 @@ class TestUlauncherWindow:
     @pytest.fixture(autouse=True)
     def Theme(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.Theme')
-
-    @pytest.fixture(autouse=True)
-    def load_available_themes(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_available_themes')
 
     @pytest.fixture(autouse=True)
     def new_image_from_surface(self, mocker):

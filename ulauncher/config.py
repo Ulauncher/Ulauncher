@@ -8,12 +8,13 @@ API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 HOME = os.path.expanduser("~")
-CACHE = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{HOME}/.cache"), "ulauncher_cache")  # See issue#40
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
 DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
 EXTENSIONS = os.path.join(DATA, "extensions")
 EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
+USER_THEMES = os.path.join(CONFIG, "user-themes")
+SYSTEM_THEMES = os.path.join(ASSETS, "themes")
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
@@ -21,12 +22,13 @@ class _PATHS_CLASS:
     APPLICATION = APPLICATION
     ASSETS = ASSETS
     HOME = HOME
-    CACHE = CACHE
     CONFIG = CONFIG
     DATA = DATA
     STATE = STATE
     EXTENSIONS = EXTENSIONS
     EXTENSIONS_CONFIG = EXTENSIONS_CONFIG
+    USER_THEMES = USER_THEMES
+    SYSTEM_THEMES = SYSTEM_THEMES
 
 
 PATHS = _PATHS_CLASS()
@@ -37,11 +39,11 @@ FIRST_V6_RUN = not os.path.exists(PATHS.STATE)
 if not os.path.exists(PATHS.ASSETS):
     raise OSError(PATHS.ASSETS)
 
-os.makedirs(PATHS.CACHE, exist_ok=True)
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
+os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
 
 @lru_cache()

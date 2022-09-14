@@ -74,7 +74,7 @@ class TestPreferencesContextServer:
         prefs_server.apply_settings('theme_name', 'lime')
         assert prefs_server.settings.theme_name == 'lime'
         assert check_json_prop("theme_name") == 'lime'
-        ulauncherWindow.init_theme.assert_called_with()
+        ulauncherWindow.apply_theme.assert_called_with()
 
     def test_show_hotkey_dialog(self, prefs_server, hotkey_dialog):
         prefs_server.show_hotkey_dialog.original(prefs_server)

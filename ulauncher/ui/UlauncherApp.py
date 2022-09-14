@@ -60,7 +60,7 @@ class UlauncherApp(Gtk.Application):
         window.set_application(self)
         window.set_keep_above(True)
         window.position_window()
-        window.init_theme()
+        window.apply_theme()
 
         # this will trigger to show frequent apps if necessary
         window.show_results([])
