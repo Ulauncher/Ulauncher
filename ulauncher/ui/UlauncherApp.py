@@ -56,14 +56,14 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self, _):
         self.hold()  # Keep the app running even without a window
-        self.window = window = UlauncherWindow.get_instance()
-        window.set_application(self)
-        window.set_keep_above(True)
-        window.position_window()
-        window.apply_theme()
+        self.window = UlauncherWindow.get_instance()
+        self.window.set_application(self)
+        self.window.set_keep_above(True)
+        self.window.position_window()
+        self.window.apply_theme()
 
         # this will trigger to show frequent apps if necessary
-        window.show_results([])
+        self.window.show_results([])
 
         if self.settings.show_indicator_icon:
             self.appindicator = AppIndicator(self)
