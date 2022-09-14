@@ -11,6 +11,7 @@ from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.api.shared.query import Query
 
 logger = logging.getLogger()
 
@@ -19,6 +20,7 @@ class UlauncherApp(Gtk.Application):
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
+    _query = ""
     settings = Settings.load()
     window = None  # type: UlauncherWindow
     preferences = None  # type: PreferencesWindow
@@ -34,10 +36,21 @@ class UlauncherApp(Gtk.Application):
         )
         self.connect("startup", self.setup)  # runs only once on the main instance
 
+    @property
+    def query(self) -> Query:
+        return Query(self._query)
+
+    @query.setter
+    def query(self, value: str):
+        self._query = value.lstrip()
+        if self.window:
+            self.window.input.set_text(self._query)
+            self.window.input.set_position(-1)
+
     def do_before_emit(self, *args, **kwargs):
         query = args[0].lookup_value("query", GLib.VariantType("s"))
         if query:
-            self.window.initial_query = query.unpack()
+            self.query = query.unpack()
 
     def do_activate(self, *args, **kwargs):
         self.window.show()

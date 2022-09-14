@@ -15,7 +15,6 @@ from ulauncher.utils.wm import get_monitor
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme
-from ulauncher.api.shared.query import Query
 
 logger = logging.getLogger()
 
@@ -36,7 +35,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     window_body = Gtk.Template.Child("body")
     results_nav = None
     settings = Settings.load()
-    initial_query = ""
     _css_provider = None
     _drag_start_coords = None
 
@@ -72,11 +70,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        query = self._get_user_query()
-        # This might seem odd, but this makes sure any normalization done in get_user_query() is
-        # reflected in the input box. In particular, stripping out the leading white-space.
-        self.input.set_text(query)
-        ModeHandler.get_instance().on_query_change(query)
+        self.app.query = self.input.get_text()
+        ModeHandler.get_instance().on_query_change(self.app.query)
 
     @Gtk.Template.Callback()
     def on_input_key_press(self, widget, event):
@@ -85,7 +80,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         jump_keys = self.settings.get_jump_keys()
-        ModeHandler.get_instance().on_key_press_event(widget, event, self._get_user_query())
+        ModeHandler.get_instance().on_key_press_event(widget, event, self.app.query)
 
         if keyname == 'Escape':
             self.hide()
@@ -116,7 +111,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @Gtk.Template.Callback()
     def show_preferences(self, *_):
-        self.get_application().show_preferences()
+        self.app.show_preferences()
 
     @Gtk.Template.Callback()
     def on_mouse_down(self, _, event):
@@ -151,6 +146,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
     # Helpers
     ######################################
+
+    @property
+    def app(self):
+        return self.get_application()
 
     def apply_css(self, widget):
         Gtk.StyleContext.add_provider(
@@ -194,11 +193,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if IS_X11_COMPATIBLE:
             self.present_with_time(Keybinder.get_current_event_time())
 
-        if self.initial_query or self.settings.clear_previous_query:
-            self.input.set_text(self.initial_query)
-            self.input.set_position(-1)
-            self.initial_query = ""
-        elif not self._get_input_text():
+        if not self.app.query:
             # make sure frequent apps are shown if necessary
             self.show_results([])
 
@@ -211,22 +206,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
         super().hide(*args, **kwargs)
+        if self.settings.clear_previous_query:
+            self.app.query = ""
 
     def set_cursor(self, cursor_name):
         cursor = Gdk.Cursor.new_from_name(self.get_display(), cursor_name)
         self.get_window().set_cursor(cursor)
 
-    def _get_input_text(self):
-        return self.input.get_text().lstrip()
-
-    def _get_user_query(self):
-        return Query(self._get_input_text())
-
     def select_result(self, index):
         self.results_nav.select(index)
 
     def enter_result(self, index=None, alt=False):
-        if self.results_nav.enter(self._get_user_query(), index, alt=alt):
+        if self.results_nav.enter(self.app.query, index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
@@ -252,13 +243,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if not self.input.get_text() and self.settings.max_recent_apps:
             results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
-        results = self.create_item_widgets(results, self._get_user_query())
+        results = self.create_item_widgets(results, self.app.query)
 
         if results:
             for item in results[:limit]:
                 self.result_box.add(item)
             self.results_nav = ItemNavigation(self.result_box.get_children())
-            self.results_nav.select_default(self._get_user_query())
+            self.results_nav.select_default(self.app.query)
 
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
