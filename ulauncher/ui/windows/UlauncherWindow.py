@@ -70,7 +70,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        self.app.query = self.input.get_text()
+        self.app._query = self.input.get_text().lstrip()
         ModeHandler.get_instance().on_query_change(self.app.query)
 
     @Gtk.Template.Callback()
