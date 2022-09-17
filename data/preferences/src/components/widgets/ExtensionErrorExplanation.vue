@@ -10,7 +10,7 @@
         >The author of this extension does not provide a version compatible with your Ulauncher version.</p>
         <p
           v-else-if="errorName === 'VersionsJsonNotFound'"
-        >It looks like this extension is not compatible with the new version of Ulauncher.</p>
+        >It looks like this extension is not compatible with this version of Ulauncher.</p>
         <p v-else-if="errorName === 'InvalidVersionsJson'">
           There's an error in versions.json:
           <br>
