@@ -182,6 +182,12 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         Search.get_instance().on_key_press_event(widget, event, self._get_user_query())
 
+        if keyname == 'Escape':
+            self.hide()
+
+        elif ctrl and keyname == 'comma':
+            self.activate_preferences()
+
         if self.results_nav:
             if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
                 self.results_nav.go_up()
@@ -207,9 +213,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                 except IndexError:
                     # selected non-existing result item
                     pass
-
-        if keyname == 'Escape':
-            self.hide()
 
     ######################################
     # Helpers
