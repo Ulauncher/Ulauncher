@@ -111,7 +111,7 @@ class GithubExtension:
             raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError) from e
 
     def read_versions(self) -> List[Dict[str, str]]:
-        versions = self._read_json('master', 'versions.json')
+        versions = self._read_json('HEAD', 'versions.json')
 
         if not isinstance(versions, list):
             raise GithubExtensionError('versions.json should contain a list', ErrorName.InvalidVersionsJson)
