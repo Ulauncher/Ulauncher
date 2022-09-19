@@ -143,7 +143,6 @@ export default {
       hideCopyErrorDetails: [
         'InvalidGithubUrl',
         'IncompatibleVersion',
-        'VersionsJsonNotFound',
         'InvalidVersionsJson',
         'InvalidManifestJson'
       ]

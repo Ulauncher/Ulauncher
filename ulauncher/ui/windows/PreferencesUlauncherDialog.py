@@ -16,7 +16,7 @@ gi.require_version('WebKit2', '4.0')
 # pylint: disable=wrong-import-position,unused-argument
 from gi.repository import Gio, Gtk, WebKit2, GLib
 
-from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 from ulauncher.ui.windows.Builder import Builder
@@ -413,7 +413,12 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def prefs_open_url(self, url_params):
         url = unquote(url_params['query']['url'])
         logger.info('Open Web URL %s', url)
-        OpenUrlAction(url).run()
+        OpenAction(url).run()
+
+    @rt.route('/open/extensions-dir')
+    def open_extensions_dir(self, _):
+        logger.info('Open extensions directory "%s" in default file manager.', EXTENSIONS_DIR)
+        OpenAction(EXTENSIONS_DIR).run()
 
     @rt.route('/close')
     def prefs_close(self, url_params):

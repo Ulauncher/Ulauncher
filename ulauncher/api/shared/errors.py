@@ -4,7 +4,6 @@ from enum import Enum
 class ErrorName(Enum):
     InvalidGithubUrl = 'InvalidGithubUrl'
     IncompatibleVersion = 'IncompatibleVersion'
-    VersionsJsonNotFound = 'VersionsJsonNotFound'
     InvalidVersionsJson = 'InvalidVersionsJson'
     GithubApiError = 'GithubApiError'
     ExtensionAlreadyAdded = 'ExtensionAlreadyAdded'

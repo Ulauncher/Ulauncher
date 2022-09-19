@@ -3,7 +3,6 @@ import json
 import logging
 from datetime import datetime
 from urllib.request import urlopen
-from urllib.error import HTTPError
 from typing import Dict, List, cast
 from ulauncher.utils.mypy_extensions import TypedDict
 
@@ -54,13 +53,16 @@ class GithubExtension:
     def __init__(self, url):
         self.url = url
 
+    def _unsafe_fetch_json(self, url):
+        return json.loads(urlopen(url).read().decode('utf-8'))
+
     def validate_url(self):
         if not re.match(self.url_match_pattern, self.url, re.I):
             raise GithubExtensionError('Invalid GithubUrl: %s' % self.url, ErrorName.InvalidGithubUrl)
 
     def find_compatible_version(self) -> Commit:
         """
-        Finds maximum version that is compatible with current version of Ulauncher
+        Finds latest version that is compatible with current version of Ulauncher
         and returns a commit or branch/tag name
 
         :raises ulauncher.api.server.GithubExtension.InvalidVersionsFileError:
@@ -75,13 +77,7 @@ class GithubExtension:
                 "This extension is not compatible with current version Ulauncher extension API (v%s)" % api_version,
                 ErrorName.IncompatibleVersion)
 
-        try:
-            return self.get_commit(sha_or_branch)
-        except HTTPError as e:
-            raise GithubExtensionError(
-                f'Branch/commit "{sha_or_branch}" does not exist.',
-                ErrorName.InvalidVersionsJson
-            ) from e
+        return self.get_commit(sha_or_branch)
 
     def get_commit(self, sha_or_branch) -> Commit:
         """
@@ -90,7 +86,14 @@ class GithubExtension:
 
         project_path = self._get_project_path()
         url = self.url_commit_template.format(project_path=project_path, commit=sha_or_branch)
-        resp = json.loads(urlopen(url).read().decode('utf-8'))
+
+        try:
+            resp = self._unsafe_fetch_json(url)
+        except Exception as e:
+            raise GithubExtensionError(
+                f'Commit/branch "{sha_or_branch}" does not exist or could not be retrieved.',
+                ErrorName.InvalidVersionsJson
+            ) from e
 
         return {
             'sha': resp['sha'],
@@ -102,12 +105,11 @@ class GithubExtension:
         url = self.url_file_template.format(project_path=project_path, branch=commit, file_path=file_path)
 
         try:
-            return json.loads(urlopen(url).read().decode('utf-8'))
-        except HTTPError as e:
-            logger.warning('_read_json("%s", "%s") failed. %s: %s', commit, file_path, type(e).__name__, e)
-            if e.code == 404:
+            return self._unsafe_fetch_json(url)
+        except Exception as e:
+            if getattr(e, 'code', None) == 404:
                 raise GithubExtensionError('Could not find versions.json file using URL "%s"' %
-                                           url, ErrorName.VersionsJsonNotFound) from e
+                                           url, ErrorName.IncompatibleVersion) from e
             raise GithubExtensionError('Unexpected Github API Error', ErrorName.GithubApiError) from e
 
     def read_versions(self) -> List[Dict[str, str]]:
