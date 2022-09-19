@@ -26,35 +26,21 @@ Check out :doc:`debugging` to learn how to test and debug your extension.
 
 versions.json
 -------------
+``versions.json`` lists the supported versions of Ulauncher API. It should be in to the **root** directory of the default branch.
 
-The file contains a list with supported versions of Ulauncher API. ``commit`` field may be either a commit id, branch name, or git tag where the code for that required version is located
+Note that before Ulauncher 5.15.0 the default branch had to be named **master**, so for compatibility reasons it's highly adviced to use this name still.
 
-``versions.json`` must be checked in to the **root** dir of **master** branch.
+* ``commit`` should specify the commit hash, branch name, or git tag referencing the version.
+* ``required_api_version`` should contain a version string, ex "2".
 
-``required_api_version`` must contain a specific version or a range of versions defined using `NPM Semver <https://docs.npmjs.com/cli/v6/using-npm/semver>`_ format.
-
-Let's take this example::
-
+Example::
 
   [
-    {"required_api_version": "^1.0.0", "commit": "release-for-api-v1"},
-    {"required_api_version": "^2.0.0", "commit": "release-for-api-v2"},
-    {"required_api_version": "^2.3.1", "commit": "master"}
+    {"required_api_version": "2", "commit": "master"},
+    {"required_api_version": "3", "commit": "future_v3_api"}
   ]
 
-``release-for-api-v1`` is a branch name (or may be a git tag in this case too). You can choose branch/tag names whatever you like.
-
-``^1.0.0`` means that the Ulauncher will install extension from branch ``release-for-api-v1`` if Ulauncher Extension API >= 1.0.0 and < 2.0.0
-
-If for example the current API version is ``2.5.0``, which matches both ``^2.0.0`` and ``^2.3.1`` requirements, then Ulauncher will install extension from ``master`` branch because it chooses the last matched item.
-
 You can find the current version on the About page of Ulauncher preferences.
-
-.. TODO: add a screenshot
-
-**What problem does versions.json solve?**
-
-We want to minimize the amount of code and infrastructure components that are needed to have a flexible extension ecosystem. For that reason we want to rely on Github as much as possible as a storage of extensions. We also want to allow extension developers to release extensions for previous versions of Ulauncher (for bug fixes for example). That's why ``versions.json`` will be used to track all releases of a certain extension.
 
 **How does Ulauncher use this file?**
 
@@ -68,7 +54,7 @@ manifest.json
 Create :file:`manifest.json` using the following template::
 
   {
-    "required_api_version": "^2.0.0",
+    "required_api_version": "2",
     "name": "Demo extension",
     "description": "Extension Description",
     "developer_name": "John Doe",
@@ -87,7 +73,7 @@ Create :file:`manifest.json` using the following template::
     ]
   }
 
-* ``required_api_version`` - a version of Ulauncher Extension API that the extension requires. It should follow `NPM Semver <https://docs.npmjs.com/misc/semver>`_ format. In most of the cases you would want to specify a string like ``^x.y.z`` where ``x.y.z`` is the current version of extension API (not Ulauncher). You can find the current version number on the About page of Ulauncher preferences.
+* ``required_api_version`` - a version of Ulauncher Extension API that the extension requires, for example "2". You can find the current version number on the About page of Ulauncher preferences.
 * ``name``, ``description``, ``developer_name`` can be anything you like but not an empty string
 * ``icon`` - relative path to an extension icon
 * ``options`` - dictionary of optional parameters. See available options below
