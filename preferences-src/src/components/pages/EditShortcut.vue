@@ -71,7 +71,7 @@ const shortcutIconEventName = 'shortcut-icon-event'
 
 export default {
   name: 'edit-shortcut',
-  props: ['id', 'icon', 'name', 'keyword', 'cmd', 'is_default_search', 'run_without_argument'],
+  props: ['added', 'id', 'icon', 'name', 'keyword', 'cmd', 'is_default_search', 'run_without_argument'],
   created() {
     bus.$on(shortcutIconEventName, this.onIconSelected)
   },
@@ -123,7 +123,6 @@ export default {
       }
 
       let shortcut = {
-        id: this.id || '',
         icon: this.localIcon || '',
         name: this.localName,
         keyword: this.localKeyword.trim(),
@@ -131,8 +130,11 @@ export default {
         is_default_search: this.localIsDefaultSearch,
         run_without_argument: this.localRunWithoutArgument
       }
-      let method = shortcut.id ? 'update' : 'add'
-      fetchData('prefs:///shortcut/' + method, shortcut).then(this.hide, err => bus.$emit('error', err))
+      if (this.id) { // Editing existing shortcut
+        shortcut.id = this.id;
+        shortcut.added = this.added;
+      }
+      fetchData('prefs:///shortcut/update', shortcut).then(this.hide, err => bus.$emit('error', err))
     },
     hide() {
       this.$router.push({ path: '/shortcuts' })
