@@ -122,17 +122,15 @@ export default {
         return
       }
 
-      let shortcut = {
+      const shortcut = {
+        added: Number(this.added) || Math.floor(new Date().getTime() / 1000),
+        id: this.id || Array(20).fill().map(n=>(Math.random()*36|0).toString(36)).join(''),
         icon: this.localIcon || '',
         name: this.localName,
         keyword: this.localKeyword.trim(),
         cmd: this.localCmd,
         is_default_search: this.localIsDefaultSearch,
         run_without_argument: this.localRunWithoutArgument
-      }
-      if (this.id) { // Editing existing shortcut
-        shortcut.id = this.id;
-        shortcut.added = this.added;
       }
       fetchData('prefs:///shortcut/update', shortcut).then(this.hide, err => bus.$emit('error', err))
     },

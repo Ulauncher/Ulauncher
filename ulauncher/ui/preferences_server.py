@@ -254,13 +254,11 @@ class PreferencesServer():
         return list(ShortcutsDb.load().values())
 
     @route('/shortcut/update')
-    @route('/shortcut/add')
     def shortcut_update(self, shortcut):
         logger.info('Add/Update shortcut: %s', json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
-        id = shortcuts.add(shortcut)
+        shortcuts[shortcut["id"]] = shortcut
         shortcuts.save()
-        return {'id': id}
 
     @route('/shortcut/remove')
     def shortcut_remove(self, shortcut_id):
