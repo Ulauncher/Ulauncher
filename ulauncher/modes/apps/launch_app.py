@@ -19,7 +19,7 @@ def launch_app(app_id):
     app_wm_id = (app.get_string("StartupWMClass") or basename(app_exec)).lower()
     if app_exec and IS_X11 and (settings.raise_if_started or app.get_boolean('SingleMainWindow')):
         for win in get_windows_stacked():
-            win_app_wm_id = win.get_class_group_name().lower()
+            win_app_wm_id = (win.get_class_group_name() or "").lower()
             if win_app_wm_id == "thunar" and win.get_name().startswith("Bulk Rename"):
                 # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
                 win_app_wm_id = "thunar --bulk-rename"
