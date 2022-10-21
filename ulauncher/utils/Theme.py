@@ -48,9 +48,8 @@ class Theme(JsonData):
 
     def get_css(self):
         css = self.get_css_path().read_text()
-        # Convert relative links starting with "./", would break if people use links starting with "../",
-        # but they _really_ shouldn't reference other user themes.
-        css = re.sub(r"url\(([\"\'])\.", f'url(\\1{self._path}', css)
+        # Convert relative links to absolute
+        css = re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self._path}/", css)
         if self.extend_theme:
             parent_theme_path = Theme.load(self.extend_theme).get_css_path()
             if parent_theme_path.is_file():
