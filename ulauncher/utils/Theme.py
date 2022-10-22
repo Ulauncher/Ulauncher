@@ -51,9 +51,9 @@ class Theme(JsonData):
         # Convert relative links to absolute
         css = re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self._path}/", css)
         if self.extend_theme:
-            parent_theme_path = Theme.load(self.extend_theme).get_css_path()
-            if parent_theme_path.is_file():
-                css = f'@import url("{parent_theme_path}");\n\n{css}'
+            parent_theme = Theme.load(self.extend_theme)
+            if parent_theme.get_css_path().is_file():
+                css = f'{parent_theme.get_css()}\n\n{css}'
             else:
                 logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
         return css
