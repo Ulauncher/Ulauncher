@@ -24,7 +24,7 @@ body:
     id: logs
     attributes:
       label: Log output
-      description: Run Ulauncher from the shell with `ulauncher -v` and copy and paste the log output or grab the log from the previous session (`~/.local/state/ulauncher/last.log`). This will be automatically formatted into code, so no need for backticks.
+      description: Run Ulauncher from the shell with `ulauncher -v` and copy and paste the log output or grab the log from the previous session (`~/.local/share/ulauncher/last.log` for v5 or `~/.local/state/ulauncher/last.log` for v6). This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: checkboxes
     id: communication-guidelines
