@@ -57,6 +57,7 @@ class TestJsonData:
         jd_static.save_as(file_path)
         assert load_json(file_path).get("abc") == 123
         jd = JsonData.new_from_file(json_file)
+        jd.save()
         jd.bcd = 234
         jd.save_as(file_path)
         assert load_json(json_file).get("abc") is None
