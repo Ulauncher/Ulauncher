@@ -85,14 +85,6 @@ ulauncher.utils.named\_tuple\_from\_dict module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.setup\_logging module
--------------------------------------
-
-.. automodule:: ulauncher.utils.setup_logging
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.string module
 -----------------------------
 

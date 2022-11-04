@@ -13,7 +13,7 @@ from ulauncher.api.shared.event import (BaseEvent, KeywordQueryEvent, InputTrigg
 from ulauncher.api.shared.query import Query
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
-from ulauncher.api.client.setup_logging import setup_logging
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
 class Extension:
@@ -22,7 +22,12 @@ class Extension:
     """
 
     def __init__(self):
-        setup_logging()
+        logHandler = logging.StreamHandler()
+        logHandler.setFormatter(ColoredFormatter())
+        logging.basicConfig(
+            level=logging.DEBUG if os.getenv('VERBOSE') else logging.WARNING,
+            handlers=[logHandler]
+        )
         self.extension_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.extension_id)
         self._listeners = defaultdict(list)

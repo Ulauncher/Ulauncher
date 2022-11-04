@@ -20,15 +20,6 @@ ulauncher\.api\.client\.EventListener module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.api\.client\.setup\_logging module
----------------------------------------------
-
-.. automodule:: ulauncher.api.client.setup_logging
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 
