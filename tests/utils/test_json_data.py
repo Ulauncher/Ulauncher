@@ -6,8 +6,11 @@ json_file = "/tmp/ulauncher-test/jsondata.json"
 
 
 def load_json(file=json_file):
-    with open(file) as f:
-        return json.load(f)
+    try:
+        with open(file) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
 
 
 class TestJsonData:
