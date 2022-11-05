@@ -60,13 +60,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         self.add(window_frame)
 
-        self.window_body = Gtk.Box(
+        window_container = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
             app_paintable=True,
         )
-        window_frame.pack_start(self.window_body, True, True, 0)
+        window_frame.pack_start(window_container, True, True, 0)
 
-        self.input_box = Gtk.Box()
+        input_box = Gtk.Box()
 
         self.input = Gtk.Entry(
             can_default=True,
@@ -81,7 +81,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             receives_default=True,
         )
 
-        self.prefs_btn = Gtk.Button(
+        prefs_btn = Gtk.Button(
             name="prefs_btn",
             width_request=24,
             height_request=24,
@@ -91,8 +91,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             margin_end=15,
         )
 
-        self.input_box.pack_start(self.input, True, True, 0)
-        self.input_box.pack_end(self.prefs_btn, False, False, 0)
+        input_box.pack_start(self.input, True, True, 0)
+        input_box.pack_end(prefs_btn, False, False, 0)
 
         self.scroll_container = Gtk.ScrolledWindow(
             can_focus=True,
@@ -104,13 +104,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
 
-        self.window_body.pack_start(self.input_box, True, True, 0)
-        self.window_body.pack_end(self.scroll_container, True, True, 0)
+        window_container.pack_start(input_box, True, True, 0)
+        window_container.pack_end(self.scroll_container, True, True, 0)
 
-        self.window_body.get_style_context().add_class("app")
+        window_container.get_style_context().add_class("app")
         self.input.get_style_context().add_class("input")
-        self.prefs_btn.get_style_context().add_class("prefs-btn")
+        prefs_btn.get_style_context().add_class("prefs-btn")
         self.result_box.get_style_context().add_class("result-box")
+
+        prefs_icon_surface = load_icon_surface(
+            f"{PATHS.ASSETS}/icons/gear.svg",
+            16,
+            self.get_scale_factor()
+        )
+        prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
         self.show_all()
 
         self.connect("focus-in-event", self.on_focus_in)
@@ -120,7 +127,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.connect("motion_notify_event", self.on_mouse_move)
         self.input.connect("changed", self.on_input_changed)
         self.input.connect("key-press-event", self.on_input_key_press)
-        self.prefs_btn.connect("clicked", self.show_preferences)
+        prefs_btn.connect("clicked", self.show_preferences)
 
     @classmethod
     @singleton
@@ -237,9 +244,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             widget.forall(self.apply_css)
 
     def apply_theme(self):
-        prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
-        self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
-
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
         self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
