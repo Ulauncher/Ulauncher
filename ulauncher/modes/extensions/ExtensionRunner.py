@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import signal
-import shlex
 from collections import namedtuple, deque
 from functools import partial
 from time import time
