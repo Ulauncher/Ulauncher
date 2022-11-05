@@ -5,7 +5,8 @@ Build-Depends: debhelper (>=9~),
  dh-python,
  python3-all,
  gobject-introspection,
- python3-setuptools
+ python3-setuptools,
+ zstd
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 4.1.4
 X-Python3-Version: >= 3.5
@@ -27,8 +28,7 @@ Depends: ${misc:Depends},
  gir1.2-gdkpixbuf-2.0,
  python3-gi,
  python3-gi-cairo,
- python3-levenshtein,
- zstd
+ python3-levenshtein
 Recommends: gir1.2-ayatanaappindicator3-0.1
 Description: Application launcher for Linux
  See https://ulauncher.io for more information
