@@ -41,12 +41,6 @@ RUN apt install -y gir1.2-notify-0.7
 RUN apt install -y gir1.2-webkit2-4.0
 RUN apt install -y gir1.2-keybinder-3.0
 
-# Upgrade python3-gi on 18.04 (skip this section if you upgrade the Dockerfile to 20.04+)
-RUN apt install -y libgirepository1.0-dev
-RUN apt install -y libcairo2-dev
-RUN apt remove -y python3-gi
-RUN pip3 install --upgrade PyGObject
-
 # Clean up
 RUN apt autoremove -y
 RUN apt clean

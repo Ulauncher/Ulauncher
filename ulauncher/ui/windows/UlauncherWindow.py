@@ -19,24 +19,103 @@ from ulauncher.utils.Theme import Theme
 logger = logging.getLogger()
 
 
-@Gtk.Template(filename=f"{PATHS.ASSETS}/ui/ulauncher_window.ui")
 class UlauncherWindow(Gtk.ApplicationWindow):
-    __gtype_name__ = "UlauncherWindow"
-    input: Gtk.Entry  # These have to be declared on a separate line for some reason
-    prefs_btn: Gtk.Button
-    result_box: Gtk.Box
-    scroll_container: Gtk.ScrolledWindow
-    window_body: Gtk.Box
-
-    input = Gtk.Template.Child("input")
-    prefs_btn = Gtk.Template.Child("prefs_btn")
-    result_box = Gtk.Template.Child("result_box")
-    scroll_container = Gtk.Template.Child("result_box_scroll_container")
-    window_body = Gtk.Template.Child("body")
-    results_nav = None
-    settings = Settings.load()
     _css_provider = None
     _drag_start_coords = None
+    results_nav = None
+    settings = Settings.load()
+
+    def __init__(self):
+        super().__init__(
+            decorated=False,
+            deletable=False,
+            has_focus=True,
+            icon_name="ulauncher",
+            resizable=False,
+            skip_pager_hint=True,
+            skip_taskbar_hint=True,
+            title="Ulauncher - Application Launcher",
+            urgency_hint=True,
+            window_position="center",
+        )
+
+        # Try setting a transparent background
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        self.supports_transparency = visual is not None
+        if not self.supports_transparency:
+            logger.debug("Screen does not support alpha channels")
+            visual = screen.get_system_visual()
+
+        self.set_visual(visual)
+
+        self.window_body = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            app_paintable=True,
+            margin_top=20,
+            margin_bottom=20,
+            margin_start=20,
+            margin_end=20,
+        )
+        self.add(self.window_body)
+
+        self.input_box = Gtk.Box()
+
+        self.input = Gtk.Entry(
+            can_default=True,
+            can_focus=True,
+            has_focus=True,
+            is_focus=True,
+            height_request=30,
+            margin_top=15,
+            margin_bottom=15,
+            margin_start=20,
+            margin_end=20,
+            receives_default=True,
+        )
+
+        self.prefs_btn = Gtk.Button(
+            name="prefs_btn",
+            width_request=24,
+            height_request=24,
+            receives_default=False,
+            halign="center",
+            valign="center",
+            margin_end=15,
+        )
+
+        self.input_box.pack_start(self.input, True, True, 0)
+        self.input_box.pack_end(self.prefs_btn, False, False, 0)
+
+        self.scroll_container = Gtk.ScrolledWindow(
+            can_focus=True,
+            max_content_height=500,
+            hscrollbar_policy="never",
+            propagate_natural_height=True,
+            shadow_type="in",
+        )
+        self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.scroll_container.add(self.result_box)
+
+        self.window_body.pack_start(self.input_box, True, True, 0)
+        self.window_body.pack_end(self.scroll_container, True, True, 0)
+
+        self.window_body.get_style_context().add_class("app")
+        self.input.get_style_context().add_class("input")
+        self.prefs_btn.get_style_context().add_class("prefs-btn")
+        self.result_box.get_style_context().add_class("result-box")
+        if self.settings.disable_window_shadow or not self.supports_transparency:
+            self.window_body.get_style_context().add_class('no-window-shadow')
+        self.show_all()
+
+        self.connect("focus-in-event", self.on_focus_in)
+        self.connect("focus-out-event", self.on_focus_out)
+        self.connect("button-press-event", self.on_mouse_down)
+        self.connect("button-release-event", self.on_mouse_up)
+        self.connect("motion_notify_event", self.on_mouse_move)
+        self.input.connect("changed", self.on_input_changed)
+        self.input.connect("key-press-event", self.on_input_key_press)
+        self.prefs_btn.connect("clicked", self.show_preferences)
 
     @classmethod
     @singleton
@@ -47,11 +126,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # GTK Signal Handlers
     ######################################
 
-    @Gtk.Template.Callback()
     def on_focus_out(self, *_):
         self.hide()
 
-    @Gtk.Template.Callback()
     def on_focus_in(self, *args):
         if self.settings.grab_mouse_pointer:
             ptr_dev = self.get_pointer_device()
@@ -65,7 +142,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             )
             logger.debug("Focus in event, grabbing pointer: %s", result)
 
-    @Gtk.Template.Callback()
     def on_input_changed(self, _):
         """
         Triggered by user input
@@ -73,7 +149,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.app._query = self.input.get_text().lstrip()
         ModeHandler.get_instance().on_query_change(self.app.query)
 
-    @Gtk.Template.Callback()
     def on_input_key_press(self, widget, event):
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
@@ -109,11 +184,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         return False
 
-    @Gtk.Template.Callback()
     def show_preferences(self, *_):
         self.app.show_preferences()
 
-    @Gtk.Template.Callback()
     def on_mouse_down(self, _, event):
         """
         Prepare moving the window if the user drags
@@ -123,7 +196,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_cursor("grab")
             self._drag_start_coords = {'x': event.x, 'y': event.y}
 
-    @Gtk.Template.Callback()
     def on_mouse_up(self, *_):
         """
         Clear drag to move event data
@@ -131,7 +203,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self._drag_start_coords = None
         self.set_cursor("default")
 
-    @Gtk.Template.Callback()
     def on_mouse_move(self, _, event):
         """
         Move window if cursor is held
@@ -161,7 +232,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             widget.forall(self.apply_css)
 
     def apply_theme(self):
-        if self.settings.disable_window_shadow:
+        if self.settings.disable_window_shadow or not self.supports_transparency:
             self.window_body.get_style_context().add_class('no-window-shadow')
 
         prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
