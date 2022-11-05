@@ -25,10 +25,6 @@ class TestUlauncherWindow:
         return mocked
 
     @pytest.fixture(autouse=True)
-    def load_icon_surface(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.load_icon_surface')
-
-    @pytest.fixture(autouse=True)
     def AppResult(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.AppResult.get_most_frequent').return_value
 
