@@ -60,11 +60,11 @@ def get_options():
         "--no-window", action="store_true",
         help=gettext("Hide window upon application startup"))
     parser.add_argument(
-        "--no-extensions", action="store_true",
-        help=gettext("Do not run extensions"))
-    parser.add_argument(
         "--dev", action="store_true",
         help=gettext("Enables context menu in the Preferences UI"))
+    parser.add_argument(
+        "--no-extensions", action="store_true",
+        help=argparse.SUPPRESS)
     parser.add_argument(
         "--no-window-shadow", action="store_true",
         help=argparse.SUPPRESS)
