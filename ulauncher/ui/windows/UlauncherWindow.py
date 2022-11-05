@@ -50,15 +50,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.set_visual(visual)
 
-        self.window_body = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            app_paintable=True,
+        # This box exists only for setting the margin conditionally, based on ^
+        # without the theme being able to override it
+        window_frame = Gtk.Box(
             margin_top=window_margin,
             margin_bottom=window_margin,
             margin_start=window_margin,
             margin_end=window_margin,
         )
-        self.add(self.window_body)
+        self.add(window_frame)
+
+        self.window_body = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            app_paintable=True,
+        )
+        window_frame.add(self.window_body)
 
         self.input_box = Gtk.Box()
 
