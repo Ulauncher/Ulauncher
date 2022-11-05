@@ -44,7 +44,7 @@ def main():
     logger.info('Ulauncher version %s', VERSION)
     logger.info('Extension API version %s', API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
-    logger.info("PyGobject+ %i.%i.%i", *gi.version_info)
+    logger.info("PyGObject+ %i.%i.%i", *gi.version_info)
 
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
 
