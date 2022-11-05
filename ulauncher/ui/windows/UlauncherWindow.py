@@ -64,7 +64,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             orientation=Gtk.Orientation.VERTICAL,
             app_paintable=True,
         )
-        window_frame.add(self.window_body)
+        window_frame.pack_start(self.window_body, True, True, 0)
 
         self.input_box = Gtk.Box()
 
