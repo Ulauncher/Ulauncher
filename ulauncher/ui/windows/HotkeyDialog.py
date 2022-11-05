@@ -1,6 +1,5 @@
 import logging
 from gi.repository import Gtk, Gdk, GObject
-from ulauncher.config import PATHS
 
 
 logger = logging.getLogger()
@@ -10,24 +9,45 @@ FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', '
                         'Escape', 'Tab', 'Insert')
 
 
-@Gtk.Template(filename=f"{PATHS.ASSETS}/ui/hotkey_dialog.ui")
-class HotkeyDialog(Gtk.Window):
-    __gtype_name__ = "HotkeyDialog"
+class HotkeyDialog(Gtk.ApplicationWindow):
     _accel_name = None
     _display_name = None
     __gsignals__ = {
         # parameters: <hotkey-value (str)>, <hotkey-display-value (str)>
         'hotkey-set': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
     }
-    _hotkey_input: Gtk.Entry  # Have to be declared on a separate line for some reason
-    _hotkey_input = Gtk.Template.Child("hotkey_input")
 
-    @Gtk.Template.Callback()
+    def __init__(self):
+        super().__init__(
+            modal=True,
+            resizable=False,
+            title="New Hotkey",
+            type_hint="dialog",
+        )
+
+        vbox = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            margin_top=5,
+            margin_bottom=5,
+            margin_start=10,
+            margin_end=10,
+        )
+
+        label = Gtk.Label()
+        label.set_markup("<i>Set a new hotkey and press Enter</i>")
+        vbox.pack_start(label, True, True, 5)
+
+        self._hotkey_input = Gtk.Entry(editable=False)
+        vbox.pack_start(self._hotkey_input, True, True, 5)
+        self.add(vbox)
+        self.show_all()
+        self.connect("destroy", self.on_destroy)
+        self.connect("key-press-event", self.on_key_press)
+
     def on_destroy(self, *args):
         self.hide()
         return True
 
-    @Gtk.Template.Callback()
     def on_key_press(self, _, event):
         # remove GDK_MOD2_MASK, because it seems unnecessary
         mask = event.state
