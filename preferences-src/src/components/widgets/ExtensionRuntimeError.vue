@@ -2,15 +2,8 @@
   <div class="wrapper selectable">
     <b-alert show variant="warning">
       <small>
-        <p v-if="errorName === 'NoExtensionsFlag'">
-          You ran ulauncher with
-          <code>--no-extensions</code> flag.
-          You have to manually start this extension by running
-          <br />
-          <code>{{ errorMessage }}</code>
-        </p>
         <p
-          v-else-if="errorName === 'Terminated'"
+          v-if="errorName === 'Terminated'"
         >The extension was terminated. Please check the logs</p>
         <p
           v-else-if="errorName === 'ExitedInstantly'"
@@ -27,7 +20,7 @@
           <a href @click.prevent="openUrlInBrowser(`${extUrl}/issues`)">extension issue tracker</a>.
         </p>
         <p v-else>{{ errorMessage }}</p>
-        <p v-if="extUrl && errorName !== 'NoExtensionsFlag' && errorName !== 'MissingModule'">
+        <p v-if="extUrl && errorName !== 'MissingModule'">
           You can let the author know about this problem by creating an
           <a
             href

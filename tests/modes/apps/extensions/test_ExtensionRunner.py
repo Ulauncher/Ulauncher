@@ -10,7 +10,6 @@ class TestExtensionRunner:
     @pytest.fixture
     def runner(self):
         thisrunner = ExtensionRunner()
-        thisrunner.dont_run_extensions = False
         return thisrunner
 
     @pytest.fixture(autouse=True)

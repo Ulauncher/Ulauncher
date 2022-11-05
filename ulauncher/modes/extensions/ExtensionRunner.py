@@ -25,7 +25,6 @@ ExtensionProc = namedtuple("ExtensionProc", (
 
 
 class ExtensionRuntimeError(Enum):
-    NoExtensionsFlag = 'NoExtensionsFlag'
     Terminated = 'Terminated'
     ExitedInstantly = 'ExitedInstantly'
     Exited = 'Exited'
@@ -43,7 +42,6 @@ class ExtensionRunner:
     def __init__(self):
         self.extension_errors = {}
         self.extension_procs = {}
-        self.dont_run_extensions = get_options().no_extensions
         self.verbose = bool(get_options().verbose)
 
     def run_all(self):
@@ -79,13 +77,6 @@ class ExtensionRunner:
                 "EXTENSION_PATH": extension_path,
                 "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(',', ':'))
             }
-
-            if self.dont_run_extensions:
-                run_cmd = " ".join(f"{k}={shlex.quote(v)}" for k, v in env.items()) + " " + " ".join(cmd)
-                logger.warning('Copy and run the following command to start %s', extension_id)
-                logger.warning(run_cmd)
-                self.set_extension_error(extension_id, ExtensionRuntimeError.NoExtensionsFlag, run_cmd)
-                return
 
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
             for env_name, env_value in env.items():

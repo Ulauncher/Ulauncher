@@ -1,42 +1,11 @@
 Debugging & Logging
 ===================
 
-Run Extension Separately
+WIP
 ------------------------
 
-You don't have to restart Ulauncher every time a change is made to your extension.
-For your convenience there is a flag ``--no-extension`` that prevents extensions from starting automatically.
-
-First, start Ulauncher with the following command::
-
-  ulauncher --no-extensions --dev -v
-
-Then find in the logs command to run your extension. It should look similar to this::
-
-  VERBOSE=1 PYTHONPATH=/home/username/projects/ulauncher EXTENSION_PREFERENCES='{"kw":"demo"}' /usr/bin/python3 /home/username/.local/share/ulauncher/extensions/ulauncher-demo/main.py
-
-Now when you need to restart your extension hit ``Ctrl+C`` and run the last command again.
-
-
-Debugging With `ipdb <https://github.com/gotcha/ipdb>`_
--------------------------------------------------------
-
-Here is the easiest way to set a breakpoint and execute code line by line:
-
-1. Install ipdb
-
-  ::
-
-    sudo pip install ipdb
-
-2. In your code add this line wherever you need to break
-
-  ::
-
-    import ipdb; ipdb.set_trace()
-
-3. Restart extension
-
+We have removed the Extension debugging functionality from Ulauncher v6.
+We plan to do internal changes and then bring back a more convenient method to debug extensions without copying/installing them to the Ulauncher extension directory, then update this space.
 
 
 Set up Logger
@@ -54,8 +23,6 @@ Here's all you need to do to enable logging for your extension::
   logger.warn('...')
   logger.info('...')
   logger.debug('...')
-
-
 
 
 .. NOTE::
