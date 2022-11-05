@@ -42,22 +42,29 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        self.supports_transparency = visual is not None
-        if not self.supports_transparency:
+        window_margin = 20
+        if visual is None:
             logger.debug("Screen does not support alpha channels")
             visual = screen.get_system_visual()
+            window_margin = 0
 
         self.set_visual(visual)
+
+        # This box exists only for setting the margin conditionally, based on ^
+        # without the theme being able to override it
+        window_frame = Gtk.Box(
+            margin_top=window_margin,
+            margin_bottom=window_margin,
+            margin_start=window_margin,
+            margin_end=window_margin,
+        )
+        self.add(window_frame)
 
         self.window_body = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
             app_paintable=True,
-            margin_top=20,
-            margin_bottom=20,
-            margin_start=20,
-            margin_end=20,
         )
-        self.add(self.window_body)
+        window_frame.add(self.window_body)
 
         self.input_box = Gtk.Box()
 
@@ -104,8 +111,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
         self.result_box.get_style_context().add_class("result-box")
-        if self.settings.disable_window_shadow or not self.supports_transparency:
-            self.window_body.get_style_context().add_class('no-window-shadow')
         self.show_all()
 
         self.connect("focus-in-event", self.on_focus_in)
@@ -232,9 +237,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             widget.forall(self.apply_css)
 
     def apply_theme(self):
-        if self.settings.disable_window_shadow or not self.supports_transparency:
-            self.window_body.get_style_context().add_class('no-window-shadow')
-
         prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
 

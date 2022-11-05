@@ -56,7 +56,7 @@ def main():
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
     if options.no_window_shadow:
-        logger.warning("The --no-window-shadow argument has been moved to a user setting in Ulauncher v6")
+        logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
     if options.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
