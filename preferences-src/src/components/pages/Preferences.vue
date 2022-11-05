@@ -144,23 +144,6 @@
 
       <tr>
         <td>
-          <label for="disable-window-shadow">Disable window shadow</label>
-          <small>
-            <p>
-              Try this if you see a box or border instead of shadows.
-            </p>
-            <p v-if="changed.disable_window_shadow">
-              <i class="fa fa-warning"></i> Restart Ulauncher for this to take effect.
-            </p>
-          </small>
-        </td>
-        <td>
-          <b-form-checkbox id="disable-window-shadow" v-model="disable_window_shadow"></b-form-checkbox>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
           <label for="jump-keys">Jump keys</label>
           <small>
             <p>Set the keys to use for quickly jumping to results</p>
@@ -230,7 +213,6 @@ export default {
       'autostart_enabled',
       'clear_previous_query',
       'disable_desktop_filters',
-      'disable_window_shadow',
       'grab_mouse_pointer',
       'jump_keys',
       'raise_if_started',

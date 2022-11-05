@@ -5,7 +5,6 @@ from ulauncher.utils.json_data import JsonData, json_data_class
 @json_data_class
 class Settings(JsonData):
     disable_desktop_filters = False
-    disable_window_shadow = False
     clear_previous_query = True
     grab_mouse_pointer = False
     hotkey_show_app = "<Primary>space"
