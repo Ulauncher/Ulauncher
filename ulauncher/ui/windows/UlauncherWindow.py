@@ -127,7 +127,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.connect("motion_notify_event", self.on_mouse_move)
         self.input.connect("changed", self.on_input_changed)
         self.input.connect("key-press-event", self.on_input_key_press)
-        prefs_btn.connect("clicked", self.show_preferences)
+        prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
 
     @classmethod
     @singleton
@@ -173,7 +173,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.hide()
 
         elif ctrl and keyname == 'comma':
-            self.show_preferences()
+            self.app.show_preferences()
 
         elif self.results_nav:
             if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
@@ -195,9 +195,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     pass
 
         return False
-
-    def show_preferences(self, *_):
-        self.app.show_preferences()
 
     def on_mouse_down(self, _, event):
         """
