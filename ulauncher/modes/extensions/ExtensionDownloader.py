@@ -1,14 +1,14 @@
 import os
 import logging
-import tarfile
 from urllib.request import urlretrieve
-from tempfile import mktemp, mkdtemp
-from shutil import rmtree, move
+from tempfile import mktemp
+from shutil import rmtree
 from datetime import datetime
 from typing import Tuple
 
 from ulauncher.config import PATHS
 from ulauncher.utils.decorator.singleton import singleton
+from ulauncher.utils.untar import untar
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 
@@ -61,7 +61,7 @@ class ExtensionDownloader:
 
         # 3. download & untar
         filename = download_tarball(remote.get_download_url(commit_sha))
-        untar(filename, ext_path)
+        untar(filename, ext_path, strip=1)
 
         # 4. add to the db
         self.ext_db.save({remote.extension_id: {
@@ -96,7 +96,7 @@ class ExtensionDownloader:
 
         remote = ExtensionRemote(ext.url)
         filename = download_tarball(remote.get_download_url(commit_sha))
-        untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}")
+        untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}", strip=1)
 
         ext.update(
             updated_at=datetime.now().isoformat(),
@@ -122,26 +122,6 @@ class ExtensionDownloader:
         if not ext:
             raise ExtensionDownloaderError("Extension not found")
         return ext
-
-
-def untar(filename: str, ext_path: str) -> None:
-    """
-    1. Remove ext_path
-    2. Extract tar into temp dir
-    3. Move contents of <temp_dir>/<project_name>-master/* to ext_path
-    """
-    if os.path.exists(ext_path):
-        rmtree(ext_path)
-
-    temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
-
-    with tarfile.open(filename, mode="r") as archive:
-        archive.extractall(temp_ext_path)
-
-    for dir in os.listdir(temp_ext_path):
-        move(os.path.join(temp_ext_path, dir), ext_path)
-        # there is only one directory here, so return immediately
-        return
 
 
 def download_tarball(url: str) -> str:

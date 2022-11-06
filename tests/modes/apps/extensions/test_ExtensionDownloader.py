@@ -47,7 +47,7 @@ class TestExtensionDownloader:
         assert downloader.download('https://github.com/Ulauncher/ulauncher-timer') == \
             'com.github.ulauncher.ulauncher-timer'
 
-        untar.assert_called_with(download_tarball.return_value, mock.ANY)
+        untar.assert_called_with(download_tarball.return_value, mock.ANY, strip=1)
         ext_db.save.assert_called_with({'com.github.ulauncher.ulauncher-timer': {
             'id': 'com.github.ulauncher.ulauncher-timer',
             'url': 'https://github.com/Ulauncher/ulauncher-timer',
@@ -85,7 +85,7 @@ class TestExtensionDownloader:
         assert downloader.update(ext_id)
 
         download_tarball.assert_called_with(gh_ext.get_download_url.return_value)
-        untar.assert_called_with(download_tarball.return_value, mock.ANY)
+        untar.assert_called_with(download_tarball.return_value, mock.ANY, strip=1)
         ext_db.save.assert_called_with({ext_id: {
             'id': ext_id,
             'url': 'https://github.com/Ulauncher/ulauncher-timer',
