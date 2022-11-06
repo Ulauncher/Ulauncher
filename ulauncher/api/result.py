@@ -29,7 +29,8 @@ class Result:
                  highlightable: bool = None,
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None,
-                 searchable: bool = None):
+                 searchable: bool = None,
+                 compact: bool = None):
         if not isinstance(name, str):
             raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given')
         if not isinstance(description, str):
@@ -40,6 +41,8 @@ class Result:
         self.description = description
         self.keyword = keyword
         self.icon = icon
+        if compact is not None:
+            self.compact = compact
         if searchable is not None:
             self.searchable = searchable
         if highlightable is not None:
