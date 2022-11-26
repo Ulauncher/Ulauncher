@@ -12,18 +12,16 @@ if sys.version_info.major != 3:
 # Add project root directory (enable symlink and trunk execution)
 PYTHONPATH = os.getenv("PYTHONPATH", "")
 PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
+IS_DEV = PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path
 
 # Running in developer environment path
-if (PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path):
+if IS_DEV:
     sys.path.insert(0, str(PROJECT_ROOT))
     os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
-    # Ensure preferences UI is built
-    from setuptools import sandbox
-    sandbox.run_setup("setup.py", ["build_prefs"])
 
 if not os.environ.get("GDK_BACKEND"):
     os.environ["GDK_BACKEND"] = "x11"
 
 from ulauncher.main import main
 
-main()
+main(IS_DEV)

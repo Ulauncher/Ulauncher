@@ -19,11 +19,27 @@ def reload_config(app, logger):
     app.window.apply_theme()
 
 
-def main():
+def main(is_dev=False):
     """
     Main function that starts everything
     """
     options = get_options()
+    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
+        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
+        sys.exit(2)
+    if options.hide_window:
+        # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
+        # it was implemented using XDG autostart. To prevent files created the old way
+        # from starting a second Ulauncher background process we have to make sure the
+        # --no-window flag prevents the app from starting.
+        print("The --hide-window argument has been renamed to --no-window")
+        sys.exit(2)
+
+    if is_dev:
+        # Ensure preferences UI is built
+        # pylint: disable=import-outside-toplevel
+        from setuptools import sandbox
+        sandbox.run_setup("setup.py", ["build_prefs"])
 
     # Set up global logging for stdout and file
     file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode='w+')
@@ -50,20 +66,10 @@ def main():
 
     if XDG_SESSION_TYPE != "X11":
         logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
-    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
-        logger.critical("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
-        sys.exit()
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
     if options.no_window_shadow:
         logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
-    if options.hide_window:
-        # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
-        # it was implemented using XDG autostart. To prevent files created the old way
-        # from starting a second Ulauncher background process we have to make sure the
-        # --no-window flag prevents the app from starting.
-        logger.critical("The --hide-window argument has been renamed to --no-window")
-        sys.exit()
 
     # log uncaught exceptions
     def except_hook(exctype, value, tb):
