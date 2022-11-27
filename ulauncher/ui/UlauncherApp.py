@@ -25,9 +25,9 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    window: UlauncherWindow
-    preferences: PreferencesWindow
-    _appindicator: AppIndicator
+    window = None  # type: UlauncherWindow
+    preferences = None  # type: PreferencesWindow
+    _appindicator = None  # type: AppIndicator
     _current_accel_name = None
 
     def __init__(self, *args, **kwargs):
