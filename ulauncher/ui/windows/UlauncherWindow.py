@@ -5,7 +5,7 @@ from gi.repository import Gtk, Gdk, Keybinder
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
-from ulauncher.config import get_options, PATHS
+from ulauncher.config import PATHS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -119,8 +119,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
         window_frame.show_all()
-        if not get_options().no_window:
-            self.show_all()
 
         self.connect("focus-in-event", self.on_focus_in)
         self.connect("focus-out-event", self.on_focus_out)
