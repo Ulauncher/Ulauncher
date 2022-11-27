@@ -1,5 +1,4 @@
 import time
-import argparse
 import logging
 from gi.repository import Gio, GLib, Gtk, Keybinder
 from ulauncher.config import FIRST_RUN
@@ -56,13 +55,9 @@ class UlauncherApp(Gtk.Application):
         self.window.show()
 
     def do_command_line(self, *args, **kwargs):
-        # This is where we handle "--no-window" which we need to get from the remote call
-        # All other aguments are persistent and handled in config.get_options()
-        parser = argparse.ArgumentParser(prog='gui')
-        parser.add_argument("--no-window", action="store_true")
-        args, _ = parser.parse_known_args(args[0].get_arguments()[1:])
-
-        if not args.no_window:
+        # We need to use "--no-window" from the unique CLI invocation here,
+        # Can't use config.get_options(), because that's the daemon's initial cli arguments
+        if '--no-window' not in args[0].get_arguments():
             self.activate()
 
         return 0

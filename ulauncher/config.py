@@ -48,28 +48,22 @@ os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
 @lru_cache()
 def get_options():
-    """Support for command line options"""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v", "--verbose", action="count", dest="verbose",
-        help=gettext("Show debug messages"))
-    parser.add_argument(
-        '--version', action='version',
-        version=f"Ulauncher {VERSION}")
-    parser.add_argument(
-        "--no-window", action="store_true",
-        help=gettext("Hide window upon application startup"))
-    parser.add_argument(
-        "--dev", action="store_true",
-        help=gettext("Enables context menu in the Preferences UI"))
-    parser.add_argument(
-        "--no-extensions", action="store_true",
-        help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--no-window-shadow", action="store_true",
-        help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--hide-window", action="store_true",
-        help=argparse.SUPPRESS)
+    """Command Line options for the initial ulauncher (daemon) call"""
+    # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
+    # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
+    parser = argparse.ArgumentParser(None, None, "Ulauncher is an application launcher.", add_help=False)
+
+    cli_options = [
+        ("Show this help message and exit", ["-h", "--help"], {"action": "help"}),
+        ("Show debug messages", ["-v", "--verbose"], {}),
+        ("Show version number and exit", ["--version"], {"action": "version", "version": f"Ulauncher {VERSION}"}),
+        ("Hide window upon application startup", ["--no-window"], {}),
+        ("Enables context menu in the Preferences UI", ["--dev"], {}),
+    ]
+
+    for descr, args, kwargs in cli_options:
+        parser.add_argument(*args, help=gettext(descr), **{**{"action": "store_true"}, **kwargs})
+    for arg in ["--no-extensions", "--no-window-shadow", "--hide-window"]:
+        parser.add_argument(arg, action="store_true", help=argparse.SUPPRESS)
 
     return parser.parse_args()
