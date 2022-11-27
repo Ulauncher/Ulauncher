@@ -10,7 +10,6 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.wm import get_monitor
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
@@ -128,11 +127,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.connect("changed", self.on_input_changed)
         self.input.connect("key-press-event", self.on_input_key_press)
         prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
-
-    @classmethod
-    @singleton
-    def get_instance(cls):
-        return cls()
 
     ######################################
     # GTK Signal Handlers

@@ -1,6 +1,4 @@
-from time import sleep
 from gi.repository import GLib
-
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
@@ -18,11 +16,5 @@ class SetUserQueryAction(BaseAction):
 
     def _update_query(self):
         # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-        input = UlauncherWindow.get_instance().input
-        input.set_text(self.new_query)
-
-        # Ugly hack:
-        # Defer set position, because GTK sets position after change event occurs
-        sleep(0.002)
-        input.set_position(-1)
+        from ulauncher.ui.UlauncherApp import UlauncherApp
+        UlauncherApp().query = self.new_query

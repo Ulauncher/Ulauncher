@@ -15,9 +15,9 @@ class RenderResultListAction(BaseAction):
 
     def run(self):
         # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        window = UlauncherWindow.get_instance()
+        window = UlauncherApp().window
         if window.is_visible():
             # update UI in the main thread to avoid race conditions
             GLib.idle_add(window.show_results, self.result_list)

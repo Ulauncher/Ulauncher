@@ -80,9 +80,9 @@ class DeferredResultRenderer:
 
     def _hide_window(self):
         # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        window = UlauncherWindow.get_instance()
+        window = UlauncherApp().window
         if window.is_visible():
             # update UI in the main thread to avoid race conditions
             GLib.idle_add(window.hide_and_clear_input)

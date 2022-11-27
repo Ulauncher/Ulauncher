@@ -25,10 +25,9 @@ class ExtensionCustomAction(BaseAction):
         # import here to avoid circular deps
         # pylint: disable=import-outside-toplevel
         from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-        from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+        from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        window = UlauncherWindow.get_instance()
-        if not window.is_visible():
+        if not UlauncherApp().window.is_visible():
             return
 
         renderer = DeferredResultRenderer.get_instance()

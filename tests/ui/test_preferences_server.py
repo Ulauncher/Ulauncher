@@ -17,7 +17,7 @@ class TestPreferencesContextServer:
 
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
-        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow.get_instance').return_value
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow').return_value
 
     @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):

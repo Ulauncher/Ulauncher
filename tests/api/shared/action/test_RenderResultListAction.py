@@ -5,6 +5,11 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 
 
 class TestRenderResultListAction:
+    @pytest.fixture(autouse=True)
+    def UlauncherApp(self, mocker):
+        app = mocker.patch('ulauncher.ui.UlauncherApp.UlauncherApp')
+        app.window = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')()
+        return app
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
@@ -21,7 +26,6 @@ class TestRenderResultListAction:
     def test_keep_app_open(self, action):
         assert action.keep_app_open
 
-    def test_run(self, action, mocker, result_list, GLib):
-        UlauncherWindow = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')
+    def test_run(self, action, result_list, GLib, UlauncherApp):
         action.run()
-        GLib.idle_add.assert_called_with(UlauncherWindow.get_instance.return_value.show_results, result_list)
+        GLib.idle_add.assert_called_with(UlauncherApp.return_value.window.show_results, result_list)

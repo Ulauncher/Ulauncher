@@ -1,5 +1,6 @@
 import time
 import logging
+from functools import lru_cache
 from gi.repository import Gio, GLib, Gtk, Keybinder
 from ulauncher.config import FIRST_RUN
 from ulauncher.utils.environment import IS_X11
@@ -15,14 +16,18 @@ from ulauncher.api.shared.query import Query
 logger = logging.getLogger()
 
 
+@lru_cache(maxsize=None)
 class UlauncherApp(Gtk.Application):
+    """
+    Main Ulauncher application (singleton)
+    """
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    window = None  # type: UlauncherWindow
-    preferences = None  # type: PreferencesWindow
-    _appindicator = None  # type: AppIndicator
+    window: UlauncherWindow
+    preferences: PreferencesWindow
+    _appindicator: AppIndicator
     _current_accel_name = None
 
     def __init__(self, *args, **kwargs):
@@ -64,7 +69,7 @@ class UlauncherApp(Gtk.Application):
     def setup(self, _):
         settings = Settings.load()
         self.hold()  # Keep the app running even without a window
-        self.window = UlauncherWindow.get_instance()
+        self.window = UlauncherWindow()
         self.window.set_application(self)
         self.window.set_keep_above(True)
         self.window.position_window()
