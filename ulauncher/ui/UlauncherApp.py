@@ -20,7 +20,6 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    settings = Settings.load()
     window = None  # type: UlauncherWindow
     preferences = None  # type: PreferencesWindow
     appindicator = None  # type: AppIndicator
@@ -63,6 +62,7 @@ class UlauncherApp(Gtk.Application):
         return 0
 
     def setup(self, _):
+        settings = Settings.load()
         self.hold()  # Keep the app running even without a window
         self.window = UlauncherWindow.get_instance()
         self.window.set_application(self)
@@ -73,7 +73,7 @@ class UlauncherApp(Gtk.Application):
         # this will trigger to show frequent apps if necessary
         self.window.show_results([])
 
-        if self.settings.show_indicator_icon:
+        if settings.show_indicator_icon:
             self.appindicator = AppIndicator(self)
             self.appindicator.switch(True)
 
@@ -81,7 +81,7 @@ class UlauncherApp(Gtk.Application):
             # bind hotkey
             Keybinder.init()
             # bind in the main thread
-            GLib.idle_add(self.bind_hotkey, self.settings.hotkey_show_app)
+            GLib.idle_add(self.bind_hotkey, settings.hotkey_show_app)
 
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
