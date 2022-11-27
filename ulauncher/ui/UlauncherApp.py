@@ -22,7 +22,7 @@ class UlauncherApp(Gtk.Application):
     _query = ""
     window = None  # type: UlauncherWindow
     preferences = None  # type: PreferencesWindow
-    appindicator = None  # type: AppIndicator
+    _appindicator = None  # type: AppIndicator
     _current_accel_name = None
 
     def __init__(self, *args, **kwargs):
@@ -74,8 +74,7 @@ class UlauncherApp(Gtk.Application):
         self.window.show_results([])
 
         if settings.show_indicator_icon:
-            self.appindicator = AppIndicator(self)
-            self.appindicator.switch(True)
+            self.toggle_appindicator(True)
 
         if IS_X11:
             # bind hotkey
@@ -88,9 +87,9 @@ class UlauncherApp(Gtk.Application):
         ExtensionRunner.get_instance().run_all()
 
     def toggle_appindicator(self, enable):
-        if not self.appindicator:
-            self.appindicator = AppIndicator(self)
-        self.appindicator.switch(enable)
+        if not self._appindicator:
+            self._appindicator = AppIndicator(self)
+        self._appindicator.switch(enable)
 
     def bind_hotkey(self, accel_name):
         if not IS_X11 or self._current_accel_name == accel_name:
