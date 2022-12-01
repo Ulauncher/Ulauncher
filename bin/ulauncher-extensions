@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+import os
+import sys
+from pathlib import Path
+
+
+# Add project root directory (enable symlink and trunk execution)
+PYTHONPATH = os.getenv("PYTHONPATH", "")
+PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
+
+# Running in developer environment path
+if (PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path):
+    sys.path.insert(0, str(PROJECT_ROOT))
+    os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
+
+from ulauncher.config import PATHS
+from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader, ExtensionAlreadyInstalledWarning, \
+    ExtensionDownloaderError
+from ulauncher.modes.extensions.ExtensionRemote import InvalidExtensionUrlWarning
+
+import click
+
+
+def get_ext_manifests():
+    extension_list = find_extensions(PATHS.EXTENSIONS)
+    for ext in extension_list:
+        yield ext[0], ExtensionManifest.load_from_extension_id(ext[0])
+
+
+@click.group(help="CLI tool that assists in Ulauncher extension management and development")
+def cli():
+    pass
+
+
+@click.command('show')
+@click.option('--name/--no-name', '-n/ ', default=False)
+@click.option('--id/--no-id', '-i/ ', default=False)
+def list_extensions(name, id):
+    for ext_id, ext_manifest in get_ext_manifests():
+        ext_name = ext_manifest.name
+
+        if name and not id:
+            click.echo(ext_name)
+        elif not name and id:
+            click.echo(ext_id)
+        else:
+            click.echo(click.style(f'{ext_manifest.name}: ', bold=True), nl=False)
+            click.echo(ext_id)
+
+
+@click.command('install')
+@click.argument('git_url')
+def install_extension(git_url):
+    ext_downloader = ExtensionDownloader.get_instance()
+    try:
+        ext_downloader.download(git_url)
+
+    except ExtensionAlreadyInstalledWarning:
+        raise click.UsageError('Extension already exists!')
+    except InvalidExtensionUrlWarning:
+        raise click.UsageError(f'Invalid GIT_URL: {git_url}!')
+
+
+def get_extension_id_opts(ctx, params, incomplete):
+    matches = []
+    for ext_id, ext_manifest in get_ext_manifests():
+        if ext_id.startswith(incomplete):
+            matches.append(ext_id)
+    return matches
+
+
+@click.command('uninstall')
+@click.argument('extension_id', shell_complete=get_extension_id_opts)
+def remove_extension(extension_id):
+    ext_downloader = ExtensionDownloader.get_instance()
+    if not ext_downloader.ext_db.get(extension_id):
+        raise click.UsageError(f'Extension with id: {extension_id} is not installed!')
+    else:
+        ext_downloader.remove(extension_id)
+
+
+@click.command('version')
+def version():
+    pass
+
+
+cli.add_command(list_extensions)
+cli.add_command(version)
+cli.add_command(install_extension)
+cli.add_command(remove_extension)
+
+if __name__ == '__main__':
+    cli()
