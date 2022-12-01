@@ -3,7 +3,6 @@ import os
 import sys
 from pathlib import Path
 
-
 # Add project root directory (enable symlink and trunk execution)
 PYTHONPATH = os.getenv("PYTHONPATH", "")
 PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
@@ -23,6 +22,9 @@ from ulauncher.modes.extensions.ExtensionRemote import InvalidExtensionUrlWarnin
 import click
 
 
+def get_ext_manifest(ext_id):
+    return ExtensionManifest.load_from_extension_id(ext_id)
+
 def get_ext_manifests():
     extension_list = find_extensions(PATHS.EXTENSIONS)
     for ext in extension_list:
@@ -37,13 +39,13 @@ def cli():
 @click.command('show')
 @click.option('--name/--no-name', '-n/ ', default=False)
 @click.option('--id/--no-id', '-i/ ', default=False)
-def list_extensions(name, id):
+def list_extensions(name, ext_id):
     for ext_id, ext_manifest in get_ext_manifests():
         ext_name = ext_manifest.name
 
-        if name and not id:
+        if name and not ext_id:
             click.echo(ext_name)
-        elif not name and id:
+        elif not name and ext_id:
             click.echo(ext_id)
         else:
             click.echo(click.style(f'{ext_manifest.name}: ', bold=True), nl=False)
@@ -55,12 +57,14 @@ def list_extensions(name, id):
 def install_extension(git_url):
     ext_downloader = ExtensionDownloader.get_instance()
     try:
-        ext_downloader.download(git_url)
+        ext_id = ext_downloader.download(git_url)
+        ext_info = get_ext_manifest(ext_id)
+        click.echo(f'Installed extension: {ext_info.name} ({ext_id})')
 
     except ExtensionAlreadyInstalledWarning:
-        raise click.UsageError('Extension already exists!')
+        raise click.ClickException('Extension already exists!')
     except InvalidExtensionUrlWarning:
-        raise click.UsageError(f'Invalid GIT_URL: {git_url}!')
+        raise click.ClickException(f'Invalid GIT_URL: {git_url}!')
 
 
 def get_extension_id_opts(ctx, params, incomplete):
@@ -76,9 +80,36 @@ def get_extension_id_opts(ctx, params, incomplete):
 def remove_extension(extension_id):
     ext_downloader = ExtensionDownloader.get_instance()
     if not ext_downloader.ext_db.get(extension_id):
-        raise click.UsageError(f'Extension with id: {extension_id} is not installed!')
+        raise click.ClickException(f'Extension with id: {extension_id} is not installed!')
     else:
+        ext_info = get_ext_manifest(extension_id)
+        click.echo(f'Uninstalling extension: {ext_info.name} ({extension_id})...')
         ext_downloader.remove(extension_id)
+
+@click.command('upgrade')
+@click.argument('extension_id', shell_complete=get_extension_id_opts, required=False)
+def upgrade(extension_id):
+    ext_downloader = ExtensionDownloader.get_instance()
+    ext_to_update = []
+    if extension_id and not ext_downloader.ext_db.get(extension_id):
+        raise click.ClickException(f'Extension with id: {extension_id} is not installed!')
+    elif extension_id:
+        ext_info = get_ext_manifest(extension_id)
+        update_status = ext_downloader.check_update(extension_id)
+
+        if not update_status[0]:
+            raise click.ClickException(f'Extension {ext_info.name} ({extension_id}) already up-to-date')
+
+        ext_to_update.append(extension_id)
+    else:
+        for ext in find_extensions(PATHS.EXTENSIONS):
+            if ext_downloader.check_update(ext[0]):
+                ext_to_update.append(ext[0])
+
+    for ext_id in ext_to_update:
+        ext_info = get_ext_manifest(ext_id)
+        click.echo(f"Updating extension: {ext_info.name} ({ext_id})")
+        ext_downloader.update(ext_id)
 
 
 @click.command('version')
@@ -90,6 +121,7 @@ cli.add_command(list_extensions)
 cli.add_command(version)
 cli.add_command(install_extension)
 cli.add_command(remove_extension)
+cli.add_command(upgrade)
 
 if __name__ == '__main__':
     cli()
