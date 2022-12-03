@@ -146,7 +146,7 @@ def restore(yes_):
     if not yes_:
         click.confirm("Apply changes?", default=True, abort=True)
 
-    logging.disable(logging.CRITICAL)
+    logging.disable(logging.WARN) # disable warnings
     if len(rm_ext_ids):
         with click.progressbar(rm_ext_ids, label='Uninstalling extensions', length=len(rm_ext_ids)) as bar:
             for rm_ext_id in bar:
@@ -156,17 +156,10 @@ def restore(yes_):
         with click.progressbar(add_ext_ids, label='Installing extensions', length=len(add_ext_ids)) as bar:
             for add_ext_id in bar:
                 ext_downloader.download(ext_db.get(add_ext_id).get('url'))
-    logging.disable(logging.NOTSET)
-
-
-
-
-
-
 
 @click.command('version')
 def version():
-    pass
+    click.echo(f'Version: {VERSION}')
 
 
 cli.add_command(list_extensions)
@@ -175,6 +168,8 @@ cli.add_command(install_extension)
 cli.add_command(remove_extension)
 cli.add_command(upgrade)
 cli.add_command(restore)
+
+VERSION="v1.0.0"
 
 if __name__ == '__main__':
     cli()
