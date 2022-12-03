@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import logging
 import os
 import sys
 from pathlib import Path
@@ -15,9 +16,9 @@ if (PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader, ExtensionAlreadyInstalledWarning, \
-    ExtensionDownloaderError
+from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader, ExtensionAlreadyInstalledWarning
 from ulauncher.modes.extensions.ExtensionRemote import InvalidExtensionUrlWarning
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 
 import click
 
@@ -29,7 +30,6 @@ def get_ext_manifests():
     extension_list = find_extensions(PATHS.EXTENSIONS)
     for ext in extension_list:
         yield ext[0], ExtensionManifest.load_from_extension_id(ext[0])
-
 
 @click.group(help="CLI tool that assists in Ulauncher extension management and development")
 def cli():
@@ -83,8 +83,10 @@ def remove_extension(extension_id):
         raise click.ClickException(f'Extension with id: {extension_id} is not installed!')
     else:
         ext_info = get_ext_manifest(extension_id)
-        click.echo(f'Uninstalling extension: {ext_info.name} ({extension_id})...')
-        ext_downloader.remove(extension_id)
+
+        if click.confirm(f'Are you sure you want to unistall {ext_info.name} ({extension_id})?'):
+            click.echo(f'Uninstalling extension: {ext_info.name} ({extension_id})...')
+            ext_downloader.remove(extension_id)
 
 @click.command('upgrade')
 @click.argument('extension_id', shell_complete=get_extension_id_opts, required=False)
@@ -112,6 +114,56 @@ def upgrade(extension_id):
         ext_downloader.update(ext_id)
 
 
+@click.command('restore', help="Restore plugins to extensions.json")
+@click.option('-y', '--yes', 'yes_', is_flag=True, default=False, help="Allow restore without verification.")
+def restore(yes_):
+    ext_db = ExtensionDb.load()
+    ext_db_ids = [ext for ext in ext_db]
+    ext_downloader = ExtensionDownloader.get_instance()
+
+    installed_ext_ids = [ext[0] for ext in find_extensions(PATHS.EXTENSIONS)]
+    rm_ext_ids = set(installed_ext_ids) - set(ext_db_ids)
+    add_ext_ids = set(ext_db_ids) - set(installed_ext_ids)
+
+    if not len(add_ext_ids) and not len(rm_ext_ids):
+        click.echo("Nothing to restore")
+        sys.exit(0)
+
+    if len(rm_ext_ids) > 0:
+        click.echo("Removing following extensions: ")
+        for rm_ext_id in rm_ext_ids:
+            rm_ext_manifest = get_ext_manifest(rm_ext_id)
+            click.echo(f"- {rm_ext_manifest.name} ({rm_ext_id})")
+        click.echo("") # add one empty line
+
+    if len(add_ext_ids) > 0:
+        click.echo("Installing following extensions: ")
+        for add_ext_id in add_ext_ids:
+            add_ext_manifest = get_ext_manifest(add_ext_id)
+            click.echo(f"+ {add_ext_manifest.name} ({add_ext_id})")
+        click.echo("") # add one empty line
+
+    if not yes_:
+        click.confirm("Apply changes?", default=True, abort=True)
+
+    logging.disable(logging.CRITICAL)
+    if len(rm_ext_ids):
+        with click.progressbar(rm_ext_ids, label='Uninstalling extensions', length=len(rm_ext_ids)) as bar:
+            for rm_ext_id in bar:
+                ext_downloader.remove(rm_ext_id)
+
+    if len(add_ext_ids):
+        with click.progressbar(add_ext_ids, label='Installing extensions', length=len(add_ext_ids)) as bar:
+            for add_ext_id in bar:
+                ext_downloader.download(ext_db.get(add_ext_id).get('url'))
+    logging.disable(logging.NOTSET)
+
+
+
+
+
+
+
 @click.command('version')
 def version():
     pass
@@ -122,6 +174,7 @@ cli.add_command(version)
 cli.add_command(install_extension)
 cli.add_command(remove_extension)
 cli.add_command(upgrade)
+cli.add_command(restore)
 
 if __name__ == '__main__':
     cli()
