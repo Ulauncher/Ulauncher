@@ -36,9 +36,9 @@ def cli():
     pass
 
 
-@click.command('show')
-@click.option('--name/--no-name', '-n/ ', default=False)
-@click.option('--id/--no-id', '-i/ ', default=False)
+@click.command('show', help="Show installed extensions")
+@click.option('--name/--no-name', '-n/ ', default=False, help="Show human readable name of extension")
+@click.option('--id/--no-id', '-i/ ', default=False, help="Show extension id")
 def list_extensions(name, ext_id):
     for ext_id, ext_manifest in get_ext_manifests():
         ext_name = ext_manifest.name
@@ -52,7 +52,7 @@ def list_extensions(name, ext_id):
             click.echo(ext_id)
 
 
-@click.command('install')
+@click.command('install', help="Install extensions")
 @click.argument('git_url')
 def install_extension(git_url):
     ext_downloader = ExtensionDownloader.get_instance()
@@ -75,7 +75,7 @@ def get_extension_id_opts(ctx, params, incomplete):
     return matches
 
 
-@click.command('uninstall')
+@click.command('uninstall', help="Uninstall extensions")
 @click.argument('extension_id', shell_complete=get_extension_id_opts)
 def remove_extension(extension_id):
     ext_downloader = ExtensionDownloader.get_instance()
@@ -88,7 +88,7 @@ def remove_extension(extension_id):
             click.echo(f'Uninstalling extension: {ext_info.name} ({extension_id})...')
             ext_downloader.remove(extension_id)
 
-@click.command('upgrade')
+@click.command('upgrade', help="Upgrade extensions")
 @click.argument('extension_id', shell_complete=get_extension_id_opts, required=False)
 def upgrade(extension_id):
     ext_downloader = ExtensionDownloader.get_instance()
@@ -114,7 +114,7 @@ def upgrade(extension_id):
         ext_downloader.update(ext_id)
 
 
-@click.command('restore', help="Restore plugins to extensions.json")
+@click.command('restore', help="Restore extensions to extensions.json")
 @click.option('-y', '--yes', 'yes_', is_flag=True, default=False, help="Allow restore without verification.")
 def restore(yes_):
     ext_db = ExtensionDb.load()
@@ -157,7 +157,7 @@ def restore(yes_):
             for add_ext_id in bar:
                 ext_downloader.download(ext_db.get(add_ext_id).get('url'))
 
-@click.command('version')
+@click.command('version', help="Show version of ulauncher-extensions")
 def version():
     click.echo(f'Version: {VERSION}')
 
