@@ -34,7 +34,7 @@ class UlauncherApp(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args,
-            application_id="net.launchpad.ulauncher",
+            application_id="io.ulauncher.Ulauncher",
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
             **kwargs
         )

@@ -22,7 +22,7 @@ done
 shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
 gdbus call --session \
-  --dest net.launchpad.ulauncher \
-  --object-path /net/launchpad/ulauncher \
+  --dest io.ulauncher.Ulauncher \
+  --object-path /io/ulauncher/Ulauncher \
   --method org.gtk.Application.Activate \
   "$QUERY"

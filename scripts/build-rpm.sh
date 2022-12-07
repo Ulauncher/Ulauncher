@@ -42,7 +42,7 @@ build-rpm () {
         setup.cfg \
         setup.py \
         ulauncher \
-        ulauncher.desktop \
+        io.ulauncher.Ulauncher.desktop \
         $tmpdir \
         --exclude-from=.gitignore
 
