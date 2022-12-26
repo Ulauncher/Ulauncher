@@ -1,3 +1,4 @@
+from typing import Optional
 from decimal import Decimal
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
@@ -8,7 +9,7 @@ from ulauncher.config import PATHS
 class CalcResult(Result):
 
     # pylint: disable=super-init-not-called
-    def __init__(self, result: Decimal = None, error: str = 'Unknown error'):
+    def __init__(self, result: Optional[Decimal] = None, error: str = 'Unknown error'):
         self.result = result
         self.error = error
         self.name = f'{Decimal(self.result):n}' if self.result is not None else 'Error!'

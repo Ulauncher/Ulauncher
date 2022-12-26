@@ -11,32 +11,32 @@ OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 # pylint: disable=too-many-instance-attributes
 class Result:
     compact = False
-    name = None  # type: str
-    description = None  # type: str
-    keyword = None  # type: str
-    icon = None  # type: Optional[str]
-    _on_enter = None  # type: OnEnterCallback
-    _on_alt_enter = None  # type: OnEnterCallback
-    highlightable = False  # type: bool
-    searchable = False  # type: bool
+    highlightable = False
+    searchable = False
+    name: str = ""
+    description: str = ""
+    keyword: str = ""
+    icon: Optional[str] = None
+    _on_enter: Optional[OnEnterCallback] = None
+    _on_alt_enter: Optional[OnEnterCallback] = None
 
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 name: str = '',
-                 description: str = '',
-                 keyword: str = '',
-                 icon: str = None,
-                 highlightable: bool = None,
+                 name: str = "",
+                 description: str = "",
+                 keyword: str = "",
+                 icon: str = "",
+                 highlightable: bool = False,
                  on_enter: OnEnterCallback = None,
                  on_alt_enter: OnEnterCallback = None,
-                 searchable: bool = None,
-                 compact: bool = None):
+                 searchable: Optional[bool] = None,
+                 compact: Optional[bool] = None):
         if not isinstance(name, str):
-            raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given')
+            raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given.')
         if not isinstance(description, str):
-            raise TypeError(f'"description" must be of type "str", "{type(description).__name__}" given')
+            raise TypeError(f'"description" must be of type "str", "{type(description).__name__}" given.')
         if not isinstance(keyword, str):
-            raise TypeError(f'"keyword" must be of type "str", "{type(keyword).__name__}" given')
+            raise TypeError(f'"keyword" must be of type "str", "{type(keyword).__name__}" given.')
         self.name = name
         self.description = description
         self.keyword = keyword
