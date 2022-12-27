@@ -5,7 +5,7 @@ import gi
 # pylint: disable=wrong-import-position
 try:
     gi.require_version('XApp', '1.0')
-    from gi.repository import XApp
+    from gi.repository import XApp  # type: ignore[attr-defined]
     # Older versions of XApp doesn't have StatusIcon
     assert hasattr(XApp, 'StatusIcon')
     AyatanaIndicator = None
@@ -13,12 +13,12 @@ except (AssertionError, ImportError, ValueError):
     XApp = None
     try:
         gi.require_version('AppIndicator3', '0.1')
-        from gi.repository import AppIndicator3
+        from gi.repository import AppIndicator3  # type: ignore[attr-defined]
         AyatanaIndicator = AppIndicator3
     except (ImportError, ValueError):
         try:
             gi.require_version('AyatanaAppIndicator3', '0.1')
-            from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # noqa: F811
+            from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type: ignore[attr-defined, no-redef] # noqa: F811,E501
             AyatanaIndicator = AppIndicator3
         except (ImportError, ValueError):
             pass

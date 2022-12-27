@@ -1,11 +1,11 @@
 import logging
-from gi.repository import Gdk, GdkX11, Gio
+from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
 from ulauncher.utils.environment import IS_X11
 
 
 logger = logging.getLogger()
 if IS_X11:
-    from gi.repository import Wnck
+    from gi.repository import Wnck  # type: ignore[attr-defined]
 
     wnck_screen = Wnck.Screen.get_default()
 
@@ -33,7 +33,7 @@ def get_text_scaling_factor() -> int:
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
     # Text_scaling allow fractional scaling
-    return Gio.Settings.new("org.gnome.desktop.interface").get_double('text-scaling-factor')
+    return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")  # type: ignore[arg-type]
 
 
 def get_windows_stacked():
