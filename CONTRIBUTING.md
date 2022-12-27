@@ -18,6 +18,7 @@ For the v6 branch you need the the following to setup the local build environmen
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-setuptools (if you have pip, you have it already)
 * Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **wnck is new for v6**)
+* Optionally install [pygobject-stubs](https://github.com/pygobject/pygobject-stubs). Note that pygobject-stubs can only be installed for Gtk3 OR Gtk4. The only way to switch is to reinstall. Ulauncher uses Gtk3, but Gtk4 is the default. Rather than requiring users to install it for Gtk3 we are currently ignoring the mypy errors for all the incompatible places.
 
 #### Distro specific instructions
 
