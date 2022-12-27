@@ -1,8 +1,13 @@
 import logging
-from gi.repository import Gdk, GdkX11, Gio, Wnck
+from gi.repository import Gdk, GdkX11, Gio
+from ulauncher.utils.environment import IS_X11
+
 
 logger = logging.getLogger()
-wnck_screen = Wnck.Screen.get_default()
+if IS_X11:
+    from gi.repository import Wnck
+
+    wnck_screen = Wnck.Screen.get_default()
 
 
 def get_monitor(use_mouse_position=False):
