@@ -14,12 +14,12 @@ logger = logging.getLogger()
 class ResultWidget(Gtk.EventBox):
     __gtype_name__ = "ResultWidget"
 
-    index = 0  # type: int
-    builder = None  # type: Any
-    name = ''  # type: str
-    query = Query('')  # type: Query
-    result = None  # type: Any
-    item_box = None  # type: Any
+    index: int = 0
+    builder: Any
+    name: str
+    query: Query
+    result: Any
+    item_box: Any
     compact = False
 
     def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:

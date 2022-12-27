@@ -1,6 +1,7 @@
 import time
 import logging
 from functools import lru_cache
+from typing import Optional
 from gi.repository import Gio, GLib, Gtk, Keybinder
 from ulauncher.config import FIRST_RUN
 from ulauncher.utils.environment import IS_X11
@@ -25,9 +26,9 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    window = None  # type: UlauncherWindow
-    preferences = None  # type: PreferencesWindow
-    _appindicator = None  # type: AppIndicator
+    window: Optional[UlauncherWindow] = None
+    preferences: Optional[PreferencesWindow] = None
+    _appindicator: Optional[AppIndicator] = None
     _current_accel_name = None
 
     def __init__(self, *args, **kwargs):
