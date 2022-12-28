@@ -90,7 +90,7 @@ setup(
     packages=find_packages(exclude=["tests", "conftest.py"]),
     # These will be placed in /usr
     data_files=[
-        ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
+        ("share/applications", ["ulauncher.desktop"]),
         ("lib/systemd/user", ["ulauncher.service"]),
         ("share/doc/ulauncher", ["README.md"]),
         ("share/licenses/ulauncher", ["LICENSE"]),

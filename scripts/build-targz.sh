@@ -25,7 +25,7 @@ build-targz () {
         setup.cfg \
         setup.py \
         ulauncher \
-        io.ulauncher.Ulauncher.desktop \
+        *.desktop \
         ulauncher.service \
         $tmpdir \
         --exclude-from=.gitignore
