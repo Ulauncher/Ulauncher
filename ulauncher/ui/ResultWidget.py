@@ -11,15 +11,15 @@ from ulauncher.api.shared.query import Query
 logger = logging.getLogger()
 
 
-class ResultWidget(Gtk.EventBox):
+class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
     __gtype_name__ = "ResultWidget"
 
-    index = 0  # type: int
-    builder = None  # type: Any
-    name = ''  # type: str
-    query = Query('')  # type: Query
-    result = None  # type: Any
-    item_box = None  # type: Any
+    index: int = 0
+    builder: Any
+    name: str
+    query: Query
+    result: Any
+    item_box: Any
     compact = False
 
     def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:
@@ -62,7 +62,7 @@ class ResultWidget(Gtk.EventBox):
         self.set_description(result.get_description(query))  # need to run even if there is no descr
         self.set_name_highlighted()
 
-    def set_index(self, index):
+    def set_index(self, index: int):
         """
         Set index for the item and assign shortcut
         """

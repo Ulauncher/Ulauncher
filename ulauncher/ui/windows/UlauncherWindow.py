@@ -1,6 +1,6 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 import logging
-from gi.repository import Gtk, Gdk, Keybinder
+from gi.repository import Gtk, Gdk, Keybinder  # type: ignore[attr-defined]
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes

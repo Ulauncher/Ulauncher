@@ -1,7 +1,6 @@
 from typing import Dict, Callable, Any
 
-CachedInstances = Dict[Callable, Any]
-objects = {}  # type: CachedInstances
+objects: Dict[Callable, Any] = {}
 
 
 def singleton(fn):

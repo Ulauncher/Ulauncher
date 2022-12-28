@@ -26,7 +26,7 @@ class ExtensionController:
             raise RuntimeError("No extension_id provided")
         self.controllers = controllers
         self.framer = framer
-        self.result_renderer = DeferredResultRenderer.get_instance()  # type: DeferredResultRenderer
+        self.result_renderer = DeferredResultRenderer.get_instance()
         self.extension_id = extension_id
         self.manifest = ExtensionManifest.load_from_extension_id(extension_id)
         try:

@@ -5,7 +5,7 @@ from functools import lru_cache
 from gi.repository import Gdk, Gtk, GdkPixbuf
 from ulauncher import ASSETS
 
-icon_theme = Gtk.IconTheme.get_default()
+icon_theme = Gtk.IconTheme.get_default()  # type: ignore[attr-defined]
 logger = logging.getLogger()
 
 DEFAULT_EXE_ICON = f"{ASSETS}/icons/executable.png"
