@@ -1,4 +1,5 @@
 from os.path import basename, dirname, isdir, join
+from ulauncher.api.shared.query import Query
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
@@ -21,9 +22,8 @@ class FileBrowserResult(Result):
         self.name = basename(path)
         self.icon = get_icon_from_path(path)
 
-    def get_name_highlighted(self, query, color):
-        query = basename(query)
-        return super().get_name_highlighted(query, color)
+    def get_highlightable_input(self, query: Query):
+        return basename(query)
 
     def on_enter(self, _):
         if isdir(self.path):

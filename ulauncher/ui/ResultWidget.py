@@ -5,6 +5,7 @@ from gi.repository import Gtk
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.wm import get_text_scaling_factor
 from ulauncher.utils.icon import load_icon_surface
+from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.Theme import Theme
 from ulauncher.api.shared.query import Query
 
@@ -98,10 +99,20 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         if icon:
             self.builder.get_object('item-icon').set_from_surface(icon)
 
-    def set_name_highlighted(self, is_selected: bool = False) -> None:
+    def set_name_highlighted(self, is_selected=False):
+        name = self.result.name
         colors = Theme.load(Settings.load().theme_name).matched_text_hl_colors
         color = colors.get('when_selected' if is_selected else 'when_not_selected')
-        self.set_name(self.result.get_name_highlighted(self.query, color) or self.result.get_name())
+        highlightable_input = self.result.get_highlightable_input(self.query)
+        if highlightable_input and (self.result.searchable or self.result.highlightable):
+            name = highlight_text(
+                highlightable_input,
+                self.result.name,
+                open_tag=f'<span foreground="{color}">',
+                close_tag='</span>'
+            )
+
+        self.set_name(name)
 
     # pylint: disable=arguments-differ
     def set_name(self, name: str) -> None:

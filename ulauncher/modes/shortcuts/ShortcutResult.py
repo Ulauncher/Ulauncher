@@ -4,6 +4,7 @@ from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.api.shared.query import Query
 
 
 class ShortcutResult(Result):
@@ -18,12 +19,8 @@ class ShortcutResult(Result):
         self.is_default_search = default_search
         self.run_without_argument = run_without_argument
 
-    def get_name_highlighted(self, query, color):
-        # highlight only if we did not enter Web search item keyword
-        if query.keyword == self.keyword and query.argument:
-            return None
-
-        return super().get_name_highlighted(query, color)
+    def get_highlightable_input(self, query: Query):
+        return str(query) if self.keyword != query.keyword else None
 
     def get_description(self, query):
         if self.cmd.startswith('#!'):

@@ -23,6 +23,10 @@ class TestResultWidget:
     def scroll_to_focus(self, mocker):
         return mocker.patch('ulauncher.ui.ResultWidget.ResultWidget.scroll_to_focus')
 
+    @pytest.fixture(autouse=True)
+    def unicodedata(self, mocker):
+        return mocker.patch('ulauncher.utils.string.unicodedata')
+
     @pytest.fixture
     def result_wgt(self, builder, result):
         result_wgt = ResultWidget()
@@ -52,7 +56,7 @@ class TestResultWidget:
         builder.get_object.return_value.connect.assert_any_call("button-release-event", result_wgt.on_click)
         builder.get_object.return_value.connect.assert_any_call("enter_notify_event", result_wgt.on_mouse_hover)
         set_index.assert_called_with(3)
-        set_name.assert_called_with(result.get_name_highlighted.return_value)
+        set_name.assert_called()
         set_description.assert_called_with(result.get_description.return_value)
         result.get_description.assert_called_with('query')
 

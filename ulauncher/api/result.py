@@ -3,7 +3,6 @@ from typing import Callable, Optional
 from ulauncher.utils.fuzzy_search import get_score
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
-from ulauncher.utils.text_highlighter import highlight_text
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
@@ -70,18 +69,10 @@ class Result:
     def get_icon(self) -> Optional[str]:
         return self.icon
 
-    def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
-        # Searchable implies highlightable even if it's not set specifically
-        highlightable_input = query.argument if self.keyword and self.keyword == query.keyword else query
-        if highlightable_input and (self.searchable or self.highlightable):
-            return highlight_text(
-                highlightable_input,
-                self.name,
-                open_tag=f'<span foreground="{color}">',
-                close_tag='</span>'
-            )
-        # don't highlight if query is empty
-        return self.name
+    def get_highlightable_input(self, query: Query):
+        if self.keyword and self.keyword == query.keyword:
+            return query.argument
+        return str(query)
 
     # pylint: disable=unused-argument
     def get_description(self, query: Query) -> str:
