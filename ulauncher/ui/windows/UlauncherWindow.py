@@ -1,5 +1,6 @@
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 import logging
+import gi
 from gi.repository import Gtk, Gdk, Keybinder  # type: ignore[attr-defined]
 
 # pylint: disable=unused-import
@@ -17,10 +18,19 @@ from ulauncher.utils.Theme import Theme
 
 logger = logging.getLogger()
 
+try:
+    gi.require_version('GtkLayerShell', '0.1')
+    # pylint: disable=ungrouped-imports
+    from gi.repository import GtkLayerShell
+except (ValueError, ImportError):
+    logger.warning("Failed to load GtkLayerShell, disabling positioning on wayland!")
+    GtkLayerShell = None
+
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider = None
     _drag_start_coords = None
+    _layer_shell_enabled = False
     results_nav = None
     settings = Settings.load()
 
@@ -37,6 +47,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             urgency_hint=True,
             window_position="center",
         )
+
+        # Check if running under a wayland compositor that supports the layer shell extension
+        if GtkLayerShell is not None and GtkLayerShell.is_supported():
+            logger.info("Layer shell extension is supported, using to position window")
+            self._layer_shell_enabled = True
+            GtkLayerShell.init_for_window(self)
+            GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+            GtkLayerShell.set_layer(self, GtkLayerShell.Layer.OVERLAY)
+            # Ask to be moved when over some other shell component
+            GtkLayerShell.set_exclusive_zone(self, 0)
 
         # Try setting a transparent background
         screen = self.get_screen()
@@ -249,9 +269,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 750
+        pos_x = geo.width * 0.5 - window_width * 0.5 + geo.x
+        pos_y = geo.y + geo.height * 0.12
         self.set_property('width-request', window_width)
         self.scroll_container.set_property('max-content-height', max_height)
-        self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
+
+        if self._layer_shell_enabled:
+            # Set vertical position and anchor to the top edge, will be centered horizontally
+            # by default
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, pos_y)
+        else:
+            self.move(pos_x, pos_y)
 
     # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def show(self):
