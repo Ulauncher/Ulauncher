@@ -72,9 +72,10 @@ class Result:
 
     def get_name_highlighted(self, query: Query, color: str) -> Optional[str]:
         # Searchable implies highlightable even if it's not set specifically
-        if query and (self.searchable or self.highlightable):
+        highlightable_input = query.argument if self.keyword and self.keyword == query.keyword else query
+        if highlightable_input and (self.searchable or self.highlightable):
             return highlight_text(
-                query if not self.keyword else query.argument,
+                highlightable_input,
                 self.name,
                 open_tag=f'<span foreground="{color}">',
                 close_tag='</span>'
