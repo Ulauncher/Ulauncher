@@ -1,6 +1,6 @@
 import logging
 import mimetypes
-from os.path import join
+from os.path import expanduser, join
 from functools import lru_cache
 from gi.repository import Gdk, Gtk, GdkPixbuf
 from ulauncher import ASSETS
@@ -18,6 +18,7 @@ def get_icon_path(icon, size=32, base_path=""):
     """
     try:
         if icon and isinstance(icon, str):
+            icon = expanduser(icon)
             if icon.startswith("/"):
                 return icon
 

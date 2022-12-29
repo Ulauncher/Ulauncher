@@ -1,4 +1,3 @@
-import os
 import re
 
 from ulauncher.api.result import Result
@@ -15,7 +14,7 @@ class ShortcutResult(Result):
         self.keyword = keyword
         self.name = name
         self.cmd = cmd
-        self.icon = icon and os.path.expanduser(icon)
+        self.icon = icon
         self.is_default_search = default_search
         self.run_without_argument = run_without_argument
 
