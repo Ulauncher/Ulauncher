@@ -5,6 +5,7 @@ from ulauncher.utils.environment import IS_X11
 
 logger = logging.getLogger()
 if IS_X11:
+    # pylint: disable=ungrouped-imports, no-name-in-module
     from gi.repository import Wnck  # type: ignore[attr-defined]
 
     wnck_screen = Wnck.Screen.get_default()
