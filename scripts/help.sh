@@ -13,8 +13,11 @@ help () {
   ${bold}./ul rm-python-cache
     ${dim}Removes .pyc, .pyo, __pycache__${normal}
 
+  ${bold}./ul test-black
+    ${dim}Runs black format checker${normal}
+
   ${bold}./ul test-mypy
-    ${dim}Runs type cheker using mypy${normal}
+    ${dim}Runs type checker using mypy${normal}
 
   ${bold}./ul test-pylint
     ${dim}Runs pylint${normal}

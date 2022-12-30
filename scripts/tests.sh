@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+test-black () {
+    echo '[ test: black ]'
+    set -e
+    black --diff --check .
+}
+
 test-mypy () {
     echo '[ test: mypy ]'
     set -e

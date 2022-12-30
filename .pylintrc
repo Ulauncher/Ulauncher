@@ -68,10 +68,11 @@ disable=broad-except,         # Try/except catching all exceptionds instead of s
         redefined-builtin,    # Shadowing python internals
         too-few-public-methods,
         too-many-boolean-expressions,
-        unspecified-encoding,  # Only needed for Windows
+        unspecified-encoding, # Only needed for Windows
         # Ignore Pylint 2.14 config sanity check (breaking behavior otherwise)
         unrecognized-option, useless-option-value,
         c-extension-no-member,
+        line-too-long,        # Handled by black
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -266,9 +267,6 @@ indent-after-paren=4
 # String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
 # tab).
 indent-string='    '
-
-# Maximum number of characters on a single line.
-max-line-length=120
 
 # Maximum number of lines in a module.
 max-module-lines=1000

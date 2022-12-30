@@ -23,6 +23,7 @@ main () {
   case "$1" in
     run) exec ./bin/ulauncher -v --dev $2 ;;
     rm-python-cache) rm-python-cache ;;
+    test-black) test-black ;;
     test-mypy) test-mypy ;;
     test-pylint) test-pylint ;;
     test-flake8) test-flake8 ;;

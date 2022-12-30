@@ -57,8 +57,8 @@ class PickleFramer(GObject.GObject):
     def close(self):
         if self.is_closing():
             log.debug("Connection %s already closing", self)
-        elif (self._conn.get_input_stream().has_pending() or
-              self._conn.get_output_stream().has_pending()):
+        elif (self._conn.get_input_stream().has_pending()
+              or self._conn.get_output_stream().has_pending()):
             self._canceller.cancel()
         else:
             log.debug("Starting to close connection %s", self)
