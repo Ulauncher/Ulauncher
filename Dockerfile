@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 # Run this to build this image:
 # source scripts/common.sh && docker build -t $BUILD_IMAGE .
 
