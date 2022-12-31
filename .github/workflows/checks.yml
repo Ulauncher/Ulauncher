@@ -14,7 +14,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt update &&
-        sudo apt install -y libgirepository1.0-dev libcairo2-dev gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 gir1.2-notify-0.7 gir1.2-webkit2-4.0 gir1.2-wnck-3.0
+        sudo apt install -y xvfb libgirepository1.0-dev libcairo2-dev gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 gir1.2-notify-0.7 gir1.2-webkit2-4.0 gir1.2-wnck-3.0
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
@@ -27,4 +27,4 @@ jobs:
     - run: flake8 .
     - run: mypy .
     - run: pylint --disable=cyclic-import ulauncher
-    - run: pytest tests
+    - run: DISPLAY=:1 xvfb-run pytest tests
