@@ -9,8 +9,11 @@ settings_file = '/tmp/ulauncher-test/pref-ctx-settings.json'
 
 
 def check_json_prop(name):
-    with open(settings_file) as f:
-        return json.load(f).get(name)
+    try:
+        with open(settings_file) as f:
+            return json.load(f).get(name, None)
+    except FileNotFoundError:
+        return None
 
 
 class TestPreferencesContextServer:
@@ -46,11 +49,6 @@ class TestPreferencesContextServer:
 
     # pylint: disable=too-many-arguments
     def test_apply_settings_show_indicator_icon(self, prefs_server):
-        prefs_server.apply_settings('show_indicator_icon', True)
-        prefs_server.app.toggle_appindicator.assert_called_with(True)
-        assert prefs_server.settings.show_indicator_icon is True
-        assert check_json_prop("show_indicator_icon") is True
-
         prefs_server.apply_settings('show_indicator_icon', False)
         prefs_server.app.toggle_appindicator.assert_called_with(False)
         assert prefs_server.settings.show_indicator_icon is False

@@ -10,7 +10,7 @@ def load_json(file=json_file):
         with open(file) as f:
             return json.load(f)
     except FileNotFoundError:
-        return None
+        return {}
 
 
 class TestJsonData:
@@ -63,7 +63,7 @@ class TestJsonData:
         jd.save()
         jd.bcd = 234
         jd.save_as(file_path)
-        assert load_json(json_file).get("abc") is None
+        assert load_json().get("abc", None) is None
         assert load_json(file_path).get("abc") is None
         assert load_json(file_path).get("bcd") == 234
 
