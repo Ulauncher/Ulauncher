@@ -26,5 +26,9 @@ jobs:
     # - run: black --diff --check .
     - run: flake8 .
     - run: mypy .
+    # disabling cyclic-import since we want to see them but not error on them
+    # Can't override the error level unfortunately: https://github.com/PyCQA/pylint/issues/2293
+    # Might want to change pylint this to `pylint --errors-only ulauncher`,
+    # but I think most warnings should be trated as errors
     - run: pylint --disable=cyclic-import ulauncher
     - run: DISPLAY=:1 xvfb-run pytest tests
