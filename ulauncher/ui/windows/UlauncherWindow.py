@@ -65,7 +65,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         window_frame.pack_start(window_container, True, True, 0)
 
+        event_box = Gtk.EventBox()
         input_box = Gtk.Box()
+        event_box.add(input_box)
 
         self.input = Gtk.Entry(
             can_default=True,
@@ -103,7 +105,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
 
-        window_container.pack_start(input_box, True, True, 0)
+        window_container.pack_start(event_box, True, True, 0)
         window_container.pack_end(self.scroll_container, True, True, 0)
 
         window_container.get_style_context().add_class("app")
@@ -121,7 +123,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.connect("focus-in-event", self.on_focus_in)
         self.connect("focus-out-event", self.on_focus_out)
-        self.connect("button-press-event", self.on_mouse_down)
+        event_box.connect("button-press-event", self.on_mouse_down)
         self.connect("button-release-event", self.on_mouse_up)
         self.connect("motion_notify_event", self.on_mouse_move)
         self.input.connect("changed", self.on_input_changed)
@@ -194,8 +196,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Prepare moving the window if the user drags
         """
-        # Only on left clicks and not on the results
-        if event.button == 1 and event.y < 100:
+        if event.button == 1:
             self.set_cursor("grab")
             self._drag_start_coords = {'x': event.x, 'y': event.y}
 
