@@ -30,7 +30,7 @@ def get_icon_path(icon, size=32, base_path=""):
                 return themed_icon.get_filename()
 
     except Exception as e:
-        logger.info('Could not load icon path %s. E: %s', icon, e)
+        logger.info("Could not load icon path %s. E: %s", icon, e)
 
     return None
 

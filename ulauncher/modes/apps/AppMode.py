@@ -13,6 +13,6 @@ class AppMode(BaseMode):
             show_in = app.get_show_in() or settings.disable_desktop_filters
             # Make an exception for gnome-control-center, because all the very useful specific settings
             # like "Keyboard", "Wi-Fi", "Sound" etc have NoDisplay=true
-            nodisplay = app.get_nodisplay() and not executable == 'gnome-control-center'
+            nodisplay = app.get_nodisplay() and not executable == "gnome-control-center"
             if app.get_display_name() and executable and show_in and not nodisplay:
                 yield AppResult(app)

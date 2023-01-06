@@ -25,7 +25,7 @@ def run_async(*args, **kwargs):
     >>> t2.join()
 
     """
-    daemon = kwargs.get('daemon', False)
+    daemon = kwargs.get("daemon", False)
 
     def _run_async(func):
         @wraps(func)

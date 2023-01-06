@@ -8,6 +8,7 @@ class RenderResultListAction(BaseAction):
 
     :param list result_list: list of :class:`~ulauncher.api.result.Result` objects
     """
+
     keep_app_open = True
 
     def __init__(self, result_list):

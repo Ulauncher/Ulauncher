@@ -8,8 +8,15 @@ from collections import defaultdict
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import (BaseEvent, KeywordQueryEvent, InputTriggerEvent, ItemEnterEvent,
-                                        LaunchTriggerEvent, PreferencesUpdateEvent, UnloadEvent)
+from ulauncher.api.shared.event import (
+    BaseEvent,
+    KeywordQueryEvent,
+    InputTriggerEvent,
+    ItemEnterEvent,
+    LaunchTriggerEvent,
+    PreferencesUpdateEvent,
+    UnloadEvent,
+)
 from ulauncher.api.shared.query import Query
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
@@ -24,10 +31,7 @@ class Extension:
     def __init__(self):
         logHandler = logging.StreamHandler()
         logHandler.setFormatter(ColoredFormatter())
-        logging.basicConfig(
-            level=logging.DEBUG if os.getenv('VERBOSE') else logging.WARNING,
-            handlers=[logHandler]
-        )
+        logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[logHandler])
         self.extension_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.extension_id)
         self._listeners = defaultdict(list)
@@ -40,15 +44,15 @@ class Extension:
 
         # subscribe with methods if user has added their own
         if self.__class__.on_input is not Extension.on_input:
-            self.subscribe(InputTriggerEvent, 'on_input')
+            self.subscribe(InputTriggerEvent, "on_input")
         if self.__class__.on_launch is not Extension.on_launch:
-            self.subscribe(LaunchTriggerEvent, 'on_launch')
+            self.subscribe(LaunchTriggerEvent, "on_launch")
         if self.__class__.on_item_enter is not Extension.on_item_enter:
-            self.subscribe(ItemEnterEvent, 'on_item_enter')
+            self.subscribe(ItemEnterEvent, "on_item_enter")
         if self.__class__.on_unload is not Extension.on_unload:
-            self.subscribe(UnloadEvent, 'on_unload')
+            self.subscribe(UnloadEvent, "on_unload")
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
-            self.subscribe(PreferencesUpdateEvent, 'on_preferences_update')
+            self.subscribe(PreferencesUpdateEvent, "on_preferences_update")
 
     def subscribe(self, event_type: Type[BaseEvent], listener: Union[str, object]):
         """
@@ -73,7 +77,7 @@ class Extension:
                 kw_event = KeywordQueryEvent(Query(f"{keyword} {input_text}"), event)
                 self.trigger_event(kw_event)
             else:
-                self.logger.debug('No listeners for event %s', event_type.__name__)
+                self.logger.debug("No listeners for event %s", event_type.__name__)
 
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
@@ -115,6 +119,5 @@ class Extension:
 
 
 class PreferencesUpdateEventListener(EventListener):
-
     def on_event(self, event, extension):
         extension.preferences[event.id] = event.new_value

@@ -37,7 +37,7 @@ class ShortcutsDb(JsonData):
                     keyword="g",
                     name="Google Search",
                     cmd="https://google.com/search?q=%s",
-                    icon=f"{PATHS.ASSETS}/icons/google-search.png"
+                    icon=f"{PATHS.ASSETS}/icons/google-search.png",
                 ),
                 Shortcut(
                     id="stackoverflow",
@@ -45,7 +45,7 @@ class ShortcutsDb(JsonData):
                     keyword="so",
                     name="Stack Overflow",
                     cmd="https://stackoverflow.com/search?q=%s",
-                    icon=f"{PATHS.ASSETS}/icons/stackoverflow.svg"
+                    icon=f"{PATHS.ASSETS}/icons/stackoverflow.svg",
                 ),
                 Shortcut(
                     id="wikipedia",
@@ -53,7 +53,7 @@ class ShortcutsDb(JsonData):
                     keyword="wiki",
                     name="Wikipedia",
                     cmd="https://en.wikipedia.org/wiki/%s",
-                    icon=f"{PATHS.ASSETS}/icons/wikipedia.png"
+                    icon=f"{PATHS.ASSETS}/icons/wikipedia.png",
                 ),
             ]
             instance.save({keyword.id: keyword for keyword in keywords})

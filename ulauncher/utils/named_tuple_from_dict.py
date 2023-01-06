@@ -5,14 +5,11 @@ def namedtuple_from_dict(obj):
     if isinstance(obj, dict):
         fields = sorted(obj.keys())
         namedtuple_type = namedtuple(
-            typename='GenericObject',
+            typename="GenericObject",
             field_names=fields,
             rename=True,
         )
-        field_value_pairs = OrderedDict(
-            (str(field), namedtuple_from_dict(obj[field]))
-            for field in fields
-        )
+        field_value_pairs = OrderedDict((str(field), namedtuple_from_dict(obj[field])) for field in fields)
         try:
             return namedtuple_type(**field_value_pairs)
         except TypeError:

@@ -1,11 +1,13 @@
 import os
 import pytest
 from ulauncher.modes.extensions.ExtensionManifest import (
-    ExtensionManifest, ExtensionManifestError, ExtensionIncompatibleWarning)
+    ExtensionManifest,
+    ExtensionManifestError,
+    ExtensionIncompatibleWarning,
+)
 
 
 class TestExtensionManifest:
-
     @pytest.fixture
     def valid_manifest(self):
         return {
@@ -13,9 +15,7 @@ class TestExtensionManifest:
             "name": "Timer",
             "authors": "Aleksandr Gornostal",
             "icon": "images/timer.png",
-            "triggers": {
-                "keyword": {"name": "Timer", "keyword": "ti"}
-            }
+            "triggers": {"keyword": {"name": "Timer", "keyword": "ti"}},
         }
 
     def test_open__manifest_file__is_read(self):
@@ -33,32 +33,26 @@ class TestExtensionManifest:
         manifest.validate()
 
     def test_validate__prefs_incorrect_type__exception_raised(self, valid_manifest):
-        valid_manifest['preferences'] = {
-            'id': {'type': 'incorrect'}
-        }
+        valid_manifest["preferences"] = {"id": {"type": "incorrect"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
     def test_validate__type_kw_empty_name__exception_raised(self, valid_manifest):
-        valid_manifest['preferences'] = {
-            'id': {'type': 'incorrect', 'keyword': 'kw'}
-        }
+        valid_manifest["preferences"] = {"id": {"type": "incorrect", "keyword": "kw"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
     def test_validate__raises_error_if_empty_default_value_for_keyword(self, valid_manifest):
-        valid_manifest['preferences'] = {
-            'id': {'type': 'keyword', 'name': 'My Keyword'}
-        }
+        valid_manifest["preferences"] = {"id": {"type": "keyword", "name": "My Keyword"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, valid_manifest):
-        valid_manifest['preferences'] = {
-            'city': {'type': 'input', 'name': 'City'},
+        valid_manifest["preferences"] = {
+            "city": {"type": "input", "name": "City"},
         }
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
@@ -78,10 +72,9 @@ class TestExtensionManifest:
         assert ExtensionManifest(preferences={"ns": {"k": "v"}}).stringify() == '{"preferences": {"ns": {"k": "v"}}}'
 
     def test_get_user_preferences(self):
-        manifest = ExtensionManifest(preferences={
-            "txt": {"type": "text", "value": "asdf"},
-            "num": {"type": "number", "value": 11}
-        })
+        manifest = ExtensionManifest(
+            preferences={"txt": {"type": "text", "value": "asdf"}, "num": {"type": "number", "value": 11}}
+        )
         assert manifest.get_user_preferences() == {"txt": "asdf", "num": 11}
 
     def test_manifest_backwards_compatibility(self):
@@ -91,7 +84,7 @@ class TestExtensionManifest:
             manifest_version="1",
             description="asdf",
             options={"query_debounce": 0.555},
-            preferences=[{"id": "asdf", "name": "ghjk"}]
+            preferences=[{"id": "asdf", "name": "ghjk"}],
         )
         assert em.get("options") is None
         assert em.get("required_api_version") is None

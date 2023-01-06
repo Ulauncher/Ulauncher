@@ -13,7 +13,6 @@ logger = logging.getLogger()
 
 
 class ExtensionServer:
-
     @classmethod
     @singleton
     def get_instance(cls):
@@ -40,10 +39,7 @@ class ExtensionServer:
             os.unlink(self.socket_path)
 
         self.service.add_address(
-            Gio.UnixSocketAddress.new(self.socket_path),
-            Gio.SocketType.STREAM,
-            Gio.SocketProtocol.DEFAULT,
-            None
+            Gio.UnixSocketAddress.new(self.socket_path), Gio.SocketType.STREAM, Gio.SocketProtocol.DEFAULT, None
         )
         self.pending = {}
         self.controllers = {}
@@ -113,7 +109,7 @@ class ServerIsNotRunningError(RuntimeError):
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     server = ExtensionServer.get_instance()

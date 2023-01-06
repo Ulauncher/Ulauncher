@@ -2,6 +2,7 @@ import sys
 import signal
 import logging
 from functools import partial
+
 # This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
@@ -39,10 +40,11 @@ def main(is_dev=False):
         # Ensure preferences UI is built
         # pylint: disable=import-outside-toplevel
         from setuptools import sandbox
+
         sandbox.run_setup("setup.py", ["build_prefs"])
 
     # Set up global logging for stdout and file
-    file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode='w+')
+    file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode="w+")
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
     stream_handler.setFormatter(ColoredFormatter())
@@ -51,21 +53,21 @@ def main(is_dev=False):
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s | %(levelname)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s",
-        handlers=[file_handler, stream_handler]
+        handlers=[file_handler, stream_handler],
     )
 
     # Logger for actual use in this file
     logger = logging.getLogger()
 
-    logger.info('Ulauncher version %s', VERSION)
-    logger.info('Extension API version %s', API_VERSION)
+    logger.info("Ulauncher version %s", VERSION)
+    logger.info("Extension API version %s", API_VERSION)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("PyGObject+ %i.%i.%i", *gi.version_info)
 
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
 
     if XDG_SESSION_TYPE != "X11":
-        logger.info("X11 backend: %s", ('Yes' if IS_X11_COMPATIBLE else 'No'))
+        logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
     if options.no_window_shadow:
@@ -82,12 +84,7 @@ def main(is_dev=False):
 
     app = UlauncherApp()
 
-    GLib.unix_signal_add(
-        GLib.PRIORITY_DEFAULT,
-        signal.SIGHUP,
-        partial(reload_config, app, logger),
-        None
-    )
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGHUP, partial(reload_config, app, logger), None)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
 
     try:

@@ -4,9 +4,29 @@ from gi.repository import Gtk, Gdk, GObject
 
 logger = logging.getLogger()
 
-FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', 'Down', 'Left', 'Right', 'Return',
-                        'BackSpace', 'Alt_L', 'Alt_R', 'Shift_L', 'Shift_R', 'Control_L', 'Control_R', 'space',
-                        'Escape', 'Tab', 'Insert')
+FORBIDDEN_ACCEL_KEYS = (
+    "Delete",
+    "Page_Down",
+    "Page_Up",
+    "Home",
+    "End",
+    "Up",
+    "Down",
+    "Left",
+    "Right",
+    "Return",
+    "BackSpace",
+    "Alt_L",
+    "Alt_R",
+    "Shift_L",
+    "Shift_R",
+    "Control_L",
+    "Control_R",
+    "space",
+    "Escape",
+    "Tab",
+    "Insert",
+)
 
 
 class HotkeyDialog(Gtk.ApplicationWindow):
@@ -14,7 +34,7 @@ class HotkeyDialog(Gtk.ApplicationWindow):
     _display_name = None
     __gsignals__ = {
         # parameters: <hotkey-value (str)>, <hotkey-display-value (str)>
-        'hotkey-set': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
+        "hotkey-set": (GObject.SignalFlags.RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_STRING, GObject.TYPE_STRING))
     }
 
     def __init__(self):
@@ -59,12 +79,12 @@ class HotkeyDialog(Gtk.ApplicationWindow):
         accel_name = Gtk.accelerator_name(event.keyval, mask)
         display_name = Gtk.accelerator_get_label(event.keyval, mask)
 
-        if accel_name == 'Return':
+        if accel_name == "Return":
             # emit hotkey-set signal
-            self.emit('hotkey-set', self._accel_name, self._display_name)
+            self.emit("hotkey-set", self._accel_name, self._display_name)
             self.hide()
 
-        if accel_name == 'Escape':
+        if accel_name == "Escape":
             self.hide()
             return
 
@@ -88,4 +108,4 @@ class HotkeyDialog(Gtk.ApplicationWindow):
         NOTE: it's very likely these verifications are not enough,
         but I could not find more information about this topic
         """
-        return (accel_name not in FORBIDDEN_ACCEL_KEYS) and len(label) > 1 and not accel_name.startswith('KP_')
+        return (accel_name not in FORBIDDEN_ACCEL_KEYS) and len(label) > 1 and not accel_name.startswith("KP_")

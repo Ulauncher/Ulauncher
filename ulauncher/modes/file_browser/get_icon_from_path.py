@@ -5,15 +5,15 @@ from gi.repository import GLib
 
 
 SPECIAL_DIRS = {
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): 'folder-download',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS): 'folder-documents',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC): 'folder-music',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES): 'folder-pictures',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PUBLIC_SHARE): 'folder-publicshare',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_TEMPLATES): 'folder-templates',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS): 'folder-videos',
-    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP): 'user-desktop',
-    Path('~').expanduser(): 'folder-home'
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): "folder-download",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS): "folder-documents",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC): "folder-music",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES): "folder-pictures",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PUBLIC_SHARE): "folder-publicshare",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_TEMPLATES): "folder-templates",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS): "folder-videos",
+    GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP): "user-desktop",
+    Path("~").expanduser(): "folder-home",
 }
 
 

@@ -16,13 +16,7 @@ class ModeHandler:
     @classmethod
     @singleton
     def get_instance(cls):
-        return cls([
-            FileBrowserMode(),
-            CalcMode(),
-            ShortcutMode(),
-            ExtensionMode(),
-            AppMode()
-        ])
+        return cls([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
 
     def __init__(self, modes):
         self.modes = modes

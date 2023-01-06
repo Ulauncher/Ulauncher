@@ -10,18 +10,39 @@ from ulauncher.modes.calc.CalcResult import CalcResult
 
 
 # supported operators
-operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-             ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
-             ast.USub: op.neg, ast.Mod: op.mod}
+operators = {
+    ast.Add: op.add,
+    ast.Sub: op.sub,
+    ast.Mult: op.mul,
+    ast.Div: op.truediv,
+    ast.Pow: op.pow,
+    ast.BitXor: op.xor,
+    ast.USub: op.neg,
+    ast.Mod: op.mod,
+}
 
-functions = {"sqrt": Decimal.sqrt, "exp": Decimal.exp,
-             "ln": Decimal.ln, "log10": Decimal.log10,
-             "sin": math.sin, "cos": math.cos, "tan": math.tan,
-             "asin": math.asin, "acos": math.acos, "atan": math.atan,
-             "sinh": math.sinh, "cosh": math.cosh, "tanh": math.tanh,
-             "asinh": math.asinh, "acosh": math.acosh, "atanh": math.atanh,
-             "erf": math.erf, "erfc": math.erfc, "gamma": math.gamma,
-             "lgamma": math.lgamma}
+functions = {
+    "sqrt": Decimal.sqrt,
+    "exp": Decimal.exp,
+    "ln": Decimal.ln,
+    "log10": Decimal.log10,
+    "sin": math.sin,
+    "cos": math.cos,
+    "tan": math.tan,
+    "asin": math.asin,
+    "acos": math.acos,
+    "atan": math.atan,
+    "sinh": math.sinh,
+    "cosh": math.cosh,
+    "tanh": math.tanh,
+    "asinh": math.asinh,
+    "acosh": math.acosh,
+    "atanh": math.atanh,
+    "erf": math.erf,
+    "erfc": math.erfc,
+    "gamma": math.gamma,
+    "lgamma": math.lgamma,
+}
 
 constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
 
@@ -52,7 +73,7 @@ def eval_expr(expr):
     -5.0
     """
     expr = normalize_expr(expr)
-    tree = ast.parse(expr, mode='eval').body
+    tree = ast.parse(expr, mode="eval").body
     result = _eval(tree).quantize(Decimal("1e-15"))
     int_result = int(result)
     if result == int_result:
@@ -65,7 +86,7 @@ def eval_expr(expr):
 def _is_enabled(query):
     query = normalize_expr(query)
     try:
-        node = ast.parse(query, mode='eval').body
+        node = ast.parse(query, mode="eval").body
         if isinstance(node, ast.Num):
             return True
         if isinstance(node, ast.BinOp):
@@ -118,5 +139,5 @@ class CalcMode(BaseMode):
             result = CalcResult(result=result)
         # pylint: disable=broad-except
         except Exception:
-            result = CalcResult(error='Invalid expression')
+            result = CalcResult(error="Invalid expression")
         return [result]

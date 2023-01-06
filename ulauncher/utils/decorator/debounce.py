@@ -2,9 +2,10 @@ from ulauncher.utils.timer import timer
 
 
 def debounce(wait):
-    """ Decorator that will postpone a functions
-        execution until after wait seconds
-        have elapsed since the last time it was invoked. """
+    """Decorator that will postpone a functions
+    execution until after wait seconds
+    have elapsed since the last time it was invoked."""
+
     def decorator(fn):
         def debounced(*args, **kwargs):
             def call_it():

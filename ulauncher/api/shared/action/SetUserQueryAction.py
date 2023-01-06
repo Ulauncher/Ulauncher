@@ -6,6 +6,7 @@ class SetUserQueryAction(BaseAction):
     """
     Changes query string to a new one
     """
+
     keep_app_open = True
 
     def __init__(self, new_query: str):
@@ -17,4 +18,5 @@ class SetUserQueryAction(BaseAction):
     def _update_query(self):
         # pylint: disable=import-outside-toplevel
         from ulauncher.ui.UlauncherApp import UlauncherApp
+
         UlauncherApp().query = self.new_query

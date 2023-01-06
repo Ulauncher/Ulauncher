@@ -20,16 +20,18 @@ class Result:
     _on_alt_enter: Optional[OnEnterCallback] = None
 
     # pylint: disable=too-many-arguments
-    def __init__(self,
-                 name: str = "",
-                 description: str = "",
-                 keyword: str = "",
-                 icon: str = "",
-                 highlightable: bool = False,
-                 on_enter: OnEnterCallback = None,
-                 on_alt_enter: OnEnterCallback = None,
-                 searchable: Optional[bool] = None,
-                 compact: Optional[bool] = None):
+    def __init__(
+        self,
+        name: str = "",
+        description: str = "",
+        keyword: str = "",
+        icon: str = "",
+        highlightable: bool = False,
+        on_enter: OnEnterCallback = None,
+        on_alt_enter: OnEnterCallback = None,
+        searchable: Optional[bool] = None,
+        compact: Optional[bool] = None,
+    ):
         if not isinstance(name, str):
             raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given.')
         if not isinstance(description, str):
@@ -95,7 +97,7 @@ class Result:
         return self._on_alt_enter(query) if callable(self._on_alt_enter) else None
 
     def get_searchable_fields(self):
-        return [(self.name, 1), (self.description, .8)]
+        return [(self.name, 1), (self.description, 0.8)]
 
     def search_score(self, query):
         if not self.searchable:

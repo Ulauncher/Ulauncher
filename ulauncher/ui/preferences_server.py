@@ -48,7 +48,7 @@ def get_extensions():
             manifest.validate()
             manifest.check_compatibility()
         except Exception as e:
-            error = {'message': str(e), 'errorName': type(e).__name__}
+            error = {"message": str(e), "errorName": type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
@@ -56,21 +56,21 @@ def get_extensions():
 
         yield {
             **ExtensionDb.load().get(ext_id, {}),
-            'id': ext_id,
-            'name': manifest.name,
-            'icon': icon,
-            'authors': manifest.authors,
-            'instructions': manifest.instructions,
-            'preferences': manifest.preferences,
-            'triggers': manifest.triggers,
-            'error': error,
-            'is_running': is_running,
-            'runtime_error': ext_runner.get_extension_error(ext_id) if not is_running else None
+            "id": ext_id,
+            "name": manifest.name,
+            "icon": icon,
+            "authors": manifest.authors,
+            "instructions": manifest.instructions,
+            "preferences": manifest.preferences,
+            "triggers": manifest.triggers,
+            "error": error,
+            "is_running": is_running,
+            "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
 
 
 # pylint: disable=too-many-public-methods
-class PreferencesServer():
+class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
@@ -79,6 +79,7 @@ class PreferencesServer():
     For this reason it should be separate from the window class, which is an object that you want to be able to create,
     destroy and recreate.
     """
+
     client: WebKit2.WebView
 
     @classmethod
@@ -91,7 +92,7 @@ class PreferencesServer():
         self.autostart_pref = UlauncherSystemdController()
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
-        self.context.register_uri_scheme('prefs', self.request_listener)
+        self.context.register_uri_scheme("prefs", self.request_listener)
         self.context.set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
 
     @run_async
@@ -120,7 +121,7 @@ class PreferencesServer():
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
                 error = JsonData(message=str(e), name=type(e).__name__)
-                logging.exception('Preferences server error %s: %s', error.name, e)
+                logging.exception("Preferences server error %s: %s", error.name, e)
 
                 if not error.name.endswith("Warning"):
                     additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
@@ -151,9 +152,9 @@ class PreferencesServer():
     # Route handlers
     ######################################
 
-    @route('/get/all')
+    @route("/get/all")
     def get_all(self):
-        logger.info('API call /get/all')
+        logger.info("API call /get/all")
         export_settings = self.settings.copy()
 
         hotkey_caption = "Ctrl+Space"
@@ -163,37 +164,39 @@ class PreferencesServer():
         except Exception:
             logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', self.settings.hotkey_show_app)
 
-        export_settings.update({
-            'autostart_allowed': self.autostart_pref.is_allowed(),
-            'autostart_enabled': self.autostart_pref.is_enabled(),
-            'available_themes': [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
-            'hotkey_show_app': hotkey_caption,
-            'env': {
-                'version': VERSION,
-                'api_version': API_VERSION,
-                'user_home': os.path.expanduser('~'),
-                'is_x11': IS_X11,
+        export_settings.update(
+            {
+                "autostart_allowed": self.autostart_pref.is_allowed(),
+                "autostart_enabled": self.autostart_pref.is_enabled(),
+                "available_themes": [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
+                "hotkey_show_app": hotkey_caption,
+                "env": {
+                    "version": VERSION,
+                    "api_version": API_VERSION,
+                    "user_home": os.path.expanduser("~"),
+                    "is_x11": IS_X11,
+                },
             }
-        })
+        )
         return export_settings
 
-    @route('/set')
+    @route("/set")
     def apply_settings(self, property, value):
-        logger.info('Setting %s to %s', property, value)
+        logger.info("Setting %s to %s", property, value)
         # This setting is not stored to the config
-        if property == 'autostart-enabled':
+        if property == "autostart-enabled":
             self.apply_autostart(value)
             return
 
         self.settings.save({property: value})
 
-        if property == 'show_indicator_icon':
+        if property == "show_indicator_icon":
             self.app.toggle_appindicator(value)
-        if property == 'theme_name':
+        if property == "theme_name":
             self.app.window.apply_theme()
 
     def apply_autostart(self, is_enabled):
-        logger.info('Set autostart-enabled to %s', is_enabled)
+        logger.info("Set autostart-enabled to %s", is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
             raise Exception("Unable to turn on autostart preference")
 
@@ -202,32 +205,32 @@ class PreferencesServer():
         except Exception as err:
             raise Exception(f'Caught an error while switching "autostart": {err}') from err
 
-    @route('/set/hotkey-show-app')
+    @route("/set/hotkey-show-app")
     @glib_idle_add
     def set_hotkey_show_app(self, hotkey):
         self.app.bind_hotkey(hotkey)
         self.settings.save(hotkey_show_app=hotkey)
 
-    @route('/show/hotkey-dialog')
+    @route("/show/hotkey-dialog")
     @glib_idle_add
     def show_hotkey_dialog(self):
         logger.info("Show hotkey-dialog")
         hotkey_dialog = HotkeyDialog()
         hotkey_dialog.connect(
             "hotkey-set",
-            lambda _, val, caption: self.notify_client("hotkey-show-app", {"value": val, "caption": caption})
+            lambda _, val, caption: self.notify_client("hotkey-show-app", {"value": val, "caption": caption}),
         )
         hotkey_dialog.present()
 
-    @route('/show/file-chooser')
+    @route("/show/file-chooser")
     @glib_idle_add
     def show_file_chooser(self, name, mime_filter):
-        logger.info('Show file browser dialog for %s', name)
+        logger.info("Show file browser dialog for %s", name)
         dialog = Gtk.FileChooserDialog(
             "Please choose a file",
             self.client.get_toplevel(),
             Gtk.FileChooserAction.OPEN,
-            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
         )
         if mime_filter and isinstance(mime_filter, dict):
             filter = Gtk.FileFilter()
@@ -238,51 +241,51 @@ class PreferencesServer():
         value = dialog.get_filename() if dialog.run() == Gtk.ResponseType.OK else None
         self.notify_client(name, {"value": value})
 
-    @route('/open/web-url')
+    @route("/open/web-url")
     def open_url(self, url):
-        logger.info('Open Web URL %s', url)
+        logger.info("Open Web URL %s", url)
         OpenAction(url).run()
 
-    @route('/open/extensions-dir')
+    @route("/open/extensions-dir")
     def open_extensions_dir(self):
         logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
         OpenAction(PATHS.EXTENSIONS).run()
 
-    @route('/shortcut/get-all')
+    @route("/shortcut/get-all")
     def shortcut_get_all(self):
-        logger.info('Handling /shortcut/get-all')
+        logger.info("Handling /shortcut/get-all")
         return list(ShortcutsDb.load().values())
 
-    @route('/shortcut/update')
+    @route("/shortcut/update")
     def shortcut_update(self, shortcut):
-        logger.info('Add/Update shortcut: %s', json.dumps(shortcut))
+        logger.info("Add/Update shortcut: %s", json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
         shortcuts[shortcut["id"]] = shortcut
         shortcuts.save()
 
-    @route('/shortcut/remove')
+    @route("/shortcut/remove")
     def shortcut_remove(self, shortcut_id):
-        logger.info('Remove shortcut: %s', json.dumps(shortcut_id))
+        logger.info("Remove shortcut: %s", json.dumps(shortcut_id))
         shortcuts = ShortcutsDb.load()
         del shortcuts[shortcut_id]
         shortcuts.save()
 
-    @route('/extension/get-all')
+    @route("/extension/get-all")
     def extension_get_all(self):
-        logger.info('Handling /extension/get-all')
+        logger.info("Handling /extension/get-all")
         return list(get_extensions())
 
-    @route('/extension/add')
+    @route("/extension/add")
     def extension_add(self, url):
-        logger.info('Add extension: %s', url)
+        logger.info("Add extension: %s", url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
         ExtensionRunner.get_instance().run(ext_id)
         return list(get_extensions())
 
-    @route('/extension/set-prefs')
+    @route("/extension/set-prefs")
     def extension_update_prefs(self, extension_id, data):
-        logger.info('Update extension preferences %s to %s', extension_id, data)
+        logger.info("Update extension preferences %s to %s", extension_id, data)
         controller = ExtensionServer.get_instance().controllers.get(extension_id)
         manifest = controller.manifest
         for id, new_value in data.get("preferences", {}).items():
@@ -292,21 +295,21 @@ class PreferencesServer():
         manifest.apply_user_preferences(data)
         manifest.save_user_preferences(extension_id)
 
-    @route('/extension/check-update')
+    @route("/extension/check-update")
     def extension_check_update(self, extension_id):
-        logger.info('Checking if extension has an update')
+        logger.info("Checking if extension has an update")
         return ExtensionDownloader.get_instance().check_update(extension_id)
 
-    @route('/extension/update-ext')
+    @route("/extension/update-ext")
     def extension_update_ext(self, extension_id):
-        logger.info('Update extension: %s', extension_id)
+        logger.info("Update extension: %s", extension_id)
         runner = ExtensionRunner.get_instance()
         runner.stop(extension_id)
         ExtensionDownloader.get_instance().update(extension_id)
         runner.run(extension_id)
 
-    @route('/extension/remove')
+    @route("/extension/remove")
     def extension_remove(self, extension_id):
-        logger.info('Remove extension: %s', extension_id)
+        logger.info("Remove extension: %s", extension_id)
         ExtensionRunner.get_instance().stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)

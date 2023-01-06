@@ -5,14 +5,13 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 
 
 class TestExtension:
-
     @pytest.fixture(autouse=True)
     def client(self, mocker):
-        return mocker.patch('ulauncher.api.extension.Client').return_value
+        return mocker.patch("ulauncher.api.extension.Client").return_value
 
     @pytest.fixture(autouse=True)
     def response(self, mocker):
-        return mocker.patch('ulauncher.api.extension.Response').return_value
+        return mocker.patch("ulauncher.api.extension.Response").return_value
 
     @pytest.fixture
     def extension(self):

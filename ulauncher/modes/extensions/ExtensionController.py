@@ -84,9 +84,12 @@ class ExtensionController:
         if not isinstance(response, Response):
             raise Exception(f"Unsupported type {type(response).__name__}")
 
-        logger.debug('Incoming response (%s, %s) from "%s"', type(response.event).__name__,
-                     type(response.action).__name__,
-                     self.extension_id)
+        logger.debug(
+            'Incoming response (%s, %s) from "%s"',
+            type(response.event).__name__,
+            type(response.action).__name__,
+            self.extension_id,
+        )
         self.result_renderer.handle_response(response, self)
 
     # pylint: disable=unused-argument

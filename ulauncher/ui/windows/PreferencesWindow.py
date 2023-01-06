@@ -7,11 +7,7 @@ from ulauncher.ui.preferences_server import PreferencesServer
 
 class PreferencesWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs):
-        super().__init__(
-            title="Ulauncher Preferences",
-            window_position=Gtk.WindowPosition.CENTER,
-            **kwargs
-        )
+        super().__init__(title="Ulauncher Preferences", window_position=Gtk.WindowPosition.CENTER, **kwargs)
 
         self.set_default_size(1000, 600)
         self._init_webview()
@@ -35,9 +31,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.show()
         self.load_page()
         # Show right click menu if running with --dev flag
-        self.webview.connect('context-menu', lambda *_: not get_options().dev)
+        self.webview.connect("context-menu", lambda *_: not get_options().dev)
 
-    def load_page(self, page=''):
+    def load_page(self, page=""):
         self.webview.load_uri(f"prefs://{PATHS.ASSETS}/preferences/index.html#/{page}")
 
     # pylint: disable=arguments-differ

@@ -7,13 +7,13 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 class TestRenderResultListAction:
     @pytest.fixture(autouse=True)
     def UlauncherApp(self, mocker):
-        app = mocker.patch('ulauncher.ui.UlauncherApp.UlauncherApp')
-        app.window = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')()
+        app = mocker.patch("ulauncher.ui.UlauncherApp.UlauncherApp")
+        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow")()
         return app
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
-        return mocker.patch('ulauncher.api.shared.action.RenderResultListAction.GLib')
+        return mocker.patch("ulauncher.api.shared.action.RenderResultListAction.GLib")
 
     @pytest.fixture
     def result_list(self):

@@ -53,7 +53,7 @@ class Theme(JsonData):
         if self.extend_theme:
             parent_theme = Theme.load(self.extend_theme)
             if parent_theme.get_css_path().is_file():
-                css = f'{parent_theme.get_css()}\n\n{css}'
+                css = f"{parent_theme.get_css()}\n\n{css}"
             else:
                 logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
         return css
@@ -61,9 +61,9 @@ class Theme(JsonData):
     def validate(self):
         try:
             assert self.manifest_version == "1", "Supported manifest version is '1'"
-            for prop in ['name', 'display_name', 'matched_text_hl_colors', 'css_file']:
+            for prop in ["name", "display_name", "matched_text_hl_colors", "css_file"]:
                 assert self.get(prop), f'"{prop}" is empty'
-            assert self.get_css_path().is_file(), f'{self.get_css_path()} is not a file'
+            assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
         except AssertionError as e:
             raise ThemeError(e) from e
 

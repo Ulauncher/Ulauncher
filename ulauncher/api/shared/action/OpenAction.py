@@ -11,4 +11,4 @@ class OpenAction(BaseAction):
         self.item = item
 
     def run(self):
-        launch_detached(['xdg-open', self.item])
+        launch_detached(["xdg-open", self.item])

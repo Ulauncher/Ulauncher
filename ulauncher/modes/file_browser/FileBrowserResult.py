@@ -27,7 +27,7 @@ class FileBrowserResult(Result):
 
     def on_enter(self, _):
         if isdir(self.path):
-            return SetUserQueryAction(join(fold_user_path(self.path), ''))
+            return SetUserQueryAction(join(fold_user_path(self.path), ""))
 
         return OpenAction(self.path)
 
@@ -35,5 +35,5 @@ class FileBrowserResult(Result):
         if isdir(self.path):
             open_folder = OpenFolderItem(self.path, f'Open Folder "{basename(self.path)}"')
         else:
-            open_folder = OpenFolderItem(dirname(self.path), 'Open Containing Folder')
+            open_folder = OpenFolderItem(dirname(self.path), "Open Containing Folder")
         return [open_folder, CopyPathToClipboardItem(self.path)]

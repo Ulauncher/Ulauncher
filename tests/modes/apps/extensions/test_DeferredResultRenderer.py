@@ -12,17 +12,17 @@ from ulauncher.api.shared.query import Query
 class TestDeferredResultRenderer:
     @pytest.fixture(autouse=True)
     def UlauncherApp(self, mocker):
-        app = mocker.patch('ulauncher.ui.UlauncherApp.UlauncherApp')
-        app.window = mocker.patch('ulauncher.ui.windows.UlauncherWindow.UlauncherWindow')()
+        app = mocker.patch("ulauncher.ui.UlauncherApp.UlauncherApp")
+        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow")()
         return app
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.DeferredResultRenderer.timer')
+        return mocker.patch("ulauncher.modes.extensions.DeferredResultRenderer.timer")
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.DeferredResultRenderer.GLib')
+        return mocker.patch("ulauncher.modes.extensions.DeferredResultRenderer.GLib")
 
     @pytest.fixture
     def event(self):
@@ -52,7 +52,7 @@ class TestDeferredResultRenderer:
 
     def test_handle_response__action__is_ran(self, renderer, controller):
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'))
+        response.event = KeywordQueryEvent(Query("test"))
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
@@ -60,7 +60,7 @@ class TestDeferredResultRenderer:
 
     def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, UlauncherApp):
         response = mock.Mock()
-        response.event = KeywordQueryEvent(Query('test'))
+        response.event = KeywordQueryEvent(Query("test"))
         response.action.keep_app_open = False
         renderer.active_event = response.event
         renderer.active_controller = controller

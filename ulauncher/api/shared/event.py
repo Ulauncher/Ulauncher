@@ -22,6 +22,7 @@ class RegisterEvent(BaseEvent):
     """
     This event is triggered when a new extension connects to the server socket.
     """
+
     def __init__(self, extension_id):
         self.extension_id = extension_id
 
@@ -30,6 +31,7 @@ class LaunchTriggerEvent(BaseEvent):
     """
     When user activates a launch trigger
     """
+
     def __init__(self, trigger_id: str):
         self.args = [trigger_id]
 
@@ -38,6 +40,7 @@ class InputTriggerEvent(BaseEvent):
     """
     When user activates an input trigger, passing the input
     """
+
     def __init__(self, trigger_id: str, input_text: str):
         self.args = [input_text, trigger_id]
 

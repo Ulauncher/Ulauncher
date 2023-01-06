@@ -16,7 +16,6 @@ def bind_final(fn, *args):
 
 
 class ExtensionMode(BaseMode):
-
     def __init__(self):
         self.extensionServer = ExtensionServer.get_instance()
         self.deferredResultRenderer = DeferredResultRenderer.get_instance()
@@ -48,7 +47,7 @@ class ExtensionMode(BaseMode):
                 if trigger.keyword is None:
                     callback = bind_final(controller.trigger_event, LaunchTriggerEvent(trigger_id))
                 elif trigger.user_keyword:
-                    callback = bind_final(SetUserQueryAction, f'{trigger.user_keyword} ')
+                    callback = bind_final(SetUserQueryAction, f"{trigger.user_keyword} ")
 
                 if callback:
                     yield Result(
@@ -56,5 +55,5 @@ class ExtensionMode(BaseMode):
                         description=html.escape(trigger.description),
                         icon=controller.get_normalized_icon_path(trigger.icon),
                         on_enter=callback,
-                        searchable=True
+                        searchable=True,
                     )
