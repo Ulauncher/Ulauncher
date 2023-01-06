@@ -1,3 +1,4 @@
+import operator
 from os.path import basename
 from gi.repository import Gio
 from ulauncher.config import PATHS
@@ -39,6 +40,14 @@ class AppResult(Result):
             return None
 
     @staticmethod
+    def get_top_app_ids():
+        """
+        Returns list of app ids sorted by launch count
+        """
+        sorted_tuples = sorted(app_starts.items(), key=operator.itemgetter(1), reverse=True)
+        return [*map(operator.itemgetter(0), sorted_tuples)]
+
+    @staticmethod
     def get_most_frequent(limit=5):
         """
         Returns most frequent apps
@@ -48,16 +57,18 @@ class AppResult(Result):
         :param int limit: limit
         :rtype: class:`ResultList`
         """
-        sorted_tuples = sorted(app_starts.items(), key=lambda rec: rec[1], reverse=True)
-        sorted_app_ids = [tuple[0] for tuple in sorted_tuples]
-        return list(filter(None, map(AppResult.from_id, sorted_app_ids)))[:limit]
+        return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
     def get_searchable_fields(self):
+        sorted_app_ids = AppResult.get_top_app_ids()
+        count = len(sorted_app_ids)
+        index = sorted_app_ids.index(self._app_id) if self._app_id in sorted_app_ids else count
+        frequency_weight = 1 - (index / count * 0.1) + 0.05
         return [
-            (self.name, 1),
-            (self._executable, .8),  # command names, such as "baobab" or "nautilus"
-            (self.description, .7),
-            *[(k, .6) for k in self.keywords]
+            (self.name, 1 * frequency_weight),
+            (self._executable, 0.8 * frequency_weight),  # command names, such as "baobab" or "nautilus"
+            (self.description, 0.7 * frequency_weight),
+            *[(k, 0.6 * frequency_weight) for k in self.keywords]
         ]
 
     def on_enter(self, _):
