@@ -18,6 +18,7 @@ from ulauncher.utils.Theme import Theme
 
 logger = logging.getLogger()
 
+
 class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     _css_provider = None
     _drag_start_coords = None
