@@ -5,6 +5,7 @@ from gi.repository import Gtk, Gdk, Keybinder  # type: ignore[attr-defined]
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
+from ulauncher.ui.LayerShell import LayerShellOverlay
 from ulauncher.config import PATHS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
@@ -17,8 +18,7 @@ from ulauncher.utils.Theme import Theme
 
 logger = logging.getLogger()
 
-
-class UlauncherWindow(Gtk.ApplicationWindow):
+class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     _css_provider = None
     _drag_start_coords = None
     results_nav = None
@@ -37,6 +37,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             urgency_hint=True,
             window_position="center",
         )
+
+        if LayerShellOverlay.is_supported():
+            self.enable_layer_shell()
 
         # Try setting a transparent background
         screen = self.get_screen()
@@ -251,9 +254,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 750
+        pos_x = geo.width * 0.5 - window_width * 0.5 + geo.x
+        pos_y = geo.y + geo.height * 0.12
         self.set_property('width-request', window_width)
         self.scroll_container.set_property('max-content-height', max_height)
-        self.move(geo.width * 0.5 - window_width * 0.5 + geo.x, geo.y + geo.height * 0.12)
+
+        if self.layer_shell_enabled:
+            self.set_vertical_position(pos_y)
+        else:
+            self.move(pos_x, pos_y)
 
     # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def show(self):
