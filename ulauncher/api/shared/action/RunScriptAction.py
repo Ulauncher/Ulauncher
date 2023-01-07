@@ -23,12 +23,12 @@ class RunScriptAction(BaseAction):
 
     def run(self):
         file_path = f"{tempfile.gettempdir()}/ulauncher_run_script_{time.time()}"
-        with open(file_path, 'w') as file:
+        with open(file_path, "w") as file:
             file.write(self.script)
         try:
             os.chmod(file_path, 0o777)
-            logger.debug('Running a script from %s', file_path)
-            output = subprocess.check_output([f"{file_path} {self.args}"], shell=True).decode('utf-8')
+            logger.debug("Running a script from %s", file_path)
+            output = subprocess.check_output([f"{file_path} {self.args}"], shell=True).decode("utf-8")
             logger.debug("Script action output:\n%s", output)
             self.remove_temp_file(file_path)
         except Exception:
@@ -38,5 +38,5 @@ class RunScriptAction(BaseAction):
     @run_async(daemon=True)
     def remove_temp_file(self, filename: str) -> None:
         time.sleep(1)  # wait just a bit, because Popen runs file asynchronously
-        logger.debug('Deleting a temporary file %s', filename)
+        logger.debug("Deleting a temporary file %s", filename)
         os.remove(filename)

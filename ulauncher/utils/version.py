@@ -6,7 +6,7 @@
 
 
 def get_version(version_string):
-    sanitized = version_string.translate(str.maketrans({'^': '', '~': '', 'x': ''}))
+    sanitized = version_string.translate(str.maketrans({"^": "", "~": "", "x": ""}))
     major, minor, *_ = sanitized.split(".") + [None]
     return (int(major), int(minor) if minor else None)
 

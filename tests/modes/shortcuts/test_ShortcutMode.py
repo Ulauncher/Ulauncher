@@ -10,49 +10,49 @@ class TestShortcutMode:
 
     @pytest.fixture(autouse=True)
     def shortcuts_db(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutsDb.load').return_value
+        return mocker.patch("ulauncher.modes.shortcuts.ShortcutMode.ShortcutsDb.load").return_value
 
     @pytest.fixture(autouse=True)
     def ShortcutResult(self, mocker):
-        return mocker.patch('ulauncher.modes.shortcuts.ShortcutMode.ShortcutResult')
+        return mocker.patch("ulauncher.modes.shortcuts.ShortcutMode.ShortcutResult")
 
     def test_is_enabled__query_starts_with_query_and_space__returns_true(self, mode, shortcuts_db):
-        query = 'kw '
+        query = "kw "
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.is_enabled(query)
 
     def test_is_enabled__query_starts_with_query__returns_false(self, mode, shortcuts_db):
-        query = 'kw'
+        query = "kw"
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert not mode.is_enabled(query)
 
     def test_is_enabled__query_doesnt_start_with_query__returns_false(self, mode, shortcuts_db):
-        query = 'wk something'
+        query = "wk something"
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert not mode.is_enabled(query)
 
     def test_is_enabled__query_run_without_argument__returns_true(self, mode, shortcuts_db):
-        query = 'wk'
+        query = "wk"
         shortcut = ShortcutRecord(keyword="wk", run_without_argument=True)
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.is_enabled(query)
 
     def test_handle_query__return_value__is(self, mode, shortcuts_db, ShortcutResult):
-        query = 'kw something'
+        query = "kw something"
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.handle_query(query)[0] == ShortcutResult.return_value
 
     def test_handle_query__ShortcutResult__is_called(self, mode, shortcuts_db, ShortcutResult):
-        query = 'kw something'
+        query = "kw something"
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 

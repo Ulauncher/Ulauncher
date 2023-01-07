@@ -4,21 +4,24 @@ import gi
 # Only XApp supports activating the launcher on left click and showing the menu on right click
 # pylint: disable=wrong-import-position
 try:
-    gi.require_version('XApp', '1.0')
+    gi.require_version("XApp", "1.0")
     from gi.repository import XApp  # type: ignore[attr-defined]
+
     # Older versions of XApp doesn't have StatusIcon
-    assert hasattr(XApp, 'StatusIcon')
+    assert hasattr(XApp, "StatusIcon")
     AyatanaIndicator = None
 except (AssertionError, ImportError, ValueError):
     XApp = None
     try:
-        gi.require_version('AppIndicator3', '0.1')
+        gi.require_version("AppIndicator3", "0.1")
         from gi.repository import AppIndicator3  # type: ignore[attr-defined]
+
         AyatanaIndicator = AppIndicator3
     except (ImportError, ValueError):
         try:
-            gi.require_version('AyatanaAppIndicator3', '0.1')
+            gi.require_version("AyatanaAppIndicator3", "0.1")
             from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type: ignore[attr-defined, no-redef] # noqa: F811
+
             AyatanaIndicator = AppIndicator3
         except (ImportError, ValueError):
             pass
@@ -53,9 +56,7 @@ class AppIndicator(GObject.Object):
 
         elif AyatanaIndicator:
             self.indicator = AyatanaIndicator.Indicator.new(
-                "ulauncher",
-                "ulauncher-indicator",
-                AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
+                "ulauncher", "ulauncher-indicator", AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
             )
             # libappindicator can't/won't distinguish between left and right clicks
             # Show menu on left or right click and show launcher on middle click

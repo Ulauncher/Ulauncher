@@ -4,10 +4,9 @@ from ulauncher.utils.timer import timer
 
 
 class TestTimer:
-
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
-        return mocker.patch('ulauncher.utils.timer.GLib')
+        return mocker.patch("ulauncher.utils.timer.GLib")
 
     def test_timer_subsecond(self, GLib):
         func = mock.Mock()

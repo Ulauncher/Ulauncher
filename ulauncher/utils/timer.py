@@ -4,6 +4,7 @@ from gi.repository import GLib
 
 class TimerContext:
     """A utility class to hold the context for the timer() function."""
+
     def __init__(self, source, func, repeat=False):
         self.source = source
         self.repeat = repeat

@@ -6,7 +6,6 @@ from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, Extensio
 
 
 class TestExtensionRunner:
-
     @pytest.fixture
     def runner(self):
         thisrunner = ExtensionRunner()
@@ -14,42 +13,42 @@ class TestExtensionRunner:
 
     @pytest.fixture(autouse=True)
     def find_extensions(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.find_extensions')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.find_extensions")
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.timer')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.timer")
 
     @pytest.fixture(autouse=True)
     def get_options(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.get_options')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.get_options")
 
     @pytest.fixture(autouse=True)
     def ExtensionManifest(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest")
 
     @pytest.fixture(autouse=True)
     def json_dumps(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.json.dumps', return_value="{}")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.json.dumps", return_value="{}")
 
     @pytest.fixture
     def SubprocessLauncher(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.Gio.SubprocessLauncher')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.SubprocessLauncher")
 
     @pytest.fixture
     def DataInputStream(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.Gio.DataInputStream')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.DataInputStream")
 
     @pytest.fixture
     def ProcessErrorExtractor(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.ProcessErrorExtractor')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ProcessErrorExtractor")
 
     @pytest.fixture
     def time(self, mocker):
-        return mocker.patch('ulauncher.modes.extensions.ExtensionRunner.time')
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.time")
 
     def test_run__basic_execution__is_called(self, runner, SubprocessLauncher, DataInputStream):
-        extid = 'id'
+        extid = "id"
         runner.run(extid)
         SubprocessLauncher.new.assert_called_once()
         extproc = runner.extension_procs[extid]
@@ -57,18 +56,18 @@ class TestExtensionRunner:
         extproc.error_stream.read_line_async.assert_called_once()
 
     def test_run_all__run__called_with_extension_ids(self, runner, mocker, find_extensions):
-        mocker.patch.object(runner, 'run')
-        find_extensions.return_value = [('id_1', 'path_1'), ('id_2', 'path_2'), ('id_3', 'path_3')]
+        mocker.patch.object(runner, "run")
+        find_extensions.return_value = [("id_1", "path_1"), ("id_2", "path_2"), ("id_3", "path_3")]
         runner.run_all()
-        runner.run.assert_any_call('id_1')
-        runner.run.assert_any_call('id_2')
-        runner.run.assert_any_call('id_3')
+        runner.run.assert_any_call("id_1")
+        runner.run.assert_any_call("id_2")
+        runner.run.assert_any_call("id_3")
 
     def test_set_extension_error(self, runner):
-        runner.set_extension_error('id_1', ExtensionRuntimeError.Terminated, 'message')
-        error = runner.get_extension_error('id_1')
-        assert error['name'] == ExtensionRuntimeError.Terminated.value
-        assert error['message'] == 'message'
+        runner.set_extension_error("id_1", ExtensionRuntimeError.Terminated, "message")
+        error = runner.get_extension_error("id_1")
+        assert error["name"] == ExtensionRuntimeError.Terminated.value
+        assert error["message"] == "message"
 
     def test_read_stderr_line(self, runner, SubprocessLauncher, DataInputStream):
         test_output1 = "Test Output 1"

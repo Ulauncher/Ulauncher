@@ -8,8 +8,8 @@ class CopyPathToClipboardItem(Result):
     # pylint: disable=super-init-not-called
     def __init__(self, path: str):
         self.path = path
-        self.name = 'Copy Path to Clipboard'
-        self.icon = 'edit-copy'
+        self.name = "Copy Path to Clipboard"
+        self.icon = "edit-copy"
 
     def on_enter(self, query):
         return CopyToClipboardAction(self.path)

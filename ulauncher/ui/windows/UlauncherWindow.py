@@ -117,11 +117,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         prefs_btn.get_style_context().add_class("prefs-btn")
         self.result_box.get_style_context().add_class("result-box")
 
-        prefs_icon_surface = load_icon_surface(
-            f"{PATHS.ASSETS}/icons/gear.svg",
-            16,
-            self.get_scale_factor()
-        )
+        prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
         window_frame.show_all()
 
@@ -145,12 +141,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if self.settings.grab_mouse_pointer:
             ptr_dev = self.get_pointer_device()
             result = ptr_dev.grab(
-                self.get_window(),
-                Gdk.GrabOwnership.NONE,
-                True,
-                Gdk.EventMask.ALL_EVENTS_MASK,
-                None,
-                0
+                self.get_window(), Gdk.GrabOwnership.NONE, True, Gdk.EventMask.ALL_EVENTS_MASK, None, 0
             )
             logger.debug("Focus in event, grabbing pointer: %s", result)
 
@@ -169,22 +160,22 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         jump_keys = self.settings.get_jump_keys()
         ModeHandler.get_instance().on_key_press_event(widget, event, self.app.query)
 
-        if keyname == 'Escape':
+        if keyname == "Escape":
             self.hide()
 
-        elif ctrl and keyname == 'comma':
+        elif ctrl and keyname == "comma":
             self.app.show_preferences()
 
         elif self.results_nav:
-            if keyname in ('Up', 'ISO_Left_Tab') or (ctrl and keyname == 'p'):
+            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
                 self.results_nav.go_up()
                 return True
-            if keyname in ('Down', 'Tab') or (ctrl and keyname == 'n'):
+            if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
                 self.results_nav.go_down()
                 return True
-            if alt and keyname in ('Return', 'KP_Enter'):
+            if alt and keyname in ("Return", "KP_Enter"):
                 self.enter_result(alt=True)
-            elif keyname in ('Return', 'KP_Enter'):
+            elif keyname in ("Return", "KP_Enter"):
                 self.enter_result()
             elif alt and keyname in jump_keys:
                 # on Alt+<num/letter>
@@ -203,7 +194,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if event.button == 1:
             self.set_cursor("grab")
             x, y = self.event_box.translate_coordinates(self, event.x, event.y)
-            self._drag_start_coords = {'x': x, 'y': y}
+            self._drag_start_coords = {"x": x, "y": y}
 
     def on_mouse_up(self, *_):
         """
@@ -218,10 +209,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         """
         start = self._drag_start_coords
         if start and event.state == Gdk.ModifierType.BUTTON1_MASK:
-            self.move(
-                event.x_root - start['x'],
-                event.y_root - start['y']
-            )
+            self.move(event.x_root - start["x"], event.y_root - start["y"])
 
     ######################################
     # Helpers
@@ -233,9 +221,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
     def apply_css(self, widget):
         Gtk.StyleContext.add_provider(
-            widget.get_style_context(),
-            self._css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            widget.get_style_context(), self._css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
@@ -257,8 +243,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         window_width = 750
         pos_x = geo.width * 0.5 - window_width * 0.5 + geo.x
         pos_y = geo.y + geo.height * 0.12
-        self.set_property('width-request', window_width)
-        self.scroll_container.set_property('max-content-height', max_height)
+        self.set_property("width-request", window_width)
+        self.scroll_container.set_property("max-content-height", max_height)
 
         if self.layer_shell_enabled:
             self.set_vertical_position(pos_y)
@@ -302,14 +288,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.hide_and_clear_input()
 
     def get_pointer_device(self):
-        return (self
-                .get_window()
-                .get_display()
-                .get_device_manager()
-                .get_client_pointer())
+        return self.get_window().get_display().get_device_manager().get_client_pointer()
 
     def hide_and_clear_input(self):
-        self.input.set_text('')
+        self.input.set_text("")
         self.hide()
 
     def show_results(self, results):
@@ -339,17 +321,17 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
-        logger.debug('render %s results', len(results))
+        logger.debug("render %s results", len(results))
 
     @staticmethod
     def create_item_widgets(items, query):
         results = []
         for index, result in enumerate(items):
             builder = Gtk.Builder()
-            builder.set_translation_domain('ulauncher')
+            builder.set_translation_domain("ulauncher")
             builder.add_from_file(f"{PATHS.ASSETS}/ui/result.ui")
 
-            item_frame = builder.get_object('item-frame')
+            item_frame = builder.get_object("item-frame")
             item_frame.initialize(builder, result, index, query)
 
             results.append(item_frame)

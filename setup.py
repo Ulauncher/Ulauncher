@@ -14,7 +14,7 @@ icons = {
     "app": "data/icons/system/default/ulauncher.svg",
     "indicator": "data/icons/system/default/ulauncher-indicator.svg",
     "indicator-dark": "data/icons/system/dark/ulauncher-indicator.svg",
-    "indicator-light": "data/icons/system/light/ulauncher-indicator.svg"
+    "indicator-light": "data/icons/system/light/ulauncher-indicator.svg",
 }
 
 
@@ -22,20 +22,17 @@ def data_files_from_path(target_path, source_path):
     # Creates a list of valid entries for data_files weird custom format
     # Recurses over the real_path and adds it's content to package_path
     entries = []
-    for p in Path.cwd().glob(source_path + '/**/*'):
+    for p in Path.cwd().glob(source_path + "/**/*"):
         if p.is_file():
             relative_file = p.relative_to(Path(source_path).absolute())
-            entries.append((
-                f'{target_path}/{relative_file.parent}',
-                [f'{source_path}/{relative_file}'])
-            )
+            entries.append((f"{target_path}/{relative_file.parent}", [f"{source_path}/{relative_file}"]))
     return entries
 
 
 class build_preferences(Command):
     description = "Build Ulauncher preferences (Vue.js app)"
     user_options = [
-        ('force', None, 'Rebuild even if source has no modifications since last build'),
+        ("force", None, "Rebuild even if source has no modifications since last build"),
     ]
 
     def initialize_options(self):
@@ -48,7 +45,7 @@ class build_preferences(Command):
         src = Path("preferences-src")
         dst = Path("data/preferences")
 
-        if '--force' in sys.argv and dst.is_dir():
+        if "--force" in sys.argv and dst.is_dir():
             # Need to do this in particular to avoid packaging node_modules if the user has
             # been switching between building Ulauncher v5 and v6
             rmtree(dst)
@@ -56,7 +53,7 @@ class build_preferences(Command):
         if not src.is_dir():
             raise Exception(f"{src.resolve()} directory missing.")
 
-        sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob('preferences-src/**/*')))
+        sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob("preferences-src/**/*")))
 
         if dst.is_dir() and dst.stat().st_mtime > sourceModified:
             print("Detected no changes to Preferences since last build.")
@@ -68,22 +65,26 @@ class build_preferences(Command):
 
 class build_wrapper(build_py, Command):
     user_options = [
-        ('with-preferences', None, 'Also build preferences (when building from git tree)'),
+        ("with-preferences", None, "Also build preferences (when building from git tree)"),
     ]
 
     def run(self):
         # Build Preferences before python package build
-        if '--with-preferences' in sys.argv:
+        if "--with-preferences" in sys.argv:
             build_preferences.run(self)
 
         build_py.run(self)
         print("Overwriting the namespace package with fixed values")
-        Path(self.build_lib + "/ulauncher/__init__.py").write_text("\n".join([
-            "import gi",
-            f"gi.require_versions({json.dumps(dict(config['gi_versions']))})",
-            f"ASSETS = '{sys.prefix}/share/ulauncher'",
-            f"VERSION = '{VERSION}'"
-        ]))
+        Path(self.build_lib + "/ulauncher/__init__.py").write_text(
+            "\n".join(
+                [
+                    "import gi",
+                    f"gi.require_versions({json.dumps(dict(config['gi_versions']))})",
+                    f"ASSETS = '{sys.prefix}/share/ulauncher'",
+                    f"VERSION = '{VERSION}'",
+                ]
+            )
+        )
 
 
 setup(
@@ -109,5 +110,5 @@ setup(
         # Recursively add data as share/ulauncher
         *data_files_from_path("share/ulauncher", "data"),
     ],
-    cmdclass={'build_py': build_wrapper, 'build_prefs': build_preferences}
+    cmdclass={"build_py": build_wrapper, "build_prefs": build_preferences},
 )

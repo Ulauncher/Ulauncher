@@ -22,6 +22,7 @@ class UlauncherApp(Gtk.Application):
     """
     Main Ulauncher application (singleton)
     """
+
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
@@ -33,10 +34,7 @@ class UlauncherApp(Gtk.Application):
 
     def __init__(self, *args, **kwargs):
         super().__init__(
-            *args,
-            application_id="io.ulauncher.Ulauncher",
-            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
-            **kwargs
+            *args, application_id="io.ulauncher.Ulauncher", flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs
         )
         self.connect("startup", self.setup)  # runs only once on the main instance
 
@@ -62,7 +60,7 @@ class UlauncherApp(Gtk.Application):
     def do_command_line(self, *args, **kwargs):
         # We need to use "--no-window" from the unique CLI invocation here,
         # Can't use config.get_options(), because that's the daemon's initial cli arguments
-        if '--no-window' not in args[0].get_arguments():
+        if "--no-window" not in args[0].get_arguments():
             self.activate()
 
         return 0

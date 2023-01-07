@@ -51,7 +51,7 @@ class Client:
         :param ulauncher.utils.framer.PickleFramer framer:
         :param ulauncher.api.shared.events.Event event:
         """
-        logger.debug('Incoming event %s', type(event).__name__)
+        logger.debug("Incoming event %s", type(event).__name__)
         try:
             self.extension.trigger_event(event)
         # pylint: disable=broad-except
@@ -77,5 +77,5 @@ class Client:
 
         :param ~ulauncher.api.shared.Response.Response response:
         """
-        logger.debug('Send message %s', response)
+        logger.debug("Send message %s", response)
         self.framer.send(response)

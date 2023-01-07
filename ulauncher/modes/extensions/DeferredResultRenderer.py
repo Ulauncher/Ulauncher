@@ -19,7 +19,7 @@ class DeferredResultRenderer:
 
     @classmethod
     @singleton
-    def get_instance(cls) -> 'DeferredResultRenderer':
+    def get_instance(cls) -> "DeferredResultRenderer":
         """
         Returns singleton instance
         """
@@ -41,7 +41,7 @@ class DeferredResultRenderer:
         """
         icon = controller.get_normalized_icon_path()
 
-        loading_message = Result(name='Loading...', icon=icon)
+        loading_message = Result(name="Loading...", icon=icon)
 
         self._cancel_loading()
         self.loading = timer(self.LOADING_DELAY, RenderResultListAction([loading_message]).run)

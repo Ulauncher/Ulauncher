@@ -34,12 +34,12 @@ def get_targz_link():
 
 
 def _set_pkg_key_(key, val, file):
-    run_shell(f'sed -i -e \'/{key}\\s*=/ s#\\(=\\s*\\).*#\\1{val}#\' {file}')
+    run_shell(f"sed -i -e '/{key}\\s*=/ s#\\(=\\s*\\).*#\\1{val}#' {file}")
 
 
 # Note that this doesn't work to set arrays unless they're single values
 def set_pkg_key(key, val):
-    _set_pkg_key_(key, val if key not in AUR_ARRAY_PROPS else f'("{val}")', 'PKGBUILD')
+    _set_pkg_key_(key, val if key not in AUR_ARRAY_PROPS else f'("{val}")', "PKGBUILD")
     _set_pkg_key_(key, val, ".SRCINFO")
 
 

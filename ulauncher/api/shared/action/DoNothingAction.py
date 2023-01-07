@@ -5,6 +5,7 @@ class DoNothingAction(BaseAction):
     """
     Does nothing. Keeps Ulauncher window open
     """
+
     keep_app_open = True
 
     def run(self):

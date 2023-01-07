@@ -12,27 +12,27 @@ TEST_EXT_ID = "com.example.test-ext-id"
 
 
 class TestExtensionController:
-
     @pytest.fixture
     def controllers(self):
         return {}
 
     @pytest.fixture(autouse=True)
     def PreferencesEvent(self, mocker):
-        PreferencesEvent = mocker.patch(
-            'ulauncher.modes.extensions.ExtensionController.PreferencesEvent')
+        PreferencesEvent = mocker.patch("ulauncher.modes.extensions.ExtensionController.PreferencesEvent")
         PreferencesEvent.return_value = object()
         return PreferencesEvent
 
     @pytest.fixture(autouse=True)
     def result_renderer(self, mocker):
         return mocker.patch(
-            'ulauncher.modes.extensions.ExtensionController.DeferredResultRenderer.get_instance').return_value
+            "ulauncher.modes.extensions.ExtensionController.DeferredResultRenderer.get_instance"
+        ).return_value
 
     @pytest.fixture(autouse=True)
     def manifest(self, mocker):
         return mocker.patch(
-            'ulauncher.modes.extensions.ExtensionController.ExtensionManifest.load_from_extension_id').return_value
+            "ulauncher.modes.extensions.ExtensionController.ExtensionManifest.load_from_extension_id"
+        ).return_value
 
     @pytest.fixture
     def controller(self, controllers, mocker):
@@ -54,11 +54,11 @@ class TestExtensionController:
         controller.framer.send.assert_called_with(event)
 
     def test_handle_query__KeywordQueryEvent__is_sent_with_query(self, controller, result_renderer):
-        query = Query('def ulauncher')
+        query = Query("def ulauncher")
         assert controller.handle_query(query) == result_renderer.handle_event.return_value
         keywordEvent = controller.framer.send.call_args_list[1][0][0]
         assert isinstance(keywordEvent, InputTriggerEvent)
-        assert keywordEvent.args[0] == 'ulauncher'
+        assert keywordEvent.args[0] == "ulauncher"
         result_renderer.handle_event.assert_called_with(keywordEvent, controller)
 
     def test_handle_response__unsupported_data_type__exception_raised(self, controller):

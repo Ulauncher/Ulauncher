@@ -18,7 +18,7 @@ if not use_systemd_run:
 
 def launch_detached(cmd):
     if use_systemd_run:
-        cmd = ['systemd-run', '--user', '--scope'] + cmd
+        cmd = ["systemd-run", "--user", "--scope"] + cmd
 
     env = dict(os.environ.items())
     # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
@@ -31,7 +31,7 @@ def launch_detached(cmd):
             argv=cmd,
             envp=envp,
             flags=GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.SEARCH_PATH,
-            child_setup=None if use_systemd_run else os.setsid
+            child_setup=None if use_systemd_run else os.setsid,
         )
     except Exception as e:
-        logger.error('%s: %s', type(e).__name__, e)
+        logger.error("%s: %s", type(e).__name__, e)

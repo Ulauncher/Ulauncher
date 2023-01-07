@@ -1,4 +1,5 @@
 import gi
+
 # The version here just refers to the "build environment". Not the actual Webkit version
 # 4.0 means it was built with GTK 3 and libsoup 2
 # 4.1 means it was built with GTK 3 and libsoup 3 (HTTP/2)

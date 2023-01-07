@@ -42,13 +42,13 @@ def json_fetch(url):
 
 class ExtensionRemote:
     url_match_pattern = r"^(?:git@|https:\/\/)(?P<host>[^\/]+)\/(?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
-    date_format = '%Y-%m-%dT%H:%M:%S%z'
+    date_format = "%Y-%m-%dT%H:%M:%S%z"
 
     def __init__(self, url):
         self.url = url.lower()
         match = re.match(self.url_match_pattern, self.url, re.I)
         if not match:
-            raise InvalidExtensionUrlWarning(f'Invalid URL: {url}')
+            raise InvalidExtensionUrlWarning(f"Invalid URL: {url}")
 
         self.user = match.group("user")
         self.repo = match.group("repo")
@@ -62,21 +62,21 @@ class ExtensionRemote:
 
         if self.host == "github.com":
             self.host_api = "https://api.github.com"
-            self.date_format = '%Y-%m-%dT%H:%M:%SZ'
+            self.date_format = "%Y-%m-%dT%H:%M:%SZ"
         elif self.host == "gitlab.com":
             host_api = "https://gitlab.com/api/v4"
             projects = json_fetch(f"{host_api}/users/{self.user}/projects?search={self.repo}")
             project = next((p for p in projects if p["name"] == self.repo), None)
 
             self.host_api = f"{host_api}/projects/{project['id']}/repository"
-            self.date_format = '%Y-%m-%dT%H:%M:%S.%f%z'
+            self.date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
         else:
             self.host_api = f"https://{self.host}/api/v1"
 
     def get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":
-            return f'https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz'
-        return f'https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz'
+            return f"https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz"
+        return f"https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz"
 
     def fetch_file(self, file_path) -> Optional[str]:
         # This saves us a request compared to using the "raw" file API that needs to know the branch

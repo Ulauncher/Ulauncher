@@ -25,10 +25,9 @@ class ExtensionDownloaderError(Exception):
 
 
 class ExtensionDownloader:
-
     @classmethod
     @singleton
-    def get_instance(cls) -> 'ExtensionDownloader':
+    def get_instance(cls) -> "ExtensionDownloader":
         ext_db = ExtensionDb.load()
         return cls(ext_db)
 
@@ -64,13 +63,17 @@ class ExtensionDownloader:
         untar(filename, ext_path, strip=1)
 
         # 4. add to the db
-        self.ext_db.save({remote.extension_id: {
-            'id': remote.extension_id,
-            'url': url,
-            'updated_at': datetime.now().isoformat(),
-            'last_commit': commit_sha,
-            'last_commit_time': commit_time
-        }})
+        self.ext_db.save(
+            {
+                remote.extension_id: {
+                    "id": remote.extension_id,
+                    "url": url,
+                    "updated_at": datetime.now().isoformat(),
+                    "last_commit": commit_sha,
+                    "last_commit_time": commit_time,
+                }
+            }
+        )
 
         return remote.extension_id
 
@@ -91,18 +94,13 @@ class ExtensionDownloader:
             return False
         ext = self._find_extension(ext_id)
 
-        logger.info('Updating extension "%s" from commit %s to %s', ext_id,
-                    ext.last_commit[:8], commit_sha[:8])
+        logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.last_commit[:8], commit_sha[:8])
 
         remote = ExtensionRemote(ext.url)
         filename = download_tarball(remote.get_download_url(commit_sha))
         untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}", strip=1)
 
-        ext.update(
-            updated_at=datetime.now().isoformat(),
-            last_commit=commit_sha,
-            last_commit_time=commit_date
-        )
+        ext.update(updated_at=datetime.now().isoformat(), last_commit=commit_sha, last_commit_time=commit_date)
 
         self.ext_db.save({ext_id: ext})
 
@@ -125,7 +123,7 @@ class ExtensionDownloader:
 
 
 def download_tarball(url: str) -> str:
-    dest_tar = mktemp('.tar.gz', prefix='ulauncher_dl_')
+    dest_tar = mktemp(".tar.gz", prefix="ulauncher_dl_")
     filename, _ = urlretrieve(url, dest_tar)
 
     return filename

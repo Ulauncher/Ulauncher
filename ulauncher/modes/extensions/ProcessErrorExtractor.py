@@ -10,7 +10,7 @@ class ProcessErrorExtractor:
         self.error = error
 
     def is_import_error(self) -> bool:
-        return 'ModuleNotFoundError' in self.error
+        return "ModuleNotFoundError" in self.error
 
     def get_missing_package_name(self) -> str:
         """

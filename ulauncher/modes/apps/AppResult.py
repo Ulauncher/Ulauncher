@@ -18,18 +18,14 @@ class AppResult(Result):
 
     def __init__(self, app_info):
         self.name = app_info.get_display_name()
-        self.icon = app_info.get_string('Icon')
+        self.icon = app_info.get_string("Icon")
         self.description = app_info.get_description() or app_info.get_generic_name()
         self.keywords = app_info.get_keywords()
         self._app_id = app_info.get_id()
         # TryExec is what we actually want (name of/path to exec), but it's often not specified
         # get_executable uses Exec, which is always specified, but it will return the actual executable.
         # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
-        self._executable = basename(
-            app_info.get_string('TryExec')
-            or app_info.get_executable()
-            or ""
-        )
+        self._executable = basename(app_info.get_string("TryExec") or app_info.get_executable() or "")
 
     @staticmethod
     def from_id(app_id):
@@ -68,7 +64,7 @@ class AppResult(Result):
             (self.name, 1 * frequency_weight),
             (self._executable, 0.8 * frequency_weight),  # command names, such as "baobab" or "nautilus"
             (self.description, 0.7 * frequency_weight),
-            *[(k, 0.6 * frequency_weight) for k in self.keywords]
+            *[(k, 0.6 * frequency_weight) for k in self.keywords],
         ]
 
     def on_enter(self, _):

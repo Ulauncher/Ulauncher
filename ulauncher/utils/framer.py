@@ -27,9 +27,10 @@ class PickleFramer(GObject.GObject):
     handles all of the async API of the Gio stream interface as well as some of the edge cases such
     as short reads and error states.
     """
+
     __gsignals__ = {
         "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "message_parsed": (GObject.SignalFlags.RUN_FIRST, None, (object,))
+        "message_parsed": (GObject.SignalFlags.RUN_FIRST, None, (object,)),
     }
 
     READ_SIZE = 65000
@@ -57,17 +58,11 @@ class PickleFramer(GObject.GObject):
     def close(self):
         if self.is_closing():
             log.debug("Connection %s already closing", self)
-        elif (self._conn.get_input_stream().has_pending()
-              or self._conn.get_output_stream().has_pending()):
+        elif self._conn.get_input_stream().has_pending() or self._conn.get_output_stream().has_pending():
             self._canceller.cancel()
         else:
             log.debug("Starting to close connection %s", self)
-            self._conn.close_async(
-                GLib.PRIORITY_DEFAULT,
-                None,
-                self._close_ready,
-                None
-            )
+            self._conn.close_async(GLib.PRIORITY_DEFAULT, None, self._close_ready, None)
 
     def send(self, obj: object):
         objp = pickle.dumps(obj)
@@ -86,11 +81,7 @@ class PickleFramer(GObject.GObject):
 
     def _read_data(self):
         self._conn.get_input_stream().read_bytes_async(
-            self.READ_SIZE,
-            GLib.PRIORITY_DEFAULT,
-            self._canceller,
-            self._read_ready,
-            None
+            self.READ_SIZE, GLib.PRIORITY_DEFAULT, self._canceller, self._read_ready, None
         )
 
     # pylint: disable=unused-argument
@@ -119,7 +110,7 @@ class PickleFramer(GObject.GObject):
                 log.debug("Waiting for %d bytes of %d bytes.", msgsize - bytesleft, msgsize)
                 break
             ptr += INTSZ
-            objp = self._inbound[ptr:ptr + msgsize]
+            objp = self._inbound[ptr : ptr + msgsize]
             obj = pickle.loads(objp)
             log.debug("Received message %s", obj)
             self.emit("message_parsed", obj)
@@ -139,11 +130,7 @@ class PickleFramer(GObject.GObject):
 
         self._inprogress = self._outbound.popleft()
         self._conn.get_output_stream().write_all_async(
-            self._inprogress,
-            GLib.PRIORITY_DEFAULT,
-            self._canceller,
-            self._write_done,
-            None
+            self._inprogress, GLib.PRIORITY_DEFAULT, self._canceller, self._write_done, None
         )
 
     # pylint: disable=unused-argument
@@ -155,8 +142,7 @@ class PickleFramer(GObject.GObject):
         elif not done:
             log.error("Error writing message of length %d", len(self._inprogress))
         elif written != len(self._inprogress):
-            log.error("Bytes written %d doesn't match expected bytes %d",
-                      written, len(self._inprogress))
+            log.error("Bytes written %d doesn't match expected bytes %d", written, len(self._inprogress))
         else:
             log.debug("Sent %d bytes", written)
         self._inprogress = None

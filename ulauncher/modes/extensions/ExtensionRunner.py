@@ -18,24 +18,23 @@ from ulauncher.modes.extensions.extension_finder import find_extensions
 
 logger = logging.getLogger()
 
-ExtensionProc = namedtuple("ExtensionProc", (
-    "extension_id", "subprocess", "start_time", "error_stream", "recent_errors"
-))
+ExtensionProc = namedtuple(
+    "ExtensionProc", ("extension_id", "subprocess", "start_time", "error_stream", "recent_errors")
+)
 
 
 class ExtensionRuntimeError(Enum):
-    Terminated = 'Terminated'
-    ExitedInstantly = 'ExitedInstantly'
-    Exited = 'Exited'
-    MissingModule = 'MissingModule'
-    Incompatible = 'Incompatible'
+    Terminated = "Terminated"
+    ExitedInstantly = "ExitedInstantly"
+    Exited = "Exited"
+    MissingModule = "MissingModule"
+    Incompatible = "Incompatible"
 
 
 class ExtensionRunner:
-
     @classmethod
     @singleton
-    def get_instance(cls) -> 'ExtensionRunner':
+    def get_instance(cls) -> "ExtensionRunner":
         return cls()
 
     def __init__(self):
@@ -74,7 +73,7 @@ class ExtensionRunner:
                 "PYTHONPATH": ":".join(filter(bool, [PATHS.APPLICATION, os.getenv("PYTHONPATH")])),
                 "EXTENSION_ICON": manifest.icon,
                 "EXTENSION_PATH": extension_path,
-                "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(',', ':'))
+                "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(",", ":")),
             }
 
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
@@ -89,7 +88,7 @@ class ExtensionRunner:
                 subprocess=subproc,
                 start_time=t_start,
                 error_stream=error_line_str,
-                recent_errors=deque(maxlen=1)
+                recent_errors=deque(maxlen=1),
             )
             logger.debug("Launched %s using Gio.Subprocess", extension_id)
 
@@ -97,12 +96,7 @@ class ExtensionRunner:
             self.read_stderr_line(self.extension_procs[extension_id])
 
     def read_stderr_line(self, extproc):
-        extproc.error_stream.read_line_async(
-            GLib.PRIORITY_DEFAULT,
-            None,
-            self.handle_stderr,
-            extproc.extension_id
-        )
+        extproc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, extproc.extension_id)
 
     def handle_stderr(self, error_stream, result, extension_id):
         output, _ = error_stream.read_line_finish_utf8(result)
@@ -143,9 +137,11 @@ class ExtensionRunner:
             if error_info.is_import_error():
                 package_name = error_info.get_missing_package_name()
                 if package_name == "ulauncher":
-                    logger.error('Extension tried to import Ulauncher modules which have been moved or removed. '
-                                 'This is likely Ulauncher internals which were not part of the extension API. '
-                                 'Extensions importing these can break at any Ulauncher release.')
+                    logger.error(
+                        "Extension tried to import Ulauncher modules which have been moved or removed. "
+                        "This is likely Ulauncher internals which were not part of the extension API. "
+                        "Extensions importing these can break at any Ulauncher release."
+                    )
                     self.set_extension_error(extension_id, ExtensionRuntimeError.Incompatible, error_msg)
                 elif package_name:
                     self.set_extension_error(extension_id, ExtensionRuntimeError.MissingModule, package_name)
@@ -184,10 +180,7 @@ class ExtensionRunner:
         return extension_id in self.extension_procs
 
     def set_extension_error(self, extension_id: str, errorName: ExtensionRuntimeError, message: str):
-        self.extension_errors[extension_id] = {
-            'name': errorName.value,
-            'message': message
-        }
+        self.extension_errors[extension_id] = {"name": errorName.value, "message": message}
 
     def get_extension_error(self, extension_id: str):
         return self.extension_errors.get(extension_id)

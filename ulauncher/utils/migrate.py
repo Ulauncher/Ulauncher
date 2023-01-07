@@ -40,7 +40,7 @@ def _migrate_file(from_path, to_path, transform=None, overwrite=False):
     if os.path.isfile(from_path) and (overwrite or not os.path.exists(to_path)):
         data = _load_legacy(Path(from_path))
         if data:
-            _logger.info('Migrating %s to %s', from_path, to_path)
+            _logger.info("Migrating %s to %s", from_path, to_path)
             if callable(transform):
                 data = transform(data)
             _storeJSON(to_path, data)
@@ -94,6 +94,7 @@ def v5_to_v6():
     # Not using settings class because we don't want to convert the keys
     # pylint: disable=import-outside-toplevel
     from ulauncher.utils.json_data import JsonData
+
     settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
     legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
     if legacy_recent_apps and settings.get("max_recent_apps") is None:
@@ -140,6 +141,7 @@ def v5_to_v6_destructive():
     # Delete old preferences
     # pylint: disable=import-outside-toplevel
     from ulauncher.utils.json_data import JsonData
+
     settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
     _logger.info("Pruning settings")
     settings.save({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})

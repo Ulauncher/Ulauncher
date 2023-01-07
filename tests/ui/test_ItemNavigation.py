@@ -4,7 +4,6 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 
 
 class TestItemNavigation:
-
     @pytest.fixture
     def items(self):
         return [mock.MagicMock() for _ in range(5)]
@@ -50,17 +49,17 @@ class TestItemNavigation:
         items[0].select.assert_called_once_with()
 
     def test_enter_by_index(self, nav, items):
-        nav.enter('test', 3)
-        items[3].result.on_enter.assert_called_with('test')
+        nav.enter("test", 3)
+        items[3].result.on_enter.assert_called_with("test")
 
     def test_enter_no_index(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter('test') is (not selected_result.on_enter.return_value.keep_app_open.return_value)
+        assert nav.enter("test") is (not selected_result.on_enter.return_value.keep_app_open.return_value)
         selected_result.on_enter.return_value.run.assert_called_with()
 
     def test_enter__alternative(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter('test', alt=True) is (not selected_result.on_alt_enter.return_value.keep_app_open.return_value)
+        assert nav.enter("test", alt=True) is (not selected_result.on_alt_enter.return_value.keep_app_open.return_value)
         selected_result.on_alt_enter.return_value.run.assert_called_with()

@@ -17,6 +17,7 @@ try:
 
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)
+
 except (ModuleNotFoundError, ImportError):
     logger.warning("Levenshtein is missing or outdated. Falling back to slower fuzzy-finding method.")
     _get_matching_blocks = _get_matching_blocks_native
@@ -32,7 +33,7 @@ def get_matching_blocks(query, text):
     output = []
     total_len = 0
     for (_, text_index, length) in blocks:
-        output.append((text_index, text[text_index: text_index + length]))
+        output.append((text_index, text[text_index : text_index + length]))
         total_len += length
     return output, total_len
 
@@ -60,7 +61,7 @@ def get_score(query, text):
 
     # Lower the score if the match is in the middle of a word.
     for index, _ in blocks:
-        is_word_boundary = index == 0 or text[index - 1] == ' '
+        is_word_boundary = index == 0 or text[index - 1] == " "
         if not is_word_boundary:
             base_similarity -= 0.5 / query_len
 
