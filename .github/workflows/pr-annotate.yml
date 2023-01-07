@@ -9,19 +9,14 @@ jobs:
     steps:
       - name: Check out source repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # This is necessary to get the commits
       - name: Set up Python environment
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-      - name: Get changed python files between base and head
-        run: >
-          echo "CHANGED_FILES=$(echo $(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- | grep \.py))" >> $GITHUB_ENV
-      - if: ${{ env.CHANGED_FILES }}
+      - name: lint
         uses: marian-code/python-lint-annotate@v3
         with:
-          python-root-list: ${{ env.CHANGED_FILES }}
+          python-root-list: ulauncher
           use-black: true
           use-mypy: true
           use-pylint: true
