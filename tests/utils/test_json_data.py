@@ -18,10 +18,10 @@ class TestJsonData:
         jd = JsonData()
         assert not hasattr(jd, "a")
         with pytest.raises(AttributeError):
-            getattr(jd, "a")
+            jd.a
         jd.a = False
         assert hasattr(jd, "a")
-        assert getattr(jd, "a") is False
+        assert jd.a is False
 
     def test_setting_and_comparison(self):
         jd = JsonData()
