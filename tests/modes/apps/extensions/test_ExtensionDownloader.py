@@ -60,7 +60,6 @@ class TestExtensionDownloader:
             }
         )
 
-    # pylint: disable=unused-argument
     def test_download_raises_AlreadyDownloadedError(self, downloader, ext_db, mocker):
         ext_id = "com.github.ulauncher.ulauncher-timer"
         ext_db.get.return_value = {

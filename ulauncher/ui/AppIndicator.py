@@ -20,7 +20,7 @@ except (AssertionError, ImportError, ValueError):
     except (ImportError, ValueError):
         try:
             gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type: ignore[attr-defined, no-redef] # noqa: F811
+            from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
             AyatanaIndicator = AppIndicator3
         except (ImportError, ValueError):
