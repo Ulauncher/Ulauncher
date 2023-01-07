@@ -1,6 +1,6 @@
 [![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
-[![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Build Status](https://github.com/Ulauncher/Ulauncher/actions/workflows/checks.yml/badge.svg)](https://github.com/Ulauncher/Ulauncher/actions/workflows/checks.yml)
 
 #### ⚠️ This is the branch for the unreleased [v6](https://github.com/Ulauncher/Ulauncher/issues/869) release. If you want the v5 branch version, go [here](https://github.com/Ulauncher/Ulauncher/tree/v5).
 We are currently working on Ulauncher v6, which is a massive release. Making continuous releases while refactoring and rewriting would have added pain for both maintainers and users. Until then we're only supporting the existing functionality in v5. No new features or improvements.
