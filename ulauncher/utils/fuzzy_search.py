@@ -18,7 +18,7 @@ try:
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)
 
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     logger.warning("Levenshtein is missing or outdated. Falling back to slower fuzzy-finding method.")
     _get_matching_blocks = _get_matching_blocks_native
 
