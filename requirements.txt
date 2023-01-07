@@ -4,4 +4,5 @@ pytest-mock~=3.10.0
 pylint~=2.15.9
 mypy~=0.991
 flake8~=6.0.0
+flake8-bugbear~=22.12.6
 PyGObject-stubs~=2.1.0
