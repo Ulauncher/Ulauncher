@@ -24,6 +24,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+    # In pip 22.1 and newer you can ignore the sudo warning by adding --root-user-action=ignore
     - run: pip install --upgrade pip
     - run: pip install -r requirements.txt
     - run: pip install PyGObject
