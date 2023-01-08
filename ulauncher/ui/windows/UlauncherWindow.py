@@ -69,9 +69,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         )
         window_frame.pack_start(window_container, True, True, 0)
 
-        self.event_box = Gtk.EventBox()
+        event_box = Gtk.EventBox()
         input_box = Gtk.Box()
-        self.event_box.add(input_box)
+        event_box.add(input_box)
 
         self.input = Gtk.Entry(
             can_default=True,
@@ -109,7 +109,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
 
-        window_container.pack_start(self.event_box, True, True, 0)
+        window_container.pack_start(event_box, True, True, 0)
         window_container.pack_end(self.scroll_container, True, True, 0)
 
         window_container.get_style_context().add_class("app")
@@ -123,7 +123,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
         self.connect("focus-in-event", self.on_focus_in)
         self.connect("focus-out-event", self.on_focus_out)
-        self.event_box.connect("button-press-event", self.on_mouse_down)
+        event_box.connect("button-press-event", self.on_mouse_down)
         self.input.connect("changed", self.on_input_changed)
         self.input.connect("key-press-event", self.on_input_key_press)
         prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
