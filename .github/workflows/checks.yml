@@ -1,5 +1,8 @@
 name: Checks
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - v5
 
 jobs:
   build:
