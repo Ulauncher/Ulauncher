@@ -14,11 +14,12 @@ jobs:
         python-version: [3.8, 3.11]
     name: Checks
     steps:
+    - name: Install system dependencies
+      run: |
+        echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+        sudo apt update &&
+        sudo apt install -y -q xvfb libgirepository1.0-dev libcairo2-dev gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 gir1.2-notify-0.7 gir1.2-webkit2-4.0 gir1.2-wnck-3.0
     - uses: actions/checkout@v3
-    - uses: awalsh128/cache-apt-pkgs-action@v1
-      with:
-        packages: xvfb libgirepository1.0-dev libcairo2-dev gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 gir1.2-notify-0.7 gir1.2-webkit2-4.0 gir1.2-wnck-3.0
-        version: 1.0
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
