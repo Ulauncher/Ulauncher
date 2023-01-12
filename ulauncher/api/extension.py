@@ -89,7 +89,8 @@ class Extension:
     def run_event_listener(self, event, method, args):
         action = method(*args)
         if action:
-            if isinstance(action, Iterator):
+            # convert iterables to list unless they are actions (ActionList is both)
+            if isinstance(action, Iterator) and not isinstance(action, BaseAction):
                 action = list(action)
             assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
             origin_event = getattr(event, "origin_event", event)

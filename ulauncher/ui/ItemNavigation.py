@@ -1,3 +1,4 @@
+from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
@@ -68,7 +69,7 @@ class ItemNavigation:
             action = result.on_enter(query) if not alt else result.on_alt_enter(query)
             if not action:
                 return True
-            if isinstance(action, list):
+            if isinstance(action, list) and not isinstance(action, BaseAction):
                 action = RenderResultListAction(action)
             action.run()
             return not action.keep_app_open
