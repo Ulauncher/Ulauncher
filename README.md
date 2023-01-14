@@ -3,8 +3,9 @@
 [![Build Status](https://github.com/Ulauncher/Ulauncher/actions/workflows/checks.yml/badge.svg)](https://github.com/Ulauncher/Ulauncher/actions/workflows/checks.yml)
 
 #### ⚠️ This is the branch for the unreleased [v6](https://github.com/Ulauncher/Ulauncher/issues/869) release. If you want the v5 branch version, go [here](https://github.com/Ulauncher/Ulauncher/tree/v5).
-We are currently working on Ulauncher v6, which is a massive release. Making continuous releases while refactoring and rewriting would have added pain for both maintainers and users. Until then we're only supporting the existing functionality in v5. No new features or improvements.
+We are currently working on Ulauncher v6, which is a huge rewrite. Until then we're only supporting the existing functionality in v5. No new features or improvements.
 
+We are not yet ready to make releases or pre-releases for Ulauncher 6, as the API is not yet set and further major changes may come.
 
 [Application Launcher for Linux 🐧](https://ulauncher.io)
 ================================
