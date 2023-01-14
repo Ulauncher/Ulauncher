@@ -32,14 +32,14 @@ export default {
         {
           icon: 'fa-github',
           label: 'Troubleshooting',
-          text: 'Report a bug or ask a question on Github',
-          url: 'https://github.com/Ulauncher/Ulauncher/issues'
+          text: 'List of common problems and workarounds',
+          url: 'https://github.com/Ulauncher/Ulauncher/discussions/991'
         },
         {
-          icon: 'fa-twitter',
-          label: 'Follow on Twitter',
-          text: 'Follow UlauncherApp on Twitter to get the latest updates and news',
-          url: 'https://twitter.com/UlauncherApp'
+          icon: 'fa-github',
+          label: 'Discussions',
+          text: 'Discussion page on Github, for questions and help',
+          url: 'https://github.com/Ulauncher/Ulauncher/discussions/'
         }
       ]
     }
