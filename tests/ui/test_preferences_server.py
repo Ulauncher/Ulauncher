@@ -36,7 +36,7 @@ class TestPreferencesContextServer:
     # pylint: disable=too-many-arguments
     @pytest.fixture
     def prefs_server(self, webview, autostart_pref, ulauncherWindow):
-        app = UlauncherApp()
+        app = UlauncherApp.get_instance()
         app.window = ulauncherWindow
         app.toggle_appindicator = mock.MagicMock()
         app.bind_hotkey = mock.MagicMock()

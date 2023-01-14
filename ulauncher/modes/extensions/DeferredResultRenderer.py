@@ -82,7 +82,7 @@ class DeferredResultRenderer:
         # pylint: disable=import-outside-toplevel
         from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        window = UlauncherApp().window
+        window = UlauncherApp.get_instance().window
         if window.is_visible():
             # update UI in the main thread to avoid race conditions
             GLib.idle_add(window.hide_and_clear_input)

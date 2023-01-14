@@ -28,4 +28,4 @@ class TestRenderResultListAction:
 
     def test_run(self, action, result_list, GLib, UlauncherApp):
         action.run()
-        GLib.idle_add.assert_called_with(UlauncherApp.return_value.window.show_results, result_list)
+        GLib.idle_add.assert_called_with(UlauncherApp.get_instance.return_value.window.show_results, result_list)

@@ -27,7 +27,7 @@ class ExtensionCustomAction(BaseAction):
         from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
         from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        if not UlauncherApp().window.is_visible():
+        if not UlauncherApp.get_instance().window.is_visible():
             return
 
         renderer = DeferredResultRenderer.get_instance()

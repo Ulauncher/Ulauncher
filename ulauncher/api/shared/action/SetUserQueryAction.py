@@ -19,4 +19,4 @@ class SetUserQueryAction(BaseAction):
         # pylint: disable=import-outside-toplevel
         from ulauncher.ui.UlauncherApp import UlauncherApp
 
-        UlauncherApp().query = self.new_query
+        UlauncherApp.get_instance().query = self.new_query

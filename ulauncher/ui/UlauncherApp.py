@@ -17,7 +17,6 @@ from ulauncher.api.shared.query import Query
 logger = logging.getLogger()
 
 
-@lru_cache(maxsize=None)
 class UlauncherApp(Gtk.Application):
     """
     Main Ulauncher application (singleton)
@@ -31,6 +30,11 @@ class UlauncherApp(Gtk.Application):
     preferences: Optional[PreferencesWindow] = None
     _appindicator: Optional[AppIndicator] = None
     _current_accel_name = None
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def get_instance(cls):
+        return cls()
 
     def __init__(self, *args, **kwargs):
         super().__init__(

@@ -65,7 +65,7 @@ class TestDeferredResultRenderer:
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
-        GLib.idle_add.assert_called_with(UlauncherApp.return_value.window.hide_and_clear_input)
+        GLib.idle_add.assert_called_with(UlauncherApp.get_instance.return_value.window.hide_and_clear_input)
 
     def test_on_query_change__loading__is_canceled(self, renderer):
         timer = mock.Mock()

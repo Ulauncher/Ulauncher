@@ -82,7 +82,7 @@ def main(is_dev=False):
     # Migrate user data to v6 compatible
     v5_to_v6()
 
-    app = UlauncherApp()
+    app = UlauncherApp.get_instance()
 
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGHUP, partial(reload_config, app, logger), None)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
