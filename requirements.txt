@@ -2,6 +2,6 @@ mock==2.0.0
 pytest==5.2.0
 pytest-mock==3.3.1
 pylint==2.3.1
-mypy==0.701
-mypy_extensions==0.4.1
+mypy==0.971
+mypy_extensions==0.4.3
 flake8==3.7.7
