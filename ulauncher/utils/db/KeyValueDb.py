@@ -1,10 +1,13 @@
+import logging
 import os
-import pickle
+import pickle  # Pickle is bad for you. This has been replaced with json in v6
 from typing import Dict, TypeVar, Generic, Optional
 
 Key = TypeVar('Key')
 Value = TypeVar('Value')
 Records = Dict[Key, Value]
+
+logger = logging.getLogger(__name__)
 
 
 class KeyValueDb(Generic[Key, Value]):
@@ -29,17 +32,18 @@ class KeyValueDb(Generic[Key, Value]):
             if not os.path.isfile(self._name):
                 raise IOError("%s exists and is not a file" % self._name)
 
-            if os.path.getsize(self._name) == 0:
-                # ignore empty files
-                return self
+            if os.path.getsize(self._name) > 0:
+                with open(self._name, 'rb') as reader:
+                    try:
+                        records = pickle.load(reader)
+                        self.set_records(records)
+                        return self
+                    except (pickle.UnpicklingError, UnicodeDecodeError):
+                        logger.error("Corrupted pickle file: %s. Will overwrite.", self._name)
 
-            with open(self._name, 'rb') as _in:  # binary mode
-                self.set_records(pickle.load(_in))
-        else:
-            # make sure path exists
-            os.makedirs(os.path.dirname(self._name), exist_ok=True)
-            self.commit()
-
+        # make sure path exists
+        os.makedirs(os.path.dirname(self._name), exist_ok=True)
+        self.commit()
         return self
 
     def commit(self) -> 'KeyValueDb':
