@@ -16,12 +16,6 @@ install:
   - true
 script:
   - if [ ! -z "$TRAVIS_TAG" ] && [ ! -z "$encrypted_103700d0e85f_key" ]; then ./ul build-release $TRAVIS_TAG; fi
-branches:
-  only:
-  - v5
-  - v6
-  - master
-  - "/^\\d+.\\d+.\\d+/"
 deploy:
   provider: releases
   draft: true
