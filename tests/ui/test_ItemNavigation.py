@@ -66,7 +66,7 @@ class TestItemNavigation:
     def test_select_default(self, nav, items, mocker):
         select = mocker.patch.object(nav, 'select')
         for item in items:
-            setattr(item.selected_by_default, 'return_value', False)
+            item.selected_by_default.return_value = False
         items[3].selected_by_default.return_value = True
         nav.select_default('q')
         select.assert_called_with(3)

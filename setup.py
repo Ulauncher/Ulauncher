@@ -15,8 +15,9 @@ assert DistUtilsExtra.auto.__version__ >= '2.18', \
     'needs DistUtilsExtra.auto >= 2.18'
 
 
-def update_config(libdir, values={}):
-
+def update_config(libdir, values=None):
+    if not values:
+        values = {}
     filename = os.path.join(libdir, 'ulauncher/config.py')
     oldvalues = {}
     try:
@@ -34,7 +35,7 @@ def update_config(libdir, values={}):
         fout.close()
         fin.close()
         os.rename(fout.name, fin.name)
-    except (OSError, IOError):
+    except OSError:
         print("ERROR: Can't find %s" % filename)
         sys.exit(1)
 
@@ -82,7 +83,7 @@ def update_desktop_file(filename, target_pkgdata, target_scripts):
 
         with open(filename, "w") as fout:
             fout.write(dst)
-    except (OSError, IOError):
+    except OSError:
         print("ERROR: Can't find %s" % filename)
         sys.exit(1)
 
@@ -119,7 +120,7 @@ class DataFileList(list):
             return super().append(item)
 
 
-def exclude_files(patterns=[]):
+def exclude_files(patterns=None):
     """
     Suppress completely useless warning about files DistUtilsExta.aut does
     recognize because require developer to scroll past them to get to useful
@@ -145,7 +146,7 @@ def exclude_files(patterns=[]):
     def src_find_with_excludes(attrs):
         src = original_src_find(attrs)
 
-        for pattern in patterns:
+        for pattern in patterns or []:
             DistUtilsExtra.auto.src_markglob(src, pattern)
 
         return src

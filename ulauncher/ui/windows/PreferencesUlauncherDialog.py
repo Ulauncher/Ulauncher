@@ -14,7 +14,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gtk, WebKit2, GLib
+from gi.repository import Gio, Gtk, WebKit2, GLib  # type: ignore[attr-defined]
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog

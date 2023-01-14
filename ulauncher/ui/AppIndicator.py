@@ -26,7 +26,7 @@ except ImportError:
     pass
 
 try:
-    from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # noqa: F811
+    from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type: ignore[no-redef] # noqa: F811
 except ImportError:
     pass
 

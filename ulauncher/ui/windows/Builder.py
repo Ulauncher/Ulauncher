@@ -193,7 +193,7 @@ class UiFactory:
         def iterator():
             '''Support 'for o in self' '''
             return iter(widget_dict.values())
-        setattr(self, '__iter__', iterator)
+        self.__iter__ = iterator
 
     def __getitem__(self, name):
         'access as dictionary where name might be non-pythonic'

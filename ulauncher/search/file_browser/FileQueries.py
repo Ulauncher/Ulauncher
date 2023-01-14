@@ -8,8 +8,8 @@ from ulauncher.utils.decorator.singleton import singleton
 
 
 class FileQueries(KeyValueDb[str, float]):
-    __last_put_time = None  # type: Optional[float]
-    __last_save_time = None  # type: Optional[float]
+    __last_put_time: Optional[float] = None
+    __last_save_time: Optional[float] = None
 
     @classmethod
     @singleton

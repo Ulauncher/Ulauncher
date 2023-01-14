@@ -8,7 +8,7 @@ from ulauncher.config import get_data_path, CONFIG_DIR, CACHE_DIR
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.version_cmp import gtk_version_is_gte
 
-themes = {}  # type: Dict[str, Any]
+themes: Dict[str, Any] = {}
 logger = logging.getLogger(__name__)
 user_theme_dir = os.path.join(CONFIG_DIR, 'user-themes')
 

@@ -5,7 +5,7 @@ except ValueError:
     gi.require_version("Notify", "0.8")
 
 # pylint: disable=wrong-import-position
-from gi.repository import Notify
+from gi.repository import Notify  # type: ignore[attr-defined]
 
 Notify.init('ulauncher')
 

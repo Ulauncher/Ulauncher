@@ -39,8 +39,8 @@ class ExtensionRunner:
         return cls(ExtensionServer.get_instance())
 
     def __init__(self, extension_server):
-        self.extensions_dir = EXTENSIONS_DIR  # type: str
-        self.extension_errors = {}  # type: Dict[str, ExtRunError]
+        self.extensions_dir = EXTENSIONS_DIR
+        self.extension_errors: Dict[str, ExtRunError] = {}
         self.extension_procs = {}
         self.extension_server = extension_server
         self.dont_run_extensions = get_options().no_extensions

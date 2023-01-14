@@ -19,8 +19,8 @@ class Client:
     :param str ws_api_url: uses env. var `ULAUNCHER_WS_API` by default
     """
 
-    def __init__(self, extension, ws_api_url=os.environ.get('ULAUNCHER_WS_API')):
-        self.ws_api_url = ws_api_url
+    def __init__(self, extension, ws_api_url=None):
+        self.ws_api_url = ws_api_url or os.environ.get('ULAUNCHER_WS_API')
         if not self.ws_api_url:
             raise Exception('ULAUNCHER_WS_API was not specified')
 

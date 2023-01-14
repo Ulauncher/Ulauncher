@@ -55,8 +55,8 @@ class FileBrowserMode(BaseSearchMode):
         if query == '~':
             return SetUserQueryAction('~/')
 
-        path = Path(query)  # type: Path
-        result_items = []  # type: Union[List, SortedList]
+        path = Path(query)
+        result_items: Union[List, SortedList] = []
 
         try:
             existing_dir = path.get_existing_dir()

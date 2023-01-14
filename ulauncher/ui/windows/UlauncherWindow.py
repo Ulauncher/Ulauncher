@@ -11,7 +11,7 @@ gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
 # pylint: disable=wrong-import-position, unused-argument
-from gi.repository import Gtk, Gdk, GLib, Keybinder
+from gi.repository import Gtk, Gdk, GLib, Keybinder  # type: ignore[attr-defined]
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
@@ -335,7 +335,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 
-    def hide(self, *args, **kwargs):
+    def hide(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.get_property('grab-mouse-pointer'):
             self.get_pointer_device().ungrab(0)

@@ -3,7 +3,7 @@ import gi
 gi.require_version('Gdk', '3.0')
 gi.require_version('GdkX11', '3.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gdk, GdkX11
+from gi.repository import Gdk, GdkX11  # type: ignore[attr-defined]
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def get_monitor_scale_factor() -> int:
     try:
         return Gdk.Display.get_default().get_primary_monitors().get_scale_factor()
     except AttributeError:  # Fallback to support GTK <3.22
-        screen = Gdk.Screen.get_default()
+        screen = Gdk.Screen.get_default()  # type: ignore[attr-defined]
         prim_monitor_num = screen.get_primary_monitor()
         return screen.get_monitor_scale_factor(prim_monitor_num)
 
