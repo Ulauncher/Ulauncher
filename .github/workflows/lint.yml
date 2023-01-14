@@ -1,0 +1,35 @@
+name: Lint
+on: [push]
+
+jobs:
+  build:
+    # Can only go as old as ubuntu-20.04 / py3.8:
+    # https://github.blog/changelog/2022-08-09-github-actions-the-ubuntu-18-04-actions-runner-image-is-being-deprecated-and-will-be-removed-by-12-1-22/
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [3.8, 3.11]
+    name: Lint
+    steps:
+    - name: Install system dependencies
+      run: |
+        echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+        sudo apt update &&
+        sudo apt install -y -q xvfb libgirepository1.0-dev libcairo2-dev gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-keybinder-3.0 gir1.2-notify-0.7 gir1.2-webkit2-4.0
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    # In pip 22.1 and newer you can ignore the sudo warning by adding --root-user-action=ignore
+    - run: pip install --upgrade pip
+    - run: pip install -r requirements.txt
+    - run: pip install PyGObject dbus-python python-Levenshtein
+    - run: flake8 .
+    - run: mypy .
+    # disabling cyclic-import since we want to see them but not error on them
+    # Can't override the error level unfortunately: https://github.com/PyCQA/pylint/issues/2293
+    # Might want to change pylint this to `pylint --errors-only ulauncher`,
+    # but I think most warnings should be trated as errors
+    - run: pylint --disable=cyclic-import ulauncher
+    - run: DISPLAY=:1 xvfb-run pytest tests
