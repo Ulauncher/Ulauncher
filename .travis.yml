@@ -1,8 +1,7 @@
 if: tag IS present
-language: python
 services:
   - docker
-before_install:
+install:
   - |
     if [ ! -z "$encrypted_103700d0e85f_key" ]; then
       openssl aes-256-cbc -K $encrypted_103700d0e85f_key -iv $encrypted_103700d0e85f_iv -in scripts/launchpad-secret.key.enc -out scripts/launchpad-secret.key -d
@@ -12,17 +11,9 @@ before_install:
     fi
   - source ./scripts/common.sh
   - docker pull $BUILD_IMAGE
-install:
-  # this is to skip default "pip install -r requirements.txt" on travis
-  - true
-script:
-  - if [ ! -z "$TRAVIS_TAG" ] && [ ! -z "$encrypted_103700d0e85f_key" ]; then ./ul build-release $TRAVIS_TAG; fi
-branches:
-  only:
-  - v5
-  - v6
-  - master
-  - "/^\\d+.\\d+.\\d+/"
+before_deploy:
+  - pip3 install -r requirements.txt # docker image has outdated pip versions
+  - ./ul build-release $TRAVIS_TAG
 deploy:
   provider: releases
   draft: true
