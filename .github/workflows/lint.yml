@@ -1,4 +1,4 @@
-name: Checks
+name: Lint
 on: [push]
 
 jobs:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.11]
-    name: Checks
+    name: Lint
     steps:
     - name: Install system dependencies
       run: |
