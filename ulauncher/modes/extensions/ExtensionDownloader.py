@@ -1,5 +1,6 @@
 import os
 import logging
+from functools import lru_cache
 from urllib.request import urlretrieve
 from tempfile import mktemp
 from shutil import rmtree
@@ -7,7 +8,6 @@ from datetime import datetime
 from typing import Tuple
 
 from ulauncher.config import PATHS
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.untar import untar
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
@@ -26,7 +26,7 @@ class ExtensionDownloaderError(Exception):
 
 class ExtensionDownloader:
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls) -> "ExtensionDownloader":
         ext_db = ExtensionDb.load()
         return cls(ext_db)

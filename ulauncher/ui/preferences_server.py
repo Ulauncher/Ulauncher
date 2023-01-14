@@ -3,6 +3,7 @@ import logging
 import json
 import mimetypes
 import traceback
+from functools import lru_cache
 from urllib.parse import unquote, urlparse
 from gi.repository import Gio, Gtk
 from ulauncher.api.shared.action.OpenAction import OpenAction
@@ -16,7 +17,6 @@ from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
@@ -83,7 +83,7 @@ class PreferencesServer:
     client: WebKit2.WebView
 
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls, application):
         return cls(application)
 

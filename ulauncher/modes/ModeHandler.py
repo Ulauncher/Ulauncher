@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
@@ -7,14 +8,13 @@ from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.calc.CalcMode import CalcMode
-from ulauncher.utils.decorator.singleton import singleton
 
 logger = logging.getLogger()
 
 
 class ModeHandler:
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls):
         return cls([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
 

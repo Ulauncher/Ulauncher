@@ -1,10 +1,10 @@
 import logging
+from functools import lru_cache
 from gi.repository import GLib
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -18,7 +18,7 @@ class DeferredResultRenderer:
     LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
 
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls) -> "DeferredResultRenderer":
         """
         Returns singleton instance

@@ -1,12 +1,12 @@
 import logging
 import os
 import os.path
+from functools import lru_cache
 from gi.repository import Gio, GObject
 
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.api.shared.event import RegisterEvent
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.framer import PickleFramer
 
 logger = logging.getLogger()
@@ -14,7 +14,7 @@ logger = logging.getLogger()
 
 class ExtensionServer:
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls):
         return cls()
 

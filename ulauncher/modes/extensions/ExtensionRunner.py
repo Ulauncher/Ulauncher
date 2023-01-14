@@ -4,13 +4,12 @@ import os
 import sys
 import signal
 from collections import namedtuple, deque
-from functools import partial
+from functools import lru_cache, partial
 from time import time
 from enum import Enum
 from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
-from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.utils.timer import timer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
@@ -33,7 +32,7 @@ class ExtensionRuntimeError(Enum):
 
 class ExtensionRunner:
     @classmethod
-    @singleton
+    @lru_cache(maxsize=None)
     def get_instance(cls) -> "ExtensionRunner":
         return cls()
 
