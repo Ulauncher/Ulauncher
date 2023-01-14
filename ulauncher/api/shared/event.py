@@ -1,13 +1,13 @@
-from pickle import loads, dumps
+import pickle
 
 
 class BaseEvent:
 
     def __eq__(self, other):
-        return dumps(self) == dumps(other)
+        return pickle.dumps(self) == pickle.dumps(other)
 
     def __ne__(self, other):
-        return dumps(self) != dumps(other)
+        return pickle.dumps(self) != pickle.dumps(other)
 
 
 class KeywordQueryEvent(BaseEvent):
@@ -56,7 +56,7 @@ class ItemEnterEvent(BaseEvent):
         """
         :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
         """
-        return loads(self._data)
+        return pickle.loads(self._data)
 
 
 class SystemExitEvent(BaseEvent):

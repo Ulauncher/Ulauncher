@@ -1,5 +1,5 @@
 import io
-from json import dumps
+import json
 
 import pytest
 from urllib.error import HTTPError
@@ -28,7 +28,7 @@ class TestGithubExtension:
 
     def test_read_json(self, gh_ext: GithubExtension, mocker):
         urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
-        urlopen.return_value.read.return_value = dumps(manifest_example).encode('utf-8')
+        urlopen.return_value.read.return_value = json.dumps(manifest_example).encode('utf-8')
         actual = gh_ext._read_json('master', 'manifest.json')
         assert actual == manifest_example
 
@@ -102,7 +102,7 @@ class TestGithubExtension:
 
     def test_get_commit(self, gh_ext, mocker):
         urlopen = mocker.patch('ulauncher.api.server.GithubExtension.urlopen')
-        urlopen.return_value = io.BytesIO(dumps({
+        urlopen.return_value = io.BytesIO(json.dumps({
             'sha': '64e106c57ad90f9f02e9941dfa9780846b7457b9',
             'commit': {
                 'committer': {

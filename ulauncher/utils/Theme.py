@@ -1,6 +1,6 @@
 import os
 import logging
-from json import load
+import json
 from typing import Dict, Any
 from shutil import copytree, rmtree
 
@@ -57,7 +57,7 @@ class Theme:
     def _read(self):
         if not self._data:
             with open(os.path.join(self.path, 'manifest.json'), 'r') as file:
-                self._data = load(file)
+                self._data = json.load(file)
 
         return self._data
 
