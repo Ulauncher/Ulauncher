@@ -33,9 +33,11 @@ create_deb() {
     DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
     step1="ln -s /var/node_modules data/preferences" # take node modules from cache
     step2="ln -s /var/bower_components data/preferences"
-    step3="./ul test"
-    step4="./ul build-deb $VERSION --deb"
-    step5="./ul build-targz $VERSION"
+    step3="pip3 install --upgrade pip"
+    step4="PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt" # docker image has outdated pip versions
+    step5="./ul test"
+    step6="./ul build-deb $VERSION --deb"
+    step7="./ul build-targz $VERSION"
 
     h1 "Creating .deb"
     set -x
@@ -43,7 +45,7 @@ create_deb() {
         -v $(pwd):/root/ulauncher \
         --name ulauncher-deb \
         $BUILD_IMAGE \
-        bash -c "$step1 && $step2 && $step3 && $step4 && $step5"
+        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7"
     set +x
     docker cp ulauncher-deb:/tmp/ulauncher_$VERSION.tar.gz .
     docker cp "ulauncher-deb:/tmp/ulauncher_${DEB_VERSION}_all.deb" "ulauncher_${VERSION}_all.deb"

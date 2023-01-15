@@ -16,7 +16,6 @@ install:
   # this is to skip default "pip install -r requirements.txt" on travis
   - true
 script:
-  - pip3 install -r requirements.txt # docker image has outdated pip versions
   - ./ul build-release $TRAVIS_TAG
 deploy:
   provider: releases
