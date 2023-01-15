@@ -1,7 +1,8 @@
-mock==2.0.0
-pytest==5.2.0
+mock==5.0.1
+pytest==7.0.1
 pytest-mock==3.3.1
-pylint==2.3.1
-mypy==0.971
+pylint==2.13.9
+mypy==0.812
 mypy_extensions==0.4.3
-flake8==3.7.7
+flake8==5.0.4
+PyGObject-stubs==2.0.0
