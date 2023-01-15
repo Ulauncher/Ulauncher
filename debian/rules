@@ -10,4 +10,5 @@ else
 	dh $@ --with python3 --buildsystem=pybuild
 endif
 
-
+override_dh_builddeb:
+	dh_builddeb -- -Zgzip
