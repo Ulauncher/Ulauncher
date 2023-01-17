@@ -53,9 +53,6 @@ The commands below are useful for maintainers:
     ${dim}Builds Docker images which are used for building packages.
     It also pushes them to the Docker registry${normal}
 
-  ${bold}./ul tag-release
-    ${dim} Wrapper script to tag a new release with the change note, and bump the version in setup.cfg${normal}
-
   ${bold}./ul build-release
     ${dim}[Travis CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
 
