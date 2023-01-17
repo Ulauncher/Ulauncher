@@ -22,6 +22,21 @@ build-release() {
     set -e
 
     create_deb
+}
+
+upload-release() {
+    # Args:
+    # $1 version
+
+    export VERSION=$1
+    if [ -z "$VERSION" ]; then
+        echo "First argument should be version"
+        exit 1
+    fi
+
+    info "Uploading Ulauncher $VERSION"
+
+    set -e
 
     # Upload if tag doesn't contain "test"
     if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
