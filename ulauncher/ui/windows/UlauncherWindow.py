@@ -244,7 +244,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # make sure frequent apps are shown if necessary
             self.show_results([])
 
-        self.input.grab_focus()
+        self.input.grab_focus_without_selecting()
         super().show()
 
     # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
