@@ -43,6 +43,7 @@ main () {
     build-doc) build-doc ;;
     build-preferences) build-preferences $2 ;;
     build-release) build-release $2 ;;
+    upload-release) upload-release $2 ;;
     travis-cli-container) travis-cli-container ;;
     run-ci) run-ci ;;
     watch-doc) watch-doc ;;

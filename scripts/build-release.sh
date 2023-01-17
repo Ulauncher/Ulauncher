@@ -21,6 +21,21 @@ build-release() {
 
     # RPMs deactivated for now
     # create_rpms
+}
+
+upload-release() {
+    # Args:
+    # $1 version
+
+    export VERSION=$1
+    if [ -z "$VERSION" ]; then
+        echo "First argument should be version"
+        exit 1
+    fi
+
+    info "Uploading Ulauncher $VERSION"
+
+    set -e
 
     # Upload if tag doesn't contain "test"
     if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
@@ -32,24 +47,22 @@ build-release() {
 create_deb() {
     DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
     step1="ln -s /var/node_modules data/preferences" # take node modules from cache
-    step2="ln -s /var/bower_components data/preferences"
-    step3="pip3 install --upgrade pip"
-    step4="PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt" # docker image has outdated pip versions
-    step5="./ul test"
-    step6="./ul build-deb $VERSION --deb"
-    step7="./ul build-targz $VERSION"
+    step2="pip3 install --upgrade pip"
+    step3="PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt" # docker image has outdated pip versions
+    step4="./ul test"
+    step5="./ul build-deb $VERSION --deb"
+    step6="./ul build-targz $VERSION"
+    step7="cp /tmp/ulauncher_$VERSION.tar.gz ."
+    step8="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
 
     h1 "Creating .deb"
     set -x
     docker run \
+        --rm \
         -v $(pwd):/root/ulauncher \
-        --name ulauncher-deb \
         $BUILD_IMAGE \
-        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7"
+        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7 && $step8"
     set +x
-    docker cp ulauncher-deb:/tmp/ulauncher_$VERSION.tar.gz .
-    docker cp "ulauncher-deb:/tmp/ulauncher_${DEB_VERSION}_all.deb" "ulauncher_${VERSION}_all.deb"
-    docker rm ulauncher-deb
 }
 
 create_rpms() {
