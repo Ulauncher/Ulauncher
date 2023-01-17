@@ -37,18 +37,17 @@ create_deb() {
     step3="./ul test"
     step4="./ul build-deb --deb"
     step5="./ul build-targz"
+    step6="cp /tmp/ulauncher_$VERSION.tar.gz ."
+    step7="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
 
     h1 "Creating .deb"
     set -x
     docker run \
+        --rm \
         -v $(pwd):/root/ulauncher \
-        --name ulauncher-deb \
         $BUILD_IMAGE \
-        bash -c "$step1 && $step2 && $step3 && $step4 && $step5"
+        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7"
     set +x
-    docker cp ulauncher-deb:/tmp/ulauncher_$VERSION.tar.gz .
-    docker cp "ulauncher-deb:/tmp/ulauncher_${DEB_VERSION}_all.deb" "ulauncher_${VERSION}_all.deb"
-    docker rm ulauncher-deb
 }
 
 aur_update() {
@@ -76,7 +75,7 @@ launchpad_upload() {
     else
         PPA="agornostal/ulauncher"
     fi
-    
+
     kinetic="PPA=$PPA RELEASE=kinetic ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     impish="PPA=$PPA RELEASE=impish ./ul build-deb $VERSION --upload"
