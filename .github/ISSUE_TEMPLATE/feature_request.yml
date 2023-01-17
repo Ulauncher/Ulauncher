@@ -29,3 +29,11 @@ body:
       options:
         - label: This feature request cannot satisfactory be supported as a third party extension.
           required: true
+  - type: checkboxes
+    id: latest
+    attributes:
+      label: Ulauncher v6
+      description: Please test the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure this hasn't already been implemeted. Note that Ulauncher v6 doesn't have a release yet.
+      options:
+        - label: I have checked and couldn't find my suggestion in v6.
+          required: true
