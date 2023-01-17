@@ -33,7 +33,8 @@ build-release() {
 create_deb() {
     DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
     step1="ln -s /var/node_modules preferences-src" # take node modules from cache
-    step2="ln -s /var/bower_components preferences-src"
+    # Both step 2 and 3 should be moved out imo, but we need to make sure they run correctly somewhere before continuing 
+    step2="pip3 install --upgrade pip && PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt"
     step3="./ul test"
     step4="./ul build-deb --deb"
     step5="./ul build-targz"
