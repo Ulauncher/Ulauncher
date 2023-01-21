@@ -24,7 +24,7 @@ class TestResultWidget:
 
     @pytest.fixture(autouse=True)
     def unicodedata(self, mocker):
-        return mocker.patch("ulauncher.utils.string.unicodedata")
+        return mocker.patch("ulauncher.utils.fuzzy_search.unicodedata")
 
     @pytest.fixture
     def result_wgt(self, builder, result):

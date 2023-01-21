@@ -1,7 +1,7 @@
 import logging
+import unicodedata
 from functools import lru_cache
 from difflib import SequenceMatcher
-from ulauncher.utils.string import remove_accents
 
 logger = logging.getLogger()
 
@@ -23,13 +23,18 @@ except ImportError:
     _get_matching_blocks = _get_matching_blocks_native
 
 
+# convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
+def _normalize(str):
+    return unicodedata.normalize("NFD", str.casefold()).encode("ascii", "ignore").decode("utf-8")
+
+
 @lru_cache(maxsize=1000)
 def get_matching_blocks(query, text):
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched
     """
-    blocks = _get_matching_blocks(remove_accents(query.lower()), remove_accents(text.lower()))[:-1]
+    blocks = _get_matching_blocks(_normalize(query), _normalize(text))[:-1]
     output = []
     total_len = 0
     for (_, text_index, length) in blocks:

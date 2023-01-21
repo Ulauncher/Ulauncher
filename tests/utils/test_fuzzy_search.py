@@ -1,5 +1,12 @@
 import time
-from ulauncher.utils.fuzzy_search import get_matching_blocks, get_score
+from ulauncher.utils.fuzzy_search import get_matching_blocks, get_score, _normalize
+
+
+def test_normalize():
+    assert _normalize("Virransäästö") == "virransaasto"
+    assert _normalize("Éditeur d’image GIMP") == "editeur dimage gimp"
+    assert _normalize("Ögbelgilengen Uyğulamalar") == "ogbelgilengen uygulamalar"
+    assert _normalize("Füße") == "fusse"
 
 
 def test_get_matching_indexes():
