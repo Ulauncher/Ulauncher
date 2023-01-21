@@ -10,3 +10,4 @@ Icon=ulauncher
 SingleMainWindow=true
 Terminal=false
 Type=Application
+X-GNOME-UsesNotifications=true

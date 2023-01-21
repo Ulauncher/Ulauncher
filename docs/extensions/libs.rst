@@ -23,8 +23,5 @@ In future we'll make it possible to support ``requirements.txt`` for extensions.
 `gir1.2-glib-2.0 <https://lazka.github.io/pgi-docs/#GLib-2.0>`_
   Low level core library
 
-`gir1.2-notify-0.7 <https://lazka.github.io/pgi-docs/#Notify-0.7>`_
-  Desktop notification library (libnotify is a library for sending desktop notifications)
-
 `gir1.2-gdkpixbuf-2.0 <https://lazka.github.io/pgi-docs/#GdkPixbuf-2.0>`_
   An image loading library

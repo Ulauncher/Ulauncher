@@ -6,7 +6,6 @@ from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined
 from ulauncher.config import FIRST_RUN
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
@@ -112,7 +111,7 @@ class UlauncherApp(Gtk.Application):
         self._current_accel_name = accel_name
         if FIRST_RUN:
             display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(accel_name))
-            show_notification("Ulauncher", f"Hotkey is set to {display_name}")
+            self.show_notification(f"Hotkey is set to {display_name}", "hotkey_first_run")
 
     def show_preferences(self, page=None):
         self.window.hide()
@@ -122,3 +121,8 @@ class UlauncherApp(Gtk.Application):
         else:
             self.preferences = PreferencesWindow(application=self)
             self.preferences.show(page)
+
+    def show_notification(self, text, id=None):
+        notification = Gio.Notification.new("Ulauncher")
+        notification.set_body(text)
+        self.send_notification(id, notification)
