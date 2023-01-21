@@ -1,13 +1,10 @@
-import logging
 from functools import lru_cache
-from gi.repository import GLib
+from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.utils.timer import timer
-
-logger = logging.getLogger()
 
 
 class DeferredResultRenderer:
@@ -79,10 +76,7 @@ class DeferredResultRenderer:
             self.loading = None
 
     def _hide_window(self):
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.ui.UlauncherApp import UlauncherApp
-
-        window = UlauncherApp.get_instance().window
-        if window.is_visible():
+        app = Gio.Application.get_default()
+        if app and hasattr(app, "window") and app.window.is_visible():
             # update UI in the main thread to avoid race conditions
-            GLib.idle_add(window.hide_and_clear_input)
+            GLib.idle_add(app.window.hide_and_clear_input)
