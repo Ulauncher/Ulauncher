@@ -47,9 +47,6 @@ def get_score(query, text):
 
     if not query or not text:
         return 0
-    # This is only needed until Arch packages https://github.com/maxbachmann/Levenshtein/releases/tag/v0.20.2
-    if query == text:
-        return 100
 
     query_len = len(query)
     text_len = len(text)
