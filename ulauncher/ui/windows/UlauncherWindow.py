@@ -149,7 +149,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         Triggered by user input
         """
         self.app._query = self.input.get_text().lstrip()
-        ModeHandler.get_instance().on_query_change(self.app.query)
+        if self.is_visible():
+            # input_changed can trigger when hiding window
+            ModeHandler.get_instance().on_query_change(self.app.query)
 
     def on_input_key_press(self, widget, event):
         keyval = event.get_keyval()
