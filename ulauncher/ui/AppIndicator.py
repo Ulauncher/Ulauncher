@@ -24,47 +24,55 @@ except (AssertionError, ImportError, ValueError):
 
             AyatanaIndicator = AppIndicator3
         except (ImportError, ValueError):
-            pass
+            AyatanaIndicator = None
 
-from gi.repository import GObject, Gtk
+from gi.repository import Gio, Gtk
 
 
-def create_menu_item(label, command):
+def _create_menu_item(label, command):
     menu_item = Gtk.MenuItem(label=label)
     menu_item.connect("activate", command)
     return menu_item
 
 
-class AppIndicator(GObject.Object):
-    def __init__(self, app):
-        if XApp or AyatanaIndicator:
-            show_menu_item = create_menu_item("Show Ulauncher", lambda *_: app.do_activate())
+class AppIndicator(Gio.Application):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.supports_appindicator():
+            show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: self.activate())
             menu = Gtk.Menu()
             menu.append(show_menu_item)
-            menu.append(create_menu_item("Preferences", lambda *_: app.show_preferences()))
-            menu.append(create_menu_item("About", lambda *_: app.show_preferences("about")))
+            menu.append(_create_menu_item("Preferences", lambda *_: self.show_preferences()))
+            menu.append(_create_menu_item("About", lambda *_: self.show_preferences("about")))
             menu.append(Gtk.SeparatorMenuItem())
-            menu.append(create_menu_item("Exit", lambda *_: app.quit()))
+            menu.append(_create_menu_item("Exit", lambda *_: self.quit()))
             menu.show_all()
 
         if XApp:
-            self.indicator = XApp.StatusIcon()
-            self.indicator.set_icon_name("ulauncher-indicator")
+            self._indicator = XApp.StatusIcon()
+            self._indicator.set_icon_name("ulauncher-indicator")
             # Show menu on right click and show launcher on left click
-            self.indicator.set_secondary_menu(menu)
-            self.indicator.connect("activate", lambda *_: app.do_activate())
+            self._indicator.set_secondary_menu(menu)
+            self._indicator.connect("activate", lambda *_: self.activate())
 
         elif AyatanaIndicator:
-            self.indicator = AyatanaIndicator.Indicator.new(
+            self._indicator = AyatanaIndicator.Indicator.new(
                 "ulauncher", "ulauncher-indicator", AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
             )
-            # libappindicator can't/won't distinguish between left and right clicks
+            # libappindicator can't / won't distinguish between left and right clicks
             # Show menu on left or right click and show launcher on middle click
-            self.indicator.set_menu(menu)
-            self.indicator.set_secondary_activate_target(show_menu_item)
+            self._indicator.set_menu(menu)
+            self._indicator.set_secondary_activate_target(show_menu_item)
 
-    def switch(self, status=False):
+    def supports_appindicator(self):
+        return bool(XApp or AyatanaIndicator)
+
+    def toggle_appindicator(self, status=False):
         if XApp:
-            self.indicator.set_visible(status)
+            self._indicator.set_visible(status)
         elif AyatanaIndicator:
-            self.indicator.set_status(getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE"))
+            self._indicator.set_status(getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE"))
+
+    # dummy method, we override it in UlauncherApp
+    def show_preferences(self, page=None):
+        pass
