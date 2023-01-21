@@ -37,7 +37,6 @@ RUN apt install -y python3-gi-cairo
 RUN apt install -y gir1.2-glib-2.0
 RUN apt install -y gir1.2-gtk-3.0
 RUN apt install -y gir1.2-wnck-3.0
-RUN apt install -y gir1.2-notify-0.7
 RUN apt install -y gir1.2-webkit2-4.0
 RUN apt install -y gir1.2-keybinder-3.0
 

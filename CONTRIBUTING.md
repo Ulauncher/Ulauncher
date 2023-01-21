@@ -41,7 +41,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo apt-get install python3-{all,gi,levenshtein} gobject-introspection \
-    gir1.2-{glib-2.0,gtk-3.0,notify-0.7,webkit2-4.0,wnck-3.0,keybinder-3.0}
+    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0,keybinder-3.0}
   ```
 
 </details>
@@ -65,7 +65,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo pacman -Syu --needed \
-    gtk3 webkit2gtk-4.1 libnotify libkeybinder3 libwnck3 python-{cairo,gobject,levenshtein}
+    gtk3 webkit2gtk-4.1 libkeybinder3 libwnck3 python-{cairo,gobject,levenshtein}
   ```
 </details>
 
