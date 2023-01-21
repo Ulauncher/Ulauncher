@@ -70,8 +70,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     def setup(self, _):
         settings = Settings.load()
         self.hold()  # Keep the app running even without a window
-        self.window = UlauncherWindow()
-        self.window.set_application(self)
+        self.window = UlauncherWindow(application=self)
         self.window.set_keep_above(True)
         self.window.position_window()
         self.window.apply_theme()

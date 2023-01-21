@@ -25,7 +25,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     results_nav = None
     settings = Settings.load()
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(
             decorated=False,
             deletable=False,
@@ -37,6 +37,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             title="Ulauncher - Application Launcher",
             urgency_hint=True,
             window_position="center",
+            **kwargs,
         )
 
         if LayerShellOverlay.is_supported():
