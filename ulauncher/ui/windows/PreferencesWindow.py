@@ -7,7 +7,7 @@ from ulauncher.ui.preferences_server import PreferencesServer
 
 class PreferencesWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs):
-        super().__init__(title="Ulauncher Preferences", window_position=Gtk.WindowPosition.CENTER, **kwargs)
+        super().__init__(title="Ulauncher Preferences", window_position="center", **kwargs)
 
         self.set_default_size(1000, 600)
         self._init_webview()
