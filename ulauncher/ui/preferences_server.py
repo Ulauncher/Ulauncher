@@ -188,12 +188,11 @@ class PreferencesServer:
             return
 
         self.settings.save({property: value})
-        app = Gio.Application.get_default()
 
         if property == "show_indicator_icon":
-            app.toggle_appindicator(value)
+            Gio.Application.get_default().toggle_appindicator(value)
         if property == "theme_name":
-            app.window.apply_theme()
+            Gio.Application.get_default().window.apply_theme()
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart-enabled to %s", is_enabled)
