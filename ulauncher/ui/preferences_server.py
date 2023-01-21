@@ -84,11 +84,10 @@ class PreferencesServer:
 
     @classmethod
     @lru_cache(maxsize=None)
-    def get_instance(cls, application):
-        return cls(application)
+    def get_instance(cls):
+        return cls()
 
-    def __init__(self, application):
-        self.app = application
+    def __init__(self):
         self.autostart_pref = UlauncherSystemdController()
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
@@ -189,11 +188,12 @@ class PreferencesServer:
             return
 
         self.settings.save({property: value})
+        app = Gio.Application.get_default()
 
         if property == "show_indicator_icon":
-            self.app.toggle_appindicator(value)
+            app.toggle_appindicator(value)
         if property == "theme_name":
-            self.app.window.apply_theme()
+            app.window.apply_theme()
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart-enabled to %s", is_enabled)
@@ -208,7 +208,7 @@ class PreferencesServer:
     @route("/set/hotkey-show-app")
     @glib_idle_add
     def set_hotkey_show_app(self, hotkey):
-        self.app.bind_hotkey(hotkey)
+        Gio.Application.get_default().bind_hotkey(hotkey)
         self.settings.save(hotkey_show_app=hotkey)
 
     @route("/show/hotkey-dialog")
