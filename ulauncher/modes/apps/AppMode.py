@@ -18,5 +18,8 @@ class AppMode(BaseMode):
             # like "Keyboard", "Wi-Fi", "Sound" etc have NoDisplay=true
             if app.get_nodisplay() and executable != "gnome-control-center":
                 continue
+            # Don't show Ulauncher app in own list
+            if app.get_id() == "io.ulauncher.Ulauncher.desktop":
+                continue
 
             yield AppResult(app)
