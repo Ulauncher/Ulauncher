@@ -1,6 +1,7 @@
 from unittest import mock
 import pytest
 
+from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -11,10 +12,10 @@ from ulauncher.api.shared.query import Query
 
 class TestDeferredResultRenderer:
     @pytest.fixture(autouse=True)
-    def UlauncherApp(self, mocker):
-        app = mocker.patch("ulauncher.ui.UlauncherApp.UlauncherApp")
-        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow")()
-        return app
+    def UlauncherWindow(self, mocker):
+        app = UlauncherApp.get_instance()
+        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
+        return app.window
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
@@ -58,14 +59,14 @@ class TestDeferredResultRenderer:
         renderer.handle_response(response, controller)
         response.action.run.assert_called_once_with()
 
-    def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, UlauncherApp):
+    def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, UlauncherWindow):
         response = mock.Mock()
         response.event = KeywordQueryEvent(Query("test"))
         response.action.keep_app_open = False
         renderer.active_event = response.event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
-        GLib.idle_add.assert_called_with(UlauncherApp.get_instance.return_value.window.hide_and_clear_input)
+        GLib.idle_add.assert_called_with(UlauncherWindow.hide_and_clear_input)
 
     def test_on_query_change__loading__is_canceled(self, renderer):
         timer = mock.Mock()

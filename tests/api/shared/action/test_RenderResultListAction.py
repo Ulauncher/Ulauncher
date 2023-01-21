@@ -1,15 +1,15 @@
 from unittest import mock
 import pytest
-
+from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 
 
 class TestRenderResultListAction:
     @pytest.fixture(autouse=True)
-    def UlauncherApp(self, mocker):
-        app = mocker.patch("ulauncher.ui.UlauncherApp.UlauncherApp")
-        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow")()
-        return app
+    def UlauncherWindow(self, mocker):
+        app = UlauncherApp.get_instance()
+        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
+        return app.window
 
     @pytest.fixture(autouse=True)
     def GLib(self, mocker):
@@ -26,6 +26,6 @@ class TestRenderResultListAction:
     def test_keep_app_open(self, action):
         assert action.keep_app_open
 
-    def test_run(self, action, result_list, GLib, UlauncherApp):
+    def test_run(self, action, result_list, GLib, UlauncherWindow):
         action.run()
-        GLib.idle_add.assert_called_with(UlauncherApp.get_instance.return_value.window.show_results, result_list)
+        GLib.idle_add.assert_called_with(UlauncherWindow.show_results, result_list)
