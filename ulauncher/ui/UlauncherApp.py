@@ -16,7 +16,7 @@ from ulauncher.api.shared.query import Query
 logger = logging.getLogger()
 
 
-class UlauncherApp(Gtk.Application):
+class UlauncherApp(Gtk.Application, AppIndicator):
     """
     Main Ulauncher application (singleton)
     """
@@ -27,7 +27,6 @@ class UlauncherApp(Gtk.Application):
     _query = ""
     window: Optional[UlauncherWindow] = None
     preferences: Optional[PreferencesWindow] = None
-    _appindicator: Optional[AppIndicator] = None
     _current_accel_name = None
 
     @classmethod
@@ -92,11 +91,6 @@ class UlauncherApp(Gtk.Application):
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
-
-    def toggle_appindicator(self, enable):
-        if not self._appindicator:
-            self._appindicator = AppIndicator(self)
-        self._appindicator.switch(enable)
 
     def bind_hotkey(self, accel_name):
         if not IS_X11 or self._current_accel_name == accel_name:
