@@ -36,14 +36,6 @@ ulauncher.utils.decorator.run\_async module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.decorator.singleton module
-------------------------------------------
-
-.. automodule:: ulauncher.utils.decorator.singleton
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
