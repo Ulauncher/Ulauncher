@@ -1,12 +1,17 @@
 import json
-from gi.repository import Gio
+import shutil
 from unittest import mock
+from gi.repository import Gio
 import pytest
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.ui.preferences_server import PreferencesServer
 
 settings_file = "/tmp/ulauncher-test/pref-ctx-settings.json"
+
+
+def teardown_module(module):
+    shutil.rmtree("/tmp/ulauncher-test")
 
 
 def check_json_prop(name):

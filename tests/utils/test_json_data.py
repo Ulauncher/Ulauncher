@@ -1,8 +1,13 @@
 import json
+import shutil
 import pytest
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 json_file = "/tmp/ulauncher-test/jsondata.json"
+
+
+def teardown_module(module):
+    shutil.rmtree("/tmp/ulauncher-test")
 
 
 def load_json(file=json_file):
