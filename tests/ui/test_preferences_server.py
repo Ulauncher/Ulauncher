@@ -7,7 +7,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.ui.preferences_server import PreferencesServer
 
-settings_file = "/tmp/ulauncher-test/pref-ctx-settings.json"
+settings_file = "/tmp/ulauncher-test/pref-settings.json"
 
 
 def teardown_module(module):
@@ -22,7 +22,7 @@ def check_json_prop(name):
         return None
 
 
-class TestPreferencesContextServer:
+class TestPreferencesServer:
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
         app = UlauncherApp.get_instance()
