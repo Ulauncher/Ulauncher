@@ -1,3 +1,4 @@
+from gi.repository import Gio
 from ulauncher.api.shared.event import custom_data_store, ItemEnterEvent
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
@@ -22,15 +23,14 @@ class ExtensionCustomAction(BaseAction):
         Runs :meth:`~ulauncher.modes.extensions.ExtensionController.ExtensionController.trigger_event`
         with :class:`ItemEnterEvent`
         """
-        # import here to avoid circular deps
-        # pylint: disable=import-outside-toplevel
-        from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-        from ulauncher.ui.UlauncherApp import UlauncherApp
+        app = Gio.Application.get_default()
 
-        if not UlauncherApp.get_instance().window.is_visible():
-            return
+        if app and hasattr(app, "window") and app.window.is_visible():
+            # import here to avoid circular deps
+            # pylint: disable=import-outside-toplevel
+            from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 
-        renderer = DeferredResultRenderer.get_instance()
-        controller = renderer.get_active_controller()
-        if controller:
-            controller.trigger_event(ItemEnterEvent(self.ref))
+            renderer = DeferredResultRenderer.get_instance()
+            controller = renderer.get_active_controller()
+            if controller:
+                controller.trigger_event(ItemEnterEvent(self.ref))
