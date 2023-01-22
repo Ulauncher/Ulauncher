@@ -100,7 +100,8 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             self.show_notification(f"Hotkey is set to {display_name}", "hotkey_first_run")
 
     def show_launcher(self):
-        self.window = UlauncherWindow(application=self)
+        if not self.window:
+            self.window = UlauncherWindow(application=self)
         self.window.show()
 
     def show_preferences(self, page=None):
