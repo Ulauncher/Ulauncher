@@ -129,6 +129,13 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.input.connect("key-press-event", self.on_input_key_press)
         prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
 
+        self.set_keep_above(True)
+        self.position_window()
+        self.apply_theme()
+
+        # this will trigger to show frequent apps if necessary
+        self.show_results([])
+
     ######################################
     # GTK Signal Handlers
     ######################################
