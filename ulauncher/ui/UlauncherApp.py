@@ -57,7 +57,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             self.query = query.unpack()
 
     def do_activate(self, *args, **kwargs):
-        self.window.show()
+        self.show_launcher()
 
     def do_command_line(self, *args, **kwargs):
         # We need to use "--no-window" from the unique CLI invocation here,
@@ -70,7 +70,6 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     def setup(self, _):
         settings = Settings.load()
         self.hold()  # Keep the app running even without a window
-        self.window = UlauncherWindow(application=self)
 
         if settings.show_indicator_icon:
             self.toggle_appindicator(True)
@@ -94,11 +93,15 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             self._current_accel_name = None
 
         logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, lambda _: self.window.show())
+        Keybinder.bind(accel_name, lambda _: self.show_launcher())
         self._current_accel_name = accel_name
         if FIRST_RUN:
             display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(accel_name))
             self.show_notification(f"Hotkey is set to {display_name}", "hotkey_first_run")
+
+    def show_launcher(self):
+        self.window = UlauncherWindow(application=self)
+        self.window.show()
 
     def show_preferences(self, page=None):
         self.window.hide()
