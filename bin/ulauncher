@@ -19,9 +19,6 @@ if IS_DEV:
     sys.path.insert(0, str(PROJECT_ROOT))
     os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
 
-if not os.environ.get("GDK_BACKEND"):
-    os.environ["GDK_BACKEND"] = "x11"
-
 from ulauncher.main import main
 
 main(IS_DEV)
