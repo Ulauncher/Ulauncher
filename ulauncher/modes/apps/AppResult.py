@@ -56,10 +56,13 @@ class AppResult(Result):
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
     def get_searchable_fields(self):
+        frequency_weight = 1
         sorted_app_ids = AppResult.get_top_app_ids()
         count = len(sorted_app_ids)
-        index = sorted_app_ids.index(self._app_id) if self._app_id in sorted_app_ids else count
-        frequency_weight = 1 - (index / count * 0.1) + 0.05
+        if count:
+            index = sorted_app_ids.index(self._app_id) if self._app_id in sorted_app_ids else count
+            frequency_weight = 1 - (index / count * 0.1) + 0.05
+
         return [
             (self.name, 1 * frequency_weight),
             (self._executable, 0.8 * frequency_weight),  # command names, such as "baobab" or "nautilus"
