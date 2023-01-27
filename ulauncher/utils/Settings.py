@@ -11,7 +11,6 @@ class Settings(JsonData):
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
     max_recent_apps = 0
     raise_if_started = False
-    render_on_screen = "mouse-pointer-monitor"
     show_indicator_icon = True
     terminal_command = ""
     theme_name = "light"

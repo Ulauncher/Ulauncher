@@ -11,13 +11,13 @@ if IS_X11:
     wnck_screen = Wnck.Screen.get_default()
 
 
-def get_monitor(use_mouse_position=False):
+def get_active_monitor():
     """
     :rtype: class:Gdk.Monitor
     """
     display = Gdk.Display.get_default()
 
-    if use_mouse_position:
+    if IS_X11:
         try:
             x11_display = GdkX11.X11Display.get_default()
             seat = x11_display.get_default_seat()

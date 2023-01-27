@@ -11,7 +11,7 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.wm import get_monitor
+from ulauncher.utils.wm import get_active_monitor
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.Theme import Theme
@@ -228,7 +228,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.set_visual(visual)
 
     def position_window(self):
-        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
+        monitor = get_active_monitor()
         geo = monitor.get_geometry()
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 750

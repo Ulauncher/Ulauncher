@@ -57,20 +57,6 @@
 
       <tr>
         <td>
-          <label for="render-on-screen">Screen to show on</label>
-        </td>
-        <td>
-          <b-form-select style="min-width:380px"
-            id="render-on-screen"
-            class="render-on-screen-select"
-            :options="renderOnScreenOptions"
-            v-model="render_on_screen"
-          ></b-form-select>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
@@ -193,11 +179,7 @@ export default {
 
   data() {
     return {
-      changed : {},
-      renderOnScreenOptions: [
-        { value: 'mouse-pointer-monitor', text: 'The screen with the mouse pointer' },
-        { value: 'default-monitor', text: 'The default screen' },
-      ]
+      changed : {}
     }
   },
 
@@ -216,7 +198,6 @@ export default {
       'grab_mouse_pointer',
       'jump_keys',
       'raise_if_started',
-      'render_on_screen',
       'show_indicator_icon',
       'max_recent_apps',
       'terminal_command',
