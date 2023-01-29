@@ -55,7 +55,6 @@ class TestExtensionDownloader:
                     "url": "https://github.com/Ulauncher/ulauncher-timer",
                     "updated_at": datetime.now.return_value.isoformat.return_value,
                     "last_commit": "64e106c",
-                    "last_commit_time": "2017-05-01T07:30:39",
                 }
             }
         )
@@ -68,7 +67,6 @@ class TestExtensionDownloader:
             "url": "https://github.com/Ulauncher/ulauncher-timer",
             "updated_at": "2017-01-01",
             "last_commit": "aDbc",
-            "last_commit_time": "2017-01-01",
         }
         os = mocker.patch("ulauncher.modes.extensions.ExtensionDownloader.os")
         os.path.exists.return_value = True
@@ -83,7 +81,6 @@ class TestExtensionDownloader:
             url="https://github.com/Ulauncher/ulauncher-timer",
             updated_at="2017-01-01",
             last_commit="aDbc",
-            last_commit_time="2017-01-01",
         )
 
         assert downloader.update(ext_id)
@@ -97,7 +94,6 @@ class TestExtensionDownloader:
                     "url": "https://github.com/Ulauncher/ulauncher-timer",
                     "updated_at": datetime.now.return_value.isoformat.return_value,
                     "last_commit": "64e106c",
-                    "last_commit_time": "2017-05-01T07:30:39",
                 }
             }
         )
@@ -109,7 +105,6 @@ class TestExtensionDownloader:
             url="https://github.com/Ulauncher/ulauncher-timer",
             updated_at="2017-01-01",
             last_commit="a8827b723",
-            last_commit_time="2017-01-01",
         )
 
         assert downloader.check_update(ext_id) == (True, "64e106c", "2017-05-01T07:30:39")

@@ -8,7 +8,6 @@ class ExtensionRecord(JsonData):
     url = ""
     updated_at = ""
     last_commit = ""
-    last_commit_time = ""
 
 
 class ExtensionDb(JsonData):

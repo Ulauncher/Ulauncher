@@ -56,10 +56,10 @@ class ExtensionDownloader:
             raise ExtensionAlreadyInstalledWarning(f'Extension with URL "{url}" is already installed')
 
         # 2. get last commit info
-        commit_sha, commit_time = remote.get_latest_compatible_commit()
+        commit_hash = remote.get_compatible_hash()
 
         # 3. download & untar
-        filename = download_tarball(remote.get_download_url(commit_sha))
+        filename = download_tarball(remote.get_download_url(commit_hash))
         untar(filename, ext_path, strip=1)
 
         # 4. add to the db
@@ -69,8 +69,7 @@ class ExtensionDownloader:
                     "id": remote.extension_id,
                     "url": url,
                     "updated_at": datetime.now().isoformat(),
-                    "last_commit": commit_sha,
-                    "last_commit_time": commit_time,
+                    "last_commit": commit_hash,
                 }
             }
         )
@@ -89,31 +88,34 @@ class ExtensionDownloader:
         :rtype: boolean
         :returns: False if already up-to-date, True if was updated
         """
-        has_update, commit_sha, commit_date = self.check_update(ext_id)
+        has_update, commit_hash = self.check_update(ext_id)
         if not has_update:
             return False
         ext = self._find_extension(ext_id)
 
-        logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.last_commit[:8], commit_sha[:8])
+        logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.last_commit[:8], commit_hash[:8])
 
-        remote = ExtensionRemote(ext.url)
-        filename = download_tarball(remote.get_download_url(commit_sha))
+        url = ExtensionRemote(ext.url).get_download_url(commit_hash)
+        filename = download_tarball(url)
         untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}", strip=1)
 
-        ext.update(updated_at=datetime.now().isoformat(), last_commit=commit_sha, last_commit_time=commit_date)
+        ext.update(
+            updated_at=datetime.now().isoformat(),
+            last_commit=commit_hash,
+        )
 
         self.ext_db.save({ext_id: ext})
 
         return True
 
-    def check_update(self, ext_id: str) -> Tuple[bool, str, str]:
+    def check_update(self, ext_id: str) -> Tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """
         ext = self._find_extension(ext_id)
-        commit_sha, commit_time = ExtensionRemote(ext.url).get_latest_compatible_commit()
-        can_update = ext.last_commit != commit_sha
-        return can_update, commit_sha, commit_time
+        commit_hash = ExtensionRemote(ext.url).get_compatible_hash()
+        has_update = ext.last_commit != commit_hash
+        return has_update, commit_hash
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)

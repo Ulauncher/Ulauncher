@@ -1,58 +1,30 @@
-import codecs
-import json
 import re
 import logging
-from datetime import datetime
+from os.path import basename
 from urllib.request import urlopen
-from typing import Optional, Tuple
 
 from ulauncher.config import API_VERSION
 from ulauncher.utils.version import satisfies
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 
 logger = logging.getLogger()
-
-Commit = Tuple[str, str]
-
-
-class ExtensionRemoteError(Exception):
-    pass
 
 
 class InvalidExtensionUrlWarning(Exception):
     pass
 
 
-class ExtensionNetworkError(Exception):
-    pass
-
-
-class ExtensionIncompatibleWarning(Exception):
-    pass
-
-
-def json_fetch(url):
-    try:
-        return json.loads(urlopen(url).read())
-    except Exception as e:
-        # If json.loads fails, treat it as a network error too.
-        # It should never happen as all these API endpoint are exclusively JSON
-        raise ExtensionNetworkError(f'Could not access repository resource "{url}"') from e
-
-
 class ExtensionRemote:
     url_match_pattern = r"^(?:git@|https:\/\/)(?P<host>[^\/]+)\/(?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
-    date_format = "%Y-%m-%dT%H:%M:%S%z"
 
     def __init__(self, url):
-        self.url = url.lower()
-        match = re.match(self.url_match_pattern, self.url, re.I)
+        match = re.match(self.url_match_pattern, url.lower(), re.I)
         if not match:
             raise InvalidExtensionUrlWarning(f"Invalid URL: {url}")
 
         self.user = match.group("user")
         self.repo = match.group("repo")
         self.host = match.group("host")
+        self.url = f"https://{self.host}/{self.user}/{self.repo}"
 
         if "." not in self.host:
             self.extension_id = f"{self.host}.{self.user}.{self.repo}"
@@ -60,108 +32,43 @@ class ExtensionRemote:
             domain, tld = self.host.rsplit(".", 1)
             self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
 
-        if self.host == "github.com":
-            self.host_api = "https://api.github.com"
-            self.date_format = "%Y-%m-%dT%H:%M:%SZ"
-        elif self.host == "gitlab.com":
-            host_api = "https://gitlab.com/api/v4"
-            projects = json_fetch(f"{host_api}/users/{self.user}/projects?search={self.repo}")
-            project = next((p for p in projects if p["name"] == self.repo), None)
-
-            self.host_api = f"{host_api}/projects/{project['id']}/repository"
-            self.date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
-        else:
-            self.host_api = f"https://{self.host}/api/v1"
-
     def get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":
-            return f"https://{self.host}/{self.user}/{self.repo}/-/archive/{commit}/{self.repo}-{commit}.tar.gz"
-        return f"https://{self.host}/{self.user}/{self.repo}/archive/{commit}.tar.gz"
+            return f"{self.url}/-/archive/{commit}/{self.repo}-{commit}.tar.gz"
+        return f"{self.url}/archive/{commit}.tar.gz"
 
-    def fetch_file(self, file_path) -> Optional[str]:
-        # This saves us a request compared to using the "raw" file API that needs to know the branch
-        file_api_url = f"{self.host_api}/repos/{self.user}/{self.repo}/contents/{file_path}"
-        if self.host == "gitlab.com":
-            file_api_url = f"{self.host_api}/files/{file_path}?ref=HEAD"
-
-        file_data = json_fetch(file_api_url)
-
-        if file_data and file_data.get("content") and file_data.get("encoding"):
-            return codecs.decode(file_data["content"].encode(), file_data["encoding"]).decode()
-
-        return None
-
-    def get_compatible_commit_from_tags(self) -> Optional[Commit]:
-        """
-        This method is new for v6, but intentionally undocumented because we still want extension
-        devs to use the old way until Ulauncher 5/apiv2 is fully phased out
-        """
-        tags = {}
-        # pagination is only implemented for GitHub (default 30, max 100)
-        tags_url = f"{self.host_api}/repos/{self.user}/{self.repo}/tags?per_page=100"
-        if self.host == "gitlab.com":
-            # GitLab's API allows to filter out tags starting with our prefix
-            tags_url = f"{self.host_api}/tags?search=^apiv"
-
+    def get_refs(self):
+        refs = {}
         try:
-            tags_data = json_fetch(tags_url)
+            with urlopen(f"{self.url}/info/refs?service=git-upload-pack") as reader:
+                response = reader.read().decode().split("\n")
+                if response:
+                    if response[-1] == "0000":
+                        # Convert "smart" response, to more readable "dumb" response
+                        # See https://www.git-scm.com/docs/http-protocol#_discovering_references
+                        response = [r.split("\x00")[0][8:] if r.startswith("0000") else r[4:] for r in response[1:-1]]
 
-            for tag in tags_data or []:
-                if tag["name"].startswith("apiv") and satisfies(API_VERSION, tag["name"][4:]):
-                    commit = tag["commit"]
-                    version = tag["name"][4:]
-                    id = commit.get("sha", commit.get("id"))  # id fallback is needed for GitLab
-                    commit_time = commit.get("created", commit.get("created_at"))
-                    tags[version] = (id, commit_time)
-
-            if tags:
-                id, commit_time = tags[max(tags)]
-                if id and self.host == "github.com":  # GitHub's tag API doesn't give any dates
-                    commit_data = json_fetch(f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{id}")
-                    commit_time = commit_data["commit"]["committer"]["date"]
-                if id and commit_time:
-                    date = datetime.strptime(commit_time, self.date_format)
-                    return id, date.isoformat()
+                    for row in response:
+                        commit, ref = row.split()
+                        refs[basename(ref)] = commit
 
         except Exception as e:
-            logger.warning("Unexpected error retrieving version from tags '%s' (%s: %s)", self.url, type(e).__name__, e)
+            logger.warning("Unexpected error fetching extension versions '%s' (%s: %s)", self.url, type(e).__name__, e)
 
-        return None
+        return refs
 
-    def get_commit(self, ref: str = "HEAD") -> Commit:
-        if self.host == "gitlab.com":
-            url = f"{self.host_api}/commits/{ref}"
-        elif self.host == "github.com":
-            url = f"{self.host_api}/repos/{self.user}/{self.repo}/commits/{ref}"
-        else:
-            # Gitea/Codeberg API differs from GitHub here, but has the same API
-            url = f"{self.host_api}/repos/{self.user}/{self.repo}/git/commits/{ref}"
-
-        try:
-            response = json_fetch(url)
-            id = response.get("sha") or response.get("id")
-            commit_time = response.get("created_at") or response["commit"]["committer"]["date"]
-            date = datetime.strptime(commit_time, self.date_format)
-            return id, date.isoformat()
-        except (KeyError, TypeError) as e:
-            raise ExtensionRemoteError(f'Could not fetch reference "{ref}" for {self.url}.') from e
-
-    def get_latest_compatible_commit(self) -> Commit:
+    def get_compatible_hash(self) -> str:
         """
-        Finds first version that is compatible with users Ulauncher version.
-        Returns a commit hash and datetime.
+        Returns the commit hash for the highest compatible version, matching using branch names
+        and tags names starting with "apiv", ex "apiv3" and "apiv3.2"
+        New method for v6. The new behavior is intentionally undocumented because we still
+        want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
         """
-        manifest = ExtensionManifest(json.loads(self.fetch_file("manifest.json") or "{}"))
+        remote_refs = self.get_refs()
+        compatible = {ref: sha for ref, sha in remote_refs.items() if satisfies(API_VERSION, ref[4:])}
 
-        if satisfies(API_VERSION, manifest.api_version):
-            return self.get_commit()
+        if compatible:
+            return compatible[max(compatible)]
 
-        tag = self.get_compatible_commit_from_tags()
-        if tag:
-            return tag
-
-        if satisfies("2.0", manifest.api_version):
-            logger.warning("Falling back on using API 2.0 version for %s.", self.repo)
-            return self.get_commit()
-
-        raise ExtensionIncompatibleWarning(f"{manifest.name} does not support Ulauncher API v{API_VERSION}.")
+        # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
+        return remote_refs.get("HEAD", "HEAD")
