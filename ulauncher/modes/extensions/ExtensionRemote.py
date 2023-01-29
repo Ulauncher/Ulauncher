@@ -14,16 +14,18 @@ class InvalidExtensionUrlWarning(Exception):
 
 
 class ExtensionRemote:
-    url_match_pattern = r"^(?:git@|https:\/\/)(?P<host>[^\/]+)\/(?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
+    url_match_pattern = r"^(?:git@|https?:\/\/)(?P<host>[^\/\:]+)[\/\:](?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
 
     def __init__(self, url):
         match = re.match(self.url_match_pattern, url.lower(), re.I)
         if not match:
             raise InvalidExtensionUrlWarning(f"Invalid URL: {url}")
 
+        self.host = match.group("host")
         self.user = match.group("user")
         self.repo = match.group("repo")
-        self.host = match.group("host")
+        if self.repo.endswith(".git"):
+            self.repo = self.repo[:-4]
         self.url = f"https://{self.host}/{self.user}/{self.repo}"
 
         if "." not in self.host:
