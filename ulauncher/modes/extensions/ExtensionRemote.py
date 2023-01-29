@@ -2,6 +2,7 @@ import re
 import logging
 from os.path import basename
 from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
 
 from ulauncher.config import API_VERSION
 from ulauncher.utils.version import satisfies
@@ -9,7 +10,15 @@ from ulauncher.utils.version import satisfies
 logger = logging.getLogger()
 
 
+class ExtensionRemoteError(Exception):
+    pass
+
+
 class InvalidExtensionUrlWarning(Exception):
+    pass
+
+
+class ExtensionNetworkError(Exception):
     pass
 
 
@@ -55,7 +64,11 @@ class ExtensionRemote:
                         refs[basename(ref)] = commit
 
         except Exception as e:
+            if isinstance(e, (HTTPError, URLError)):
+                raise ExtensionNetworkError(f'Could not access repository resource "{self.url}"') from e
+
             logger.warning("Unexpected error fetching extension versions '%s' (%s: %s)", self.url, type(e).__name__, e)
+            raise ExtensionRemoteError(f'Could not fetch reference "{ref}" for {self.url}.') from e
 
         return refs
 
