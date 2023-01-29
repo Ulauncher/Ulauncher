@@ -7,11 +7,12 @@ from shutil import rmtree
 from datetime import datetime
 from typing import Tuple
 
-from ulauncher.config import PATHS
+from ulauncher.config import API_VERSION, PATHS
 from ulauncher.utils.untar import untar
+from ulauncher.utils.version import satisfies
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
-
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionIncompatibleWarning
 
 logger = logging.getLogger()
 
@@ -62,6 +63,13 @@ class ExtensionDownloader:
         filename = download_tarball(remote.get_download_url(commit_hash))
         untar(filename, ext_path, strip=1)
 
+        manifest = ExtensionManifest.load_from_extension_id(remote.extension_id)
+        if not satisfies(API_VERSION, manifest.api_version):
+            if not satisfies("2.0", manifest.api_version):
+                rmtree(ext_path)
+                raise ExtensionIncompatibleWarning(f"{manifest.name} does not support Ulauncher API v{API_VERSION}.")
+            logger.warning("Falling back on using API 2.0 version for %s.", remote.url)
+
         # 4. add to the db
         self.ext_db.save(
             {
@@ -97,7 +105,15 @@ class ExtensionDownloader:
 
         url = ExtensionRemote(ext.url).get_download_url(commit_hash)
         filename = download_tarball(url)
-        untar(filename, f"{PATHS.EXTENSIONS}/{ext_id}", strip=1)
+        tmpdir = f"{PATHS.EXTENSIONS}/{ext_id}_tmp"
+        untar(filename, tmpdir, strip=1)
+
+        manifest = ExtensionManifest.load_from_extension_id(ext_id)
+        if not satisfies(API_VERSION, manifest.api_version):
+            if not satisfies("2.0", manifest.api_version):
+                rmtree(tmpdir)
+                raise ExtensionIncompatibleWarning(f"{manifest.name} does not support Ulauncher API v{API_VERSION}.")
+            logger.warning("Falling back on using API 2.0 version for %s.", ext_id)
 
         ext.update(
             updated_at=datetime.now().isoformat(),
