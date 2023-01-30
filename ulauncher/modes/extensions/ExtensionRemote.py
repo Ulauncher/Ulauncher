@@ -1,13 +1,21 @@
 import re
 import logging
-from os.path import basename
-from urllib.request import urlopen
+from os.path import basename, exists
+from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError, URLError
+from shutil import move, rmtree
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
-from ulauncher.config import API_VERSION
+from ulauncher.config import API_VERSION, PATHS
 from ulauncher.utils.version import satisfies
+from ulauncher.utils.untar import untar
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionIncompatibleWarning
 
 logger = logging.getLogger()
+
+
+class ExtensionAlreadyInstalledWarning(Exception):
+    pass
 
 
 class ExtensionRemoteError(Exception):
@@ -43,12 +51,12 @@ class ExtensionRemote:
             domain, tld = self.host.rsplit(".", 1)
             self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
 
-    def get_download_url(self, commit: str) -> str:
+    def _get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":
             return f"{self.url}/-/archive/{commit}/{self.repo}-{commit}.tar.gz"
         return f"{self.url}/archive/{commit}.tar.gz"
 
-    def get_refs(self):
+    def _get_refs(self):
         refs = {}
         try:
             with urlopen(f"{self.url}/info/refs?service=git-upload-pack") as reader:
@@ -79,7 +87,7 @@ class ExtensionRemote:
         New method for v6. The new behavior is intentionally undocumented because we still
         want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
         """
-        remote_refs = self.get_refs()
+        remote_refs = self._get_refs()
         compatible = {ref: sha for ref, sha in remote_refs.items() if satisfies(API_VERSION, ref[4:])}
 
         if compatible:
@@ -87,3 +95,29 @@ class ExtensionRemote:
 
         # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
         return remote_refs.get("HEAD", "HEAD")
+
+    def download(self, commit_hash=None, overwrite=False):
+        if not commit_hash:
+            commit_hash = self.get_compatible_hash()
+        url = self._get_download_url(commit_hash)
+        output_dir = f"{PATHS.EXTENSIONS}/{self.extension_id}"
+        output_dir_exists = exists(output_dir)
+
+        if output_dir_exists and not overwrite:
+            raise ExtensionAlreadyInstalledWarning(f'Extension with URL "{url}" is already installed.')
+
+        with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
+            urlretrieve(url, tmp_file.name)
+            with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_dir:
+                untar(tmp_file.name, tmp_dir, strip=1)
+                manifest = ExtensionManifest.new_from_file(f"{tmp_dir}/manifest.json")
+                if not satisfies(API_VERSION, manifest.api_version):
+                    if not satisfies("2.0", manifest.api_version):
+                        raise ExtensionIncompatibleWarning(
+                            f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
+                        )
+                    logger.warning("Falling back on using API 2.0 version for %s.", self.url)
+
+                if output_dir_exists:
+                    rmtree(output_dir)
+                move(tmp_dir, output_dir)
