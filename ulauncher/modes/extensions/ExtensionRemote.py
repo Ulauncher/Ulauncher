@@ -1,5 +1,6 @@
 import re
 import logging
+import os
 from os.path import basename, exists
 from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError, URLError
@@ -109,7 +110,11 @@ class ExtensionRemote:
         with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
             urlretrieve(url, tmp_file.name)
             with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_dir:
-                untar(tmp_file.name, tmp_dir, strip=1)
+                untar(tmp_file.name, tmp_dir)
+                subdirs = os.listdir(tmp_dir)
+                if len(subdirs) != 1:
+                    raise ExtensionRemoteError(f"Invalid archive for {self.url}.")
+                tmp_dir = f"{tmp_dir}/{subdirs[0]}"
                 manifest = ExtensionManifest.new_from_file(f"{tmp_dir}/manifest.json")
                 if not satisfies(API_VERSION, manifest.api_version):
                     if not satisfies("2.0", manifest.api_version):
