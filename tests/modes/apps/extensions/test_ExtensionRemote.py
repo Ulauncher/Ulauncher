@@ -1,50 +1,32 @@
-import codecs
 import pytest
-
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, InvalidExtensionUrlWarning
 
-manifest_example = {
-    "api_version": "1",
-    "authors": "Aleksandr Gornostal",
-    "icon": "images/timer.png",
-    "name": "Timer",
-    "input_debounce": 0.1,
-    "preferences": [{"default_value": "ti", "id": "keyword", "name": "My Timer", "type": "keyword"}],
-}
-
-
-def base64_file_attachment(data):
-    content = codecs.encode(data.encode(), "base64").decode()
-    return {"content": content, "encoding": "base64"}
+# @todo: Add missing coverage for _get_refs, get_compatible_hash, download (with ExtensionAlreadyInstalledWarning)
 
 
 class TestExtensionRemote:
     @pytest.fixture
-    def json_fetch(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRemote.json_fetch")
-
-    @pytest.fixture
     def remote(self) -> ExtensionRemote:
         return ExtensionRemote("https://github.com/Ulauncher/ulauncher-timer")
 
-    def test_ext_id(self, remote):
-        assert remote.extension_id == "com.github.ulauncher.ulauncher-timer"
+    def test_valid_urls_ext_id(self):
+        assert ExtensionRemote("https://host.tld/user/repo").extension_id == "tld.host.user.repo"
+        assert ExtensionRemote("http://host/user/repo").extension_id == "host.user.repo"
+        assert ExtensionRemote("https://host.org/user/repo.git").extension_id == "org.host.user.repo"
+        assert ExtensionRemote("http://host/user/repo.git").extension_id == "host.user.repo"
+        assert ExtensionRemote("git@host.com:user/repo.git").extension_id == "com.host.user.repo"
+        assert ExtensionRemote("https://host/user/repo/tree/master").extension_id == "host.user.repo"
 
-    def test_invalid_urls(self):
+    def test_invalid_url(self):
         with pytest.raises(InvalidExtensionUrlWarning):
-            ExtensionRemote("http://github.com/Ulauncher/ulauncher-timer")
+            ExtensionRemote("INVALID URL")
 
-        with pytest.raises(InvalidExtensionUrlWarning):
-            ExtensionRemote("git@github.com/Ulauncher")
-
-    def test_get_download_url(self, remote):
-        assert remote.get_download_url("master") == "https://github.com/ulauncher/ulauncher-timer/archive/master.tar.gz"
-
-    def test_get_commit(self, remote, json_fetch):
-        json_fetch.return_value = {
-            "sha": "64e106c57ad90f9f02e9941dfa9780846b7457b9",
-            "commit": {"committer": {"date": "2017-05-01T07:30:39Z"}},
-        }
-        commit_sha, commit_time = remote.get_commit("64e106c57")
-        assert commit_sha == "64e106c57ad90f9f02e9941dfa9780846b7457b9"
-        assert commit_time == "2017-05-01T07:30:39"
+    def test_get_download_url(self):
+        assert (
+            ExtensionRemote("https://github.com/user/repo")._get_download_url("master")
+            == "https://github.com/user/repo/archive/master.tar.gz"
+        )
+        assert (
+            ExtensionRemote("https://gitlab.com/user/repo")._get_download_url("master")
+            == "https://gitlab.com/user/repo/-/archive/master/repo-master.tar.gz"
+        )

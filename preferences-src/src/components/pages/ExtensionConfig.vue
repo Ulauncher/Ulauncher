@@ -26,11 +26,11 @@
           <b-dropdown-item v-if="extension.url" @click="reportIssue">Report issue</b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-calendar fa-fw"></i>
-            {{ lastCommitDate }}
+            {{ extension.updated_at.slice(0, 10) }}
           </b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-code-fork fa-fw"></i>
-            <span class="text-monospace">{{ extension.last_commit.substring(0, 7) }}</span>
+            <span class="text-monospace">{{ extension.last_commit.slice(0, 7) }}</span>
           </b-dropdown-item>
         </b-dropdown>
       </div>
@@ -127,12 +127,7 @@
           New version is available:
           &nbsp;&nbsp;&nbsp;
           <i class="fa fa-code-fork"></i>
-          {{ newVersionInfo.last_commit.slice(0, 7) }}
-          &nbsp;&nbsp;&nbsp;
-          <i
-            class="fa fa-calendar"
-          ></i>
-          {{ newVersionInfo.last_commit_time.slice(0, 10) }}
+          {{ commitHash.slice(0, 7) }}
         </p>
       </div>
       <div v-if="updateState == 'no-updates'">No new updates are available</div>
@@ -173,13 +168,10 @@ export default {
       showSavedMsg: false,
       updateError: null,
       updateState: null, // null | checking-updates | update-available | no-updates | updating | updated
-      newVersionInfo: null
+      commitHash: null
     }
   },
   computed: {
-    lastCommitDate() {
-      return  (this.$props.extension.last_commit_time || '').slice(0, 10)
-    },
     canSave() {
       const { preferences, triggers } = this.$props.extension
       return Boolean(Object.keys(triggers).length || Object.keys(preferences).length)
@@ -280,17 +272,13 @@ export default {
     checkUpdates() {
       this.updateError = null
       this.updateExtModal = true
-      this.newVersionInfo = null
+      this.commitHash = null
       this.updateState = 'checking-updates'
       fetchData('prefs:///extension/check-update', this.extension.id)
         .then(
-          ([has_update, last_commit, last_commit_time]) => {
-            if (has_update) {
-              this.newVersionInfo = {last_commit, last_commit_time}
-              this.updateState = 'update-available'
-            } else {
-              this.updateState = 'no-updates'
-            }
+          ([hasUpdate, commitHash]) => {
+            this.commitHash = commitHash
+            this.updateState = hasUpdate ? 'update-available' : 'no-updates'
           },
           err => {
             this.updateState = null
