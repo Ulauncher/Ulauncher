@@ -1,6 +1,6 @@
 import logging
 import os
-from os.path import basename, exists, getmtime
+from os.path import basename, getmtime, isdir
 from datetime import datetime
 from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
@@ -120,7 +120,7 @@ class ExtensionRemote:
             commit_hash = self.get_compatible_hash()
         url = self._get_download_url(commit_hash)
         output_dir = f"{PATHS.EXTENSIONS}/{self.extension_id}"
-        output_dir_exists = exists(output_dir)
+        output_dir_exists = isdir(output_dir)
 
         if output_dir_exists and not overwrite:
             raise ExtensionAlreadyInstalledWarning(f'Extension with URL "{url}" is already installed.')
