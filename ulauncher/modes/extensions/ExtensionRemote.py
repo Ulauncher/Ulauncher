@@ -1,8 +1,8 @@
-import re
 import logging
 import os
 from os.path import basename, exists, getmtime
 from datetime import datetime
+from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError, URLError
 from shutil import move, rmtree
@@ -35,35 +35,50 @@ class ExtensionNetworkError(Exception):
 
 
 class ExtensionRemote:
-    url_match_pattern = r"^(?:git@|https?:\/\/)(?P<host>[^\/\:]+)[\/\:](?P<user>[^\/]+)\/(?P<repo>[^\/]+)"
+    def __init__(self, url: str):
+        try:
+            self.url = url.strip().lower()
+            # Reformat to URL format if it's SSH
+            if self.url.startswith("git@"):
+                self.url = "git://" + self.url[4:].replace(":", "/")
 
-    def __init__(self, url):
-        match = re.match(self.url_match_pattern, url.lower(), re.I)
-        if not match:
-            raise InvalidExtensionUrlWarning(f"Invalid URL: {url}")
+            url_parts = urlparse(self.url)
+            assert url_parts.scheme and url_parts.netloc and url_parts.path
 
-        self.host = match.group("host")
-        self.user = match.group("user")
-        self.repo = match.group("repo")
-        if self.repo.endswith(".git"):
-            self.repo = self.repo[:-4]
-        self.url = f"https://{self.host}/{self.user}/{self.repo}"
+            self.host = url_parts.netloc
+            self.path = url_parts.path[1:]
 
-        if "." not in self.host:
-            self.extension_id = f"{self.host}.{self.user}.{self.repo}"
-        else:
-            domain, tld = self.host.rsplit(".", 1)
-            self.extension_id = f"{tld}.{domain}.{self.user}.{self.repo}"
+            if self.host in ("github.com", "gitlab.com", "codeberg.org"):
+                # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
+                user, repo, *_ = self.path.split("/", 2)
+                if repo.endswith(".git"):
+                    repo = repo[:-4]
+                self.path = f"{user}/{repo}"
+            elif url_parts.scheme != "https":
+                logger.warning('Unsupported URL protocol: "%s". Will attempt to use HTTPS', url_parts.scheme)
+            self.url = f"https://{self.host}/{self.path}"
+
+        except Exception as e:
+            raise InvalidExtensionUrlWarning(f"Invalid URL: {url}") from e
+
+        self.extension_id = ".".join(
+            [
+                *reversed(self.host.split(".")),
+                *self.path.split("/"),
+            ]
+        )
 
     def _get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":
-            return f"{self.url}/-/archive/{commit}/{self.repo}-{commit}.tar.gz"
+            repo = self.path.split("/")[1]
+            return f"{self.url}/-/archive/{commit}/{repo}-{commit}.tar.gz"
         return f"{self.url}/archive/{commit}.tar.gz"
 
     def _get_refs(self):
         refs = {}
+        url = f"{self.url}.git" if self.host in ("github.com", "gitlab.com", "codeberg.org") else self.url
         try:
-            with urlopen(f"{self.url}/info/refs?service=git-upload-pack") as reader:
+            with urlopen(f"{url}/info/refs?service=git-upload-pack") as reader:
                 response = reader.read().decode().split("\n")
                 if response:
                     if response[-1] == "0000":
