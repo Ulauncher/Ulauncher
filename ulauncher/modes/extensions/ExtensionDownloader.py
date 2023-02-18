@@ -31,6 +31,7 @@ class ExtensionDownloader:
         remote = ExtensionRemote(url)
         commit_hash = remote.get_compatible_hash()
         remote.download(commit_hash)
+        ext_mtime = os.path.getmtime(f"{PATHS.EXTENSIONS}/{remote.extension_id}")
 
         self.ext_db.save(
             {
@@ -39,6 +40,7 @@ class ExtensionDownloader:
                     "url": url,
                     "updated_at": datetime.now().isoformat(),
                     "last_commit": commit_hash,
+                    "last_commit_time": datetime.fromtimestamp(ext_mtime).isoformat(),
                 }
             }
         )
@@ -66,10 +68,12 @@ class ExtensionDownloader:
 
         remote = ExtensionRemote(ext.url)
         remote.download(commit_hash, overwrite=True)
+        ext_mtime = os.path.getmtime(f"{PATHS.EXTENSIONS}/{remote.extension_id}")
 
         ext.update(
             updated_at=datetime.now().isoformat(),
             last_commit=commit_hash,
+            last_commit_time=datetime.fromtimestamp(ext_mtime).isoformat(),
         )
 
         self.ext_db.save({ext_id: ext})
