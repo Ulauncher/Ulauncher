@@ -1,7 +1,8 @@
 import re
 import logging
 import os
-from os.path import basename, exists
+from os.path import basename, exists, getmtime
+from datetime import datetime
 from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError, URLError
 from shutil import move, rmtree
@@ -10,9 +11,11 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from ulauncher.config import API_VERSION, PATHS
 from ulauncher.utils.version import satisfies
 from ulauncher.utils.untar import untar
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionIncompatibleWarning
 
 logger = logging.getLogger()
+db = ExtensionDb.load()
 
 
 class ExtensionAlreadyInstalledWarning(Exception):
@@ -126,3 +129,13 @@ class ExtensionRemote:
                 if output_dir_exists:
                     rmtree(output_dir)
                 move(tmp_dir, output_dir)
+
+        ext_mtime = getmtime(output_dir)
+        ext_record = ExtensionRecord(
+            id=self.extension_id,
+            last_commit=commit_hash,
+            last_commit_time=datetime.fromtimestamp(ext_mtime).isoformat(),
+            updated_at=datetime.now().isoformat(),
+            url=self.url,
+        )
+        db.save({self.extension_id: ext_record})

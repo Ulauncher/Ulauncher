@@ -2,7 +2,6 @@ import os
 import logging
 from functools import lru_cache
 from shutil import rmtree
-from datetime import datetime
 from typing import Tuple
 
 from ulauncher.config import PATHS
@@ -29,22 +28,7 @@ class ExtensionDownloader:
 
     def download(self, url: str) -> str:
         remote = ExtensionRemote(url)
-        commit_hash = remote.get_compatible_hash()
-        remote.download(commit_hash)
-        ext_mtime = os.path.getmtime(f"{PATHS.EXTENSIONS}/{remote.extension_id}")
-
-        self.ext_db.save(
-            {
-                remote.extension_id: {
-                    "id": remote.extension_id,
-                    "url": url,
-                    "updated_at": datetime.now().isoformat(),
-                    "last_commit": commit_hash,
-                    "last_commit_time": datetime.fromtimestamp(ext_mtime).isoformat(),
-                }
-            }
-        )
-
+        remote.download()
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
@@ -68,16 +52,6 @@ class ExtensionDownloader:
 
         remote = ExtensionRemote(ext.url)
         remote.download(commit_hash, overwrite=True)
-        ext_mtime = os.path.getmtime(f"{PATHS.EXTENSIONS}/{remote.extension_id}")
-
-        ext.update(
-            updated_at=datetime.now().isoformat(),
-            last_commit=commit_hash,
-            last_commit_time=datetime.fromtimestamp(ext_mtime).isoformat(),
-        )
-
-        self.ext_db.save({ext_id: ext})
-
         return True
 
     def check_update(self, ext_id: str) -> Tuple[bool, str]:
