@@ -23,7 +23,7 @@
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
-          <b-dropdown-item v-if="extension.url" @click="reportIssue">Report issue</b-dropdown-item>
+          <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-calendar fa-fw"></i>
             {{ extension.updated_at.slice(0, 10) }}
