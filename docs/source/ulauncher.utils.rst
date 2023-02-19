@@ -77,14 +77,6 @@ ulauncher.utils.icon module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.named\_tuple\_from\_dict module
------------------------------------------------
-
-.. automodule:: ulauncher.utils.named_tuple_from_dict
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.string module
 -----------------------------
 
