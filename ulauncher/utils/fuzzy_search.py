@@ -37,7 +37,7 @@ def get_matching_blocks(query, text):
     blocks = _get_matching_blocks(_normalize(query), _normalize(text))[:-1]
     output = []
     total_len = 0
-    for (_, text_index, length) in blocks:
+    for _, text_index, length in blocks:
         output.append((text_index, text[text_index : text_index + length]))
         total_len += length
     return output, total_len
