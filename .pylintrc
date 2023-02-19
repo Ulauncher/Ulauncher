@@ -488,5 +488,5 @@ known-third-party=enchant
 [EXCEPTIONS]
 
 # Exceptions that will emit a warning when being caught. Defaults to
-# "Exception".
-overgeneral-exceptions=Exception
+# "builtins.Exception".
+# overgeneral-exceptions=builtins.Exception
