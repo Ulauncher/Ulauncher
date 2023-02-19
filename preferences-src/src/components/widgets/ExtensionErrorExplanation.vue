@@ -4,8 +4,8 @@
       <small>
         <p
           v-if="errorName === 'InvalidExtensionUrlWarning'"
-        >The URL should be a GitHub, GitLab or Gitea-compatible extension repository link.
-        <br>Examples: https://github.com/user/repo or https://codeberg.org/user/repo</p>
+        >The URL should be a HTTPS git repository link or a path to a local git repository.
+        <br>Examples: https://github.com/user/repo.git or https://codeberg.org/user/repo.git</p>
         <p v-else-if="errorName === 'ExtensionManifestError'">
           There's an error in manifest.json:
           <br>

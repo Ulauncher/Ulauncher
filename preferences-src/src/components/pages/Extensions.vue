@@ -65,7 +65,7 @@
             class="repo-url-input"
             ref="repoUrl"
             type="text"
-            placeholder="https://github.com/org-name/project-name"
+            placeholder="https://github.com/user/repo.git"
           ></b-form-input>
         </b-form>
 

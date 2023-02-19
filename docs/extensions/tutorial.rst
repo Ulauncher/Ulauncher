@@ -6,20 +6,18 @@ Creating a Project
 
 Ulauncher runs all extensions from ``~/.local/share/ulauncher/extensions/``.
 
-Create a new directory there (name it as you wish) with the following structure::
+Create a new local git repository::
 
-  .
-  ├── images
-  │   └── icon.png
-  ├── manifest.json
-  └── main.py
+  # you can also create a repo online on github for example and then clone it locally
+  git init demo-extension
+  cd demo-extension
+  # example .gitignore (you likely will want to use your own)
+  printf "*tmp*\n__pycache__\n.cache\n.mypy_cache\n*.pyc\n*.pyo" > .gitignore
+  touch manifest.json main.py
 
+* :file:`.gitignore` is for ignoring file paths for common cached files and similar that you don't want to add to your repo.
 * :file:`manifest.json` contains all necessary metadata
 * :file:`main.py` is an entry point for your extension
-* :file:`images/` contains at least an icon of you extension
-
-
-Check out :doc:`debugging` to learn how to test and debug your extension.
 
 manifest.json
 -------------
@@ -30,7 +28,7 @@ Create :file:`manifest.json` using the following template::
     "api_version": "3",
     "authors": "John Doe",
     "name": "Demo extension",
-    "icon": "images/icon.png",
+    "icon": "system-run",
     "instructions": "You need to install <code>examplecommand</code> to run this extension",
     "triggers": {
       "dm": {
@@ -44,7 +42,7 @@ Create :file:`manifest.json` using the following template::
 * ``api_version`` - the version(s) of the Ulauncher Extension API (not the main app version) that the extension requires. See above for more information.
 * ``authors`` - the name(s) or user name(s) of the extension authors and maintainers
 * ``name`` can be anything you like but not an empty string
-* ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "edit-paste".
+* ``icon`` - relative path to an extension icon, or the name of a `themed icon <https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html#names>`_, for example "system-run" or "edit-paste".
 * ``triggers`` - User triggers to activate your extension (see below for details).
 * ``preferences`` - Optional user preferences (see below for details).
 * ``instructions`` - Optional installation instructions that is shown in the extension preferences view.
@@ -122,8 +120,10 @@ Copy the following code to ``main.py``::
 .. TIP:: If you don't want to use ``yield``, you can also return a list of Results.
 
 
-Now exit Ulauncher and run ``ulauncher -v`` from command line to see the verbose output.
-
+To test your extension, install your extension using the system path as the url. Ex ``file:///home/me/mycode/demo-extension`` or just ``/home/me/mycode/demo-extension``
+Ulauncher only installs from git repositories, so you need to commit your changes.
+To update an extension you installed this way, you simply use the regular update functionality.
+For testing purposes we highly recommend you exit ulauncher and run ``ulauncher -v`` in a terminal for verbose output.
 
 .. figure:: https://i.imgur.com/GlEfHjA.png
   :align: center
