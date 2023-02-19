@@ -2,7 +2,9 @@ import time
 import os
 import logging
 import subprocess
+import shlex
 import tempfile
+from typing import Optional
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.utils.decorator.run_async import run_async
 
@@ -14,12 +16,12 @@ class RunScriptAction(BaseAction):
     Runs a user script
 
     :param str script: script content
-    :param list args: arguments
+    :param list arg: arguments
     """
 
-    def __init__(self, script, args=None):
+    def __init__(self, script, arg: Optional[str] = None):
         self.script = script
-        self.args = args
+        self.arg = arg
 
     def run(self):
         file_path = f"{tempfile.gettempdir()}/ulauncher_run_script_{time.time()}"
@@ -28,7 +30,7 @@ class RunScriptAction(BaseAction):
         try:
             os.chmod(file_path, 0o777)
             logger.debug("Running a script from %s", file_path)
-            output = subprocess.check_output([f"{file_path} {self.args}"], shell=True).decode("utf-8")
+            output = subprocess.check_output([file_path + " " + shlex.quote(self.arg)], shell=True).decode("utf-8")
             logger.debug("Script action output:\n%s", output)
             self.remove_temp_file(file_path)
         except Exception:
