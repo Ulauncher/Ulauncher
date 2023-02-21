@@ -1,7 +1,5 @@
 name: Lint & Annotate PR
-on:
-  pull_request:
-    types: [ opened, reopened, synchronize, edited ]
+on: [push, pull_request]
 
 jobs:
   lint:
