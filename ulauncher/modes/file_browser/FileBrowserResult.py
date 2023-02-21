@@ -16,6 +16,7 @@ class FileBrowserResult(Result):
     """
     :param ~str path:
     """
+
     # pylint: disable=super-init-not-called
     def __init__(self, path):
         self.path = path

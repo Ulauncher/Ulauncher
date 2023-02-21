@@ -30,7 +30,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             decorated=False,
             deletable=False,
             has_focus=True,
-            icon_name='ulauncher',
+            icon_name="ulauncher",
             resizable=False,
             skip_pager_hint=True,
             skip_taskbar_hint=True,
