@@ -7,6 +7,7 @@ from ulauncher.config import PATHS
 
 
 class CalcResult(Result):
+
     # pylint: disable=super-init-not-called
     def __init__(self, result: Optional[Decimal] = None, error: str = "Unknown error"):
         self.result = result

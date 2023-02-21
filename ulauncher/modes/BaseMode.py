@@ -2,6 +2,7 @@ from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 
 class BaseMode:
+
     # pylint: disable=unused-argument
     def is_enabled(self, query):
         """
