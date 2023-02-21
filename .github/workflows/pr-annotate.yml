@@ -2,26 +2,12 @@ name: Lint & Annotate PR
 on:
   pull_request:
     types: [ opened, reopened, synchronize, edited ]
+
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint
     steps:
       - name: Check out source repository
         uses: actions/checkout@v3
-      - name: Set up Python environment
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - name: lint
-        uses: marian-code/python-lint-annotate@v3
-        with:
-          python-root-list: ulauncher
-          use-black: true
-          use-mypy: true
-          use-pylint: true
-          use-flake8: true
-          use-isort: false
-          use-vulture: false
-          use-pycodestyle: false
-          use-pydocstyle: false
+      - name: Run black
+        uses: psf/black@stable
