@@ -1,4 +1,4 @@
-name: Lint & Annotate PR
+name: reviewdog-suggester
 on: [push, pull_request]
 
 jobs:
