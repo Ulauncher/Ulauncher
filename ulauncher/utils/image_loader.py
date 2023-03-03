@@ -65,8 +65,24 @@ def get_app_icon_pixbuf(icon, icon_size, icon_name):
     return pixbuf_icon
 
 
+def check_icon_name(icon_name):
+    if icon_theme.has_icon(icon_name):
+        return icon_name
+    for icon in icon_theme.list_icons():
+        if icon.startswith(icon_name):
+            logger.warning('Icon theme is broken or incomplete. Substituting "%s" for "%s"', icon_name, icon)
+            return icon
+    if icon_name != "application-x-executable":
+        logger.warning('Icon "%s" completely missing from icon theme. Consider switching icon theme.', icon_name)
+        logger.info('Falling back on default icon "application-x-executable"')
+        return check_icon_name("application-x-executable")
+
+
 def get_themed_icon_by_name(icon_name, icon_size):
-    return icon_theme.load_icon(icon_name, icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
+    _icon_name = check_icon_name(icon_name)
+    if _icon_name:
+        return icon_theme.load_icon(_icon_name, icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
+    return load_image(get_data_file('media', 'unknown-file-icon.png'), icon_size)
 
 
 ULAUNCHER_FILE_ICON_DB = ['3g2', '3gp', 'ai', 'air', 'asf', 'avi', 'bib', 'cls', 'csv', 'deb', 'djvu', 'dmg', 'doc',
