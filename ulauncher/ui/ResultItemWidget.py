@@ -13,7 +13,8 @@ from ulauncher.search.Query import Query
 logger = logging.getLogger(__name__)
 
 
-class ResultItemWidget(Gtk.EventBox):  # type: ignore[name-defined]
+# type: ignore
+class ResultItemWidget(Gtk.EventBox):
     __gtype_name__ = "ResultItemWidget"
 
     shortcut = ''  # type: str

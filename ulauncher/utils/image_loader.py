@@ -13,7 +13,8 @@ from gi.repository import Gtk, Gio, GLib, GdkPixbuf
 from ulauncher.config import get_data_file
 
 
-icon_theme = Gtk.IconTheme.get_default()  # type: ignore[attr-defined]
+# type: ignore
+icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger(__name__)
 
 
