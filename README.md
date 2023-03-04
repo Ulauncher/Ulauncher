@@ -1,12 +1,12 @@
 Ulauncher was created in Ukraine 🇺🇦 [Stand with Ukraine](https://www.stopputin.net/)
 
-[![Build Status](https://travis-ci.org/Ulauncher/Ulauncher.svg?branch=dev)](https://travis-ci.org/Ulauncher/Ulauncher)
+![CI Status](https://github.com/Ulauncher/Ulauncher/actions/workflows/test-and-release.yml/badge.svg?branch=v5)
 
 
 [Application Launcher for Linux 🐧](https://ulauncher.io)
 ================================
 
-Ulauncher is a fast application launcher for Linux. It's is written in Python, using GTK+, and features: App Search (fuzzy matching), Calculator, [Extensions](https://ext.ulauncher.io/), Shortcuts, File browser mode and [Custom Color Themes](https://docs.ulauncher.io/en/latest/themes/themes.html)
+Ulauncher is a fast application launcher for Linux. It is written in Python, using GTK+, and features: App Search (fuzzy matching), Calculator, [Extensions](https://ext.ulauncher.io/), Shortcuts, File browser mode and [Custom Color Themes](https://docs.ulauncher.io/en/latest/themes/themes.html)
 
 | App Search | File Browser | Color Themes |
 ---|---|---
