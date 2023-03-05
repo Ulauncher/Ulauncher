@@ -5,7 +5,7 @@ MAINTAINER ulauncher.app@gmail.com
 WORKDIR /root/ulauncher
 
 RUN apt-get update && \
-    apt install -y \
+    DEBIAN_FRONTEND=noninteractive apt install -y \
         git \
         vim \
         wget \
@@ -33,8 +33,8 @@ RUN apt-get update && \
         python3-websocket \
         python3-paramiko \
         python3-pip && \
-    pip3 install --upgrade pip pybuild setuptools && \
-    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_10.x && \
+    pip3 install --upgrade pip setuptools && \
+    wget -O /tmp/node-setup.sh https://deb.nodesource.com/setup_16.x && \
     bash /tmp/node-setup.sh && \
     apt install -y nodejs && \
     apt autoremove -y && \
@@ -48,7 +48,6 @@ COPY [ "docs/requirements.txt", "./docs/" ]
 COPY [ "scripts/dput.cf", "/etc" ]
 
 # Caching node_modules to make builds faster
-RUN pip3 install -r requirements.txt && \
-    pip3 install -r docs/requirements.txt && \
-    yarn && \
-    mv node_modules /var
+RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
+RUN pip3 install -r docs/requirements.txt
+RUN yarn && mv node_modules /var

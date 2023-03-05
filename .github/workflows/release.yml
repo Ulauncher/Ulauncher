@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  create:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Release
+        run: |
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            GITHUB_REF_NAME=1.0.100-beta14
+          fi
+          echo "Tag is created: $GITHUB_REF_NAME"
+
+          source ./scripts/common.sh
+          # docker pull $BUILD_IMAGE
+          # ./ul build-release $GITHUB_REF_NAME
+
+      - name: Upload release to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.tar.gz
+            *.deb
+
+      - name: Upload release to Launchpad
+        env:
+          credentials: ${{ secrets.LAUNCHPAD_SSH_TAR }}
+        run: |
+          ./ul upload-release $GITHUB_REF_NAME

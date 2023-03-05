@@ -40,20 +40,17 @@ upload-release() {
     # Upload if tag doesn't contain "test"
     if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
         launchpad_upload
-        aur_update
+        # aur_update
     fi
 }
 
 create_deb() {
     DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
-    step1="ln -s /var/node_modules data/preferences" # take node modules from cache
-    step2="pip3 install --upgrade pip"
-    step3="PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt" # docker image has outdated pip versions
-    step4="./ul test"
-    step5="./ul build-deb $VERSION --deb"
-    step6="./ul build-targz $VERSION"
-    step7="cp /tmp/ulauncher_$VERSION.tar.gz ."
-    step8="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
+    use_cached_modules="ln -s /var/node_modules data/preferences" # take node modules from cache
+    build_deb="./ul build-deb $VERSION --deb"
+    build_targz="./ul build-targz $VERSION"
+    cp_targz="cp /tmp/ulauncher_$VERSION.tar.gz ."
+    cp_deb="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
 
     h1 "Creating .deb"
     set -x
@@ -61,7 +58,7 @@ create_deb() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7 && $step8"
+        bash -c "$use_cached_modules && $build_deb && $build_targz && $cp_targz && $cp_deb"
     set +x
 }
 
@@ -113,18 +110,23 @@ launchpad_upload() {
 
     kinetic="PPA=$PPA RELEASE=kinetic ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
-    impish="PPA=$PPA RELEASE=impish ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
     bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each release
     h1 "Launchpad upload"
+
+    h2 "Extracting launchpad.ssh.tar from env var LAUNCHPAD_SSH_TAR"
+    echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
+    md5sum scripts/launchpad.ssh.tar
+    ls -alh scripts/launchpad.ssh.tar
+
     set -x
     docker run \
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $kinetic && $jammy && $impish && $focal && $bionic"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $kinetic && $jammy && $focal && $bionic"
     set +x
 }

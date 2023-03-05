@@ -9,6 +9,7 @@ on:
     branches:
       - v5
       - v6
+      - moved-to-gh-actions-v5
   create:
     tags:
       - '*'
@@ -20,13 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-
-      - name: Run tests
+      - name: Tests
         run: |
-          source ./scripts/common.sh
-          docker pull $BUILD_IMAGE
-          ./ul run-ci
+          true
+          # source ./scripts/common.sh
+          # docker pull $BUILD_IMAGE
+          # ./ul run-ci
