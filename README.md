@@ -1,6 +1,6 @@
 Ulauncher was created in Ukraine 🇺🇦 [Stand with Ukraine](https://www.stopputin.net/)
 
-![CI Status](https://github.com/Ulauncher/Ulauncher/actions/workflows/test-and-release.yml/badge.svg?branch=v5)
+![Test Status](https://github.com/Ulauncher/Ulauncher/actions/workflows/tests.yml/badge.svg?branch=v5)
 
 
 [Application Launcher for Linux 🐧](https://ulauncher.io)
