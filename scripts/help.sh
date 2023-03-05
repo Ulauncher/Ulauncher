@@ -54,10 +54,7 @@ The commands below are useful for maintainers:
     It also pushes them to the Docker registry${normal}
 
   ${bold}./ul build-release
-    ${dim}[Travis CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
-
-  ${bold}./ul travis-cli-container
-    ${dim}Takes you into travis-cli container. Useful for updating .travis.yml${normal}
+    ${dim}[CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
 
   ${bold}./ul build-doc
     ${dim}Builds API docs for extensions using sphinx${normal}

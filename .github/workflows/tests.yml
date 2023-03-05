@@ -1,15 +1,27 @@
-name: Lint
-on: [push]
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - v5
+      - v6
+  push:
+    branches:
+      - v5
+      - v6
+  create:
+    tags:
+      - '*'
 
 jobs:
-  build:
+  tests:
     # Can only go as old as ubuntu-20.04 / py3.8:
     # https://github.blog/changelog/2022-08-09-github-actions-the-ubuntu-18-04-actions-runner-image-is-being-deprecated-and-will-be-removed-by-12-1-22/
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.8, 3.11]
-    name: Lint
+    name: Tests
     steps:
     - name: Install system dependencies
       run: |
