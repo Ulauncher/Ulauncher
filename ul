@@ -12,7 +12,6 @@
 . scripts/build-doc.sh
 . scripts/build-release.sh
 . scripts/send-signal.sh
-. scripts/travis-cli-container.sh
 . scripts/watch-doc.sh
 . scripts/edit-ui.sh
 
@@ -37,7 +36,6 @@ main () {
     create-build-images) create-build-images ;;
     build-doc) build-doc ;;
     build-release) build-release $2 ;;
-    travis-cli-container) travis-cli-container ;;
     watch-doc) watch-doc ;;
 
     *)
