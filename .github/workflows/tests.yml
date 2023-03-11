@@ -7,8 +7,7 @@ on:
       - v6
   push:
     branches:
-      - v5
-      - v6
+      - '*'
   create:
     tags:
       - '*'
