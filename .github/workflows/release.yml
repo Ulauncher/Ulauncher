@@ -16,6 +16,7 @@ jobs:
 
       - name: Release
         run: |
+          env
           echo "Tag is created: $GITHUB_REF_NAME"
           echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
           echo "Ref: ${{ github.ref }}"
