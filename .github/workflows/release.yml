@@ -1,39 +1,43 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: [Tests]
-    types:
-      - completed
+  create:
+    tags:
+      - '*'
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    # if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.ref, 'refs/tags/') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Release
         run: |
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            GITHUB_REF_NAME=1.0.100-beta14
+          fi
           echo "Tag is created: $GITHUB_REF_NAME"
 
-      # - name: Upload release assets
-      #   uses: actions/upload-release-asset@v1
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: |
-      #       ulauncher_${{ github.ref }}.tar.gz
-      #       ulauncher_${{ github.ref }}_all.deb
-      #     asset_name: |
-      #       ulauncher_${{ github.ref }}.tar.gz
-      #       ulauncher_${{ github.ref }}_all.deb
-      #     asset_content_type: application/gzip
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source ./scripts/common.sh
+          docker pull $BUILD_IMAGE
+          ./ul build-release $GITHUB_REF_NAME
 
-      # - name: Call after_deploy script
-      #   env:
-      #     TRAVIS_TAG: ${{ github.ref }}
-      #   run: |
-      #     ./ul upload-release $TRAVIS_TAG
+      - name: Upload release to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.tar.gz
+            *.deb
+
+      - name: Upload release to Launchpad
+        env:
+          LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
+          LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
+          LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
+        run: |
+          echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
+          echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
+          echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
+
+          ./ul upload-release $GITHUB_REF_NAME
