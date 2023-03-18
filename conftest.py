@@ -1,8 +1,8 @@
 import gi
 gi.require_version('GdkX11', '3.0')
 # pylint: disable=wrong-import-position
-# type: ignore
-from gi.repository import GdkX11
+
+from gi.repository import GdkX11  # type: ignore
 
 import pytest
 

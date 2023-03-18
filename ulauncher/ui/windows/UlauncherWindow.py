@@ -11,8 +11,7 @@ gi.require_version('GLib', '2.0')
 gi.require_version('Keybinder', '3.0')
 
 # pylint: disable=wrong-import-position, unused-argument
-# type: ignore
-from gi.repository import Gtk, Gdk, GLib, Keybinder
+from gi.repository import Gtk, Gdk, GLib, Keybinder  # type: ignore
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
