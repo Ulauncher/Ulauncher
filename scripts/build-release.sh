@@ -116,12 +116,6 @@ launchpad_upload() {
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each release
     h1 "Launchpad upload"
-
-    h2 "Extracting launchpad.ssh.tar from env var LAUNCHPAD_SSH_TAR"
-    echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
-    md5sum scripts/launchpad.ssh.tar
-    ls -alh scripts/launchpad.ssh.tar
-
     set -x
     docker run \
         --rm \

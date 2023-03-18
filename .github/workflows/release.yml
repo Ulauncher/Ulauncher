@@ -32,6 +32,12 @@ jobs:
 
       - name: Upload release to Launchpad
         env:
-          credentials: ${{ secrets.LAUNCHPAD_SSH_TAR }}
+          LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
+          LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
+          LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
         run: |
+          echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
+          echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
+          echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
+
           ./ul upload-release $GITHUB_REF_NAME
