@@ -1,4 +1,4 @@
-name: Release
+name: Draft release
 
 on:
   create:
@@ -10,34 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Release
+      - name: Build release
         run: |
-          if [[ $GITHUB_REF == refs/heads/* ]]; then
-            GITHUB_REF_NAME=1.0.100-beta14
-          fi
           echo "Tag is created: $GITHUB_REF_NAME"
-
           source ./scripts/common.sh
           docker pull $BUILD_IMAGE
           ./ul build-release $GITHUB_REF_NAME
 
-      - name: Upload release to Github
+      - name: Make draft GitHub release
         uses: softprops/action-gh-release@v1
         with:
+          draft: true
           files: |
             *.tar.gz
             *.deb
-
-      - name: Upload release to Launchpad
-        env:
-          LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
-          LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
-          LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
-        run: |
-          echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
-          echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
-          echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
-
-          ./ul upload-release $GITHUB_REF_NAME
