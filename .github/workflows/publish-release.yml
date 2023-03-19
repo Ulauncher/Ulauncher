@@ -14,7 +14,8 @@ jobs:
       - name: Validate
         if: ${{ env.GITHUB_REF_TYPE != 'tag' }}
         run: |
-          echo "Ref must be a tag"
+          echo "Ref type must be a tag"
+          echo "Ref type: $GITHUB_REF_TYPE"
           exit 1
 
       - name: Upload release to Launchpad
