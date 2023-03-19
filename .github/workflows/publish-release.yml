@@ -11,20 +11,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Validate
-        if: ${{ GITHUB_REF_TYPE != 'tag' }}
-        run: |
-          echo "Ref type must be a tag"
-          echo "Ref type: $GITHUB_REF_TYPE"
-          echo "Tag: $GITHUB_REF_NAME"
-        # exit 1 # skip this for now
-
       - name: Upload release to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
           LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
           LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
         run: |
+          echo "Ref type: $GITHUB_REF_TYPE"
+          echo "Tag: $GITHUB_REF_NAME"
           source ./scripts/common.sh
           docker pull $BUILD_IMAGE
           echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
