@@ -10,6 +10,7 @@ from ulauncher.config import PATHS
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.ui.windows.InfoWindow import InfoWindow
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.wm import get_monitor
 from ulauncher.utils.icon import load_icon_surface
@@ -44,6 +45,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.enable_layer_shell()
 
         # Try setting a transparent background
+        self.info_window = InfoWindow()
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
         window_margin = 20
@@ -135,6 +137,21 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
         # this will trigger to show frequent apps if necessary
         self.show_results([])
+
+        self.connect("size-allocate", self.update_info_window_position)
+
+        self.connect("hide", self.on_main_window_hide)
+
+    def update_info_window_position(self, *_):
+        main_window_x, main_window_y = self.get_position()
+        main_window_width = self.get_allocated_width()
+        new_x = main_window_x + main_window_width
+        new_y = main_window_y + 20
+        self.info_window.move(new_x, new_y)
+
+    def on_main_window_hide(self, *_):
+        self.info_window.hide()
+        # pass
 
     ######################################
     # GTK Signal Handlers
@@ -233,6 +250,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
         window_width = 750
         pos_x = geo.width * 0.5 - window_width * 0.5 + geo.x
+        if self.settings.move_window_when_open_info and self.info_window.visible:
+            pos_x -= 250
         pos_y = geo.y + geo.height * 0.12
         self.set_property("width-request", window_width)
         self.scroll_container.set_property("max-content-height", max_height)
@@ -241,6 +260,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.set_vertical_position(pos_y)
         else:
             self.move(pos_x, pos_y)
+
+    def set_info(self, info):
+        self.info_window.set_info(info)
+        self.position_window()
 
     # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def show(self):

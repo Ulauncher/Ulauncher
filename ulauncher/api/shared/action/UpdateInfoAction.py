@@ -1,22 +1,15 @@
-import logging
-from gi.repository import Gio, GLib
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from gi.repository import Gio, GLib
+import logging
 
 logger = logging.getLogger()
 
 
-class RenderResultListAction(BaseAction):
-    """
-    Renders list of result items
+class UpdateInfoAction(BaseAction):
 
-    :param list result_list: list of :class:`~ulauncher.api.result.Result` objects
-    """
-
-    keep_app_open = True
-
-    def __init__(self, result_list, info=None):
-        self.result_list = result_list
+    def __init__(self, info, keep_app_open=False):
         self._info = info
+        self.keep_app_open = keep_app_open
 
     def run(self):
         # pylint: disable=import-outside-toplevel
@@ -28,5 +21,4 @@ class RenderResultListAction(BaseAction):
             logger.warning("RenderResultListAction called, but no Ulauncher window is open")
         else:
             # update UI in the main thread to avoid race conditions
-            GLib.idle_add(app.window.show_results, self.result_list)
             GLib.idle_add(app.window.set_info, self._info)
