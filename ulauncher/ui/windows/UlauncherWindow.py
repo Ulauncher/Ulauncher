@@ -261,8 +261,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         else:
             self.move(pos_x, pos_y)
 
-    def set_info(self, info):
-        self.info_window.set_info(info)
+    def set_info(self, info, base_url="file:///"):
+        self.info_window.set_info(info, base_url)
         self.position_window()
 
     # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231

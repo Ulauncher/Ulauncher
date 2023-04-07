@@ -14,9 +14,10 @@ class RenderResultListAction(BaseAction):
 
     keep_app_open = True
 
-    def __init__(self, result_list, info=None):
+    def __init__(self, result_list, info=None, base_url=None):
         self.result_list = result_list
         self._info = info
+        self.base_url = base_url
 
     def run(self):
         # pylint: disable=import-outside-toplevel
@@ -29,4 +30,4 @@ class RenderResultListAction(BaseAction):
         else:
             # update UI in the main thread to avoid race conditions
             GLib.idle_add(app.window.show_results, self.result_list)
-            GLib.idle_add(app.window.set_info, self._info)
+            GLib.idle_add(app.window.set_info, self._info, self.base_url)

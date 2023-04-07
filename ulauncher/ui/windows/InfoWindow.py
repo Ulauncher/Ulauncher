@@ -21,11 +21,11 @@ class InfoWindow(Gtk.ApplicationWindow):
         self.show_all()
         self.hide()
 
-    def set_info(self, info: str):
+    def set_info(self, info: str, base_url="file:///"):
         if info:
             if not self.visible:
                 self.show_all()
-            self.webview.load_html(info, "file:///")
+            self.webview.load_html(info, base_url)
         else:
             self.hide()
 
