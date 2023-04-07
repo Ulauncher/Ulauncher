@@ -18,6 +18,7 @@ class Result:
     icon: Optional[str] = None
     _on_enter: Optional[OnEnterCallback] = None
     _on_alt_enter: Optional[OnEnterCallback] = None
+    _on_select: Optional[OnEnterCallback] = None
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -31,6 +32,7 @@ class Result:
         on_alt_enter: OnEnterCallback = None,
         searchable: Optional[bool] = None,
         compact: Optional[bool] = None,
+        on_select: OnEnterCallback = None
     ):
         if not isinstance(name, str):
             raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given.')
@@ -50,6 +52,7 @@ class Result:
             self.highlightable = highlightable
         self._on_enter = on_enter
         self._on_alt_enter = on_alt_enter
+        self._on_select = on_select
 
         # This part only runs when initialized from an extensions
         ext_path = os.environ.get("EXTENSION_PATH")
@@ -95,6 +98,11 @@ class Result:
         if isinstance(self._on_alt_enter, BaseAction):  # For extensions
             return self._on_alt_enter
         return self._on_alt_enter(query) if callable(self._on_alt_enter) else None
+
+    def on_select(self) -> Optional[BaseAction]:
+        if isinstance(self._on_select, BaseAction):  # For extensions
+            return self._on_select
+        return self._on_select() if callable(self._on_select) else None
 
     def get_searchable_fields(self):
         return [(self.name, 1), (self.description, 0.8)]

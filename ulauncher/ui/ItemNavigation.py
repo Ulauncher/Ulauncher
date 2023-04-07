@@ -41,6 +41,9 @@ class ItemNavigation:
 
         self.selected = index
         self.result_widgets[index].select()
+        action = self.result_widgets[index].result.on_select()
+        if action:
+            action.run()
 
     def go_up(self):
         self.select((self.selected or len(self.result_widgets)) - 1)
