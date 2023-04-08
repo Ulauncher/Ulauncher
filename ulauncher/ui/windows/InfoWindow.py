@@ -1,5 +1,5 @@
-import logging
 from gi.repository import Gtk, Gdk, WebKit2  # type: ignore[attr-defined]
+
 
 class InfoWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -24,10 +24,10 @@ class InfoWindow(Gtk.ApplicationWindow):
     def set_info(self, info: str, base_url="file:///"):
         if info:
             if not self.visible:
-                self.show_all()
+                self.show_all()  # type: ignore[attr-defined]
             self.webview.load_html(info, base_url)
         else:
-            self.hide()
+            self.hide()  # type: ignore[attr-defined]
 
     @property
     def visible(self):

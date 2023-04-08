@@ -28,4 +28,11 @@ class TestRenderResultListAction:
 
     def test_run(self, action, result_list, GLib, UlauncherWindow):
         action.run()
-        GLib.idle_add.assert_called_with(UlauncherWindow.show_results, result_list)
+
+        assert GLib.idle_add.call_count == 2
+        calls = GLib.idle_add.call_args_list
+        expected_first_call_args = (UlauncherWindow.show_results, result_list)
+        assert calls[0] == mock.call(*expected_first_call_args)
+
+        expected_second_call_args = (UlauncherWindow.set_info, None, None)
+        assert calls[1] == mock.call(*expected_second_call_args)

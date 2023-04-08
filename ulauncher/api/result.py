@@ -5,6 +5,7 @@ from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
+OnSelectCallback = Optional[Callable[[], Optional[BaseAction]]]
 
 
 # pylint: disable=too-many-instance-attributes
@@ -18,7 +19,7 @@ class Result:
     icon: Optional[str] = None
     _on_enter: Optional[OnEnterCallback] = None
     _on_alt_enter: Optional[OnEnterCallback] = None
-    _on_select: Optional[OnEnterCallback] = None
+    _on_select: Optional[OnSelectCallback] = None
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -32,7 +33,7 @@ class Result:
         on_alt_enter: OnEnterCallback = None,
         searchable: Optional[bool] = None,
         compact: Optional[bool] = None,
-        on_select: OnEnterCallback = None
+        on_select: OnSelectCallback = None,
     ):
         if not isinstance(name, str):
             raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given.')
