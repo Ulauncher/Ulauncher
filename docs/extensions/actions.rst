@@ -56,6 +56,11 @@ SetUserQueryAction
 .. autoclass:: ulauncher.api.shared.action.SetUserQueryAction.SetUserQueryAction
 
 
+UpdateInfoAction
+----------------
+
+.. autoclass:: ulauncher.api.shared.action.UpdateInfoAction.UpdateInfoAction
+
 
 .. NOTE::
   Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation
