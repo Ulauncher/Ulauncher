@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Upload release to Launchpad
+      - name: Publish to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
           LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
@@ -25,3 +25,11 @@ jobs:
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           ./ul upload-release $GITHUB_REF_NAME
+      - name: Publish to AUR
+        uses: friday/aur-publish-action@v1
+        with:
+          new_release: ${{ github.ref_name }}
+          package_name: ulauncher
+          commit_username: 'Ulauncher'
+          commit_email: mail@albinlarsson.com
+          ssh_private_key: ${{ secrets.AUR_PRIVATE_KEY }}
