@@ -1,16 +1,6 @@
 name: Tests
 
-on:
-  pull_request:
-    branches:
-      - v5
-      - v6
-  push:
-    branches:
-      - '*'
-  create:
-    tags:
-      - '*'
+on: [push, pull_request]
 
 jobs:
   tests:
