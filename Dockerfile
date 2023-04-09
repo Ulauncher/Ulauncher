@@ -25,7 +25,7 @@ RUN apt install -y dh-python
 RUN apt install -y python3-pip
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
-RUN wget -qO- https://deb.nodesource.com/setup_12.x | bash -
+RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash -
 RUN apt install -y nodejs
 RUN npm install -g yarn
 
