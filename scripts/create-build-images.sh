@@ -8,12 +8,4 @@ create-build-images () {
 
     docker build -t $BUILD_IMAGE .
     docker push $BUILD_IMAGE
-
-    cd scripts/dockerfiles
-
-    docker build -f Dockerfile.fedora-32 -t $FEDORA_BUILD_IMAGE .
-    docker push $FEDORA_BUILD_IMAGE
-
-    docker build -f Dockerfile.fedora-33 -t $FEDORA_33_BUILD_IMAGE .
-    docker push $FEDORA_33_BUILD_IMAGE
 }

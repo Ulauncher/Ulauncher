@@ -129,8 +129,7 @@ def exclude_files(patterns=None):
     Example of the useless warnings:
 
     WARNING: the following files are not recognized by DistUtilsExtra.auto:
-    Dockerfile.build
-    Dockerfile.build-rpm
+    Dockerfile
     PKGBUILD.template
     """
 
