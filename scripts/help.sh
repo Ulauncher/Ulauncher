@@ -63,9 +63,6 @@ The commands below are useful for maintainers:
   ${bold}./ul build-release
     ${dim}[CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
 
-  ${bold}./ul run-ci
-    ${dim}Runc CI integration tasks: tests, build preferences and API docs${normal}
-
   ${bold}./ul build-doc
     ${dim}Builds API docs for extensions using sphinx${normal}
 

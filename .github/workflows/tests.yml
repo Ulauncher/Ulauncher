@@ -15,12 +15,21 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    container: ulauncher/build-image:5.0
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v3
       - name: Tests
         run: |
-          source ./scripts/common.sh
-          docker pull $BUILD_IMAGE
-          ./ul run-ci
+          flake8 .
+          mypy .
+          pylint ulauncher
+          DISPLAY=:1 xvfb-run pytest tests
+      - name: Build docs
+        run: |
+          cd docs
+          sphinx-apidoc -d 5 -o source ../ulauncher
+          make html
+          cd -
+      - name: Build preferences
+        run: ./ul build-preferences --skip-if-built
