@@ -130,10 +130,8 @@ def exclude_files(patterns=None):
 
     WARNING: the following files are not recognized by DistUtilsExtra.auto:
     Dockerfile.build
-    Dockerfile.build-arch
     Dockerfile.build-rpm
     PKGBUILD.template
-    scripts/aur-update.py
     """
 
     # it's maddening the DistUtilsExtra does not offer a way to exclude globs

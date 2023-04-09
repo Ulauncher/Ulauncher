@@ -11,9 +11,6 @@ create-build-images () {
 
     cd scripts/dockerfiles
 
-    docker build -f Dockerfile.arch -t $ARCH_BUILD_IMAGE .
-    docker push $ARCH_BUILD_IMAGE
-
     docker build -f Dockerfile.fedora-32 -t $FEDORA_BUILD_IMAGE .
     docker push $FEDORA_BUILD_IMAGE
 
