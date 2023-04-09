@@ -41,20 +41,16 @@ upload-release() {
     # Upload if tag doesn't contain "test"
     if [[ $(echo "$VERSION" | tr '[:upper:]' '[:lower:]') != *test* ]]; then
         launchpad_upload
-        aur_update
     fi
 }
 
 create_deb() {
     DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
-    step1="ln -s /var/node_modules preferences-src" # take node modules from cache
-    # Both step 2 and 3 should be moved out imo, but we need to make sure they run correctly somewhere before continuing 
-    step2="pip3 install --upgrade pip && PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt"
-    step3="./ul test"
-    step4="./ul build-deb --deb"
-    step5="./ul build-targz"
-    step6="cp /tmp/ulauncher_$VERSION.tar.gz ."
-    step7="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
+    use_cached_modules="ln -s /var/node_modules preferences-src" # take node modules from cache
+    build_deb="./ul build-deb --deb"
+    build_targz="./ul build-targz"
+    copy_targz="cp /tmp/ulauncher_$VERSION.tar.gz ."
+    copy_deb="cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb"
 
     h1 "Creating .deb"
     set -x
@@ -62,26 +58,8 @@ create_deb() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "$step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $step7"
+        bash -c "$use_cached_modules && $build_deb && $build_targz && $copy_targz && $copy_deb"
     set +x
-}
-
-aur_update() {
-    # Note that this script does not need to run with Docker in any specific
-    # environment/distro, but it was written that way and it works,
-    # so it still does use Docker and https://hub.docker.com/r/ulauncher/arch
-    h1 "Push new PKGBUILD to AUR stable channel"
-    workdir=/home/notroot/ulauncher
-    chmod 600 scripts/aur_key
-    sudo chown 1000:1000 scripts/aur_key
-
-    docker run \
-        --rm \
-        -u notroot \
-        -w $workdir \
-        -v $(pwd):$workdir \
-        ulauncher/arch:5.0 \
-        bash -c "./ul aur-update $VERSION"
 }
 
 launchpad_upload() {

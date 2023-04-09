@@ -49,10 +49,6 @@ The commands below are useful for maintainers:
   ${bold}./ul build-targz
     ${dim}Builds a targz archive with the source code${normal}
 
-  ${bold}./ul create-build-images
-    ${dim}Builds Docker images which are used for building packages.
-    It also pushes them to the Docker registry${normal}
-
   ${bold}./ul build-release
     ${dim}[CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
 

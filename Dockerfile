@@ -50,7 +50,7 @@ COPY [ "docs/requirements.txt", "./docs/" ]
 # Update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 COPY [ "scripts/dput.cf", "/etc" ]
 
-RUN pip3 install -r requirements.txt
+RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
 RUN pip3 install -r docs/requirements.txt
 # Caching node_modules to make builds faster
 RUN yarn

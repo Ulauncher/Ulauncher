@@ -8,7 +8,6 @@
 . scripts/build-deb.sh
 . scripts/build-rpm.sh
 . scripts/build-targz.sh
-. scripts/create-build-images.sh
 . scripts/build-doc.sh
 . scripts/build-release.sh
 . scripts/send-signal.sh
@@ -33,7 +32,6 @@ main () {
     build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
     aur-update) ./scripts/aur-update.py $2 ;;
-    create-build-images) create-build-images ;;
     build-doc) build-doc ;;
     build-release) build-release $2 ;;
     watch-doc) watch-doc ;;
