@@ -57,10 +57,6 @@ The commands below are useful for maintainers:
   ${bold}./ul build-targz <VERSION>
     ${dim}Builds a targz archive with the source code${normal}
 
-  ${bold}./ul create-build-images
-    ${dim}Builds Docker images which are used for building packages.
-    It also pushes them to the Docker registry${normal}
-
   ${bold}./ul build-preferences
     ${dim}Builds JS/HTML/CSS files for Preferences UI${normal}
 
