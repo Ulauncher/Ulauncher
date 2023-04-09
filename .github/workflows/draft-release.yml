@@ -1,7 +1,7 @@
 name: Draft release
 
 on:
-  create:
+  push:
     tags:
       - '*'
 
