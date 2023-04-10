@@ -51,7 +51,7 @@ class build_preferences(Command):
             rmtree(dst)
 
         if not src.is_dir():
-            raise Exception(f"{src.resolve()} directory missing.")
+            raise NotADirectoryError(f"{src.resolve()} directory missing.")
 
         sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob("preferences-src/**/*")))
 

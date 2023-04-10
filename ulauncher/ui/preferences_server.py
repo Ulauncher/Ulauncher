@@ -197,12 +197,12 @@ class PreferencesServer:
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart-enabled to %s", is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
-            raise Exception("Unable to turn on autostart preference")
+            raise RuntimeError("Unable to turn on autostart preference")
 
         try:
             self.autostart_pref.switch(is_enabled)
         except Exception as err:
-            raise Exception(f'Caught an error while switching "autostart": {err}') from err
+            raise RuntimeError(f'Caught an error while switching "autostart": {err}') from err
 
     @route("/set/hotkey-show-app")
     @glib_idle_add

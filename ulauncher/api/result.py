@@ -60,7 +60,7 @@ class Result:
                 self.icon = f"{ext_path}/{self.icon}"
 
             if self._on_enter and not isinstance(self._on_enter, BaseAction):
-                raise Exception("Invalid on_enter argument. Expected BaseAction")
+                raise TypeError("Invalid on_enter argument. Expected BaseAction")
 
     def get_keyword(self) -> str:
         return self.keyword

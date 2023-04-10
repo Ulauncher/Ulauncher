@@ -82,7 +82,7 @@ class ExtensionController:
         of `DeferredResultRenderer`
         """
         if not isinstance(response, Response):
-            raise Exception(f"Unsupported type {type(response).__name__}")
+            raise TypeError(f"Unsupported type {type(response).__name__}")
 
         logger.debug(
             'Incoming response (%s, %s) from "%s"',

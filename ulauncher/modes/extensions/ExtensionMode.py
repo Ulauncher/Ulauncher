@@ -33,7 +33,7 @@ class ExtensionMode(BaseMode):
         controller = self.extensionServer.get_controller_by_keyword(query.keyword)
 
         if not controller:
-            raise Exception("Controller not found. (This line shouldn't be entered)")
+            raise RuntimeError("Invalid extension keyword")
 
         return controller.handle_query(query)
 

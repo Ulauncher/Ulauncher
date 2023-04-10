@@ -29,7 +29,7 @@ class ShortcutMode(BaseMode):
         """
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
-            raise Exception("No active shortcut. This line should not be entered")
+            raise RuntimeError("Query doesn't match any shortcut")
 
         return [ShortcutResult(**shortcut)]
 

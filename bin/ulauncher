@@ -7,7 +7,7 @@ import locale
 locale.textdomain("ulauncher")
 
 if sys.version_info.major != 3:
-    raise Exception("Ulauncher requires Python version 3")
+    raise SystemError("Ulauncher requires Python version 3")
 
 # Add project root directory (enable symlink and trunk execution)
 PYTHONPATH = os.getenv("PYTHONPATH", "")
