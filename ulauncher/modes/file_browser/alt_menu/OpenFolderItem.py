@@ -11,5 +11,5 @@ class OpenFolderItem(Result):
         self.name = name
         self.icon = "system-file-manager"
 
-    def on_enter(self, query):
+    def on_enter(self, *_):
         return OpenAction(self.path)

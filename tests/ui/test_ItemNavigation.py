@@ -57,5 +57,5 @@ class TestItemNavigation:
     def test_enter__alternative(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter("test", alt=True) is selected_result.on_alt_enter.return_value.keep_app_open
-        selected_result.on_alt_enter.return_value.run.assert_called_with()
+        nav.enter("test", True)
+        selected_result.on_enter.assert_called_with("test", True)

@@ -26,13 +26,13 @@ class FileBrowserResult(Result):
     def get_highlightable_input(self, query: Query):
         return basename(query)
 
-    def on_enter(self, _):
-        if isdir(self.path):
-            return SetUserQueryAction(join(fold_user_path(self.path), ""))
+    def on_enter(self, _, alt=bool):
+        if not alt:
+            if isdir(self.path):
+                return SetUserQueryAction(join(fold_user_path(self.path), ""))
 
-        return OpenAction(self.path)
+            return OpenAction(self.path)
 
-    def on_alt_enter(self, _):
         if isdir(self.path):
             open_folder = OpenFolderItem(self.path, f'Open Folder "{basename(self.path)}"')
         else:

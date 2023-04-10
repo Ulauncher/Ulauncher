@@ -65,7 +65,7 @@ class ItemNavigation:
             if query and not alt and result.searchable:
                 query_history.save({str(query): result.get_name()})
 
-            action = result.on_enter(query) if not alt else result.on_alt_enter(query)
+            action = result.on_enter(query, alt)
             if not action:
                 return False
             if isinstance(action, list) and not isinstance(action, BaseAction):

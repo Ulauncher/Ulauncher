@@ -41,7 +41,7 @@ class ShortcutResult(Result):
 
         return description.replace("%s", "...")
 
-    def on_enter(self, query):
+    def on_enter(self, query, alt=False):
         if query.keyword == self.keyword and query.argument:
             argument = query.argument
         elif self.is_default_search:

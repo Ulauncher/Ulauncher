@@ -11,5 +11,5 @@ class CopyPathToClipboardItem(Result):
         self.name = "Copy Path to Clipboard"
         self.icon = "edit-copy"
 
-    def on_enter(self, query):
+    def on_enter(self, *_):
         return CopyToClipboardAction(self.path)

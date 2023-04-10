@@ -70,7 +70,7 @@ class AppResult(Result):
             *[(k, 0.6 * frequency_weight) for k in self.keywords],
         ]
 
-    def on_enter(self, _):
+    def on_enter(self, *_):
         starts = app_starts.get(self._app_id, 0)
         app_starts.save({self._app_id: starts + 1})
         return launch_app(self._app_id)

@@ -80,21 +80,14 @@ class Result:
     def get_description(self, query: Query) -> str:
         return self.description
 
-    def on_enter(self, query: Query) -> Optional[BaseAction]:
+    def on_enter(self, query: Query, alt=False) -> Optional[BaseAction]:
         """
         Handle the main action
         """
-        if isinstance(self._on_enter, BaseAction):  # For extensions
-            return self._on_enter
-        return self._on_enter(query) if callable(self._on_enter) else None
-
-    def on_alt_enter(self, query: Query) -> Optional[BaseAction]:
-        """
-        Handle the optional secondary action (alt+enter)
-        """
-        if isinstance(self._on_alt_enter, BaseAction):  # For extensions
-            return self._on_alt_enter
-        return self._on_alt_enter(query) if callable(self._on_alt_enter) else None
+        handler = self._on_alt_enter if alt else self._on_enter
+        if isinstance(handler, BaseAction):  # For extensions
+            return handler
+        return handler(query) if callable(handler) else None
 
     def get_searchable_fields(self):
         return [(self.name, 1), (self.description, 0.8)]
