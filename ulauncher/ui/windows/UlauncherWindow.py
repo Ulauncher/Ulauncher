@@ -270,7 +270,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.results_nav.select(index)
 
     def enter_result(self, index=None, alt=False):
-        if self.results_nav.enter(self.app.query, index, alt=alt):
+        if not self.results_nav.enter(self.app.query, index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
 

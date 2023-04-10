@@ -52,7 +52,7 @@ class ItemNavigation:
     def enter(self, query, index=None, alt=False):
         """
         Enter into selected item, unless 'index' is passed
-        Return boolean - True if Ulauncher window should be closed
+        Return boolean - True if Ulauncher window should be kept open
         """
         if index is not None:
             if not 0 <= index < len(self.result_widgets):
@@ -68,10 +68,10 @@ class ItemNavigation:
 
             action = result.on_enter(query) if not alt else result.on_alt_enter(query)
             if not action:
-                return True
+                return False
             if isinstance(action, list) and not isinstance(action, BaseAction):
                 action = RenderResultListAction(action)
             action.run()
-            return not action.keep_app_open
+            return action.keep_app_open
 
-        return None
+        return True
