@@ -43,11 +43,9 @@ class ModeHandler:
                     results.extend(mode.get_fallback_results())
             RenderResultListAction(results).run()
 
-    def on_key_press_event(self, widget, event, query):
-        # This is used for FileBrowserMode to make backspace delete the entire "word"
+    def on_query_backspace(self, query):
         mode = self.get_mode_from_query(query)
-        if mode:
-            mode.handle_key_press_event(widget, event, query).run()
+        return mode and mode.on_query_backspace(query)
 
     def get_mode_from_query(self, query):
         for mode in self.modes:
