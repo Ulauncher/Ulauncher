@@ -3,7 +3,6 @@ import re
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
-from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.query import Query
 
 
@@ -56,7 +55,7 @@ class ShortcutResult(Result):
         if argument or self.run_without_argument:
             return OpenAction(command) if self._is_url() else RunScriptAction(command, argument)
 
-        return SetUserQueryAction(f"{self.keyword} ")
+        return f"{self.keyword} "
 
     def _is_url(self) -> bool:
         return bool(re.match(r"^http(s)?://", self.cmd.strip()))

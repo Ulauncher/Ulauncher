@@ -3,7 +3,6 @@ from ulauncher.api.shared.query import Query
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
 from ulauncher.modes.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
@@ -29,7 +28,7 @@ class FileBrowserResult(Result):
     def on_activation(self, _, alt=bool):
         if not alt:
             if isdir(self.path):
-                return SetUserQueryAction(join(fold_user_path(self.path), ""))
+                return join(fold_user_path(self.path), "")
 
             return OpenAction(self.path)
 

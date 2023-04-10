@@ -66,6 +66,8 @@ class ItemNavigation:
                 query_history.save({str(query): result.get_name()})
 
             action = result.on_activation(query, alt)
+            if isinstance(action, str):
+                return action
             if not action:
                 return False
             if isinstance(action, list) and not isinstance(action, BaseAction):

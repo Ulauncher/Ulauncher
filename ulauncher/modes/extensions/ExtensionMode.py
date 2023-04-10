@@ -7,7 +7,6 @@ from ulauncher.api.result import Result
 from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 
 
 # bind function to args, ignoring further args on call time
@@ -43,17 +42,17 @@ class ExtensionMode(BaseMode):
         """
         for controller in self.extensionServer.controllers.values():
             for trigger_id, trigger in controller.manifest.triggers.items():
-                callback = None
+                action = None
                 if trigger.keyword is None:
-                    callback = bind_final(controller.trigger_event, LaunchTriggerEvent(trigger_id))
+                    action = bind_final(controller.trigger_event, LaunchTriggerEvent(trigger_id))
                 elif trigger.user_keyword:
-                    callback = bind_final(SetUserQueryAction, f"{trigger.user_keyword} ")
+                    action = f"{trigger.user_keyword} "
 
-                if callback:
+                if action:
                     yield Result(
                         name=html.escape(trigger.name),
                         description=html.escape(trigger.description),
                         icon=controller.get_normalized_icon_path(trigger.icon),
-                        on_enter=callback,
+                        on_enter=action,
                         searchable=True,
                     )

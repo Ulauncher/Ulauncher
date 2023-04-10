@@ -29,10 +29,6 @@ class TestFileBrowserMode:
         return sd
 
     @pytest.fixture
-    def SetUserQueryAction(self, mocker):
-        return mocker.patch("ulauncher.modes.file_browser.FileBrowserMode.SetUserQueryAction")
-
-    @pytest.fixture
     def mode(self):
         return FileBrowserMode()
 

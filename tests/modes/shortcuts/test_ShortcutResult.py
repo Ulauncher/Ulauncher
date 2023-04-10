@@ -13,10 +13,6 @@ class TestShortcutResult:
         return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.RunScriptAction")
 
     @pytest.fixture
-    def SetUserQueryAction(self, mocker):
-        return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.SetUserQueryAction")
-
-    @pytest.fixture
     def item(self):
         return ShortcutResult(
             "kw", "name", "https://site/?q=%s", "icon_path", is_default_search=True, run_without_argument=False
@@ -36,28 +32,27 @@ class TestShortcutResult:
     def test_icon(self, item):
         assert isinstance(item.icon, str)
 
-    def test_on_activation(self, item, OpenAction, SetUserQueryAction):
-        item.on_activation(Query("kw test"))
+    def test_on_activation(self, item, OpenAction):
+        result = item.on_activation(Query("kw test"))
         OpenAction.assert_called_once_with("https://site/?q=test")
-        assert not SetUserQueryAction.called
+        assert not isinstance(result, str)
 
-    def test_on_activation__default_search(self, item, OpenAction, SetUserQueryAction):
+    def test_on_activation__default_search(self, item, OpenAction):
         item.is_default_search = True
-        item.on_activation(Query("search query"))
+        result = item.on_activation(Query("search query"))
         OpenAction.assert_called_once_with("https://site/?q=search query")
-        assert not SetUserQueryAction.called
+        assert not isinstance(result, str)
 
-    def test_on_activation__run_without_arguments(self, item, OpenAction, SetUserQueryAction):
+    def test_on_activation__run_without_arguments(self, item, OpenAction):
         item.run_without_argument = True
-        item.on_activation(Query("kw"))
+        result = item.on_activation(Query("kw"))
         # it doesn't replace %s if run_without_argument = True
         OpenAction.assert_called_once_with("https://site/?q=%s")
-        assert not SetUserQueryAction.called
+        assert not isinstance(result, str)
 
-    def test_on_activation__misspelled_kw(self, item, OpenAction, SetUserQueryAction):
-        item.on_activation(Query("keyword query"))
+    def test_on_activation__misspelled_kw(self, item, OpenAction):
+        assert item.on_activation(Query("keyword query")) == "kw "
         assert not OpenAction.called
-        SetUserQueryAction.assert_called_once_with("kw ")
 
     def test_on_activation__run_file(self, RunScriptAction):
         item = ShortcutResult("kw", "name", "/usr/bin/something/%s", "icon_path")

@@ -50,12 +50,5 @@ RunScriptAction
 .. autoclass:: ulauncher.api.shared.action.RunScriptAction.RunScriptAction
 
 
-SetUserQueryAction
-------------------
-
-.. autoclass:: ulauncher.api.shared.action.SetUserQueryAction.SetUserQueryAction
-
-
-
 .. NOTE::
   Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation

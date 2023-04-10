@@ -75,16 +75,6 @@ ulauncher\.api\.shared\.action\.RunScriptAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.SetUserQueryAction module
----------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.SetUserQueryAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
-
 Module contents
 ---------------
 
