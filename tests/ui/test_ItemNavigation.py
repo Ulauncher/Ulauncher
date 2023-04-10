@@ -14,7 +14,7 @@ class TestItemNavigation:
 
     def test_select_is_called(self, nav, items):
         nav.select(1)
-        assert nav.selected == 1
+        assert nav.index == 1
         items[1].select.assert_called_once_with()
 
     def test_select_and_deselect_is_called(self, nav, items):
@@ -22,7 +22,7 @@ class TestItemNavigation:
         nav.select(5)
         items[1].deselect.assert_called_once_with()
         items[0].select.assert_called_once_with()
-        assert nav.selected == 0, "First element is not selected"
+        assert nav.index == 0, "First element is not selected"
 
     def test_go_up_from_start(self, nav, items):
         nav.go_up()
@@ -47,10 +47,6 @@ class TestItemNavigation:
         nav.select(4)
         nav.go_down()
         items[0].select.assert_called_once_with()
-
-    def test_enter_by_index(self, nav, items):
-        nav.enter("test", 3)
-        items[3].result.on_enter.assert_called_with("test")
 
     def test_enter_no_index(self, nav, items):
         nav.select(2)

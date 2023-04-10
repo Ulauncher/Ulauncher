@@ -198,7 +198,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.results_nav.go_down()
                 return True
             if keyname in ("Return", "KP_Enter"):
-                self.enter_result(alt=alt)
+                if not self.results_nav.enter(self.app.query, alt=alt):
+                    # hide the window if it has to be closed on enter
+                    self.hide_and_clear_input()
                 return True
             if alt and keyname in jump_keys:
                 try:
@@ -283,11 +285,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
     def select_result(self, index):
         self.results_nav.select(index)
-
-    def enter_result(self, index=None, alt=False):
-        if not self.results_nav.enter(self.app.query, index, alt=alt):
-            # hide the window if it has to be closed on enter
-            self.hide_and_clear_input()
 
     def get_pointer_device(self):
         return self.get_window().get_display().get_device_manager().get_client_pointer()
