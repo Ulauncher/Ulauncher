@@ -6,18 +6,24 @@ on:
       - '*'
 
 jobs:
-  release:
+  draft_release:
     runs-on: ubuntu-latest
+    container: ulauncher/build-image:6.0
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
+      - name: Quick test
+        run: |
+          mypy .
+          DISPLAY=:1 xvfb-run pytest test
       - name: Build release
         run: |
-          echo "Tag is created: $GITHUB_REF_NAME"
-          source ./scripts/common.sh
-          docker pull $BUILD_IMAGE
-          ./ul build-release $GITHUB_REF_NAME
+          echo "Building Ulauncher version: $GITHUB_REF_NAME"
+          DEB_VERSION=$(echo "$GITHUB_REF_NAME" | tr "-" "~")
+          ln -s /var/node_modules preferences-src # use node modules from cache
+          ./ul build-targz
+          ./ul build-deb --deb
+          cp /tmp/ulauncher_$VERSION.tar.gz .
+          cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb
 
       - name: Make draft GitHub release
         uses: softprops/action-gh-release@v1

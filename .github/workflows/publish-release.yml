@@ -7,24 +7,32 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    container: ulauncher/build-image:6.0
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Publish to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
           LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
           LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
+          VERSION: ${{ github.ref_name }}
+          PPA: agornostal/ulauncher
         run: |
           echo "Ref type: $GITHUB_REF_TYPE"
-          echo "Tag: $GITHUB_REF_NAME"
-          source ./scripts/common.sh
-          docker pull $BUILD_IMAGE
+          echo "Version: $VERSION"
+          # If release name contains prerelease-separator "-", use ulauncher-dev PPA
+          if [[ "$VERSION" == *-* ]]; then PPA="agornostal/ulauncher-dev" fi
+          echo "PPA: $PPA"
           echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
-          ./ul upload-release $GITHUB_REF_NAME
+          tar -xvf scripts/launchpad.ssh.tar -C /
+          RELEASE=kinetic ./ul build-deb $VERSION --upload
+          RELEASE=jammy ./ul build-deb $VERSION --upload
+          RELEASE=impish ./ul build-deb $VERSION --upload
+          RELEASE=focal ./ul build-deb $VERSION --upload
+          RELEASE=bionic ./ul build-deb $VERSION --upload
+
       - name: Publish to AUR
         uses: friday/aur-publish-action@v1
         with:

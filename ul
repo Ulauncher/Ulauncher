@@ -9,7 +9,6 @@
 . scripts/build-rpm.sh
 . scripts/build-targz.sh
 . scripts/build-doc.sh
-. scripts/build-release.sh
 . scripts/send-signal.sh
 . scripts/watch-doc.sh
 . scripts/edit-ui.sh
@@ -33,7 +32,6 @@ main () {
     build-targz) build-targz $2 ;;
     aur-update) ./scripts/aur-update.py $2 ;;
     build-doc) build-doc ;;
-    build-release) build-release $2 ;;
     watch-doc) watch-doc ;;
 
     *)
