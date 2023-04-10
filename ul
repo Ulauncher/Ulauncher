@@ -2,7 +2,6 @@
 
 . scripts/common.sh
 . scripts/help.sh
-. scripts/rm-python-cache.sh
 . scripts/tests.sh
 . scripts/dev-container.sh
 . scripts/build-deb.sh
@@ -17,7 +16,6 @@
 main () {
   case "$1" in
     run) exec ./bin/ulauncher -v --dev $2 ;;
-    rm-python-cache) rm-python-cache ;;
     test-black) test-black ;;
     test-mypy) test-mypy ;;
     test-pylint) test-pylint ;;

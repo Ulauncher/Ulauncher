@@ -10,9 +10,6 @@ help () {
     ${dim}Takes you into an Ubuntu Docker container from which you can run tests and build binary packages
     This is added for convenience so developers won't be required to install all the build and test dependencies locally
 
-  ${bold}./ul rm-python-cache
-    ${dim}Removes .pyc, .pyo, __pycache__${normal}
-
   ${bold}./ul test-black
     ${dim}Runs black format checker${normal}
 
