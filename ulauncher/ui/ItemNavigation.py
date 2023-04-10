@@ -1,5 +1,4 @@
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 
@@ -60,19 +59,12 @@ class ItemNavigation:
         """
         Return boolean - True if Ulauncher window should be kept open
         """
-        if self.selected_item:
-            result = self.selected_item.result
-            if query and not alt and result.searchable:
-                query_history.save({str(query): result.get_name()})
+        result = self.selected_item.result
+        if query and not alt and result.searchable:
+            query_history.save({str(query): result.get_name()})
 
-            action = result.on_activation(query, alt)
-            if isinstance(action, str):
-                return action
-            if not action:
-                return False
-            if isinstance(action, list) and not isinstance(action, BaseAction):
-                action = RenderResultListAction(action)
+        action = result.on_activation(query, alt)
+        if isinstance(action, BaseAction):
             action.run()
             return action.keep_app_open
-
-        return True
+        return action

@@ -57,15 +57,6 @@ ulauncher\.api\.shared\.action\.OpenAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.RenderResultListAction module
--------------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.RenderResultListAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.RunScriptAction module
 ------------------------------------------------------
 

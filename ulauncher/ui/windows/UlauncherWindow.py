@@ -158,7 +158,15 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.app._query = self.input.get_text().lstrip()
         if self.is_visible():
             # input_changed can trigger when hiding window
-            ModeHandler.get_instance().on_query_change(self.app.query)
+            result = ModeHandler.get_instance().on_query_change(self.app.query)
+            if isinstance(result, str):
+                self.app.query = result
+            elif isinstance(result, list):
+                self.show_results(result)
+            else:
+                _type = type(result).__name__
+                if _type != "DoNothingAction":
+                    logger.warning("Invalid result from mode: %s, expected list or string", _type)
 
     def on_input_key_press(self, widget, event) -> bool:
         """

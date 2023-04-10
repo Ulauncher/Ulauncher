@@ -12,6 +12,10 @@ class TestItemNavigation:
     def nav(self, items):
         return ItemNavigation(items)
 
+    @pytest.fixture(autouse=True)
+    def query_history(self, mocker):
+        return mocker.patch("ulauncher.ui.ItemNavigation.query_history")
+
     def test_select_is_called(self, nav, items):
         nav.select(1)
         assert nav.index == 1
@@ -51,8 +55,7 @@ class TestItemNavigation:
     def test_enter_no_index(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.activate("test") is selected_result.on_activation.return_value.keep_app_open
-        selected_result.on_activation.return_value.run.assert_called_with()
+        assert nav.activate("test") is selected_result.on_activation.return_value
 
     def test_enter__alternative(self, nav, items):
         nav.select(2)

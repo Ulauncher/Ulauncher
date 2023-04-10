@@ -38,12 +38,6 @@ OpenAction
 .. autoclass:: ulauncher.api.shared.action.OpenAction.OpenAction
 
 
-RenderResultListAction
-----------------------
-
-.. autoclass:: ulauncher.api.shared.action.RenderResultListAction.RenderResultListAction
-
-
 RunScriptAction
 ---------------
 
