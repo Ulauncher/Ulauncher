@@ -15,7 +15,7 @@ class CalcResult(Result):
         self.description = "Enter to copy to the clipboard" if self.result is not None else error
         self.icon = f"{PATHS.ASSETS}/icons/calculator.png"
 
-    def on_enter(self, *_):
+    def on_activation(self, *_):
         if self.result is not None:
             return CopyToClipboardAction(str(self.result))
 

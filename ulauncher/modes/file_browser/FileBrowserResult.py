@@ -26,7 +26,7 @@ class FileBrowserResult(Result):
     def get_highlightable_input(self, query: Query):
         return basename(query)
 
-    def on_enter(self, _, alt=bool):
+    def on_activation(self, _, alt=bool):
         if not alt:
             if isdir(self.path):
                 return SetUserQueryAction(join(fold_user_path(self.path), ""))

@@ -80,7 +80,7 @@ class Result:
     def get_description(self, query: Query) -> str:
         return self.description
 
-    def on_enter(self, query: Query, alt=False) -> Optional[BaseAction]:
+    def on_activation(self, query: Query, alt=False) -> Optional[BaseAction]:
         """
         Handle the main action
         """

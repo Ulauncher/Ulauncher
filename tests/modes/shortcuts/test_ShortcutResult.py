@@ -36,31 +36,31 @@ class TestShortcutResult:
     def test_icon(self, item):
         assert isinstance(item.icon, str)
 
-    def test_on_enter(self, item, OpenAction, SetUserQueryAction):
-        item.on_enter(Query("kw test"))
+    def test_on_activation(self, item, OpenAction, SetUserQueryAction):
+        item.on_activation(Query("kw test"))
         OpenAction.assert_called_once_with("https://site/?q=test")
         assert not SetUserQueryAction.called
 
-    def test_on_enter__default_search(self, item, OpenAction, SetUserQueryAction):
+    def test_on_activation__default_search(self, item, OpenAction, SetUserQueryAction):
         item.is_default_search = True
-        item.on_enter(Query("search query"))
+        item.on_activation(Query("search query"))
         OpenAction.assert_called_once_with("https://site/?q=search query")
         assert not SetUserQueryAction.called
 
-    def test_on_enter__run_without_arguments(self, item, OpenAction, SetUserQueryAction):
+    def test_on_activation__run_without_arguments(self, item, OpenAction, SetUserQueryAction):
         item.run_without_argument = True
-        item.on_enter(Query("kw"))
+        item.on_activation(Query("kw"))
         # it doesn't replace %s if run_without_argument = True
         OpenAction.assert_called_once_with("https://site/?q=%s")
         assert not SetUserQueryAction.called
 
-    def test_on_enter__misspelled_kw(self, item, OpenAction, SetUserQueryAction):
-        item.on_enter(Query("keyword query"))
+    def test_on_activation__misspelled_kw(self, item, OpenAction, SetUserQueryAction):
+        item.on_activation(Query("keyword query"))
         assert not OpenAction.called
         SetUserQueryAction.assert_called_once_with("kw ")
 
-    def test_on_enter__run_file(self, RunScriptAction):
+    def test_on_activation__run_file(self, RunScriptAction):
         item = ShortcutResult("kw", "name", "/usr/bin/something/%s", "icon_path")
-        item.on_enter(Query("kw query"))
+        item.on_activation(Query("kw query"))
         # Scripts should support both %s and arguments
         RunScriptAction.assert_called_once_with("/usr/bin/something/query", "query")

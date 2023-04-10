@@ -198,8 +198,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.results_nav.go_down()
                 return True
             if keyname in ("Return", "KP_Enter"):
-                if not self.results_nav.enter(self.app.query, alt=alt):
-                    # hide the window if it has to be closed on enter
+                if not self.results_nav.activate(self.app.query, alt=alt):
+                    # true to hide the window on activation
                     self.hide_and_clear_input()
                 return True
             if alt and keyname in jump_keys:

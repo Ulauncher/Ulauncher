@@ -56,7 +56,7 @@ class ItemNavigation:
         next = (self.index or 0) + 1
         self.select(next if next < len(self.result_widgets) else 0)
 
-    def enter(self, query, alt=False):
+    def activate(self, query, alt=False):
         """
         Return boolean - True if Ulauncher window should be kept open
         """
@@ -65,7 +65,7 @@ class ItemNavigation:
             if query and not alt and result.searchable:
                 query_history.save({str(query): result.get_name()})
 
-            action = result.on_enter(query, alt)
+            action = result.on_activation(query, alt)
             if not action:
                 return False
             if isinstance(action, list) and not isinstance(action, BaseAction):

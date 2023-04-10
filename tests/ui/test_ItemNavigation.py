@@ -51,11 +51,11 @@ class TestItemNavigation:
     def test_enter_no_index(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter("test") is selected_result.on_enter.return_value.keep_app_open
-        selected_result.on_enter.return_value.run.assert_called_with()
+        assert nav.activate("test") is selected_result.on_activation.return_value.keep_app_open
+        selected_result.on_activation.return_value.run.assert_called_with()
 
     def test_enter__alternative(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        nav.enter("test", True)
-        selected_result.on_enter.assert_called_with("test", True)
+        nav.activate("test", True)
+        selected_result.on_activation.assert_called_with("test", True)
