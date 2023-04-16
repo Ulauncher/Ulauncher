@@ -3,6 +3,7 @@ from typing import List
 
 
 def trigger_action(method: str, arguments: List[str]):
+    # fmt: off
     # pylint: disable=consider-using-with
     subprocess.Popen([
         "gdbus",

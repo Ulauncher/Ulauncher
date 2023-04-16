@@ -2,9 +2,10 @@ import time
 import logging
 from functools import lru_cache
 from typing import Optional
-from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gio, GLib, Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 from ulauncher.config import FIRST_RUN, PATHS
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.Settings import Settings
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
@@ -128,6 +129,14 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         if method == "set_query":
             logger.debug('Setting query to "%s"', args[0])
             self.query = args[0]
+        elif method == "open":
+            logger.debug('Opening "%s"', args[0])
+            launch_detached(["xdg-open", args[0]])
+        elif method == "copy":
+            logger.debug('Copying "%s"', args[0])
+            clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+            clipboard.set_text(args[0], -1)
+            clipboard.store()
         else:
             logger.warning("Unknown dbus method '%s'", method)
         invocation.return_value()

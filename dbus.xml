@@ -1,7 +1,13 @@
 <node>
   <interface name="io.ulauncher.Ulauncher.actions">
     <method name="set_query">
-      <arg name="query" type="s" direction="in" />
+      <arg name="query" type="s" direction="in"/>
+    </method>
+    <method name="open">
+      <arg name="query" type="s" direction="in"/>
+    </method>
+    <method name="copy">
+      <arg name="text" type="s" direction="in"/>
     </method>
   </interface>
 </node>

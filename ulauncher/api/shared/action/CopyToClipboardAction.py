@@ -1,5 +1,5 @@
-from gi.repository import Gtk, Gdk
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.utils.trigger_action import trigger_action
 
 
 class CopyToClipboardAction(BaseAction):
@@ -11,6 +11,4 @@ class CopyToClipboardAction(BaseAction):
         self.text = text
 
     def run(self):
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(self.text, -1)
-        clipboard.store()
+        trigger_action("copy", [self.text])

@@ -1,5 +1,5 @@
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.utils.launch_detached import launch_detached
+from ulauncher.utils.trigger_action import trigger_action
 
 
 class OpenAction(BaseAction):
@@ -11,4 +11,4 @@ class OpenAction(BaseAction):
         self.item = item
 
     def run(self):
-        launch_detached(["xdg-open", self.item])
+        trigger_action("open", [self.item])
