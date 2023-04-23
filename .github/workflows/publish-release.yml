@@ -27,11 +27,10 @@ jobs:
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           tar -xvf scripts/launchpad.ssh.tar -C /
-          RELEASE=kinetic ./ul build-deb $VERSION --upload
-          RELEASE=jammy ./ul build-deb $VERSION --upload
-          RELEASE=impish ./ul build-deb $VERSION --upload
-          RELEASE=focal ./ul build-deb $VERSION --upload
-          RELEASE=bionic ./ul build-deb $VERSION --upload
+          RELEASE=jammy   ./ul build-deb $VERSION --upload # 22.04 LTS EOL 2027-04
+          RELEASE=focal   ./ul build-deb $VERSION --upload # 20.04 LTS EOL 2025-04
+          RELEASE=lunar   ./ul build-deb $VERSION --upload # 23.04     EOL 2024-01
+          RELEASE=kinetic ./ul build-deb $VERSION --upload # 22.10     EOL 2023-07
 
       - name: Publish to AUR
         uses: friday/aur-publish-action@v1
