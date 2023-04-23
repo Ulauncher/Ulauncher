@@ -95,10 +95,10 @@ launchpad_upload() {
         PPA="agornostal/ulauncher"
     fi
 
+    lunar="PPA=$PPA RELEASE=lunar ./ul build-deb $VERSION --upload"
     kinetic="PPA=$PPA RELEASE=kinetic ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
-    bionic="PPA=$PPA RELEASE=bionic ./ul build-deb $VERSION --upload"
 
     # extracts ~/.shh for uploading package to ppa.launchpad.net via sftp
     # then uploads each release
@@ -108,6 +108,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $kinetic && $jammy && $focal && $bionic"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $lunar && $kinetic && $jammy && $focal"
     set +x
 }
