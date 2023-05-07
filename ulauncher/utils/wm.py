@@ -30,11 +30,11 @@ def get_monitor(use_mouse_position=False):
     return display.get_primary_monitor() or display.get_monitor(0)
 
 
-def get_text_scaling_factor() -> int:
+def get_text_scaling_factor() -> float:
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
     # Text_scaling allow fractional scaling
-    return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")  # type: ignore[arg-type]
+    return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")
 
 
 def get_windows_stacked():
