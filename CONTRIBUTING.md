@@ -34,7 +34,7 @@ For the v6 branch you need the the following to setup the local build environmen
   Install the Python testing packages:
 
   ```sh
-  pip3 install -r requirements.txt
+  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
@@ -59,6 +59,12 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo pacman -Syu --needed git yarn python-setuptools python-pytest python-pytest-mock python-pylint mypy flake8
+  ```
+
+  To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended:
+
+  ```sh
+  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip install --no-cache-dir pygobject-stubs
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
