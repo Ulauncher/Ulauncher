@@ -15,6 +15,7 @@ class Settings(JsonData):
     show_indicator_icon = True
     terminal_command = ""
     theme_name = "light"
+    move_window_when_open_info = False
 
     # Convert dash to underscore
     def __setitem__(self, key, value):

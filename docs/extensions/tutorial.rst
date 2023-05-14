@@ -229,6 +229,48 @@ Custom Action on Item Enter
   Now this will be rendered when you click on any item
 
 
+Using Information Window
+------------------------
+The Information Window Feature provides the ability to display HTML content in an information window within Ulauncher.
+This allows you to provide a richer and more detailed context for your Ulauncher extension.
+
+.. figure:: https://i.imgur.com/fVGkSj5.png
+  :align: center
+
+  Information Window example
+
+To display HTML content in the information window, you can either use the **UpdateInfoAction** or add two
+parameters ``info`` and ``base_url`` after the result list when creating the **RenderResultListAction**.
+
+The UpdateInfoAction accepts the following parameters:
+
+UpdateInfoAction(info, base_url="file:///", keep_app_open=False):
+ - info (required): The HTML content you want to display in the information window.
+ - base_url (optional): The base URL for resolving relative URLs within the HTML content. Defaults to "file:///".
+ - keep_app_open (optional): Determines if the Ulauncher app window should stay open when the action is executed. Defaults to False.
+
+  ::
+
+    def on_event(self, event, ext):
+        query = event.get_argument()
+        if not query:
+            return
+
+        search_results = self.search_wikipedia(query)
+        if not search_results:
+            return
+
+        items = [ExtensionResultItem(icon="images/icon.svg",
+                                     name=result["title"],
+                                     description=result["snippet"],
+                                     on_enter=OpenUrlAction(result["url"]),
+                                     on_alt_enter=CopyToClipboardAction(result["url"]),
+                                     on_select=UpdateInfoAction(self.fetch_wikipedia_html(result["url"]),
+                                                                "https://en.wikipedia.org")) for result in search_results]
+
+        return items
+  Example of using UpdateInfoAction to show a preview of wikipedia page when an item is selected
+
 
 .. NOTE::
   Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation
