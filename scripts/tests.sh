@@ -27,12 +27,13 @@ test-flake8 () {
 test-pytest () {
     set +e
     echo '[ test: pytest ]'
-    # Always use xvfb-run (on display 99) if present
     if ! [ -x "$(command -v xvfb-run)" ]
     then
-        DISPLAY=:99 xvfb-run pytest -s tests
+        pytest tests
     else
-        pytest -s tests
+        # Use xvfb-run (virtual X server environment)
+        # Use very high fake display number to avoid using a real display
+        DISPLAY=:99 xvfb-run pytest tests
     fi
     set -e
 }

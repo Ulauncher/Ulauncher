@@ -30,7 +30,7 @@ def get_monitor(use_mouse_position=False):
     return display.get_primary_monitor() or display.get_monitor(0)
 
 
-def get_text_scaling_factor() -> float:
+def get_text_scaling_factor():
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
     # Text_scaling allow fractional scaling
