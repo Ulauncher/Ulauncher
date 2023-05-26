@@ -102,7 +102,6 @@ main.py
 Copy the following code to ``main.py``::
 
   from ulauncher.api import Extension, Result
-  from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 
 
   class DemoExtension(Extension):
@@ -110,8 +109,7 @@ Copy the following code to ``main.py``::
           for i in range(5):
               yield Result(
                   name='Item %s' % i,
-                  description='Item description %s' % i,
-                  on_enter=HideWindowAction()
+                  description='Item description %s' % i
               )
 
   if __name__ == '__main__':
@@ -167,12 +165,8 @@ Basic API Concepts
             for i in range(5):
                 yield Result(
                     name='Item %s' % i,
-                    description='Item description %s' % i,
-                    on_enter=HideWindowAction()
+                    description='Item description %s' % i
                 )
-
-
-  :code:`on_enter` is an action that will be ran when item is entered/clicked.
 
 
 **3. Run extension**
@@ -182,6 +176,49 @@ Basic API Concepts
     if __name__ == '__main__':
         DemoExtension().run()
 
+**4. Add an action**
+
+The result above has name and description, but it doesn't have any action for when it's activated. The easiest way to add an action is with ``on_enter``.
+
+  :code:`on_enter` an action that will run when the result is activated with anter keypress (or by clicking).
+
+  ::
+
+    from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+    ...
+
+    Result(
+        name='Name',
+        description='Description',
+        on_enter=CopyToClipboardAction('Text to copy')
+    )
+
+It can be one of
+
+``False``
+  Close the Ulauncher window open (default)
+
+``True``
+  Keep the Ulauncher window open
+
+A string value
+  Set the query
+
+A list of results
+  Render new result list
+
+CopyToClipboardAction
+  Copy text to clipboard
+
+OpenAction
+  Open a URL or path in the default browser or application
+
+ExtensionCustomAction
+  Handle more complex actions with a custom method (see below)
+
+ActionList
+  List of actions
+  
 
 Custom Action on Item Enter
 ---------------------------
@@ -217,8 +254,7 @@ Custom Action on Item Enter
 
             # you may want to return another list of results
             yield Result(
-                name=data['new_name'],
-                on_enter=HideWindowAction()
+                name=data['new_name']
             )
 
 

@@ -20,12 +20,6 @@ CopyToClipboardAction
 .. autoclass:: ulauncher.api.shared.action.CopyToClipboardAction.CopyToClipboardAction
 
 
-HideWindowAction
-----------------
-
-.. autoclass:: ulauncher.api.shared.action.HideWindowAction.HideWindowAction
-
-
 OpenAction
 ----------
 

@@ -163,6 +163,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.app.query = result
             elif isinstance(result, list):
                 self.show_results(result)
+            elif result is False:
+                self.hide()
             elif result is not True:
                 logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(result).__name__)
 
