@@ -96,7 +96,7 @@ class TestResultWidget:
         result_wgt.set_index(3)
         result_wgt.on_click(None, None)
         mock_get_toplevel.return_value.select_result.assert_called_with(3)
-        mock_get_toplevel.return_value.results_nav.activate.assert_called_with(alt=False)
+        mock_get_toplevel.return_value.results_nav.activate.assert_called_with("query", alt=False)
 
     def test_on_click_alt_enter(self, mocker, result_wgt):
         mock_get_toplevel = mocker.patch.object(result_wgt, "get_toplevel")
@@ -106,7 +106,7 @@ class TestResultWidget:
         result_wgt.set_index(3)
         result_wgt.on_click(None, event)
         mock_get_toplevel.return_value.select_result.assert_called_with(3)
-        mock_get_toplevel.return_value.results_nav.activate.assert_called_with(alt=True)
+        mock_get_toplevel.return_value.results_nav.activate.assert_called_with("query", alt=True)
 
     def test_set_description(self, result_wgt, builder):
         result_wgt.set_description("test description")
