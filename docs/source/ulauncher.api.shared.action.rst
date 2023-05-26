@@ -30,15 +30,6 @@ ulauncher\.api\.shared\.action\.CopyToClipboardAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.DoNothingAction module
-------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.DoNothingAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.ExtensionCustomAction module
 ------------------------------------------------------------
 

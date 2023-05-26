@@ -4,10 +4,6 @@ from ulauncher.modes.calc.CalcResult import CalcResult
 
 class TestCalcResult:
     @pytest.fixture
-    def DoNothingAction(self, mocker):
-        return mocker.patch("ulauncher.modes.calc.CalcResult.DoNothingAction")
-
-    @pytest.fixture
     def CopyToClipboardAction(self, mocker):
         return mocker.patch("ulauncher.modes.calc.CalcResult.CopyToClipboardAction")
 
@@ -25,8 +21,7 @@ class TestCalcResult:
         assert item.on_activation("q") == CopyToClipboardAction.return_value
         CopyToClipboardAction.assert_called_with("52")
 
-    def test_on_activation__error__DoNothingAction_returned(self, DoNothingAction, CopyToClipboardAction):
+    def test_on_activation__error__returns_true(self, CopyToClipboardAction):
         item = CalcResult(error="message")
-        assert item.on_activation("q") == DoNothingAction.return_value
-        DoNothingAction.assert_called_with()
+        assert item.on_activation("q") is True
         assert not CopyToClipboardAction.called

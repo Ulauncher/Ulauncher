@@ -2,7 +2,6 @@ from typing import Optional
 from decimal import Decimal
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.config import PATHS
 
 
@@ -19,4 +18,4 @@ class CalcResult(Result):
         if self.result is not None:
             return CopyToClipboardAction(str(self.result))
 
-        return DoNothingAction()
+        return True

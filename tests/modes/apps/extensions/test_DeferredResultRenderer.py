@@ -5,7 +5,6 @@ from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
 from ulauncher.api.shared.query import Query
 
@@ -40,10 +39,6 @@ class TestDeferredResultRenderer:
     @pytest.fixture
     def renderer(self):
         return DeferredResultRenderer()
-
-    def test_handle_event__result__instanceof_BaseAction(self, renderer, event, controller):
-        result = renderer.handle_event(event, controller)
-        assert isinstance(result, BaseAction)
 
     def test_handle_event__loading_timer__is_canceled(self, renderer, event, controller):
         timer = mock.Mock()

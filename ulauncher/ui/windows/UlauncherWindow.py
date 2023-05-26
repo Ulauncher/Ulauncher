@@ -163,10 +163,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.app.query = result
             elif isinstance(result, list):
                 self.show_results(result)
-            else:
-                _type = type(result).__name__
-                if _type != "DoNothingAction":
-                    logger.warning("Invalid result from mode: %s, expected list or string", _type)
+            elif result is not True:
+                logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(result).__name__)
 
     def on_input_key_press(self, widget, event) -> bool:
         """

@@ -59,8 +59,8 @@ class Result:
             if self.icon and os.path.isfile(f"{ext_path}/{self.icon}"):
                 self.icon = f"{ext_path}/{self.icon}"
 
-            if self._on_enter and not isinstance(self._on_enter, (str, BaseAction)):
-                raise TypeError("Invalid on_enter argument. Expected string or BaseAction")
+            if self._on_enter and not isinstance(self._on_enter, (bool, str, BaseAction)):
+                raise TypeError("Invalid on_enter argument. Expected bool, string or BaseAction")
 
     def get_keyword(self) -> str:
         return self.keyword
@@ -85,7 +85,7 @@ class Result:
         Handle the main action
         """
         handler = self._on_alt_enter if alt else self._on_enter
-        if isinstance(handler, (str, BaseAction)):  # For extensions
+        if isinstance(handler, (bool, str, BaseAction)):  # For extensions
             return handler
         return handler(query) if callable(handler) else None
 

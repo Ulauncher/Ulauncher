@@ -4,7 +4,6 @@ from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -37,8 +36,6 @@ class DeferredResultRenderer:
     def handle_event(self, event, controller):
         """
         Schedules "Loading..." message
-
-        :rtype: :class:`~ulauncher.api.shared.action.DoNothingAction.DoNothingAction`
         """
         icon = controller.get_normalized_icon_path()
         loading_message = Result(name="Loading...", icon=icon)
@@ -48,7 +45,7 @@ class DeferredResultRenderer:
         self.active_event = event
         self.active_controller = controller
 
-        return DoNothingAction()
+        return True
 
     def handle_response(self, response, controller):
         """
