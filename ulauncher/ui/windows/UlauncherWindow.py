@@ -158,37 +158,64 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.app._query = self.input.get_text().lstrip()
         if self.is_visible():
             # input_changed can trigger when hiding window
-            ModeHandler.get_instance().on_query_change(self.app.query)
+            result = ModeHandler.get_instance().on_query_change(self.app.query)
+            if isinstance(result, str):
+                self.app.query = result
+            elif isinstance(result, list):
+                self.show_results(result)
+            elif result is False:
+                self.hide()
+            elif result is not True:
+                logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(result).__name__)
 
-    def on_input_key_press(self, widget, event):
+    def on_input_key_press(self, widget, event) -> bool:
+        """
+        Triggered by user key press
+        Return True to stop other handlers from being invoked for the event
+        """
         keyval = event.get_keyval()
         keyname = Gdk.keyval_name(keyval[1])
-        alt = event.state & Gdk.ModifierType.MOD1_MASK
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)  # type: ignore[attr-defined]
+        ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()
-        ModeHandler.get_instance().on_key_press_event(widget, event, self.app.query)
 
         if keyname == "Escape":
             self.hide()
+            return True
 
-        elif ctrl and keyname == "comma":
+        if ctrl and keyname == "comma":
             self.app.show_preferences()
+            return True
 
-        elif self.results_nav:
+        if (
+            keyname == "BackSpace"
+            and not ctrl
+            and not widget.get_selection_bounds()
+            and widget.get_position() == len(self.app.query)
+        ):
+            new_query = ModeHandler.get_instance().on_query_backspace(self.app.query)
+            if new_query is not None:
+                self.app.query = new_query
+                return True
+
+        if self.results_nav:
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
                 self.results_nav.go_up()
                 return True
             if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
                 self.results_nav.go_down()
                 return True
-            if alt and keyname in ("Return", "KP_Enter"):
-                self.enter_result(alt=True)
-            elif keyname in ("Return", "KP_Enter"):
-                self.enter_result()
-            elif alt and keyname in jump_keys:
-                # on Alt+<num/letter>
+            if keyname in ("Return", "KP_Enter"):
+                result = self.results_nav.activate(self.app.query, alt=alt)
+                if isinstance(result, str):
+                    self.app.query = result
+                if not result:
+                    self.hide_and_clear_input()
+                return True
+            if alt and keyname in jump_keys:
                 try:
                     self.select_result(jump_keys.index(keyname))
+                    return True
                 except IndexError:
                     # selected non-existing result item
                     pass
@@ -268,11 +295,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
     def select_result(self, index):
         self.results_nav.select(index)
-
-    def enter_result(self, index=None, alt=False):
-        if self.results_nav.enter(self.app.query, index, alt=alt):
-            # hide the window if it has to be closed on enter
-            self.hide_and_clear_input()
 
     def get_pointer_device(self):
         return self.get_window().get_display().get_device_manager().get_client_pointer()

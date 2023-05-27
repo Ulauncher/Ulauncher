@@ -1,10 +1,7 @@
 import os
 from pathlib import Path
 from typing import List
-from gi.repository import Gdk
 from ulauncher.utils.fuzzy_search import get_score
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.file_browser.FileBrowserResult import FileBrowserResult
 
@@ -66,25 +63,7 @@ class FileBrowserMode(BaseMode):
 
         return results
 
-    def handle_key_press_event(self, widget, event, query):
-        keyval = event.get_keyval()
-        keyname = Gdk.keyval_name(keyval[1])
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        if (
-            keyname == "BackSpace"
-            and not ctrl
-            and "/" in query
-            and len(query.strip().rstrip("/")) > 1
-            and widget.get_position() == len(query)
-            and not widget.get_selection_bounds()
-        ):
-            # stop key press event if:
-            # it's a BackSpace key and
-            # Ctrl modifier is not pressed and
-            # cursor is at the last position and
-            # path exists and it's a directory and
-            # input text is not selected
-            widget.emit_stop_by_name("key-press-event")
-            return SetUserQueryAction(os.path.join(Path(query).parent, ""))
-
-        return DoNothingAction()
+    def on_query_backspace(self, query):
+        if "/" in query and len(query.strip().rstrip("/")) > 1:
+            return os.path.join(Path(query).parent, "")
+        return None

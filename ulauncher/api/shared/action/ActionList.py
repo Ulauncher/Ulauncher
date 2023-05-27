@@ -12,13 +12,16 @@ class ActionList(list, BaseAction):
     def keep_app_open(self):
         """
         :rtype: boolean
-        :returns: return true if there are no actions in the list
-                  otherwise returns ``any(map(lambda i: i.keep_app_open, self))``
+        :returns: return true any action should keep the window open or if the list is empty
         """
         if not self:
             return True
 
-        return any(map(lambda i: i.keep_app_open, self))
+        for item in self:
+            if item is True or isinstance(item, (str, list)) or (isinstance(item, BaseAction) and item.keep_app_open):
+                return True
+
+        return False
 
     def run(self):
         for item in self:

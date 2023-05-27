@@ -1,5 +1,4 @@
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 
@@ -11,12 +10,19 @@ class ItemNavigation:
     Performs navigation through found results
     """
 
+    index = 0
+
     def __init__(self, result_widgets):
         """
         :param list result_widgets: list of ResultWidget()'s
         """
         self.result_widgets = result_widgets
-        self.selected = None
+
+    @property
+    def selected_item(self):
+        if self.index is not None and len(self.result_widgets) > self.index:
+            return self.result_widgets[self.index]
+        return None
 
     def get_default(self, query):
         """
@@ -36,42 +42,29 @@ class ItemNavigation:
         if not 0 < index < len(self.result_widgets):
             index = 0
 
-        if self.selected is not None:
-            self.result_widgets[self.selected].deselect()
+        if self.selected_item:
+            self.selected_item.deselect()
 
-        self.selected = index
+        self.index = index
         self.result_widgets[index].select()
 
     def go_up(self):
-        self.select((self.selected or len(self.result_widgets)) - 1)
+        self.select((self.index or len(self.result_widgets)) - 1)
 
     def go_down(self):
-        next = (self.selected or 0) + 1
+        next = (self.index or 0) + 1
         self.select(next if next < len(self.result_widgets) else 0)
 
-    def enter(self, query, index=None, alt=False):
+    def activate(self, query, alt=False):
         """
-        Enter into selected item, unless 'index' is passed
-        Return boolean - True if Ulauncher window should be closed
+        Return boolean - True if Ulauncher window should be kept open
         """
-        if index is not None:
-            if not 0 <= index < len(self.result_widgets):
-                raise IndexError
+        result = self.selected_item.result
+        if query and not alt and result.searchable:
+            query_history.save({str(query): result.get_name()})
 
-            self.select(index)
-            return self.enter(query)
-
-        if self.selected is not None:
-            result = self.result_widgets[self.selected].result
-            if query and not alt and result.searchable:
-                query_history.save({str(query): result.get_name()})
-
-            action = result.on_enter(query) if not alt else result.on_alt_enter(query)
-            if not action:
-                return True
-            if isinstance(action, list) and not isinstance(action, BaseAction):
-                action = RenderResultListAction(action)
+        action = result.on_activation(query, alt)
+        if isinstance(action, BaseAction):
             action.run()
-            return not action.keep_app_open
-
-        return None
+            return action.keep_app_open
+        return action

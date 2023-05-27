@@ -30,15 +30,6 @@ ulauncher\.api\.shared\.action\.CopyToClipboardAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.DoNothingAction module
-------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.DoNothingAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.ExtensionCustomAction module
 ------------------------------------------------------------
 
@@ -57,15 +48,6 @@ ulauncher\.api\.shared\.action\.OpenAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.RenderResultListAction module
--------------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.RenderResultListAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 ulauncher\.api\.shared\.action\.RunScriptAction module
 ------------------------------------------------------
 
@@ -74,16 +56,6 @@ ulauncher\.api\.shared\.action\.RunScriptAction module
     :undoc-members:
     :noindex:
     :show-inheritance:
-
-ulauncher\.api\.shared\.action\.SetUserQueryAction module
----------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.SetUserQueryAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 
 Module contents
 ---------------

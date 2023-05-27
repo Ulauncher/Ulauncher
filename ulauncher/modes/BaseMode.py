@@ -1,6 +1,3 @@
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-
-
 class BaseMode:
     # pylint: disable=unused-argument
     def is_enabled(self, query):
@@ -14,14 +11,10 @@ class BaseMode:
         Triggered when user changes a search query
         """
 
-    def handle_key_press_event(self, widget, event, query):
+    def on_query_backspace(self, query):
         """
-        :param Gdk.Widget widget:
-        :param Gdk.EventKey event:
-        :param ~ulauncher.api.shared.query.Query query:
-        :rtype: :class:`BaseAction`
+        Return string to override default backspace and set the query to that string
         """
-        return DoNothingAction()
 
     def handle_query(self, query):
         """

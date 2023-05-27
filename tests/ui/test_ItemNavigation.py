@@ -12,9 +12,13 @@ class TestItemNavigation:
     def nav(self, items):
         return ItemNavigation(items)
 
+    @pytest.fixture(autouse=True)
+    def query_history(self, mocker):
+        return mocker.patch("ulauncher.ui.ItemNavigation.query_history")
+
     def test_select_is_called(self, nav, items):
         nav.select(1)
-        assert nav.selected == 1
+        assert nav.index == 1
         items[1].select.assert_called_once_with()
 
     def test_select_and_deselect_is_called(self, nav, items):
@@ -22,7 +26,7 @@ class TestItemNavigation:
         nav.select(5)
         items[1].deselect.assert_called_once_with()
         items[0].select.assert_called_once_with()
-        assert nav.selected == 0, "First element is not selected"
+        assert nav.index == 0, "First element is not selected"
 
     def test_go_up_from_start(self, nav, items):
         nav.go_up()
@@ -48,18 +52,13 @@ class TestItemNavigation:
         nav.go_down()
         items[0].select.assert_called_once_with()
 
-    def test_enter_by_index(self, nav, items):
-        nav.enter("test", 3)
-        items[3].result.on_enter.assert_called_with("test")
-
     def test_enter_no_index(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter("test") is (not selected_result.on_enter.return_value.keep_app_open.return_value)
-        selected_result.on_enter.return_value.run.assert_called_with()
+        assert nav.activate("test") is selected_result.on_activation.return_value
 
     def test_enter__alternative(self, nav, items):
         nav.select(2)
         selected_result = items[2].result
-        assert nav.enter("test", alt=True) is (not selected_result.on_alt_enter.return_value.keep_app_open.return_value)
-        selected_result.on_alt_enter.return_value.run.assert_called_with()
+        nav.activate("test", True)
+        selected_result.on_activation.assert_called_with("test", True)

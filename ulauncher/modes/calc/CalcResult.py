@@ -2,7 +2,6 @@ from typing import Optional
 from decimal import Decimal
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 from ulauncher.config import PATHS
 
 
@@ -15,8 +14,8 @@ class CalcResult(Result):
         self.description = "Enter to copy to the clipboard" if self.result is not None else error
         self.icon = f"{PATHS.ASSETS}/icons/calculator.png"
 
-    def on_enter(self, query):
+    def on_activation(self, *_):
         if self.result is not None:
             return CopyToClipboardAction(str(self.result))
 
-        return DoNothingAction()
+        return True

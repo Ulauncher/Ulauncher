@@ -56,9 +56,9 @@ class TestAppResult:
     def test_search_score(self, app1):
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_on_enter(self, app1, mocker, app_starts):
+    def test_on_activation(self, app1, mocker, app_starts):
         launch_app = mocker.patch("ulauncher.modes.apps.AppResult.launch_app")
-        assert app1.on_enter(Query("query")) is launch_app.return_value
+        assert app1.on_activation(Query("query")) is launch_app.return_value
         launch_app.assert_called_with("trueapp.desktop")
         assert app_starts.get("trueapp.desktop") == 766
 
