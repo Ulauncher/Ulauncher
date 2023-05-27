@@ -9,8 +9,8 @@ class TestShortcutResult:
         return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.OpenAction")
 
     @pytest.fixture(autouse=True)
-    def RunScriptAction(self, mocker):
-        return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.RunScriptAction")
+    def run_script(self, mocker):
+        return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.run_script")
 
     @pytest.fixture
     def item(self):
@@ -54,8 +54,8 @@ class TestShortcutResult:
         assert item.on_activation(Query("keyword query")) == "kw "
         assert not OpenAction.called
 
-    def test_on_activation__run_file(self, RunScriptAction):
+    def test_on_activation__run_file(self, run_script):
         item = ShortcutResult("kw", "name", "/usr/bin/something/%s", "icon_path")
         item.on_activation(Query("kw query"))
         # Scripts should support both %s and arguments
-        RunScriptAction.assert_called_once_with("/usr/bin/something/query", "query")
+        run_script.assert_called_once_with("/usr/bin/something/query", "query")

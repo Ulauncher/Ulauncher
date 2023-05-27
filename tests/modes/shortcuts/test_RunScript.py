@@ -1,6 +1,6 @@
 import os
 from random import randint
-from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+from ulauncher.modes.shortcuts.run_script import run_script
 
 
 class TestRunScriptAction:
@@ -9,7 +9,7 @@ class TestRunScriptAction:
         arg = "hello world"
         # RunScriptAction only supports bash argument placeholders ("$@" or "$1")
         # Shortcuts also support "%s", but that should be handled before they get here.
-        RunScriptAction(f"#!/bin/bash\necho $@ > {test_file}", arg).run()
+        run_script(f"#!/bin/bash\necho $@ > {test_file}", arg)
         with open(test_file, "r") as f:
             assert f.read() == f"{arg}\n"
         os.remove(test_file)
