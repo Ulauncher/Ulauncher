@@ -16,7 +16,8 @@ class TestActionList:
     def test_keep_app_open(self):
         assert ActionList().keep_app_open
         assert ActionList([EmptyAction(False), EmptyAction(True), EmptyAction(False)]).keep_app_open
-        assert not ActionList([EmptyAction(False), EmptyAction(False)]).keep_app_open
+        assert ActionList(["kw val", False, EmptyAction(False)]).keep_app_open
+        assert not ActionList([EmptyAction(False), EmptyAction(False), False]).keep_app_open
 
     def test_run(self):
         list = ActionList([mock.create_autospec(BaseAction), mock.create_autospec(BaseAction)])
