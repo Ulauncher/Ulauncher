@@ -48,15 +48,6 @@ ulauncher\.api\.shared\.action\.OpenAction module
     :noindex:
     :show-inheritance:
 
-ulauncher\.api\.shared\.action\.RunScriptAction module
-------------------------------------------------------
-
-.. automodule:: ulauncher.api.shared.action.RunScriptAction
-    :members:
-    :undoc-members:
-    :noindex:
-    :show-inheritance:
-
 Module contents
 ---------------
 
