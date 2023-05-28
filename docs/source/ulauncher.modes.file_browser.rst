@@ -1,15 +1,16 @@
 ulauncher\.modes\.file\_browser package
 ========================================
 
-Subpackages
------------
-
-.. toctree::
-
-    ulauncher.modes.file_browser.alt_menu
-
 Submodules
 ----------
+
+ulauncher\.modes\.file\_browser\.CopyPathToClipboardResult module
+---------------------------------------------------------------------------
+
+.. automodule:: ulauncher.modes.file_browser.CopyPathToClipboardResult
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 ulauncher\.modes\.file\_browser\.FileBrowserMode module
 --------------------------------------------------------
@@ -23,6 +24,14 @@ ulauncher\.modes\.file\_browser\.FileBrowserResult module
 --------------------------------------------------------------
 
 .. automodule:: ulauncher.modes.file_browser.FileBrowserResult
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ulauncher\.modes\.file\_browser\.OpenFolderResult module
+------------------------------------------------------------------
+
+.. automodule:: ulauncher.modes.file_browser.OpenFolderResult
     :members:
     :undoc-members:
     :show-inheritance:

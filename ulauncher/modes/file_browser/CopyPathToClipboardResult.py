@@ -2,7 +2,7 @@ from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
 
-class CopyPathToClipboardItem(Result):
+class CopyPathToClipboardResult(Result):
     compact = True
 
     # pylint: disable=super-init-not-called

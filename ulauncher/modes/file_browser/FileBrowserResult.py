@@ -3,8 +3,8 @@ from ulauncher.api.shared.query import Query
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.modes.file_browser.alt_menu.CopyPathToClipboardItem import CopyPathToClipboardItem
-from ulauncher.modes.file_browser.alt_menu.OpenFolderItem import OpenFolderItem
+from ulauncher.modes.file_browser.CopyPathToClipboardResult import CopyPathToClipboardResult
+from ulauncher.modes.file_browser.OpenFolderResult import OpenFolderResult
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 
 
@@ -33,7 +33,8 @@ class FileBrowserResult(Result):
             return OpenAction(self.path)
 
         if isdir(self.path):
-            open_folder = OpenFolderItem(self.path, f'Open Folder "{basename(self.path)}"')
+            open_folder = OpenFolderResult(self.path, f'Open Folder "{basename(self.path)}"')
         else:
-            open_folder = OpenFolderItem(dirname(self.path), "Open Containing Folder")
-        return [open_folder, CopyPathToClipboardItem(self.path)]
+            open_folder = OpenFolderResult(dirname(self.path), "Open Containing Folder")
+
+        return [open_folder, CopyPathToClipboardResult(self.path)]
