@@ -73,7 +73,7 @@ class JsonData(dict):
     def __dir__(self):  # For IDE autocompletion
         return dir(type(self)) + list(self.keys())
 
-    # Make sure everything flows hrough __setitem__ except __default_props__
+    # Make sure everything flows through __setitem__ except __default_props__
     def update(self, *args, **kwargs):
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
