@@ -158,15 +158,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.app._query = self.input.get_text().lstrip()
         if self.is_visible():
             # input_changed can trigger when hiding window
-            result = ModeHandler.get_instance().on_query_change(self.app.query)
-            if isinstance(result, str):
-                self.app.query = result
-            elif isinstance(result, list):
-                self.show_results(result)
-            elif result is False:
-                self.hide()
-            elif result is not True:
-                logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(result).__name__)
+            self.handle_action(ModeHandler.get_instance().on_query_change(self.app.query))
 
     def on_input_key_press(self, widget, event) -> bool:
         """
@@ -207,10 +199,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
             if keyname in ("Return", "KP_Enter"):
                 result = self.results_nav.activate(self.app.query, alt=alt)
-                if isinstance(result, str):
-                    self.app.query = result
-                if not result:
-                    self.hide_and_clear_input()
+                self.handle_action(result)
                 return True
             if alt and keyname in jump_keys:
                 try:
@@ -236,6 +225,16 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     @property
     def app(self):
         return self.get_application()
+
+    def handle_action(self, action):
+        if isinstance(action, str):
+            self.app.query = action
+        elif isinstance(action, list):
+            self.show_results(action)
+        elif not action:
+            self.hide_and_clear_input()
+        elif action is not True:
+            logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(action).__name__)
 
     def apply_css(self, widget):
         Gtk.StyleContext.add_provider(
