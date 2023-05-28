@@ -10,12 +10,12 @@ class ShortcutResult(Result):
     searchable = True
 
     # pylint: disable=super-init-not-called, too-many-arguments
-    def __init__(self, keyword, name, cmd, icon, default_search=False, run_without_argument=False, **kw):
+    def __init__(self, keyword, name, cmd, icon, is_default_search=False, run_without_argument=False, **kw):
         self.keyword = keyword
         self.name = name
         self.cmd = cmd
         self.icon = icon
-        self.is_default_search = default_search
+        self.is_default_search = is_default_search
         self.run_without_argument = run_without_argument
 
     def get_highlightable_input(self, query: Query):

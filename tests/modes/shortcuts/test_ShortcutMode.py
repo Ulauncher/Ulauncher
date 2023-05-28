@@ -70,4 +70,4 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
         assert mode.get_triggers() == [ShortcutResult.return_value]
-        ShortcutResult.assert_called_once_with(default_search=False, **shortcut)
+        ShortcutResult.assert_called_once_with(**shortcut)

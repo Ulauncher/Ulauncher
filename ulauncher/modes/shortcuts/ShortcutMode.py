@@ -20,8 +20,8 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def _create_items(self, shortcuts, default_search=False):
-        return [ShortcutResult(default_search=default_search, **s) for s in shortcuts]
+    def _create_items(self, shortcuts):
+        return [ShortcutResult(**s) for s in shortcuts]
 
     def handle_query(self, query):
         """
@@ -34,7 +34,7 @@ class ShortcutMode(BaseMode):
         return [ShortcutResult(**shortcut)]
 
     def get_fallback_results(self):
-        return self._create_items([s for s in self.shortcutsDb.values() if s["is_default_search"]], default_search=True)
+        return self._create_items([s for s in self.shortcutsDb.values() if s["is_default_search"]])
 
     def get_triggers(self):
         return self._create_items(list(self.shortcutsDb.values()))
