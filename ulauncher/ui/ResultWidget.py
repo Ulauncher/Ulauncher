@@ -127,8 +127,8 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
     def on_click(self, widget, event=None):
         window = self.get_toplevel()
         window.select_result(self.index)
-        alt_enter = bool(event and event.button != 1)
-        window.results_nav.activate(self.query, alt=alt_enter)
+        alt = bool(event and event.button != 1)  # right click
+        window.handle_action(window.results_nav.activate(self.query, alt=alt))
 
     def on_mouse_hover(self, widget, event):
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
