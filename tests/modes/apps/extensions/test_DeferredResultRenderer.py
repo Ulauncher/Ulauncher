@@ -1,3 +1,4 @@
+from types import MethodType
 from unittest import mock
 
 import pytest
@@ -31,7 +32,9 @@ class TestDeferredResultRenderer:
 
     @pytest.fixture
     def controller(self):
-        return mock.create_autospec(ExtensionController)
+        ctrl = mock.create_autospec(ExtensionController)
+        ctrl.get_normalized_icon_path = MethodType(lambda _: "/path/to/asdf.png", ctrl)
+        return ctrl
 
     @pytest.fixture
     def renderer(self):

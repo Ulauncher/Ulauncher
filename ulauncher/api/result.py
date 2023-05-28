@@ -50,17 +50,28 @@ class Result(dict):
         self[key] = value
 
     def __setitem__(self, key, value):
-        if key in ["name", "description", "keyword", "icon"] and not isinstance(value, str):
-            msg = f'"{key}" must be of type "str", "{type(value).__name__}" given.'
-            raise TypeError(msg)
-        if key in ["compact", "highlightable", "searchable"] and not isinstance(value, int):
-            msg = f'"{key}" must be of type "str", "{type(value).__name__}" given.'
-            raise TypeError(msg)
+        if hasattr(self.__class__, key):
+            if key.startswith("__"):
+                msg = f'Invalid property "{key}". Must not override class property.'
+                raise KeyError(msg)
+
+            class_val = getattr(self.__class__, key)
+            if callable(class_val):
+                msg = f'Invalid property "{key}". Must not override class method.'
+                raise KeyError(msg)
+            if not isinstance(value, type(class_val)):
+                msg = f'"{key}" must be of type {type(class_val).__name__}, {type(value).__name__} given.'
+                raise KeyError(msg)
         if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, str, BaseAction)):
             msg = f"Invalid {key} argument. Expected bool, string or BaseAction"
-            raise TypeError(msg)
+            raise KeyError(msg)
 
         super().__setitem__(key, value)
+
+    # Make sure everything flows through __setitem__
+    def update(self, *args, **kwargs):
+        for k, v in dict(*args, **kwargs).items():
+            self[k] = v
 
     def get_highlightable_input(self, query: Query):
         if self.keyword and self.keyword == query.keyword:
