@@ -67,15 +67,6 @@ class Result:
                 msg = "Invalid on_enter argument. Expected bool, string or BaseAction"
                 raise TypeError(msg)
 
-    def get_keyword(self) -> str:
-        return self.keyword
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_icon(self) -> Optional[str]:
-        return self.icon
-
     def get_highlightable_input(self, query: Query):
         if self.keyword and self.keyword == query.keyword:
             return query.argument

@@ -31,7 +31,7 @@ class ItemNavigation:
         previous_pick = query_history.get(query)
 
         for index, widget in enumerate(self.result_widgets):
-            if widget.result.searchable and widget.result.get_name() == previous_pick:
+            if widget.result.searchable and widget.result.name == previous_pick:
                 return index
         return 0
 
@@ -61,7 +61,7 @@ class ItemNavigation:
         """
         result = self.selected_item.result
         if query and not alt and result.searchable:
-            query_history.save({str(query): result.get_name()})
+            query_history.save({str(query): result.name})
 
         action = result.on_activation(query, alt)
         if isinstance(action, BaseAction):
