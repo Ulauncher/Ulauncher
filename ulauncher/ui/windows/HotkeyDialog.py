@@ -1,6 +1,6 @@
 import logging
-from gi.repository import Gtk, Gdk, GObject
 
+from gi.repository import Gdk, GObject, Gtk
 
 logger = logging.getLogger()
 
@@ -64,7 +64,7 @@ class HotkeyDialog(Gtk.ApplicationWindow):
         self.connect("destroy", self.on_destroy)
         self.connect("key-press-event", self.on_key_press)
 
-    def on_destroy(self, *args):
+    def on_destroy(self, *_args):
         self.hide()
         return True
 

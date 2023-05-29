@@ -1,8 +1,8 @@
-import os
 import mimetypes
+import os
 from pathlib import Path
-from gi.repository import GLib
 
+from gi.repository import GLib
 
 SPECIAL_DIRS = {
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): "folder-download",

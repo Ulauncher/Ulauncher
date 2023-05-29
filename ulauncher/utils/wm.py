@@ -1,7 +1,8 @@
 import logging
-from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
-from ulauncher.utils.environment import IS_X11
 
+from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
+
+from ulauncher.utils.environment import IS_X11
 
 logger = logging.getLogger()
 if IS_X11:
@@ -24,8 +25,8 @@ def get_monitor(use_mouse_position=False):
             (_, x, y) = seat.get_pointer().get_position()
             return display.get_monitor_at_point(x, y)
         # pylint: disable=broad-except
-        except Exception as e:
-            logger.exception("Unexpected exception: %s", e)
+        except Exception:
+            logger.exception("Could not get monitor with X11. Defaulting to first or primary monitor")
 
     return display.get_primary_monitor() or display.get_monitor(0)
 

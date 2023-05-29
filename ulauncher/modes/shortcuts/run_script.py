@@ -1,9 +1,10 @@
-import time
-import os
 import logging
-import subprocess
+import os
 import shlex
+import subprocess
 import tempfile
+import time
+
 from ulauncher.utils.decorator.run_async import run_async
 
 logger = logging.getLogger()

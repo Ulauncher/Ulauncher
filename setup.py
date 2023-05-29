@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 
 import json
 import subprocess
 import sys
 from pathlib import Path
 from shutil import rmtree, which
+
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
-from ulauncher import config, VERSION
+
+from ulauncher import VERSION, config
 
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
@@ -51,9 +52,10 @@ class build_preferences(Command):
             rmtree(dst)
 
         if not src.is_dir():
-            raise NotADirectoryError(f"{src.resolve()} directory missing.")
+            msg = f"{src.resolve()} directory missing."
+            raise NotADirectoryError(msg)
 
-        sourceModified = max(map(lambda p: p.stat().st_mtime, Path.cwd().glob("preferences-src/**/*")))
+        sourceModified = max(p.stat().st_mtime for p in Path.cwd().glob("preferences-src/**/*"))
 
         if dst.is_dir() and dst.stat().st_mtime > sourceModified:
             print("Detected no changes to Preferences since last build.")

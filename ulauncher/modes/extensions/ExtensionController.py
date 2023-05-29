@@ -1,11 +1,13 @@
-import os
+import contextlib
 import logging
-from ulauncher.config import PATHS
-from ulauncher.utils.decorator.debounce import debounce
-from ulauncher.api.shared.Response import Response
+import os
+
 from ulauncher.api.shared.event import InputTriggerEvent, PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.shared.Response import Response
+from ulauncher.config import PATHS
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.utils.decorator.debounce import debounce
 
 logger = logging.getLogger()
 
@@ -23,7 +25,8 @@ class ExtensionController:
 
     def __init__(self, controllers, framer, extension_id):
         if not extension_id:
-            raise RuntimeError("No extension_id provided")
+            msg = "No extension_id provided"
+            raise RuntimeError(msg)
         self.controllers = controllers
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()
@@ -76,13 +79,14 @@ class ExtensionController:
         return expanded_path if os.path.isfile(expanded_path) else icon
 
     # pylint: disable=unused-argument
-    def handle_response(self, framer, response):
+    def handle_response(self, _framer, response):
         """
         :meth:`~ulauncher.modes.extensions.DeferredResultRenderer.DeferredResultRenderer.handle_response`
         of `DeferredResultRenderer`
         """
         if not isinstance(response, Response):
-            raise TypeError(f"Unsupported type {type(response).__name__}")
+            msg = f"Unsupported type {type(response).__name__}"
+            raise TypeError(msg)
 
         logger.debug(
             'Incoming response (%s, %s) from "%s"',
@@ -93,10 +97,7 @@ class ExtensionController:
         self.result_renderer.handle_response(response, self)
 
     # pylint: disable=unused-argument
-    def handle_close(self, framer):
+    def handle_close(self, _framer):
         logger.info('Extension "%s" disconnected', self.extension_id)
-        try:
+        with contextlib.suppress(Exception):
             del self.controllers[self.extension_id]
-        # pylint: disable=broad-except
-        except Exception:
-            pass

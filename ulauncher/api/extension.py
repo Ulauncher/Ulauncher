@@ -1,25 +1,26 @@
-import sys
-import os
+import contextlib
 import json
 import logging
+import os
+import sys
 import threading
-from typing import Iterator, Type, Union
 from collections import defaultdict
+from typing import Iterator, Type, Union
 
-from ulauncher.api.shared.Response import Response
+from ulauncher.api.client.Client import Client
+from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import (
     BaseEvent,
-    KeywordQueryEvent,
     InputTriggerEvent,
     ItemEnterEvent,
+    KeywordQueryEvent,
     LaunchTriggerEvent,
     PreferencesUpdateEvent,
     UnloadEvent,
 )
 from ulauncher.api.shared.query import Query
-from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.client.Client import Client
+from ulauncher.api.shared.Response import Response
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -37,10 +38,8 @@ class Extension:
         self._listeners = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}
-        try:
+        with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
-        except Exception:
-            pass
 
         # subscribe with methods if user has added their own
         if self.__class__.on_input is not Extension.on_input:

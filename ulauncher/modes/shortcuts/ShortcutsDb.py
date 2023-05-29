@@ -1,5 +1,6 @@
-from time import time
 from pathlib import Path
+from time import time
+
 from ulauncher.config import PATHS
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.utils.json_data import JsonData, json_data_class

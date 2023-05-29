@@ -1,8 +1,9 @@
 import os
 from typing import Callable, Optional
-from ulauncher.utils.fuzzy_search import get_score
+
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
+from ulauncher.utils.fuzzy_search import get_score
 
 OnEnterCallback = Optional[Callable[[Query], Optional[BaseAction]]]
 
@@ -33,11 +34,14 @@ class Result:
         compact: Optional[bool] = None,
     ):
         if not isinstance(name, str):
-            raise TypeError(f'"name" must be of type "str", "{type(name).__name__}" given.')
+            msg = f'"name" must be of type "str", "{type(name).__name__}" given.'
+            raise TypeError(msg)
         if not isinstance(description, str):
-            raise TypeError(f'"description" must be of type "str", "{type(description).__name__}" given.')
+            msg = f'"description" must be of type "str", "{type(description).__name__}" given.'
+            raise TypeError(msg)
         if not isinstance(keyword, str):
-            raise TypeError(f'"keyword" must be of type "str", "{type(keyword).__name__}" given.')
+            msg = f'"keyword" must be of type "str", "{type(keyword).__name__}" given.'
+            raise TypeError(msg)
         self.name = name
         self.description = description
         self.keyword = keyword
@@ -60,7 +64,8 @@ class Result:
                 self.icon = f"{ext_path}/{self.icon}"
 
             if self._on_enter and not isinstance(self._on_enter, (bool, str, BaseAction)):
-                raise TypeError("Invalid on_enter argument. Expected bool, string or BaseAction")
+                msg = "Invalid on_enter argument. Expected bool, string or BaseAction"
+                raise TypeError(msg)
 
     def get_keyword(self) -> str:
         return self.keyword
@@ -77,7 +82,7 @@ class Result:
         return str(query)
 
     # pylint: disable=unused-argument
-    def get_description(self, query: Query) -> str:
+    def get_description(self, _query: Query) -> str:
         return self.description
 
     def on_activation(self, query: Query, alt=False) -> Optional[BaseAction]:

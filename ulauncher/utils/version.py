@@ -7,7 +7,7 @@
 
 def get_version(version_string):
     sanitized = version_string.translate(str.maketrans({"^": "", "~": "", "x": ""}))
-    major, minor, *_ = sanitized.split(".") + [None]
+    major, minor, *_ = sanitized.split(".") + [None]  # noqa: RUF005
     return (int(major), int(minor) if minor else None)
 
 
@@ -20,9 +20,9 @@ def unpack_range(range_string):
     return min_version, max_version
 
 
-def valid_range(range):
+def valid_range(rng):
     try:
-        (min_version, max_version) = unpack_range(range)
+        (min_version, max_version) = unpack_range(rng)
     except (ValueError, TypeError):
         return False
     if min_version[1] is None or max_version[1] is None:

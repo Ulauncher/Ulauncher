@@ -1,6 +1,7 @@
-from unittest import mock
-import pytest
 import signal
+from unittest import mock
+
+import pytest
 
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError
 
@@ -8,8 +9,7 @@ from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, Extensio
 class TestExtensionRunner:
     @pytest.fixture
     def runner(self):
-        thisrunner = ExtensionRunner()
-        return thisrunner
+        return ExtensionRunner()
 
     @pytest.fixture(autouse=True)
     def find_extensions(self, mocker):
@@ -31,11 +31,11 @@ class TestExtensionRunner:
     def json_dumps(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.json.dumps", return_value="{}")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def SubprocessLauncher(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.SubprocessLauncher")
 
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def DataInputStream(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.DataInputStream")
 
@@ -47,7 +47,7 @@ class TestExtensionRunner:
     def time(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.time")
 
-    def test_run__basic_execution__is_called(self, runner, SubprocessLauncher, DataInputStream):
+    def test_run__basic_execution__is_called(self, runner, SubprocessLauncher):
         extid = "id"
         runner.run(extid)
         SubprocessLauncher.new.assert_called_once()
@@ -69,7 +69,7 @@ class TestExtensionRunner:
         assert error["name"] == ExtensionRuntimeError.Terminated.value
         assert error["message"] == "message"
 
-    def test_read_stderr_line(self, runner, SubprocessLauncher, DataInputStream):
+    def test_read_stderr_line(self, runner):
         test_output1 = "Test Output 1"
         test_output2 = "Test Output 2"
         extid = "id"
@@ -92,7 +92,7 @@ class TestExtensionRunner:
         assert extproc.recent_errors[0] == test_output2
         assert extproc.error_stream.read_line_async.call_count == 3
 
-    def test_handle_wait__signaled(self, runner, DataInputStream, SubprocessLauncher):
+    def test_handle_wait__signaled(self, runner):
         extid = "id"
 
         runner.run(extid)
@@ -107,7 +107,7 @@ class TestExtensionRunner:
         assert extid in runner.extension_errors
         assert extid not in runner.extension_procs
 
-    def test_handle_wait__rapid_exit(self, runner, DataInputStream, SubprocessLauncher, time, ProcessErrorExtractor):
+    def test_handle_wait__rapid_exit(self, runner, time, ProcessErrorExtractor):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 0.5
@@ -125,7 +125,7 @@ class TestExtensionRunner:
         assert extid in runner.extension_errors
         assert extid not in runner.extension_procs
 
-    def test_handle_wait__restart(self, runner, DataInputStream, SubprocessLauncher, time):
+    def test_handle_wait__restart(self, runner, time):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 5
@@ -144,7 +144,7 @@ class TestExtensionRunner:
         assert extid not in runner.extension_procs
         runner.run.assert_called_once()
 
-    def test_stop(self, runner, timer, SubprocessLauncher, DataInputStream):
+    def test_stop(self, runner, timer):
         extid = "id"
 
         runner.run(extid)

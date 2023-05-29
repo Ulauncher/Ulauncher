@@ -2,6 +2,7 @@ import argparse
 import os
 from functools import lru_cache
 from gettext import gettext
+
 from ulauncher import ASSETS, VERSION
 
 API_VERSION = "3.0"
@@ -62,7 +63,7 @@ def get_options():
     ]
 
     for descr, args, kwargs in cli_options:
-        parser.add_argument(*args, help=gettext(descr), **{**{"action": "store_true"}, **kwargs})
+        parser.add_argument(*args, help=gettext(descr), **{**{"action": "store_true"}, **kwargs})  # noqa: PIE800
     for arg in ["--no-extensions", "--no-window-shadow", "--hide-window"]:
         parser.add_argument(arg, action="store_true", help=argparse.SUPPRESS)
 

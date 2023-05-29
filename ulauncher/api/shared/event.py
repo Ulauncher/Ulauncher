@@ -1,5 +1,6 @@
 import pickle
 from typing import Any, Dict, List
+
 from ulauncher.api.shared.query import Query
 
 # This holds references to custom data for use with ExtensionCustomAction

@@ -1,2 +1,63 @@
 [tool.black]
 line-length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py37" # py37 is the lowest supported option
+ignore = [
+  "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
+  "PLR2004",  # Allow direct comparison with integers (magic-value)
+  "SLF001",   # For now, allow accessing private members (obj._hello)
+  "T201",     # For now, allow print statements
+  "TRY300",   # Allow non-risky ops at the end of a try statement instead of "else" after
+  "TRY301",   # Allow raising inside of a try statement
+]
+select = [
+  "A",        # flake8-builtins
+  "ARG",      # flake8-unused-arguments
+  "B",        # flake8-bugbear
+  "C4",       # flake8-comprehensions
+  # "DTZ",    # flake8-datetimez (too focused on enforcing time zone argument, which we don't need)
+  "E",        # pycodestyle errors
+  "EM",       # flake8-errmsg
+  "ERA",      # eradicate (commented-out-code)
+  "EXE",      # flake8-executable
+  "FA",       # flake8-future-annotations
+  "FLY",      # flynt
+  "F",        # pyflakes
+  "G",        # flake8-logging-format
+  "I",        # isort
+  "ICN",      # flake8-import-conventions
+  "INP",      # flake8-no-pep420 (ban implicit namespace packages without __init__.py)
+  "INT",      # flake8-gettext
+  "ISC",      # flake8-implicit-str-concat
+  "PGH",      # pygrep-hooks
+  "PIE",      # flake8-pie
+  "PL",       # pylint (same as PLC+PLE+PLR+PLW)
+  "PT",       # flake8-pytest-style
+  # "PTH",    # flake8-use-pathlib (pathlib isn't always better imo)
+  "PYI",      # flake8-pyi
+  "RET",      # flake8-return
+  "RSE",      # flake8-raise
+  "RUF",      # Ruff-specific rules
+  "SLF",      # flake8-self
+  "SIM",      # flake8-simplify
+  "T10",      # flake8-debugger
+  "T20",      # flake8-print
+  "TCH",      # flake8-type-checking
+  "TD",       # flake8-todos
+  "TID",      # flake8-tidy-imports
+  "TRY",      # tryceratops
+  "UP",       # pyupgrade
+  "W",        # pycodestyle warnings
+  "Q",        # flake8-quotes
+]
+
+[tool.ruff.pylint]
+max-args = 10
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+
+[tool.ruff.flake8-builtins]
+builtins-ignorelist = ["id"]

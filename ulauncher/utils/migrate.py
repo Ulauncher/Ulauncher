@@ -1,16 +1,17 @@
-import logging
 import json
+import logging
 import os
 import pickle
 import sys
-from shutil import rmtree
+from configparser import ConfigParser
 from functools import partial
 from pathlib import Path
-from configparser import ConfigParser
+from shutil import rmtree
 from types import ModuleType
-from ulauncher.config import PATHS, FIRST_V6_RUN
-from ulauncher.utils.systemd_controller import UlauncherSystemdController
+
+from ulauncher.config import FIRST_V6_RUN, PATHS
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.utils.systemd_controller import UlauncherSystemdController
 
 _logger = logging.getLogger()
 CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{PATHS.HOME}/.cache"), "ulauncher_cache")  # See issue#40

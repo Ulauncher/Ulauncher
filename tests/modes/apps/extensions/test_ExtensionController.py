@@ -1,12 +1,12 @@
 from unittest import mock
+
 import pytest
 
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import InputTriggerEvent
 from ulauncher.api.shared.query import Query
-
+from ulauncher.api.shared.Response import Response
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 
 TEST_EXT_ID = "com.example.test-ext-id"
 
@@ -35,7 +35,7 @@ class TestExtensionController:
         ).return_value
 
     @pytest.fixture
-    def controller(self, controllers, mocker):
+    def controller(self, controllers):
         controller = ExtensionController(controllers, mock.Mock(), TEST_EXT_ID)
         controller._debounced_send_event = controller._send_event
         return controller
@@ -62,11 +62,11 @@ class TestExtensionController:
         result_renderer.handle_event.assert_called_with(keywordEvent, controller)
 
     def test_handle_response__unsupported_data_type__exception_raised(self, controller):
-        controller.data = dict()
-        with pytest.raises(Exception):
+        controller.data = {}
+        with pytest.raises(TypeError):
             controller.handle_response(controller.framer, object())
 
-    def test_handle_response__is_called(self, controller, result_renderer, mocker):
+    def test_handle_response__is_called(self, controller, result_renderer):
         response = Response(mock.Mock(), TestAction())
 
         controller.handle_response(controller.framer, response)

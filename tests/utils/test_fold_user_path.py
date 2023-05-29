@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from ulauncher.utils.fold_user_path import fold_user_path
 
 

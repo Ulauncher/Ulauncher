@@ -1,9 +1,10 @@
 import os
 from pathlib import Path
 from typing import List
-from ulauncher.utils.fuzzy_search import get_score
+
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.file_browser.FileBrowserResult import FileBrowserResult
+from ulauncher.utils.fuzzy_search import get_score
 
 
 class FileBrowserMode(BaseMode):
@@ -35,11 +36,12 @@ class FileBrowserMode(BaseMode):
             path = Path(os.path.expandvars(query.strip())).expanduser()
             results = []
 
-            closest_parent = str(next(parent for parent in [path] + list(path.parents) if parent.exists()))
+            closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
             remainder = "/".join(path.parts[closest_parent.count("/") + 1 :])
 
             if closest_parent == ".":
-                raise RuntimeError(f'Invalid path "{path}"')
+                msg = f'Invalid path "{path}"'
+                raise RuntimeError(msg)
 
             if not remainder:
                 file_names = self.list_files(str(path), sort_by_atime=True)

@@ -5,4 +5,5 @@ class BaseAction:
         """
         Runs action
         """
-        raise RuntimeError(f"{self.__class__.__name__}#run() is not implemented")
+        msg = f"{self.__class__.__name__}#run() is not implemented"
+        raise RuntimeError(msg)

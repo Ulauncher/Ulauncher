@@ -1,6 +1,6 @@
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
+from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 
 
 class ShortcutMode(BaseMode):
@@ -29,7 +29,8 @@ class ShortcutMode(BaseMode):
         """
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
-            raise RuntimeError("Query doesn't match any shortcut")
+            msg = "Query doesn't match any shortcut"
+            raise RuntimeError(msg)
 
         return [ShortcutResult(**shortcut)]
 

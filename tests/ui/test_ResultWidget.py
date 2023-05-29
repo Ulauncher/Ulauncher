@@ -1,4 +1,5 @@
 from unittest import mock
+
 import pytest
 from gi.repository import GdkPixbuf
 
@@ -23,7 +24,7 @@ class TestResultWidget:
         return mocker.patch("ulauncher.ui.ResultWidget.ResultWidget.scroll_to_focus")
 
     @pytest.fixture(autouse=True)
-    def _get_matching_blocks(self, mocker):
+    def _get_matching_blocks(self, mocker):  # noqa: PT005
         return mocker.patch("ulauncher.utils.fuzzy_search._get_matching_blocks")
 
     @pytest.fixture(autouse=True)

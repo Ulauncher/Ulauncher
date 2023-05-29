@@ -1,8 +1,10 @@
 import os
+
 from gi.repository import Gtk
+
 from ulauncher.config import PATHS, get_options
-from ulauncher.utils.WebKit2 import WebKit2
 from ulauncher.ui.preferences_server import PreferencesServer
+from ulauncher.utils.WebKit2 import WebKit2
 
 
 class PreferencesWindow(Gtk.ApplicationWindow):
@@ -47,7 +49,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             self.load_page(page)
         super().show()
 
-    def on_delete(self, *args, **kwargs):
+    def on_delete(self, *_args, **_kwargs):
         del self.get_application().preferences
         self.destroy()
         os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}")

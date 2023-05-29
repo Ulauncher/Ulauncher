@@ -4,10 +4,9 @@ Module for detecting the display protocol.
 These constants are in a standalone module to minimize the dependencies so that
 ulauncher.utils.xinit can safely use it.
 """
-import os
 import csv
+import os
 import pathlib
-
 
 with open(pathlib.Path("/etc/os-release")) as stream:
     reader = csv.reader(stream, delimiter="=")

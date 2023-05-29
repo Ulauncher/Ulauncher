@@ -1,12 +1,13 @@
 from unittest import mock
+
 import pytest
 
-from ulauncher.ui.UlauncherApp import UlauncherApp
+from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
+from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
-from ulauncher.api.shared.query import Query
+from ulauncher.ui.UlauncherApp import UlauncherApp
 
 
 class TestDeferredResultRenderer:
@@ -19,10 +20,6 @@ class TestDeferredResultRenderer:
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.DeferredResultRenderer.timer")
-
-    @pytest.fixture(autouse=True)
-    def GLib(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.DeferredResultRenderer.GLib")
 
     @pytest.fixture
     def event(self):
@@ -53,7 +50,7 @@ class TestDeferredResultRenderer:
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
 
-    def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller, GLib, UlauncherWindow):
+    def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller):
         response = mock.Mock()
         response.event = KeywordQueryEvent(Query("test"))
         response.action.keep_app_open = False

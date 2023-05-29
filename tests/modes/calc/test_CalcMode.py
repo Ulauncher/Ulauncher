@@ -1,5 +1,7 @@
 from decimal import Decimal
+
 import pytest
+
 from ulauncher.modes.calc.CalcMode import CalcMode, eval_expr
 
 

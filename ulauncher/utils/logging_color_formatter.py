@@ -10,8 +10,8 @@ def mkcolor(color, bold=False):
 
 class ColoredFormatter(logging.Formatter):
     formats = {
-        logging.DEBUG: ("ℹ️", 34),  # blue
-        logging.INFO: ("ℹ️", 37),  # white
+        logging.DEBUG: ("ℹ️", 34),  # blue # noqa: RUF001
+        logging.INFO: ("ℹ️", 37),  # white # noqa: RUF001
         logging.WARNING: ("⚠️", 33),  # yellow
         logging.ERROR: ("⚠️", 31),  # red
         logging.CRITICAL: ("⚠️", 31),  # red

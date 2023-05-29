@@ -1,7 +1,7 @@
 import logging
 import unicodedata
-from functools import lru_cache
 from difflib import SequenceMatcher
+from functools import lru_cache
 
 logger = logging.getLogger()
 
@@ -13,7 +13,7 @@ def _get_matching_blocks_native(query, text):
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
-    from Levenshtein import matching_blocks, editops
+    from Levenshtein import editops, matching_blocks
 
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)
@@ -24,8 +24,8 @@ except ImportError:
 
 
 # convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
-def _normalize(str):
-    return unicodedata.normalize("NFD", str.casefold()).encode("ascii", "ignore").decode("utf-8")
+def _normalize(string):
+    return unicodedata.normalize("NFD", string.casefold()).encode("ascii", "ignore").decode("utf-8")
 
 
 @lru_cache(maxsize=1000)
@@ -68,6 +68,4 @@ def get_score(query, text):
             base_similarity -= 0.5 / query_len
 
     # Rank matches lower for each extra character, to slightly favor shorter ones.
-    score = 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.001)
-
-    return score
+    return 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.001)

@@ -1,13 +1,12 @@
-import re
 import ast
 import math
-from decimal import Decimal
 import operator as op
+import re
+from decimal import Decimal
 from functools import lru_cache
 
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcResult import CalcResult
-
 
 # supported operators
 operators = {
@@ -82,8 +81,7 @@ def eval_expr(expr):
 
 
 @lru_cache(maxsize=1000)
-# pylint: disable=too-many-return-statements
-def _is_enabled(query):
+def _is_enabled(query):  # noqa: PLR0911
     query = normalize_expr(query)
     try:
         node = ast.parse(query, mode="eval").body
@@ -113,15 +111,13 @@ def _eval(node):
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return operators[type(node.op)](_eval(node.operand))
-    if isinstance(node, ast.Name):  # <name>
-        if node.id in constants:
-            return constants[node.id]
-    if isinstance(node, ast.Call):  # <func>(<args>)
-        if node.func.id in functions:
-            value = functions[node.func.id](_eval(node.args[0]))
-            if isinstance(value, float):
-                value = Decimal(value)
-            return value
+    if isinstance(node, ast.Name) and node.id in constants:  # <name>
+        return constants[node.id]
+    if isinstance(node, ast.Call) and node.func.id in functions:  # <func>(<args>)
+        value = functions[node.func.id](_eval(node.args[0]))
+        if isinstance(value, float):
+            value = Decimal(value)
+        return value
 
     raise TypeError(node)
 
@@ -134,7 +130,7 @@ class CalcMode(BaseMode):
         try:
             result = eval_expr(query)
             if result is None:
-                raise ValueError()
+                raise ValueError
 
             result = CalcResult(result=result)
         # pylint: disable=broad-except

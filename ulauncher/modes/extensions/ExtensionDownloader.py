@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 from functools import lru_cache
 from shutil import rmtree
 from typing import Tuple
@@ -66,5 +66,6 @@ class ExtensionDownloader:
     def _find_extension(self, ext_id: str) -> ExtensionRecord:
         ext = self.ext_db.get(ext_id)
         if not ext:
-            raise ExtensionDownloaderError("Extension not found")
+            msg = "Extension not found"
+            raise ExtensionDownloaderError(msg)
         return ext

@@ -1,12 +1,14 @@
 import json
 import shutil
+
 import pytest
+
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 json_file = "/tmp/ulauncher-test/jsondata.json"
 
 
-def teardown_module(module):
+def teardown_module():
     shutil.rmtree("/tmp/ulauncher-test")
 
 
@@ -23,7 +25,7 @@ class TestJsonData:
         jd = JsonData()
         assert not hasattr(jd, "a")
         with pytest.raises(AttributeError):
-            jd.a
+            jd.a  # noqa: B018
         jd.a = False
         assert hasattr(jd, "a")
         assert jd.a is False
@@ -129,7 +131,7 @@ class TestJsonData:
                 super().__setitem__("_" + key, value)
 
         data = UnderscorePrefix({"one": 1})
-        data.update(({"two": 2}))
+        data.update({"two": 2})
         data.three = 3
         data["four"] = 4
         assert data.stringify(sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'

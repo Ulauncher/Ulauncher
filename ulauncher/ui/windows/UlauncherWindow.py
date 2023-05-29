@@ -1,20 +1,21 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 import logging
-from gi.repository import Gtk, Gdk, Keybinder  # type: ignore[attr-defined]
+
+from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
+
+from ulauncher.config import PATHS
+from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.modes.ModeHandler import ModeHandler
+from ulauncher.ui.ItemNavigation import ItemNavigation
+from ulauncher.ui.LayerShell import LayerShellOverlay
 
 # pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
-from ulauncher.ui.LayerShell import LayerShellOverlay
-from ulauncher.config import PATHS
-from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.modes.ModeHandler import ModeHandler
-from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.utils.Settings import Settings
-from ulauncher.utils.wm import get_monitor
-from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
+from ulauncher.utils.icon import load_icon_surface
+from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Theme import Theme
+from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
 
@@ -143,7 +144,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def on_focus_out(self, *_):
         self.hide()
 
-    def on_focus_in(self, *args):
+    def on_focus_in(self, *_args):
         if self.settings.grab_mouse_pointer:
             ptr_dev = self.get_pointer_device()
             result = ptr_dev.grab(
@@ -160,7 +161,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_action(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def on_input_key_press(self, widget, event) -> bool:
+    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
         """
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event

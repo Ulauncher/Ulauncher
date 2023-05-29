@@ -1,7 +1,8 @@
 from unittest import mock
+
 import pytest
 
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, ServerIsRunningError, RegisterEvent
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, RegisterEvent, ServerIsRunningError
 
 
 class TestExtensionServer:

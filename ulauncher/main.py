@@ -1,18 +1,20 @@
-import sys
-import signal
+import contextlib
 import logging
+import signal
+import sys
 from functools import partial
+
+import gi
+from gi.repository import GLib, Gtk
 
 # This xinit import must happen before any GUI libraries are initialized.
 # pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
-import gi
-from gi.repository import GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
-from ulauncher.utils.migrate import v5_to_v6
-from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, IS_X11_COMPATIBLE
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.ui.UlauncherApp import UlauncherApp
+from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
+from ulauncher.utils.migrate import v5_to_v6
 
 
 def reload_config(app, logger):
@@ -87,7 +89,5 @@ def main(is_dev=False):
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGHUP, partial(reload_config, app, logger), None)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
 
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         app.run(sys.argv)
-    except KeyboardInterrupt:
-        pass

@@ -1,4 +1,5 @@
 import math
+
 from gi.repository import GLib
 
 
@@ -18,7 +19,7 @@ class TimerContext:
             self.source = None
 
     # pylint: disable=unused-argument
-    def trigger(self, user_data):
+    def trigger(self, _user_data):
         self.func()
         return self.repeat
 
@@ -35,9 +36,6 @@ def timer(delay_sec, func, repeat=False):
 
     """
     frac, _ = math.modf(delay_sec)
-    if frac == 0.0:
-        source = GLib.timeout_source_new_seconds(delay_sec)
-    else:
-        source = GLib.timeout_source_new(delay_sec * 1000)
+    source = GLib.timeout_source_new_seconds(delay_sec) if frac == 0.0 else GLib.timeout_source_new(delay_sec * 1000)
 
     return TimerContext(source, func, repeat)

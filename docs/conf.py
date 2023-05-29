@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# ruff: noqa: A001, ERA001
 #
 # Ulauncher documentation build configuration file, created by
 # sphinx-quickstart on Sat Apr 22 13:15:04 2017.
@@ -18,13 +18,14 @@
 #
 import os
 import sys
-from datetime import date
+from datetime import datetime
 from typing import Dict
+
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath(".."))
 # pylint: disable=wrong-import-position
-from ulauncher import config, VERSION
+from ulauncher import VERSION, config  # noqa: E402
 
 # -- General configuration ------------------------------------------------
 
@@ -55,7 +56,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Ulauncher"
-copyright = f"2015-{date.today().year}, Aleksandr Gornostal"
+copyright = f"2015-{datetime.now().year}, Aleksandr Gornostal"
 author = "Aleksandr Gornostal"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -115,7 +116,7 @@ htmlhelp_basename = "Ulauncherdoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+latex_elements: Dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
@@ -128,7 +129,7 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
-}  # type: Dict[str, str]
+}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,

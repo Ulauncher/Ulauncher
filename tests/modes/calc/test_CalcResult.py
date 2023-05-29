@@ -1,4 +1,5 @@
 import pytest
+
 from ulauncher.modes.calc.CalcResult import CalcResult
 
 
