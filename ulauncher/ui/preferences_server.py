@@ -1,21 +1,24 @@
-import os
-import logging
 import json
+import logging
 import mimetypes
+import os
 import traceback
 from functools import lru_cache
 from urllib.parse import unquote, urlparse
+
 from gi.repository import Gio, Gtk
+
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.api.shared.event import PreferencesUpdateEvent
+from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions.extension_finder import find_extensions
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.utils.Theme import get_themes
+from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
@@ -23,9 +26,8 @@ from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
-from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
-from ulauncher.config import API_VERSION, VERSION, PATHS
 
 logger = logging.getLogger()
 routes = {}
@@ -69,7 +71,6 @@ def get_extensions():
         }
 
 
-# pylint: disable=too-many-public-methods
 class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
@@ -120,7 +121,7 @@ class PreferencesServer:
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
                 error = JsonData(message=str(e), name=type(e).__name__)
-                logging.exception("Preferences server error %s: %s", error.name, e)
+                logging.exception("Preferences server error: %s", error.name)
 
                 if not error.name.endswith("Warning"):
                     additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
@@ -180,29 +181,31 @@ class PreferencesServer:
         return export_settings
 
     @route("/set")
-    def apply_settings(self, property, value):
-        logger.info("Setting %s to %s", property, value)
+    def apply_settings(self, prop, value):
+        logger.info("Setting %s to %s", prop, value)
         # This setting is not stored to the config
-        if property == "autostart-enabled":
+        if prop == "autostart-enabled":
             self.apply_autostart(value)
             return
 
-        self.settings.save({property: value})
+        self.settings.save({prop: value})
 
-        if property == "show_indicator_icon":
+        if prop == "show_indicator_icon":
             Gio.Application.get_default().toggle_appindicator(value)
-        if property == "theme_name":
+        if prop == "theme_name":
             Gio.Application.get_default().window.apply_theme()
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart-enabled to %s", is_enabled)
         if is_enabled and not self.autostart_pref.is_allowed():
-            raise RuntimeError("Unable to turn on autostart preference")
+            msg = "Unable to turn on autostart preference"
+            raise RuntimeError(msg)
 
         try:
             self.autostart_pref.switch(is_enabled)
         except Exception as err:
-            raise RuntimeError(f'Caught an error while switching "autostart": {err}') from err
+            msg = f'Caught an error while switching "autostart": {err}'
+            raise RuntimeError(msg) from err
 
     @route("/set/hotkey-show-app")
     @glib_idle_add
@@ -232,11 +235,11 @@ class PreferencesServer:
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
         )
         if mime_filter and isinstance(mime_filter, dict):
-            filter = Gtk.FileFilter()
+            file_filter = Gtk.FileFilter()
             for filter_name, filter_mime in mime_filter.items():
-                filter.set_name(filter_name)
-                filter.add_mime_type(filter_mime)
-            dialog.add_filter(filter)
+                file_filter.set_name(filter_name)
+                file_filter.add_mime_type(filter_mime)
+            dialog.add_filter(file_filter)
         value = dialog.get_filename() if dialog.run() == Gtk.ResponseType.OK else None
         self.notify_client(name, {"value": value})
 

@@ -18,10 +18,9 @@ main () {
     run) exec ./bin/ulauncher -v --dev $2 ;;
     test-black) test-black ;;
     test-mypy) test-mypy ;;
-    test-pylint) test-pylint ;;
-    test-flake8) test-flake8 ;;
+    test-ruff) test-ruff ;;
     test-pytest) test-pytest ;;
-    test) test-mypy && test-black && test-flake8 && test-pylint && test-pytest ;;
+    test) test-mypy && test-black && test-ruff && test-pytest ;;
     dev-container) dev-container $2 ;;
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;

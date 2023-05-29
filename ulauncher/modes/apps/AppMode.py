@@ -1,7 +1,8 @@
 from gi.repository import Gio
-from ulauncher.utils.Settings import Settings
-from ulauncher.modes.BaseMode import BaseMode
+
 from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.utils.Settings import Settings
 
 
 class AppMode(BaseMode):

@@ -1,7 +1,7 @@
-import tarfile
 import os
-from shutil import rmtree
+import tarfile
 from pathlib import Path
+from shutil import rmtree
 from typing import Union
 
 

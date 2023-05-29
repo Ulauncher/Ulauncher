@@ -1,5 +1,7 @@
 from unittest import mock
+
 import pytest
+
 from ulauncher.api.extension import Extension
 from ulauncher.api.shared.action.BaseAction import BaseAction
 

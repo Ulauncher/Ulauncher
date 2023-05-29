@@ -1,8 +1,10 @@
 import logging
 import mimetypes
-from os.path import expanduser, join
 from functools import lru_cache
-from gi.repository import Gdk, Gtk, GdkPixbuf
+from os.path import expanduser, join
+
+from gi.repository import Gdk, GdkPixbuf, Gtk
+
 from ulauncher import ASSETS
 
 icon_theme = Gtk.IconTheme.get_default()  # type: ignore[attr-defined]
@@ -49,7 +51,8 @@ def load_icon_surface(icon, size, scaling_factor=1):
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
     except Exception as e:
         if icon_path == DEFAULT_EXE_ICON:
-            raise RuntimeError(f"Could not load fallback icon: {icon_path}") from e
+            msg = f"Could not load fallback icon: {icon_path}"
+            raise RuntimeError(msg) from e
 
         logger.warning("Could not load specified icon %s (%s). Will use fallback icon", icon, e)
         return load_icon_surface(DEFAULT_EXE_ICON, size, scaling_factor)

@@ -1,6 +1,7 @@
 from gi.repository import Gio
-from ulauncher.api.shared.event import custom_data_store, ItemEnterEvent
+
 from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.api.shared.event import ItemEnterEvent, custom_data_store
 
 
 class ExtensionCustomAction(BaseAction):

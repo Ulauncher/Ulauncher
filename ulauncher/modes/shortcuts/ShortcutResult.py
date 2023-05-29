@@ -2,15 +2,17 @@ import re
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.api.shared.query import Query
+from ulauncher.modes.shortcuts.run_script import run_script
 
 
 class ShortcutResult(Result):
     searchable = True
 
     # pylint: disable=super-init-not-called, too-many-arguments
-    def __init__(self, keyword, name, cmd, icon, is_default_search=False, run_without_argument=False, **kw):
+    def __init__(
+        self, keyword, name, cmd, icon, is_default_search=False, run_without_argument=False, **kw  # noqa: ARG002
+    ):
         self.keyword = keyword
         self.name = name
         self.cmd = cmd
@@ -22,11 +24,7 @@ class ShortcutResult(Result):
         return str(query) if self.keyword != query.keyword else None
 
     def get_description(self, query):
-        if self.cmd.startswith("#!"):
-            # this is a script
-            description = ""
-        else:
-            description = self.cmd
+        description = "" if self.cmd.startswith("#!") else self.cmd
 
         if self.is_default_search:
             return description.replace("%s", query)
@@ -40,7 +38,7 @@ class ShortcutResult(Result):
 
         return description.replace("%s", "...")
 
-    def on_activation(self, query, alt=False):
+    def on_activation(self, query, _alt=False):
         if query.keyword == self.keyword and query.argument:
             argument = query.argument
         elif self.is_default_search:

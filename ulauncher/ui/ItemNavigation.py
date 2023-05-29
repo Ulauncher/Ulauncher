@@ -52,8 +52,8 @@ class ItemNavigation:
         self.select((self.index or len(self.result_widgets)) - 1)
 
     def go_down(self):
-        next = (self.index or 0) + 1
-        self.select(next if next < len(self.result_widgets) else 0)
+        next_result = (self.index or 0) + 1
+        self.select(next_result if next_result < len(self.result_widgets) else 0)
 
     def activate(self, query, alt=False):
         """

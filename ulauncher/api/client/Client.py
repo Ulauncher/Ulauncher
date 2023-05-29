@@ -1,9 +1,10 @@
+import logging
 import os
 import sys
-import logging
 import traceback
 from functools import partial
-from gi.repository import GLib, Gio
+
+from gi.repository import Gio, GLib
 
 from ulauncher.api.shared.event import RegisterEvent, UnloadEvent
 from ulauncher.api.shared.socket_path import get_socket_path
@@ -33,7 +34,8 @@ class Client:
         """
         self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
         if not self.conn:
-            raise RuntimeError(f"Failed to connect to socket_path {self.socket_path}")
+            msg = f"Failed to connect to socket_path {self.socket_path}"
+            raise RuntimeError(msg)
         self.framer = PickleFramer()
         self.framer.connect("message_parsed", self.on_message)
         self.framer.connect("closed", self.on_close)
@@ -44,7 +46,7 @@ class Client:
         mainloop.run()
 
     # pylint: disable=unused-argument
-    def on_message(self, framer, event):
+    def on_message(self, _framer, event):
         """
         Parses message from Ulauncher and triggers extension event
 
@@ -58,7 +60,7 @@ class Client:
         except Exception:
             traceback.print_exc(file=sys.stderr)
 
-    def on_close(self, framer):
+    def on_close(self, _framer):
         """
         Terminates extension process on client disconnect.
 

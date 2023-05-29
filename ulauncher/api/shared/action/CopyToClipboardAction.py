@@ -1,4 +1,5 @@
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk, Gtk
+
 from ulauncher.api.shared.action.BaseAction import BaseAction
 
 

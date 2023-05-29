@@ -1,10 +1,9 @@
+import signal
 import sys
 from time import sleep
-import signal
 
 
-# pylint: disable=unused-argument
-def exit_gracefully(signum, frame):
+def exit_gracefully(_signum, _frame):
     print("On SIGTERM")
     sleep(3)
 

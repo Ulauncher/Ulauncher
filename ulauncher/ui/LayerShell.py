@@ -1,6 +1,6 @@
 import logging
-import gi
 
+import gi
 from gi.repository import Gtk
 
 logger = logging.getLogger()

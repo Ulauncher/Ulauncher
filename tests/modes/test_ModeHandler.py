@@ -1,5 +1,7 @@
 from unittest import mock
+
 import pytest
+
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.ModeHandler import ModeHandler
 

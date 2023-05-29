@@ -1,4 +1,5 @@
 import pytest
+
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 from ulauncher.modes.shortcuts.ShortcutsDb import Shortcut as ShortcutRecord
 

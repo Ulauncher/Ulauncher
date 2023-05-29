@@ -1,17 +1,19 @@
-import time
 import logging
+import time
 from functools import lru_cache
 from typing import Optional
+
 from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
+
+from ulauncher.api.shared.query import Query
 from ulauncher.config import FIRST_RUN
-from ulauncher.utils.environment import IS_X11
-from ulauncher.utils.Settings import Settings
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.api.shared.query import Query
+from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
 
@@ -51,15 +53,15 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             self.window.input.set_text(self._query)
             self.window.input.set_position(-1)
 
-    def do_before_emit(self, *args, **kwargs):
+    def do_before_emit(self, *args, **_kwargs):
         query = args[0].lookup_value("query", GLib.VariantType("s"))
         if query:
             self.query = query.unpack()
 
-    def do_activate(self, *args, **kwargs):
+    def do_activate(self, *_args, **_kwargs):
         self.show_launcher()
 
-    def do_command_line(self, *args, **kwargs):
+    def do_command_line(self, *args, **_kwargs):
         # We need to use "--no-window" from the unique CLI invocation here,
         # Can't use config.get_options(), because that's the daemon's initial cli arguments
         if "--no-window" not in args[0].get_arguments():

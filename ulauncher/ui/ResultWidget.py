@@ -1,13 +1,15 @@
 import logging
 from types import SimpleNamespace
 from typing import Any
+
 from gi.repository import Gtk
-from ulauncher.utils.Settings import Settings
-from ulauncher.utils.wm import get_text_scaling_factor
+
+from ulauncher.api.shared.query import Query
 from ulauncher.utils.icon import load_icon_surface
+from ulauncher.utils.Settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.Theme import Theme
-from ulauncher.api.shared.query import Query
+from ulauncher.utils.wm import get_text_scaling_factor
 
 logger = logging.getLogger()
 
@@ -124,13 +126,13 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         return self.name
 
     # pylint: disable=unused-argument
-    def on_click(self, widget, event=None):
+    def on_click(self, _widget, event=None):
         window = self.get_toplevel()
         window.select_result(self.index)
         alt = bool(event and event.button != 1)  # right click
         window.handle_action(window.results_nav.activate(self.query, alt=alt))
 
-    def on_mouse_hover(self, widget, event):
+    def on_mouse_hover(self, _widget, event):
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
             self.get_toplevel().select_result(self.index)

@@ -1,22 +1,22 @@
 class BaseMode:
     # pylint: disable=unused-argument
-    def is_enabled(self, query):
+    def is_enabled(self, _query):
         """
         Return True if mode should be enabled for a query
         """
         return False
 
-    def on_query_change(self, query):
+    def on_query_change(self, _query):
         """
         Triggered when user changes a search query
         """
 
-    def on_query_backspace(self, query):
+    def on_query_backspace(self, _query):
         """
         Return string to override default backspace and set the query to that string
         """
 
-    def handle_query(self, query):
+    def handle_query(self, _query):
         """
         :rtype: list of Results
         """

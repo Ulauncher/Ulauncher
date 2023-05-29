@@ -2,7 +2,7 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, cast, Dict, List, Tuple, Type, TypeVar
+from typing import Any, Dict, List, Tuple, Type, TypeVar, cast
 
 
 def filter_recursive(data, blacklist):
@@ -62,7 +62,8 @@ class JsonData(dict):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'") from None
+            msg = f"'{self.__class__.__name__}' object has no attribute '{key}'"
+            raise AttributeError(msg) from None
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -86,9 +87,9 @@ class JsonData(dict):
         if key not in _file_instances and file_path.is_file():
             try:
                 data = json.loads(file_path.read_text())
-            except Exception as e:
-                logger.error("Error '%s' opening JSON file %s: %s", type(e).__name__, file_path, e)
-                logger.warning("Ignoring invalid JSON file (%s)", file_path)
+            except Exception:
+                logger.exception('Error opening JSON file "%s"', file_path)
+                logger.warning('Ignoring invalid JSON file "%s"', file_path)
 
         instance = _file_instances.get(key, cls())
         instance.update(data)
@@ -116,8 +117,8 @@ class JsonData(dict):
                 file_path.parent.mkdir(parents=True, exist_ok=True)
                 file_path.write_text(self.stringify(indent=2, sort_keys=self.__json_sort_keys__))
                 return True
-            except Exception as e:
-                logger.error("Error '%s' writing to JSON file %s: %s.", type(e).__name__, file_path, e)
+            except Exception:
+                logger.exception('Could not write to JSON file "%s"', file_path)
         return False
 
 

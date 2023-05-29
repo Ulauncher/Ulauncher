@@ -1,3 +1,5 @@
+import contextlib
+
 from ulauncher.utils.timer import timer
 
 
@@ -11,10 +13,8 @@ def debounce(wait):
             def call_it():
                 fn(*args, **kwargs)
 
-            try:
+            with contextlib.suppress(AttributeError):
                 debounced.t.cancel()
-            except AttributeError:
-                pass
 
             debounced.t = timer(wait, call_it)
 

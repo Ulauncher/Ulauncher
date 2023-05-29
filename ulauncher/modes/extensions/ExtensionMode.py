@@ -1,12 +1,12 @@
 import html
 
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.api.result import Result
+from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
-from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.modes.BaseMode import BaseMode
+from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 
 
 # bind function to args, ignoring further args on call time
@@ -22,7 +22,7 @@ class ExtensionMode(BaseMode):
     def is_enabled(self, query: Query):
         return bool(self.extensionServer.get_controller_by_keyword(query.keyword)) and " " in query
 
-    def on_query_change(self, query: Query):
+    def on_query_change(self, _query: Query):
         """
         Triggered when user changes the query
         """
@@ -32,7 +32,8 @@ class ExtensionMode(BaseMode):
         controller = self.extensionServer.get_controller_by_keyword(query.keyword)
 
         if not controller:
-            raise RuntimeError("Invalid extension keyword")
+            msg = "Invalid extension keyword"
+            raise RuntimeError(msg)
 
         return controller.handle_query(query)
 

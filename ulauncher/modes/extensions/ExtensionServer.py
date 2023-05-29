@@ -2,11 +2,12 @@ import logging
 import os
 import os.path
 from functools import lru_cache
+
 from gi.repository import Gio, GObject
 
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.api.shared.event import RegisterEvent
+from ulauncher.api.shared.socket_path import get_socket_path
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.utils.framer import PickleFramer
 
 logger = logging.getLogger()
@@ -29,7 +30,7 @@ class ExtensionServer:
         Starts extension server
         """
         if self.is_running():
-            raise ServerIsRunningError()
+            raise ServerIsRunningError
 
         self.service = Gio.SocketService.new()
         self.service.connect("incoming", self.handle_incoming)
@@ -45,7 +46,7 @@ class ExtensionServer:
         self.controllers = {}
 
     # pylint: disable=unused-argument
-    def handle_incoming(self, service, conn, source):
+    def handle_incoming(self, _service, conn, _source):
         framer = PickleFramer()
         msg_handler_id = framer.connect("message_parsed", self.handle_registration)
         closed_handler_id = framer.connect("closed", self.handle_pending_close)
@@ -70,7 +71,7 @@ class ExtensionServer:
         Stops extension server
         """
         if not self.is_running():
-            raise ServerIsNotRunningError()
+            raise ServerIsNotRunningError
 
         self.service.stop()
         self.service.close()

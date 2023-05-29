@@ -1,16 +1,18 @@
 import json
 import shutil
 from unittest import mock
-from gi.repository import Gio
+
 import pytest
-from ulauncher.utils.Settings import Settings
-from ulauncher.ui.UlauncherApp import UlauncherApp
+from gi.repository import Gio
+
 from ulauncher.ui.preferences_server import PreferencesServer
+from ulauncher.ui.UlauncherApp import UlauncherApp
+from ulauncher.utils.Settings import Settings
 
 settings_file = "/tmp/ulauncher-test/pref-settings.json"
 
 
-def teardown_module(module):
+def teardown_module():
     shutil.rmtree("/tmp/ulauncher-test")
 
 
@@ -43,7 +45,6 @@ class TestPreferencesServer:
     def hotkey_dialog(self, mocker):
         return mocker.patch("ulauncher.ui.preferences_server.HotkeyDialog").return_value
 
-    # pylint: disable=too-many-arguments
     @pytest.fixture
     def prefs_server(self, webview, autostart_pref):
         server = PreferencesServer()
@@ -52,7 +53,6 @@ class TestPreferencesServer:
         server.client = webview
         return server
 
-    # pylint: disable=too-many-arguments
     def test_apply_settings_show_indicator_icon(self, prefs_server):
         prefs_server.apply_settings("show_indicator_icon", False)
         Gio.Application.get_default().toggle_appindicator.assert_called_with(False)

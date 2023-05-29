@@ -1,5 +1,5 @@
-from threading import Thread
 from functools import wraps
+from threading import Thread
 
 
 def run_async(*args, **kwargs):

@@ -1,6 +1,8 @@
 from unittest import mock
+
 import pytest
 from gi.repository import Gtk
+
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 
 

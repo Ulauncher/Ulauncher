@@ -7,7 +7,7 @@ logger = logging.getLogger()
 
 def systemctl_unit_run(*args):
     try:
-        return check_output(["systemctl", "--user"] + list(args) + ["ulauncher"]).decode("utf-8").rstrip()
+        return check_output(["systemctl", "--user", *list(args), "ulauncher"]).decode("utf-8").rstrip()
     except Exception:
         return False
 
@@ -40,6 +40,7 @@ class UlauncherSystemdController:
         :param bool status:
         """
         if not self.is_allowed():
-            raise OSError("Autostart is not allowed")
+            msg = "Autostart is not allowed"
+            raise OSError(msg)
 
         systemctl_unit_run("reenable" if status else "disable")

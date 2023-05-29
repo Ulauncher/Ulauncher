@@ -1,9 +1,11 @@
 import os
+
 import pytest
+
 from ulauncher.modes.extensions.ExtensionManifest import (
+    ExtensionIncompatibleWarning,
     ExtensionManifest,
     ExtensionManifestError,
-    ExtensionIncompatibleWarning,
 )
 
 

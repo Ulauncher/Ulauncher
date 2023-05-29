@@ -1,5 +1,6 @@
-from typing import Optional
 from decimal import Decimal
+from typing import Optional
+
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.config import PATHS

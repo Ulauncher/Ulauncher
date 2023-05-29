@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ulauncher.config import API_VERSION, PATHS
 from ulauncher.utils.json_data import JsonData, json_data_class
@@ -102,7 +102,8 @@ class ExtensionManifest(JsonData):
             for id, t in self.triggers.items():
                 assert t.name, f'"{id}" missing non-optional field "name"'
         except AssertionError as e:
-            raise ExtensionManifestError(f"Invalid triggers in Extension manifest: {str(e)}") from None
+            msg = f"Invalid triggers in Extension manifest: {e}"
+            raise ExtensionManifestError(msg) from None
 
         try:
             for id, p in self.preferences.items():
@@ -138,7 +139,8 @@ class ExtensionManifest(JsonData):
                     assert isinstance(p.options, list), f'"{id}" options field must be a list'
                     assert p.options, f'"{id}" option cannot be empty for select type'
         except AssertionError as e:
-            raise ExtensionManifestError(f"Invalid preferences in Extension manifest: {str(e)}") from None
+            msg = f"Invalid preferences in Extension manifest: {e}"
+            raise ExtensionManifestError(msg) from None
 
     def check_compatibility(self, verbose=False):
         """
@@ -155,7 +157,8 @@ class ExtensionManifest(JsonData):
                         API_VERSION,
                     )
             else:
-                raise ExtensionIncompatibleWarning(f"{self.name} does not support Ulauncher API v{API_VERSION}.")
+                msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
+                raise ExtensionIncompatibleWarning(msg)
 
     def find_matching_trigger(self, **kwargs) -> Optional[str]:
         """

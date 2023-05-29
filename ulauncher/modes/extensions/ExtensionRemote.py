@@ -1,19 +1,19 @@
 import logging
 import os
 import subprocess
-from os.path import basename, getmtime, isdir
 from datetime import datetime
-from urllib.parse import urlparse
-from urllib.request import urlopen, urlretrieve
-from urllib.error import HTTPError, URLError
+from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tempfile import NamedTemporaryFile, TemporaryDirectory
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
+from urllib.request import urlopen, urlretrieve
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.utils.version import satisfies
-from ulauncher.utils.untar import untar
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionIncompatibleWarning
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionIncompatibleWarning, ExtensionManifest
+from ulauncher.utils.untar import untar
+from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
 db = ExtensionDb.load()
@@ -57,7 +57,8 @@ class ExtensionRemote:
                 self.host = url_parts.netloc
                 self.protocol = "https"
 
-            assert self.path and (self.host or self.protocol == "file")
+            assert self.path
+            assert self.host or self.protocol == "file"
 
             if self.host in ("github.com", "gitlab.com", "codeberg.org"):
                 # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
@@ -70,7 +71,8 @@ class ExtensionRemote:
             self.url = f"{self.protocol}://{self.host}/{self.path}"
 
         except Exception as e:
-            raise InvalidExtensionUrlWarning(f"Invalid URL: {url}") from e
+            msg = f"Invalid URL: {url}"
+            raise InvalidExtensionUrlWarning(msg) from e
 
         self.extension_id = ".".join(
             [
@@ -125,10 +127,12 @@ class ExtensionRemote:
 
         except Exception as e:
             if isinstance(e, (HTTPError, URLError)):
-                raise ExtensionNetworkError(f'Could not access repository resource "{self.url}"') from e
+                msg = f'Could not access repository resource "{self.url}"'
+                raise ExtensionNetworkError(msg) from e
 
             logger.warning("Unexpected error fetching extension versions '%s' (%s: %s)", self.url, type(e).__name__, e)
-            raise ExtensionRemoteError(f'Could not fetch reference "{ref}" for {self.url}.') from e
+            msg = f'Could not fetch reference "{ref}" for {self.url}.'
+            raise ExtensionRemoteError(msg) from e
 
         return refs
 
@@ -154,7 +158,8 @@ class ExtensionRemote:
         output_dir_exists = isdir(self._dir)
 
         if output_dir_exists and not overwrite:
-            raise ExtensionAlreadyInstalledWarning(f'Extension with URL "{self.url}" is already installed.')
+            msg = f'Extension with URL "{self.url}" is already installed.'
+            raise ExtensionAlreadyInstalledWarning(msg)
 
         if self._use_git and isdir(self._git_dir):
             os.makedirs(self._dir, exist_ok=True)
@@ -173,18 +178,18 @@ class ExtensionRemote:
         else:
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
                 urlretrieve(self._get_download_url(commit_hash), tmp_file.name)
-                with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_dir:
-                    untar(tmp_file.name, tmp_dir)
-                    subdirs = os.listdir(tmp_dir)
+                with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
+                    untar(tmp_file.name, tmp_root_dir)
+                    subdirs = os.listdir(tmp_root_dir)
                     if len(subdirs) != 1:
-                        raise ExtensionRemoteError(f"Invalid archive for {self.url}.")
-                    tmp_dir = f"{tmp_dir}/{subdirs[0]}"
+                        msg = f"Invalid archive for {self.url}."
+                        raise ExtensionRemoteError(msg)
+                    tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
                     manifest = ExtensionManifest.new_from_file(f"{tmp_dir}/manifest.json")
                     if not satisfies(API_VERSION, manifest.api_version):
                         if not satisfies("2.0", manifest.api_version):
-                            raise ExtensionIncompatibleWarning(
-                                f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
-                            )
+                            msg = f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
+                            raise ExtensionIncompatibleWarning(msg)
                         logger.warning("Falling back on using API 2.0 version for %s.", self.url)
 
                     if output_dir_exists:

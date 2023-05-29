@@ -1,5 +1,6 @@
 import logging
 from functools import lru_cache
+
 from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result

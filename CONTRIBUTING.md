@@ -58,7 +58,7 @@ For the v6 branch you need the the following to setup the local build environmen
   Install the development and testing dependecies:
 
   ```sh
-  sudo pacman -Syu --needed git yarn python-setuptools python-pytest python-pytest-mock python-pylint mypy flake8
+  sudo pacman -Syu --needed git yarn mypy ruff python-{black,pytest,pytest-mock,setuptools}
   ```
 
   To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended:

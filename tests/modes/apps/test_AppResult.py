@@ -1,17 +1,19 @@
 import pathlib
 import shutil
+
 import pytest
 from gi.repository import Gio
-from ulauncher.utils.json_data import JsonData
-from ulauncher.modes.apps.AppResult import AppResult
+
 from ulauncher.api.shared.query import Query
+from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.utils.json_data import JsonData
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None
 ENTRIES_DIR = pathlib.Path(__file__).parent.joinpath("mock_desktop_entries").resolve()
 
 
-def teardown_module(module):
+def teardown_module():
     shutil.rmtree("/tmp/ulauncher-test")
 
 

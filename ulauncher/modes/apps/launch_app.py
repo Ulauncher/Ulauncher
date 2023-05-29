@@ -2,10 +2,12 @@ import logging
 import re
 import shlex
 from os.path import basename
+
 from gi.repository import Gio
+
 from ulauncher.utils.environment import IS_X11
-from ulauncher.utils.Settings import Settings
 from ulauncher.utils.launch_detached import launch_detached
+from ulauncher.utils.Settings import Settings
 from ulauncher.utils.wm import get_windows_stacked, get_xserver_time
 
 logger = logging.getLogger()
@@ -30,20 +32,20 @@ def launch_app(app_id):
 
     if app.get_boolean("DBusActivatable"):
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
-        exec = ["gapplication", "launch", app_id.replace(".desktop", "")]
+        cmd = ["gapplication", "launch", app_id.replace(".desktop", "")]
     elif app_exec:
         if app.get_boolean("Terminal"):
             terminal_exec = settings.terminal_command
             if terminal_exec:
                 logger.info("Will run command in preferred terminal (%s)", terminal_exec)
-                exec = shlex.split(terminal_exec) + [app_exec]
+                cmd = [*shlex.split(terminal_exec), app_exec]
             else:
-                exec = ["gtk-launch", app_id]
+                cmd = ["gtk-launch", app_id]
         else:
-            exec = shlex.split(app_exec)
+            cmd = shlex.split(app_exec)
 
-    if not exec:
+    if not cmd:
         logger.error("No command to run %s", app_id)
     else:
-        logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, exec)
-        launch_detached(exec)
+        logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, cmd)
+        launch_detached(cmd)

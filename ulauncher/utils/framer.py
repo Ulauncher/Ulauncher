@@ -1,8 +1,9 @@
 import logging
 import pickle
-from struct import pack, unpack_from
 from collections import deque
-from gi.repository import GLib, Gio, GObject
+from struct import pack, unpack_from
+
+from gi.repository import Gio, GLib, GObject
 
 INTSZ = 4
 
@@ -46,7 +47,8 @@ class PickleFramer(GObject.GObject):
 
     def set_connection(self, conn: Gio.SocketConnection):
         if self._conn:
-            raise InvalidStateError("Socket already associated with this framer, please create a new instance.")
+            msg = "Socket already associated with this framer, please create a new instance."
+            raise InvalidStateError(msg)
         self._conn = conn
         self._read_data()
 
@@ -71,7 +73,7 @@ class PickleFramer(GObject.GObject):
         self._write_next()
 
     # pylint: disable=unused-argument
-    def _close_ready(self, source, result, user):
+    def _close_ready(self, _source, result, _user):
         ret = self._conn.close_finish(result)
         if ret:
             log.debug("Connection (%s) closed", self)
@@ -85,7 +87,7 @@ class PickleFramer(GObject.GObject):
         )
 
     # pylint: disable=unused-argument
-    def _read_ready(self, source, result, user):
+    def _read_ready(self, _source, result, _user):
         bytesbuf = self._conn.get_input_stream().read_bytes_finish(result)
         if not bytesbuf or bytesbuf.get_size() == 0:
             self.close()
@@ -134,7 +136,7 @@ class PickleFramer(GObject.GObject):
         )
 
     # pylint: disable=unused-argument
-    def _write_done(self, source, result, user):
+    def _write_done(self, _source, result, _user):
         done, written = self._conn.get_output_stream().write_all_finish(result)
         if not done and self._canceller.is_cancelled():
             log.debug("Write canceled, closing connection.")

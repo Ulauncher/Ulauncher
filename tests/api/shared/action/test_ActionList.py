@@ -20,8 +20,8 @@ class TestActionList:
         assert not ActionList([EmptyAction(False), EmptyAction(False), False]).keep_app_open
 
     def test_run(self):
-        list = ActionList([mock.create_autospec(BaseAction), mock.create_autospec(BaseAction)])
-        list.run()
+        alist = ActionList([mock.create_autospec(BaseAction), mock.create_autospec(BaseAction)])
+        alist.run()
 
-        list[0].run.assert_called_with()
-        list[1].run.assert_called_with()
+        alist[0].run.assert_called_with()
+        alist[1].run.assert_called_with()

@@ -12,16 +12,10 @@ test-mypy () {
     mypy .
 }
 
-test-pylint () {
-    echo '[ test: pylint ]'
+test-ruff () {
+    echo '[ test: ruff ]'
     set -e
-    pylint --output-format=colorized ulauncher
-}
-
-test-flake8 () {
-    echo '[ test: flake8 ]'
-    set -e
-    flake8 $@
+    ruff check .
 }
 
 test-pytest () {
