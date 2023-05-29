@@ -1,15 +1,12 @@
 import json
 import shutil
+from pathlib import Path
 
 import pytest
 
 from ulauncher.utils.json_data import JsonData, json_data_class
 
 json_file = "/tmp/ulauncher-test/jsondata.json"
-
-
-def teardown_module():
-    shutil.rmtree("/tmp/ulauncher-test")
 
 
 def load_json(file=json_file):
@@ -21,6 +18,12 @@ def load_json(file=json_file):
 
 
 class TestJsonData:
+    def setup_class(self):
+        Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
+
+    def teardown_class(self):
+        shutil.rmtree("/tmp/ulauncher-test")
+
     def test_attr_methods(self):
         jd = JsonData()
         assert not hasattr(jd, "a")

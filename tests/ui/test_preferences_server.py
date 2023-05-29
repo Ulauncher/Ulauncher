@@ -1,5 +1,6 @@
 import json
 import shutil
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -12,10 +13,6 @@ from ulauncher.utils.Settings import Settings
 settings_file = "/tmp/ulauncher-test/pref-settings.json"
 
 
-def teardown_module():
-    shutil.rmtree("/tmp/ulauncher-test")
-
-
 def check_json_prop(name):
     try:
         with open(settings_file) as f:
@@ -25,6 +22,12 @@ def check_json_prop(name):
 
 
 class TestPreferencesServer:
+    def setup_class(self):
+        Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
+
+    def teardown_class(self):
+        shutil.rmtree("/tmp/ulauncher-test")
+
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
         app = UlauncherApp.get_instance()
