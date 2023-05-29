@@ -20,7 +20,9 @@ class Result(dict):
         for cls in reversed(self.__class__.__mro__):
             if cls in dict.__mro__:
                 continue
-            defaults = {k: v for k, v in vars(cls).items() if (not k.startswith("__") and not callable(v))}
+            defaults = {
+                k: v for k, v in vars(cls).items() if (not k.startswith("__") and not callable(getattr(cls, k)))
+            }
             self.update(defaults)
 
         # set values
