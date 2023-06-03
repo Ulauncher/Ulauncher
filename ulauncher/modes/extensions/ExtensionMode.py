@@ -1,7 +1,6 @@
 import html
 
 from ulauncher.api.result import Result
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.BaseMode import BaseMode
@@ -28,7 +27,7 @@ class ExtensionMode(BaseMode):
         """
         self.deferredResultRenderer.on_query_change()
 
-    def handle_query(self, query: Query) -> BaseAction:
+    def handle_query(self, query: Query):
         controller = self.extensionServer.get_controller_by_keyword(query.keyword)
 
         if not controller:

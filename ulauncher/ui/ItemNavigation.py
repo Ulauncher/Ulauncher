@@ -1,4 +1,3 @@
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData
 
@@ -63,8 +62,4 @@ class ItemNavigation:
         if query and not alt and result.searchable:
             query_history.save({str(query): result.name})
 
-        action = result.on_activation(query, alt)
-        if isinstance(action, BaseAction):
-            action.run()
-            return action.keep_app_open
-        return action
+        return result.on_activation(query, alt)

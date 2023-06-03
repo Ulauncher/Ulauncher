@@ -2,6 +2,7 @@ import logging
 
 from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 
+from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.ModeHandler import ModeHandler
@@ -228,6 +229,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         return self.get_application()
 
     def handle_action(self, action):
+        if isinstance(action, BaseAction):
+            action.run()
+            action = action.keep_app_open
         if isinstance(action, str):
             self.app.query = action
         elif isinstance(action, list):

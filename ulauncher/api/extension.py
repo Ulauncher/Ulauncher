@@ -9,7 +9,7 @@ from typing import Iterator, Type, Union
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.action.BaseAction import BaseAction
+from ulauncher.api.shared.action.ActionList import ActionList
 from ulauncher.api.shared.event import (
     BaseEvent,
     InputTriggerEvent,
@@ -89,9 +89,8 @@ class Extension:
         action = method(*args)
         if action is not None:
             # convert iterables to list unless they are actions (ActionList is both)
-            if isinstance(action, Iterator) and not isinstance(action, BaseAction):
+            if isinstance(action, Iterator) and not isinstance(action, ActionList):
                 action = list(action)
-            assert isinstance(action, (list, BaseAction)), "on_event must return list of Results or a BaseAction"
             origin_event = getattr(event, "origin_event", event)
             self._client.send(Response(origin_event, action))
 
