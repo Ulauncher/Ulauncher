@@ -77,7 +77,7 @@ class Client:
         """
         Sends response to Ulauncher
 
-        :param ~ulauncher.api.shared.Response.Response response:
+        :param dict response:
         """
         logger.debug("Send message %s", response)
         self.framer.send(response)

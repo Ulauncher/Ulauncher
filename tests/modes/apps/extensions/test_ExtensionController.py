@@ -5,7 +5,6 @@ import pytest
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import InputTriggerEvent
 from ulauncher.api.shared.query import Query
-from ulauncher.api.shared.Response import Response
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 
 TEST_EXT_ID = "com.example.test-ext-id"
@@ -67,7 +66,7 @@ class TestExtensionController:
             controller.handle_response(controller.framer, object())
 
     def test_handle_response__is_called(self, controller, result_renderer):
-        response = Response(mock.Mock(), TestAction())
+        response = {"event": mock.Mock(), "action": TestAction()}
 
         controller.handle_response(controller.framer, response)
 

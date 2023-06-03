@@ -51,12 +51,12 @@ class DeferredResultRenderer:
         """
         Calls :func:`response.action.run`
         """
-        if self.active_controller != controller or self.active_event != response.event:
+        if self.active_controller != controller or self.active_event != response.get("event"):
             return
 
         self._cancel_loading()
         if self.app and hasattr(self.app, "window"):
-            GLib.idle_add(self.app.window.handle_action, response.action)
+            GLib.idle_add(self.app.window.handle_action, response.get("action"))
 
     def on_query_change(self):
         """

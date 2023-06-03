@@ -3,7 +3,6 @@ import logging
 import os
 
 from ulauncher.api.shared.event import InputTriggerEvent, PreferencesEvent, PreferencesUpdateEvent
-from ulauncher.api.shared.Response import Response
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
@@ -84,14 +83,13 @@ class ExtensionController:
         :meth:`~ulauncher.modes.extensions.DeferredResultRenderer.DeferredResultRenderer.handle_response`
         of `DeferredResultRenderer`
         """
-        if not isinstance(response, Response):
+        if not isinstance(response, dict):
             msg = f"Unsupported type {type(response).__name__}"
             raise TypeError(msg)
 
         logger.debug(
-            'Incoming response (%s, %s) from "%s"',
-            type(response.event).__name__,
-            type(response.action).__name__,
+            'Incoming response (%s) from "%s"',
+            response,
             self.extension_id,
         )
         self.result_renderer.handle_response(response, self)

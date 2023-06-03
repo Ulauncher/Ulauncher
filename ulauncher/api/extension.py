@@ -20,7 +20,6 @@ from ulauncher.api.shared.event import (
     UnloadEvent,
 )
 from ulauncher.api.shared.query import Query
-from ulauncher.api.shared.Response import Response
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -92,7 +91,7 @@ class Extension:
             if isinstance(action, Iterator) and not isinstance(action, ActionList):
                 action = list(action)
             origin_event = getattr(event, "origin_event", event)
-            self._client.send(Response(origin_event, action))
+            self._client.send({"event": origin_event, "action": action})
 
     def run(self):
         """

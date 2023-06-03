@@ -47,17 +47,19 @@ class TestDeferredResultRenderer:
         timer.cancel.assert_called_once_with()
 
     def test_handle_response__action__is_ran(self, renderer, controller):
-        response = mock.Mock()
-        response.event = KeywordQueryEvent(Query("test"))
-        renderer.active_event = response.event
+        action = mock.Mock()
+        event = KeywordQueryEvent(Query("test"))
+        response = {"event": event, "action": action}
+        renderer.active_event = event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
 
     def test_handle_response__keep_app_open_is_False__hide_is_called(self, renderer, controller):
-        response = mock.Mock()
-        response.event = KeywordQueryEvent(Query("test"))
-        response.action.keep_app_open = False
-        renderer.active_event = response.event
+        action = mock.Mock()
+        action.keep_app_open = False
+        event = KeywordQueryEvent(Query("test"))
+        response = {"event": event, "action": action}
+        renderer.active_event = event
         renderer.active_controller = controller
         renderer.handle_response(response, controller)
 
