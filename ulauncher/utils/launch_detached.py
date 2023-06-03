@@ -36,3 +36,7 @@ def launch_detached(cmd):
         )
     except Exception:
         logger.exception('Could not launch "%s"', cmd)
+
+
+def open_detached(path_or_url):
+    launch_detached(["xdg-open", path_or_url])

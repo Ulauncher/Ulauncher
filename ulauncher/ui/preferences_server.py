@@ -8,7 +8,6 @@ from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, Gtk
 
-from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions.extension_finder import find_extensions
@@ -24,6 +23,7 @@ from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.json_data import JsonData
+from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
 from ulauncher.utils.Theme import get_themes
@@ -246,12 +246,12 @@ class PreferencesServer:
     @route("/open/web-url")
     def open_url(self, url):
         logger.info("Open Web URL %s", url)
-        OpenAction(url).run()
+        open_detached(url)
 
     @route("/open/extensions-dir")
     def open_extensions_dir(self):
         logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
-        OpenAction(PATHS.EXTENSIONS).run()
+        open_detached(PATHS.EXTENSIONS)
 
     @route("/shortcut/get-all")
     def shortcut_get_all(self):
