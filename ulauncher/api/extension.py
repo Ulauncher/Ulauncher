@@ -87,7 +87,7 @@ class Extension:
 
     def run_event_listener(self, event, method, args):
         action = method(*args)
-        if action:
+        if action is not None:
             # convert iterables to list unless they are actions (ActionList is both)
             if isinstance(action, Iterator) and not isinstance(action, BaseAction):
                 action = list(action)

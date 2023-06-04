@@ -1,5 +1,5 @@
 import logging
-from functools import lru_cache
+from functools import lru_cache, partial
 
 from gi.repository import Gio, GLib
 
@@ -42,7 +42,7 @@ class DeferredResultRenderer:
         loading_message = Result(name="Loading...", icon=icon)
 
         self._cancel_loading()
-        self.loading = timer(self.LOADING_DELAY, GLib.idle_add(self.app.window.show_results, [loading_message]))
+        self.loading = timer(self.LOADING_DELAY, partial(self.app.window.show_results, [loading_message]))
         self.active_event = event
         self.active_controller = controller
 
