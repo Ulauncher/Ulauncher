@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 # This is a more compact alternative to JsonData, which does not require using decorators
 #
 # It works slightly differently by looping through the class props of the class and all inherited classes
@@ -18,7 +20,9 @@ class BaseDataClass(dict):
             if cls in BaseDataClass.__mro__:
                 continue
             defaults = {
-                k: v for k, v in vars(cls).items() if (not k.startswith("__") and not callable(getattr(cls, k)))
+                k: deepcopy(v)  # deep copy to handle https://stackoverflow.com/q/1132941/633921
+                for k, v in vars(cls).items()
+                if (not k.startswith("__") and not callable(getattr(cls, k)))
             }
             self.update(defaults)
 
