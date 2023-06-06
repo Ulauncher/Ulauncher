@@ -12,16 +12,18 @@ from ulauncher.utils.fold_user_path import fold_user_path
 class FileBrowserResult(Result):
     compact = True
     highlightable = True
+    path = ""
 
     """
     :param ~str path:
     """
 
-    # pylint: disable=super-init-not-called
     def __init__(self, path):
-        self.path = path
-        self.name = basename(path)
-        self.icon = get_icon_from_path(path)
+        super().__init__(
+            path=path,
+            name=basename(path),
+            icon=get_icon_from_path(path),
+        )
 
     def get_highlightable_input(self, query: Query):
         return basename(query)
@@ -34,8 +36,8 @@ class FileBrowserResult(Result):
             return OpenAction(self.path)
 
         if isdir(self.path):
-            open_folder = OpenFolderResult(self.path, f'Open Folder "{basename(self.path)}"')
+            open_folder = OpenFolderResult(name=f'Open Folder "{basename(self.path)}"', path=self.path)
         else:
-            open_folder = OpenFolderResult(dirname(self.path), "Open Containing Folder")
+            open_folder = OpenFolderResult(name="Open Containing Folder", path=dirname(self.path))
 
-        return [open_folder, CopyPathToClipboardResult(self.path)]
+        return [open_folder, CopyPathToClipboardResult(path=self.path)]
