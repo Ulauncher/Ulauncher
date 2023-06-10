@@ -21,7 +21,7 @@ class AppResult(Result):
     def __init__(self, app_info):
         super().__init__(
             name=app_info.get_display_name(),
-            icon=app_info.get_string("Icon"),
+            icon=app_info.get_string("Icon") or "",
             description=app_info.get_description() or app_info.get_generic_name() or "",
             keywords=app_info.get_keywords(),
             _app_id=app_info.get_id(),
