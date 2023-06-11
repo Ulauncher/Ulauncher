@@ -8,7 +8,6 @@ from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, Gtk
 
-from ulauncher.api.shared.event import PreferencesUpdateEvent
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions.extension_finder import find_extensions
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
@@ -293,7 +292,7 @@ class PreferencesServer:
         for id, new_value in data.get("preferences", {}).items():
             pref = manifest.preferences.get(id)
             if pref and new_value != pref.value:
-                controller.trigger_event(PreferencesUpdateEvent(id, pref.value, new_value))
+                controller.trigger_event({"type": "event:update_preferences", "args": [id, new_value, pref.value]})
         manifest.apply_user_preferences(data)
         manifest.save_user_preferences(extension_id)
 

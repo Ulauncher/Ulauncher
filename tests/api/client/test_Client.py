@@ -8,10 +8,6 @@ from ulauncher.api.extension import Extension
 
 class TestClient:
     @pytest.fixture(autouse=True)
-    def UnloadEvent(self, mocker):
-        return mocker.patch("ulauncher.api.client.Client.UnloadEvent")
-
-    @pytest.fixture(autouse=True)
     def sock_client(self, mocker):
         return mocker.patch("ulauncher.api.client.Client.Gio.SocketClient")
 
@@ -50,9 +46,9 @@ class TestClient:
         client.on_message(mock.Mock(), {"hello": "world"})
         extension.trigger_event.assert_called_with({"hello": "world"})
 
-    def test_on_close__UnloadEvent__is_triggered(self, client, extension, UnloadEvent):
+    def test_on_close__UnloadEvent__is_triggered(self, client, extension):
         client.on_close(mock.Mock())
-        extension.trigger_event.assert_called_with(UnloadEvent.return_value)
+        extension.trigger_event.assert_called_with({"type": "event:unload"})
 
     def test_send__ws_send__is_called(self, client):
         client.send({"hello": "world"})

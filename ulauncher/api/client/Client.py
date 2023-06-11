@@ -6,7 +6,6 @@ from functools import partial
 
 from gi.repository import Gio, GLib
 
-from ulauncher.api.shared.event import RegisterEvent, UnloadEvent
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.utils.framer import PickleFramer
 from ulauncher.utils.timer import timer
@@ -40,7 +39,7 @@ class Client:
         self.framer.connect("message_parsed", self.on_message)
         self.framer.connect("closed", self.on_close)
         self.framer.set_connection(self.conn)
-        self.send(RegisterEvent(self.extension.extension_id))
+        self.send({"type": "extension:socket_connected", "ext_id": self.extension.extension_id})
 
         mainloop = GLib.MainLoop.new(None, None)
         mainloop.run()
@@ -69,7 +68,7 @@ class Client:
         :param ulauncher.utils.framer.PickleFramer framer:
         """
         logger.warning("Connection closed. Exiting")
-        self.extension.trigger_event(UnloadEvent())
+        self.extension.trigger_event({"type": "event:unload"})
         # extension has 0.5 sec to save it's state, after that it will be terminated
         timer(0.5, partial(os._exit, 0))
 
@@ -79,5 +78,5 @@ class Client:
 
         :param dict response:
         """
-        logger.debug("Send message %s", response)
+        logger.debug('Send message with keys "%s"', set(response))
         self.framer.send(response)

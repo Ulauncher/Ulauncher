@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, RegisterEvent, ServerIsRunningError
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, ServerIsRunningError
 
 
 class TestExtensionServer:
@@ -69,7 +69,7 @@ class TestExtensionServer:
         server.start()
         server.handle_incoming(server.service, conn, source)
         extid = "id"
-        event = RegisterEvent(extid)
+        event = {"type": "extension:socket_connected", "ext_id": extid}
         assert id(PickleFramer.return_value) in server.pending
         server.handle_registration(PickleFramer.return_value, event)
         assert id(PickleFramer.return_value) not in server.pending

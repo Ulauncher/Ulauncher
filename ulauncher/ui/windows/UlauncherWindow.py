@@ -5,6 +5,8 @@ from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
+from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.LayerShell import LayerShellOverlay
@@ -236,6 +238,18 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.app.query = action
         elif isinstance(action, list):
             self.show_results(action)
+        elif isinstance(action, dict):
+            action_type = action.get("type", "")
+            controller = None
+            if action_type == "event:activate_custom":
+                controller = DeferredResultRenderer.get_instance().get_active_controller()
+                self.hide_and_clear_input()
+            elif action.get("ext_id") and action_type.startswith("event"):
+                controller = ExtensionServer.get_instance().get_controller_by_id(action.get("ext_id"))
+
+            if controller:
+                controller.trigger_event(action)
+
         elif not action:
             self.hide_and_clear_input()
         elif action is not True:
