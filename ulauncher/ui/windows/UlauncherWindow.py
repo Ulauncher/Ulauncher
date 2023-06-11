@@ -16,6 +16,7 @@ from ulauncher.ui.LayerShell import LayerShellOverlay
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.icon import load_icon_surface
+from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_monitor
@@ -240,7 +241,17 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.show_results(action)
         elif isinstance(action, dict):
             action_type = action.get("type", "")
+            data = action.get("data")
             controller = None
+            if action_type == "action:open" and data:
+                open_detached(data)
+                self.hide_and_clear_input()
+            if action_type == "action:clipboard_store" and data:
+                clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+                clipboard.set_text(data, -1)
+                clipboard.store()
+                self.hide_and_clear_input()
+
             if action_type == "event:activate_custom":
                 controller = DeferredResultRenderer.get_instance().get_active_controller()
                 if not action.get("keep_app_open", False):

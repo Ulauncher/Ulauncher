@@ -1,17 +1,2 @@
-from gi.repository import Gdk, Gtk
-
-from ulauncher.api.shared.action.BaseAction import BaseAction
-
-
-class CopyToClipboardAction(BaseAction):
-    """
-    Copy text to the clipboard
-    """
-
-    def __init__(self, text: str):
-        self.text = text
-
-    def run(self):
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(self.text, -1)
-        clipboard.store()
+def CopyToClipboardAction(text: str):
+    return {"type": "action:clipboard_store", "data": text}
