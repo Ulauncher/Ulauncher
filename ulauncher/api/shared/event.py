@@ -1,12 +1,7 @@
 import pickle
-from typing import Any, Dict, List
+from typing import Any, List
 
 from ulauncher.api.shared.query import Query
-
-# This holds references to custom data for use with ExtensionCustomAction
-# This way the data never travels to the Ulauncher app and back. Only a reference to it.
-# So the data can be anything, even if the serialization doesn't handle it
-custom_data_store: Dict[int, Any] = {}
 
 
 class BaseEvent:
@@ -18,14 +13,8 @@ class BaseEvent:
     def __ne__(self, other):
         return pickle.dumps(self) != pickle.dumps(other)
 
-
-class RegisterEvent(BaseEvent):
-    """
-    This event is triggered when a new extension connects to the server socket.
-    """
-
-    def __init__(self, extension_id):
-        self.extension_id = extension_id
+    def __init__(self, args: List[Any]):
+        self.args = args
 
 
 class LaunchTriggerEvent(BaseEvent):
@@ -33,17 +22,11 @@ class LaunchTriggerEvent(BaseEvent):
     When user activates a launch trigger
     """
 
-    def __init__(self, trigger_id: str):
-        self.args = [trigger_id]
-
 
 class InputTriggerEvent(BaseEvent):
     """
     When user activates an input trigger, passing the input
     """
-
-    def __init__(self, trigger_id: str, input_text: str):
-        self.args = [input_text, trigger_id]
 
 
 class KeywordQueryEvent(BaseEvent):
@@ -51,10 +34,9 @@ class KeywordQueryEvent(BaseEvent):
     Deprecated older variant of InputTriggerEvent
     """
 
-    def __init__(self, query: Query, origin_event=None):
-        self.query = query
-        self.origin_event = origin_event
-        self.args = [query]
+    def __init__(self, query: str):
+        self.query = Query(query)
+        self.args = [self.query]
 
     def get_keyword(self) -> str:
         """
@@ -81,23 +63,6 @@ class ItemEnterEvent(BaseEvent):
     :param str data:
     """
 
-    def __init__(self, ref):
-        self.ref = ref
-
-    @property
-    def args(self):
-        return [self.get_data()]
-
-    def get_data(self):
-        """
-        :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
-        """
-        data = custom_data_store.get(self.ref)
-        # Remove all entries except the one the user choose, because get_data can be called more than once
-        custom_data_store.clear()
-        custom_data_store[self.ref] = data
-        return data
-
 
 class UnloadEvent(BaseEvent):
     """
@@ -121,11 +86,9 @@ class PreferencesUpdateEvent(BaseEvent):
     old_value = None
     new_value = None
 
-    def __init__(self, id, previous_value, value):
-        self.id = id
-        self.old_value = previous_value
-        self.new_value = value
-        self.args = [id, value, previous_value]
+    def __init__(self, args):
+        self.id, self.new_value, self.old_value = args
+        self.args = args
 
 
 class PreferencesEvent(BaseEvent):
@@ -137,10 +100,19 @@ class PreferencesEvent(BaseEvent):
 
     preferences = None
 
-    def __init__(self, preferences):
-        self.preferences = preferences
-        self.args = [preferences]
+    def __init__(self, args):
+        self.preferences = args[0]
+        self.args = args
 
 
 # Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
 SystemExitEvent = UnloadEvent
+
+events = {
+    "event:launch_trigger": LaunchTriggerEvent,
+    "event:update_preferences": PreferencesUpdateEvent,
+    "event:legacy_preferences_load": PreferencesEvent,
+    "event:unload": UnloadEvent,
+    "event:input_trigger": InputTriggerEvent,
+    "event:activate_custom": ItemEnterEvent,
+}

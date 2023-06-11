@@ -27,7 +27,7 @@ class Result(BaseDataClass):
                 self.icon = f"{ext_path}/{self.icon}"
 
     def __setitem__(self, key, value):
-        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, str, BaseAction)):
+        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str, BaseAction)):
             msg = f"Invalid {key} argument. Expected bool, string or BaseAction"
             raise KeyError(msg)
 
@@ -47,9 +47,7 @@ class Result(BaseDataClass):
         Handle the main action
         """
         handler = self.on_alt_enter if alt else self.on_enter
-        if isinstance(handler, (bool, str, BaseAction)):  # For extensions
-            return handler
-        return handler(query) if callable(handler) else None
+        return handler(query) if callable(handler) else handler
 
     def get_searchable_fields(self):
         return [(self.name, 1), (self.description, 0.8)]

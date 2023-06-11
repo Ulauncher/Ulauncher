@@ -1,16 +1,10 @@
 import html
 
 from ulauncher.api.result import Result
-from ulauncher.api.shared.event import LaunchTriggerEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
-
-
-# bind function to args, ignoring further args on call time
-def bind_final(fn, *args):
-    return lambda *_: fn(*args)
 
 
 class ExtensionMode(BaseMode):
@@ -44,7 +38,11 @@ class ExtensionMode(BaseMode):
             for trigger_id, trigger in controller.manifest.triggers.items():
                 action = None
                 if trigger.keyword is None:
-                    action = bind_final(controller.trigger_event, LaunchTriggerEvent(trigger_id))
+                    action = {
+                        "type": "event:launch_trigger",
+                        "args": [trigger_id],
+                        "ext_id": controller.extension_id,
+                    }
                 elif trigger.user_keyword:
                     action = f"{trigger.user_keyword} "
 

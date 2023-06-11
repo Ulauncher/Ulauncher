@@ -1,8 +1,8 @@
 import contextlib
 import logging
 import os
+from typing import Any, Dict
 
-from ulauncher.api.shared.event import InputTriggerEvent, PreferencesEvent, PreferencesUpdateEvent
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
@@ -20,7 +20,6 @@ class ExtensionController:
 
     extension_id = None
     manifest: ExtensionManifest
-    _debounced_send_event = None
 
     def __init__(self, controllers, framer, extension_id):
         if not extension_id:
@@ -42,8 +41,8 @@ class ExtensionController:
         # Use default if unspecified or 0.
         self._debounced_send_event = debounce(self.manifest.input_debounce or 0.05)(self._send_event)
 
-        # PreferencesEvent is candidate for future removal
-        self._send_event(PreferencesEvent(self.manifest.get_user_preferences()))
+        # legacy_preferences_load is useless and deprecated
+        self._send_event({"type": "event:legacy_preferences_load", "args": [self.manifest.get_user_preferences()]})
         logger.info('Extension "%s" connected', extension_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
@@ -58,14 +57,20 @@ class ExtensionController:
         :returns: :class:`BaseAction` object
         """
         trigger_id = self.manifest.find_matching_trigger(user_keyword=query.keyword)
-        return self.trigger_event(InputTriggerEvent(trigger_id, query.argument))
+        return self.trigger_event(
+            {
+                "type": "event:input_trigger",
+                "ext_id": self.extension_id,
+                "args": [query.argument, trigger_id],
+            }
+        )
 
-    def trigger_event(self, event):
+    def trigger_event(self, event: Dict[str, Any]):
         """
         Triggers event for an extension
         """
         # don't debounce events that are triggered by updates in preferences
-        if isinstance(event, PreferencesUpdateEvent):
+        if event.get("type") == "event:update_preferences":
             self._send_event(event)
         else:
             self._debounced_send_event(event)
@@ -78,18 +83,10 @@ class ExtensionController:
         return expanded_path if os.path.isfile(expanded_path) else icon
 
     # pylint: disable=unused-argument
-    def handle_response(self, _framer, response):
-        """
-        :meth:`~ulauncher.modes.extensions.DeferredResultRenderer.DeferredResultRenderer.handle_response`
-        of `DeferredResultRenderer`
-        """
-        if not isinstance(response, dict):
-            msg = f"Unsupported type {type(response).__name__}"
-            raise TypeError(msg)
-
+    def handle_response(self, _framer, response: Dict[str, Any]):
         logger.debug(
-            'Incoming response (%s) from "%s"',
-            response,
+            'Incoming response with keys "%s" from "%s"',
+            set(response),
             self.extension_id,
         )
         self.result_renderer.handle_response(response, self)

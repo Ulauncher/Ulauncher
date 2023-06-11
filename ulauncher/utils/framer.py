@@ -114,7 +114,7 @@ class PickleFramer(GObject.GObject):
             ptr += INTSZ
             objp = self._inbound[ptr : ptr + msgsize]
             obj = pickle.loads(objp)
-            log.debug("Received message %s", obj)
+            log.debug('Received message with keys "%s"', set(obj))
             self.emit("message_parsed", obj)
             ptr += msgsize
 

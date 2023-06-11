@@ -5,7 +5,6 @@ from functools import lru_cache
 
 from gi.repository import Gio, GObject
 
-from ulauncher.api.shared.event import RegisterEvent
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.utils.framer import PickleFramer
@@ -57,12 +56,12 @@ class ExtensionServer:
         self.pending.pop(id(framer))
 
     def handle_registration(self, framer, event):
-        if isinstance(event, RegisterEvent):
+        if isinstance(event, dict) and event.get("type") == "extension:socket_connected":
             pended = self.pending.pop(id(framer))
             if pended:
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
-            ExtensionController(self.controllers, framer, event.extension_id)
+            ExtensionController(self.controllers, framer, event.get("ext_id"))
         else:
             logger.debug("Unhandled message received: %s", event)
 
@@ -88,6 +87,13 @@ class ExtensionServer:
         :rtype: list of  :class:`~ulauncher.modes.extensions.ExtensionController.ExtensionController`
         """
         return self.controllers.values()
+
+    def get_controller_by_id(self, extension_id):
+        """
+        :param str extension_id:
+        :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
+        """
+        return self.controllers.get(extension_id)
 
     def get_controller_by_keyword(self, keyword):
         """
