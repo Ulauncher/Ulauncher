@@ -243,7 +243,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             controller = None
             if action_type == "event:activate_custom":
                 controller = DeferredResultRenderer.get_instance().get_active_controller()
-                self.hide_and_clear_input()
+                if not action.get("keep_app_open", False):
+                    self.hide_and_clear_input()
             elif action.get("ext_id") and action_type.startswith("event"):
                 controller = ExtensionServer.get_instance().get_controller_by_id(action.get("ext_id"))
 
