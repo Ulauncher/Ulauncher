@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 
@@ -62,12 +61,8 @@ class TestExtensionController:
             controller.handle_response(controller.framer, object())
 
     def test_handle_response__is_called(self, controller, result_renderer):
-        response = {"event": mock.Mock(), "action": TestAction()}
+        response = {"event": mock.Mock(), "action": {}}
 
         controller.handle_response(controller.framer, response)
 
         result_renderer.handle_response.assert_called_with(response, controller)
-
-
-class TestAction(BaseAction):
-    pass

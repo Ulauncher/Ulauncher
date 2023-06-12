@@ -1,6 +1,5 @@
 import os
 
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.fuzzy_search import get_score
@@ -27,8 +26,8 @@ class Result(BaseDataClass):
                 self.icon = f"{ext_path}/{self.icon}"
 
     def __setitem__(self, key, value):
-        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str, BaseAction)):
-            msg = f"Invalid {key} argument. Expected bool, string or BaseAction"
+        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str)):
+            msg = f"Invalid {key} argument. Expected bool, dict or string"
             raise KeyError(msg)
 
         super().__setitem__(key, value)

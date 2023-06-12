@@ -8,6 +8,6 @@ class EventListener:
         :param ~ulauncher.api.shared.event.BaseEvent event: event that listener was subscribed to
         :param ~ulauncher.api.Extension extension:
 
-        :rtype: :class:`~ulauncher.api.shared.action.BaseAction.BaseAction` or None
-        :return: Instance of :class:`BaseAction` or :code:`None`
+        :rtype: bool, strict, dict or None
+        :return: Action to run
         """

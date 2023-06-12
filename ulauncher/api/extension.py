@@ -9,7 +9,6 @@ from typing import Any, Dict, Iterator, Optional, Type, Union
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.action.ActionList import ActionList
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, events
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
@@ -99,8 +98,8 @@ class Extension:
     def run_event_listener(self, event, method, args):
         action = method(*args)
         if action is not None:
-            # convert iterables to list unless they are actions (ActionList is both)
-            if isinstance(action, Iterator) and not isinstance(action, ActionList):
+            # convert iterables to list
+            if isinstance(action, Iterator):
                 action = list(action)
             self._client.send({"event": event or event, "action": action})
 

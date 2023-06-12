@@ -54,7 +54,7 @@ class ExtensionController:
     def handle_query(self, query):
         """
         Handles user query with a keyword from this extension
-        :returns: :class:`BaseAction` object
+        :returns: action object
         """
         trigger_id = self.manifest.find_matching_trigger(user_keyword=query.keyword)
         return self.trigger_event(

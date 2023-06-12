@@ -1,8 +1,8 @@
 import logging
+from typing import Any, Dict, Union
 
 from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 
-from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
@@ -22,6 +22,47 @@ from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
+
+
+def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:
+    if isinstance(event, bool):
+        return event
+    if isinstance(event, list):
+        window.show_results(event)
+        return True
+    if isinstance(event, str):
+        window.app.query = event
+        return True
+
+    event_type = event.get("type", "")
+    data = event.get("data")
+    extension_id = event.get("ext_id")
+    controller = None
+    if event_type == "action:open" and data:
+        open_detached(data)
+    elif event_type == "action:clipboard_store" and data:
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(data, -1)
+        clipboard.store()
+        window.hide_and_clear_input()
+    elif event_type == "action:legacy_run_many" and isinstance(data, list):
+        keep_open = False
+        for action in data:
+            if handle_event(window, action):
+                keep_open = True
+        return keep_open
+    elif event_type == "event:activate_custom":
+        controller = DeferredResultRenderer.get_instance().get_active_controller()
+    elif event_type.startswith("event") and extension_id:
+        controller = ExtensionServer.get_instance().get_controller_by_id(extension_id)
+    else:
+        logger.warning("Invalid result from mode: %s", type(event).__name__)
+
+    if controller:
+        controller.trigger_event(event)
+        return event.get("keep_app_open", False) if event_type == "event:activate_custom" else True
+
+    return False
 
 
 class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
@@ -163,7 +204,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.app._query = self.input.get_text().lstrip()
         if self.is_visible():
             # input_changed can trigger when hiding window
-            self.handle_action(ModeHandler.get_instance().on_query_change(self.app.query))
+            self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
     def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
         """
@@ -204,7 +245,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
             if keyname in ("Return", "KP_Enter"):
                 result = self.results_nav.activate(self.app.query, alt=alt)
-                self.handle_action(result)
+                self.handle_event(result)
                 return True
             if alt and keyname in jump_keys:
                 try:
@@ -231,41 +272,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def app(self):
         return self.get_application()
 
-    def handle_action(self, action):
-        if isinstance(action, BaseAction):
-            action.run()
-            action = action.keep_app_open
-        if isinstance(action, str):
-            self.app.query = action
-        elif isinstance(action, list):
-            self.show_results(action)
-        elif isinstance(action, dict):
-            action_type = action.get("type", "")
-            data = action.get("data")
-            controller = None
-            if action_type == "action:open" and data:
-                open_detached(data)
-                self.hide_and_clear_input()
-            if action_type == "action:clipboard_store" and data:
-                clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-                clipboard.set_text(data, -1)
-                clipboard.store()
-                self.hide_and_clear_input()
-
-            if action_type == "event:activate_custom":
-                controller = DeferredResultRenderer.get_instance().get_active_controller()
-                if not action.get("keep_app_open", False):
-                    self.hide_and_clear_input()
-            elif action.get("ext_id") and action_type.startswith("event"):
-                controller = ExtensionServer.get_instance().get_controller_by_id(action.get("ext_id"))
-
-            if controller:
-                controller.trigger_event(action)
-
-        elif not action:
+    def handle_event(self, event: Union[bool, list, str, Dict[str, Any], None]):
+        if event is not None and not handle_event(self, event):
             self.hide_and_clear_input()
-        elif action is not True:
-            logger.warning("Invalid result from mode: %s, expected list, string or boolean", type(action).__name__)
 
     def apply_css(self, widget):
         Gtk.StyleContext.add_provider(

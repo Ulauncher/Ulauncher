@@ -56,7 +56,7 @@ class DeferredResultRenderer:
 
         self._cancel_loading()
         if self.app and hasattr(self.app, "window"):
-            GLib.idle_add(self.app.window.handle_action, response.get("action"))
+            GLib.idle_add(self.app.window.handle_event, response.get("action"))
 
     def on_query_change(self):
         """
