@@ -62,6 +62,11 @@ class ItemEnterEvent(BaseEvent):
 
     :param str data:
     """
+    def get_data(self):
+        """
+        :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
+        """
+        return self.args[0]
 
 
 class UnloadEvent(BaseEvent):
