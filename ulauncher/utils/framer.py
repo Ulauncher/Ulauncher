@@ -1,5 +1,5 @@
+import json
 import logging
-import pickle
 from collections import deque
 from struct import pack, unpack_from
 
@@ -67,7 +67,7 @@ class PickleFramer(GObject.GObject):
             self._conn.close_async(GLib.PRIORITY_DEFAULT, None, self._close_ready, None)
 
     def send(self, obj: object):
-        objp = pickle.dumps(obj)
+        objp = json.dumps(obj).encode()
         msg = pack("I", len(objp)) + objp
         self._outbound.append(msg)
         self._write_next()
@@ -113,7 +113,7 @@ class PickleFramer(GObject.GObject):
                 break
             ptr += INTSZ
             objp = self._inbound[ptr : ptr + msgsize]
-            obj = pickle.loads(objp)
+            obj = json.loads(objp)
             log.debug('Received message with keys "%s"', set(obj))
             self.emit("message_parsed", obj)
             ptr += msgsize

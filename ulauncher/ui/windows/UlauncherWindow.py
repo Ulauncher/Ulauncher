@@ -3,6 +3,7 @@ from typing import Any, Dict, Union
 
 from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 
+from ulauncher.api.result import Result
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
@@ -28,7 +29,7 @@ def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:
     if isinstance(event, bool):
         return event
     if isinstance(event, list):
-        window.show_results(event)
+        window.show_results(res if isinstance(res, Result) else Result(**res) for res in event)
         return True
     if isinstance(event, str):
         window.app.query = event
