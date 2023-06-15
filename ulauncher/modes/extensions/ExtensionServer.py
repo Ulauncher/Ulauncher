@@ -7,7 +7,7 @@ from gi.repository import Gio, GObject
 
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.utils.framer import PickleFramer
+from ulauncher.utils.framer import JSONFramer
 
 logger = logging.getLogger()
 
@@ -46,7 +46,7 @@ class ExtensionServer:
 
     # pylint: disable=unused-argument
     def handle_incoming(self, _service, conn, _source):
-        framer = PickleFramer()
+        framer = JSONFramer()
         msg_handler_id = framer.connect("message_parsed", self.handle_registration)
         closed_handler_id = framer.connect("closed", self.handle_pending_close)
         self.pending[id(framer)] = (framer, msg_handler_id, closed_handler_id)

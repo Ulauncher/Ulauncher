@@ -33,8 +33,8 @@ class TestExtensionServer:
         return mocker.patch("ulauncher.modes.extensions.ExtensionServer.os.unlink")
 
     @pytest.fixture(autouse=True)
-    def PickleFramer(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.PickleFramer")
+    def JSONFramer(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.JSONFramer")
 
     @pytest.fixture
     def server(self):
@@ -55,24 +55,24 @@ class TestExtensionServer:
         with pytest.raises(ServerIsRunningError):
             server.start()
 
-    def test_handle_incoming(self, server, PickleFramer):
+    def test_handle_incoming(self, server, JSONFramer):
         conn = mock.Mock()
         source = mock.Mock()
         server.start()
         server.handle_incoming(server.service, conn, source)
-        assert id(PickleFramer.return_value) in server.pending
-        PickleFramer.return_value.set_connection.assert_called_with(conn)
+        assert id(JSONFramer.return_value) in server.pending
+        JSONFramer.return_value.set_connection.assert_called_with(conn)
 
-    def test_handle_registration(self, server, PickleFramer, GObject, ExtensionController):
+    def test_handle_registration(self, server, JSONFramer, GObject, ExtensionController):
         conn = mock.Mock()
         source = mock.Mock()
         server.start()
         server.handle_incoming(server.service, conn, source)
         extid = "id"
         event = {"type": "extension:socket_connected", "ext_id": extid}
-        assert id(PickleFramer.return_value) in server.pending
-        server.handle_registration(PickleFramer.return_value, event)
-        assert id(PickleFramer.return_value) not in server.pending
+        assert id(JSONFramer.return_value) in server.pending
+        server.handle_registration(JSONFramer.return_value, event)
+        assert id(JSONFramer.return_value) not in server.pending
         assert GObject.signal_handler_disconnect.call_count == 2
         ExtensionController.assert_called_once()
 

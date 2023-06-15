@@ -17,7 +17,7 @@ class TestClient:
 
     @pytest.fixture(autouse=True)
     def framer(self, mocker):
-        return mocker.patch("ulauncher.api.client.Client.PickleFramer")
+        return mocker.patch("ulauncher.api.client.Client.JSONFramer")
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):

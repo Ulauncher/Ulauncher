@@ -16,14 +16,14 @@ class InvalidStateError(RuntimeError):
     """
 
 
-class PickleFramer(GObject.GObject):
+class JSONFramer(GObject.GObject):
     """
-    The PickleFramer frames objects serialized using Pickle into and out of a Gio based
+    The JSONFramer frames objects serialized using JSON into and out of a Gio based
     SocketConnection instances.
 
-    The binary data resulting from Pickle serialization has no inherent boundaries, so this class
+    The binary data resulting from JSON serialization has no inherent boundaries, so this class
     uses a typical "bytes to follow" word to indicate the size of each frame worth of data. This
-    way the receiver, which is expected to be another instance of PickleFramer, can correctly
+    way the receiver, which is expected to be another instance of JSONFramer, can correctly
     extract the right number of bytes to deserialize back into the original object. This class
     handles all of the async API of the Gio stream interface as well as some of the edge cases such
     as short reads and error states.
