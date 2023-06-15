@@ -1,4 +1,3 @@
-import pickle
 from typing import Any, List
 
 from ulauncher.api.shared.query import Query
@@ -6,12 +5,6 @@ from ulauncher.api.shared.query import Query
 
 class BaseEvent:
     args: List[Any] = []
-
-    def __eq__(self, other):
-        return pickle.dumps(self) == pickle.dumps(other)
-
-    def __ne__(self, other):
-        return pickle.dumps(self) != pickle.dumps(other)
 
     def __init__(self, args: List[Any]):
         self.args = args
