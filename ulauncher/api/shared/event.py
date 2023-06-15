@@ -36,7 +36,7 @@ class KeywordQueryEvent(BaseEvent):
 
     def __init__(self, query: str):
         self.query = Query(query)
-        self.args = [self.query]
+        super().__init__([self.query])
 
     def get_keyword(self) -> str:
         """
@@ -93,8 +93,8 @@ class PreferencesUpdateEvent(BaseEvent):
     new_value = None
 
     def __init__(self, args):
+        super().__init__(args)
         self.id, self.new_value, self.old_value = args
-        self.args = args
 
 
 class PreferencesEvent(BaseEvent):
@@ -107,8 +107,8 @@ class PreferencesEvent(BaseEvent):
     preferences = None
 
     def __init__(self, args):
+        super().__init__(args)
         self.preferences = args[0]
-        self.args = args
 
 
 # Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
