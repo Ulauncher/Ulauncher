@@ -73,6 +73,7 @@ disable=broad-except,         # Try/except catching all exceptionds instead of s
         unrecognized-option, useless-option-value,
         c-extension-no-member,
         line-too-long,        # Handled by black
+        too-many-branches,    # Handled by ruff
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

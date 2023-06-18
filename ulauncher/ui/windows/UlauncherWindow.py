@@ -25,7 +25,7 @@ from ulauncher.utils.wm import get_monitor
 logger = logging.getLogger()
 
 
-def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:
+def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:  # noqa: PLR0912
     if isinstance(event, bool):
         return event
     if isinstance(event, list):
