@@ -8,6 +8,7 @@ from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.ModeHandler import ModeHandler
+from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.LayerShell import LayerShellOverlay
 
@@ -45,6 +46,8 @@ def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:
         clipboard.set_text(data, -1)
         clipboard.store()
         window.hide_and_clear_input()
+    elif event_type == "action:legacy_run_script" and isinstance(data, list):
+        run_script(*data)
     elif event_type == "action:legacy_run_many" and isinstance(data, list):
         keep_open = False
         for action in data:
