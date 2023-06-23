@@ -75,17 +75,22 @@ For the v6 branch you need the the following to setup the local build environmen
   ```
 </details>
 
-### How to build, run and contribute
+#### Running the app from the local repository
 
-Use the v6 branch as the base branch and target for new Pull requests, and check that your contributions haven't already been fixed.
-
-1. Fork the repo here and clone your fork locally.
-1. Create a new branch for your PR
-1. Make your changes to the code
+1. `git clone` the repository locally
 1. If you have Ulauncher running, make sure you stop it. For systemd this will do it: `systemctl --user stop ulauncher`
-1. `./bin/ulauncher -v` runs the app from the git directory (`-v` turns on verbose logging), so you can test it.
-1. Commit and push your changes. When possible, try to make your changes so that each commit changes just one thing.
-1. Create a pull request (provide the relevant information suggested by the template)
+1. Open a terminal window and cd into the ulauncher repository root directory.
+1. Run `./bin/ulauncher -v` to start the app (`-v` turns on verbose logging), so you can test it.
+1. When you are done testing or want to restart, press ctrl+c to stop the Ulauncher process.
+
+### How to contribute
+
+Use the Ulauncher working branch (v6), and verify that the issue or feature hasn't already been resolved there.
+
+1. Follow the steps above to set up and test locally, but fork the Ulauncher repo and git clone from that fork instead (or change/add the remote to your fork).
+1. When you are ready to contribute code, create a new branch for your PR.
+1. Commit and push your changes. When possible, try to make your changes so that each commit changes just one thing, and please use [Conventional Commits](https://www.conventionalcommits.org/) for your commit messages.
+1. Create a pull request (provide the relevant information suggested by the template). Use the v6 branch as the base branch and target.
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
 
