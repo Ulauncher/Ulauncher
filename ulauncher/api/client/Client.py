@@ -7,7 +7,7 @@ from functools import partial
 from gi.repository import Gio, GLib
 
 from ulauncher.api.shared.socket_path import get_socket_path
-from ulauncher.utils.framer import PickleFramer
+from ulauncher.utils.framer import JSONFramer
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -35,7 +35,7 @@ class Client:
         if not self.conn:
             msg = f"Failed to connect to socket_path {self.socket_path}"
             raise RuntimeError(msg)
-        self.framer = PickleFramer()
+        self.framer = JSONFramer()
         self.framer.connect("message_parsed", self.on_message)
         self.framer.connect("closed", self.on_close)
         self.framer.set_connection(self.conn)
@@ -49,7 +49,7 @@ class Client:
         """
         Parses message from Ulauncher and triggers extension event
 
-        :param ulauncher.utils.framer.PickleFramer framer:
+        :param ulauncher.utils.framer.JSONFramer framer:
         :param ulauncher.api.shared.events.Event event:
         """
         logger.debug("Incoming event %s", type(event).__name__)
@@ -65,7 +65,7 @@ class Client:
 
         Triggers :class:`~ulauncher.api.shared.event.UnloadEvent` for graceful shutdown
 
-        :param ulauncher.utils.framer.PickleFramer framer:
+        :param ulauncher.utils.framer.JSONFramer framer:
         """
         logger.warning("Connection closed. Exiting")
         self.extension.trigger_event({"type": "event:unload"})

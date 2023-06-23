@@ -1,5 +1,5 @@
+import json
 import logging
-import pickle
 from collections import deque
 from struct import pack, unpack_from
 
@@ -16,14 +16,14 @@ class InvalidStateError(RuntimeError):
     """
 
 
-class PickleFramer(GObject.GObject):
+class JSONFramer(GObject.GObject):
     """
-    The PickleFramer frames objects serialized using Pickle into and out of a Gio based
+    The JSONFramer frames objects serialized using JSON into and out of a Gio based
     SocketConnection instances.
 
-    The binary data resulting from Pickle serialization has no inherent boundaries, so this class
+    The binary data resulting from JSON serialization has no inherent boundaries, so this class
     uses a typical "bytes to follow" word to indicate the size of each frame worth of data. This
-    way the receiver, which is expected to be another instance of PickleFramer, can correctly
+    way the receiver, which is expected to be another instance of JSONFramer, can correctly
     extract the right number of bytes to deserialize back into the original object. This class
     handles all of the async API of the Gio stream interface as well as some of the edge cases such
     as short reads and error states.
@@ -67,7 +67,7 @@ class PickleFramer(GObject.GObject):
             self._conn.close_async(GLib.PRIORITY_DEFAULT, None, self._close_ready, None)
 
     def send(self, obj: object):
-        objp = pickle.dumps(obj)
+        objp = json.dumps(obj).encode()
         msg = pack("I", len(objp)) + objp
         self._outbound.append(msg)
         self._write_next()
@@ -113,7 +113,7 @@ class PickleFramer(GObject.GObject):
                 break
             ptr += INTSZ
             objp = self._inbound[ptr : ptr + msgsize]
-            obj = pickle.loads(objp)
+            obj = json.loads(objp)
             log.debug('Received message with keys "%s"', set(obj))
             self.emit("message_parsed", obj)
             ptr += msgsize
