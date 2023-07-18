@@ -47,7 +47,7 @@ constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
 
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
-def normalize_expr(expr):
+def normalize_expr(expr: str) -> str:
     # Dot is the Python notation for decimals
     expr = expr.replace(",", ".")
     # ^ means xor in Python. ** is the Python notation for pow
@@ -60,7 +60,7 @@ def normalize_expr(expr):
 
 
 @lru_cache(maxsize=1000)
-def eval_expr(expr):
+def eval_expr(expr: str):
     """
     >>> eval_expr('2^6')
     64
@@ -81,7 +81,7 @@ def eval_expr(expr):
 
 
 @lru_cache(maxsize=1000)
-def _is_enabled(query):  # noqa: PLR0911
+def _is_enabled(query: str):  # noqa: PLR0911
     query = normalize_expr(query)
     try:
         node = ast.parse(query, mode="eval").body
@@ -98,7 +98,7 @@ def _is_enabled(query):  # noqa: PLR0911
             # Allow for minus, but no other operators
             return isinstance(node.op, ast.USub)
         if isinstance(node, ast.Call):
-            return node.func.id in functions
+            return node.func.id in functions  # type: ignore[attr-defined]
     except SyntaxError:
         pass
     return False
@@ -128,11 +128,7 @@ class CalcMode(BaseMode):
 
     def handle_query(self, query):
         try:
-            result = eval_expr(query)
-            if result is None:
-                raise ValueError
-
-            result = CalcResult(result=result)
+            result = CalcResult(result=eval_expr(query))
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]

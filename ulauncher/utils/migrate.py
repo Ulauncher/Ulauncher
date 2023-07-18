@@ -31,10 +31,10 @@ def _load_legacy(path: Path):
 def _storeJSON(path, data):
     try:
         Path(path).write_text(json.dumps(data, indent=4))
-        return True
     except Exception as e:
         _logger.warning('Could not store JSON file "%s": %s', path, e)
         return False
+    return True
 
 
 def _migrate_file(from_path, to_path, transform=None, overwrite=False):
@@ -129,13 +129,13 @@ def v5_to_v6_destructive():
         *Path(PATHS.DATA).rglob("last.log"),
     ]
     if cleanup_list:
-        print("Removing deprecated data files:")
-        print("\n".join(map(str, cleanup_list)))
+        print("Removing deprecated data files:")  # noqa: T201
+        print("\n".join(map(str, cleanup_list)))  # noqa: T201
         for file in cleanup_list:
             file.unlink()
 
     if Path(CACHE_PATH).is_dir():
-        print(f"Removing deprecated cache directory '{CACHE_PATH}'")
+        print(f"Removing deprecated cache directory '{CACHE_PATH}'")  # noqa: T201
         rmtree(CACHE_PATH)
 
     # Delete old preferences

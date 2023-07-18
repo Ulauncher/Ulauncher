@@ -27,14 +27,14 @@ def main(is_dev=False):
     """
     options = get_options()
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
-        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")
+        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
         sys.exit(2)
     if options.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
         # from starting a second Ulauncher background process we have to make sure the
         # --no-window flag prevents the app from starting.
-        print("The --hide-window argument has been renamed to --no-window")
+        print("The --hide-window argument has been renamed to --no-window")  # noqa: T201
         sys.exit(2)
 
     if is_dev:

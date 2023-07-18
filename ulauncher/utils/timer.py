@@ -35,6 +35,6 @@ def timer(delay_sec, func, repeat=False):
 
     """
     frac, _ = math.modf(delay_sec)
-    source = GLib.timeout_source_new_seconds(delay_sec) if frac == 0.0 else GLib.timeout_source_new(delay_sec * 1000)
+    source = GLib.timeout_source_new_seconds(delay_sec) if frac == 0 else GLib.timeout_source_new(delay_sec * 1000)
 
     return TimerContext(source, func, repeat)

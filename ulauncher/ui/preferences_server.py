@@ -136,9 +136,10 @@ class PreferencesServer:
                 [mime_type, _] = mimetypes.guess_type(params.path)
                 stream = Gio.file_new_for_path(params.path).read()
                 scheme_request.finish(stream, -1, mime_type)
-                return
             except Exception as e:
                 logger.warning("Couldn't handle file request from '%s' (%s: %s)", uri, type(e).__name__, e)
+            else:
+                return
 
         logger.warning("Unhandled request from '%s'.", uri)
 

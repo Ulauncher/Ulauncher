@@ -9,6 +9,7 @@ from ulauncher.utils.fuzzy_search import get_score
 
 class FileBrowserMode(BaseMode):
     LIMIT = 50
+    THRESHOLD = 40
 
     def is_enabled(self, query: str) -> bool:
         """
@@ -39,11 +40,10 @@ class FileBrowserMode(BaseMode):
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
             remainder = "/".join(path.parts[closest_parent.count("/") + 1 :])
 
-            if closest_parent == ".":
-                msg = f'Invalid path "{path}"'
-                raise RuntimeError(msg)
+            if closest_parent == ".":  # invalid path
+                pass
 
-            if not remainder:
+            elif not remainder:
                 file_names = self.list_files(str(path), sort_by_atime=True)
                 for name in self.filter_dot_files(file_names)[: self.LIMIT]:
                     file = os.path.join(closest_parent, name)
@@ -57,8 +57,8 @@ class FileBrowserMode(BaseMode):
                     file_names = self.filter_dot_files(file_names)
 
                 sorted_files = sorted(file_names, key=lambda fn: get_score(query, fn), reverse=True)
-                filtered_files = list(filter(lambda fn: get_score(query, fn) > 40, sorted_files))[: self.LIMIT]
-                results = [FileBrowserResult(os.path.join(closest_parent, name)) for name in filtered_files]
+                filtered = list(filter(lambda fn: get_score(query, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
+                results = [FileBrowserResult(os.path.join(closest_parent, name)) for name in filtered]
 
         except (RuntimeError, OSError):
             results = []

@@ -100,7 +100,7 @@ class ExtensionRunner:
     def handle_stderr(self, error_stream, result, extension_id):
         output, _ = error_stream.read_line_finish_utf8(result)
         if output:
-            print(output)
+            print(output)  # noqa: T201
         extproc = self.extension_procs.get(extension_id)
         if not extproc:
             logger.debug("Extension process context for %s no longer present", extension_id)

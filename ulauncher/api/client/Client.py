@@ -68,7 +68,7 @@ class Client:
         logger.warning("Connection closed. Exiting")
         self.extension.trigger_event({"type": "event:unload"})
         # extension has 0.5 sec to save it's state, after that it will be terminated
-        timer(0.5, partial(os._exit, 0))
+        timer(0.5, partial(os._exit, 0))  # noqa: SLF001
 
     def send(self, response):
         """

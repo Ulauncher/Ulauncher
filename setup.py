@@ -58,7 +58,7 @@ class build_preferences(Command):
         sourceModified = max(p.stat().st_mtime for p in Path.cwd().glob("preferences-src/**/*"))
 
         if dst.is_dir() and dst.stat().st_mtime > sourceModified:
-            print("Detected no changes to Preferences since last build.")
+            print("Detected no changes to Preferences since last build.")  # noqa: T201
             return
 
         yarnbin = which("yarn") or which("yarnpkg")
@@ -76,7 +76,7 @@ class build_wrapper(build_py, Command):
             build_preferences.run(self)
 
         build_py.run(self)
-        print("Overwriting the namespace package with fixed values")
+        print("Overwriting the namespace package with fixed values")  # noqa: T201
         Path(self.build_lib + "/ulauncher/__init__.py").write_text(
             "\n".join(
                 [

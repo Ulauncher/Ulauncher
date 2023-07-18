@@ -204,7 +204,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         """
         Triggered by user input
         """
-        self.app._query = self.input.get_text().lstrip()
+        self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
         if self.is_visible():
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
@@ -251,12 +251,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.handle_event(result)
                 return True
             if alt and keyname in jump_keys:
-                try:
-                    self.select_result(jump_keys.index(keyname))
-                    return True
-                except IndexError:
-                    # selected non-existing result item
-                    pass
+                self.select_result(jump_keys.index(keyname))
+                return True
 
         return False
 
