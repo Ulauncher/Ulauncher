@@ -2,7 +2,6 @@ import gi
 
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click
-# pylint: disable=wrong-import-position
 try:
     gi.require_version("XApp", "1.0")
     from gi.repository import XApp  # type: ignore[attr-defined]

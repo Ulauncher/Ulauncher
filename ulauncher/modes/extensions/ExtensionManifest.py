@@ -49,7 +49,7 @@ class ExtensionManifest(JsonData):
     instructions: Optional[str] = None
     input_debounce: Optional[float] = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
-    __json_value_blacklist__: List[Any] = [[], {}, None, ""]  # pylint: disable=dangerous-default-value
+    __json_value_blacklist__: List[Any] = [[], {}, None, ""]
 
     def __setitem__(self, key, value):
         # Rename "required_api_version" back to "api_version"

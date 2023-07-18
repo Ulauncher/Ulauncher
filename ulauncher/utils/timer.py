@@ -18,7 +18,6 @@ class TimerContext:
             self.source.destroy()
             self.source = None
 
-    # pylint: disable=unused-argument
     def trigger(self, _user_data):
         self.func()
         return self.repeat

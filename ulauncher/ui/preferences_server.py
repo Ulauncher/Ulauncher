@@ -114,7 +114,6 @@ class PreferencesServer:
             # 1. Data is sent to the server as URL encoded JSON in the URL query string.
             # (because actual URL params is an old, terrible and lossy standard).
             # 2. The response is sent as an array "[data, error]".
-            # pylint: disable=broad-except
             try:
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
@@ -133,7 +132,6 @@ class PreferencesServer:
             return
 
         if os.path.isfile(params.path):
-            # pylint: disable=broad-except
             try:
                 [mime_type, _] = mimetypes.guess_type(params.path)
                 stream = Gio.file_new_for_path(params.path).read()
@@ -159,7 +157,6 @@ class PreferencesServer:
         hotkey_caption = "Ctrl+Space"
         try:
             hotkey_caption = Gtk.accelerator_get_label(*Gtk.accelerator_parse(self.settings.hotkey_show_app))
-        # pylint: disable=broad-except
         except Exception:
             logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', self.settings.hotkey_show_app)
 

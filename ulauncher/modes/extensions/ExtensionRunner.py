@@ -49,7 +49,6 @@ class ExtensionRunner:
         for ex_id, _ in find_extensions(PATHS.EXTENSIONS):
             try:
                 self.run(ex_id)
-            # pylint: disable=broad-except
             except Exception:
                 logger.exception("Couldn't start extension '%s'", ex_id)
 

@@ -72,7 +72,6 @@ class JSONFramer(GObject.GObject):
         self._outbound.append(msg)
         self._write_next()
 
-    # pylint: disable=unused-argument
     def _close_ready(self, _source, result, _user):
         ret = self._conn.close_finish(result)
         if ret:
@@ -86,7 +85,6 @@ class JSONFramer(GObject.GObject):
             self.READ_SIZE, GLib.PRIORITY_DEFAULT, self._canceller, self._read_ready, None
         )
 
-    # pylint: disable=unused-argument
     def _read_ready(self, _source, result, _user):
         bytesbuf = self._conn.get_input_stream().read_bytes_finish(result)
         if not bytesbuf or bytesbuf.get_size() == 0:
@@ -135,7 +133,6 @@ class JSONFramer(GObject.GObject):
             self._inprogress, GLib.PRIORITY_DEFAULT, self._canceller, self._write_done, None
         )
 
-    # pylint: disable=unused-argument
     def _write_done(self, _source, result, _user):
         done, written = self._conn.get_output_stream().write_all_finish(result)
         if not done and self._canceller.is_cancelled():

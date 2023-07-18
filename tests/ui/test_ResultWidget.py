@@ -7,7 +7,6 @@ from ulauncher.api.result import Result
 from ulauncher.ui.ResultWidget import ResultWidget
 
 
-# pylint: disable=too-many-public-methods
 class TestResultWidget:
     @pytest.fixture
     def result(self):

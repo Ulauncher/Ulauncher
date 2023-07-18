@@ -1,5 +1,4 @@
 class BaseMode:
-    # pylint: disable=unused-argument
     def is_enabled(self, _query):
         """
         Return True if mode should be enabled for a query

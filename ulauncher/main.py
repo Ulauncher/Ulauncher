@@ -8,7 +8,6 @@ import gi
 from gi.repository import GLib, Gtk
 
 # This xinit import must happen before any GUI libraries are initialized.
-# pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports,unused-import
 import ulauncher.utils.xinit  # noqa: F401
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
 from ulauncher.ui.UlauncherApp import UlauncherApp
@@ -40,7 +39,6 @@ def main(is_dev=False):
 
     if is_dev:
         # Ensure preferences UI is built
-        # pylint: disable=import-outside-toplevel
         from setuptools import sandbox
 
         sandbox.run_setup("setup.py", ["build_prefs"])

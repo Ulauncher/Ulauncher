@@ -37,7 +37,6 @@ class Result(BaseDataClass):
             return query.argument
         return str(query)
 
-    # pylint: disable=unused-argument
     def get_description(self, _query: Query) -> str:
         return self.description
 

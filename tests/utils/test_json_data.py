@@ -87,7 +87,7 @@ class TestJsonData:
 
     def test_cannot_override_method(self):
         jd = JsonData()
-        jd.get = 1  # pylint: disable=all
+        jd.get = 1
         assert callable(jd.get)
         assert jd.get("get") == 1
 
@@ -108,7 +108,7 @@ class TestJsonData:
         assert ClassWDefault(b=2).b == 2
         assert ClassWDefault(a=9).sum() == 10
         inst = ClassWDefault()
-        inst.sum = 4  # pylint: disable=all
+        inst.sum = 4
         assert inst.sum() == 3
         assert inst.get("sum") == 4
         assert SubclassWDefault().stringify() == '{"a": 2, "b": 1, "c": 3}'

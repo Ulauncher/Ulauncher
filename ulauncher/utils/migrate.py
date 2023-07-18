@@ -93,7 +93,6 @@ def v5_to_v6():
 
     # Convert show_recent_apps to max_recent_apps
     # Not using settings class because we don't want to convert the keys
-    # pylint: disable=import-outside-toplevel
     from ulauncher.utils.json_data import JsonData
 
     settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
@@ -140,7 +139,6 @@ def v5_to_v6_destructive():
         rmtree(CACHE_PATH)
 
     # Delete old preferences
-    # pylint: disable=import-outside-toplevel
     from ulauncher.utils.json_data import JsonData
 
     settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")

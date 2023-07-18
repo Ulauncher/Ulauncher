@@ -24,7 +24,6 @@ from typing import Dict
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath(".."))
-# pylint: disable=wrong-import-position
 from ulauncher import VERSION, config  # noqa: E402
 
 # -- General configuration ------------------------------------------------

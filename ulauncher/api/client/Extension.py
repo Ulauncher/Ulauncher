@@ -1,3 +1,1 @@
-# flake8: noqa
-# pylint: disable=unused-import
-from ulauncher.api.extension import Extension
+from ulauncher.api.extension import Extension  # noqa: F401

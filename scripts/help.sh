@@ -16,9 +16,6 @@ help () {
   ${bold}./ul test-mypy
     ${dim}Runs type checker using mypy${normal}
 
-  ${bold}./ul test-pylint
-    ${dim}Runs pylint${normal}
-
   ${bold}./ul test-pytest
     ${dim}Runs pytest${normal}
 

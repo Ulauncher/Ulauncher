@@ -7,7 +7,6 @@ logger = logging.getLogger()
 
 try:
     gi.require_version("GtkLayerShell", "0.1")
-    # pylint: disable=ungrouped-imports
     from gi.repository import GtkLayerShell  # type: ignore[attr-defined]
 except (ValueError, ImportError):
     logger.warning("Failed to load GtkLayerShell, disabling positioning on wayland!")
@@ -50,7 +49,6 @@ class LayerShellOverlay(Gtk.Window):
     def layer_shell_enabled(self):
         return self._use_layer_shell
 
-    # pylint: disable=unused-argument
     def set_vertical_position(self, pos_y):
         # Set vertical position and anchor to the top edge, will be centered horizontally
         # by default

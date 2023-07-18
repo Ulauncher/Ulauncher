@@ -56,7 +56,7 @@ def normalize_expr(expr):
     expr = re.sub(r"\s*[\.\+\-\*/%\(]\*?\s*$", "", expr)
     # Complete unfinished brackets
     expr = expr + ")" * (expr.count("(") - expr.count(")"))
-    return expr
+    return expr  # noqa: RET504
 
 
 @lru_cache(maxsize=1000)
@@ -133,7 +133,6 @@ class CalcMode(BaseMode):
                 raise ValueError
 
             result = CalcResult(result=result)
-        # pylint: disable=broad-except
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]

@@ -38,7 +38,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def load_page(self, page=""):
         self.webview.load_uri(f"prefs://{PATHS.ASSETS}/preferences/index.html#/{page}")
 
-    # pylint: disable=arguments-differ
     def present(self, page=None):
         if page:
             self.load_page(page)

@@ -6,7 +6,6 @@ from ulauncher.utils.environment import IS_X11
 
 logger = logging.getLogger()
 if IS_X11:
-    # pylint: disable=ungrouped-imports, no-name-in-module
     from gi.repository import Wnck  # type: ignore[attr-defined]
 
     wnck_screen = Wnck.Screen.get_default()
@@ -24,7 +23,6 @@ def get_monitor(use_mouse_position=False):
             seat = x11_display.get_default_seat()
             (_, x, y) = seat.get_pointer().get_position()
             return display.get_monitor_at_point(x, y)
-        # pylint: disable=broad-except
         except Exception:
             logger.exception("Could not get monitor with X11. Defaulting to first or primary monitor")
 

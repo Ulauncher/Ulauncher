@@ -52,7 +52,7 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 
 class JsonData(dict):
     __json_sort_keys__ = True
-    __json_value_blacklist__: List[Any] = [[], {}, None]  # pylint: disable=dangerous-default-value
+    __json_value_blacklist__: List[Any] = [[], {}, None]
 
     def __init__(self, *args, **kwargs):
         super().__init__(deepcopy(getattr(self, "__default_props__", {})))

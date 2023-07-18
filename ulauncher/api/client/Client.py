@@ -44,7 +44,6 @@ class Client:
         mainloop = GLib.MainLoop.new(None, None)
         mainloop.run()
 
-    # pylint: disable=unused-argument
     def on_message(self, _framer, event):
         """
         Parses message from Ulauncher and triggers extension event
@@ -55,7 +54,6 @@ class Client:
         logger.debug("Incoming event %s", type(event).__name__)
         try:
             self.extension.trigger_event(event)
-        # pylint: disable=broad-except
         except Exception:
             traceback.print_exc(file=sys.stderr)
 

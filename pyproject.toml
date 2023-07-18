@@ -1,12 +1,20 @@
 [tool.black]
 line-length = 120
 
+[tool.pylint.MASTER]
+ignore-patterns="ulauncher,docs,data,scripts,tests"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable="all"
+
+
 [tool.ruff]
 line-length = 120
 target-version = "py37" # py37 is the lowest supported option
 ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
   "PLR2004",  # Allow direct comparison with integers (magic-value)
+  "RUF012",   # We're fixing this issue in our custom data class instead
   "SLF001",   # For now, allow accessing private members (obj._hello)
   "T201",     # For now, allow print statements
   "TRY300",   # Allow non-risky ops at the end of a try statement instead of "else" after

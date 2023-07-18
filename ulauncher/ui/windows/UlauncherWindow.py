@@ -13,7 +13,6 @@ from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.LayerShell import LayerShellOverlay
 
-# pylint: disable=unused-import
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
@@ -292,7 +291,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self._css_provider = Gtk.CssProvider()
         self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
         self.apply_css(self)
-        # pylint: disable=no-member
         visual = self.get_screen().get_rgba_visual()
         if visual:
             self.set_visual(visual)
@@ -312,7 +310,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         else:
             self.move(pos_x, pos_y)
 
-    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def show(self):
         # works only when the following methods are called in that exact order
         self.present()
@@ -327,7 +324,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.input.grab_focus_without_selecting()
         super().show()
 
-    # pylint: disable=arguments-differ; https://gitlab.gnome.org/GNOME/pygobject/-/issues/231
     def hide(self, *args, **kwargs):
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.grab_mouse_pointer:

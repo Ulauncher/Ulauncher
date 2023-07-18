@@ -82,7 +82,6 @@ class ExtensionController:
         expanded_path = icon and f"{PATHS.EXTENSIONS}/{self.extension_id}/{icon}"
         return expanded_path if os.path.isfile(expanded_path) else icon
 
-    # pylint: disable=unused-argument
     def handle_response(self, _framer, response: Dict[str, Any]):
         logger.debug(
             'Incoming response with keys "%s" from "%s"',
@@ -91,7 +90,6 @@ class ExtensionController:
         )
         self.result_renderer.handle_response(response, self)
 
-    # pylint: disable=unused-argument
     def handle_close(self, _framer):
         logger.info('Extension "%s" disconnected', self.extension_id)
         with contextlib.suppress(Exception):

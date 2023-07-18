@@ -44,7 +44,6 @@ class ExtensionServer:
         self.pending = {}
         self.controllers = {}
 
-    # pylint: disable=unused-argument
     def handle_incoming(self, _service, conn, _source):
         framer = JSONFramer()
         msg_handler_id = framer.connect("message_parsed", self.handle_registration)

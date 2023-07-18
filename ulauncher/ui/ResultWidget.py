@@ -113,7 +113,6 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
 
         self.set_name(name)
 
-    # pylint: disable=arguments-differ
     def set_name(self, name: str) -> None:
         item = self.builder.get_object("item-name")
         if "<span" in name:  # dealing with markup
@@ -125,7 +124,6 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
     def get_name(self):
         return self.name
 
-    # pylint: disable=unused-argument
     def on_click(self, _widget, event=None):
         window = self.get_toplevel()
         window.select_result(self.index)
