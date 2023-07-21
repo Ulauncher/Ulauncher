@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from ulauncher.config import API_VERSION, PATHS
 from ulauncher.utils.json_data import JsonData, json_data_class
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
-ValueType = Union[str, int]  # Bool is a subclass of int
 
 
 class ExtensionManifestError(Exception):
@@ -22,20 +23,20 @@ class Preference(JsonData):
     name = ""
     type = ""
     description = ""
-    default_value: ValueType = ""
-    value: Optional[ValueType] = None
-    options: List[dict] = []
-    max: Optional[int] = None
-    min: Optional[int] = None
+    default_value: str | int = ""
+    value: str | int | None = None
+    options: list[dict] = []
+    max: int | None = None
+    min: int | None = None
 
 
 @json_data_class
 class Trigger(JsonData):
     name = ""
     description = ""
-    keyword: Optional[str] = None
-    user_keyword: Optional[str] = None
-    icon: Optional[str] = None
+    keyword: str | None = None
+    user_keyword: str | None = None
+    icon: str | None = None
 
 
 @json_data_class
@@ -44,12 +45,12 @@ class ExtensionManifest(JsonData):
     authors = ""
     name = ""
     icon = ""
-    triggers: Dict[str, Trigger] = {}
-    preferences: Dict[str, Preference] = {}
-    instructions: Optional[str] = None
-    input_debounce: Optional[float] = None
+    triggers: dict[str, Trigger] = {}
+    preferences: dict[str, Preference] = {}
+    instructions: str | None = None
+    input_debounce: float | None = None
     # Filter out the empty values we use as defaults so they're not saved to the JSON
-    __json_value_blacklist__: List[Any] = [[], {}, None, ""]
+    __json_value_blacklist__: list[Any] = [[], {}, None, ""]
 
     def __setitem__(self, key, value):
         # Rename "required_api_version" back to "api_version"
@@ -160,14 +161,14 @@ class ExtensionManifest(JsonData):
                 msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
                 raise ExtensionIncompatibleWarning(msg)
 
-    def find_matching_trigger(self, **kwargs) -> Optional[str]:
+    def find_matching_trigger(self, **kwargs) -> str | None:
         """
         Get the first trigger matching the arguments, and returns the id
         Ex find_matching_trigger(user_keyword='asdf', icon=None)
         """
         return next((id for id, t in self.triggers.items() if {**t, **kwargs} == t), None)
 
-    def get_user_preferences(self) -> Dict[str, Any]:
+    def get_user_preferences(self) -> dict[str, Any]:
         """
         Get the preferences as an id-value dict
         """

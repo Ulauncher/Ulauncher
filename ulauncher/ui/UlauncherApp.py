@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import logging
 import time
 from functools import lru_cache
-from typing import Optional
 
 from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
 
@@ -27,8 +28,8 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    window: Optional[UlauncherWindow] = None
-    preferences: Optional[PreferencesWindow] = None
+    window: UlauncherWindow | None = None
+    preferences: PreferencesWindow | None = None
     _current_accel_name = None
 
     @classmethod

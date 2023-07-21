@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import List
 
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.file_browser.FileBrowserResult import FileBrowserResult
@@ -20,7 +21,7 @@ class FileBrowserMode(BaseMode):
         """
         return f"{query.lstrip()} "[0] in ("~", "/", "$")
 
-    def list_files(self, path_str: str, sort_by_atime: bool = False) -> List[str]:
+    def list_files(self, path_str: str, sort_by_atime: bool = False) -> list[str]:
         paths = sorted(
             os.scandir(path_str),
             reverse=sort_by_atime,
@@ -29,10 +30,10 @@ class FileBrowserMode(BaseMode):
         paths.sort(key=lambda p: p.is_file())
         return [p.name for p in paths]
 
-    def filter_dot_files(self, file_list: List[str]) -> List[str]:
+    def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: str) -> List[FileBrowserResult]:
+    def handle_query(self, query: str) -> list[FileBrowserResult]:
         try:
             path = Path(os.path.expandvars(query.strip())).expanduser()
             results = []

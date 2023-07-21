@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import logging
 import os
 from functools import lru_cache
 from shutil import rmtree
-from typing import Tuple
 
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
@@ -18,7 +19,7 @@ class ExtensionDownloaderError(Exception):
 class ExtensionDownloader:
     @classmethod
     @lru_cache(maxsize=None)
-    def get_instance(cls) -> "ExtensionDownloader":
+    def get_instance(cls) -> ExtensionDownloader:
         ext_db = ExtensionDb.load()
         return cls(ext_db)
 
@@ -54,7 +55,7 @@ class ExtensionDownloader:
         remote.download(commit_hash, overwrite=True)
         return True
 
-    def check_update(self, ext_id: str) -> Tuple[bool, str]:
+    def check_update(self, ext_id: str) -> tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """

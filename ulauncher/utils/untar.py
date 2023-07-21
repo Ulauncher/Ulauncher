@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import os
 import tarfile
 from pathlib import Path
 from shutil import rmtree
-from typing import Union
 
 
 # This function is the same as Path.is_relative_to in 3.9, but we can't use that yet
-def is_relative_to(child_path: Union[str, os.PathLike], root_path: Union[str, os.PathLike]):
+def is_relative_to(child_path: str | os.PathLike, root_path: str | os.PathLike):
     return Path(root_path).resolve() in Path(child_path).resolve().parents
 
 

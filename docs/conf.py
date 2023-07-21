@@ -16,10 +16,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+from __future__ import annotations
+
 import os
 import sys
 from datetime import datetime
-from typing import Dict
 
 import sphinx_rtd_theme
 
@@ -115,7 +116,7 @@ htmlhelp_basename = "Ulauncherdoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements: Dict[str, str] = {
+latex_elements: dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',

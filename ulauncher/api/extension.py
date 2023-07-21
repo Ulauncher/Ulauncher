@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import json
 import logging
@@ -5,7 +7,7 @@ import os
 import sys
 import threading
 from collections import defaultdict
-from typing import Any, Dict, Iterator, Optional, Type, Union
+from typing import Any, Iterator
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -43,7 +45,7 @@ class Extension:
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
             self.subscribe(events["event:update_preferences"], "on_preferences_update")
 
-    def subscribe(self, event_type: Type[BaseEvent], listener: Union[str, object]):
+    def subscribe(self, event_type: type[BaseEvent], listener: str | object):
         """
         Example: extension.subscribe(InputTriggerEvent, "on_input")
         """
@@ -54,7 +56,7 @@ class Extension:
 
         self._listeners[event_type].append((listener, method_name))
 
-    def convert_to_baseevent(self, event: dict) -> Optional[BaseEvent]:
+    def convert_to_baseevent(self, event: dict) -> BaseEvent | None:
         event_type = event.get("type", "")
         args = event.get("args", [])
         event_constructor = events.get(event_type)
@@ -76,7 +78,7 @@ class Extension:
 
         return None
 
-    def trigger_event(self, event: Dict[str, Any]):
+    def trigger_event(self, event: dict[str, Any]):
         base_event = self.convert_to_baseevent(event)
         if not base_event:
             self.logger.warning("Dropping unknown event: %s", event)

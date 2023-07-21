@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import contextlib
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
@@ -65,7 +67,7 @@ class ExtensionController:
             }
         )
 
-    def trigger_event(self, event: Dict[str, Any]):
+    def trigger_event(self, event: dict[str, Any]):
         """
         Triggers event for an extension
         """
@@ -82,7 +84,7 @@ class ExtensionController:
         expanded_path = icon and f"{PATHS.EXTENSIONS}/{self.extension_id}/{icon}"
         return expanded_path if os.path.isfile(expanded_path) else icon
 
-    def handle_response(self, _framer, response: Dict[str, Any]):
+    def handle_response(self, _framer, response: dict[str, Any]):
         logger.debug(
             'Incoming response with keys "%s" from "%s"',
             set(response),

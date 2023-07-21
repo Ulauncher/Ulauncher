@@ -1,12 +1,14 @@
-from typing import Any, List
+from __future__ import annotations
+
+from typing import Any
 
 from ulauncher.api.shared.query import Query
 
 
 class BaseEvent:
-    args: List[Any] = []
+    args: list[Any] = []
 
-    def __init__(self, args: List[Any]):
+    def __init__(self, args: list[Any]):
         self.args = args
 
 

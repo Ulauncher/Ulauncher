@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import json
 import logging
 import re
 from pathlib import Path
-from typing import Dict
 
 from ulauncher.config import PATHS
 from ulauncher.utils.json_data import JsonData, json_data_class
@@ -39,7 +40,7 @@ class Theme(JsonData):
     display_name = ""
     css_file = ""
     extend_theme = ""
-    matched_text_hl_colors: Dict[str, str] = {}
+    matched_text_hl_colors: dict[str, str] = {}
     _path = ""  # This should not be stored, but we never overwrite these files anyway
 
     def get_css_path(self):

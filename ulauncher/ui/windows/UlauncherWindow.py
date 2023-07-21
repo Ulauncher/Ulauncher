@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Union
+from typing import Any
 
 from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 
@@ -25,7 +27,7 @@ from ulauncher.utils.wm import get_monitor
 logger = logging.getLogger()
 
 
-def handle_event(window, event: Union[bool, list, str, Dict[str, Any]]) -> bool:  # noqa: PLR0912
+def handle_event(window, event: bool | list | str | dict[str, Any]) -> bool:  # noqa: PLR0912
     if isinstance(event, bool):
         return event
     if isinstance(event, list):
@@ -271,7 +273,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def app(self):
         return self.get_application()
 
-    def handle_event(self, event: Union[bool, list, str, Dict[str, Any], None]):
+    def handle_event(self, event: bool | list | str | dict[str, Any] | None):
         if event is not None and not handle_event(self, event):
             self.hide_and_clear_input()
 

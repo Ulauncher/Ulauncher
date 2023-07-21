@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 
 def filter_recursive(data, blacklist):
@@ -13,7 +15,7 @@ def filter_recursive(data, blacklist):
     return data
 
 
-_file_instances: Dict[Tuple[Path, Type], "JsonData"] = {}
+_file_instances: dict[tuple[Path, type], JsonData] = {}
 logger = logging.getLogger()
 # Optimally use "TypeVar('T', bound=JsonData"), but it requires py3.7 see https://stackoverflow.com/a/63237226/633921
 T = TypeVar("T", bound="JsonData")
@@ -52,7 +54,7 @@ jw.save_as("/path/to/file") # Save as JSON to the given path
 
 class JsonData(dict):
     __json_sort_keys__ = True
-    __json_value_blacklist__: List[Any] = [[], {}, None]
+    __json_value_blacklist__: list[Any] = [[], {}, None]
 
     def __init__(self, *args, **kwargs):
         super().__init__(deepcopy(getattr(self, "__default_props__", {})))
@@ -80,7 +82,7 @@ class JsonData(dict):
             self[k] = v
 
     @classmethod
-    def new_from_file(cls: Type[T], path) -> T:
+    def new_from_file(cls: type[T], path) -> T:
         data = {}
         file_path = Path(path).resolve()
         key = (file_path, cls)

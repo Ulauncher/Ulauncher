@@ -12,7 +12,8 @@ line-length = 120
 target-version = "py37" # py37 is the lowest supported option
 ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
-  "RUF012",   # We're fixing this issue in our custom data class instead
+  "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
+  "TCH001", "TCH002", "TCH003" # Performance best practice that does nothing for our use
 ]
 select = [
   "A",        # flake8-builtins
@@ -24,7 +25,7 @@ select = [
   "EM",       # flake8-errmsg
   "ERA",      # eradicate (commented-out-code)
   "EXE",      # flake8-executable
-  # "FA",     # flake8-future-annotations (temporarily deactivated)
+  "FA",       # flake8-future-annotations
   "FLY",      # flynt
   "F",        # pyflakes
   "G",        # flake8-logging-format
