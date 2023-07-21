@@ -31,10 +31,10 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo apt-get update && sudo apt-get install git yarnpkg python3-setuptools
   ```
 
-  Install the Python testing packages:
+  Install the Python testing packages (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
 
   ```sh
-  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
+  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install -r requirements.txt
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
@@ -61,10 +61,10 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo pacman -Syu --needed git yarn mypy ruff python-{black,pytest,pytest-mock,setuptools}
   ```
 
-  To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended:
+  To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
 
   ```sh
-  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip install --no-cache-dir pygobject-stubs
+  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 PIP_BREAK_SYSTEM_PACKAGES=1 pip install --no-cache-dir pygobject-stubs
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
