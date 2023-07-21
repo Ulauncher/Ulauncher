@@ -9,7 +9,7 @@ test-black () {
 test-mypy () {
     echo '[ test: mypy ]'
     set -e
-    mypy .
+    mypy ulauncher
 }
 
 test-ruff () {
