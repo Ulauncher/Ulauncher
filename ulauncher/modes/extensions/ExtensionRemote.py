@@ -185,7 +185,7 @@ class ExtensionRemote:
                         msg = f"Invalid archive for {self.url}."
                         raise ExtensionRemoteError(msg)
                     tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
-                    manifest = ExtensionManifest.new_from_file(f"{tmp_dir}/manifest.json")
+                    manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
                     if not satisfies(API_VERSION, manifest.api_version):
                         if not satisfies("2.0", manifest.api_version):
                             msg = f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
@@ -204,4 +204,5 @@ class ExtensionRemote:
             updated_at=datetime.now().isoformat(),
             url=self.url,
         )
-        db.save({self.extension_id: ext_record})
+        db.update({self.extension_id: ext_record})
+        db.save()

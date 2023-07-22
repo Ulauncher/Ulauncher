@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.utils.json_data import JsonData, json_data_class
+from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
@@ -18,39 +18,38 @@ class ExtensionIncompatibleWarning(Exception):
     pass
 
 
-@json_data_class
-class Preference(JsonData):
+class Preference(JsonConf):
     name = ""
     type = ""
     description = ""
+    options: list[dict] = []
     default_value: str | int = ""
     value: str | int | None = None
-    options: list[dict] = []
     max: int | None = None
     min: int | None = None
 
+    def __setitem__(self, key, value):
+        validate_type = key in ["name", "type", "description", "options"]
+        super().__setitem__(key, value, validate_type)
 
-@json_data_class
-class Trigger(JsonData):
+
+class Trigger(JsonConf):
     name = ""
     description = ""
-    keyword: str | None = None
-    user_keyword: str | None = None
-    icon: str | None = None
+    keyword = ""
+    user_keyword = ""
+    icon = ""
 
 
-@json_data_class
-class ExtensionManifest(JsonData):
+class ExtensionManifest(JsonConf):
     api_version = ""
     authors = ""
     name = ""
     icon = ""
+    instructions = ""
+    input_debounce = 0.05
     triggers: dict[str, Trigger] = {}
     preferences: dict[str, Preference] = {}
-    instructions: str | None = None
-    input_debounce: float | None = None
-    # Filter out the empty values we use as defaults so they're not saved to the JSON
-    __json_value_blacklist__: list[Any] = [[], {}, None, ""]
 
     def __setitem__(self, key, value):
         # Rename "required_api_version" back to "api_version"
@@ -84,7 +83,7 @@ class ExtensionManifest(JsonData):
                             name=pref.name,
                             description=pref.description,
                             keyword=pref.default_value,
-                            icon=pref.get("icon"),
+                            icon=pref.get("icon", ""),
                         )
                 value = prefs
         super().__setitem__(key, value)
@@ -177,7 +176,9 @@ class ExtensionManifest(JsonData):
     def save_user_preferences(self, ext_id: str):
         path = f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"
         triggers = {id: ({"keyword": t.user_keyword} if t.keyword else {}) for id, t in self.triggers.items()}
-        JsonData.new_from_file(path).save(triggers=triggers, preferences=self.get_user_preferences())
+        file = JsonConf.load(path)
+        file.update(triggers=triggers, preferences=self.get_user_preferences())
+        file.save()
 
     def apply_user_preferences(self, user_prefs: dict):
         for id, pref in self.preferences.items():
@@ -189,6 +190,6 @@ class ExtensionManifest(JsonData):
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
-        manifest = cls.new_from_file(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
-        manifest.apply_user_preferences(JsonData.new_from_file(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
+        manifest = super().load(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
+        manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
         return manifest

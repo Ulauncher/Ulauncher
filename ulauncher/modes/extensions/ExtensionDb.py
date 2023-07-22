@@ -1,9 +1,8 @@
 from ulauncher.config import PATHS
-from ulauncher.utils.json_data import JsonData, json_data_class
+from ulauncher.utils.json_conf import JsonConf
 
 
-@json_data_class
-class ExtensionRecord(JsonData):
+class ExtensionRecord(JsonConf):
     id = ""
     url = ""
     updated_at = ""
@@ -11,11 +10,11 @@ class ExtensionRecord(JsonData):
     last_commit_time = ""
 
 
-class ExtensionDb(JsonData):
+class ExtensionDb(JsonConf):
     # Ensure all values are ExtensionRecords
     def __setitem__(self, key, value):
         super().__setitem__(key, ExtensionRecord(value))
 
     @classmethod
     def load(cls):
-        return cls.new_from_file(f"{PATHS.CONFIG}/extensions.json")
+        return super().load(f"{PATHS.CONFIG}/extensions.json")

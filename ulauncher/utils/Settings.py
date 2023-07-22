@@ -1,9 +1,10 @@
 from ulauncher.config import PATHS
-from ulauncher.utils.json_data import JsonData, json_data_class
+from ulauncher.utils.json_conf import JsonConf
+
+_settings_file = f"{PATHS.CONFIG}/settings.json"
 
 
-@json_data_class
-class Settings(JsonData):
+class Settings(JsonConf):
     disable_desktop_filters = False
     clear_previous_query = True
     grab_mouse_pointer = False
@@ -26,4 +27,4 @@ class Settings(JsonData):
 
     @classmethod
     def load(cls):
-        return cls.new_from_file(f"{PATHS.CONFIG}/settings.json")
+        return super().load(_settings_file)

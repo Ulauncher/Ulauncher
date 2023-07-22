@@ -21,7 +21,6 @@ from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
-from ulauncher.utils.json_data import JsonData
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import UlauncherSystemdController
@@ -118,12 +117,13 @@ class PreferencesServer:
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
-                error = JsonData(message=str(e), name=type(e).__name__)
-                logging.exception("Preferences server error: %s", error.name)
+                name = type(e).__name__
+                error = {"message": str(e), "name": name}
+                logging.exception("Preferences server error: %s", name)
 
-                if not error.name.endswith("Warning"):
+                if not name.endswith("Warning"):
                     additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
-                    error.details = "\n".join([f"{k}: {v}" for k, v in {**error, **additionals}.items()])
+                    error["details"] = "\n".join([f"{k}: {v}" for k, v in {**error, **additionals}.items()])
 
                 data = json.dumps([None, error])
 
@@ -185,7 +185,8 @@ class PreferencesServer:
             self.apply_autostart(value)
             return
 
-        self.settings.save({prop: value})
+        self.settings.update({prop: value})
+        self.settings.save()
 
         if prop == "show_indicator_icon":
             Gio.Application.get_default().toggle_appindicator(value)
@@ -208,7 +209,8 @@ class PreferencesServer:
     @glib_idle_add
     def set_hotkey_show_app(self, hotkey):
         Gio.Application.get_default().bind_hotkey(hotkey)
-        self.settings.save(hotkey_show_app=hotkey)
+        self.settings.update(hotkey_show_app=hotkey)
+        self.settings.save()
 
     @route("/show/hotkey-dialog")
     @glib_idle_add
