@@ -93,9 +93,9 @@ def v5_to_v6():
 
     # Convert show_recent_apps to max_recent_apps
     # Not using settings class because we don't want to convert the keys
-    from ulauncher.utils.json_data import JsonData
+    from ulauncher.utils.json_conf import JsonConf
 
-    settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
+    settings = JsonConf.load(f"{PATHS.CONFIG}/settings.json")
     legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
     if legacy_recent_apps and settings.get("max_recent_apps") is None:
         # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
@@ -140,9 +140,9 @@ def v5_to_v6_destructive():
         rmtree(CACHE_PATH)
 
     # Delete old preferences
-    from ulauncher.utils.json_data import JsonData
+    from ulauncher.utils.json_conf import JsonConf
 
-    settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
+    settings = JsonConf.load(f"{PATHS.CONFIG}/settings.json")
     _logger.info("Pruning settings")
     settings.update({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
     settings.save()
