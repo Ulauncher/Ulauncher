@@ -6,9 +6,9 @@ from gi.repository import Gio
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.launch_app import launch_app
-from ulauncher.utils.json_data import JsonData
+from ulauncher.utils.json_conf import JsonConf
 
-app_starts = JsonData.new_from_file(f"{PATHS.STATE}/app_starts.json")
+app_starts = JsonConf.load(f"{PATHS.STATE}/app_starts.json")
 
 
 class AppResult(Result):
@@ -76,5 +76,6 @@ class AppResult(Result):
 
     def on_activation(self, *_):
         starts = app_starts.get(self._app_id, 0)
-        app_starts.save({self._app_id: starts + 1})
+        app_starts.update({self._app_id: starts + 1})
+        app_starts.save()
         return launch_app(self._app_id)
