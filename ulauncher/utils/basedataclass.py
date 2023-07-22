@@ -1,21 +1,35 @@
 from copy import deepcopy
 
-# This is a more compact alternative to JsonData, which does not require using decorators
-#
-# It works slightly differently by looping through the class props of the class and all inherited classes
-# and setting them for the instance in __init__
-# It also needs to use __getattribute__ instead of __getattr__
-#
-# TODO(friday): try to migrate the methods from JsonData here. # noqa: TD003
-# Should be able to move stringify and save_as here and
-# replace __json_value_blacklist__ and __json_sort_keys__ with params
-# But don't migrate "new_from_file" and "save"
-
 
 class BaseDataClass(dict):
-    def __init__(self, **kwargs):
+    """
+    BaseDataClass
+
+    Custom lightweight alternative to dataclasses, that work in older Python versions from before dataclasses.
+    * Intentionally does not support positional arguments (because of https://stackoverflow.com/q/51575931/633921).
+    * Does not need decorators to declare class props.
+    * Ensures type consistency for properties declared in class
+    * Unlike dataclasses, new props (set at runtime, but undeclared in the class) become part of the data.
+    * Implemented using the AttrDict pattern, but it avoids self.__dict__ = self
+
+    # Example use:
+    class Person(BaseDataClass):
+        # All props you declare need a default value (not None)
+        first_name = ""
+        last_name = ""
+        age = 0
+        metadata = {}  # Note: This will be cloned when you create a new instance, so you can ignore linter warnings
+
+        def full_name(self):
+            return self.first_name + " " + self.last_name
+
+    print(Person(first_name=John, last_name="Wayne").full_name()) # John Wayne
+    """
+
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        # add defaults from parent classes in inheritance order
+        # loop through class inheritance chain and add class props (defaults) as to the instance
+        # this is the same as the python dataclass decorators does
         for cls in reversed(self.__class__.__mro__):
             if cls in BaseDataClass.__mro__:
                 continue
@@ -27,7 +41,7 @@ class BaseDataClass(dict):
             self.update(defaults)
 
         # set values
-        self.update(**kwargs)
+        self.update(*args, **kwargs)
 
     def __dir__(self):  # For IDE autocompletion
         return dir(type(self)) + list(self.keys())
