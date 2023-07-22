@@ -185,7 +185,8 @@ class PreferencesServer:
             self.apply_autostart(value)
             return
 
-        self.settings.save({prop: value})
+        self.settings.update({prop: value})
+        self.settings.save()
 
         if prop == "show_indicator_icon":
             Gio.Application.get_default().toggle_appindicator(value)
@@ -208,7 +209,8 @@ class PreferencesServer:
     @glib_idle_add
     def set_hotkey_show_app(self, hotkey):
         Gio.Application.get_default().bind_hotkey(hotkey)
-        self.settings.save(hotkey_show_app=hotkey)
+        self.settings.update(hotkey_show_app=hotkey)
+        self.settings.save()
 
     @route("/show/hotkey-dialog")
     @glib_idle_add

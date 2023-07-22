@@ -100,7 +100,8 @@ def v5_to_v6():
     if legacy_recent_apps and settings.get("max_recent_apps") is None:
         # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
         # If people haven't changed their settings since 2020 it'll be set to 0
-        settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
+        settings.update(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
+        settings.save()
 
     # Migrate autostart conf from XDG autostart file to systemd
     if FIRST_V6_RUN:
@@ -143,7 +144,8 @@ def v5_to_v6_destructive():
 
     settings = JsonData.new_from_file(f"{PATHS.CONFIG}/settings.json")
     _logger.info("Pruning settings")
-    settings.save({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
+    settings.update({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
+    settings.save()
 
     # Update icon locations for shortcuts.json generated before v6
     # (v6 created symlinks for them for backwards compatibility, but when v6 comes we should delete the symlinks)
