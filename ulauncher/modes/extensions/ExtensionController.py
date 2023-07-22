@@ -40,8 +40,7 @@ class ExtensionController:
             return
 
         self.controllers[extension_id] = self
-        # Use default if unspecified or 0.
-        self._debounced_send_event = debounce(self.manifest.input_debounce or 0.05)(self._send_event)
+        self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
         self._send_event({"type": "event:legacy_preferences_load", "args": [self.manifest.get_user_preferences()]})

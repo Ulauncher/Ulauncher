@@ -7,6 +7,7 @@ from ulauncher.modes.extensions.ExtensionManifest import (
     ExtensionManifest,
     ExtensionManifestError,
 )
+from ulauncher.utils.json_conf import stringify
 
 
 class TestExtensionManifest:
@@ -22,7 +23,7 @@ class TestExtensionManifest:
 
     def test_open__manifest_file__is_read(self):
         ext_dir = os.path.dirname(os.path.abspath(__file__))
-        manifest = ExtensionManifest.new_from_file(f"{ext_dir}/test_extension/manifest.json")
+        manifest = ExtensionManifest.load(f"{ext_dir}/test_extension/manifest.json")
         assert manifest.name == "Test Extension"
 
     def test_validate__name_empty__exception_raised(self):
@@ -70,8 +71,9 @@ class TestExtensionManifest:
 
     def test_defaults_not_included_in_stringify(self):
         # Ensure defaults don't leak
-        assert ExtensionManifest().stringify() == "{}"
-        assert ExtensionManifest(preferences={"ns": {"k": "v"}}).stringify() == '{"preferences": {"ns": {"k": "v"}}}'
+        assert stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
+        manifest = ExtensionManifest(preferences={"ns": {"k": "v"}})
+        assert stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
 
     def test_get_user_preferences(self):
         manifest = ExtensionManifest(

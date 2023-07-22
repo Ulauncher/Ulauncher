@@ -58,7 +58,7 @@ class BaseDataClass(dict):
     def __setattr__(self, key, value):
         self[key] = value
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value, validate_type=True):
         if hasattr(self.__class__, key):
             if key.startswith("__"):
                 msg = f'Invalid property "{key}". Must not override class property.'
@@ -68,7 +68,7 @@ class BaseDataClass(dict):
             if callable(class_val):
                 msg = f'Invalid property "{key}". Must not override class method.'
                 raise KeyError(msg)
-            if not isinstance(value, type(class_val)):
+            if validate_type and not isinstance(value, type(class_val)):
                 msg = f'"{key}" must be of type {type(class_val).__name__}, {type(value).__name__} given.'
                 raise KeyError(msg)
 

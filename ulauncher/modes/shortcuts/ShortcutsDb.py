@@ -19,13 +19,13 @@ class Shortcut(JsonConf):
 
 class ShortcutsDb(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
-    def __setitem__(self, key, value: dict):
+    def __setitem__(self, key, value: dict, validate_type=True):
         if "added" in value and isinstance(value.get("added"), float):
             # convert legacy float timestamps ulauncher used
             value["added"] = int(value["added"])
         if "icon" in value:
             value["icon"] = fold_user_path(value["icon"])
-        super().__setitem__(key, Shortcut(value))
+        super().__setitem__(key, Shortcut(value), validate_type)
 
     @classmethod
     def load(cls):
