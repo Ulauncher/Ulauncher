@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 from ulauncher.config import PATHS
-from ulauncher.utils.json_data import JsonData, json_data_class
+from ulauncher.utils.json_conf import JsonConf
 
 logger = logging.getLogger()
 DEFAULT_THEME = "light"
@@ -24,7 +24,10 @@ def get_themes():
 
     for manifest_path in manifests_paths:
         try:
-            theme = Theme(json.loads(manifest_path.read_text()), _path=manifest_path.parent)
+            data = json.loads(manifest_path.read_text())
+            if data.get("extend_theme", "") is None:
+                del data["extend_theme"]
+            theme = Theme(data, _path=str(manifest_path.parent))
             theme.validate()
             themes[theme.name] = theme
         except Exception as e:
@@ -33,8 +36,7 @@ def get_themes():
     return themes
 
 
-@json_data_class
-class Theme(JsonData):
+class Theme(JsonConf):
     manifest_version = ""
     name = ""
     display_name = ""

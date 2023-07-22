@@ -287,7 +287,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def apply_theme(self):
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        self._css_provider.load_from_data(Theme.load(self.settings.theme_name).get_css().encode())
+        theme_css = Theme.load(self.settings.theme_name).get_css().encode()
+        self._css_provider.load_from_data(theme_css)
         self.apply_css(self)
         visual = self.get_screen().get_rgba_visual()
         if visual:
