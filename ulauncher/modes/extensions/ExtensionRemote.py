@@ -204,4 +204,5 @@ class ExtensionRemote:
             updated_at=datetime.now().isoformat(),
             url=self.url,
         )
-        db.save({self.extension_id: ext_record})
+        db.update({self.extension_id: ext_record})
+        db.save()
