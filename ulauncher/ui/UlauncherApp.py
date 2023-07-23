@@ -7,7 +7,7 @@ from functools import lru_cache
 from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
 
 from ulauncher.api.shared.query import Query
-from ulauncher.config import FIRST_RUN
+from ulauncher.config import APP_ID, FIRST_RUN
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -38,9 +38,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         return cls()
 
     def __init__(self, *args, **kwargs):
-        super().__init__(
-            *args, application_id="io.ulauncher.Ulauncher", flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs
-        )
+        super().__init__(*args, application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
         self.connect("startup", self.setup)  # runs only once on the main instance
 
     @property

@@ -1,5 +1,6 @@
 from gi.repository import Gio
 
+from ulauncher.config import APP_ID
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.utils.Settings import Settings
@@ -20,7 +21,7 @@ class AppMode(BaseMode):
             if app.get_nodisplay() and executable != "gnome-control-center":
                 continue
             # Don't show Ulauncher app in own list
-            if app.get_id() == "io.ulauncher.Ulauncher.desktop":
+            if app.get_id() == f"{APP_ID}.desktop":
                 continue
 
             yield AppResult(app)
