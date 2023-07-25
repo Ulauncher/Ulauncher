@@ -9,7 +9,6 @@ try:
     gi.require_version("GtkLayerShell", "0.1")
     from gi.repository import GtkLayerShell  # type: ignore[attr-defined]
 except (ValueError, ImportError):
-    logger.warning("Failed to load GtkLayerShell, disabling positioning on wayland!")
     GtkLayerShell = None
 
 
