@@ -241,6 +241,7 @@ class PreferencesServer:
             dialog.add_filter(file_filter)
         value = dialog.get_filename() if dialog.run() == Gtk.ResponseType.OK else None
         self.notify_client(name, {"value": value})
+        dialog.close()
 
     @route("/open/web-url")
     def open_url(self, url):
