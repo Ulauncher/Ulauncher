@@ -1,0 +1,7 @@
+<node>
+  <interface name="io.ulauncher.Ulauncher.actions">
+    <method name="RunAction">
+      <arg name="json" type="s" direction="in"/>
+    </method>
+  </interface>
+</node>

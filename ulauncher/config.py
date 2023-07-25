@@ -6,6 +6,7 @@ from gettext import gettext
 from ulauncher import ASSETS, VERSION
 
 APP_ID = "io.ulauncher.Ulauncher"
+DBUS_PATH = "/" + APP_ID.replace(".", "/")
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import json
 import logging
 import time
 from functools import lru_cache
 
-from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gdk, Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
 
 from ulauncher.api.shared.query import Query
-from ulauncher.config import APP_ID, FIRST_RUN
+from ulauncher.config import APP_ID, DBUS_PATH, FIRST_RUN, PATHS
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
@@ -84,6 +86,11 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
 
+        with open(f"{PATHS.APPLICATION}/dbus.xml") as file:
+            xml = file.read()
+            (actions,) = Gio.DBusNodeInfo.new_for_xml(xml).interfaces
+            self.get_dbus_connection().register_object(DBUS_PATH, actions, self.dbus_method_listener)
+
     def bind_hotkey(self, accel_name):
         if not IS_X11 or self._current_accel_name == accel_name:
             return
@@ -121,3 +128,25 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     def activate_query(self, _action, variant, *_):
         self.activate()
         self.query = variant.get_string()
+
+    def dbus_method_listener(self, *_args):
+        method, [raw_data], invocation, *_ = _args[4:]
+        if method == "RunAction":
+            try:
+                data = json.loads(raw_data)
+                action = data.get("action", None)
+                if action == "open":
+                    value = data.get("value")
+                    logger.debug('Opening "%s"', value)
+                    launch_detached(["xdg-open", value])
+                if action == "copy":
+                    value = data.get("value")
+                    logger.debug('Copying "%s"', value)
+                    clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+                    clipboard.set_text(value, -1)
+                    clipboard.store()
+            except Exception as e:
+                logger.exception('Error "%s" parsing JSON message "%s"', e, data)
+        else:
+            logger.warning("Unknown dbus method '%s'", method)
+        invocation.return_value()

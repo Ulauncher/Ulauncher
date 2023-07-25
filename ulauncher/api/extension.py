@@ -103,6 +103,10 @@ class Extension:
             # convert iterables to list
             if isinstance(action, Iterator):
                 action = list(action)
+            print("SENDING!!!!!111\n\n\n")
+            print(event)
+            print(action)
+            print("\n\n\n\n")
             self._client.send({"event": event or event, "action": action})
 
     def run(self):
