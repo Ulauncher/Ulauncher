@@ -94,32 +94,16 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if LayerShellOverlay.is_supported():
             self.enable_layer_shell()
 
-        # Try setting a transparent background
-        screen = self.get_screen()
-        visual = screen.get_rgba_visual()
-        window_margin = 20
-        if visual is None:
-            logger.debug("Screen does not support alpha channels")
-            visual = screen.get_system_visual()
-            window_margin = 0
-
-        self.set_visual(visual)
-
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
-        window_frame = Gtk.Box(
-            margin_top=window_margin,
-            margin_bottom=window_margin,
-            margin_start=window_margin,
-            margin_end=window_margin,
-        )
-        self.add(window_frame)
+        self.window_frame = Gtk.Box()
+        self.add(self.window_frame)
 
         window_container = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
             app_paintable=True,
         )
-        window_frame.pack_start(window_container, True, True, 0)
+        self.window_frame.pack_start(window_container, True, True, 0)
 
         event_box = Gtk.EventBox()
         input_box = Gtk.Box()
@@ -171,7 +155,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
         prefs_icon_surface = load_icon_surface(f"{PATHS.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
-        window_frame.show_all()
+        self.window_frame.show_all()
 
         self.connect("focus-in-event", self.on_focus_in)
         self.connect("focus-out-event", self.on_focus_out)
@@ -303,6 +287,22 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         pos_y = geo.y + geo.height * 0.12
         self.set_property("width-request", window_width)
         self.scroll_container.set_property("max-content-height", max_height)
+
+        # Try setting a transparent background
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        shadow_size = 20 if visual else 0
+        self.window_frame.set_properties(
+            margin_top=shadow_size,
+            margin_bottom=shadow_size,
+            margin_start=shadow_size,
+            margin_end=shadow_size,
+        )
+        if visual is None:
+            logger.info("Screen does not support alpha channels. Likely not running a compositor.")
+            visual = screen.get_system_visual()
+
+        self.set_visual(visual)
 
         if self.layer_shell_enabled:
             self.set_vertical_position(pos_y)
