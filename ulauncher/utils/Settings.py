@@ -10,6 +10,7 @@ class Settings(JsonConf):
     grab_mouse_pointer = False
     hotkey_show_app = "<Primary>space"
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
+    enable_application_mode = True
     max_recent_apps = 0
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"

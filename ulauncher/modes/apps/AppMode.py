@@ -10,6 +10,9 @@ class AppMode(BaseMode):
     def get_triggers(self):
         settings = Settings.load()
 
+        if not settings.enable_application_mode:
+            return []
+
         for app in Gio.DesktopAppInfo.get_all():
             executable = app.get_executable()
             if not executable or not app.get_display_name():

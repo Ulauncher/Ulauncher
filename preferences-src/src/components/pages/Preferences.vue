@@ -71,19 +71,34 @@
 
       <tr>
         <td>
-          <label for="show-recent-apps">Number of frequent apps to show</label>
+          <label for="clear_previous_query">Start each session with a blank query</label>
         </td>
         <td>
-          <b-form-input style="width:380px" id="show-recent-apps" v-model.number="max_recent_apps" type="number" min="0"></b-form-input>
+          <b-form-checkbox id="clear_previous_query" v-model="clear_previous_query"></b-form-checkbox>
         </td>
       </tr>
 
       <tr>
         <td>
-          <label for="clear_previous_query">Start each session with a blank query</label>
+          <label for="grab_mouse_pointer">Don't hide after losing mouse focus</label>
         </td>
         <td>
-          <b-form-checkbox id="clear_previous_query" v-model="clear_previous_query"></b-form-checkbox>
+          <b-form-checkbox id="grab_mouse_pointer" v-model="grab_mouse_pointer"></b-form-checkbox>
+        </td>
+      </tr>
+    </table>
+
+    <h1>Applications</h1>
+    <table>
+      <tr>
+        <td>
+          <label for="enable_application_mode">Include applications in search</label>
+          <small>
+            <p>Disable if you only want to use Ulauncher for shortcuts and extensions</p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="enable_application_mode" v-model="enable_application_mode"></b-form-checkbox>
         </td>
       </tr>
 
@@ -105,10 +120,10 @@
 
       <tr>
         <td>
-          <label for="grab_mouse_pointer">Don't hide after losing mouse focus</label>
+          <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
-          <b-form-checkbox id="grab_mouse_pointer" v-model="grab_mouse_pointer"></b-form-checkbox>
+          <b-form-input style="width:380px" id="show-recent-apps" v-model.number="max_recent_apps" type="number" min="0"></b-form-input>
         </td>
       </tr>
     </table>
@@ -215,6 +230,7 @@ export default {
       'disable_desktop_filters',
       'grab_mouse_pointer',
       'jump_keys',
+      'enable_application_mode',
       'raise_if_started',
       'render_on_screen',
       'show_indicator_icon',
