@@ -4,6 +4,7 @@ Name=Ulauncher
 Comment=Application launcher for Linux
 GenericName=Launcher
 Categories=GNOME;GTK;Utility;
+DBusActivatable=true
 TryExec=ulauncher
 Exec=ulauncher
 Icon=ulauncher

@@ -46,6 +46,7 @@ build-deb () {
         setup.py \
         ulauncher \
         io.ulauncher.Ulauncher.desktop \
+        io.ulauncher.Ulauncher.service \
         ulauncher.service \
         $tmpdir \
         --exclude-from=.gitignore
