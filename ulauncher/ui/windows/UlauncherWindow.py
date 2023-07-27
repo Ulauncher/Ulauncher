@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gdk, Gtk, Gio, Keybinder  # type: ignore[attr-defined]
 
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
@@ -195,6 +195,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
+    def emacs_bindings_active(self) -> bool:
+        gsettings = Gio.Settings.new("org.gnome.desktop.interface")
+        return gsettings.get_string("gtk-key-theme") == "Emacs"
+
     def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
         """
         Triggered by user key press
@@ -229,6 +233,15 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p") or (ctrl and keyname == "k"):
                 self.results_nav.go_up()
                 return True
+
+            if not self.emacs_bindings_active():
+                if (ctrl and keyname == "k"):
+                    self.results_nav.go_up()
+                    return True
+                if (ctrl and keyname == "j"):
+                    self.results_nav.go_down()
+                    return True
+
             if keyname in ("Down", "Tab") or (ctrl and keyname == "n") or (ctrl and keyname == "j"):
                 self.results_nav.go_down()
                 return True
