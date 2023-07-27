@@ -250,7 +250,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.results_nav.go_down()
                 return True
 
-            if not self.emacs_bindings_active():
+            if not self.is_emacs_bindings_active():
                 if keyname in (ctrl and keyname == "k"):
                     self.results_nav.go_up()
                     return True
