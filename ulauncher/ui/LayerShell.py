@@ -23,19 +23,16 @@ class LayerShellOverlay(Gtk.Window):
     """
 
     @classmethod
-    def is_supported(cls, *, quiet=False):
+    def is_supported(cls):
         """Check if running under a wayland compositor that supports the layer shell extension"""
-        supported = GtkLayerShell is not None and GtkLayerShell.is_supported()
-        if not quiet:
-            logger.info("Wayland layer shell extension: %s", ("supported" if supported else "not supported"))
-        return supported
+        return GtkLayerShell is not None and GtkLayerShell.is_supported()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._use_layer_shell = False
 
     def enable_layer_shell(self):
-        assert __class__.is_supported(quiet=True), "Should be supported to enable"
+        assert __class__.is_supported(), "Should be supported to enable"
         self._use_layer_shell = True
 
         GtkLayerShell.init_for_window(self)
