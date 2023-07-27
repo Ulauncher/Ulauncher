@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gdk, Gtk, Gio, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gdk, Gio, Gtk, Keybinder  # type: ignore[attr-defined]
 
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
@@ -195,9 +195,21 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def emacs_bindings_active(self) -> bool:
-        gsettings = Gio.Settings.new("org.gnome.desktop.interface")
-        return gsettings.get_string("gtk-key-theme") == "Emacs"
+    def is_emacs_bindings_active(self) -> bool:
+        """
+        Checks whether the Emacs bindings are active in the GNOME.
+
+        Returns:
+            bool: True if the Emacs bindings are active, False otherwise.
+        """
+        try:
+            gsettings = Gio.Settings.new("org.gnome.desktop.interface")
+            key_theme = gsettings.get_string("gtk-key-theme")
+        except Exception as e:
+            logger.info("Failed to get the gtk-key-theme: %s", e)
+            return False
+
+        return key_theme.lower() == "emacs"
 
     def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
         """
