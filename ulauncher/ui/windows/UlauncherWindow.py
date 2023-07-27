@@ -226,10 +226,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
 
         if self.results_nav:
-            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
+            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p") or (ctrl and keyname == "k"):
                 self.results_nav.go_up()
                 return True
-            if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
+            if keyname in ("Down", "Tab") or (ctrl and keyname == "n") or (ctrl and keyname == "j"):
                 self.results_nav.go_down()
                 return True
             if keyname in ("Return", "KP_Enter"):
