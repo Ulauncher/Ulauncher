@@ -242,21 +242,23 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
 
         if self.results_nav:
-            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p") or (ctrl and keyname == "k"):
+            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
                 self.results_nav.go_up()
                 return True
 
+            if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
+                self.results_nav.go_down()
+                return True
+
             if not self.emacs_bindings_active():
-                if (ctrl and keyname == "k"):
+                if keyname in (ctrl and keyname == "k"):
                     self.results_nav.go_up()
                     return True
-                if (ctrl and keyname == "j"):
+
+                if keyname in (ctrl and keyname == "j"):
                     self.results_nav.go_down()
                     return True
 
-            if keyname in ("Down", "Tab") or (ctrl and keyname == "n") or (ctrl and keyname == "j"):
-                self.results_nav.go_down()
-                return True
             if keyname in ("Return", "KP_Enter"):
                 result = self.results_nav.activate(self.app.query, alt=alt)
                 self.handle_event(result)
