@@ -1,3 +1,4 @@
 [D-BUS Service]
 Name=io.ulauncher.Ulauncher
 Exec=ulauncher
+SystemdService=ulauncher.service

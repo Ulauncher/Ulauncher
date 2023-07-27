@@ -3,6 +3,7 @@ Description=Linux Application Launcher
 Documentation=https://ulauncher.io/
 
 [Service]
+BusName=io.ulauncher.Ulauncher
 Type=simple
 Restart=always
 RestartSec=1
