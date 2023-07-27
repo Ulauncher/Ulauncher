@@ -94,6 +94,7 @@ setup(
     # These will be placed in /usr
     data_files=[
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
+        ("share/dbus-1/services", ["io.ulauncher.Ulauncher.service"]),
         ("lib/systemd/user", ["ulauncher.service"]),
         ("share/doc/ulauncher", ["README.md"]),
         ("share/licenses/ulauncher", ["LICENSE"]),
