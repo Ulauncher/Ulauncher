@@ -207,8 +207,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         jump_keys = self.settings.get_jump_keys()
 
         if not self.settings.emacs_bindings:
-            up_aliases = ["k", "p"]
-            down_aliases = ["j", "n"]
+            up_aliases = ["k"]
+            down_aliases = ["j"]
         else:
             up_aliases = ["p"]
             down_aliases = ["n"]
