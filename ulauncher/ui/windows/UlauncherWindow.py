@@ -241,15 +241,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 self.results_nav.go_down()
                 return True
 
-            if not self.settings.emacs_bindings:
-                if keyname in (ctrl and keyname == "k"):
-                    self.results_nav.go_up()
-                    return True
-
-                if keyname in (ctrl and keyname == "j"):
-                    self.results_nav.go_down()
-                    return True
-
             if keyname in ("Return", "KP_Enter"):
                 result = self.results_nav.activate(self.app.query, alt=alt)
                 self.handle_event(result)
