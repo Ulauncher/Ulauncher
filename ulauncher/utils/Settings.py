@@ -17,6 +17,7 @@ class Settings(JsonConf):
     show_indicator_icon = True
     terminal_command = ""
     theme_name = "light"
+    emacs_bindings = False
 
     # Convert dash to underscore
     def __setitem__(self, key, value):

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gdk, Gio, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
 
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
@@ -195,22 +195,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def is_emacs_bindings_active(self) -> bool:
-        """
-        Checks whether the Emacs bindings are active in the GNOME.
-
-        Returns:
-            bool: True if the Emacs bindings are active, False otherwise.
-        """
-        try:
-            gsettings = Gio.Settings.new("org.gnome.desktop.interface")
-            key_theme = gsettings.get_string("gtk-key-theme")
-        except Exception as e:
-            logger.info("Failed to get the gtk-key-theme: %s", e)
-            return False
-
-        return key_theme.lower() == "emacs"
-
     def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
         """
         Triggered by user key press
@@ -221,6 +205,13 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)  # type: ignore[attr-defined]
         ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()
+
+        if not self.settings.emacs_bindings:
+            up_aliases = ["k", "p"]
+            down_aliases = ["j", "n"]
+        else:
+            up_aliases = ["p"]
+            down_aliases = ["n"]
 
         if keyname == "Escape":
             self.hide()
@@ -242,15 +233,15 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
 
         if self.results_nav:
-            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
+            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname in up_aliases):
                 self.results_nav.go_up()
                 return True
 
-            if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
+            if keyname in ("Down", "Tab") or (ctrl and keyname in down_aliases):
                 self.results_nav.go_down()
                 return True
 
-            if not self.is_emacs_bindings_active():
+            if not self.settings.emacs_bindings:
                 if keyname in (ctrl and keyname == "k"):
                     self.results_nav.go_up()
                     return True
