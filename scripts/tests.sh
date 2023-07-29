@@ -3,7 +3,7 @@
 test-mypy () {
     echo '[ test: mypy ]'
     set -e
-    mypy .
+    mypy ulauncher
 }
 
 test-pylint () {
@@ -15,7 +15,7 @@ test-pylint () {
 test-flake8 () {
     echo '[ test: flake8 ]'
     set -e
-    flake8 $@
+    flake8 ulauncher $@
 }
 
 test-pytest () {
