@@ -3,6 +3,7 @@ import os
 import re
 import shlex
 from shutil import which
+from pathlib import Path
 import gi
 
 gi.require_version("GLib", "2.0")
@@ -34,11 +35,11 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        app_id = app.get_id()
+        app_id = Path(app.get_id()).stem
         app_exec = app.get_string('Exec')
         if app.get_boolean('DBusActivatable'):
             # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
-            exec = ['gapplication', 'launch', app_id.replace('.desktop', '')]
+            exec = ['gapplication', 'launch', app_id]
         elif app_exec:
             # strip field codes %f, %F, %u, %U, etc
             stripped_app_exec = re.sub(r'\%[uUfFdDnNickvm]', '', app_exec).rstrip()
