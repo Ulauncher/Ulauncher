@@ -52,10 +52,9 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             self.window.input.set_text(self._query)
             self.window.input.set_position(-1)
 
-    def do_before_emit(self, *args, **_kwargs):
-        query = args[0].lookup_value("query", GLib.VariantType("s"))
-        if query:
-            self.query = query.unpack()
+    def do_startup(self):
+        Gtk.Application.do_startup(self)
+        Gio.ActionMap.add_action_entries(self, [("set-query", self.activate_query, "s")])
 
     def do_activate(self, *_args, **_kwargs):
         self.show_launcher()
@@ -118,3 +117,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         notification = Gio.Notification.new("Ulauncher")
         notification.set_body(text)
         self.send_notification(id, notification)
+
+    def activate_query(self, _action, variant, *_):
+        self.activate()
+        self.query = variant.get_string()
