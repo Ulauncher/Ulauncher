@@ -320,7 +320,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # make sure frequent apps are shown if necessary
             self.show_results([])
 
-        self.input.grab_focus_without_selecting()
+        self.input.grab_focus()
         super().show()
 
     def hide(self, *args, **kwargs):
