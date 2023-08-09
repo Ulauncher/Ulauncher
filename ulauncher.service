@@ -4,7 +4,7 @@ Documentation=https://ulauncher.io/
 
 [Service]
 BusName=io.ulauncher.Ulauncher
-Type=simple
+Type=dbus
 Restart=always
 RestartSec=1
 ExecStart=/usr/bin/ulauncher --no-window
