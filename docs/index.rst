@@ -34,7 +34,6 @@ Extension Development Guide
    extensions/tutorial
    extensions/events
    extensions/actions
-   extensions/libs
    extensions/examples
    extensions/debugging
    extensions/migration
@@ -50,9 +49,6 @@ Extension Development Guide
 
 :doc:`extensions/actions`
     Actions that your extensions perform in response to events.
-
-:doc:`extensions/libs`
-    List of libraries that you can use in your extensions.
 
 :doc:`extensions/examples`
     Learn from other Ulauncher extensions.
