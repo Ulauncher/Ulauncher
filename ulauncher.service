@@ -1,5 +1,5 @@
 [Unit]
-Description=Linux Application Launcher
+Description=Ulauncher service
 Documentation=https://ulauncher.io/
 
 [Service]
