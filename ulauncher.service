@@ -1,6 +1,7 @@
 [Unit]
 Description=Ulauncher service
 Documentation=https://ulauncher.io/
+After=graphical-session.target
 
 [Service]
 BusName=io.ulauncher.Ulauncher
