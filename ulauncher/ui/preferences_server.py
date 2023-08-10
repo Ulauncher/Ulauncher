@@ -23,7 +23,7 @@ from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.systemd_controller import UlauncherSystemdController
+from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
 
@@ -87,7 +87,7 @@ class PreferencesServer:
         return cls()
 
     def __init__(self):
-        self.autostart_pref = UlauncherSystemdController()
+        self.autostart_pref = SystemdController("ulauncher")
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
         self.context.register_uri_scheme("prefs", self.request_listener)
@@ -163,7 +163,7 @@ class PreferencesServer:
 
         export_settings.update(
             {
-                "autostart_allowed": self.autostart_pref.is_allowed(),
+                "autostart_allowed": self.autostart_pref.can_start(),
                 "autostart_enabled": self.autostart_pref.is_enabled(),
                 "available_themes": [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
                 "hotkey_show_app": hotkey_caption,
@@ -195,12 +195,12 @@ class PreferencesServer:
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart-enabled to %s", is_enabled)
-        if is_enabled and not self.autostart_pref.is_allowed():
+        if is_enabled and not self.autostart_pref.can_start():
             msg = "Unable to turn on autostart preference"
             raise RuntimeError(msg)
 
         try:
-            self.autostart_pref.switch(is_enabled)
+            self.autostart_pref.toggle(is_enabled)
         except Exception as err:
             msg = f'Caught an error while switching "autostart": {err}'
             raise RuntimeError(msg) from err

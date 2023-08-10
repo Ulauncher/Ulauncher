@@ -1,46 +1,49 @@
 import logging
 from shutil import which
-from subprocess import check_output, run
+from subprocess import check_output
 
 logger = logging.getLogger()
 
 
-def systemctl_unit_run(*args):
+def systemctl_run(*args):
     try:
-        return check_output(["systemctl", "--user", *list(args), "ulauncher"]).decode("utf-8").rstrip()
+        return check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
     except Exception:
         return False
 
 
-class UlauncherSystemdController:
-    def is_allowed(self):
+class SystemdController:
+    def __init__(self, unit: str):
+        self.unit = unit
+
+    def can_start(self):
         """
-        :returns: True if autostart can be controlled by Ulauncher
+        :returns: True if unit exists and can start
         """
         if not which("systemctl"):
-            logger.info("Need systemd to use Ulauncher 'Launch at Login'")
+            logger.warning("systemctl command missing")
             return False
-        status = systemctl_unit_run("show")
+        status = systemctl_run("show", self.unit)
         if "NeedDaemonReload=yes" in status:
             logger.info("Reloading systemd daemon")
-            run(["systemctl", "--user", "daemon-reload"], check=True)
-            status = systemctl_unit_run("show")
+            systemctl_run("daemon-reload")
+            status = systemctl_run("show", self.unit)
         return "CanStart=yes" in status
 
     def is_enabled(self):
         """
-        :returns: True if Ulauncher is set to start automatically
+        :returns: True if unit is set to start automatically
         """
-        return self.is_allowed() and systemctl_unit_run("is-enabled") == "enabled"
+        return self.can_start() and systemctl_run("is-enabled", self.unit) == "enabled"
 
-    def switch(self, status):
+    def toggle(self, status):
         """
-        Enable or disable Ulauncher systemd unit
+        Enable or disable unit
 
         :param bool status:
         """
-        if not self.is_allowed():
+        if not self.can_start():
             msg = "Autostart is not allowed"
             raise OSError(msg)
 
-        systemctl_unit_run("reenable" if status else "disable")
+        systemctl_run("reenable" if status else "disable", self.unit)

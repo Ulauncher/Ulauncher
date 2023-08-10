@@ -42,7 +42,7 @@ class TestPreferencesServer:
 
     @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):
-        return mocker.patch("ulauncher.ui.preferences_server.UlauncherSystemdController").return_value
+        return mocker.patch("ulauncher.ui.preferences_server.SystemdController").return_value
 
     @pytest.fixture(autouse=True)
     def webview(self, mocker):
@@ -75,10 +75,10 @@ class TestPreferencesServer:
 
     def test_set_autostart(self, prefs_server, autostart_pref):
         prefs_server.apply_autostart(True)
-        autostart_pref.switch.assert_called_with(True)
+        autostart_pref.toggle.assert_called_with(True)
 
         prefs_server.apply_autostart(False)
-        autostart_pref.switch.assert_called_with(False)
+        autostart_pref.toggle.assert_called_with(False)
 
     def test_set_theme_name(self, prefs_server, ulauncherWindow):
         prefs_server.apply_settings("theme_name", "lime")
