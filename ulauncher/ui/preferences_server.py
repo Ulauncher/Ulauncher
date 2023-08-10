@@ -181,7 +181,7 @@ class PreferencesServer:
     def apply_settings(self, prop, value):
         logger.info("Setting %s to %s", prop, value)
         # This setting is not stored to the config
-        if prop == "autostart-enabled":
+        if prop == "autostart_enabled":
             self.apply_autostart(value)
             return
 
@@ -194,7 +194,7 @@ class PreferencesServer:
             Gio.Application.get_default().window.apply_theme()
 
     def apply_autostart(self, is_enabled):
-        logger.info("Set autostart-enabled to %s", is_enabled)
+        logger.info("Set autostart_enabled to %s", is_enabled)
         if is_enabled and not self.autostart_pref.can_start():
             msg = "Unable to turn on autostart preference"
             raise RuntimeError(msg)
