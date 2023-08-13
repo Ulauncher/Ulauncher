@@ -8,7 +8,7 @@ class Settings(JsonConf):
     disable_desktop_filters = False
     clear_previous_query = True
     grab_mouse_pointer = False
-    hotkey_show_app = "<Primary>space"
+    hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
     enable_application_mode = True
     max_recent_apps = 0
