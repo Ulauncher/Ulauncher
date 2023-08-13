@@ -9,14 +9,14 @@
         </td>
         <td>
           <b-form-checkbox
-            :disabled="!prefs.autostart_allowed"
+            :disabled="!prefs.env.autostart_allowed"
             id="autostart"
             v-model="autostart_enabled"
           ></b-form-checkbox>
         </td>
       </tr>
 
-      <tr v-if="prefs.hotkey_supported">
+      <tr v-if="prefs.env.hotkey_supported">
         <td>
           <label for="hotkey-show-app">Hotkey</label>
         </td>

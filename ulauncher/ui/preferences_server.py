@@ -155,20 +155,16 @@ class PreferencesServer:
     def get_all(self):
         logger.info("API call /get/all")
         export_settings = self.settings.copy()
+        export_settings["available_themes"] = [{"value": t.name, "text": t.display_name} for t in get_themes().values()]
+        export_settings["autostart_enabled"] = self.autostart_pref.is_enabled()
+        export_settings["env"] = {
+            "autostart_allowed": self.autostart_pref.can_start(),
+            "api_version": API_VERSION,
+            "hotkey_supported": HotkeyController.is_supported(),
+            "version": VERSION,
+            "is_x11": IS_X11,
+        }
 
-        export_settings.update(
-            {
-                "autostart_allowed": self.autostart_pref.can_start(),
-                "autostart_enabled": self.autostart_pref.is_enabled(),
-                "available_themes": [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
-                "hotkey_supported": HotkeyController.is_supported(),
-                "env": {
-                    "version": VERSION,
-                    "api_version": API_VERSION,
-                    "is_x11": IS_X11,
-                },
-            }
-        )
         return export_settings
 
     @route("/set")
