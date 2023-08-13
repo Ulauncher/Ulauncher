@@ -195,7 +195,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
+    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911, PLR0912
         """
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event
