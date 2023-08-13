@@ -16,12 +16,22 @@
         </td>
       </tr>
 
-      <tr v-if="prefs.env.hotkey_supported">
+      <tr>
         <td>
           <label for="hotkey-show-app">Hotkey</label>
         </td>
         <td>
-          <b-button variant="secondary" @click="showHotkeyDialog">Set hotkey</b-button>
+          <b-button variant="secondary" @click="showHotkeyDialog" v-if="prefs.env.hotkey_supported">Set hotkey</b-button>
+          <div v-if="!prefs.env.hotkey_supported" class="compat-warning">
+            <b-alert show variant="warning small">
+              Ulauncher doesn't support setting the hotkey for your desktop environment.<br/>
+              If you haven't already, please add a global shortcut for this command on your desktop environment:<br/>
+              <code>gapplication launch io.ulauncher.Ulauncher</code>
+              <b-button size="sm" v-clipboard:copy="'gapplication launch io.ulauncher.Ulauncher'" title="Copy">
+                <i class="fa fa-copy"></i>
+              </b-button>
+            </b-alert>
+          </div>
         </td>
       </tr>
 
@@ -92,7 +102,7 @@
         </td>
         <td>
           <b-form-checkbox id="raise-if-started" v-model="raise_if_started"></b-form-checkbox>
-          <div v-if="!prefs.env.is_x11" class="wayland-warning">
+          <div v-if="!prefs.env.is_x11" class="compat-warning">
             <b-alert show variant="warning">
               <small>
                 This feature can only be supported with the X11 Display Server, but you are using Wayland.
@@ -279,13 +289,16 @@ label + small {
   cursor: pointer;
   width: 200px;
 }
-.wayland-warning {
+.compat-warning {
   width: 550px;
 }
-.wayland-warning .alert {
+.compat-warning .alert {
   margin: 10px 0 0 0;
   padding: 0.4em 0.7em;
-  line-height: 95%;
+}
+.compat-warning .alert button {
+  font-size: 0.75rem;
+  padding: 0 4px;
 }
 .theme-select,
 .render-on-screen-select {
