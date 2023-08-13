@@ -45,7 +45,7 @@ class HotkeyController:
     @staticmethod
     def is_supported():
         # User contributions to support more environments are very welcome
-        return DESKTOP_NAME in ["GNOME", "KDE", "XFCE"]
+        return DESKTOP_NAME in ["GNOME", "XFCE"]
 
     @staticmethod
     def set(hotkey: str):
