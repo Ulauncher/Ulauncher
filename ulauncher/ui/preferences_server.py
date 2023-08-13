@@ -170,7 +170,6 @@ class PreferencesServer:
                 "env": {
                     "version": VERSION,
                     "api_version": API_VERSION,
-                    "user_home": os.path.expanduser("~"),
                     "is_x11": IS_X11,
                 },
             }
@@ -256,7 +255,12 @@ class PreferencesServer:
     @route("/shortcut/get-all")
     def shortcut_get_all(self):
         logger.info("Handling /shortcut/get-all")
-        return list(ShortcutsDb.load().values())
+        shortcuts = []
+        for shortcut in ShortcutsDb.load().values():
+            if shortcut.icon:
+                shortcut.icon = os.path.expanduser(shortcut.icon)
+            shortcuts.append(shortcut)
+        return shortcuts
 
     @route("/shortcut/update")
     def shortcut_update(self, shortcut):

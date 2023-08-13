@@ -6,7 +6,7 @@
         slot="aside"
         @click="selectIcon"
       >
-        <img v-if="localIcon" :src="expandUserPath(localIcon)" />
+        <img v-if="localIcon" :src="localIcon" />
       </div>
 
       <b-form-group label="Name" :state="nameState">
@@ -104,9 +104,6 @@ export default {
     }
   },
   methods: {
-    expandUserPath(path) {
-      return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
-    },
     selectIcon() {
       const filter = {'Image files': 'image/*'}
       fetchData('prefs:///show/file-chooser', shortcutIconEventName, filter).then(null, err =>

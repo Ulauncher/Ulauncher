@@ -9,7 +9,7 @@
         <div class="limited-width">{{ item.value }}</div>
       </template>
       <template slot="cell(icon)" slot-scope="item">
-        <img class="icon" :src="item.value ? expandUserPath(item.value) : defaultIcon" />
+        <img class="icon" :src="item.value || defaultIcon" />
       </template>
       <template slot="cell(cmd)" slot-scope="item">
         <div class="cmd">
@@ -65,9 +65,6 @@ export default {
       fetchData('prefs:///shortcut/get-all').then((data) => {
         this.items = data
       })
-    },
-    expandUserPath (path) {
-      return path.indexOf('~') === 0 ? path.replace('~', this.prefs.env.user_home, 1) : path
     },
     edit (item) {
       // Workaround because otherwise Vue converts bools to strings "true" or "false",
