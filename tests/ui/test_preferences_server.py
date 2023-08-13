@@ -33,7 +33,6 @@ class TestPreferencesServer:
         app = UlauncherApp.get_instance()
         app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
         app.toggle_appindicator = mock.MagicMock()
-        app.bind_hotkey = mock.MagicMock()
         return app.window
 
     @pytest.fixture(autouse=True)
@@ -65,13 +64,6 @@ class TestPreferencesServer:
         Gio.Application.get_default().toggle_appindicator.assert_called_with(False)
         assert prefs_server.settings.show_indicator_icon is False
         assert load_json().get("show_indicator_icon") is False
-
-    def test_set_hotkey_show_app(self, prefs_server):
-        hotkey = "<Primary>space"
-        prefs_server.set_hotkey_show_app.original(prefs_server, hotkey)
-        Gio.Application.get_default().bind_hotkey.assert_called_with(hotkey)
-        assert prefs_server.settings.hotkey_show_app == hotkey
-        assert load_json().get("hotkey_show_app") == hotkey
 
     def test_set_autostart(self, prefs_server, autostart_pref):
         prefs_server.apply_autostart(True)

@@ -20,6 +20,7 @@ from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
@@ -154,26 +155,16 @@ class PreferencesServer:
     def get_all(self):
         logger.info("API call /get/all")
         export_settings = self.settings.copy()
+        export_settings["available_themes"] = [{"value": t.name, "text": t.display_name} for t in get_themes().values()]
+        export_settings["autostart_enabled"] = self.autostart_pref.is_enabled()
+        export_settings["env"] = {
+            "autostart_allowed": self.autostart_pref.can_start(),
+            "api_version": API_VERSION,
+            "hotkey_supported": HotkeyController.is_supported(),
+            "version": VERSION,
+            "is_x11": IS_X11,
+        }
 
-        hotkey_caption = "Ctrl+Space"
-        try:
-            hotkey_caption = Gtk.accelerator_get_label(*Gtk.accelerator_parse(self.settings.hotkey_show_app))
-        except Exception:
-            logger.warning('Unable to parse accelerator "%s". Use Ctrl+Space', self.settings.hotkey_show_app)
-
-        export_settings.update(
-            {
-                "autostart_allowed": self.autostart_pref.can_start(),
-                "autostart_enabled": self.autostart_pref.is_enabled(),
-                "available_themes": [{"value": t.name, "text": t.display_name} for t in get_themes().values()],
-                "hotkey_show_app": hotkey_caption,
-                "env": {
-                    "version": VERSION,
-                    "api_version": API_VERSION,
-                    "is_x11": IS_X11,
-                },
-            }
-        )
         return export_settings
 
     @route("/set")
@@ -204,23 +195,11 @@ class PreferencesServer:
             msg = f'Caught an error while switching "autostart": {err}'
             raise RuntimeError(msg) from err
 
-    @route("/set/hotkey-show-app")
-    @glib_idle_add
-    def set_hotkey_show_app(self, hotkey):
-        Gio.Application.get_default().bind_hotkey(hotkey)
-        self.settings.update(hotkey_show_app=hotkey)
-        self.settings.save()
-
     @route("/show/hotkey-dialog")
     @glib_idle_add
     def show_hotkey_dialog(self):
         logger.info("Show hotkey-dialog")
-        hotkey_dialog = HotkeyDialog()
-        hotkey_dialog.connect(
-            "hotkey-set",
-            lambda _, val, caption: self.notify_client("hotkey-show-app", {"value": val, "caption": caption}),
-        )
-        hotkey_dialog.present()
+        HotkeyDialog().present()
 
     @route("/show/file-chooser")
     @glib_idle_add

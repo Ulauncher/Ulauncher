@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gdk, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gdk, Gtk
 
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
@@ -17,7 +17,6 @@ from ulauncher.ui.LayerShell import LayerShellOverlay
 
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
-from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
@@ -309,8 +308,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         # works only when the following methods are called in that exact order
         self.present()
         self.position_window()
-        if IS_X11_COMPATIBLE:
-            self.present_with_time(Keybinder.get_current_event_time())
 
         if not self.app.query:
             # make sure frequent apps are shown if necessary

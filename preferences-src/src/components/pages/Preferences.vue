@@ -9,7 +9,7 @@
         </td>
         <td>
           <b-form-checkbox
-            :disabled="!prefs.autostart_allowed"
+            :disabled="!prefs.env.autostart_allowed"
             id="autostart"
             v-model="autostart_enabled"
           ></b-form-checkbox>
@@ -21,21 +21,15 @@
           <label for="hotkey-show-app">Hotkey</label>
         </td>
         <td>
-          <b-form-input style="min-width:380px"
-            id="hotkey-show-app"
-            @focus.native="showHotkeyDialog($event)"
-            :value="prefs.hotkey_show_app"
-          ></b-form-input>
-          <div v-if="!prefs.env.is_x11" class="wayland-warning">
-            <b-alert show variant="warning">
-              <small>
-                Global hotkeys is unsupported in Wayland.<br>See our 
-                <a
-                  href
-                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/discussions/991')"
-                >Troubleshooting</a>
-                for how to work around this.
-              </small>
+          <b-button variant="secondary" @click="showHotkeyDialog" v-if="prefs.env.hotkey_supported">Set hotkey</b-button>
+          <div v-if="!prefs.env.hotkey_supported" class="compat-warning">
+            <b-alert show variant="warning small">
+              Ulauncher doesn't support setting the hotkey for your desktop environment.<br/>
+              If you haven't already, please add a global shortcut for this command on your desktop environment:<br/>
+              <code>gapplication launch io.ulauncher.Ulauncher</code>
+              <b-button size="sm" v-clipboard:copy="'gapplication launch io.ulauncher.Ulauncher'" title="Copy">
+                <i class="fa fa-copy"></i>
+              </b-button>
             </b-alert>
           </div>
         </td>
@@ -108,7 +102,7 @@
         </td>
         <td>
           <b-form-checkbox id="raise-if-started" v-model="raise_if_started"></b-form-checkbox>
-          <div v-if="!prefs.env.is_x11" class="wayland-warning">
+          <div v-if="!prefs.env.is_x11" class="compat-warning">
             <b-alert show variant="warning">
               <small>
                 This feature can only be supported with the X11 Display Server, but you are using Wayland.
@@ -193,18 +187,8 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 
-const hotkeyEventName = 'hotkey-show-app'
-
 export default {
   name: 'preferences',
-
-  created() {
-    bus.$on(hotkeyEventName, this.onHotkeySet)
-  },
-
-  beforeDestroy() {
-    bus.$off(hotkeyEventName, this.onHotkeySet)
-  },
 
   data() {
     return {
@@ -260,17 +244,9 @@ export default {
       fetchData('prefs:///open/web-url', url)
     },
 
-    showHotkeyDialog(e) {
+    showHotkeyDialog() {
       fetchData('prefs:///show/hotkey-dialog')
-      e.target.blur()
     },
-
-    onHotkeySet(e) {
-      fetchData('prefs:///set/hotkey-show-app', e.value).then(
-        () => this.setPrefs({ hotkey_show_app: e.caption }),
-        err => bus.$emit('error', err)
-      )
-    }
   }
 }
 </script>
@@ -313,13 +289,16 @@ label + small {
   cursor: pointer;
   width: 200px;
 }
-.wayland-warning {
+.compat-warning {
   width: 550px;
 }
-.wayland-warning .alert {
+.compat-warning .alert {
   margin: 10px 0 0 0;
   padding: 0.4em 0.7em;
-  line-height: 95%;
+}
+.compat-warning .alert button {
+  font-size: 0.75rem;
+  padding: 0 4px;
 }
 .theme-select,
 .render-on-screen-select {
