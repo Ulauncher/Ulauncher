@@ -16,28 +16,12 @@
         </td>
       </tr>
 
-      <tr>
+      <tr v-if="prefs.hotkey_supported">
         <td>
           <label for="hotkey-show-app">Hotkey</label>
         </td>
         <td>
-          <b-form-input style="min-width:380px"
-            id="hotkey-show-app"
-            @focus.native="showHotkeyDialog($event)"
-            :value="prefs.hotkey_show_app"
-          ></b-form-input>
-          <div v-if="!prefs.env.is_x11" class="wayland-warning">
-            <b-alert show variant="warning">
-              <small>
-                Global hotkeys is unsupported in Wayland.<br>See our 
-                <a
-                  href
-                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/discussions/991')"
-                >Troubleshooting</a>
-                for how to work around this.
-              </small>
-            </b-alert>
-          </div>
+          <b-button variant="secondary" @click="showHotkeyDialog">Set hotkey</b-button>
         </td>
       </tr>
 
@@ -193,18 +177,8 @@ import { mapState, mapMutations, mapGetters } from 'vuex'
 import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 
-const hotkeyEventName = 'hotkey-show-app'
-
 export default {
   name: 'preferences',
-
-  created() {
-    bus.$on(hotkeyEventName, this.onHotkeySet)
-  },
-
-  beforeDestroy() {
-    bus.$off(hotkeyEventName, this.onHotkeySet)
-  },
 
   data() {
     return {
@@ -260,17 +234,9 @@ export default {
       fetchData('prefs:///open/web-url', url)
     },
 
-    showHotkeyDialog(e) {
+    showHotkeyDialog() {
       fetchData('prefs:///show/hotkey-dialog')
-      e.target.blur()
     },
-
-    onHotkeySet(e) {
-      fetchData('prefs:///set/hotkey-show-app', e.value).then(
-        () => this.setPrefs({ hotkey_show_app: e.caption }),
-        err => bus.$emit('error', err)
-      )
-    }
   }
 }
 </script>

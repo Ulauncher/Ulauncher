@@ -4,16 +4,15 @@ import logging
 import time
 from functools import lru_cache
 
-from gi.repository import Gio, GLib, Gtk, Keybinder  # type: ignore[attr-defined]
+from gi.repository import Gio, Gtk
 
 from ulauncher.api.shared.query import Query
-from ulauncher.config import APP_ID, FIRST_RUN
+from ulauncher.config import APP_ID
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
@@ -30,7 +29,6 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     _query = ""
     window: UlauncherWindow | None = None
     preferences: PreferencesWindow | None = None
-    _current_accel_name = None
 
     @classmethod
     @lru_cache(maxsize=None)
@@ -74,30 +72,9 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         if settings.show_indicator_icon:
             self.toggle_appindicator(True)
 
-        if IS_X11:
-            # bind hotkey
-            Keybinder.init()
-            # bind in the main thread
-            GLib.idle_add(self.bind_hotkey, settings.hotkey_show_app)
-
         ExtensionServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
-
-    def bind_hotkey(self, accel_name):
-        if not IS_X11 or self._current_accel_name == accel_name:
-            return
-
-        if self._current_accel_name:
-            Keybinder.unbind(self._current_accel_name)
-            self._current_accel_name = None
-
-        logger.info("Trying to bind app hotkey: %s", accel_name)
-        Keybinder.bind(accel_name, lambda _: self.show_launcher())
-        self._current_accel_name = accel_name
-        if FIRST_RUN:
-            display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(accel_name))
-            self.show_notification(f"Hotkey is set to {display_name}", "hotkey_first_run")
 
     def show_launcher(self):
         if not self.window:
@@ -112,11 +89,6 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         else:
             self.preferences = PreferencesWindow(application=self)
             self.preferences.show(page)
-
-    def show_notification(self, text, id=None):
-        notification = Gio.Notification.new("Ulauncher")
-        notification.set_body(text)
-        self.send_notification(id, notification)
 
     def activate_query(self, _action, variant, *_):
         self.activate()
