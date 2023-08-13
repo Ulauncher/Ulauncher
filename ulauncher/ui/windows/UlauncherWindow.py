@@ -99,10 +99,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.window_frame = Gtk.Box()
         self.add(self.window_frame)
 
-        window_container = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            app_paintable=True,
-        )
+        window_container = Gtk.Box(app_paintable=True, orientation="vertical")
         self.window_frame.pack_start(window_container, True, True, 0)
 
         event_box = Gtk.EventBox()
@@ -142,7 +139,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             propagate_natural_height=True,
             shadow_type="in",
         )
-        self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.result_box = Gtk.Box(orientation="vertical")
         self.scroll_container.add(self.result_box)
 
         window_container.pack_start(event_box, True, True, 0)
@@ -200,9 +197,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event
         """
-        keyval = event.get_keyval()
-        keyname = Gdk.keyval_name(keyval[1])
-        alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)  # type: ignore[attr-defined]
+        keyname = Gdk.keyval_name(event.keyval)
+        alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)
         ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()
 
