@@ -207,9 +207,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         jump_keys = self.settings.get_jump_keys()
 
         if len(self.settings.arrow_key_aliases) == 4:  # noqa: PLR2004
-            _left_alias, down_alias, up_alias, _right_alias = [*self.settings.arrow_key_aliases]  # type: ignore[misc]
+            left_alias, down_alias, up_alias, right_alias = [*self.settings.arrow_key_aliases]  # type: ignore[misc]
         else:
-            _left_alias, down_alias, up_alias, _right_alias = [None] * 4
+            left_alias, down_alias, up_alias, right_alias = [None] * 4
             logger.warning(
                 "Invalid value for arrow_key_aliases: %s, expected four letters", self.settings.arrow_key_aliases
             )
@@ -240,6 +240,14 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
             if keyname in ("Down", "Tab") or (ctrl and keyname == down_alias):
                 self.results_nav.go_down()
+                return True
+
+            if ctrl and keyname == left_alias:
+                widget.set_position(max(0, widget.get_position() - 1))
+                return True
+
+            if ctrl and keyname == right_alias:
+                widget.set_position(widget.get_position() + 1)
                 return True
 
             if keyname in ("Return", "KP_Enter"):
