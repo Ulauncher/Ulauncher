@@ -191,7 +191,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911
+    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911, PLR0912
         """
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event
@@ -200,6 +200,14 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)
         ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()
+
+        if len(self.settings.arrow_key_aliases) == 4:  # noqa: PLR2004
+            left_alias, down_alias, up_alias, right_alias = [*self.settings.arrow_key_aliases]  # type: ignore[misc]
+        else:
+            left_alias, down_alias, up_alias, right_alias = [None] * 4
+            logger.warning(
+                "Invalid value for arrow_key_aliases: %s, expected four letters", self.settings.arrow_key_aliases
+            )
 
         if keyname == "Escape":
             self.hide()
@@ -221,12 +229,22 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
 
         if self.results_nav:
-            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == "p"):
+            if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == up_alias):
                 self.results_nav.go_up()
                 return True
-            if keyname in ("Down", "Tab") or (ctrl and keyname == "n"):
+
+            if keyname in ("Down", "Tab") or (ctrl and keyname == down_alias):
                 self.results_nav.go_down()
                 return True
+
+            if ctrl and keyname == left_alias:
+                widget.set_position(max(0, widget.get_position() - 1))
+                return True
+
+            if ctrl and keyname == right_alias:
+                widget.set_position(widget.get_position() + 1)
+                return True
+
             if keyname in ("Return", "KP_Enter"):
                 result = self.results_nav.activate(self.app.query, alt=alt)
                 self.handle_event(result)
