@@ -28,7 +28,7 @@ For the v6 branch you need the the following to setup the local build environmen
   Install the development dependecies:
 
   ```sh
-  sudo apt-get update && sudo apt-get install git yarnpkg python3-setuptools
+  sudo apt update && sudo apt install git yarnpkg python3-setuptools debhelper dh-python
   ```
 
   Install the Python testing packages (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
@@ -40,7 +40,7 @@ For the v6 branch you need the the following to setup the local build environmen
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
-  sudo apt-get install python3-{all,gi,levenshtein} gobject-introspection \
+  sudo apt install python3-{all,gi,levenshtein} gobject-introspection \
     gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0}
   ```
 
