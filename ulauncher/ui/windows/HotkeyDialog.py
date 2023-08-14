@@ -22,7 +22,7 @@ MODIFIERS = (
 
 
 class HotkeyDialog(Gtk.MessageDialog):
-    _hotkey: str
+    _hotkey = ""
 
     def __init__(self):
         super().__init__(title="Set new hotkey", flags=Gtk.DialogFlags.MODAL)
@@ -43,6 +43,7 @@ class HotkeyDialog(Gtk.MessageDialog):
     def handle_response(self, _widget, response_id: int):
         if response_id == RESPONSES.OK:
             HotkeyController.set(self._hotkey)
+            self.hide()
         if response_id == RESPONSES.CLOSE:
             self.hide()
 
@@ -53,8 +54,15 @@ class HotkeyDialog(Gtk.MessageDialog):
     def on_key_press(self, _, event: Gdk.EventKey):
         key_name = Gtk.accelerator_name(event.keyval, event.state)
         display_name = Gtk.accelerator_get_label(event.keyval, event.state)
+        breadcrumb = display_name.split("+")
 
-        if key_name and key_name not in MODIFIERS:
+        # treat Enter w/o modifiers as "submit"
+        if self._hotkey and key_name == "Return":
+            HotkeyController.set(self._hotkey)
+            self.hide()
+
+        # Must have at least one modifier (meaning two parts) and the last part must not be one
+        if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
             self._hotkey = key_name
             self._hotkey_input.set_text(display_name)
             self.set_response_sensitive(RESPONSES.OK, True)
