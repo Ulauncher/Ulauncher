@@ -24,8 +24,10 @@
           <b-button variant="secondary" @click="showHotkeyDialog" v-if="prefs.env.hotkey_supported">Set hotkey</b-button>
           <div v-if="!prefs.env.hotkey_supported" class="compat-warning">
             <b-alert show variant="warning small">
-              Ulauncher doesn't support setting the hotkey for your desktop environment.<br/>
-              If you haven't already, please add a global shortcut for this command on your desktop environment:<br/>
+              Ulauncher doesn't support setting global shortcuts for your desktop environment.<br/>
+              If you haven't already done so, we strongly advice that you manually add a global shortcut 
+              in your desktop environment settings, or using a third party service.<br/>
+              Bind it to this command:
               <code>gapplication launch io.ulauncher.Ulauncher</code>
               <b-button size="sm" v-clipboard:copy="'gapplication launch io.ulauncher.Ulauncher'" title="Copy">
                 <i class="fa fa-copy"></i>
