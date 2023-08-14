@@ -61,6 +61,11 @@ class HotkeyDialog(Gtk.MessageDialog):
             HotkeyController.set(self._hotkey)
             self.hide()
 
+        if self._hotkey and key_name == "BackSpace":
+            self._hotkey = ""
+            self._hotkey_input.set_text("")
+            self.set_response_sensitive(RESPONSES.OK, False)
+
         # Must have at least one modifier (meaning two parts) and the last part must not be one
         if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
             self._hotkey = key_name
