@@ -81,7 +81,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
                 HotkeyController.set(hotkey)
 
                 display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(settings.hotkey_show_app))
-                body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" for your Desktop settings'
+                body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
                 notification_id = "de_hotkey_auto_created"
                 notification = Gio.Notification.new("Global shortcut created")
                 notification.set_default_action("-")  # Add non-existing action to prevent activating on click
@@ -92,7 +92,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
                 notification = Gio.Notification.new("Cannot create global shortcut")
                 notification.set_default_action("app.show-preferences")
                 notification.set_body(
-                    "Ulauncher doesn't support setting global keyboard shortcuts on your Desktop. "
+                    "Ulauncher doesn't support setting global keyboard shortcuts for your desktop. "
                     "There are more details on this in the preferences view (click here to open)."
                 )
 
