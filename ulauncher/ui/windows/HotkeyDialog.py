@@ -70,4 +70,5 @@ class HotkeyDialog(Gtk.MessageDialog):
         if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
             self._hotkey = key_name
             self._hotkey_input.set_text(display_name)
+            self._hotkey_input.set_position(-1)
             self.set_response_sensitive(RESPONSES.OK, True)
