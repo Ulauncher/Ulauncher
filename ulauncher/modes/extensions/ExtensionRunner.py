@@ -3,10 +3,11 @@ import logging
 import os
 import signal
 import sys
-from collections import deque, namedtuple
+from collections import deque
 from enum import Enum
 from functools import lru_cache, partial
 from time import time
+from typing import NamedTuple
 
 from gi.repository import Gio, GLib
 
@@ -18,9 +19,13 @@ from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 
-ExtensionProc = namedtuple(
-    "ExtensionProc", ("extension_id", "subprocess", "start_time", "error_stream", "recent_errors")
-)
+
+class ExtensionProc(NamedTuple):
+    extension_id: str
+    subprocess: Gio.Subprocess
+    start_time: float
+    error_stream: Gio.DataInputStream
+    recent_errors: deque
 
 
 class ExtensionRuntimeError(Enum):
