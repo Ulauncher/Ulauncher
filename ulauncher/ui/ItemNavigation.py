@@ -1,7 +1,8 @@
 from ulauncher.config import PATHS
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.utils.json_utils import json_load, json_save
 
-query_history = JsonConf.load(f"{PATHS.STATE}/query_history.json")
+query_history_path = f"{PATHS.STATE}/query_history.json"
+query_history = json_load(query_history_path)
 
 
 class ItemNavigation:
@@ -60,7 +61,7 @@ class ItemNavigation:
         """
         result = self.selected_item.result
         if query and not alt and result.searchable:
-            query_history.update({str(query): result.name})
-            query_history.save()
+            query_history[str(query)] = result.name
+            json_save(query_history, query_history_path)
 
         return result.on_activation(query, alt)

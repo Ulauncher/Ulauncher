@@ -6,7 +6,7 @@ from gi.repository import Gio
 
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.utils.json_utils import json_load
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None
@@ -44,7 +44,7 @@ class TestAppResult:
 
     @pytest.fixture(autouse=True)
     def app_starts(self, mocker):
-        app_starts = JsonConf.load("/tmp/ulauncher-test/app_starts.json")
+        app_starts = json_load("/tmp/ulauncher-test/app_starts.json")
         app_starts.update({"falseapp.desktop": 3000, "trueapp.desktop": 765})
         return mocker.patch("ulauncher.modes.apps.AppResult.app_starts", new=app_starts)
 

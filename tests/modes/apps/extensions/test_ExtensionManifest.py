@@ -7,7 +7,7 @@ from ulauncher.modes.extensions.ExtensionManifest import (
     ExtensionManifest,
     ExtensionManifestError,
 )
-from ulauncher.utils.json_conf import stringify
+from ulauncher.utils.json_utils import json_stringify
 
 
 class TestExtensionManifest:
@@ -71,9 +71,9 @@ class TestExtensionManifest:
 
     def test_defaults_not_included_in_stringify(self):
         # Ensure defaults don't leak
-        assert stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
+        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
         manifest = ExtensionManifest(preferences={"ns": {"k": "v"}})
-        assert stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
+        assert json_stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
 
     def test_get_user_preferences(self):
         manifest = ExtensionManifest(
