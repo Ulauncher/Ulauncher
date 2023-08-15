@@ -43,12 +43,11 @@ def _set_hotkey(hotkey: str):
         keybindings.set_value("custom-keybindings", GLib.Variant("as", enabled_keybindings))
     elif DESKTOP_NAME == "XFCE":
         cmd_prefix = ["xfconf-query", "--channel", "xfce4-keyboard-shortcuts"]
-        all_shortcuts = subprocess.check_output([*cmd_prefix, "--list", "--verbose"]).decode().split("\n")
+        all_shortcuts = subprocess.check_output([*cmd_prefix, "--list", "--verbose"]).decode().strip().split("\n")
         # Unset existing bindings
         for shortcut in all_shortcuts:
-            shortcut_parts = shortcut.split()
-            if shortcut_parts[-1] == APP_ID:
-                prop = shortcut_parts[0]
+            if shortcut.endswith(launch_command):
+                prop = shortcut.split()[0]
                 subprocess.run([*cmd_prefix, "--reset", "--property", prop], check=True)
 
         cmd = [
