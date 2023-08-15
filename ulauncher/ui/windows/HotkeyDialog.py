@@ -3,8 +3,6 @@ from types import SimpleNamespace
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.utils.hotkey_controller import HotkeyController
-
 logger = logging.getLogger()
 footer_notice = "Be aware that keyboard shortcuts may be reserved by, or conflict with your system."
 
@@ -37,38 +35,44 @@ class HotkeyDialog(Gtk.MessageDialog):
 
         self.show_all()
         self.connect("response", self.handle_response)
-        self.connect("destroy", self.on_destroy)
         self.connect("key-press-event", self.on_key_press)
 
     def handle_response(self, _widget, response_id: int):
         if response_id == RESPONSES.OK:
-            HotkeyController.set(self._hotkey)
-            self.hide()
+            self.save_and_close()
         if response_id == RESPONSES.CLOSE:
-            self.hide()
+            self.close()
 
-    def on_destroy(self, *_args):
+    def set_hotkey(self, key_name=""):
+        label = Gtk.accelerator_get_label(*Gtk.accelerator_parse(key_name))
+        self._hotkey = key_name
+        self._hotkey_input.set_text(label)
+        self._hotkey_input.set_position(-1)
+        self.set_response_sensitive(RESPONSES.OK, bool(key_name))
+
+    def close(self):
+        self._hotkey = ""
         self.hide()
-        return True
+
+    def save_and_close(self):
+        self.hide()
 
     def on_key_press(self, _, event: Gdk.EventKey):
         key_name = Gtk.accelerator_name(event.keyval, event.state)
-        display_name = Gtk.accelerator_get_label(event.keyval, event.state)
-        breadcrumb = display_name.split("+")
+        label = Gtk.accelerator_get_label(event.keyval, event.state)
+        breadcrumb = label.split("+")
 
         # treat Enter w/o modifiers as "submit"
         if self._hotkey and key_name == "Return":
-            HotkeyController.set(self._hotkey)
-            self.hide()
+            self.save_and_close()
 
         if self._hotkey and key_name == "BackSpace":
-            self._hotkey = ""
-            self._hotkey_input.set_text("")
-            self.set_response_sensitive(RESPONSES.OK, False)
+            self.set_hotkey()
 
         # Must have at least one modifier (meaning two parts) and the last part must not be one
         if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
-            self._hotkey = key_name
-            self._hotkey_input.set_text(display_name)
-            self._hotkey_input.set_position(-1)
-            self.set_response_sensitive(RESPONSES.OK, True)
+            self.set_hotkey(key_name)
+
+    def run(self):
+        super().run()
+        return self._hotkey

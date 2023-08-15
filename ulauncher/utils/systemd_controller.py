@@ -30,11 +30,23 @@ class SystemdController:
             status = systemctl_run("show", self.unit)
         return "CanStart=yes" in status
 
+    def is_active(self):
+        """
+        :returns: True if unit is currently running
+        """
+        return systemctl_run("is-active", self.unit) == "active"
+
     def is_enabled(self):
         """
         :returns: True if unit is set to start automatically
         """
-        return self.can_start() and systemctl_run("is-enabled", self.unit) == "enabled"
+        return systemctl_run("is-enabled", self.unit) == "enabled"
+
+    def restart(self):
+        """
+        :returns: Restart the service
+        """
+        return systemctl_run("restart", self.unit)
 
     def toggle(self, status):
         """

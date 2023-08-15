@@ -47,10 +47,6 @@ class TestPreferencesServer:
     def webview(self, mocker):
         return mocker.patch("ulauncher.ui.preferences_server.WebKit2.WebView").return_value
 
-    @pytest.fixture(autouse=True)
-    def hotkey_dialog(self, mocker):
-        return mocker.patch("ulauncher.ui.preferences_server.HotkeyDialog").return_value
-
     @pytest.fixture
     def prefs_server(self, webview, autostart_pref):
         server = PreferencesServer()
@@ -77,10 +73,6 @@ class TestPreferencesServer:
         assert prefs_server.settings.theme_name == "lime"
         assert load_json().get("theme_name") == "lime"
         ulauncherWindow.apply_theme.assert_called_with()
-
-    def test_show_hotkey_dialog(self, prefs_server, hotkey_dialog):
-        prefs_server.show_hotkey_dialog.original(prefs_server)
-        hotkey_dialog.present.assert_called_with()
 
     def test_set_grab_mouse_pointer_dash_underscore_conversion(self, prefs_server):
         prefs_server.apply_settings("grab-mouse-pointer", True)

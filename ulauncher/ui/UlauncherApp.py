@@ -77,15 +77,16 @@ class UlauncherApp(Gtk.Application, AppIndicator):
 
         if FIRST_RUN or settings.hotkey_show_app:
             if HotkeyController.is_supported():
-                hotkey = settings.hotkey_show_app or "<Primary>space"
-                HotkeyController.set(hotkey)
-
-                display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(settings.hotkey_show_app))
-                body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
-                notification_id = "de_hotkey_auto_created"
-                notification = Gio.Notification.new("Global shortcut created")
-                notification.set_default_action("-")  # Add non-existing action to prevent activating on click
-                notification.set_body(body)
+                hotkey = "<Primary>space"
+                if settings.hotkey_show_app and not HotkeyController.is_plasma():
+                    hotkey = settings.hotkey_show_app
+                if HotkeyController.setup_default(hotkey):
+                    display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(settings.hotkey_show_app))
+                    body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
+                    notification_id = "de_hotkey_auto_created"
+                    notification = Gio.Notification.new("Global shortcut created")
+                    notification.set_default_action("-")  # Add non-existing action to prevent activating on click
+                    notification.set_body(body)
 
             else:
                 notification_id = "de_hotkey_unsupported"

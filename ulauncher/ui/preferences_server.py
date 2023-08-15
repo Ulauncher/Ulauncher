@@ -16,7 +16,6 @@ from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
-from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
@@ -199,7 +198,7 @@ class PreferencesServer:
     @glib_idle_add
     def show_hotkey_dialog(self):
         logger.info("Show hotkey-dialog")
-        HotkeyDialog().present()
+        HotkeyController.show_dialog()
 
     @route("/show/file-chooser")
     @glib_idle_add
