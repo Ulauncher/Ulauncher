@@ -46,10 +46,10 @@ def _set_hotkey(hotkey: str):
         cmd = [
             "xfconf-query",
             "--channel", "xfce4-keyboard-shortcuts",
-            "--property", f'"/commands/custom/{hotkey}"',
+            "--property", f"/commands/custom/{hotkey}",
             "--create",
             "--type", "string",
-            "--set", f'"{launch_command}"',
+            "--set", f"{launch_command}",
         ]
         # fmt: on
         logger.debug("Executing command to add XFCE global shortcut: %s", " ".join(cmd))
