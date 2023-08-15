@@ -77,19 +77,19 @@ class HotkeyController:
     @staticmethod
     def setup_default(default_hotkey: str) -> bool:
         if IS_PLASMA:
-            config_path = ["--file", "kglobalshortcutsrc", "--group", "{APP_ID}.desktop", "--key"]
+            hotkey = "Ctrl+Space"
+            config_path = ["--file", "kglobalshortcutsrc", "--group", f"{APP_ID}.desktop", "--key"]
             config = subprocess.check_output(["kreadconfig5", *config_path, '"_launch"'])
             # only proceed if it's not already set up (don't override user prefs)
             if config.decode().strip():
                 logger.debug("Ulauncher Plasma global shortcut already created")
                 return False
-            hotkey = "Ctrl+Space"
             if default_hotkey != "<Primary>space":
                 # We don't want to convert the hotkey, so instead we just hard code it
                 logger.warning("Ignoring hotkey argument %s and using default '%s'", default_hotkey, hotkey)
             logger.debug("Executing kwriteconfig5 commands to add Plasma global shortcut for '%s'", hotkey)
-            subprocess.run(["kwriteconfig5", *config_path, '"_k_friendly_name"', "Ulauncher"], check=True)
-            subprocess.run(["kwriteconfig5", *config_path, '"_launch"', f'"{hotkey},none,Ulauncher"'], check=True)
+            subprocess.run(["kwriteconfig5", *config_path, "_k_friendly_name", "Ulauncher"], check=True)
+            subprocess.run(["kwriteconfig5", *config_path, "_launch", f"{hotkey},none,Ulauncher"], check=True)
             plasma_service_controller.restart()
             return True
         if IS_SUPPORTED:

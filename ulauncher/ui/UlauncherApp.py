@@ -81,7 +81,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
                 if settings.hotkey_show_app and not HotkeyController.is_plasma():
                     hotkey = settings.hotkey_show_app
                 if HotkeyController.setup_default(hotkey):
-                    display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(settings.hotkey_show_app))
+                    display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(hotkey))
                     body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
                     notification_id = "de_hotkey_auto_created"
                     notification = Gio.Notification.new("Global shortcut created")
