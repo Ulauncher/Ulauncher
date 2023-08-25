@@ -8,6 +8,11 @@ from typing import Any
 logger = logging.getLogger()
 
 
+# remove json nulls
+def sanitize_json(d):
+    return {k: v for k, v in d.items() if v is not None}
+
+
 def _filter_recursive(data, blacklist):
     if isinstance(data, dict):
         return {k: _filter_recursive(v, blacklist) for k, v in data.items() if v not in blacklist}
@@ -21,7 +26,7 @@ def json_load(path: str | Path) -> dict:
     file_path = Path(path).resolve()
     if file_path.is_file():
         try:
-            data = json.loads(file_path.read_text())
+            data = json.loads(file_path.read_text(), object_hook=sanitize_json)
         except Exception:
             logger.exception('Error opening JSON file "%s"', file_path)
             logger.warning('Ignoring invalid JSON file "%s"', file_path)
