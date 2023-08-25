@@ -249,10 +249,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 result = self.results_nav.activate(self.app.query, alt=alt)
                 self.handle_event(result)
                 return True
-            if alt and keyname in jump_keys:
-                self.select_result(jump_keys.index(keyname))
+            if alt and event.string in jump_keys:
+                self.select_result(jump_keys.index(event.string))
                 return True
-
         return False
 
     def on_mouse_down(self, _, event):
