@@ -16,14 +16,14 @@ logger = logging.getLogger()
 launch_command = f"gapplication launch {APP_ID}"
 plasma_service_controller = SystemdController("plasma-kglobalaccel")
 IS_PLASMA = which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active()
-IS_SUPPORTED = DESKTOP_NAME in ["GNOME", "XFCE"]
+IS_SUPPORTED = DESKTOP_NAME in ["GNOME", "XFCE", "PANTHEON"]
 
 
 def _set_hotkey(hotkey: str):
     if not hotkey:
         return
 
-    if DESKTOP_NAME == "GNOME":
+    if DESKTOP_NAME in ("GNOME", "PANTHEON"):
         base_schema = "org.gnome.settings-daemon.plugins.media-keys"
         spec_schema = f"{base_schema}.custom-keybinding"
         spec_path = f"/{spec_schema.replace('.', '/')}s/ulauncher/"
