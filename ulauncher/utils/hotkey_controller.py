@@ -16,31 +16,41 @@ logger = logging.getLogger()
 launch_command = f"gapplication launch {APP_ID}"
 plasma_service_controller = SystemdController("plasma-kglobalaccel")
 IS_PLASMA = which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active()
-IS_SUPPORTED = DESKTOP_NAME in ("GNOME", "XFCE", "PANTHEON", "BUDGIE:GNOME")
+IS_SUPPORTED = DESKTOP_NAME in ("GNOME", "XFCE", "PANTHEON", "BUDGIE:GNOME", "X-CINNAMON")
+IS_CINNAMON = DESKTOP_NAME == "X-CINNAMON"
 
 
 def _set_hotkey(hotkey: str):
     if not hotkey:
         return
 
-    if DESKTOP_NAME in ("GNOME", "PANTHEON", "BUDGIE:GNOME"):
-        base_schema = "org.gnome.settings-daemon.plugins.media-keys"
+    if DESKTOP_NAME in ("GNOME", "PANTHEON", "BUDGIE:GNOME", "X-CINNAMON"):
+        if IS_CINNAMON:
+            base_schema = "org.cinnamon.desktop.keybindings"
+        else:
+            base_schema = "org.gnome.settings-daemon.plugins.media-keys"
         spec_schema = f"{base_schema}.custom-keybinding"
         spec_path = f"/{spec_schema.replace('.', '/')}s/ulauncher/"
+        list_name = "custom-list" if IS_CINNAMON else "custom-keybindings"
+        list_key = "ulauncher" if IS_CINNAMON else spec_path
 
         spec = Gio.Settings.new_with_path(spec_schema, spec_path)
         spec.set_string("name", "Show Ulauncher")
         spec.set_string("command", launch_command)
-        spec.set_string("binding", hotkey)
+        if IS_CINNAMON:
+            spec.set_value("binding", GLib.Variant("as", [hotkey]))
+        else:
+            spec.set_string("binding", hotkey)
 
         keybindings = Gio.Settings.new(base_schema)
-        enabled_keybindings = list(keybindings.get_value("custom-keybindings"))  # type: ignore[call-overload]
-        if spec_path not in enabled_keybindings:
-            logger.debug("Enabling global shortcut for Gnome")
-            enabled_keybindings.append(spec_path)
+        enabled_keybindings = list(keybindings.get_value(list_name))  # type: ignore[call-overload]
+        if list_key not in enabled_keybindings:
+            logger.debug("Enabling global shortcut for %s", DESKTOP_NAME)
+            enabled_keybindings.append(list_key)
 
-        logger.debug("Saving global shortcut '%s' for Gnome", hotkey)
-        keybindings.set_value("custom-keybindings", GLib.Variant("as", enabled_keybindings))
+        logger.debug("Saving global shortcut '%s' for %s", hotkey, DESKTOP_NAME)
+        keybindings.set_value(list_name, GLib.Variant("as", enabled_keybindings))
+
     elif DESKTOP_NAME == "XFCE":
         cmd_prefix = ["xfconf-query", "--channel", "xfce4-keyboard-shortcuts"]
         all_shortcuts = subprocess.check_output([*cmd_prefix, "--list", "--verbose"]).decode().strip().split("\n")
