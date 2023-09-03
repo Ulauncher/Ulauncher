@@ -1,6 +1,6 @@
 black==23.7.0
-mypy==1.4.1
+mypy==1.5.1
 PyGObject-stubs==2.8.0
-pytest==7.4.0
-pytest-mock==3.10.0
-ruff==0.0.279
+pytest==7.4.1
+pytest-mock==3.11.1
+ruff==0.0.287
