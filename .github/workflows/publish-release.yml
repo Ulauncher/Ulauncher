@@ -31,5 +31,5 @@ jobs:
           new_release: ${{ github.ref_name }}
           package_name: ulauncher
           commit_username: 'Ulauncher'
-          commit_email: mail@albinlarsson.com
+          commit_email: albin.larsson@gmail.com
           ssh_private_key: ${{ secrets.AUR_PRIVATE_KEY }}
