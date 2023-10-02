@@ -23,6 +23,7 @@ class ExtensionController(WebSocket):
     manifest = None
     preferences = None
     _debounced_send_event = None
+    _allowed_extension_origins = ['http://127.0.0.1:5054']
 
     def __init__(self, controllers, *args, **kw):
         self.controllers = controllers
@@ -85,6 +86,13 @@ class ExtensionController(WebSocket):
         * Validates manifest file.
         * Sends :class:`PreferencesEvent` to extension
         """
+
+        # check if origin is allowed to avoid connections from Web browsers
+        origin_header = self.request.headers.get('origin')
+        if origin_header not in self._allowed_extension_origins:
+            self.close()
+            return
+
         self.extension_id = self.request.path[1:]
         if not self.extension_id:
             raise Exception('Incorrect path %s' % self.request.path)
