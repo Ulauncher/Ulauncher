@@ -1,12 +1,19 @@
 import pickle
 import mock
 import pytest
+from http.client import HTTPMessage
 
 from ulauncher.api.server.ExtensionController import ExtensionController
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
 from ulauncher.api.shared.event import KeywordQueryEvent
 from ulauncher.search.Query import Query
+
+
+valid_headers = HTTPMessage()
+valid_headers.add_header('Origin', 'http://127.0.0.1:5054')
+invalid_headers = HTTPMessage()
+invalid_headers.add_header('Origin', 'https://example.com')
 
 
 class TestExtensionController:
@@ -45,19 +52,29 @@ class TestExtensionController:
         extPrefs.get_dict.return_value = {}
         controller.request = mock.Mock()
         controller.request.path = '/extension-name'
+        controller.request.headers = valid_headers
         controller.handleConnected()
         assert controllers['extension-name'] == controller
 
     def test_handleConnected__invalid_extension_id__raises(self, controller):
         controller.request = mock.Mock()
         controller.request.path = '/'
+        controller.request.headers = valid_headers
         with pytest.raises(Exception):
             controller.handleConnected()
+
+    def test_handleConnected__invalid_origin__doesnt_call_sendMessage(self, controller):
+        controller.request = mock.Mock()
+        controller.request.path = '/'
+        controller.request.headers = invalid_headers
+        controller.handleConnected()
+        assert not controller.sendMessage.called
 
     def test_handleConnected__preferences__sent_to_client(self, controller, extPrefs, mocker):
         extPrefs.get_dict.return_value = {}
         controller.request = mock.Mock()
         controller.request.path = '/extension-name'
+        controller.request.headers = valid_headers
         PreferencesEvent = mocker.patch(
             'ulauncher.api.server.ExtensionController.PreferencesEvent')
         PreferencesEvent.return_value = object()

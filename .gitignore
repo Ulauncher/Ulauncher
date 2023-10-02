@@ -29,3 +29,4 @@ package-lock.json
 data/preferences/app.js
 data/preferences/static/font-awesome.woff2
 data/preferences/static/variables.css
+.venv
