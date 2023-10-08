@@ -270,7 +270,11 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         return self.get_application()
 
     def handle_event(self, event: bool | list | str | dict[str, Any] | None):
-        if event is not None and not handle_event(self, event):
+        if event is None:
+            self.hide_and_clear_input()
+            return
+
+        if not handle_event(self, event):
             self.hide_and_clear_input()
 
     def apply_css(self, widget):
