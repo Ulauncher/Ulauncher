@@ -61,8 +61,8 @@ class ExtensionManifest(JsonConf):
         # Flatten manifest v2 API "options"
         if key == "options":
             key = "input_debounce"
-            value = value and value.get("query_debounce")
-            if value is None:
+            value = value and float(value.get("query_debounce", -1))
+            if value <= 0:
                 return
         # Convert triggers dicts to Trigger instances
         if key == "triggers":
