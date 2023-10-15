@@ -32,6 +32,7 @@ RUN apt install -y nodejs
 RUN npm install -g yarn
 
 # App dependencies
+RUN apt install -y gobject-introspection
 RUN apt install -y python3-all
 RUN apt install -y python3-levenshtein
 RUN apt install -y python3-gi
