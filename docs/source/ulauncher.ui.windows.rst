@@ -4,14 +4,6 @@ ulauncher\.ui\.windows package
 Submodules
 ----------
 
-ulauncher\.ui\.windows\.Builder module
---------------------------------------
-
-.. automodule:: ulauncher.ui.windows.Builder
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.ui\.windows\.HotkeyDialog module
 -------------------------------------------
 

@@ -4,14 +4,6 @@ ulauncher.utils.decorator package
 Submodules
 ----------
 
-ulauncher.utils.decorator.alias module
---------------------------------------
-
-.. automodule:: ulauncher.utils.decorator.alias
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.decorator.debounce module
 -----------------------------------------
 

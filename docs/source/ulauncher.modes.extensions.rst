@@ -1,11 +1,11 @@
 ulauncher\.modes\.extensions package
-==============================
+====================================
 
 Submodules
 ----------
 
 ulauncher\.modes\.extensions\.DeferredResultRenderer module
------------------------------------------------------
+-----------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.DeferredResultRenderer
     :members:
@@ -13,7 +13,7 @@ ulauncher\.modes\.extensions\.DeferredResultRenderer module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionController module
---------------------------------------------------
+--------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionController
     :members:
@@ -21,7 +21,7 @@ ulauncher\.modes\.extensions\.ExtensionController module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionManifest module
-------------------------------------------------
+------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionManifest
     :members:
@@ -29,7 +29,7 @@ ulauncher\.modes\.extensions\.ExtensionManifest module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionRunner module
-----------------------------------------------
+----------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionRunner
     :members:
@@ -45,7 +45,7 @@ ulauncher\.modes\.extensions\.ExtensionMode module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionServer module
-----------------------------------------------
+----------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionServer
     :members:
@@ -53,7 +53,7 @@ ulauncher\.modes\.extensions\.ExtensionServer module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.extension\_finder module
-------------------------------------------------
+------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.extension_finder
     :members:
