@@ -27,7 +27,7 @@ RUN apt install -y git-buildpackage
 RUN apt install -y python3-pip
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
-RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash -
+RUN wget -qO- https://deb.nodesource.com/setup_18.x | bash -
 RUN apt install -y nodejs
 RUN npm install -g yarn
 
