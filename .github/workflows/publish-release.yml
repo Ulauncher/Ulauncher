@@ -34,6 +34,7 @@ jobs:
           RELEASE=kinetic ./ul build-deb $VERSION --upload # 22.10     EOL 2023-07
 
       - name: Publish to AUR
+        if: "!contains(vars.VERSION, '-')"
         uses: friday/aur-publish-action@v1
         with:
           new_release: ${{ github.ref_name }}
