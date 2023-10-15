@@ -41,7 +41,13 @@ RUN apt install -y gir1.2-gtk-3.0
 RUN apt install -y gir1.2-wnck-3.0
 RUN apt install -y gir1.2-webkit2-4.0
 
+# Not actually used, just makes testing of the package easier
+RUN apt update
+RUN apt install -y software-properties-common
+RUN add-apt-repository ppa:agornostal/ulauncher -y
+
 # Clean up
+RUN apt update
 RUN apt autoremove -y
 RUN apt clean
 
