@@ -13,7 +13,7 @@ RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y tzdata
 RUN DEBIAN_FRONTEND=noninteractive apt install -y keyboard-configuration
 
-# Build and test dependencies
+# Build and build and test dependencies
 RUN apt install -y git
 RUN apt install -y vim
 RUN apt install -y wget
@@ -22,6 +22,8 @@ RUN apt install -y xvfb
 RUN apt install -y dput
 RUN apt install -y debhelper
 RUN apt install -y dh-python
+RUN apt install -y devscripts
+RUN apt install -y git-buildpackage
 RUN apt install -y python3-pip
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
