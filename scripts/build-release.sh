@@ -96,7 +96,7 @@ launchpad_upload() {
     fi
 
     lunar="PPA=$PPA RELEASE=lunar ./ul build-deb $VERSION --upload"
-    kinetic="PPA=$PPA RELEASE=kinetic ./ul build-deb $VERSION --upload"
+    mantic="PPA=$PPA RELEASE=mantic ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
 
@@ -108,6 +108,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $lunar && $kinetic && $jammy && $focal"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $lunar && $mantic && $jammy && $focal"
     set +x
 }
