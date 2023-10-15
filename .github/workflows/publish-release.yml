@@ -29,6 +29,7 @@ jobs:
           tar -xvf scripts/launchpad.ssh.tar -C /
           RELEASE=jammy   ./ul build-deb $VERSION --upload # 22.04 LTS EOL 2027-04
           RELEASE=focal   ./ul build-deb $VERSION --upload # 20.04 LTS EOL 2025-04
+          RELEASE=mantic  ./ul build-deb $VERSION --upload # 23.10     EOL 2024-07
           RELEASE=lunar   ./ul build-deb $VERSION --upload # 23.04     EOL 2024-01
           RELEASE=kinetic ./ul build-deb $VERSION --upload # 22.10     EOL 2023-07
 
