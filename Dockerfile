@@ -4,6 +4,8 @@ FROM ubuntu:22.04
 
 LABEL maintainer="ulauncher.app@gmail.com"
 
+ENV EMAIL=ulauncher.app@gmail.com
+
 # NOTE: Keep lines separate. One "RUN" per dependency/change
 # https://stackoverflow.com/a/47451019/633921
 
@@ -63,3 +65,7 @@ RUN pip3 install -r docs/requirements.txt
 # Caching node_modules to make builds faster
 RUN yarn
 RUN mv node_modules /var
+
+RUN git config --global --add safe.directory /root/ulauncher
+RUN git config --global user.name Ulauncher
+RUN git config --global user.email $EMAIL
