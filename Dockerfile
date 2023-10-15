@@ -66,6 +66,5 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarn
 RUN mv node_modules /var
 
+RUN usermod -c "Ulauncher" root
 RUN git config --global --add safe.directory /root/ulauncher
-RUN git config --global user.name Ulauncher
-RUN git config --global user.email $EMAIL
