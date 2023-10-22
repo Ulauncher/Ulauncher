@@ -17,8 +17,9 @@ jobs:
           DISPLAY=:1 xvfb-run pytest tests
       - name: Build release
         run: |
-          echo "Building Ulauncher version: $GITHUB_REF_NAME"
-          DEB_VERSION=$(echo "$GITHUB_REF_NAME" | tr "-" "~")
+          VERSION=$(./setup.py --version)
+          DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
+          echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache
           ./ul build-targz
           ./ul build-deb --deb
