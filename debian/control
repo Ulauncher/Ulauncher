@@ -3,8 +3,10 @@ Section: python
 Priority: extra
 Build-Depends: debhelper (>=9~),
  dh-python,
+ gir1.2-gtk-3.0,
+ gir1.2-wnck-3.0,
  python3-all,
- gobject-introspection,
+ python3-gi,
  python3-setuptools
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 4.1.4
