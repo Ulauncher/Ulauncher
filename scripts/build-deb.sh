@@ -83,7 +83,7 @@ build-deb () {
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
 
         info "Uploading to launchpad"
-        dput ppa:$PPA $tmpdir/*.changes
+        dput ppa:$PPA ../*.changes
     else
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
         sed -i "s/%RELEASE%/focal/g" debian/changelog
