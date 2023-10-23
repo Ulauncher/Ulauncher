@@ -66,6 +66,16 @@ def main(is_dev=False):
     logger.info("PyGObject+ %i.%i.%i", *gi.version_info)
 
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
+    if "-" in VERSION:
+        logger.warning(
+            "\n"
+            "\n╔═════════════════════════════════════════════════════════════════════════════╗"
+            "\n║                  YOU ARE RUNNING A PRE-RELEASE of ULAUNCHER.                ║"
+            "\n║ Please do not report extension API support warnings to extension developers ║"
+            "\n║ We are still in the process of developing and documenting these features    ║"
+            "\n╚═════════════════════════════════════════════════════════════════════════════╝"
+            "\n\n"
+        )
 
     if XDG_SESSION_TYPE != "X11":
         logger.info("Layer shell: %s", ("Yes" if LayerShellOverlay.is_supported() else "No"))

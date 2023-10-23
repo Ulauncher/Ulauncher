@@ -152,7 +152,7 @@ class ExtensionManifest(JsonConf):
                 if verbose:
                     logger.warning(
                         "Extension %s has not yet been updated to support API v%s. "
-                        "It might fail to start or not be fully functional.",
+                        "Running in compatibility mode, which may not be fully functional.",
                         self.name,
                         API_VERSION,
                     )
