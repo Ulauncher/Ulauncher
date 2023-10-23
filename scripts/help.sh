@@ -32,7 +32,7 @@ help () {
 
 The commands below are useful for maintainers:
 
-  ${bold}./ul build-deb <--deb or --upload>
+  ${bold}./ul build-deb
     ${dim}Builds a deb package or uploads new Ulauncher version to PPA in Launchpad${normal}
 
   ${bold}./ul build-rpm <DISTRO_NAME> [FILE_SUFFIX]

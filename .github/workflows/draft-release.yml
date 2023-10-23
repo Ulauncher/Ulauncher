@@ -22,7 +22,7 @@ jobs:
           echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache
           ./ul build-targz
-          ./ul build-deb --deb
+          ./ul build-deb --signed
           cp /tmp/ulauncher_$VERSION.tar.gz .
           cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb
 

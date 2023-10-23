@@ -5,7 +5,7 @@
 ######################
 build-deb () {
     # Args:
-    #   $1 --deb | --upload
+    #   $1 --signed | --upload
     #
     # Env vars:
     #   PPA required for upload
@@ -56,13 +56,7 @@ build-deb () {
 
     cd $tmpdir
 
-    if [ "$1" = "--deb" ]; then
-        sed -i "s/%VERSION%/$deb_version/g" debian/changelog
-        sed -i "s/%RELEASE%/focal/g" debian/changelog
-        info "Building deb package"
-        dpkg-buildpackage -tc -us -sa -k$GPGKEY
-        success "ulauncher_${version}_all.deb saved to /tmp"
-    elif [ "$1" = "--upload" ]; then
+    if [ "$1" = "--upload" ]; then
         if [ -z "$RELEASE" ]; then
             error "RELEASE env var is not supplied"
             exit 1
@@ -93,8 +87,13 @@ build-deb () {
     else
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
         sed -i "s/%RELEASE%/focal/g" debian/changelog
-        info "Building deb package"
-        dpkg-buildpackage -tc --no-sign
+        if [ "$1" = "--signed" ]; then
+            info "Building signed deb package"
+            dpkg-buildpackage -tc -us -sa -k$GPGKEY
+        else
+            info "Building unsigned deb package"
+            dpkg-buildpackage -tc --no-sign
+        fi
         success "ulauncher_${version}_all.deb saved to /tmp"
     fi
 }
