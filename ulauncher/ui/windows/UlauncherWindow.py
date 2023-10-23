@@ -71,8 +71,8 @@ def handle_event(window, event: bool | list | str | dict[str, Any]) -> bool:  # 
 
 class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     _css_provider = None
-    _drag_start_coords = None
     results_nav = None
+    is_dragging = False
     settings = Settings.load()
 
     def __init__(self, **kwargs):
@@ -156,6 +156,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.connect("focus-in-event", self.on_focus_in)
         self.connect("focus-out-event", self.on_focus_out)
         event_box.connect("button-press-event", self.on_mouse_down)
+        self.connect("button-release-event", self.on_mouse_up)
         self.input.connect("changed", self.on_input_changed)
         self.input.connect("key-press-event", self.on_input_key_press)
         prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
@@ -172,7 +173,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     ######################################
 
     def on_focus_out(self, *_):
-        self.hide()
+        if not self.is_dragging:
+            self.hide()
 
     def on_focus_in(self, *_args):
         if self.settings.grab_mouse_pointer:
@@ -259,7 +261,11 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         Move the window on drag
         """
         if event.button == 1:
+            self.is_dragging = True
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
+
+    def on_mouse_up(self, *_):
+        self.is_dragging = False
 
     ######################################
     # Helpers
