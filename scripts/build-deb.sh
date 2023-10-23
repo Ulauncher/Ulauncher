@@ -58,7 +58,7 @@ build-deb () {
 
     if [ "$1" = "--deb" ]; then
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
-        sed -i "s/%RELEASE%/bionic/g" debian/changelog
+        sed -i "s/%RELEASE%/focal/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc -us -sa -k$GPGKEY
         success "ulauncher_${version}_all.deb saved to /tmp"
@@ -92,7 +92,7 @@ build-deb () {
         dput ppa:$PPA $tmpdir/*.changes
     else
         sed -i "s/%VERSION%/$deb_version/g" debian/changelog
-        sed -i "s/%RELEASE%/bionic/g" debian/changelog
+        sed -i "s/%RELEASE%/focal/g" debian/changelog
         info "Building deb package"
         dpkg-buildpackage -tc --no-sign
         success "ulauncher_${version}_all.deb saved to /tmp"
