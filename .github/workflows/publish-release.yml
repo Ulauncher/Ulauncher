@@ -15,26 +15,27 @@ jobs:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
           LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
           LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
-          VERSION: ${{ github.ref_name }}
           PPA: agornostal/ulauncher
+        shell: bash
         run: |
           echo "Ref type: $GITHUB_REF_TYPE"
+          VERSION=$(./setup.py --version)
           echo "Version: $VERSION"
           # If release name contains prerelease-separator "-", use ulauncher-dev PPA
-          if [[ "$VERSION" == *-* ]]; then PPA="agornostal/ulauncher-dev" fi
+          if [[ "$VERSION" == *-* ]]; then PPA="agornostal/ulauncher-dev"; fi
           echo "PPA: $PPA"
           echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           tar -xvf scripts/launchpad.ssh.tar -C /
-          RELEASE=jammy   ./ul build-deb $VERSION --upload # 22.04 LTS EOL 2027-04
-          RELEASE=focal   ./ul build-deb $VERSION --upload # 20.04 LTS EOL 2025-04
-          RELEASE=mantic  ./ul build-deb $VERSION --upload # 23.10     EOL 2024-07
-          RELEASE=lunar   ./ul build-deb $VERSION --upload # 23.04     EOL 2024-01
-          RELEASE=kinetic ./ul build-deb $VERSION --upload # 22.10     EOL 2023-07
+          RELEASE=jammy   ./ul build-deb --upload # 22.04 LTS EOL 2027-04
+          RELEASE=focal   ./ul build-deb --upload # 20.04 LTS EOL 2025-04
+          RELEASE=mantic  ./ul build-deb --upload # 23.10     EOL 2024-07
+          RELEASE=lunar   ./ul build-deb --upload # 23.04     EOL 2024-01
+          RELEASE=kinetic ./ul build-deb --upload # 22.10     EOL 2023-07
 
       - name: Publish to AUR
-        if: "!contains(vars.VERSION, '-')"
+        if: "!contains(github.ref_name, '-')"
         uses: friday/aur-publish-action@v1
         with:
           new_release: ${{ github.ref_name }}
