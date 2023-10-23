@@ -21,11 +21,10 @@ RUN apt install -y vim
 RUN apt install -y wget
 RUN apt install -y rsync
 RUN apt install -y xvfb
-RUN apt install -y dput
-RUN apt install -y debhelper
-RUN apt install -y dh-python
-RUN apt install -y devscripts
-RUN apt install -y git-buildpackage
+# deb package build dependencies and helpers
+RUN apt install -y debhelper dh-python devscripts git-buildpackage
+# ubuntu launchpad upload dependencies
+RUN apt install -y dput python3-paramiko
 RUN apt install -y python3-pip
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
