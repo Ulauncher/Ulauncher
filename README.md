@@ -10,7 +10,7 @@ We are not yet ready to make releases or pre-releases for Ulauncher 6, as the AP
 [Application Launcher for Linux 🐧](https://ulauncher.io)
 ================================
 
-Ulauncher is a fast application launcher for Linux. It's written in Python using GTK+, and features: App Search (fuzzy matching), Calculator, [Extensions](https://ext.ulauncher.io/), Shortcuts, File browser mode and [Custom Color Themes](https://docs.ulauncher.io/en/latest/themes/themes.html)
+Ulauncher is a fast application launcher for Linux. It's written in Python using GTK+, and features: App Search (fuzzy matching), Calculator, [Extensions](https://ext.ulauncher.io/), Shortcuts, File browser mode and [Custom Color Themes](https://docs.ulauncher.io/en/stable/themes/themes.html)
 
 | App Search | File Browser | Color Themes |
 ---|---|---
