@@ -88,7 +88,7 @@ class TestResultWidget:
 
     def test_set_name(self, result_wgt, builder):
         result_wgt.set_name("test name")
-        builder.get_object.return_value.set_text.assert_called_with("test name")
+        builder.get_object.return_value.set_markup.assert_called_with("test name")
 
     def test_on_click(self, mocker, result_wgt):
         mock_get_toplevel = mocker.patch.object(result_wgt, "get_toplevel")
@@ -110,7 +110,7 @@ class TestResultWidget:
 
     def test_set_description(self, result_wgt, builder):
         result_wgt.set_description("test description")
-        builder.get_object.return_value.set_text.assert_called_with("test description")
+        builder.get_object.return_value.set_markup.assert_called_with("test description")
 
     def test_no_description(self, result_wgt, builder):
         result_wgt.set_description(None)
