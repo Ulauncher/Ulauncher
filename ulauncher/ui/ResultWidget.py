@@ -115,10 +115,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
 
     def set_name(self, name: str) -> None:
         item = self.builder.get_object("item-name")
-        if "<span" in name:  # dealing with markup
-            item.set_markup(name)
-        else:
-            item.set_text(name)
+        item.set_markup(name)
         self.name = name
 
     def get_name(self):
@@ -139,7 +136,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         description_obj = self.builder.get_object("item-descr")
 
         if description and not self.compact:
-            description_obj.set_text(description)
+            description_obj.set_markup(description)
         else:
             description_obj.destroy()  # remove description label
 
