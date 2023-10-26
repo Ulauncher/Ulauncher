@@ -52,10 +52,13 @@ class ExtensionRunner:
         Finds all extensions in `PATHS.EXTENSIONS` and runs them
         """
         for ex_id, _ in find_extensions(PATHS.EXTENSIONS):
-            try:
-                self.run(ex_id)
-            except Exception:
-                logger.exception("Couldn't start extension '%s'", ex_id)
+            manifest = ExtensionManifest.load_from_extension_id(ex_id)
+            is_enabled = manifest.get_is_enabled()
+            if is_enabled:
+                try:
+                    self.run(ex_id)
+                except Exception:
+                    logger.exception("Couldn't start extension '%s'", ex_id)
 
     def run(self, extension_id):
         """

@@ -66,6 +66,11 @@ def _migrate_user_prefs(extension_id, user_prefs):
             new_prefs["triggers"][id] = {"keyword": pref}
         else:
             new_prefs["preferences"][id] = pref
+    # new_prefs = {
+    #     "is_enabled": user_prefs.get("is_enabled", True),
+    #     "preferences": user_prefs.get("triggers", {}),
+    #     "triggers": user_prefs.get("preferences", {})
+    # }
     return new_prefs
 
 

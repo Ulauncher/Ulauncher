@@ -16,6 +16,7 @@
           <b-badge v-else-if="!ext.is_running && ext.runtime_error" variant="warning">
             Crashed
           </b-badge>
+          <b-badge v-else-if="!ext.is_enabled">Disabled</b-badge>
           <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
           <span>{{ ext.name }}</span>
         </li>

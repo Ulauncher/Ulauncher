@@ -51,6 +51,7 @@ def get_extensions():
             error = {"message": str(e), "errorName": type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
+        enabled = not manifest.get("disabled", False)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
         icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
 
@@ -65,6 +66,7 @@ def get_extensions():
             "triggers": manifest.triggers,
             "error": error,
             "is_running": is_running,
+            "is_enabled": enabled,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
 
@@ -73,7 +75,7 @@ class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
-    register_uri_scheme must be called only once per scheme and context and this means whatever ethod you bind those to
+    register_uri_scheme must be called only once per scheme and context and this means whatever method you bind those to
     have to persist as long as the app is running.
     For this reason it should be separate from the window class, which is an object that you want to be able to create,
     destroy and recreate.
@@ -294,6 +296,14 @@ class PreferencesServer:
 
     @route("/extension/remove")
     def extension_remove(self, extension_id):
-        logger.info("Remove extension: %s", extension_id)
+        logger.info("Remove extension:", extension_id)
         ExtensionRunner.get_instance().stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
+
+    @route("/extension/toggle-enabled")
+    def extension_toggle_enabled(self, extension_id):
+        logger.info("Toggle extension: %s", extension_id)
+
+        manifest = ExtensionManifest.load_from_extension_id(extension_id)
+        manifest.toggle_is_enabled()
+        manifest.save_user_preferences(extension_id)
