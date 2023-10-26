@@ -3,11 +3,12 @@
 # NOTE: ulauncher-toggle is no longer needed.
 # It's better to use these two gapplication commands directly.
 
-for ((i=1; i<=$#; i++))
+while [ "$#" -gt 0 ]
 do
-  if [ "${!i}" = "--query" ] || [ "${!i}" = "-q" ]; then
-    let val=i+1
-    gapplication action io.ulauncher.Ulauncher set-query "'${!val}'"
+  arg="$1"
+  shift
+  if [ "$arg" = "--query" ] || [ "$arg" = "-q" ]; then
+    gapplication action io.ulauncher.Ulauncher set-query "'$1'"
     exit 0
   fi
 done
