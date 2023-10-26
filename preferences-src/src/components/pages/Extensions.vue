@@ -12,11 +12,11 @@
           @click="selectExtension(ext)"
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
-          <b-badge v-if="ext.error" variant="warning">Error</b-badge>
+          <b-badge v-if="!ext.is_enabled">Disabled</b-badge>
+          <b-badge v-else-if="ext.error" variant="warning">Error</b-badge>
           <b-badge v-else-if="!ext.is_running && ext.runtime_error" variant="warning">
             Crashed
           </b-badge>
-          <b-badge v-else-if="!ext.is_enabled">Disabled</b-badge>
           <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
           <span>{{ ext.name }}</span>
         </li>
@@ -95,7 +95,7 @@
     </div>
 
     <div class="col-8 ext-view">
-      <extension-config v-if="activeExt" @removed="onRemoved" :extension="activeExt"></extension-config>
+      <extension-config v-if="activeExt" @removed="onRemoved" v-on:reload="reload" :extension="activeExt"></extension-config>
     </div>
   </div>
 </template>

@@ -51,7 +51,7 @@ def get_extensions():
             error = {"message": str(e), "errorName": type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
-        enabled = not manifest.get("disabled", False)
+        is_enabled = manifest.get_is_enabled()
         # Controller method `get_icon_path` would work, but only running extensions have controllers
         icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
 
@@ -66,7 +66,7 @@ def get_extensions():
             "triggers": manifest.triggers,
             "error": error,
             "is_running": is_running,
-            "is_enabled": enabled,
+            "is_enabled": is_enabled,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
 
@@ -307,3 +307,9 @@ class PreferencesServer:
         manifest = ExtensionManifest.load_from_extension_id(extension_id)
         manifest.toggle_is_enabled()
         manifest.save_user_preferences(extension_id)
+
+        runner = ExtensionRunner.get_instance()
+        if manifest.get_is_enabled():
+            runner.run(extension_id)
+        else:
+            runner.stop(extension_id)

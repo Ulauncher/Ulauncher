@@ -57,20 +57,16 @@ def _migrate_app_state(old_format):
 
 def _migrate_user_prefs(extension_id, user_prefs):
     # Check if alreay migrated
-    if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
+    if sorted(user_prefs.keys()) == ["is_enabled", "preferences", "triggers"]:
         return user_prefs
-    new_prefs = {"preferences": {}, "triggers": {}}
+    new_prefs = {"is_enabled": True, "preferences": {}, "triggers": {}}
     manifest = ExtensionManifest.load(f"{PATHS.EXTENSIONS}/{extension_id}/manifest.json")
     for id, pref in user_prefs.items():
+        print(id, pref)
         if manifest.triggers.get(id):
             new_prefs["triggers"][id] = {"keyword": pref}
-        else:
+        elif manifest.preferences.get(id):
             new_prefs["preferences"][id] = pref
-    # new_prefs = {
-    #     "is_enabled": user_prefs.get("is_enabled", True),
-    #     "preferences": user_prefs.get("triggers", {}),
-    #     "triggers": user_prefs.get("preferences", {})
-    # }
     return new_prefs
 
 

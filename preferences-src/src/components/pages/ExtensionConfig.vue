@@ -305,13 +305,12 @@ export default {
       fetchData('prefs:///open/web-url', url)
     },
     toggleEnabled() {
-      fetchData('prefs:///extension/toggle-enabled', this.extension.id).then(
-        // () => {
-        //   this.$emit('toggled-enabled', this.extension.id)
-        // },
-        // err => {
-        //   bus.$emit('error', err)
-        // }
+      fetchData('prefs:///extension/toggle-enabled', this.extension.id).then(() => {
+          this.$emit('reload')
+        },
+        err => {
+          bus.$emit('error', err)
+        }
       )
     },
   }
