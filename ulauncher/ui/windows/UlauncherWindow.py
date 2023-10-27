@@ -334,7 +334,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def show(self):
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
-        # (Gnome 3 forks like CInnamon or Budgie, but not Gnome 3 itself any longer)
+        # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
         # The correct time to use is the time of the user interaction requesting the focus, but we don't have access
         # to that, so we use `Gdk.CURRENT_TIME`, which is the same as passing 0.
         self.present_with_time(Gdk.CURRENT_TIME)
