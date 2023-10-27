@@ -297,3 +297,19 @@ class PreferencesServer:
         logger.info("Remove extension: %s", extension_id)
         ExtensionRunner.get_instance().stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
+
+    @route("/extension/toggle-enabled")
+    def extension_toggle_enabled(self, extension_id):
+        logger.info("Toggle extension: %s", extension_id)
+        ext_db = ExtensionDb.load()
+        ext_state = ext_db.get(extension_id)
+        if ext_state:
+            ext_state.is_enabled = not ext_state.is_enabled
+        else:
+            logger.warning("Trying to disable an extension '%s' that is not installed", extension_id)
+        ext_db.save()
+        runner = ExtensionRunner.get_instance()
+        if ext_state.is_enabled:
+            runner.run(extension_id)
+        else:
+            runner.stop(extension_id)

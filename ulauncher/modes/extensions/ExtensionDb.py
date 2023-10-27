@@ -8,6 +8,7 @@ class ExtensionRecord(JsonConf):
     updated_at = ""
     last_commit = ""
     last_commit_time = ""
+    is_enabled = True
 
 
 class ExtensionDb(JsonConf):
