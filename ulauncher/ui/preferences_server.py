@@ -73,7 +73,7 @@ class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
-    register_uri_scheme must be called only once per scheme and context and this means whatever ethod you bind those to
+    register_uri_scheme must be called only once per scheme and context and this means whatever method you bind those to
     have to persist as long as the app is running.
     For this reason it should be separate from the window class, which is an object that you want to be able to create,
     destroy and recreate.
