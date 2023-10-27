@@ -62,7 +62,6 @@ def _migrate_user_prefs(extension_id, user_prefs):
     new_prefs = {"is_enabled": True, "preferences": {}, "triggers": {}}
     manifest = ExtensionManifest.load(f"{PATHS.EXTENSIONS}/{extension_id}/manifest.json")
     for id, pref in user_prefs.items():
-        print(id, pref)
         if manifest.triggers.get(id):
             new_prefs["triggers"][id] = {"keyword": pref}
         elif manifest.preferences.get(id):
