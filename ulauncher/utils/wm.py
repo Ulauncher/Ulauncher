@@ -6,9 +6,12 @@ from ulauncher.utils.environment import IS_X11
 
 logger = logging.getLogger()
 if IS_X11:
-    from gi.repository import Wnck  # type: ignore[attr-defined]
-
-    wnck_screen = Wnck.Screen.get_default()
+    try:
+        import gi
+        gi.require_version("Wnck", "3.0")
+        from gi.repository import Wnck  # type: ignore[attr-defined]
+    except (ImportError, ValueError):
+        logger.debug("Wnck is not installed")
 
 
 def get_monitor(use_mouse_position=False):
@@ -37,8 +40,12 @@ def get_text_scaling_factor():
 
 
 def get_windows_stacked():
-    wnck_screen.force_update()
-    return reversed(wnck_screen.get_windows_stacked())
+    try:
+        wnck_screen = Wnck.Screen.get_default()
+        wnck_screen.force_update()
+        return reversed(wnck_screen.get_windows_stacked())
+    except NameError:
+        return []
 
 
 def get_xserver_time():

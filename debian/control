@@ -4,7 +4,6 @@ Priority: extra
 Build-Depends: debhelper (>=9~),
  dh-python,
  gir1.2-gtk-3.0,
- gir1.2-wnck-3.0,
  python3-all,
  python3-gi,
  python3-setuptools
@@ -21,12 +20,11 @@ Depends: ${misc:Depends},
  libgtk-3-0 (>= 3.10),
  gir1.2-gtk-3.0,
  gir1.2-webkit2-4.0,
- gir1.2-wnck-3.0,
  gir1.2-glib-2.0,
  gir1.2-gdkpixbuf-2.0,
  python3-gi,
  python3-gi-cairo,
  python3-levenshtein
-Recommends: gir1.2-ayatanaappindicator3-0.1
+Recommends: gir1.2-wnck-3.0, gir1.2-ayatanaappindicator3-0.1
 Description: Application launcher for Linux
  See https://ulauncher.io for more information
