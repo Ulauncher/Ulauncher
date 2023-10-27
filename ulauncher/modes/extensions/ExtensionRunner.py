@@ -13,7 +13,7 @@ from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
 from ulauncher.modes.extensions.extension_finder import find_extensions
-from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.utils.timer import timer
@@ -54,7 +54,7 @@ class ExtensionRunner:
         Finds all extensions in `PATHS.EXTENSIONS` and runs them
         """
         for ex_id, _ in find_extensions(PATHS.EXTENSIONS):
-            ext_record = ext_db[ex_id]
+            ext_record = ext_db.get(ex_id)
             if not ext_record or ext_record.is_enabled:
                 try:
                     self.run(ex_id)
