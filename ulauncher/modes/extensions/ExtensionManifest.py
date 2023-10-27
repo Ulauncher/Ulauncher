@@ -50,7 +50,6 @@ class ExtensionManifest(JsonConf):
     input_debounce = 0.05
     triggers: dict[str, Trigger] = {}
     preferences: dict[str, Preference] = {}
-    is_enabled = True
 
     def __setitem__(self, key, value):
         # Rename "required_api_version" back to "api_version"
@@ -178,7 +177,7 @@ class ExtensionManifest(JsonConf):
         path = f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"
         triggers = {id: ({"keyword": t.user_keyword} if t.keyword else {}) for id, t in self.triggers.items()}
         file = JsonConf.load(path)
-        file.update(triggers=triggers, preferences=self.get_user_preferences(), is_enabled=self.get_is_enabled())
+        file.update(triggers=triggers, preferences=self.get_user_preferences())
         file.save()
 
     def apply_user_preferences(self, user_prefs: dict):
@@ -188,14 +187,6 @@ class ExtensionManifest(JsonConf):
         for id, trigger in self.triggers.items():
             if trigger.keyword:
                 trigger.user_keyword = user_prefs.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
-
-        self.is_enabled = user_prefs.get("is_enabled", True)
-
-    def get_is_enabled(self):
-        return self.is_enabled
-
-    def toggle_is_enabled(self, enable=None):
-        self.is_enabled = enable or not self.is_enabled
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):

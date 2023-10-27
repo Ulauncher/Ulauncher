@@ -71,12 +71,9 @@ class TestExtensionManifest:
 
     def test_defaults_not_included_in_stringify(self):
         # Ensure defaults don't leak
-        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05, "is_enabled": true}'
+        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
         manifest = ExtensionManifest(preferences={"ns": {"k": "v"}})
-        assert (
-            json_stringify(manifest)
-            == '{"input_debounce": 0.05, "is_enabled": true, "preferences": {"ns": {"k": "v"}}}'
-        )
+        assert json_stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
 
     def test_get_user_preferences(self):
         manifest = ExtensionManifest(
