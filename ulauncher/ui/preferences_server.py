@@ -296,7 +296,7 @@ class PreferencesServer:
 
     @route("/extension/remove")
     def extension_remove(self, extension_id):
-        logger.info("Remove extension:", extension_id)
+        logger.info("Remove extension %s:", extension_id)
         ExtensionRunner.get_instance().stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
 

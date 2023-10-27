@@ -194,12 +194,11 @@ class ExtensionManifest(JsonConf):
     def get_is_enabled(self):
         return self.is_enabled
 
-    def toggle_is_enabled(self, enable = None):
+    def toggle_is_enabled(self, enable=None):
         self.is_enabled = enable or not self.is_enabled
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
         manifest = super().load(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
         manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
-        print(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json")
         return manifest
