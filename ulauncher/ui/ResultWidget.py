@@ -136,7 +136,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         description_obj = self.builder.get_object("item-descr")
 
         if description and not self.compact:
-            description_obj.set_markup(description)
+            description_obj.set_text(description)
         else:
             description_obj.destroy()  # remove description label
 
