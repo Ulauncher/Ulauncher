@@ -8,6 +8,7 @@ logger = logging.getLogger()
 if IS_X11:
     try:
         import gi
+
         gi.require_version("Wnck", "3.0")
         from gi.repository import Wnck  # type: ignore[attr-defined]
     except (ImportError, ValueError):
