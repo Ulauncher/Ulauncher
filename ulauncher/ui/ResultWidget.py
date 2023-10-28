@@ -108,6 +108,8 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
             labels = []
 
             for label_text, should_highlight in highlight_text(highlightable_input, self.result.name):
+                # allow the label to ellipsize if it is long enough and not highlighted
+                # 0 = Pango.EllipsizeMode.NONE, 2 = Pango.EllipsizeMode.MIDDLE  # noqa: ERA001
                 ellipsize = 0 if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH else 2
                 label = Gtk.Label(label=label_text, ellipsize=ellipsize)  # type: ignore[arg-type]
                 if should_highlight:
