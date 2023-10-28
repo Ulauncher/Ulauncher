@@ -82,3 +82,7 @@
 .prefs-btn:hover {
     background-color: @prefs_backgroud;
 }
+
+.item-highlight {
+    color: #99ccff
+}

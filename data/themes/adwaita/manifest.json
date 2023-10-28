@@ -3,9 +3,5 @@
     "name": "adwaita",
     "display_name": "Adwaita",
     "extend_theme": "light",
-    "css_file": "theme.css",
-    "matched_text_hl_colors": {
-        "when_selected": "#99ccff",
-        "when_not_selected": "#99ccff"
-    }
+    "css_file": "theme.css"
 }
