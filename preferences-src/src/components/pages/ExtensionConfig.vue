@@ -17,9 +17,10 @@
           split
           class="m-2 menu-button"
           @click="onDropdownClick"
-          :text="(canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
+          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
+          <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
@@ -41,7 +42,7 @@
       <div v-html="extension.instructions"></div>
     </details>
 
-    <div class="error-wrapper" v-if="extension.runtime_error">
+    <div class="error-wrapper" v-if="extension.runtime_error && extension.is_enabled">
       <ext-runtime-error
         :extUrl="extension.url"
         :errorMessage="extension.runtime_error.message"
@@ -198,6 +199,8 @@ export default {
   methods: {
     onDropdownClick() {
       switch (true) {
+        case !this.extension.is_enabled:
+          return this.setIsEnabled(true)
         case this.canSave:
           return this.save()
         case this.canCheckUpdates:
@@ -302,6 +305,15 @@ export default {
     },
     openUrl(url) {
       fetchData('prefs:///open/web-url', url)
+    },
+    setIsEnabled(is_enables) {
+      fetchData('prefs:///extension/toggle-enabled', this.extension.id, is_enables).then(() => {
+          this.$emit('reload')
+        },
+        err => {
+          bus.$emit('error', err)
+        }
+      )
     },
   }
 }

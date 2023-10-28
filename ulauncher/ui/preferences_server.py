@@ -73,7 +73,7 @@ class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
-    register_uri_scheme must be called only once per scheme and context and this means whatever ethod you bind those to
+    register_uri_scheme must be called only once per scheme and context and this means whatever method you bind those to
     have to persist as long as the app is running.
     For this reason it should be separate from the window class, which is an object that you want to be able to create,
     destroy and recreate.
@@ -297,3 +297,19 @@ class PreferencesServer:
         logger.info("Remove extension: %s", extension_id)
         ExtensionRunner.get_instance().stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
+
+    @route("/extension/toggle-enabled")
+    def extension_toggle_enabled(self, extension_id, is_enabled):
+        logger.info("Toggle extension: %s", extension_id)
+        ext_db = ExtensionDb.load()
+        ext_state = ext_db.get(extension_id)
+        if ext_state:
+            ext_state.is_enabled = is_enabled
+        else:
+            logger.warning("Trying to disable an extension '%s' that is not installed", extension_id)
+        ext_db.save()
+        runner = ExtensionRunner.get_instance()
+        if ext_state.is_enabled:
+            runner.run(extension_id)
+        else:
+            runner.stop(extension_id)
