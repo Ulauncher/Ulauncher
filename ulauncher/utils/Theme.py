@@ -70,7 +70,7 @@ class Theme(JsonConf):
     def validate(self):
         try:
             assert self.manifest_version == "1", "Supported manifest version is '1'"
-            for prop in ["name", "display_name", "matched_text_hl_colors", "css_file"]:
+            for prop in ["name", "display_name", "css_file"]:
                 assert self.get(prop), f'"{prop}" is empty'
             assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
         except AssertionError as e:
