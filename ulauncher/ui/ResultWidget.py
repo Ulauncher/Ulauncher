@@ -108,8 +108,8 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
             labels = []
 
             for label_text, should_highlight in highlight_text(highlightable_input, self.result.name):
-                ellipsize=0 if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH else 2
-                label = Gtk.Label(label=label_text, ellipsize=ellipsize) # type: ignore[arg-type]
+                ellipsize = 0 if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH else 2
+                label = Gtk.Label(label=label_text, ellipsize=ellipsize)  # type: ignore[arg-type]
                 if should_highlight:
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)
