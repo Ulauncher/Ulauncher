@@ -37,11 +37,12 @@ For the v6 branch you need the the following to setup the local build environmen
   PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install -r requirements.txt
   ```
 
-  If you don't have Ulauncher installed already, install the runtime dependencies as well:
+  If you don't have Ulauncher installed already, install the runtime dependencies as well (requires universe repo):
 
   ```sh
+  sudo add-apt-repository universe
   sudo apt install python3-{all,gi,levenshtein} gobject-introspection \
-    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0}
+    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0,gtklayershell-0.1}
   ```
 
 </details>
@@ -70,7 +71,7 @@ For the v6 branch you need the the following to setup the local build environmen
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
-  sudo pacman -Syu --needed gtk3 webkit2gtk-4.1 libwnck3 python-{cairo,gobject,levenshtein}
+  sudo pacman -Syu --needed gtk3 webkit2gtk-4.1 libwnck3 gtk-layer-shell python-{cairo,gobject,levenshtein}
   ```
 
 </details>
