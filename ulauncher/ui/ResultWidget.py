@@ -4,7 +4,7 @@ import logging
 from types import SimpleNamespace
 from typing import Any
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.icon import load_icon_surface
@@ -108,10 +108,12 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
             labels = []
 
             for label_text, should_highlight in highlight_text(highlightable_input, self.result.name):
-                # allow the label to ellipsize if it is long enough and not highlighted
-                # 0 = Pango.EllipsizeMode.NONE, 2 = Pango.EllipsizeMode.MIDDLE  # noqa: ERA001
-                ellipsize = 0 if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH else 2
-                label = Gtk.Label(label=label_text, ellipsize=ellipsize)  # type: ignore[arg-type]
+                ellipsize = (
+                    Pango.EllipsizeMode.NONE
+                    if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH
+                    else Pango.EllipsizeMode.MIDDLE
+                )
+                label = Gtk.Label(label=label_text, ellipsize=ellipsize)
                 if should_highlight:
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)
