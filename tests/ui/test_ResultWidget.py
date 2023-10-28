@@ -102,7 +102,7 @@ class TestResultWidget:
 
     def test_set_description(self, result_wgt, builder):
         result_wgt.set_description("test description")
-        builder.get_object.return_value.set_markup.assert_called_with("test description")
+        builder.get_object.return_value.set_text.assert_called_with("test description")
 
     def test_no_description(self, result_wgt, builder):
         result_wgt.set_description(None)
