@@ -20,7 +20,7 @@
           :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
-          <b-dropdown-item v-if="extension.is_enabled" @click="toggleEnabled">Disable</b-dropdown-item>
+          <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
           <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
@@ -200,7 +200,7 @@ export default {
     onDropdownClick() {
       switch (true) {
         case !this.extension.is_enabled:
-          return this.toggleEnabled()
+          return this.setIsEnabled(true)
         case this.canSave:
           return this.save()
         case this.canCheckUpdates:
@@ -306,8 +306,8 @@ export default {
     openUrl(url) {
       fetchData('prefs:///open/web-url', url)
     },
-    toggleEnabled() {
-      fetchData('prefs:///extension/toggle-enabled', this.extension.id).then(() => {
+    setIsEnabled(is_enables) {
+      fetchData('prefs:///extension/toggle-enabled', this.extension.id, is_enables).then(() => {
           this.$emit('reload')
         },
         err => {
