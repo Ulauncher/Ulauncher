@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from typing import Any
 
 from gi.repository import Gtk, Pango
+from html import unescape
 
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.icon import load_icon_surface
@@ -113,7 +114,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
                     if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH
                     else Pango.EllipsizeMode.MIDDLE
                 )
-                label = Gtk.Label(label=label_text, ellipsize=ellipsize)
+                label = Gtk.Label(label=unescape(label_text), ellipsize=ellipsize)
                 if should_highlight:
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)
@@ -138,7 +139,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         description_obj = self.builder.get_object("item-descr")
 
         if description and not self.compact:
-            description_obj.set_text(description)
+            description_obj.set_text(unescape(description))
         else:
             description_obj.destroy()  # remove description label
 
