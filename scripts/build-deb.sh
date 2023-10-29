@@ -21,12 +21,6 @@ build-deb () {
 
     h2 "Building DEB package for Ulauncher $version..."
 
-    info "Checking that current version is not in debian/changelog"
-    if grep -q "$deb_version" debian/changelog; then
-        error "debian/changelog already has a record about this version"
-        exit 1
-    fi
-
     src_dir=$(pwd)
     tmpdir="/tmp/ulauncher"
 
@@ -66,10 +60,6 @@ build-deb () {
             exit 1
         fi
 
-        # replace version and release name
-        sed -i "s/%VERSION%/${deb_version}-0ubuntu1ppa1~${RELEASE}/g" debian/changelog
-        sed -i "s/%RELEASE%/$RELEASE/g" debian/changelog
-
         info "Importing GPG keys"
         if gpg --list-keys | grep -q $GPGKEY; then
             info "GPG key is already imported"
@@ -80,13 +70,15 @@ build-deb () {
         fi
 
         info "Starting dpkg-buildpackage"
+        rm debian/changelog || true
+        dch --create --no-multimaint --package ulauncher --newversion=${deb_version}-0ubuntu1 --empty --distribution $RELEASE
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
 
         info "Uploading to launchpad"
         dput ppa:$PPA ../*.changes
     else
-        sed -i "s/%VERSION%/$deb_version/g" debian/changelog
-        sed -i "s/%RELEASE%/focal/g" debian/changelog
+        rm debian/changelog || true
+        dch --create --no-multimaint --package ulauncher --newversion=$deb_version-0ubuntu1 --empty --distribution focal
         if [ "$1" = "--signed" ]; then
             info "Building signed deb package"
             dpkg-buildpackage -tc -us -sa -k$GPGKEY
