@@ -24,7 +24,7 @@ jobs:
           ./ul build-targz
           ./ul build-deb --signed
           cp /tmp/ulauncher_$VERSION.tar.gz .
-          cp /tmp/ulauncher_${DEB_VERSION}_all.deb ulauncher_${VERSION}_all.deb
+          cp /tmp/ulauncher*.deb ulauncher_${VERSION}_all.deb
 
       - name: Make draft GitHub release
         uses: softprops/action-gh-release@v1
