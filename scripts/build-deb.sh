@@ -71,7 +71,7 @@ build-deb () {
 
         info "Starting dpkg-buildpackage"
         rm debian/changelog || true
-        dch --create --no-multimaint --package ulauncher --newversion=${deb_version}-0ubuntu1 --empty --distribution $RELEASE
+        dch --create --no-multimaint --package ulauncher --newversion=${deb_version}-0ubuntu1ppa1~$RELEASE --empty --distribution $RELEASE
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
 
         info "Uploading to launchpad"
