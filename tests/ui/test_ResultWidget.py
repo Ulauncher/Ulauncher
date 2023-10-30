@@ -15,10 +15,6 @@ class TestResultWidget:
         return res
 
     @pytest.fixture(autouse=True)
-    def Theme(self, mocker):
-        return mocker.patch("ulauncher.ui.ResultWidget.Theme")
-
-    @pytest.fixture(autouse=True)
     def scroll_to_focus(self, mocker):
         return mocker.patch("ulauncher.ui.ResultWidget.ResultWidget.scroll_to_focus")
 
@@ -51,7 +47,7 @@ class TestResultWidget:
     def test_initialize(self, builder, result, mocker):
         result_wgt = ResultWidget()
         set_index = mocker.patch.object(result_wgt, "set_index")
-        set_name = mocker.patch.object(result_wgt, "set_name")
+        highlight_name = mocker.patch.object(result_wgt, "highlight_name")
         set_description = mocker.patch.object(result_wgt, "set_description")
 
         result_wgt.initialize(builder, result, 3, "query")
@@ -59,7 +55,7 @@ class TestResultWidget:
         builder.get_object.return_value.connect.assert_any_call("button-release-event", result_wgt.on_click)
         builder.get_object.return_value.connect.assert_any_call("enter_notify_event", result_wgt.on_mouse_hover)
         set_index.assert_called_with(3)
-        set_name.assert_called()
+        highlight_name.assert_called()
         set_description.assert_called_with(result.get_description.return_value)
         result.get_description.assert_called_with("query")
 
@@ -85,10 +81,6 @@ class TestResultWidget:
 
         result_wgt.set_icon(pixbuf)
         iconWgt.set_from_surface.assert_called_with(pixbuf)
-
-    def test_set_name(self, result_wgt, builder):
-        result_wgt.set_name("test name")
-        builder.get_object.return_value.set_text.assert_called_with("test name")
 
     def test_on_click(self, mocker, result_wgt):
         mock_get_toplevel = mocker.patch.object(result_wgt, "get_toplevel")

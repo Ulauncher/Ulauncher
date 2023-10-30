@@ -79,3 +79,12 @@
 .prefs-btn:hover {
     background-color: @prefs_backgroud;
 }
+
+.item-highlight {
+    color: #ff7b57
+}
+.selected.item-box .item-highlight {
+    color: #ffcbbd
+}
+
+

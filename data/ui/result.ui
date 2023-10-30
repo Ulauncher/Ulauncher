@@ -42,13 +42,11 @@
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkLabel" id="item-name">
+                  <object class="GtkBox" id="item-name">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="hexpand">True</property>
-                    <property name="ellipsize">middle</property>
-                    <property name="max-width-chars">1</property>
-                    <property name="xalign">0</property>
+                    <property name="orientation">horizontal</property>
+                    <property name="hexpand">False</property>
                     <style>
                       <class name="item-name"/>
                       <class name="item-text"/>

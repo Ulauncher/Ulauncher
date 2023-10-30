@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 import logging
 from types import SimpleNamespace
 from typing import Any
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
-from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_text_scaling_factor
 
+ELLIPSIZE_MIN_LENGTH = 5
 logger = logging.getLogger()
 
 
@@ -63,7 +65,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
 
         self.set_icon(load_icon_surface(result.icon, sizes.icon, self.get_scale_factor()))
         self.set_description(result.get_description(query))  # need to run even if there is no descr
-        self.set_name_highlighted()
+        self.highlight_name()
 
     def set_index(self, index: int):
         """
@@ -75,12 +77,10 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
             self.set_shortcut(f"Alt+{jump_keys[index]}")
 
     def select(self):
-        self.set_name_highlighted(True)
         self.item_box.get_style_context().add_class("selected")
         self.scroll_to_focus()
 
     def deselect(self):
-        self.set_name_highlighted(False)
         self.item_box.get_style_context().remove_class("selected")
 
     def scroll_to_focus(self):
@@ -101,28 +101,27 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         if icon:
             self.builder.get_object("item-icon").set_from_surface(icon)
 
-    def set_name_highlighted(self, is_selected=False):
-        name = self.result.name
-        colors = Theme.load(Settings.load().theme_name).matched_text_hl_colors
-        color = colors.get("when_selected" if is_selected else "when_not_selected")
+    def highlight_name(self) -> None:
+        item = self.builder.get_object("item-name")
         highlightable_input = self.result.get_highlightable_input(self.query)
         if highlightable_input and (self.result.searchable or self.result.highlightable):
-            name = highlight_text(
-                highlightable_input, self.result.name, open_tag=f'<span foreground="{color}">', close_tag="</span>"
-            )
+            labels = []
 
-        self.set_name(name)
-
-    def set_name(self, name: str) -> None:
-        item = self.builder.get_object("item-name")
-        if "<span" in name:  # dealing with markup
-            item.set_markup(name)
+            for label_text, should_highlight in highlight_text(highlightable_input, self.result.name):
+                ellipsize = (
+                    Pango.EllipsizeMode.NONE
+                    if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH
+                    else Pango.EllipsizeMode.MIDDLE
+                )
+                label = Gtk.Label(label=label_text, ellipsize=ellipsize)
+                if should_highlight:
+                    label.get_style_context().add_class("item-highlight")
+                labels.append(label)
         else:
-            item.set_text(name)
-        self.name = name
+            labels = [Gtk.Label(label=self.result.name)]
 
-    def get_name(self):
-        return self.name
+        for label in labels:
+            item.pack_start(label, False, False, 0)
 
     def on_click(self, _widget, event=None):
         window = self.get_toplevel()

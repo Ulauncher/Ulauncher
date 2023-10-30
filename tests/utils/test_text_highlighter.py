@@ -1,12 +1,9 @@
-from functools import partial
-
-from ulauncher.utils.text_highlighter import highlight_text
+from ulauncher.utils.text_highlighter import highlight_text as hl
 
 
 def test_highlight_text():
-    hl = partial(highlight_text, open_tag="<i>", close_tag="</i>")
-    assert hl("fifox", "Firefox") == "<i>Fi</i>re<i>fox</i>"
-    assert hl("hell wo", "hello world") == "<i>hell</i>o<i> wo</i>rld"
-    assert hl("dome", "Documents") == "<i>Do</i>cu<i>me</i>nts"
-    assert hl("e tom", "São tomé & príncipe") == "São<i> tom</i>é &amp; príncipe"
-    assert hl("date", "Date &amp; Time") == "<i>Date</i> &amp; Time"
+    assert list(hl("fifox", "Firefox")) == [("Fi", True), ("re", False), ("fox", True)]
+    assert list(hl("hell wo", "hello world")) == [("hell", True), ("o", False), (" wo", True), ("rld", False)]
+    assert list(hl("dome", "Documents")) == [("Do", True), ("cu", False), ("me", True), ("nts", False)]
+    assert list(hl("e tom", "São tomé & príncipe")) == [("São", False), (" tom", True), ("é & príncipe", False)]
+    assert list(hl("date", "Date &amp; Time")) == [("Date", True), (" &amp; Time", False)]

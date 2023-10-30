@@ -53,18 +53,24 @@ class Theme(JsonConf):
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
         css = re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self._path}/", css)
+        highlight_color = self.matched_text_hl_colors.get("when_not_selected")
+        selected_highlight_color = self.matched_text_hl_colors.get("when_selected")
         if self.extend_theme:
             parent_theme = Theme.load(self.extend_theme)
             if parent_theme.get_css_path().is_file():
                 css = f"{parent_theme.get_css()}\n\n{css}"
             else:
                 logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
+        if highlight_color:
+            css += f".item-highlight {{ color: {highlight_color} }}"
+        if selected_highlight_color:
+            css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
         return css
 
     def validate(self):
         try:
             assert self.manifest_version == "1", "Supported manifest version is '1'"
-            for prop in ["name", "display_name", "matched_text_hl_colors", "css_file"]:
+            for prop in ["name", "display_name", "css_file"]:
                 assert self.get(prop), f'"{prop}" is empty'
             assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
         except AssertionError as e:
