@@ -260,7 +260,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         """
         Move the window on drag
         """
-        if event.button == 1:
+        if event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS:
             self.is_dragging = True
             self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
 
