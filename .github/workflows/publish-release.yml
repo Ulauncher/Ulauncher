@@ -35,7 +35,7 @@ jobs:
           RELEASE=kinetic ./ul build-deb --upload # 22.10     EOL 2023-07
 
       - name: Publish to AUR
-        if: "!contains(github.ref_name, '-')"
+        if: "${{ !contains(github.ref_name, '-') }}"
         uses: friday/aur-publish-action@v1
         with:
           new_release: ${{ github.ref_name }}
