@@ -64,7 +64,7 @@ def get_options():
     ]
 
     for descr, args, kwargs in cli_options:
-        parser.add_argument(*args, help=gettext(descr), **{**{"action": "store_true"}, **kwargs})  # noqa: PIE800
+        parser.add_argument(*args, help=gettext(descr), **{"action": "store_true", **kwargs})
     for arg in ["--no-extensions", "--no-window-shadow", "--hide-window"]:
         parser.add_argument(arg, action="store_true", help=argparse.SUPPRESS)
 

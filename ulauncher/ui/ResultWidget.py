@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
+from html import unescape
 from types import SimpleNamespace
 from typing import Any
 
 from gi.repository import Gtk, Pango
-from html import unescape
 
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.icon import load_icon_surface
