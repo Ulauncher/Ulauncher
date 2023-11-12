@@ -21,6 +21,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             enable_developer_extras=bool(get_options().dev),
             enable_hyperlink_auditing=False,
             enable_page_cache=False,
+            enable_webgl=False,
             enable_write_console_messages_to_stdout=True,
             enable_xss_auditor=False,
             hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
