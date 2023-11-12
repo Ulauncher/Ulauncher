@@ -131,15 +131,18 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         """
         Initialize preferences WebView
         """
-        self.webview = WebKit2.WebView()
+        settings = WebKit2.Settings(
+            enable_developer_extras=bool(get_options().dev),
+            enable_hyperlink_auditing=False,
+            enable_page_cache=False,
+            enable_webgl=False,
+            enable_write_console_messages_to_stdout=True,
+            enable_xss_auditor=False,
+            hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
+        )
+        self.webview = WebKit2.WebView(settings=settings)
         self.ui['scrolled_window'].add(self.webview)
-        opts = get_options()
         self._load_prefs_html()
-
-        web_settings = self.webview.get_settings()
-        web_settings.set_enable_developer_extras(bool(opts.dev))
-        web_settings.set_enable_xss_auditor(False)
-        web_settings.set_enable_write_console_messages_to_stdout(True)
 
         self.webview.get_context().register_uri_scheme('prefs', self.on_scheme_callback)
         self.webview.get_context().register_uri_scheme('file2', self.serve_file)
