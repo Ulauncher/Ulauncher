@@ -11,10 +11,7 @@
         </p>
         <p
           v-else-if="errorName === 'Terminated'"
-        >The extension was terminated. Please check the logs</p>
-        <p
-          v-else-if="errorName === 'ExitedInstantly'"
-        >The extension exited instantly. Please check the logs.</p>
+        >The extension crashed. Ensure that you read and followed the instructions on the extension <a href @click.prevent="openUrlInBrowser(`${extUrl}`)">Github</a> page, and check the error log and report the error otherwise.</p>
         <p v-else-if="errorName === 'MissingModule'">
           The extension crashed because it could not import module
           <code>{{ errorMessage }}</code>.
@@ -23,14 +20,16 @@
           <br />If that doesn't help, report the issue on
           <a href @click.prevent="openUrlInBrowser(`${extUrl}/issues`)">Github</a>.
         </p>
-        <p v-else>{{ errorMessage }}</p>
-        <p v-if="extUrl && errorName !== 'NoExtensionsFlag' && errorName !== 'MissingModule'">
-          You can let the author know about this problem by creating a
-          <a
-            href
-            @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
-          >Github issue</a>.
-        </p>
+        <div v-else>
+          <p>{{ errorMessage }}</p>
+          <p>
+            You can let the author know about this problem by creating a
+            <a
+              href
+              @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
+            >Github issue</a>.
+          </p>
+        </div>
       </small>
     </b-alert>
   </div>

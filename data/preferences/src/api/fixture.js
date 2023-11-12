@@ -175,7 +175,7 @@ function _getExtensions() {
       name: 'Crashed on start',
       isRunning: false,
       runtimeError: {
-        name: 'ExitedInstantly',
+        name: 'Terminated',
         message: 'Extension "ext.crashed" exited instantly with code 123'
       }
     }),
