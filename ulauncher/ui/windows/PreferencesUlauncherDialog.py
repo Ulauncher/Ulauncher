@@ -194,7 +194,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         # pylint: disable=broad-except
         try:
             params = get_url_params(scheme_request.get_uri())
-            file_path = params['path'].split("#", 1)[0]
+            file_path = params['path'].replace("null/", "/").split("#", 1)[0]
+
             mime_type = mimetypes.guess_type(file_path)[0]
             stream = Gio.file_new_for_path(file_path).read()
             scheme_request.finish(stream, -1, mime_type)
