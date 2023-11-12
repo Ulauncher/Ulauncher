@@ -34,7 +34,12 @@ class ShortcutsDb(KeyValueJsonDb):
         for rec in self.get_records().values():
             # fix for shortcuts generated in v6 branch not working in v5
             if rec.get("icon") and not os.path.isfile(rec.get("icon")):
-                legacy_path = rec.get("icon", "").replace("/icons/", "/media/").replace(".svg", "-icon.svg").replace(".png", "-icon.png")
+                legacy_path = (
+                    rec.get("icon", "")
+                    .replace("/icons/", "/media/")
+                    .replace(".svg", "-icon.svg")
+                    .replace(".png", "-icon.png")
+                )
                 if os.path.isfile(legacy_path):
                     rec["icon"] = legacy_path
             yield rec
