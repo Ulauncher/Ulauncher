@@ -46,7 +46,7 @@ Create :file:`manifest.json` using the following template::
 * ``triggers`` - User triggers to activate your extension (see below for details).
 * ``preferences`` - Optional user preferences (see below for details).
 * ``instructions`` - Optional installation instructions that is shown in the extension preferences view.
-* ``input_debounce`` - Default: ``0.05``. Time to wait while the user is typing before sending the input event to the extenstion. Raise to higher values like ``1`` for slow I/O operations like network requests.
+* ``input_debounce`` - Default: ``0.05``. Time to wait while the user is typing before sending the input event to the extension. Raise to higher values like ``1`` for slow I/O operations like network requests.
   They are rendered in Ulauncher preferences in the same order they are listed in manifest.
 
 .. NOTE:: ``triggers`` and ``preferences`` are key/value objects. The key should be a unique identifier that never changes (if you change it you will break user settings). For triggers the key is also what you use to distinguish which trigger was called in your callback event.
@@ -66,7 +66,7 @@ Triggers
   If you instead want it to be a "launch trigger" and trigger immediately when activated, then leave the keyword out. Then you can listen to it with your extensions ``on_launch``-method (takes only "trigger_id").
 
 ``icon``
-  Optional icon (path or themed icon). If not specificed it will use the extension icon
+  Optional icon (path or themed icon). If not specified it will use the extension icon
 
 
 Preferences

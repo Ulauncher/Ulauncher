@@ -4,7 +4,7 @@
 @define-color bg_color #3C4141;
 @define-color window_bg @bg_color;
 @define-color window_border_color #3A3A3A;
-@define-color prefs_backgroud #999;
+@define-color prefs_background #999;
 
 /**
  * Input
@@ -80,7 +80,7 @@
     box-shadow: none;
 }
 .prefs-btn:hover {
-    background-color: @prefs_backgroud;
+    background-color: @prefs_background;
 }
 
 .item-highlight {

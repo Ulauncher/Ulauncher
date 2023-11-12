@@ -134,7 +134,7 @@ class TestJsonConf:
         c1 = C1.load(json_file)
         c2a = C2.load(json_file)
         c2b = C2.load(json_file)
-        c2a.uniqe_cache_key = 1
-        assert not hasattr(c1, "uniqe_cache_key")
-        assert hasattr(c2a, "uniqe_cache_key")
-        assert hasattr(c2b, "uniqe_cache_key")
+        c2a.unique_cache_key = 1
+        assert not hasattr(c1, "unique_cache_key")
+        assert hasattr(c2a, "unique_cache_key")
+        assert hasattr(c2b, "unique_cache_key")

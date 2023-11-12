@@ -44,7 +44,7 @@ class TestItemNavigation:
         nav.go_up()
         items[3].select.assert_called_once_with()
 
-    def test_go_down_from_2nd(self, nav, items):
+    def test_go_down_from_second(self, nav, items):
         nav.select(2)
         nav.go_down()
         items[3].select.assert_called_once_with()

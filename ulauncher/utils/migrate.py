@@ -56,7 +56,7 @@ def _migrate_app_state(old_format):
 
 
 def _migrate_user_prefs(extension_id, user_prefs):
-    # Check if alreay migrated
+    # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs = {"preferences": {}, "triggers": {}}

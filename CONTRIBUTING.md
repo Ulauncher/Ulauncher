@@ -25,7 +25,7 @@ For the v6 branch you need the the following to setup the local build environmen
 <details>
   <summary>Ubuntu/Debian</summary>
 
-  Install the development dependecies:
+  Install the development dependencies:
 
   ```sh
   sudo apt update && sudo apt install git yarnpkg python3-setuptools debhelper dh-python
@@ -56,7 +56,7 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo pacman -Syu
   ```
 
-  Install the development and testing dependecies:
+  Install the development and testing dependencies:
 
   ```sh
   sudo pacman -Syu --needed git yarn mypy ruff python-{black,pytest,pytest-mock,setuptools}
