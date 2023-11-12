@@ -26,7 +26,7 @@ jobs:
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           ./ul upload-release $GITHUB_REF_NAME
       - name: Publish to AUR
-        uses: friday/aur-publish-action@v1
+        uses: friday/aur-publish-action@master
         with:
           new_release: ${{ github.ref_name }}
           package_name: ulauncher
