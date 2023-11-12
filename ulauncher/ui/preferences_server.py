@@ -122,8 +122,8 @@ class PreferencesServer:
                 logging.exception("Preferences server error: %s", name)
 
                 if not name.endswith("Warning"):
-                    additionals = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
-                    error["details"] = "\n".join([f"{k}: {v}" for k, v in {**error, **additionals}.items()])
+                    stack_details = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
+                    error["details"] = "\n".join([f"{k}: {v}" for k, v in {**error, **stack_details}.items()])
 
                 data = json.dumps([None, error])
 

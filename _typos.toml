@@ -1,0 +1,8 @@
+[default]
+extend-ignore-re = [
+  # prevent correcting gir to git  
+  "gir1.2",
+]
+
+[files]
+extend-exclude = ["preferences-src/static"]

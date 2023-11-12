@@ -18,6 +18,12 @@ test-ruff () {
     ruff check .
 }
 
+test-typos () {
+    echo '[ test: typos ]'
+    set -e
+    ruff typos .
+}
+
 test-pytest () {
     set +e
     echo '[ test: pytest ]'

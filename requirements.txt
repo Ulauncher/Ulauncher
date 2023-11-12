@@ -4,3 +4,4 @@ PyGObject-stubs==2.9.0
 pytest==7.4.2
 pytest-mock==3.11.1
 ruff==0.0.292
+typos==1.16.23
