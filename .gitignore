@@ -22,6 +22,7 @@ aur_key
 generated.css
 launchpad.ssh.tar
 .pytest_cache/
+.pylintrc/
 .mypy_cache/
 .ruff_cache
 .vscode
