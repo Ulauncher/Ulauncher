@@ -28,10 +28,16 @@ class ShortcutsDb(KeyValueJsonDb):
         super().commit()
 
     def get_sorted_records(self):
-        return [rec for rec in sorted(self.get_records().values(), key=lambda rec: rec['added'])]
+        return [rec for rec in sorted(self.get_shortcuts(), key=lambda rec: rec['added'])]
 
     def get_shortcuts(self):
-        return self.get_records().values()
+        for rec in self.get_records().values():
+            # fix for shortcuts generated in v6 branch not working in v5
+            if rec.get("icon") and not os.path.isfile(rec.get("icon")):
+                legacy_path = rec.get("icon", "").replace("/icons/", "/media/").replace(".svg", "-icon.svg").replace(".png", "-icon.png")
+                if os.path.isfile(legacy_path):
+                    rec["icon"] = legacy_path
+            yield rec
 
     # pylint: disable=too-many-arguments
     def put_shortcut(self, name, keyword, cmd, icon, is_default_search, run_without_argument, id=None):
