@@ -56,7 +56,7 @@ class AppIndicator:
         indicator.set_icon('ulauncher-indicator')
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
         indicator.add_menu_item(window.on_mnu_about_activate, "About")
-        indicator.add_seperator()
+        indicator.add_separator()
         indicator.add_menu_item(Gtk.main_quit, "Exit")
         return indicator
 
@@ -89,7 +89,7 @@ class AppIndicator:
         self.__menu.append(menu_item)
 
     @onlyIfAppindicatorIsSupported
-    def add_seperator(self):
+    def add_separator(self):
         menu_item = Gtk.SeparatorMenuItem()
         self.__menu.append(menu_item)
 

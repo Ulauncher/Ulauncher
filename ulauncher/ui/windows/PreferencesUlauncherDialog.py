@@ -97,9 +97,9 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
     def finish_initializing(self, builder):
         """Called while initializing this instance in __new__
 
-        finish_initalizing should be called after parsing the ui definition
+        finish_initializing should be called after parsing the ui definition
         and creating a PreferencesDialog object with it in order to
-        finish initializing the start of the new PerferencesUlauncherDialog
+        finish initializing the start of the new PreferencesUlauncherDialog
         instance.
 
         Put your initialization code in here and leave __init__ undefined.

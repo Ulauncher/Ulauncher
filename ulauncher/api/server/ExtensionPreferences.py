@@ -43,7 +43,7 @@ class ExtensionPreferences:
     def get_items(self, type: str = None) -> PreferenceItems:
         """
         :param str type:
-        :rtype: list of dicts: [{id: .., type: .., defalut_value: .., user_value: ..., value: ..., description}, ...]
+        :rtype: list of dicts: [{id: .., type: .., default_value: .., user_value: ..., value: ..., description}, ...]
         """
         self._open_db()
 

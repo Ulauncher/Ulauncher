@@ -54,10 +54,10 @@ class TestAutostartPreference:
         with open(desktop_file, 'r') as f:
             return [line.strip(' %s' % os.linesep) for line in f.readlines()]
 
-    def test_is_allowed__retuns_True(self, autostart):
+    def test_is_allowed__returns_True(self, autostart):
         assert autostart.is_allowed()
 
-    def test_is_allowed__retuns_False(self, db):
+    def test_is_allowed__returns_False(self, db):
         db.get_by_name.return_value = None
         assert not AutostartPreference().is_allowed()
 

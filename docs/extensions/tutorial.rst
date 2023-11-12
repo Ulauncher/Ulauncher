@@ -28,7 +28,7 @@ versions.json
 -------------
 ``versions.json`` lists the supported versions of Ulauncher API. It should be in to the **root** directory of the default branch.
 
-Note that before Ulauncher 5.15.0 the default branch had to be named **master**, so for compatibility reasons it's highly adviced to use this name still.
+Note that before Ulauncher 5.15.0 the default branch had to be named **master**, so for compatibility reasons it's highly advised to use this name still.
 
 * ``commit`` should specify the commit hash, branch name, or git tag referencing the version.
 * ``required_api_version`` should contain a version string, ex "2".

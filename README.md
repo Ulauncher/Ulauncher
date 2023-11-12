@@ -28,7 +28,7 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 
 ### Troubleshooting
 
-Please read our discussion page [Troubleshooting - Quirks and workaround](https://github.com/Ulauncher/Ulauncher/discussions/991) if you run into issues, and also check our outher discussions and issues if you still need help after this.
+Please read our discussion page [Troubleshooting - Quirks and workaround](https://github.com/Ulauncher/Ulauncher/discussions/991) if you run into issues, and also check our other discussions and issues if you still need help after this.
 
 
 ### Code Contributions

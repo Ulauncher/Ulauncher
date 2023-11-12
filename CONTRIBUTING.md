@@ -24,7 +24,7 @@ For the v6 branch you need the the following to setup the local build environmen
 <details>
   <summary>Ubuntu/Debian</summary>
 
-  Install the development dependecies:
+  Install the development dependencies:
 
   ```sh
   sudo apt-get update && sudo apt-get install git yarnpkg python3-setuptools
@@ -50,7 +50,7 @@ For the v6 branch you need the the following to setup the local build environmen
   sudo pacman -Syu
   ```
 
-  Install the development dependecies:
+  Install the development dependencies:
 
   ```sh
   sudo pacman -Syu --needed git yarn python-setuptools
