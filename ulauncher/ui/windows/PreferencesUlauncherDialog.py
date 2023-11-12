@@ -151,9 +151,6 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         self.webview.connect('button-press-event', self.webview_on_button_press_event)
         self.webview.connect('context-menu', self.webview_on_context_menu)
 
-        inspector = self.webview.get_inspector()
-        inspector.connect("attach", lambda inspector, target_view: WebKit2.WebView())
-
     ######################################
     # Overrides
     ######################################
