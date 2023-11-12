@@ -100,7 +100,6 @@ class ExtensionRunner:
             proc = Popen(cmd, env=env, stderr=PIPE)
             lasterr = ""
             logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
-            self.extension_procs[extension_id] = proc
             self.unset_extension_error(extension_id)
 
             while proc.poll() is None:
@@ -111,15 +110,12 @@ class ExtensionRunner:
 
             code = proc.returncode
 
-            if code <= 0:
+            if code == 0:
+                self.extension_procs[extension_id] = proc
+            else:
                 error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
                 logger.error(error_msg)
                 self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
-                try:
-                    del self.extension_procs[extension_id]
-                except KeyError:
-                    pass
-
                 break
 
             if time() - t_start < 1:

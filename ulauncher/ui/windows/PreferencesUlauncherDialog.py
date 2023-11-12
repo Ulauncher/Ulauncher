@@ -5,6 +5,7 @@ import json
 import mimetypes
 from urllib.parse import unquote
 from typing import List, Optional, cast
+import time
 import traceback
 
 import gi
@@ -470,6 +471,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
         ExtensionRunner.get_instance().run(ext_id)
+
+        # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
+        # to avoid race condition and needless waiting
+        time.sleep(1)
 
         return self._get_all_extensions()
 
