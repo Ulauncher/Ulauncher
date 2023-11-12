@@ -21,7 +21,7 @@ test-ruff () {
 test-typos () {
     echo '[ test: typos ]'
     set -e
-    ruff typos .
+    typos .
 }
 
 test-pytest () {

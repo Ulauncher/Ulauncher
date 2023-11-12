@@ -12,6 +12,8 @@ jobs:
         run: black --diff --check .
       - name: ruff
         run: ruff check .
+      - name: typo
+        run: typos .
       - name: mypy
         run: mypy .
       - name: pytest
