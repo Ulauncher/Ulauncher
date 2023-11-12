@@ -54,7 +54,7 @@ class ShortcutsDb(KeyValueJsonDb):
 
     def ensure_user_paths(self):
         for s in self.get_shortcuts():
-            s['icon'] = get_user_path(s['icon'])
+            s['icon'] = get_user_path(s.get('icon'))
 
 
 def get_user_path(path):
