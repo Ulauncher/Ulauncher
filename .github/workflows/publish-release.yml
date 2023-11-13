@@ -32,7 +32,6 @@ jobs:
           RELEASE=focal   ./ul build-deb --upload # 20.04 LTS EOL 2025-04
           RELEASE=mantic  ./ul build-deb --upload # 23.10     EOL 2024-07
           RELEASE=lunar   ./ul build-deb --upload # 23.04     EOL 2024-01
-          RELEASE=kinetic ./ul build-deb --upload # 22.10     EOL 2023-07
 
       - name: Publish to AUR
         if: "${{ !contains(github.ref_name, '-') }}"
