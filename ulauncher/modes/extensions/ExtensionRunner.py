@@ -32,7 +32,6 @@ class ExtensionProc(NamedTuple):
 
 class ExtensionRuntimeError(Enum):
     Terminated = "Terminated"
-    ExitedInstantly = "ExitedInstantly"
     Exited = "Exited"
     MissingModule = "MissingModule"
     Incompatible = "Incompatible"
@@ -138,7 +137,7 @@ class ExtensionRunner:
         if runtime < 1:
             error_msg = f'Extension "{extension_id}" exited instantly with code {code}'
             logger.error(error_msg)
-            self.set_extension_error(extension_id, ExtensionRuntimeError.ExitedInstantly, error_msg)
+            self.set_extension_error(extension_id, ExtensionRuntimeError.Terminated, error_msg)
             lasterr = "\n".join(extproc.recent_errors)
             error_info = ProcessErrorExtractor(lasterr)
             logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)

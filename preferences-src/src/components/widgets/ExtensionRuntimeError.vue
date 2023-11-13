@@ -4,10 +4,7 @@
       <small>
         <p
           v-if="errorName === 'Terminated'"
-        >The extension was terminated. Please check the logs</p>
-        <p
-          v-else-if="errorName === 'ExitedInstantly'"
-        >The extension exited instantly. Please check the logs.</p>
+        >The extension crashed. Ensure that you read and followed the instructions on the extension <a href @click.prevent="openUrlInBrowser(`${extUrl}`)">Github</a> page, and check the error log and report the error otherwise.</p>
         <p
           v-else-if="errorName === 'Incompatible'"
         >The extension is not compatible with this version of Ulauncher. Please report this issue to the extension developer, and attach the logs for details.</p>
