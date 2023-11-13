@@ -75,7 +75,8 @@ build-deb () {
         dpkg-buildpackage -tc -S -sa -k$GPGKEY
 
         info "Uploading to launchpad"
-        dput ppa:$PPA ../*.changes
+        dput -f ppa:$PPA ../*.changes
+        rm /tmp/ulauncher_* || true
     else
         rm debian/changelog || true
         dch --create --no-multimaint --package ulauncher --newversion=$deb_version-0ubuntu1 --empty --distribution focal
