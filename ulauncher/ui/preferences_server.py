@@ -103,7 +103,8 @@ class PreferencesServer:
         """
         uri = scheme_request.get_uri()
         params = urlparse(uri)
-        route_handler = routes.get(params.path)
+        path = params.path.replace("null/", "/")
+        route_handler = routes.get(path)
 
         if route_handler:
             # WebKit.URISchemeRequest is very primitive as a server:
@@ -131,10 +132,10 @@ class PreferencesServer:
             scheme_request.finish(stream, -1, "application/json")
             return
 
-        if os.path.isfile(params.path):
+        if os.path.isfile(path):
             try:
-                [mime_type, _] = mimetypes.guess_type(params.path)
-                stream = Gio.file_new_for_path(params.path).read()
+                [mime_type, _] = mimetypes.guess_type(path)
+                stream = Gio.file_new_for_path(path).read()
                 scheme_request.finish(stream, -1, mime_type)
             except Exception as e:
                 logger.warning("Couldn't handle file request from '%s' (%s: %s)", uri, type(e).__name__, e)
