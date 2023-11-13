@@ -2,6 +2,7 @@ import json
 import logging
 import mimetypes
 import os
+import time
 import traceback
 from functools import lru_cache
 from urllib.parse import unquote, urlparse
@@ -266,6 +267,9 @@ class PreferencesServer:
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
         ExtensionRunner.get_instance().run(ext_id)
+        # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
+        # to avoid race condition and needless waiting
+        time.sleep(1)
         return list(get_extensions())
 
     @route("/extension/set-prefs")
