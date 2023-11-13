@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from ulauncher.api.shared.query import Query
@@ -31,6 +33,15 @@ class Result(BaseDataClass):
             raise KeyError(msg)
 
         super().__setitem__(key, value)
+
+    def get_keyword(self) -> str:
+        return self.keyword
+
+    def get_name(self) -> str:
+        return self.name
+
+    def get_icon(self) -> str | None:
+        return self.icon
 
     def get_highlightable_input(self, query: Query):
         if self.keyword and self.keyword == query.keyword:
