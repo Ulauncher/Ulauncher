@@ -1,7 +1,0 @@
-{
-    "manifest_version": "1",
-    "name": "adwaita",
-    "display_name": "Adwaita",
-    "extend_theme": "light",
-    "css_file": "theme.css"
-}

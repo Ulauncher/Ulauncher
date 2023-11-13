@@ -1,34 +1,32 @@
-@import url("./reset.css");
-
 /**
  * App Window
  */
-@define-color bg_color #F2F2F2;
+@define-color bg_color #393D40;
 @define-color window_shadow rgba(0, 0, 0, 0.5);
 @define-color window_bg @bg_color;
-@define-color window_border_color #b1b1b1;
-@define-color prefs_background #ccc;
+@define-color window_border_color #393939;
+@define-color prefs_background #aaa;
 
 /**
  * Input
  */
-@define-color selected_bg_color #999;
-@define-color selected_fg_color #fafafa;
-@define-color input_color #555;
-@define-color caret_color lighter(@input_color);
+@define-color selected_bg_color #4B5053;
+@define-color selected_fg_color #d5d5d5;
+@define-color input_color #ddd;
+@define-color caret_color darker(@input_color);
 
 /**
  * Result items
  */
-@define-color item_name #333;
-@define-color item_text lighter(@item_name);
-@define-color item_box_selected #D6D6D6;
-@define-color item_text_selected darker(@item_text);
-@define-color item_name_selected @item_name;
+@define-color item_name #B3BAB8;
+@define-color item_text #999;
+@define-color item_box_selected #4B5053;
+@define-color item_text_selected #ccc;
+@define-color item_name_selected #bbb;
 @define-color item_shortcut_color #777;
-@define-color item_shortcut_shadow #fff;
-@define-color item_shortcut_color_sel #444;
-@define-color item_shortcut_shadow_sel lighter(@item_box_selected);
+@define-color item_shortcut_shadow darker(@bg_color);
+@define-color item_shortcut_color_sel #ccc;
+@define-color item_shortcut_shadow_sel darker(@item_box_selected);
 
 .app {
     box-shadow: 0 0 5px @window_shadow;
@@ -38,10 +36,10 @@
 }
 
 .input {
-    caret-color: @caret_color;
-    color: @input_color;
     font-size: 170%;
     padding: 5px 0 5px 7px;
+    caret-color: @caret_color;
+    color: @input_color;
 }
 
 /**
@@ -58,8 +56,16 @@
     color: @item_text;
 }
 .item-name {
-    color: @item_name;
     font-size: 120%;
+    color: @item_name;
+}
+
+/* Small result item  */
+.small-result-item .item-name {
+    font-size: 100%;
+}
+.item-descr {
+    font-size: 80%;
 }
 
 .selected.item-box {
@@ -81,18 +87,6 @@
     text-shadow: 1px 1px 1px @item_shortcut_shadow_sel;
 }
 
-.item-descr {
-    font-size: 80%;
-}
-
-
-/**
- * Small result item
- */
-.small-result-item .item-name {
-    font-size: 100%;
-}
-
 .prefs-btn {
     border-radius: 12px;
     opacity: 0.8;
@@ -102,5 +96,5 @@
 }
 
 .item-highlight {
-    color: #2c74cc
+    color: #fff
 }

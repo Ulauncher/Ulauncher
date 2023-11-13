@@ -156,7 +156,7 @@ class PreferencesServer:
     def get_all(self):
         logger.info("API call /get/all")
         export_settings = self.settings.copy()
-        export_settings["available_themes"] = [{"value": t.name, "text": t.display_name} for t in get_themes().values()]
+        export_settings["available_themes"] = [{"value": name, "text": name} for name in get_themes()]
         export_settings["autostart_enabled"] = self.autostart_pref.is_enabled()
         export_settings["env"] = {
             "autostart_allowed": self.autostart_pref.can_start(),
