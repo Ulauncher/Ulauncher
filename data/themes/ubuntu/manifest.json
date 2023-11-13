@@ -1,7 +1,0 @@
-{
-    "manifest_version": "1",
-    "name": "ubuntu",
-    "display_name": "Ubuntu",
-    "extend_theme": "light",
-    "css_file": "theme.css"
-}

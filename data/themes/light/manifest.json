@@ -1,7 +1,0 @@
-{
-    "manifest_version": "1",
-    "name": "light",
-    "display_name": "Elementary Light",
-    "extend_theme": null,
-    "css_file": "theme.css"
-}

@@ -51,61 +51,54 @@ def get_themes():
     Gets a dict with the theme name as the key and theme as the value
     """
     themes = {}
-    manifests_paths = [
-        *Path(PATHS.SYSTEM_THEMES).glob("**/manifest.json"),
-        *Path(PATHS.USER_THEMES).glob("**/manifest.json"),
+
+    css_theme_paths = [
+        *Path(PATHS.SYSTEM_THEMES).glob("*.css"),
+        *Path(PATHS.USER_THEMES).glob("*.css"),
     ]
 
-    for manifest_path in manifests_paths:
+    all_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in css_theme_paths]
+
+    # legacy Ulauncher manifest themes
+    for manifest_path in Path(PATHS.USER_THEMES).glob("**/manifest.json"):
+        data = json.loads(manifest_path.read_text())
+        if data.get("extend_theme", "") is None:
+            del data["extend_theme"]
+        all_themes.append(LegacyTheme(data, base_path=str(manifest_path.parent)))
+
+    for theme in all_themes:
         try:
-            data = json.loads(manifest_path.read_text())
-            if data.get("extend_theme", "") is None:
-                del data["extend_theme"]
-            theme = Theme(data, _path=str(manifest_path.parent))
             theme.validate()
-            themes[theme.name] = theme
+            if themes.get(theme.name):
+                logger.warning("Duplicate theme name '%s'", theme.name)
+            else:
+                themes[theme.name] = theme
         except Exception as e:
-            logger.warning("Ignoring invalid or broken theme '%s' (%s): %s", manifest_path, type(e).__name__, e)
+            logger.warning(
+                "Ignoring invalid or broken theme '%s' in '%s' (%s): %s",
+                theme.name,
+                theme.base_path,
+                type(e).__name__,
+                e,
+            )
 
     return themes
 
 
 class Theme(JsonConf):
-    manifest_version = ""
     name = ""
-    display_name = ""
-    css_file = ""
-    extend_theme = ""
-    matched_text_hl_colors: dict[str, str] = {}
-    _path = ""  # This should not be stored, but we never overwrite these files anyway
+    base_path = ""  # Runtime value, should not be stored
 
     def get_css_path(self):
-        # `css_file_gtk_3.20+` is the only supported one if both are specified, otherwise css_file is
-        return Path(self._path, self.get("css_file_gtk_3.20+", self.css_file))
+        return Path(self.base_path, f"{self.name}.css")
 
     def get_css(self):
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
-        css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self._path}/", css)
-        highlight_color = self.matched_text_hl_colors.get("when_not_selected")
-        selected_highlight_color = self.matched_text_hl_colors.get("when_selected")
-        if self.extend_theme:
-            parent_theme = Theme.load(self.extend_theme)
-            if parent_theme.get_css_path().is_file():
-                css = f"{parent_theme.get_css()}\n\n{css}"
-            else:
-                logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
-        if highlight_color:
-            css += f".item-highlight {{ color: {highlight_color} }}"
-        if selected_highlight_color:
-            css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
-        return css
+        return CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
 
     def validate(self):
         try:
-            assert self.manifest_version == "1", "Supported manifest version is '1'"
-            for prop in ["name", "display_name", "css_file"]:
-                assert self.get(prop), f'"{prop}" is empty'
             assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
         except AssertionError as e:
             raise ThemeError(e) from e
@@ -123,6 +116,42 @@ class Theme(JsonConf):
 
         # Return the first on the list if everything else fails
         return next(iter(themes))
+
+
+class LegacyTheme(Theme):
+    css_file = ""
+    extend_theme = ""
+    matched_text_hl_colors: dict[str, str] = {}
+
+    def get_css_path(self):
+        # `css_file_gtk_3.20+` is the only supported one if both are specified, otherwise css_file is
+        return Path(self.base_path, self.get("css_file_gtk_3.20+", self.css_file))
+
+    def get_css(self):
+        css = self.get_css_path().read_text()
+        # Convert relative links to absolute
+        css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
+        highlight_color = self.matched_text_hl_colors.get("when_not_selected")
+        selected_highlight_color = self.matched_text_hl_colors.get("when_selected")
+        if self.extend_theme:
+            parent_theme = LegacyTheme.load(self.extend_theme)
+            if parent_theme.get_css_path().is_file():
+                css = f"{parent_theme.get_css()}\n\n{css}"
+            else:
+                logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
+        if highlight_color:
+            css += f".item-highlight {{ color: {highlight_color} }}"
+        if selected_highlight_color:
+            css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
+        return css
+
+    def validate(self):
+        try:
+            for prop in ["name", "css_file"]:
+                assert self.get(prop), f'"{prop}" is empty'
+            assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
+        except AssertionError as e:
+            raise ThemeError(e) from e
 
 
 class ThemeError(Exception):
