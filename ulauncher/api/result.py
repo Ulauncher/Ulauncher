@@ -6,6 +6,8 @@ from ulauncher.api.shared.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.fuzzy_search import get_score
 
+DEFAULT_ACTION = True  #  keep window open and do nothing
+
 
 class Result(BaseDataClass):
     compact = False
@@ -55,7 +57,7 @@ class Result(BaseDataClass):
         """
         Handle the main action
         """
-        handler = self.on_alt_enter if alt else self.on_enter
+        handler = getattr(self, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION)
         return handler(query) if callable(handler) else handler
 
     def get_searchable_fields(self):
