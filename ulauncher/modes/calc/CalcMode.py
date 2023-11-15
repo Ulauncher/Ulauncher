@@ -97,8 +97,8 @@ def _is_enabled(query: str):  # noqa: PLR0911
         if isinstance(node, ast.UnaryOp):
             # Allow for minus, but no other operators
             return isinstance(node.op, ast.USub)
-        if isinstance(node, ast.Call):
-            return node.func.id in functions  # type: ignore[attr-defined]
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            return node.func.id in functions
     except SyntaxError:
         pass
     return False
