@@ -16,6 +16,7 @@ def remove_temp_file(filename: str):
     logger.debug("Deleting a temporary file %s", filename)
     os.remove(filename)
 
+
 @run_async  # must be async because the script may be launching blocking processes like pkexec (issue 1299)
 def run_script(script: str, arg: str):
     file_path = f"{tempfile.gettempdir()}/ulauncher_run_script_{time.time()}"
