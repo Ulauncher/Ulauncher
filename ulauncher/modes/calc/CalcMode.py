@@ -1,4 +1,5 @@
 import ast
+import logging
 import math
 import operator as op
 import re
@@ -44,6 +45,7 @@ functions = {
 }
 
 constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
+logger = logging.getLogger()
 
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
@@ -101,6 +103,8 @@ def _is_enabled(query: str):  # noqa: PLR0911
             return node.func.id in functions
     except SyntaxError:
         pass
+    except Exception:
+        logger.warning("Calc mode parse error for query: '%s'", query)
     return False
 
 
