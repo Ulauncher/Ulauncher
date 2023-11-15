@@ -119,7 +119,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)
         else:
-            labels = [Gtk.Label(label=self.result.name)]
+            labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
         for label in labels:
             item.pack_start(label, False, False, 0)
