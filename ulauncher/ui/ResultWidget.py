@@ -13,7 +13,8 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.wm import get_text_scaling_factor
 
-ELLIPSIZE_MIN_LENGTH = 5
+ELLIPSIZE_MIN_LENGTH = 6
+ELLIPSIZE_FORCE_AT_LENGTH = 20
 logger = logging.getLogger()
 
 
@@ -108,14 +109,11 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         if highlightable_input and (self.result.searchable or self.result.highlightable):
             labels = []
 
-            for label_text, should_highlight in highlight_text(highlightable_input, self.result.name):
-                ellipsize = (
-                    Pango.EllipsizeMode.NONE
-                    if should_highlight or len(label_text) < ELLIPSIZE_MIN_LENGTH
-                    else Pango.EllipsizeMode.MIDDLE
-                )
+            for label_text, is_highlight in highlight_text(highlightable_input, self.result.name):
+                ellipsize_min = (not is_highlight and ELLIPSIZE_MIN_LENGTH) or ELLIPSIZE_FORCE_AT_LENGTH
+                ellipsize = Pango.EllipsizeMode.MIDDLE if len(label_text) > ellipsize_min else Pango.EllipsizeMode.NONE
                 label = Gtk.Label(label=unescape(label_text), ellipsize=ellipsize)
-                if should_highlight:
+                if is_highlight:
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)
         else:
