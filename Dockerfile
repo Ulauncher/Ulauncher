@@ -9,8 +9,6 @@ ENV EMAIL=ulauncher.app@gmail.com
 # NOTE: Keep lines separate. One "RUN" per dependency/change
 # https://stackoverflow.com/a/47451019/633921
 
-WORKDIR /root/ulauncher
-
 RUN apt update --fix-missing
 RUN DEBIAN_FRONTEND=noninteractive apt install -y tzdata
 RUN DEBIAN_FRONTEND=noninteractive apt install -y keyboard-configuration
@@ -66,5 +64,12 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarnpkg
 RUN mv node_modules /var
 
-RUN usermod -c "Ulauncher" root
-RUN git config --global --add safe.directory /root/ulauncher
+# create user to avoid build output to be owned by root
+RUN useradd ulauncher --create-home --shell /bin/bash
+RUN usermod -c "Ulauncher" ulauncher
+# Need sudo to run dpkg-buildpackage for some reason, so adding passwordless sudo for ulauncher user
+RUN echo "ulauncher ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+USER ulauncher
+WORKDIR /home/ulauncher/Ulauncher
+
+RUN git config --global --add safe.directory /home/ulauncher/Ulauncher

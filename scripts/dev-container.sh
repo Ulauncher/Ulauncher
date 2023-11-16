@@ -26,8 +26,8 @@ dev-container () {
   exec $RUNNER run \
     --rm \
     -it \
-    -v $(pwd):/root/ulauncher${vol_suffix} \
-    -v $HOME/.bash_history:/root/.bash_history${vol_suffix} \
+    -v $(pwd):/home/ulauncher/Ulauncher${vol_suffix} \
+    -v $HOME/.bash_history:/home/ulauncher/.bash_history${vol_suffix} \
     -p 3002:3002 \
     --name ulauncher \
     docker.io/$BUILD_IMAGE \
