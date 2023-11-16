@@ -77,7 +77,7 @@ class ExtensionRunner:
             cmd = [sys.executable, f"{extension_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
-                "PYTHONPATH": ":".join(filter(bool, [PATHS.APPLICATION, os.getenv("PYTHONPATH")])),
+                "PYTHONPATH": ":".join([PATHS.APPLICATION] + sys.path),
                 "EXTENSION_ICON": manifest.icon,
                 "EXTENSION_PATH": extension_path,
                 "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(",", ":")),
