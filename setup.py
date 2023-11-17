@@ -96,7 +96,6 @@ setup(
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
         ("share/dbus-1/services", ["io.ulauncher.Ulauncher.service"]),
         ("lib/systemd/user", ["ulauncher.service"]),
-        ("share/doc/ulauncher", ["README.md"]),
         ("share/licenses/ulauncher", ["LICENSE"]),
         # Install icons in themes, so different icons can be used for different depending on theme
         # It's only needed for the app indicator icon
