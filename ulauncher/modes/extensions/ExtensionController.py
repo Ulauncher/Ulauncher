@@ -8,6 +8,7 @@ from typing import Any
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.extension_finder import locate_extension
 from ulauncher.utils.decorator.debounce import debounce
 
 logger = logging.getLogger()
@@ -80,7 +81,8 @@ class ExtensionController:
     def get_normalized_icon_path(self, icon=None) -> str:
         if not icon:
             icon = self.manifest.icon
-        expanded_path = icon and f"{PATHS.EXTENSIONS}/{self.extension_id}/{icon}"
+        ext_path = locate_extension(self.extension_id, PATHS.EXTENSIONS, default_first=True)
+        expanded_path = icon and os.path.join(ext_path, icon)
         return expanded_path if os.path.isfile(expanded_path) else icon
 
     def handle_response(self, _framer, response: dict[str, Any]):

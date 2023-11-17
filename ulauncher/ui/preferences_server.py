@@ -10,7 +10,7 @@ from urllib.parse import unquote, urlparse
 from gi.repository import Gio, Gtk
 
 from ulauncher.config import API_VERSION, PATHS, VERSION
-from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions.extension_finder import iter_extensions
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -42,7 +42,7 @@ def route(path: str):
 
 def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
-    for ext_id, _ in find_extensions(PATHS.EXTENSIONS):
+    for ext_id, ext_path in iter_extensions(PATHS.EXTENSIONS_ALL):
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         try:
@@ -53,7 +53,7 @@ def get_extensions():
 
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
-        icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
+        icon = get_icon_path(manifest.icon, base_path=ext_path)
 
         yield {
             **ExtensionDb.load().get(ext_id, {}),

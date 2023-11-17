@@ -8,6 +8,7 @@ from shutil import rmtree
 from ulauncher.config import PATHS
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
+from ulauncher.modes.extensions.extension_finder import is_extension
 
 logger = logging.getLogger()
 
@@ -33,7 +34,9 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        rmtree(os.path.join(PATHS.EXTENSIONS, ext_id))
+        ext_dir = os.path.join(PATHS.EXTENSIONS, ext_id)
+        if is_extension(ext_dir):
+            rmtree(ext_dir)
         if ext_id in self.ext_db:
             del self.ext_db[ext_id]
             self.ext_db.save()
