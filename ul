@@ -5,7 +5,6 @@
 . scripts/tests.sh
 . scripts/dev-container.sh
 . scripts/build-deb.sh
-. scripts/build-rpm.sh
 . scripts/build-targz.sh
 . scripts/build-doc.sh
 . scripts/send-signal.sh
@@ -26,7 +25,6 @@ main () {
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
-    build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
     build-doc) build-doc ;;
     watch-doc) watch-doc ;;
