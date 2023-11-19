@@ -5,12 +5,12 @@ from functools import lru_cache
 
 from gi.repository import Gdk, GdkPixbuf
 
-import ulauncher
+from ulauncher.config import PATHS
 from ulauncher.utils.get_icon_path import get_icon_path
 
 logger = logging.getLogger()
 
-DEFAULT_EXE_ICON = f"{ulauncher.data_dir}/icons/executable.png"
+DEFAULT_EXE_ICON = f"{PATHS.ASSETS}/icons/executable.png"
 
 
 @lru_cache(maxsize=50)
