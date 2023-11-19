@@ -79,7 +79,7 @@ build-deb () {
         rm /tmp/ulauncher_* || true
     else
         rm debian/changelog || true
-        dch --create --no-multimaint --package ulauncher --newversion=$deb_version-0ubuntu1 --empty --distribution focal
+        dch --create --no-multimaint --package ulauncher --newversion=$deb_version --empty --distribution focal
         if [ "$1" = "--signed" ]; then
             info "Building signed deb package"
             dpkg-buildpackage -tc -us -sa -k$GPGKEY
@@ -87,6 +87,6 @@ build-deb () {
             info "Building unsigned deb package"
             dpkg-buildpackage -tc --no-sign
         fi
-        success "ulauncher_${version}_all.deb saved to /tmp"
+        success "ulauncher_${deb_version}_all.deb saved to /tmp"
     fi
 }
