@@ -8,7 +8,7 @@ from typing import Any
 from gi.repository import Gtk, Pango
 
 from ulauncher.api.shared.query import Query
-from ulauncher.utils.icon import load_icon_surface
+from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.wm import get_text_scaling_factor

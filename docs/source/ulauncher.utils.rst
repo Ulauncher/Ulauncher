@@ -51,14 +51,6 @@ ulauncher.utils.fuzzy\_search module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.icon module
-------------------------------------
-
-.. automodule:: ulauncher.utils.icon
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.text\_highlighter module
 ----------------------------------------
 
