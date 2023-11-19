@@ -1,16 +1,18 @@
-# Eventually we should switch to define these in pyproject.toml and import with
-# tomllib (py3.11) w fallback to tomli: https://github.com/Ulauncher/Ulauncher/blob/1cdaeb4d28eacfddda887690072d4e3ecd02baff/ulauncher/__init__.py#L4-L15
-# importlib.metadata (Py3.8) also works (but just for version): importlib.metadata.version("ulauncher")
+import sys
+from pathlib import Path
+
+if sys.version_info >= (3, 11):
+    import tomllib  # tomllib only exists in python>=3.11
+else:
+    import tomli as tomllib
 
 
-version = "6.0.0-beta5"
-gi_versions = {
-    "Gtk": "3.0",
-    "Gdk": "3.0",
-    "GdkX11": "3.0",
-    "GdkPixbuf": "2.0",
-    "Pango": "1.0",
-}
+_project_root = Path(__file__).parent.parent
+
+with Path(_project_root, "pyproject.toml").open("rb") as f:
+    _pyproject = tomllib.load(f)
+    version = _pyproject["project"]["version"]
+    gi_versions = _pyproject.get("tool", {}).get("gobject", {}).get("pin_versions", {})
 
 # this namespace module is the only way we can pin gi versions globally,
 # but we also use it when we build, then we don't want to require gi
