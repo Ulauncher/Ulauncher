@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from functools import lru_cache
 from gettext import gettext
 
@@ -9,24 +10,26 @@ APP_ID = "io.ulauncher.Ulauncher"
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# ULAUNCHER_DATA_DIR is added by the ulauncher binary if it's detecting that it's running from source
+DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
 HOME = os.path.expanduser("~")
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
-DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
+USER_DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
-EXTENSIONS = os.path.join(DATA, "extensions")
+EXTENSIONS = os.path.join(USER_DATA, "extensions")
 EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 USER_THEMES = os.path.join(CONFIG, "user-themes")
-SYSTEM_THEMES = os.path.join(ulauncher.data_dir, "themes")
+SYSTEM_THEMES = os.path.join(DATA_DIR, "themes")
 VERSION = ulauncher.version
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
 class _PATHS_CLASS:
     APPLICATION = APPLICATION
-    ASSETS = ulauncher.data_dir
+    ASSETS = DATA_DIR
     HOME = HOME
     CONFIG = CONFIG
-    DATA = DATA
+    DATA = USER_DATA
     STATE = STATE
     EXTENSIONS = EXTENSIONS
     EXTENSIONS_CONFIG = EXTENSIONS_CONFIG

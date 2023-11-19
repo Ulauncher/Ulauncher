@@ -82,7 +82,6 @@ class build_wrapper(build_py, Command):
         ns_module.write_text(
             "\n".join(
                 [
-                    f'data_dir = "{sys.prefix}/share/ulauncher"',
                     f'version = "{ulauncher.version}"',
                     f"gi_versions = {json.dumps(ulauncher.gi_versions)}",
                     ns_module_footer,

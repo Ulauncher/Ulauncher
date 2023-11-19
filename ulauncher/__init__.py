@@ -11,7 +11,6 @@ _project_root = dirname(dirname(__file__))
 _config = CaseSensitiveConfigParser()
 _config.read(f"{_project_root}/setup.cfg")
 
-data_dir = f"{_project_root}/data"  # substituted for `{sys.prefix}/share/ulauncher` at build time
 version = _config["metadata"]["version"]
 gi_versions = {
     "Gtk": "3.0",
