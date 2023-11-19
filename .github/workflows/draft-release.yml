@@ -17,7 +17,7 @@ jobs:
           DISPLAY=:1 xvfb-run pytest tests
       - name: Build release
         run: |
-          VERSION=$(./setup.py --version)
+          VERSION=$(./ul version)
           DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
           echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache

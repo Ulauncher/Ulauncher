@@ -5,12 +5,12 @@ from os.path import expanduser, join
 
 from gi.repository import Gdk, GdkPixbuf, Gtk
 
-from ulauncher import ASSETS
+import ulauncher
 
 icon_theme = Gtk.IconTheme.get_default()  # type: ignore[attr-defined]
 logger = logging.getLogger()
 
-DEFAULT_EXE_ICON = f"{ASSETS}/icons/executable.png"
+DEFAULT_EXE_ICON = f"{ulauncher.data_dir}/icons/executable.png"
 
 
 def get_icon_path(icon, size=32, base_path=""):

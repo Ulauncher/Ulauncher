@@ -7,8 +7,7 @@ from functools import partial
 import gi
 from gi.repository import GLib, Gtk
 
-# This xinit import must happen before any GUI libraries are initialized.
-import ulauncher.utils.xinit  # noqa: F401
+import ulauncher.utils.xinit  # must import this before any GUI libraries are initialized.  # noqa: F401
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
 from ulauncher.ui.LayerShell import LayerShellOverlay
 from ulauncher.ui.UlauncherApp import UlauncherApp

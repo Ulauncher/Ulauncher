@@ -1,7 +1,5 @@
 from configparser import ConfigParser
-from pathlib import Path
-
-import gi
+from os.path import dirname
 
 
 class CaseSensitiveConfigParser(ConfigParser):
@@ -9,17 +7,26 @@ class CaseSensitiveConfigParser(ConfigParser):
         return optionstr
 
 
-# This file is overwritten by the build_wrapper script in setup.py
-# IF YOU EDIT THIS FILE make sure your changes are reflected there
+_project_root = dirname(dirname(__file__))
+_config = CaseSensitiveConfigParser()
+_config.read(f"{_project_root}/setup.cfg")
 
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent
-config = CaseSensitiveConfigParser()
-config.read(f"{_PROJECT_ROOT}/setup.cfg")
+data_dir = f"{_project_root}/data"  # substituted for `{sys.prefix}/share/ulauncher` at build time
+version = _config["metadata"]["version"]
+description = _config["metadata"]["description"]
+gi_versions = dict(_config["gi_versions"])
 
-# Pin dependencies
-gi.require_versions(dict(config["gi_versions"]))
+"""
+This file is written for when running Ulauncher from the source directory
+When packaging Ulauncher we overwrite everything above this comment with static variables
+So IF YOU EDIT THIS FILE make sure your changes are reflected in setup.py:build_wrapper
+"""
 
-# ASSETS is by default `<ulauncher_path>/../data/` in trunk
-# and `/usr/share/ulauncher` in an installed version
-ASSETS = f"{_PROJECT_ROOT}/data"
-VERSION = config["metadata"]["version"]
+# this namespace module is the only way we can pin gi versions globally,
+# but we also use it when we build, then we don't want to require gi
+try:
+    import gi
+
+    gi.require_versions(gi_versions)
+except ModuleNotFoundError:
+    pass

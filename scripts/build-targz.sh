@@ -4,7 +4,7 @@
 # Builds tar.gz file with (un)install script and Ulauncher src
 ##############################################################
 build-targz () {
-    version=$(./setup.py --version)
+    version=$(./ul version)
     name="ulauncher"
     tmpdir="/tmp/$name"
 

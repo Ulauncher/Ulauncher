@@ -5,7 +5,6 @@
 . scripts/tests.sh
 . scripts/dev-container.sh
 . scripts/build-deb.sh
-. scripts/build-rpm.sh
 . scripts/build-targz.sh
 . scripts/build-doc.sh
 . scripts/send-signal.sh
@@ -15,6 +14,7 @@
 
 main () {
   case "$1" in
+    version) exec python3 -c "import ulauncher; print(ulauncher.version)" ;;
     run) exec ./bin/ulauncher -v --dev $2 ;;
     test-black) test-black ;;
     test-mypy) test-mypy ;;
@@ -26,9 +26,7 @@ main () {
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
-    build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
-    aur-update) ./scripts/aur-update.py $2 ;;
     build-doc) build-doc ;;
     watch-doc) watch-doc ;;
 

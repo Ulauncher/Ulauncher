@@ -35,11 +35,6 @@ The commands below are useful for maintainers:
   ${bold}./ul build-deb
     ${dim}Builds a deb package or uploads new Ulauncher version to PPA in Launchpad${normal}
 
-  ${bold}./ul build-rpm <DISTRO_NAME> [FILE_SUFFIX]
-    ${dim}Builds an rpm package
-    DISTRO_NAME is a required second argument and can take one of this values: feodra, suse, centos
-    FILE_SUFFIX is an optional argument. By default, file suffix is DISTRO_NAME${normal}
-
   ${bold}./ul build-targz
     ${dim}Builds a targz archive with the source code${normal}
 

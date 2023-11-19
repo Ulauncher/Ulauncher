@@ -3,7 +3,7 @@ import os
 from functools import lru_cache
 from gettext import gettext
 
-from ulauncher import ASSETS, VERSION
+import ulauncher
 
 APP_ID = "io.ulauncher.Ulauncher"
 API_VERSION = "3.0"
@@ -16,13 +16,14 @@ STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "
 EXTENSIONS = os.path.join(DATA, "extensions")
 EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 USER_THEMES = os.path.join(CONFIG, "user-themes")
-SYSTEM_THEMES = os.path.join(ASSETS, "themes")
+SYSTEM_THEMES = os.path.join(ulauncher.data_dir, "themes")
+VERSION = ulauncher.version
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
 class _PATHS_CLASS:
     APPLICATION = APPLICATION
-    ASSETS = ASSETS
+    ASSETS = ulauncher.data_dir
     HOME = HOME
     CONFIG = CONFIG
     DATA = DATA
