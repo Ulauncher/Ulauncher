@@ -20,6 +20,13 @@ urls.Issues = "https://github.com/Ulauncher/Ulauncher/issues"
 keywords = [ "linux", "desktop", "application", "launcher", "gtk" ]
 dependencies = [ "PyGObject", "pycairo" ]
 
+[tool.gobject.pin_versions]
+Gtk = "3.0"
+Gdk = "3.0"
+GdkX11 = "3.0"
+GdkPixbuf = "2.0"
+Pango = "1.0"
+
 [tool.black]
 line-length = 120
 
