@@ -84,7 +84,6 @@ class build_wrapper(build_py, Command):
                 [
                     f'data_dir = "{sys.prefix}/share/ulauncher"',
                     f'version = "{ulauncher.version}"',
-                    f'description = "{ulauncher.description}"',
                     f"gi_versions = {json.dumps(ulauncher.gi_versions)}",
                     ns_module_footer,
                 ]

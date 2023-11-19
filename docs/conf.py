@@ -158,7 +158,7 @@ texinfo_documents = [
         "Ulauncher Documentation",
         author,
         "Ulauncher",
-        ulauncher.description,
+        "Application launcher for Linux",
         "Miscellaneous",
     ),
 ]

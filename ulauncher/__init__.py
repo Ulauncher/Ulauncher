@@ -13,7 +13,6 @@ _config.read(f"{_project_root}/setup.cfg")
 
 data_dir = f"{_project_root}/data"  # substituted for `{sys.prefix}/share/ulauncher` at build time
 version = _config["metadata"]["version"]
-description = _config["metadata"]["description"]
 gi_versions = {
     "Gtk": "3.0",
     "Gdk": "3.0",
