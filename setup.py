@@ -102,4 +102,7 @@ setup(
     ],
     cmdclass={"build_py": build_wrapper, "build_prefs": build_preferences},
     version=ulauncher.version,
+    # can also be specified in pyproject.toml as tool.setuptools.script-files,
+    # but it seems to be both broken and deprecated
+    scripts=["bin/ulauncher", "bin/ulauncher-toggle"],
 )

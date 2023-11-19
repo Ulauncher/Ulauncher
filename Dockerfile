@@ -58,6 +58,7 @@ COPY [ "docs/requirements.txt", "./docs/" ]
 COPY [ "scripts/dput.cf", "/etc" ]
 
 RUN apt install -y python3-pip
+RUN pip3 install --upgrade setuptools==68
 RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
 RUN pip3 install -r docs/requirements.txt
 # Cache node_modules to make builds faster
