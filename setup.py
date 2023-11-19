@@ -9,7 +9,7 @@ from shutil import rmtree, which
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
 
-from ulauncher import VERSION, config
+import ulauncher
 
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
@@ -77,13 +77,16 @@ class build_wrapper(build_py, Command):
 
         build_py.run(self)
         print("Overwriting the namespace package with fixed values")  # noqa: T201
-        Path(self.build_lib + "/ulauncher/__init__.py").write_text(
+        ns_module = Path(self.build_lib + "/ulauncher/__init__.py")
+        ns_module_footer = ns_module.read_text().split('"""')[-1]
+        ns_module.write_text(
             "\n".join(
                 [
-                    "import gi",
-                    f"gi.require_versions({json.dumps(dict(config['gi_versions']))})",
-                    f"ASSETS = '{sys.prefix}/share/ulauncher'",
-                    f"VERSION = '{VERSION}'",
+                    f'data_dir = "{sys.prefix}/share/ulauncher"',
+                    f'version = "{ulauncher.version}"',
+                    f'description = "{ulauncher.description}"',
+                    f"gi_versions = {json.dumps(ulauncher.gi_versions)}",
+                    ns_module_footer,
                 ]
             )
         )
