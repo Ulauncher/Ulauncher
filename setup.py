@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -76,18 +75,6 @@ class build_wrapper(build_py, Command):
             build_preferences.run(self)
 
         build_py.run(self)
-        print("Overwriting the namespace package with fixed values")  # noqa: T201
-        ns_module = Path(self.build_lib + "/ulauncher/__init__.py")
-        ns_module_footer = ns_module.read_text().split('"""')[-1]
-        ns_module.write_text(
-            "\n".join(
-                [
-                    f'version = "{ulauncher.version}"',
-                    f"gi_versions = {json.dumps(ulauncher.gi_versions)}",
-                    ns_module_footer,
-                ]
-            )
-        )
 
 
 setup(
@@ -114,4 +101,5 @@ setup(
         *data_files_from_path("share/ulauncher", "data"),
     ],
     cmdclass={"build_py": build_wrapper, "build_prefs": build_preferences},
+    version=ulauncher.version,
 )
