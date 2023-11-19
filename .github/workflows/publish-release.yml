@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           echo "Ref type: $GITHUB_REF_TYPE"
-          VERSION=$(./setup.py --version)
+          VERSION=$(./ul version)
           echo "Version: $VERSION"
           # If release name contains prerelease-separator "-", use ulauncher-dev PPA
           if [[ "$VERSION" == *-* ]]; then PPA="agornostal/ulauncher-dev"; fi

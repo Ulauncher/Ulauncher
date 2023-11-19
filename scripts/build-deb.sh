@@ -15,7 +15,7 @@ build-deb () {
     set -e
 
     GPGKEY=${GPGKEY:-B96482D36BD735B0}
-    version=$(./setup.py --version)
+    version=$(./ul version)
     # Debian prerelease separator is "~" instead of "-" (semver prerelease separator)
     deb_version=$(echo "$version" | tr "-" "~")
 
