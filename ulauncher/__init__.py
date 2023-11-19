@@ -14,7 +14,13 @@ _config.read(f"{_project_root}/setup.cfg")
 data_dir = f"{_project_root}/data"  # substituted for `{sys.prefix}/share/ulauncher` at build time
 version = _config["metadata"]["version"]
 description = _config["metadata"]["description"]
-gi_versions = dict(_config["gi_versions"])
+gi_versions = {
+    "Gtk": "3.0",
+    "Gdk": "3.0",
+    "GdkX11": "3.0",
+    "GdkPixbuf": "2.0",
+    "Pango": "1.0",
+}
 
 """
 This file is written for when running Ulauncher from the source directory
