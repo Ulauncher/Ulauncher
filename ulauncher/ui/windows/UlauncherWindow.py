@@ -17,8 +17,8 @@ from ulauncher.ui.LayerShell import LayerShellOverlay
 
 # these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
-from ulauncher.utils.icon import load_icon_surface
 from ulauncher.utils.launch_detached import open_detached
+from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_monitor

@@ -20,8 +20,8 @@ from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.glib_idle_add import glib_idle_add
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.hotkey_controller import HotkeyController
-from ulauncher.utils.icon import get_icon_path
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
