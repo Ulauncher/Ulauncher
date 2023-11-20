@@ -21,9 +21,9 @@ jobs:
           DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
           echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache
-          ./ul build-targz
+          python3 -m build --sdist
+          mv dist/ulauncher*.tar.gz ulauncher_$VERSION.tar.gz
           ./ul build-deb --signed
-          cp /tmp/ulauncher_$VERSION.tar.gz .
           cp /tmp/ulauncher*.deb ulauncher_${VERSION}_all.deb
 
       - name: Make draft GitHub release

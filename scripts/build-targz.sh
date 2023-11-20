@@ -5,47 +5,13 @@
 ##############################################################
 build-targz () {
     version=$(./ul version)
-    name="ulauncher"
-    tmpdir="/tmp/$name"
 
-    echo "###################################"
-    echo "# Building ulauncher-$version.tar.gz"
-    echo "###################################"
+    echo "#########################################"
+    echo "# Building ulauncher v$version sdist #"
+    echo "#########################################"
 
-    set -ex
     ./setup.py build_prefs --force
-
-    rm -rf $tmpdir || true
-    rsync -aq --progress \
-        AUTHORS \
-        bin \
-        data \
-        LICENSE \
-        README.md \
-        setup.cfg \
-        setup.py \
-        ulauncher \
-        io.ulauncher.Ulauncher.desktop \
-        io.ulauncher.Ulauncher.service \
-        ulauncher.service \
-        $tmpdir \
-        --exclude-from=.gitignore
-
-    # This is only needed because data/preferences is in .gitignore
-    cp -r data/preferences $tmpdir/data/preferences
-
-    filename=$name
-    if [ ! -z "$version" ]; then
-        filename="${name}_$version"
-    fi
-
-    cd /tmp
-    tar czf $filename.tar.gz $name
-    rm -rf $tmpdir
-
-    set +x
-
-    echo
-    echo "/tmp/$filename.tar.gz is built"
-    echo
+    rm -rf ulauncher.egg-info # https://stackoverflow.com/a/59686298/633921
+    python3 -m build --sdist
+    echo "Build sdist to ./dist"
 }
