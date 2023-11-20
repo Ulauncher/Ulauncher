@@ -22,7 +22,7 @@ build-targz () {
         data \
         LICENSE \
         README.md \
-        setup.cfg \
+        pyproject.toml \
         setup.py \
         ulauncher \
         io.ulauncher.Ulauncher.desktop \
