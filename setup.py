@@ -19,12 +19,18 @@ icons = {
 def data_files_from_path(target_path, source_path):
     # Creates a list of valid entries for data_files weird custom format
     # Recurses over the real_path and adds it's content to package_path
-    entries = []
-    for p in Path.cwd().glob(source_path + "/**/*"):
-        if p.is_file():
-            relative_file = p.relative_to(Path(source_path).absolute())
-            entries.append((f"{target_path}/{relative_file.parent}", [f"{source_path}/{relative_file}"]))
-    return entries
+    def _iter(directory):
+        for path in directory.iterdir():
+            resolved = path.resolve()
+            if resolved.is_dir():
+                yield from _iter(path)
+            if resolved.is_file():
+                yield path
+
+    start = Path.cwd() / source_path
+    for p in _iter(start.absolute()):
+        relative_file = p.relative_to(start)
+        yield f"{target_path}/{relative_file.parent}", [f"{source_path}/{relative_file}"]
 
 
 class build_preferences(Command):
