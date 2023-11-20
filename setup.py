@@ -8,8 +8,6 @@ from shutil import rmtree, which
 from setuptools import Command, find_packages, setup
 from setuptools.command.build_py import build_py
 
-import ulauncher
-
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
     "indicator": "data/icons/system/default/ulauncher-indicator.svg",
@@ -101,5 +99,4 @@ setup(
         *data_files_from_path("share/ulauncher", "data"),
     ],
     cmdclass={"build_py": build_wrapper, "build_prefs": build_preferences},
-    version=ulauncher.version,
 )
