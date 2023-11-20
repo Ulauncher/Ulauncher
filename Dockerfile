@@ -20,6 +20,7 @@ RUN apt install -y vim
 RUN apt install -y wget
 RUN apt install -y rsync
 RUN apt install -y xvfb
+RUN apt install -y python3.8-venv
 
 # deb package build dependencies and helpers
 RUN apt install -y debhelper

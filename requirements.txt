@@ -1,4 +1,5 @@
 black
+build
 mypy==1.7.0
 PyGObject-stubs
 pytest==7.4.3
