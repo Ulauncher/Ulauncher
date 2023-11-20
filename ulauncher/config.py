@@ -10,7 +10,7 @@ APP_ID = "io.ulauncher.Ulauncher"
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# ULAUNCHER_DATA_DIR is added by the ulauncher binary if it's detecting that it's running from source
+# ULAUNCHER_DATA_DIR is used when running in dev mode from source and by third party packagers like Nix
 DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
 HOME = os.path.expanduser("~")
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
