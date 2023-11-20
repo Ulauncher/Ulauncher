@@ -16,6 +16,7 @@ main () {
   case "$1" in
     version) exec python3 -c "import ulauncher; print(ulauncher.version)" ;;
     run) exec ./bin/ulauncher -v --dev $2 ;;
+    run-nix) exec nix run --show-trace --print-build-logs '.#default' -- "${@:2}" ;;
     test-black) test-black ;;
     test-mypy) test-mypy ;;
     test-ruff) test-ruff ;;
@@ -26,6 +27,7 @@ main () {
     send-signal) send-signal $2 ;;
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
+    build-nix) exec nix build --out-link nix/result --show-trace --print-build-logs "${@:2}" '.#default' ;;
     build-targz) build-targz $2 ;;
     build-doc) build-doc ;;
     watch-doc) watch-doc ;;
@@ -42,5 +44,5 @@ main () {
 if [ $# -eq 0 ]; then
   help
 else
-  main $@
+  main "$@"
 fi
