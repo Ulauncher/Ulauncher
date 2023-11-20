@@ -76,7 +76,7 @@ class build_wrapper(build_py, Command):
 
 
 setup(
-    packages=find_packages(exclude=["tests", "conftest.py"]),
+    packages=find_packages(exclude=["docs", "tests", "conftest.py"]),
     # These will be placed in /usr
     data_files=[
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
