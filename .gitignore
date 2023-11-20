@@ -33,3 +33,4 @@ yarn-error.log*
 preferences-src/test/unit/coverage
 data/preferences
 .venv
+/nix/result
