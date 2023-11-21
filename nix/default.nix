@@ -2,8 +2,8 @@
 { lib
 , fetchFromGitHub
 , gdk-pixbuf
-, glib
 , git
+, glib
 , gnome
 , gobject-introspection
 , gtk-layer-shell
@@ -14,13 +14,17 @@
 , librsvg
 , libwnck
 , mkYarnPackage
+, mypy
 , nix-update-script
 , python3Packages
+, ruff
+, stdenv
 , systemd
+, typos
 , webkitgtk
 , wrapGAppsHook
-, xvfb-run
 , xdg-utils
+, xvfb-run
 , withXorg ? true
 }:
 let
@@ -43,6 +47,14 @@ let
     installPhase = ''mv -T deps/ulauncher-prefs/dist $out'';
     distPhase = "true";
   };
+
+  # piece of shared makeWrapperArgs modifications to reuse in multiple places
+  wrapperArgs = ''
+    "''${makeWrapperArgs[@]}"
+    "''${gappsWrapperArgs[@]}"
+    ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
+    --set-default ULAUNCHER_DATA_DIR "$out/share/ulauncher"
+  '';
 in
 python3Packages.buildPythonPackage {
   inherit version pname;
@@ -82,10 +94,15 @@ python3Packages.buildPythonPackage {
   ];
 
   nativeCheckInputs = with python3Packages; [
+    black
     mock
     pytest
     pytest-mock
-    xvfb-run
+  ] ++ [
+    mypy
+    ruff
+    typos
+    xvfb-run # xvfb-run tests fail
   ];
 
   patches = [
@@ -111,22 +128,31 @@ python3Packages.buildPythonPackage {
     ln -s "${preferences}" data/preferences
   '';
 
-  # https://github.com/Ulauncher/Ulauncher/issues/390
-  doCheck = false;
+  doCheck = true;
 
   preCheck = ''
+    patchShebangs ul
     export PYTHONPATH=$PYTHONPATH:$out/${python3Packages.python.sitePackages}
+
+    export HOME=$TMPDIR
+
+    substituteInPlace \
+        scripts/tests.sh \
+      --replace ' pytest ' ' pytest -p no:cacheprovider '
+
+    substituteInPlace \
+        tests/modes/shortcuts/test_RunScript.py \
+      --replace '#!/bin/bash' '#!${stdenv.shell}'
+
+    # this is required to run tests
+    ulWrapperArgs=(${wrapperArgs})
+    wrapProgram ul "''${ulWrapperArgs[@]}"
   '';
 
-  # Simple translation of
-  # - https://github.com/Ulauncher/Ulauncher/blob/f5a601bdca75198a6a31b9d84433496b63530e74/test
   checkPhase = ''
     runHook preCheck
 
-    # skip tests in invocation that handle paths that
-    # aren't nix friendly (i think)
-    xvfb-run -s '-screen 0 1024x768x16' \
-      pytest -k 'not TestPath and not test_handle_key_press_event' tests
+    ./ul test
 
     runHook postCheck
   '';
@@ -134,11 +160,7 @@ python3Packages.buildPythonPackage {
   # do not double wrap
   dontWrapGApps = true;
   preFixup = ''
-    makeWrapperArgs+=(
-     "''${gappsWrapperArgs[@]}"
-     ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
-     --set-default ULAUNCHER_DATA_DIR "$out/share/ulauncher"
-    )
+    makeWrapperArgs=(${wrapperArgs})
   '';
 
   passthru = {
