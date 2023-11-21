@@ -21,6 +21,7 @@
 , stdenv
 , systemd
 , typos
+, yarn
 , webkitgtk
 , wrapGAppsHook
 , xdg-utils
@@ -35,7 +36,7 @@ let
   # putting it directly here instead of "${src.python}/preferences-src" prevents unnecessary rebuilds
   src.preferences = ../preferences-src;
 
-  preferences = mkYarnPackage {
+  preferencesPackage = mkYarnPackage {
     name = "${pname}-${version}-ulauncher-prefs";
     src = src.preferences;
 
@@ -55,123 +56,138 @@ let
     ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
     --set-default ULAUNCHER_DATA_DIR "$out/share/ulauncher"
   '';
-in
-python3Packages.buildPythonPackage {
-  inherit version pname;
-  src = src.python;
 
-  nativeBuildInputs = with python3Packages; [
-    gdk-pixbuf
-    gobject-introspection
-    intltool
-    wrapGAppsHook
-  ];
+  preferencesPackages = [ yarn ];
 
-  buildInputs = [
-    glib
-    gnome.adwaita-icon-theme
-    gtk-layer-shell
-    gtk3
-    libappindicator
-    librsvg
-    webkitgtk
-  ] ++ lib.optionals withXorg [
-    libwnck
-  ];
-
-  # runtime dependencies (binaries prepended to PATH)
-  propagatedBuildInputs = with python3Packages; [
-    levenshtein
-    mock
-    pycairo
-    pygobject3
-    requests
-  ] ++ [
-    git
-    glib
-    gtk3
-    xdg-utils
-  ];
-
-  nativeCheckInputs = with python3Packages; [
+  testsPackages = pp: (with pp; [
     black
     mock
     pytest
     pytest-mock
-  ] ++ [
+  ]) ++ [
     mypy
     ruff
     typos
     xvfb-run # xvfb-run tests fail
   ];
 
-  patches = [
-    # ./some.patch
-  ];
+  self = python3Packages.buildPythonPackage {
+    inherit version pname;
+    src = src.python;
 
-  postPatch = ''
-    patchShebangs bin/ulauncher-toggle
+    nativeBuildInputs = with python3Packages; [
+      gdk-pixbuf
+      gobject-introspection
+      intltool
+      wrapGAppsHook
+    ];
 
-    substituteInPlace \
-        bin/ulauncher-toggle \
-        io.ulauncher.Ulauncher.desktop \
-      --replace gapplication ${glib}/bin/gapplication
-    substituteInPlace \
-        ulauncher/modes/extensions/ExtensionRunner.py \
-      --replace '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
+    buildInputs = [
+      glib
+      gnome.adwaita-icon-theme
+      gtk-layer-shell
+      gtk3
+      libappindicator
+      librsvg
+      webkitgtk
+    ] ++ lib.optionals withXorg [
+      libwnck
+    ];
 
-    substituteInPlace \
-        ulauncher.service \
-        io.ulauncher.Ulauncher.service \
-      --replace "/usr" "$out"
+    # runtime dependencies (binaries prepended to PATH)
+    propagatedBuildInputs = with python3Packages; [
+      levenshtein
+      mock
+      pycairo
+      pygobject3
+      requests
+    ] ++ [
+      git
+      glib
+      gtk3
+      xdg-utils
+    ];
 
-    ln -s "${preferences}" data/preferences
-  '';
+    nativeCheckInputs = testsPackages python3Packages;
 
-  doCheck = true;
+    patches = [
+      # ./some.patch
+    ];
 
-  preCheck = ''
-    patchShebangs ul
-    export PYTHONPATH=$PYTHONPATH:$out/${python3Packages.python.sitePackages}
+    postPatch = ''
+      patchShebangs bin/ulauncher-toggle
 
-    export HOME=$TMPDIR
+      substituteInPlace \
+          bin/ulauncher-toggle \
+          io.ulauncher.Ulauncher.desktop \
+        --replace gapplication ${glib}/bin/gapplication
+      substituteInPlace \
+          ulauncher/modes/extensions/ExtensionRunner.py \
+        --replace '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
 
-    substituteInPlace \
-        scripts/tests.sh \
-      --replace ' pytest ' ' pytest -p no:cacheprovider '
+      substituteInPlace \
+          ulauncher.service \
+          io.ulauncher.Ulauncher.service \
+        --replace "/usr" "$out"
 
-    substituteInPlace \
-        tests/modes/shortcuts/test_RunScript.py \
-      --replace '#!/bin/bash' '#!${stdenv.shell}'
+      ln -s "${preferencesPackage}" data/preferences
+    '';
 
-    # this is required to run tests
-    ulWrapperArgs=(${wrapperArgs})
-    wrapProgram ul "''${ulWrapperArgs[@]}"
-  '';
+    doCheck = true;
 
-  checkPhase = ''
-    runHook preCheck
+    preCheck = ''
+      patchShebangs ul
+      export PYTHONPATH=$PYTHONPATH:$out/${python3Packages.python.sitePackages}
 
-    ./ul test
+      export HOME=$TMPDIR
 
-    runHook postCheck
-  '';
+      substituteInPlace \
+          scripts/tests.sh \
+        --replace ' pytest ' ' pytest -p no:cacheprovider '
 
-  # do not double wrap
-  dontWrapGApps = true;
-  preFixup = ''
-    makeWrapperArgs=(${wrapperArgs})
-  '';
+      substituteInPlace \
+          tests/modes/shortcuts/test_RunScript.py \
+        --replace '#!/bin/bash' '#!${stdenv.shell}'
 
-  passthru = {
-    updateScript = nix-update-script { };
+      # this is required to run tests
+      ulWrapperArgs=(${wrapperArgs})
+      wrapProgram ul "''${ulWrapperArgs[@]}"
+    '';
+
+    checkPhase = ''
+      runHook preCheck
+
+      ./ul test
+
+      runHook postCheck
+    '';
+
+    # do not double wrap
+    dontWrapGApps = true;
+    preFixup = ''
+      makeWrapperArgs=(${wrapperArgs})
+    '';
+
+    passthru = {
+      updateScript = nix-update-script { };
+      env = self.passthru.pythonModule.withPackages (pp:
+        [ self ]
+        ++ preferencesPackages
+        ++ testsPackages pp
+        # debugging
+        ++ (with pp; [ ipdb ])
+        # Jetbrains IDEs don't like it without setuptools/pip installed
+        ++ (with pp; [ setuptools pip ])
+      );
+    };
+
+    meta = with lib; {
+      description = "A fast application launcher for Linux, written in Python, using GTK";
+      homepage = "https://ulauncher.io/";
+      license = licenses.gpl3;
+      platforms = platforms.linux;
+      maintainers = with maintainers; [ nazarewk ];
+    };
   };
-
-  meta = with lib; {
-    description = "A fast application launcher for Linux, written in Python, using GTK";
-    homepage = "https://ulauncher.io/";
-    license = licenses.gpl3;
-    platforms = platforms.linux;
-    maintainers = with maintainers; [ aaronjanse sebtm ];
-  };
-}
+in
+self
