@@ -51,7 +51,7 @@ class ExtensionRunner:
         """
         Finds all extensions in `PATHS.EXTENSIONS`/`PATHS.EXTENSIONS_ALL` and runs them
         """
-        for ex_id, _ in extension_finder.iterate(PATHS.EXTENSIONS_ALL_DIRS):
+        for ex_id, _ in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
             ext_record = ext_db.get(ex_id)
             if not ext_record or ext_record.is_enabled:
                 try:

@@ -82,7 +82,7 @@ class ExtensionRemote:
             ]
         )
         self._dir = extension_finder.get_mutable_dir(self.extension_id)
-        self._git_dir = f"{PATHS.EXTENSIONS_WRITE_DIR}/.git/{self.extension_id}.git"
+        self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.extension_id}.git"
 
     def _get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":

@@ -12,7 +12,7 @@ def is_extension(directory):
     return os.path.isfile(manifest)
 
 
-def locate(ext_id, ext_dirs=PATHS.EXTENSIONS_ALL_DIRS):
+def locate(ext_id, ext_dirs=PATHS.ALL_EXTENSIONS_DIRS):
     """
     Locates (an existing) extension directory.
     """
@@ -23,14 +23,14 @@ def locate(ext_id, ext_dirs=PATHS.EXTENSIONS_ALL_DIRS):
     return None
 
 
-def get_mutable_dir(ext_id, mutable_ext_dir=PATHS.EXTENSIONS_WRITE_DIR):
+def get_mutable_dir(ext_id, mutable_ext_dir=PATHS.USER_EXTENSIONS_DIR):
     """
     Returns path to writable extension directory
     """
     return os.path.realpath(os.path.join(mutable_ext_dir, ext_id))
 
 
-def iterate(ext_dirs=PATHS.EXTENSIONS_ALL_DIRS, duplicates=False):
+def iterate(ext_dirs=PATHS.ALL_EXTENSIONS_DIRS, duplicates=False):
     """
     Yields `(extension_id, extension_path)` tuples found in a given extensions dirs
     """

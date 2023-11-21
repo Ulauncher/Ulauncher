@@ -11,34 +11,34 @@ API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # ULAUNCHER_DATA_DIR is used when running in dev mode from source and by third party packagers like Nix
-DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
+SYSTEM_DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
 HOME = os.path.expanduser("~")
-CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
-USER_WRITE_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
-STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
-EXTENSIONS_WRITE_DIR = os.path.join(USER_WRITE_DIR, "extensions")
-EXTENSIONS_READONLY_DIRS = [
+USER_CONFIG_DIR = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
+USER_DATA_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
+USER_STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
+USER_EXTENSIONS_DIR = os.path.join(USER_DATA_DIR, "extensions")
+PREINSTALLED_EXTENSIONS_DIRS = [
     os.path.join(p, "ulauncher", "extensions") for p in os.environ.get("XDG_DATA_DIRS", "").split(os.path.pathsep)
 ]
-EXTENSIONS_ALL_DIRS = [EXTENSIONS_WRITE_DIR, *EXTENSIONS_READONLY_DIRS]
-EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
-USER_THEMES = os.path.join(CONFIG, "user-themes")
-SYSTEM_THEMES = os.path.join(DATA_DIR, "themes")
+ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS_DIR, *PREINSTALLED_EXTENSIONS_DIRS]
+EXTENSIONS_CONFIG_DIR = os.path.join(USER_CONFIG_DIR, "ext_preferences")
+USER_THEMES = os.path.join(USER_CONFIG_DIR, "user-themes")
+SYSTEM_THEMES = os.path.join(SYSTEM_DATA_DIR, "themes")
 VERSION = ulauncher.version
 
 
 # Would use SimpleNamespace if that worked with typing and auto-completion.
 class _PATHS_CLASS:
     APPLICATION = APPLICATION
-    ASSETS = DATA_DIR
+    ASSETS = SYSTEM_DATA_DIR
     HOME = HOME
-    CONFIG = CONFIG
-    DATA = USER_WRITE_DIR
-    STATE = STATE
-    EXTENSIONS_WRITE_DIR = EXTENSIONS_WRITE_DIR
-    EXTENSIONS_READONLY_DIRS = EXTENSIONS_READONLY_DIRS
-    EXTENSIONS_ALL_DIRS = EXTENSIONS_ALL_DIRS
-    EXTENSIONS_CONFIG = EXTENSIONS_CONFIG
+    CONFIG = USER_CONFIG_DIR
+    DATA = USER_DATA_DIR
+    STATE = USER_STATE_DIR
+    USER_EXTENSIONS_DIR = USER_EXTENSIONS_DIR
+    PREINSTALLED_EXTENSIONS_DIRS = PREINSTALLED_EXTENSIONS_DIRS
+    ALL_EXTENSIONS_DIRS = ALL_EXTENSIONS_DIRS
+    EXTENSIONS_CONFIG = EXTENSIONS_CONFIG_DIR
     USER_THEMES = USER_THEMES
     SYSTEM_THEMES = SYSTEM_THEMES
 
@@ -53,7 +53,7 @@ if not os.path.exists(PATHS.ASSETS):
 
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
-os.makedirs(PATHS.EXTENSIONS_WRITE_DIR, exist_ok=True)
+os.makedirs(PATHS.USER_EXTENSIONS_DIR, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
 os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
