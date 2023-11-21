@@ -12,8 +12,8 @@ class TestExtensionRunner:
         return ExtensionRunner()
 
     @pytest.fixture(autouse=True)
-    def find_extensions(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.find_extensions")
+    def extensions_iterate(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.extension_finder.iterate")
 
     @pytest.fixture(autouse=True)
     def timer(self, mocker):
@@ -55,9 +55,9 @@ class TestExtensionRunner:
         extproc.subprocess.wait_async.assert_called_once()
         extproc.error_stream.read_line_async.assert_called_once()
 
-    def test_run_all__run__called_with_extension_ids(self, runner, mocker, find_extensions):
+    def test_run_all__run__called_with_extension_ids(self, runner, mocker, extensions_iterate):
         mocker.patch.object(runner, "run")
-        find_extensions.return_value = [("id_1", "path_1"), ("id_2", "path_2"), ("id_3", "path_3")]
+        extensions_iterate.return_value = iter([("id_1", "path_1"), ("id_2", "path_2"), ("id_3", "path_3")])
         runner.run_all()
         runner.run.assert_any_call("id_1")
         runner.run.assert_any_call("id_2")
