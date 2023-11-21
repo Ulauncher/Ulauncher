@@ -25,9 +25,9 @@ test-typos () {
 }
 
 test-pytest () {
-    set +e
+    set -e
     echo '[ test: pytest ]'
-    if ! [ -x "$(command -v xvfb-run)" ]
+    if ! command -v xvfb-run >/dev/null
     then
         pytest tests
     else
@@ -35,6 +35,5 @@ test-pytest () {
         # Use very high fake display number to avoid using a real display
         DISPLAY=:99 xvfb-run pytest tests
     fi
-    set -e
 }
 
