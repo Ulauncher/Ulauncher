@@ -34,3 +34,4 @@ preferences-src/test/unit/coverage
 data/preferences
 .venv
 /nix/result
+/nix/dev
