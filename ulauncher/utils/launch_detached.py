@@ -24,7 +24,8 @@ def launch_detached(cmd):
     env = dict(os.environ.items())
     # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
     # under X11 for proper centering.
-    env.pop("GDK_BACKEND", None)
+    if env.get("GDK_BACKEND") != "wayland":
+        env.pop("GDK_BACKEND", None)
 
     try:
         envp = [f"{k}={v}" for k, v in env.items()]
