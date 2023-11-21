@@ -42,7 +42,7 @@ def route(path: str):
 
 def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
-    for ext_id, ext_path in extension_finder.iter(PATHS.EXTENSIONS_ALL_DIRS):
+    for ext_id, ext_path in extension_finder.iterate():
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         try:

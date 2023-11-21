@@ -6,9 +6,9 @@ from functools import lru_cache
 from shutil import rmtree
 
 from ulauncher.config import PATHS
+from ulauncher.modes.extensions.extension_finder import is_extension
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
-from ulauncher.modes.extensions.extension_finder import is_extension
 
 logger = logging.getLogger()
 

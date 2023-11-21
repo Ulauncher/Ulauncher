@@ -5,7 +5,7 @@ import os
 from typing import Any
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.modes.extensions.extension_finder import locate
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
@@ -192,7 +192,7 @@ class ExtensionManifest(JsonConf):
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
-        ext_path = locate(ext_id, PATHS.EXTENSIONS_ALL_DIRS)
+        ext_path = extension_finder.locate(ext_id)
         manifest = super().load(os.path.join(ext_path, "manifest.json"))
         manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
         return manifest
