@@ -11,7 +11,7 @@ from types import ModuleType
 
 from ulauncher.config import FIRST_V6_RUN, PATHS
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.modes.extensions.extension_finder import locate_extension
+from ulauncher.modes.extensions.extension_finder import locate
 from ulauncher.utils.systemd_controller import SystemdController
 
 _logger = logging.getLogger()
@@ -61,7 +61,7 @@ def _migrate_user_prefs(extension_id, user_prefs):
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs = {"preferences": {}, "triggers": {}}
-    ext_path = locate_extension(extension_id, PATHS.EXTENSIONS_ALL)
+    ext_path = locate(extension_id, PATHS.EXTENSIONS_ALL_DIRS)
     manifest = ExtensionManifest.load(os.path.join(ext_path, "manifest.json"))
     for id, pref in user_prefs.items():
         if manifest.triggers.get(id):

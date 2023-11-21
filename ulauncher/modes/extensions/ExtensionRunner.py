@@ -11,7 +11,7 @@ from typing import NamedTuple
 from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
-from ulauncher.modes.extensions.extension_finder import iter_extensions, locate_extension
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
@@ -51,7 +51,7 @@ class ExtensionRunner:
         """
         Finds all extensions in `PATHS.EXTENSIONS`/`PATHS.EXTENSIONS_ALL` and runs them
         """
-        for ex_id, _ in iter_extensions(PATHS.EXTENSIONS_ALL):
+        for ex_id, _ in extension_finder.iter(PATHS.EXTENSIONS_ALL_DIRS):
             ext_record = ext_db.get(ex_id)
             if not ext_record or ext_record.is_enabled:
                 try:
@@ -71,7 +71,7 @@ class ExtensionRunner:
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
-            extension_path = locate_extension(extension_id, PATHS.EXTENSIONS_ALL)
+            extension_path = extension_finder.locate(extension_id, PATHS.EXTENSIONS_ALL_DIRS)
 
             cmd = [sys.executable, f"{extension_path}/main.py"]
             env = {

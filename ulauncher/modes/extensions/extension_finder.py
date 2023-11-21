@@ -1,5 +1,7 @@
 import os
 
+from ulauncher.config import PATHS
+
 
 def is_extension(directory):
     """
@@ -10,21 +12,32 @@ def is_extension(directory):
     return os.path.isfile(manifest)
 
 
-def locate_extension(ext_id, ext_dirs, default=None, default_first=False):
-    ret = default
+def locate(
+    ext_id,
+    ext_dirs=PATHS.EXTENSIONS_ALL_DIRS,
+    mutable_ext_dir=PATHS.EXTENSIONS_WRITE_DIR,
+    default_mutable=False,
+):
+    """
+    Locates (an existing) extension directory, optionally defaults to the writable extensions directory
+    """
     for ext_dir in ext_dirs:
         ext_path = os.path.join(ext_dir, ext_id)
-        if default_first and ret is None:
-            ret = ext_path
-        elif is_extension(ext_path):
-            ret = ext_path
-            break
-    if ret:
-        ret = os.path.realpath(ret)
-    return ret
+        if is_extension(ext_path):
+            return os.path.realpath(ext_path)
+    if default_mutable:
+        return get_mutable_dir(ext_id, mutable_ext_dir)
+    return None
 
 
-def iter_extensions(ext_dirs, duplicates=False):
+def get_mutable_dir(ext_id, mutable_ext_dir=PATHS.EXTENSIONS_WRITE_DIR):
+    """
+    Returns path to writable extension directory
+    """
+    return os.path.realpath(os.path.join(mutable_ext_dir, ext_id))
+
+
+def iter(ext_dirs=PATHS.EXTENSIONS_ALL_DIRS, duplicates=False):
     """
     Yields `(extension_id, extension_path)` tuples found in a given extensions dirs
     """

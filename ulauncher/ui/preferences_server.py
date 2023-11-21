@@ -10,7 +10,7 @@ from urllib.parse import unquote, urlparse
 from gi.repository import Gio, Gtk
 
 from ulauncher.config import API_VERSION, PATHS, VERSION
-from ulauncher.modes.extensions.extension_finder import iter_extensions
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -42,7 +42,7 @@ def route(path: str):
 
 def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
-    for ext_id, ext_path in iter_extensions(PATHS.EXTENSIONS_ALL):
+    for ext_id, ext_path in extension_finder.iter(PATHS.EXTENSIONS_ALL_DIRS):
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         try:
@@ -229,8 +229,8 @@ class PreferencesServer:
 
     @route("/open/extensions-dir")
     def open_extensions_dir(self):
-        logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
-        open_detached(PATHS.EXTENSIONS)
+        logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS_WRITE_DIR)
+        open_detached(PATHS.EXTENSIONS_WRITE_DIR)
 
     @route("/shortcut/get-all")
     def shortcut_get_all(self):

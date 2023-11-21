@@ -14,11 +14,13 @@ APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
 HOME = os.path.expanduser("~")
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
-USER_DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
-DATA_DIRS = [os.path.join(p, "ulauncher") for p in os.environ.get("XDG_DATA_DIRS", "").split(os.path.pathsep)]
+USER_WRITE_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
-EXTENSIONS = os.path.join(USER_DATA, "extensions")
-EXTENSIONS_ALL = [EXTENSIONS, *(os.path.join(p, "extensions") for p in DATA_DIRS)]
+EXTENSIONS_WRITE_DIR = os.path.join(USER_WRITE_DIR, "extensions")
+EXTENSIONS_READONLY_DIRS = [
+    os.path.join(p, "ulauncher", "extensions") for p in os.environ.get("XDG_DATA_DIRS", "").split(os.path.pathsep)
+]
+EXTENSIONS_ALL_DIRS = [EXTENSIONS_WRITE_DIR, *EXTENSIONS_READONLY_DIRS]
 EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 USER_THEMES = os.path.join(CONFIG, "user-themes")
 SYSTEM_THEMES = os.path.join(DATA_DIR, "themes")
@@ -31,10 +33,11 @@ class _PATHS_CLASS:
     ASSETS = DATA_DIR
     HOME = HOME
     CONFIG = CONFIG
-    DATA = USER_DATA
+    DATA = USER_WRITE_DIR
     STATE = STATE
-    EXTENSIONS = EXTENSIONS
-    EXTENSIONS_ALL = EXTENSIONS_ALL
+    EXTENSIONS_WRITE_DIR = EXTENSIONS_WRITE_DIR
+    EXTENSIONS_READONLY_DIRS = EXTENSIONS_READONLY_DIRS
+    EXTENSIONS_ALL_DIRS = EXTENSIONS_ALL_DIRS
     EXTENSIONS_CONFIG = EXTENSIONS_CONFIG
     USER_THEMES = USER_THEMES
     SYSTEM_THEMES = SYSTEM_THEMES
@@ -50,7 +53,7 @@ if not os.path.exists(PATHS.ASSETS):
 
 os.makedirs(PATHS.CONFIG, exist_ok=True)
 os.makedirs(PATHS.STATE, exist_ok=True)
-os.makedirs(PATHS.EXTENSIONS, exist_ok=True)
+os.makedirs(PATHS.EXTENSIONS_WRITE_DIR, exist_ok=True)
 os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
 os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
