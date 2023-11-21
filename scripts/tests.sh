@@ -32,8 +32,7 @@ test-pytest () {
         pytest tests
     else
         # Use xvfb-run (virtual X server environment)
-        # Use very high fake display number to avoid using a real display
-        DISPLAY=:99 xvfb-run pytest tests
+        xvfb-run --auto-servernum pytest tests
     fi
 }
 
