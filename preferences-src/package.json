@@ -4,7 +4,6 @@
   "author": "Aleksandr Gornostal <ulauncher.app@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "PORT=3002 node dev-server.js",
     "build": "node build.js",
     "analyze": "node build.js --analyze"
   },
@@ -16,11 +15,8 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@nuxtjs/friendly-errors-webpack-plugin": "^2.1.0",
-    "connect-history-api-fallback": "^1.3.0",
     "copy-webpack-plugin": "^6.4.1",
     "css-loader": "^6.7.1",
-    "express": "^4.17.3",
     "html-webpack-plugin": "^5.5.0",
     "rimraf": "^3.0.2",
     "url-loader": "^4.1.1",
@@ -28,9 +24,7 @@
     "vue-style-loader": "^4.1.3",
     "vue-template-compiler": "^2.6.14",
     "webpack": "5.72.0",
-    "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-dev-middleware": "^5.3.1",
-    "webpack-hot-middleware": "^2.18.0"
+    "webpack-bundle-analyzer": "^4.5.0"
   },
   "engines": {
     "node": ">= 12.13.0"

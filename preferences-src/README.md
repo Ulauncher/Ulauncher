@@ -8,9 +8,6 @@
 # install dependencies
 yarn install
 
-# serve with hot reload at localhost:8080
-yarn run dev
-
 # build for production with minification
 yarn run build
 
@@ -18,5 +15,7 @@ yarn run build
 yarn run build --report
 ```
 
-For detailed explanation on how things work, checkout the [guide](https://vuejs-templates.github.io/webpack/) 
+To debug the preferences, kill Ulauncher and reopen it with the `--dev` flag. Then you can right click and open the inspector.
+
+For detailed explanation on how things work, checkout the [guide](https://vuejs-templates.github.io/webpack/)
 and [docs for vue-loader](https://vuejs.github.io/vue-loader).
