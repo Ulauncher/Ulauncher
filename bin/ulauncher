@@ -23,7 +23,7 @@ IS_DEV = PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not i
 if IS_DEV:
     sys.path.insert(0, str(PROJECT_ROOT))
     os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
-    os.environ["ULAUNCHER_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
+    os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
 
 try:
     from ulauncher.main import main

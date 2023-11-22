@@ -10,8 +10,10 @@ APP_ID = "io.ulauncher.Ulauncher"
 API_VERSION = "3.0"
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# ULAUNCHER_DATA_DIR is used when running in dev mode from source and by third party packagers like Nix
-SYSTEM_DATA_DIR = os.environ.get("ULAUNCHER_DATA_DIR", f"{sys.prefix}/share/ulauncher")
+# ULAUNCHER_SYSTEM_PREFIX is used by a third party packagers like Nix
+SYSTEM_PREFIX = os.environ.get("ULAUNCHER_SYSTEM_PREFIX", sys.prefix)
+# ULAUNCHER_SYSTEM_DATA_DIR is used when running in dev mode from source and during tests
+SYSTEM_DATA_DIR = os.environ.get("ULAUNCHER_SYSTEM_DATA_DIR", f"{SYSTEM_PREFIX}/share/ulauncher")
 HOME = os.path.expanduser("~")
 USER_CONFIG_DIR = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
 USER_DATA_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")

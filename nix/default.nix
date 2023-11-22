@@ -54,7 +54,7 @@ let
     "''${makeWrapperArgs[@]}"
     "''${gappsWrapperArgs[@]}"
     ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
-    --set-default ULAUNCHER_DATA_DIR "$out/share/ulauncher"
+    --set-default ULAUNCHER_SYSTEM_PREFIX "$out"
   '';
 
   preferencesPackages = [ yarn ];

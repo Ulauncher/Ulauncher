@@ -2,4 +2,4 @@
 
 import os
 
-os.environ["ULAUNCHER_DATA_DIR"] = f"{os.path.dirname(__file__)}/data"
+os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = f"{os.path.dirname(__file__)}/data"
