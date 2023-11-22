@@ -3,6 +3,11 @@ import os
 from ulauncher.config import PATHS
 
 
+class ExtensionNotFound(FileNotFoundError):
+    def __init__(self, ext_id):
+        super().__init__(f"Extension with id {ext_id} was not found anywhere in search path")
+
+
 def is_extension(ext_path):
     """
     Tells whether the argument is an extension directory
@@ -14,17 +19,35 @@ def is_extension(ext_path):
     return all(os.path.isfile(os.path.join(ext_path, file)) for file in expected_files)
 
 
-
-
-def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
+def is_user_extension(ext_path, user_ext_path=PATHS.USER_EXTENSIONS_DIR):
     """
-    Locates (an existing) extension directory.
+    Tells the directory is user-provided extension.
+    """
+    ext_path = os.path.realpath(ext_path)
+    return os.path.dirname(ext_path) == user_ext_path and is_extension(ext_path)
+
+
+def locate_iter(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
+    """
+    Yields all existing directories for given `ext_id`
     """
     for exts_dir in exts_dirs:
         ext_path = os.path.join(exts_dir, ext_id)
         if is_extension(ext_path):
-            return os.path.realpath(ext_path)
-    return None
+            yield os.path.realpath(ext_path)
+
+
+def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS, check=False):
+    """
+    Locates (an existing) extension directory.
+    """
+    # TODO @nazarewk: default check to True and resolve all test errors #noqa: TD003
+    try:
+        return next(locate_iter(ext_id, exts_dirs=exts_dirs))
+    except StopIteration:
+        if not check:
+            return None
+        raise ExtensionNotFound(ext_id) from None
 
 
 def get_user_dir(ext_id, user_ext_path=PATHS.USER_EXTENSIONS_DIR):

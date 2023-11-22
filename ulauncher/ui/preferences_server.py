@@ -42,7 +42,12 @@ def route(path: str):
 
 def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
+    ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
+        ext_record = ext_db.ensure_present(ext_id)
+        if ext_record.is_enabled:
+            ExtensionRunner.get_instance().run(ext_id)
+
         manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         try:
@@ -56,8 +61,10 @@ def get_extensions():
         icon = get_icon_path(manifest.icon, base_path=ext_path)
 
         yield {
-            **ExtensionDb.load().get(ext_id, {}),
+            **ext_record,
             "id": ext_id,
+            "path": ext_path,
+            "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
             "name": manifest.name,
             "icon": icon,
             "authors": manifest.authors,
@@ -65,6 +72,7 @@ def get_extensions():
             "preferences": manifest.preferences,
             "triggers": manifest.triggers,
             "error": error,
+            "is_preinstalled": not extension_finder.is_user_extension(ext_path),
             "is_running": is_running,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
@@ -266,7 +274,9 @@ class PreferencesServer:
         logger.info("Add extension: %s", url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
-        ExtensionRunner.get_instance().run(ext_id)
+        runner = ExtensionRunner.get_instance()
+        runner.stop(ext_id)
+        runner.run(ext_id)
         # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
         # to avoid race condition and needless waiting
         time.sleep(1)
@@ -300,8 +310,14 @@ class PreferencesServer:
     @route("/extension/remove")
     def extension_remove(self, extension_id):
         logger.info("Remove extension: %s", extension_id)
-        ExtensionRunner.get_instance().stop(extension_id)
+        runner = ExtensionRunner.get_instance()
+        runner.stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
+        try:
+            extension_finder.locate(extension_id)
+        except extension_finder.ExtensionNotFound:
+            return
+        runner.run(extension_id)
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, extension_id, is_enabled):

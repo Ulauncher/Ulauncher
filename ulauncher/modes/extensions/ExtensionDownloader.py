@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import logging
-import os
 from functools import lru_cache
 from shutil import rmtree
 
-from ulauncher.config import PATHS
-from ulauncher.modes.extensions.extension_finder import is_extension
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 
@@ -34,9 +32,11 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        ext_path = os.path.join(PATHS.USER_EXTENSIONS_DIR, ext_id)
-        if is_extension(ext_path):
-            rmtree(ext_path)
+        ext_path = extension_finder.locate(ext_id)
+        if not extension_finder.is_user_extension(ext_path):
+            return
+
+        rmtree(ext_path)
         if ext_id in self.ext_db:
             del self.ext_db[ext_id]
             self.ext_db.save()
