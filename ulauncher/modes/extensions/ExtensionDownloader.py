@@ -34,9 +34,9 @@ class ExtensionDownloader:
         return remote.extension_id
 
     def remove(self, ext_id: str) -> None:
-        ext_dir = os.path.join(PATHS.USER_EXTENSIONS_DIR, ext_id)
-        if is_extension(ext_dir):
-            rmtree(ext_dir)
+        ext_path = os.path.join(PATHS.USER_EXTENSIONS_DIR, ext_id)
+        if is_extension(ext_path):
+            rmtree(ext_path)
         if ext_id in self.ext_db:
             del self.ext_db[ext_id]
             self.ext_db.save()

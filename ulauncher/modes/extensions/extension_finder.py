@@ -3,42 +3,47 @@ import os
 from ulauncher.config import PATHS
 
 
-def is_extension(directory):
+def is_extension(ext_path):
     """
     Tells whether the argument is an extension directory
     """
-    manifest = os.path.join(directory, "manifest.json")
-    manifest = os.path.realpath(manifest)
-    return os.path.isfile(manifest)
+    expected_files = [
+        "manifest.json",
+        "main.py",
+    ]
+    return all(os.path.isfile(os.path.join(ext_path, file)) for file in expected_files)
 
 
-def locate(ext_id, ext_dirs=PATHS.ALL_EXTENSIONS_DIRS):
+
+
+def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
     """
     Locates (an existing) extension directory.
     """
-    for ext_dir in ext_dirs:
-        ext_path = os.path.join(ext_dir, ext_id)
+    for exts_dir in exts_dirs:
+        ext_path = os.path.join(exts_dir, ext_id)
         if is_extension(ext_path):
             return os.path.realpath(ext_path)
     return None
 
 
-def get_mutable_dir(ext_id, mutable_ext_dir=PATHS.USER_EXTENSIONS_DIR):
+def get_user_dir(ext_id, user_ext_path=PATHS.USER_EXTENSIONS_DIR):
     """
     Returns path to writable extension directory
     """
-    return os.path.realpath(os.path.join(mutable_ext_dir, ext_id))
+    return os.path.realpath(os.path.join(user_ext_path, ext_id))
 
 
-def iterate(ext_dirs=PATHS.ALL_EXTENSIONS_DIRS, duplicates=False):
+def iterate(exts_dirs=PATHS.ALL_EXTENSIONS_DIRS, duplicates=False):
     """
     Yields `(extension_id, extension_path)` tuples found in a given extensions dirs
     """
     occurrences = set()
-    for ext_dir in ext_dirs:
-        if not os.path.exists(ext_dir):
+    for ext_path in exts_dirs:
+        if not os.path.exists(ext_path):
             continue
-        for entry in os.scandir(ext_dir):
-            if is_extension(entry.path) and (duplicates or entry.name not in occurrences):
-                occurrences.add(entry.name)
-                yield entry.name, os.path.realpath(entry.path)
+        for entry in os.scandir(ext_path):
+            ext_id = entry.name
+            if is_extension(entry.path) and (duplicates or ext_id not in occurrences):
+                occurrences.add(ext_id)
+                yield ext_id, os.path.realpath(entry.path)

@@ -81,7 +81,7 @@ class ExtensionRemote:
                 *self.path.split("/"),
             ]
         )
-        self._dir = extension_finder.get_mutable_dir(self.extension_id)
+        self._dir = extension_finder.get_user_dir(self.extension_id)
         self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.extension_id}.git"
 
     def _get_download_url(self, commit: str) -> str:
