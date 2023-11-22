@@ -198,7 +198,7 @@ class ExtensionRemote:
                     move(tmp_dir, self._dir)
             commit_timestamp = getmtime(self._dir)
 
-        ext_record = ExtensionRecord(
+        ext_record = ExtensionRecord.create(
             id=self.extension_id,
             last_commit=commit_hash,
             last_commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),

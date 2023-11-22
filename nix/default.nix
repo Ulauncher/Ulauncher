@@ -1,5 +1,6 @@
 # based off https://github.com/NixOS/nixpkgs/blob/e44462d6021bfe23dfb24b775cc7c390844f773d/pkgs/applications/misc/ulauncher/default.nix#L4-L4
 { lib
+, buildEnv
 , fetchFromGitHub
 , gdk-pixbuf
 , git
@@ -57,19 +58,21 @@ let
     --set-default ULAUNCHER_SYSTEM_PREFIX "$out"
   '';
 
-  preferencesPackages = [ yarn ];
-
-  testsPackages = pp: (with pp; [
+  packages.preferences.dev = [ yarn ];
+  packages.tests.python = pp: (with pp; [
     black
     mock
     pytest
     pytest-mock
-  ]) ++ [
+  ]);
+  packages.tests.system = [
     mypy
     ruff
     typos
     xvfb-run # xvfb-run tests fail
   ];
+
+  packages.tests.all = pp: packages.tests.python pp ++ packages.tests.system;
 
   self = python3Packages.buildPythonPackage {
     inherit version pname;
@@ -108,7 +111,7 @@ let
       xdg-utils
     ];
 
-    nativeCheckInputs = testsPackages python3Packages;
+    nativeCheckInputs = packages.tests.all python3Packages;
 
     patches = [
       # ./some.patch
@@ -169,20 +172,28 @@ let
     '';
 
     passthru = {
-      updateScript = nix-update-script { };
-      env = self.passthru.pythonModule.withPackages (pp:
-        [ self ]
-        ++ preferencesPackages
-        ++ testsPackages pp
-        ++ (with pp; [ ]
-        # debugging
-        ++ [ ipdb ]
-        # present in requirements.txt
-        ++ [ build ]
-        # Jetbrains IDEs don't like it without setuptools/pip installed
-        ++ [ setuptools pip ]
-        )
-      );
+      # won't be updateable until release
+      # updateScript = nix-update-script { };
+      env = buildEnv {
+        name = "${pname}-${version}-development";
+        paths = [
+          # python environment
+          (self.passthru.pythonModule.withPackages (pp:
+            [ self ]
+              ++ packages.tests.python pp
+              ++ (with pp; [ ]
+              # debugging
+              ++ [ ipdb ]
+              # present in requirements.txt
+              ++ [ build ]
+              # Jetbrains IDEs don't like it without setuptools/pip installed
+              ++ [ setuptools pip ]
+            )
+          ))
+        ]
+        ++ packages.preferences.dev
+        ++ packages.tests.system;
+      };
     };
 
     meta = with lib; {
