@@ -174,10 +174,14 @@ let
         [ self ]
         ++ preferencesPackages
         ++ testsPackages pp
+        ++ (with pp; [ ]
         # debugging
-        ++ (with pp; [ ipdb ])
+        ++ [ ipdb ]
+        # present in requirements.txt
+        ++ [ build ]
         # Jetbrains IDEs don't like it without setuptools/pip installed
-        ++ (with pp; [ setuptools pip ])
+        ++ [ setuptools pip ]
+        )
       );
     };
 
