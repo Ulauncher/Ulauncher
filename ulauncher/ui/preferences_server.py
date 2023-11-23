@@ -27,6 +27,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
+import contextlib
 
 logger = logging.getLogger()
 routes = {}
@@ -311,13 +312,13 @@ class PreferencesServer:
     def extension_remove(self, extension_id):
         logger.info("Remove extension: %s", extension_id)
         runner = ExtensionRunner.get_instance()
+        was_running = runner.is_running(extension_id)
         runner.stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
-        try:
-            extension_finder.locate(extension_id)
-        except extension_finder.ExtensionNotFound:
-            return
-        runner.run(extension_id)
+        # if the extension was running, try to start it again (in case it is installed in a different location)
+        if was_running:
+            with contextlib.suppress(extension_finder.ExtensionNotFound):
+                runner.run(extension_id)
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, extension_id, is_enabled):
