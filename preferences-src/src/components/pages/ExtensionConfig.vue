@@ -33,7 +33,7 @@
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
           <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
-          <b-dropdown-item @click="openRemoveModal" :disabled="canRemove">Remove</b-dropdown-item>
+          <b-dropdown-item @click="openRemoveModal" :disabled="!canRemove">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
           <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
@@ -191,7 +191,7 @@ export default {
       return Boolean(Object.keys(triggers).length || Object.keys(preferences).length)
     },
     canRemove() {
-      return !!this.$props.extension.is_preinstalled
+      return !this.$props.extension.is_preinstalled
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
