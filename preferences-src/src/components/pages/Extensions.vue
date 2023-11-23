@@ -35,7 +35,7 @@
             ['fa-spin']: reloading
           }"
           ></i>
-          <span>Reload the list</span>
+          <span>Reload extensions</span>
         </li>
         <li class="link" @click="openUrlInBrowser('https://ext.ulauncher.io')">
           <i class="fa fa-external-link"></i>
@@ -135,8 +135,8 @@ export default {
     }
   },
   methods: {
-    fetchData() {
-      fetchData('prefs:///extension/get-all').then(
+    fetchData(reload = false) {
+      fetchData('prefs:///extension/get-all', reload).then(
         data => {
           this.extensions = data
           this.activeExt = data[0]
@@ -156,7 +156,7 @@ export default {
     },
     reload() {
       this.reloading = true
-      this.fetchData()
+      this.fetchData(true)
     },
     openUrlInBrowser(url) {
       fetchData('prefs:///open/web-url', url)

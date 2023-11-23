@@ -40,7 +40,7 @@ def route(path: str):
     return decorator
 
 
-def get_extensions():
+def get_extensions(start_extensions=False):
     ext_runner = ExtensionRunner.get_instance()
     ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
@@ -48,7 +48,7 @@ def get_extensions():
         try:
             manifest = ExtensionManifest.load_from_extension_id(ext_id)
             ext_record = ext_db.get_registered(ext_id)
-            if ext_record.is_enabled:
+            if start_extensions and ext_record.is_enabled:
                 ExtensionRunner.get_instance().run(ext_id)
             else:
                 manifest.validate()
@@ -265,9 +265,9 @@ class PreferencesServer:
         shortcuts.save()
 
     @route("/extension/get-all")
-    def extension_get_all(self):
+    def extension_get_all(self, reload: bool):
         logger.info("Handling /extension/get-all")
-        return list(get_extensions())
+        return list(get_extensions(reload))
 
     @route("/extension/add")
     def extension_add(self, url):
