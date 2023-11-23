@@ -15,14 +15,12 @@ SYSTEM_PREFIX = os.environ.get("ULAUNCHER_SYSTEM_PREFIX", sys.prefix)
 # ULAUNCHER_SYSTEM_DATA_DIR is used when running in dev mode from source and during tests
 SYSTEM_DATA_DIR = os.path.abspath(os.environ.get("ULAUNCHER_SYSTEM_DATA_DIR", f"{SYSTEM_PREFIX}/share/ulauncher"))
 HOME = os.path.expanduser("~")
+XDG_DATA_DIRS = os.environ.get("XDG_DATA_DIRS", f"/usr/local/share/{os.path.pathsep}/usr/share/").split(os.path.pathsep)
 USER_CONFIG_DIR = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
 USER_DATA_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 USER_STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
 USER_EXTENSIONS_DIR = os.path.join(USER_DATA_DIR, "extensions")
-PREINSTALLED_EXTENSIONS_DIRS = [
-    os.path.join(p, "ulauncher", "extensions") for p in os.environ.get("XDG_DATA_DIRS", "").split(os.path.pathsep)
-]
-ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS_DIR, *PREINSTALLED_EXTENSIONS_DIRS]
+ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS_DIR, *[os.path.join(p, "ulauncher", "extensions") for p in XDG_DATA_DIRS]]
 EXTENSIONS_CONFIG_DIR = os.path.join(USER_CONFIG_DIR, "ext_preferences")
 USER_THEMES = os.path.join(USER_CONFIG_DIR, "user-themes")
 SYSTEM_THEMES = os.path.join(SYSTEM_DATA_DIR, "themes")
@@ -38,7 +36,6 @@ class _PATHS_CLASS:
     DATA = USER_DATA_DIR
     STATE = USER_STATE_DIR
     USER_EXTENSIONS_DIR = USER_EXTENSIONS_DIR
-    PREINSTALLED_EXTENSIONS_DIRS = PREINSTALLED_EXTENSIONS_DIRS
     ALL_EXTENSIONS_DIRS = ALL_EXTENSIONS_DIRS
     EXTENSIONS_CONFIG = EXTENSIONS_CONFIG_DIR
     USER_THEMES = USER_THEMES
