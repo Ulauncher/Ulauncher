@@ -8,8 +8,8 @@
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
         <div class="notes">
-          <span v-if="extension.is_managable">user installed,</span>
-          <span v-if="!extension.is_managable">externally managed,</span>
+          <span v-if="extension.is_manageable">user installed,</span>
+          <span v-if="!extension.is_manageable">externally managed,</span>
           <a class="text-muted" href @click.prevent
              v-clipboard:copy="extension.path"
              v-b-tooltip.hover="'click to copy:\n\n' + extension.path">see path</a>
@@ -29,11 +29,11 @@
           split
           class="m-2 menu-button"
           @click="onDropdownClick"
-          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || (isManagable && 'Remove')"
+          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || (isManageable && 'Remove')"
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
           <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
-          <b-dropdown-item @click="openRemoveModal" :disabled="!isManagable">Remove</b-dropdown-item>
+          <b-dropdown-item @click="openRemoveModal" :disabled="!isManageable">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
           <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
@@ -190,8 +190,8 @@ export default {
       const { preferences, triggers } = this.$props.extension
       return Boolean(Object.keys(triggers).length || Object.keys(preferences).length)
     },
-    isManagable() {
-      return this.$props.extension.is_managable
+    isManageable() {
+      return this.$props.extension.is_manageable
     },
     canCheckUpdates() {
       return !!this.$props.extension.url

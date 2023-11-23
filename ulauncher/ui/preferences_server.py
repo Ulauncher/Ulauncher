@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import mimetypes
@@ -27,7 +28,6 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
-import contextlib
 
 logger = logging.getLogger()
 routes = {}
@@ -73,7 +73,7 @@ def get_extensions(start_extensions=False):
             "preferences": manifest.preferences,
             "triggers": manifest.triggers,
             "error": error,
-            "is_managable": extension_finder.is_managable(ext_path),
+            "is_manageable": extension_finder.is_manageable(ext_path),
             "is_running": is_running,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
