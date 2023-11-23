@@ -33,7 +33,7 @@ class ExtensionDownloader:
 
     def remove(self, ext_id: str) -> None:
         ext_path = extension_finder.locate(ext_id)
-        if not extension_finder.is_user_extension(ext_path):
+        if not extension_finder.is_managable(ext_path):
             return
 
         rmtree(ext_path)

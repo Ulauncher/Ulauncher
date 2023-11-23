@@ -73,7 +73,7 @@ def get_extensions(start_extensions=False):
             "preferences": manifest.preferences,
             "triggers": manifest.triggers,
             "error": error,
-            "is_preinstalled": not extension_finder.is_user_extension(ext_path),
+            "is_managable": extension_finder.is_managable(ext_path),
             "is_running": is_running,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
