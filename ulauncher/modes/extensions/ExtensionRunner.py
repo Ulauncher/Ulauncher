@@ -49,7 +49,7 @@ class ExtensionRunner:
 
     def run_all(self):
         """
-        Finds all extensions in `PATHS.EXTENSIONS`/`PATHS.EXTENSIONS_ALL` and runs them
+        Finds all extensions in `PATHS.ALL_EXTENSIONS_DIRS` and runs them
         """
         for ext_id, _ in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
             ext_record = ext_db.get_registered(ext_id)
