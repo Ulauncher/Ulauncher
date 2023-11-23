@@ -44,15 +44,15 @@ def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
     ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
-        ext_record = ext_db.get_registered(ext_id)
-        if ext_record.is_enabled:
-            ExtensionRunner.get_instance().run(ext_id)
-
-        manifest = ExtensionManifest.load_from_extension_id(ext_id)
         error = None
         try:
-            manifest.validate()
-            manifest.check_compatibility()
+            manifest = ExtensionManifest.load_from_extension_id(ext_id)
+            ext_record = ext_db.get_registered(ext_id)
+            if ext_record.is_enabled:
+                ExtensionRunner.get_instance().run(ext_id)
+            else:
+                manifest.validate()
+                manifest.check_compatibility()
         except Exception as e:
             error = {"message": str(e), "errorName": type(e).__name__}
 
