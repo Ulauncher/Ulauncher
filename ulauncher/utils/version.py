@@ -5,13 +5,14 @@
 # There is no support for "*", "||", comparison operators like ">=", "!=", or the pre-release annotation
 
 
-def get_version(version_string):
-    sanitized = version_string.translate(str.maketrans({"^": "", "~": "", "x": ""}))
-    major, minor, *_ = sanitized.split(".") + [None]  # noqa: RUF005
-    return (int(major), int(minor) if minor else None)
+def get_version(version_string: str):
+    t_table = str.maketrans({"^": "", "~": "", "x": ""})
+    sanitized = version_string.translate(t_table)
+    parts = [int(x) for x in sanitized.split(".")]
+    return (parts[0], parts[1])
 
 
-def unpack_range(range_string):
+def unpack_range(range_string: str):
     if " - " in range_string:
         [min_version, max_version] = map(get_version, range_string.split(" - "))
     else:
@@ -20,7 +21,7 @@ def unpack_range(range_string):
     return min_version, max_version
 
 
-def valid_range(rng):
+def valid_range(rng: str):
     try:
         (min_version, max_version) = unpack_range(rng)
     except (ValueError, TypeError):
@@ -30,7 +31,7 @@ def valid_range(rng):
     return min_version <= max_version
 
 
-def satisfies(version_string, expected_range):
+def satisfies(version_string: str, expected_range: str):
     if not valid_range(expected_range):
         return False
     version = get_version(version_string)
