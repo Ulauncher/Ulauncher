@@ -52,7 +52,7 @@ class ExtensionDownloader:
             return False
         ext = self._find_extension(ext_id)
 
-        logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.last_commit[:8], commit_hash[:8])
+        logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.commit_hash[:8], commit_hash[:8])
 
         remote = ExtensionRemote(ext.url)
         remote.download(commit_hash, warn_if_overwrite=False)
@@ -64,7 +64,7 @@ class ExtensionDownloader:
         """
         ext = self._find_extension(ext_id)
         commit_hash = ExtensionRemote(ext.url).get_compatible_hash()
-        has_update = ext.last_commit != commit_hash
+        has_update = ext.commit_hash != commit_hash
         return has_update, commit_hash
 
     def _find_extension(self, ext_id: str) -> ExtensionRecord:

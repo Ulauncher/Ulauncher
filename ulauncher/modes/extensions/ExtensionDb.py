@@ -10,9 +10,16 @@ class ExtensionRecord(JsonConf):
     id = ""
     url = ""
     updated_at = ""
-    last_commit = ""
-    last_commit_time = ""
+    commit_hash = ""
+    commit_time = ""
     is_enabled = True
+
+    def __setitem__(self, key, value):
+        if key == "last_commit":
+            key = "commit_hash"
+        if key == "last_commit_time":
+            key = "commit_time"
+        super().__setitem__(key, value)
 
     @classmethod
     def create(cls, id, **kwargs):

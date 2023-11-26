@@ -37,14 +37,14 @@
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
           <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
-          <b-dropdown-divider v-if="extension.url && extension.last_commit" />
-          <b-dropdown-item disabled v-if="extension.last_commit">
+          <b-dropdown-divider v-if="extension.url && extension.commit_hash" />
+          <b-dropdown-item disabled v-if="extension.commit_hash">
             <i class="fa fa-calendar fa-fw"></i>
             {{ extension.updated_at.slice(0, 10) }}
           </b-dropdown-item>
-          <b-dropdown-item disabled v-if="extension.last_commit">
+          <b-dropdown-item disabled v-if="extension.commit_hash">
             <i class="fa fa-code-fork fa-fw"></i>
-            <span class="text-monospace">{{ extension.last_commit.slice(0, 7) }}</span>
+            <span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span>
           </b-dropdown-item>
         </b-dropdown>
       </div>

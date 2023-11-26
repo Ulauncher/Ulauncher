@@ -199,8 +199,8 @@ class ExtensionRemote:
 
         ext_record = ExtensionRecord.create(
             id=self.extension_id,
-            last_commit=commit_hash,
-            last_commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+            commit_hash=commit_hash,
+            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
             updated_at=datetime.now().isoformat(),
             url=self.url,
         )
