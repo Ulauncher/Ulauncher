@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import signal
@@ -39,12 +41,12 @@ class ExtensionRuntimeError(Enum):
 class ExtensionRunner:
     @classmethod
     @lru_cache(maxsize=None)
-    def get_instance(cls) -> "ExtensionRunner":
+    def get_instance(cls) -> ExtensionRunner:
         return cls()
 
     def __init__(self):
         self.extension_errors = {}
-        self.extension_procs = {}
+        self.extension_procs: dict[str, ExtensionProc] = {}
         self.verbose = get_options().verbose
 
     def run_all(self):
@@ -59,7 +61,7 @@ class ExtensionRunner:
                 except Exception:
                     logger.exception("Couldn't start extension '%s'", ext_id)
 
-    def run(self, extension_id):
+    def run(self, extension_id: str):
         """
         * Validates manifest
         * Runs extension in a new process
@@ -88,7 +90,11 @@ class ExtensionRunner:
 
             t_start = time()
             subproc = launcher.spawnv(cmd)
-            error_line_str = Gio.DataInputStream.new(subproc.get_stderr_pipe())
+            error_input_stream = subproc.get_stderr_pipe()
+            if not error_input_stream:
+                err_msg = "Subprocess must be created with Gio.SubprocessFlags.STDERR_PIPE"
+                raise AssertionError(err_msg)
+            error_line_str = Gio.DataInputStream.new(error_input_stream)
             self.extension_procs[extension_id] = ExtensionProc(
                 extension_id=extension_id,
                 subprocess=subproc,
@@ -101,10 +107,10 @@ class ExtensionRunner:
             subproc.wait_async(None, self.handle_wait, extension_id)
             self.read_stderr_line(self.extension_procs[extension_id])
 
-    def read_stderr_line(self, extproc):
+    def read_stderr_line(self, extproc: ExtensionProc):
         extproc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, extproc.extension_id)
 
-    def handle_stderr(self, error_stream, result, extension_id):
+    def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult, extension_id: str):
         output, _ = error_stream.read_line_finish_utf8(result)
         if output:
             print(output)  # noqa: T201
@@ -116,7 +122,7 @@ class ExtensionRunner:
             extproc.recent_errors.append(output)
         self.read_stderr_line(extproc)
 
-    def handle_wait(self, subprocess, result, extension_id):
+    def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, extension_id: str):
         subprocess.wait_finish(result)
         if subprocess.get_if_signaled():
             code = subprocess.get_term_sig()
@@ -161,7 +167,7 @@ class ExtensionRunner:
         self.extension_procs.pop(extension_id, None)
         self.run(extension_id)
 
-    def stop(self, extension_id):
+    def stop(self, extension_id: str):
         """
         Terminates extension
         """
@@ -174,7 +180,7 @@ class ExtensionRunner:
 
             timer(0.5, partial(self.confirm_termination, extproc))
 
-    def confirm_termination(self, extproc):
+    def confirm_termination(self, extproc: ExtensionProc):
         if extproc.subprocess.get_identifier():
             logger.info("Extension %s still running, sending SIGKILL", extproc.extension_id)
             # It is possible that the process exited between the check above and this signal,
