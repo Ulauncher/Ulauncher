@@ -22,8 +22,8 @@ class TestExtensionManifest:
         }
 
     def test_open__manifest_file__is_read(self):
-        ext_dir = os.path.dirname(os.path.abspath(__file__))
-        manifest = ExtensionManifest.load(f"{ext_dir}/test_extension/manifest.json")
+        ext_path = os.path.dirname(os.path.abspath(__file__))
+        manifest = ExtensionManifest.load(f"{ext_path}/test_extension/manifest.json")
         assert manifest.name == "Test Extension"
 
     def test_validate__name_empty__exception_raised(self):

@@ -7,6 +7,18 @@
       <div class="ext-info">
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
+        <div class="notes">
+          <span v-if="extension.is_manageable">user installed,</span>
+          <span v-if="!extension.is_manageable">externally managed,</span>
+          <a class="text-muted" href @click.prevent
+             v-clipboard:copy="extension.path"
+             v-b-tooltip.hover="'click to copy:\n\n' + extension.path">see path</a>
+        </div>
+        <div class="notes" v-if="extension.duplicate_paths.length > 0">
+          duplicates found,
+          <a class="text-muted" href @click.prevent
+             v-b-tooltip.hover="extension.duplicate_paths.map((p) => `- ${p}`).join('\n')">see paths</a>
+        </div>
       </div>
       <div class="saved-notif">
         <i v-if="showSavedMsg" class="fa fa-check-circle"/>
@@ -17,14 +29,15 @@
           split
           class="m-2 menu-button"
           @click="onDropdownClick"
-          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || 'Remove'"
+          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || (isManageable && 'Remove')"
         >
           <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
           <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
-          <b-dropdown-item @click="openRemoveModal">Remove</b-dropdown-item>
+          <b-dropdown-item @click="openRemoveModal" :disabled="!isManageable">Remove</b-dropdown-item>
           <b-dropdown-divider v-if="extension.url"/>
           <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
           <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
+          <b-dropdown-divider v-if="extension.url && extension.last_commit" />
           <b-dropdown-item disabled v-if="extension.last_commit">
             <i class="fa fa-calendar fa-fw"></i>
             {{ extension.updated_at.slice(0, 10) }}
@@ -177,6 +190,9 @@ export default {
       const { preferences, triggers } = this.$props.extension
       return Boolean(Object.keys(triggers).length || Object.keys(preferences).length)
     },
+    isManageable() {
+      return this.$props.extension.is_manageable
+    },
     canCheckUpdates() {
       return !!this.$props.extension.url
     },
@@ -266,6 +282,7 @@ export default {
       fetchData('prefs:///extension/remove', this.extension.id).then(
         () => {
           this.$emit('removed', this.extension.id)
+          bus.$emit('extension/get-all')
         },
         err => {
           bus.$emit('error', err)
@@ -341,6 +358,11 @@ export default {
       font-size: 1.3em;
 }
 .header-info .ext-info .authors {
+      font-style: italic;
+      opacity: 0.8;
+}
+.header-info .ext-info .notes {
+      font-size: smaller;
       font-style: italic;
       opacity: 0.8;
 }

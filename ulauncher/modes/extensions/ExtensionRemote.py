@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
 
 from ulauncher.config import API_VERSION, PATHS
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionIncompatibleWarning, ExtensionManifest
 from ulauncher.utils.untar import untar
@@ -80,8 +81,8 @@ class ExtensionRemote:
                 *self.path.split("/"),
             ]
         )
-        self._dir = f"{PATHS.EXTENSIONS}/{self.extension_id}"
-        self._git_dir = f"{PATHS.EXTENSIONS}/.git/{self.extension_id}.git"
+        self._dir = extension_finder.get_user_dir(self.extension_id)
+        self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.extension_id}.git"
 
     def _get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":
@@ -197,7 +198,7 @@ class ExtensionRemote:
                     move(tmp_dir, self._dir)
             commit_timestamp = getmtime(self._dir)
 
-        ext_record = ExtensionRecord(
+        ext_record = ExtensionRecord.create(
             id=self.extension_id,
             last_commit=commit_hash,
             last_commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),

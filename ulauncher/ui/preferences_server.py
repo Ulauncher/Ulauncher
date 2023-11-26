@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import mimetypes
@@ -10,7 +11,7 @@ from urllib.parse import unquote, urlparse
 from gi.repository import Gio, Gtk
 
 from ulauncher.config import API_VERSION, PATHS, VERSION
-from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -40,24 +41,31 @@ def route(path: str):
     return decorator
 
 
-def get_extensions():
+def get_extensions(start_extensions=False):
     ext_runner = ExtensionRunner.get_instance()
-    for ext_id, _ in find_extensions(PATHS.EXTENSIONS):
-        manifest = ExtensionManifest.load_from_extension_id(ext_id)
+    ext_db = ExtensionDb.load()
+    for ext_id, ext_path in extension_finder.iterate():
         error = None
         try:
-            manifest.validate()
-            manifest.check_compatibility()
+            manifest = ExtensionManifest.load_from_extension_id(ext_id)
+            ext_record = ext_db.get_registered(ext_id)
+            if start_extensions and ext_record.is_enabled:
+                ExtensionRunner.get_instance().run(ext_id)
+            else:
+                manifest.validate()
+                manifest.check_compatibility()
         except Exception as e:
             error = {"message": str(e), "errorName": type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
-        icon = get_icon_path(manifest.icon, base_path=f"{PATHS.EXTENSIONS}/{ext_id}")
+        icon = get_icon_path(manifest.icon, base_path=ext_path)
 
         yield {
-            **ExtensionDb.load().get(ext_id, {}),
+            **ext_record,
             "id": ext_id,
+            "path": ext_path,
+            "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
             "name": manifest.name,
             "icon": icon,
             "authors": manifest.authors,
@@ -65,6 +73,7 @@ def get_extensions():
             "preferences": manifest.preferences,
             "triggers": manifest.triggers,
             "error": error,
+            "is_manageable": extension_finder.is_manageable(ext_path),
             "is_running": is_running,
             "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
@@ -229,8 +238,8 @@ class PreferencesServer:
 
     @route("/open/extensions-dir")
     def open_extensions_dir(self):
-        logger.info('Open extensions directory "%s" in default file manager.', PATHS.EXTENSIONS)
-        open_detached(PATHS.EXTENSIONS)
+        logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS_DIR)
+        open_detached(PATHS.USER_EXTENSIONS_DIR)
 
     @route("/shortcut/get-all")
     def shortcut_get_all(self):
@@ -257,16 +266,18 @@ class PreferencesServer:
         shortcuts.save()
 
     @route("/extension/get-all")
-    def extension_get_all(self):
+    def extension_get_all(self, reload: bool):
         logger.info("Handling /extension/get-all")
-        return list(get_extensions())
+        return list(get_extensions(reload))
 
     @route("/extension/add")
     def extension_add(self, url):
         logger.info("Add extension: %s", url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
-        ExtensionRunner.get_instance().run(ext_id)
+        runner = ExtensionRunner.get_instance()
+        runner.stop(ext_id)
+        runner.run(ext_id)
         # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
         # to avoid race condition and needless waiting
         time.sleep(1)
@@ -300,8 +311,14 @@ class PreferencesServer:
     @route("/extension/remove")
     def extension_remove(self, extension_id):
         logger.info("Remove extension: %s", extension_id)
-        ExtensionRunner.get_instance().stop(extension_id)
+        runner = ExtensionRunner.get_instance()
+        was_running = runner.is_running(extension_id)
+        runner.stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
+        # if the extension was running, try to start it again (in case it is installed in a different location)
+        if was_running:
+            with contextlib.suppress(extension_finder.ExtensionNotFound):
+                runner.run(extension_id)
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, extension_id, is_enabled):

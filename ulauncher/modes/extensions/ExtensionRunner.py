@@ -11,7 +11,7 @@ from typing import NamedTuple
 from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
-from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
@@ -49,15 +49,15 @@ class ExtensionRunner:
 
     def run_all(self):
         """
-        Finds all extensions in `PATHS.EXTENSIONS` and runs them
+        Finds all extensions in `PATHS.ALL_EXTENSIONS_DIRS` and runs them
         """
-        for ex_id, _ in find_extensions(PATHS.EXTENSIONS):
-            ext_record = ext_db.get(ex_id)
-            if not ext_record or ext_record.is_enabled:
+        for ext_id, _ in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
+            ext_record = ext_db.get_registered(ext_id)
+            if ext_record.is_enabled:
                 try:
-                    self.run(ex_id)
+                    self.run(ext_id)
                 except Exception:
-                    logger.exception("Couldn't start extension '%s'", ex_id)
+                    logger.exception("Couldn't start extension '%s'", ext_id)
 
     def run(self, extension_id):
         """
@@ -71,14 +71,14 @@ class ExtensionRunner:
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
-            extension_path = f"{PATHS.EXTENSIONS}/{extension_id}"
+            ext_path = extension_finder.locate(extension_id)
 
-            cmd = [sys.executable, f"{extension_path}/main.py"]
+            cmd = [sys.executable, f"{ext_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
                 "PYTHONPATH": PATHS.APPLICATION,
                 "EXTENSION_ICON": manifest.icon,
-                "EXTENSION_PATH": extension_path,
+                "EXTENSION_PATH": ext_path,
                 "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(",", ":")),
             }
 

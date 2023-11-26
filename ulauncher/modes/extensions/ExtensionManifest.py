@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from ulauncher.config import API_VERSION, PATHS
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
@@ -190,6 +192,7 @@ class ExtensionManifest(JsonConf):
 
     @classmethod
     def load_from_extension_id(cls, ext_id: str):
-        manifest = super().load(f"{PATHS.EXTENSIONS}/{ext_id}/manifest.json")
+        ext_path = extension_finder.locate(ext_id, check=True)
+        manifest = super().load(os.path.join(ext_path, "manifest.json"))
         manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
         return manifest
