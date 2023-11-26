@@ -48,7 +48,7 @@ def get_extensions(start_extensions=False):
         error = None
         try:
             manifest = ExtensionManifest.load_from_extension_id(ext_id)
-            ext_record = ext_db.get_registered(ext_id)
+            ext_record = ext_db.get_record(ext_id)
             if start_extensions and ext_record.is_enabled:
                 ExtensionRunner.get_instance().run(ext_id)
             else:
