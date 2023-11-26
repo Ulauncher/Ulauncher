@@ -8,7 +8,7 @@
 def get_version(version_string: str):
     t_table = str.maketrans({"^": "", "~": "", "x": ""})
     sanitized = version_string.translate(t_table)
-    parts = [int(x) for x in sanitized.split(".")]
+    parts = [int(x) if x else None for x in sanitized.split(".")] + [None]
     return (parts[0], parts[1])
 
 
