@@ -53,15 +53,15 @@ class ExtensionRunner:
         """
         Finds all extensions in `PATHS.ALL_EXTENSIONS_DIRS` and runs them
         """
-        for ext_id, _ in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
+        for ext_id, ext_path in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
             ext_record = ext_db.get_record(ext_id)
             if ext_record.is_enabled:
                 try:
-                    self.run(ext_id)
+                    self.run(ext_id, ext_path)
                 except Exception:
                     logger.exception("Couldn't start extension '%s'", ext_id)
 
-    def run(self, extension_id: str):
+    def run(self, extension_id: str, ext_path: str | None = None):
         """
         * Validates manifest
         * Runs extension in a new process
@@ -73,8 +73,8 @@ class ExtensionRunner:
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
-            ext_path = extension_finder.locate(extension_id)
-
+            if not ext_path:
+                ext_path = extension_finder.locate(extension_id)
             cmd = [sys.executable, f"{ext_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),

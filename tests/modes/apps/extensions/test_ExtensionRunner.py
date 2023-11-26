@@ -59,9 +59,9 @@ class TestExtensionRunner:
         mocker.patch.object(runner, "run")
         extensions_iterate.return_value = iter([("id_1", "path_1"), ("id_2", "path_2"), ("id_3", "path_3")])
         runner.run_all()
-        runner.run.assert_any_call("id_1")
-        runner.run.assert_any_call("id_2")
-        runner.run.assert_any_call("id_3")
+        runner.run.assert_any_call("id_1", "path_1")
+        runner.run.assert_any_call("id_2", "path_2")
+        runner.run.assert_any_call("id_3", "path_3")
 
     def test_set_extension_error(self, runner):
         runner.set_extension_error("id_1", ExtensionRuntimeError.Terminated, "message")
