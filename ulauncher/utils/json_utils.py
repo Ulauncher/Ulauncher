@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -22,15 +24,18 @@ def _filter_recursive(data, blacklist):
 
 
 def json_load(path: str | Path) -> dict:
-    data = {}
     file_path = Path(path).resolve()
     if file_path.is_file():
         try:
-            data = json.loads(file_path.read_text(), object_hook=sanitize_json)
+            data = file_path.read_text()
+            if data.strip():
+                return json.loads(data, object_hook=sanitize_json)
         except Exception:
+            backup_path = f"{file_path}.{datetime.now().isoformat()}.backup"
             logger.exception('Error opening JSON file "%s"', file_path)
-            logger.warning('Ignoring invalid JSON file "%s"', file_path)
-    return data
+            logger.warning('Moving invalid JSON file to "%s"', backup_path)
+            shutil.move(str(file_path), backup_path)
+    return {}
 
 
 def json_stringify(data, indent=None, sort_keys=True, value_blacklist: list[Any] | None = None) -> str:
