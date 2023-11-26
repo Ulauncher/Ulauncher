@@ -50,7 +50,7 @@ def get_themes():
     """
     Gets a dict with the theme name as the key and theme as the value
     """
-    themes = {}
+    themes: dict[str, Theme] = {}
 
     css_theme_paths = [
         *Path(PATHS.SYSTEM_THEMES).glob("*.css"),

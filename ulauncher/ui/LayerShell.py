@@ -32,7 +32,7 @@ class LayerShellOverlay(Gtk.Window):
         self._use_layer_shell = False
 
     def enable_layer_shell(self):
-        assert __class__.is_supported(), "Should be supported to enable"
+        assert self.__class__.is_supported(), "Should be supported to enable"
         self._use_layer_shell = True
 
         GtkLayerShell.init_for_window(self)

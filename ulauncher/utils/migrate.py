@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -60,7 +62,7 @@ def _migrate_user_prefs(extension_id, user_prefs):
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
-    new_prefs = {"preferences": {}, "triggers": {}}
+    new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
     ext_path = extension_finder.locate(extension_id)
     manifest = ExtensionManifest.load(os.path.join(ext_path, "manifest.json"))
     for id, pref in user_prefs.items():
@@ -88,7 +90,7 @@ def v5_to_v6():
     # Convert query_history.db to JSON and put in STATE_DIR
     # Needs a module hack for pickle because v5 stored these as the "ulauncher.search.Query" type
     MockQuery = ModuleType("Query")
-    MockQuery.Query = str
+    MockQuery.Query = str  # type: ignore[attr-defined]
     sys.modules["ulauncher.search.Query"] = MockQuery
     _migrate_file(f"{PATHS.DATA}/query_history.db", f"{PATHS.STATE}/query_history.json")
     del sys.modules["ulauncher.search.Query"]  # <-- Don't want this hack to remain in the runtime afterwards

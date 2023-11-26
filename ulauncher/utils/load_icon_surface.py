@@ -24,6 +24,7 @@ def load_icon_surface(icon, size, scaling_factor=1):
     try:
         icon_path = get_icon_path(icon, real_size) or DEFAULT_EXE_ICON
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, real_size, real_size)
+        assert pixbuf
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
     except Exception as e:
         if icon_path == DEFAULT_EXE_ICON:

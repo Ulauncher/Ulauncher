@@ -121,7 +121,8 @@ class ExtensionManifest(JsonConf):
                 if p.type == "checkbox" and default:
                     assert isinstance(default, bool), f'"{id}" "default_value" must be a boolean'
                 if p.type == "number":
-                    assert not default or isinstance(default, int), f'"{id}" default_value must be a non-decimal number'
+                    assert isinstance(default, int), f'"{id}" default_value must be a non-decimal number'
+                    assert not isinstance(default, bool), f'"{id}" default_value must be a non-decimal number'
                     assert not p.min or isinstance(
                         p.min, int
                     ), f'"{id}" "min" value must be non-decimal number if specified'

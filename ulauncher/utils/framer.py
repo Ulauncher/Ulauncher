@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from collections import deque
@@ -38,9 +40,9 @@ class JSONFramer(GObject.GObject):
 
     def __init__(self):
         GObject.GObject.__init__(self)
-        self._conn = None
+        self._conn: Gio.SocketConnection | None = None
         self._canceller = Gio.Cancellable.new()
-        self._inbound = None
+        self._inbound: bytes | None = None
         self._outbound = deque()
         self._inprogress = None
         self._partial_reads = 0
@@ -52,13 +54,11 @@ class JSONFramer(GObject.GObject):
         self._conn = conn
         self._read_data()
 
-    def is_closing(self):
-        # The only async action that happens on the connection level (vs the individual in/out
-        # streams) is close, so use the existing flag to detect if close is in progress.
-        return self._conn.has_pending()
-
     def close(self):
-        if self.is_closing():
+        assert self._conn
+        if self._conn.has_pending():
+            # The only async action that happens on the connection level (vs the individual in/out
+            # streams) is close, so use the existing flag to detect if close is in progress.
             log.debug("Connection %s already closing", self)
         elif self._conn.get_input_stream().has_pending() or self._conn.get_output_stream().has_pending():
             self._canceller.cancel()
@@ -73,6 +73,7 @@ class JSONFramer(GObject.GObject):
         self._write_next()
 
     def _close_ready(self, _source, result, _user):
+        assert self._conn
         ret = self._conn.close_finish(result)
         if ret:
             log.debug("Connection (%s) closed", self)
@@ -81,16 +82,20 @@ class JSONFramer(GObject.GObject):
         self.emit("closed")
 
     def _read_data(self):
+        assert self._conn
         self._conn.get_input_stream().read_bytes_async(
             self.READ_SIZE, GLib.PRIORITY_DEFAULT, self._canceller, self._read_ready, None
         )
 
     def _read_ready(self, _source, result, _user):
+        assert self._conn
         bytesbuf = self._conn.get_input_stream().read_bytes_finish(result)
         if not bytesbuf or bytesbuf.get_size() == 0:
             self.close()
             return
-        self._ingest_data(bytesbuf.get_data())
+        _bytes = bytesbuf.get_data()
+        assert _bytes
+        self._ingest_data(_bytes)
         self._read_data()
 
     def _ingest_data(self, data: bytes):
@@ -129,11 +134,13 @@ class JSONFramer(GObject.GObject):
             return
 
         self._inprogress = self._outbound.popleft()
+        assert self._conn
         self._conn.get_output_stream().write_all_async(
             self._inprogress, GLib.PRIORITY_DEFAULT, self._canceller, self._write_done, None
         )
 
     def _write_done(self, _source, result, _user):
+        assert self._conn
         done, written = self._conn.get_output_stream().write_all_finish(result)
         if not done and self._canceller.is_cancelled():
             log.debug("Write canceled, closing connection.")

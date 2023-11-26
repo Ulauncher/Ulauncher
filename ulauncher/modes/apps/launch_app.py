@@ -17,8 +17,11 @@ def launch_app(desktop_entry_name):
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
     app = Gio.DesktopAppInfo.new(desktop_entry_name)
+    assert app
+    app_exec = app.get_commandline()
+    assert app_exec
     # strip field codes %f, %F, %u, %U, etc
-    app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app.get_commandline()).strip()
+    app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
     app_wm_id = (app.get_string("StartupWMClass") or Path(app_exec).name).lower()
     if app_exec and IS_X11 and (settings.raise_if_started or app.get_boolean("SingleMainWindow")):
         for win in get_windows_stacked():

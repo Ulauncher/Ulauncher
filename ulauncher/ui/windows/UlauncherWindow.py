@@ -16,7 +16,7 @@ from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.LayerShell import LayerShellOverlay
 
 # these imports are needed for Gtk to find widget classes
-from ulauncher.ui.ResultWidget import ResultWidget  # noqa: F401
+from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
@@ -86,7 +86,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             skip_taskbar_hint=True,
             title="Ulauncher - Application Launcher",
             urgency_hint=True,
-            window_position="center",
+            window_position=Gtk.WindowPosition.CENTER,
             **kwargs,
         )
 
@@ -98,7 +98,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.window_frame = Gtk.Box()
         self.add(self.window_frame)
 
-        window_container = Gtk.Box(app_paintable=True, orientation="vertical")
+        window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
         self.window_frame.pack_start(window_container, True, True, 0)
 
         event_box = Gtk.EventBox()
@@ -123,8 +123,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             width_request=24,
             height_request=24,
             receives_default=False,
-            halign="center",
-            valign="center",
+            halign=Gtk.Align.CENTER,
+            valign=Gtk.Align.CENTER,
             margin_end=15,
         )
 
@@ -134,11 +134,11 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.scroll_container = Gtk.ScrolledWindow(
             can_focus=True,
             max_content_height=500,
-            hscrollbar_policy="never",
+            hscrollbar_policy=Gtk.PolicyType.NEVER,
             propagate_natural_height=True,
-            shadow_type="in",
+            shadow_type=Gtk.ShadowType.IN,
         )
-        self.result_box = Gtk.Box(orientation="vertical")
+        self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
 
         window_container.pack_start(event_box, True, True, 0)
@@ -359,7 +359,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.results_nav.select(index)
 
     def get_pointer_device(self):
-        return self.get_window().get_display().get_device_manager().get_client_pointer()
+        window = self.get_window()
+        assert window
+        return window.get_display().get_device_manager().get_client_pointer()
 
     def hide_and_clear_input(self):
         self.input.set_text("")
@@ -402,7 +404,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             builder.set_translation_domain("ulauncher")
             builder.add_from_file(f"{PATHS.ASSETS}/ui/result.ui")
 
-            item_frame = builder.get_object("item-frame")
+            item_frame: ResultWidget | None = builder.get_object("item-frame")  # type: ignore[assignment]
+            assert item_frame
             item_frame.initialize(builder, result, index, query)
 
             results.append(item_frame)

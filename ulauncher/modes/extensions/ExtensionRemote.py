@@ -167,7 +167,7 @@ class ExtensionRemote:
                 ["git", f"--git-dir={self._git_dir}", f"--work-tree={self._dir}", "checkout", commit_hash, "."],
                 check=True,
             )
-            commit_timestamp = int(
+            commit_timestamp = float(
                 subprocess.check_output(
                     ["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash]
                 )

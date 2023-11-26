@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import logging
 from functools import lru_cache, partial
 
 from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result
-from ulauncher.utils.timer import timer
+from ulauncher.utils.timer import TimerContext, timer
 
 logger = logging.getLogger()
 
@@ -18,17 +20,19 @@ class DeferredResultRenderer:
 
     @classmethod
     @lru_cache(maxsize=None)
-    def get_instance(cls) -> "DeferredResultRenderer":
+    def get_instance(cls) -> DeferredResultRenderer:
         """
         Returns singleton instance
         """
         return cls()
 
     def __init__(self):
-        self.loading = None
+        self.loading: TimerContext | None = None
         self.active_event = None
         self.active_controller = None
-        self.app = Gio.Application.get_default()
+        app = Gio.Application.get_default()
+        assert app
+        self.app = app
 
     def get_active_controller(self):
         return self.active_controller
@@ -41,7 +45,7 @@ class DeferredResultRenderer:
         loading_message = Result(name="Loading...", icon=icon)
 
         self._cancel_loading()
-        self.loading = timer(self.LOADING_DELAY, partial(self.app.window.show_results, [loading_message]))
+        self.loading = timer(self.LOADING_DELAY, partial(self.app.window.show_results, [loading_message]))  # type: ignore[attr-defined]
         self.active_event = event
         self.active_controller = controller
 

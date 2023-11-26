@@ -20,6 +20,7 @@ def get_monitor(use_mouse_position=False):
     :rtype: class:Gdk.Monitor
     """
     display = Gdk.Display.get_default()
+    assert display
 
     if use_mouse_position:
         try:

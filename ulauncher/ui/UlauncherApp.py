@@ -37,7 +37,8 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         return cls()
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
+        kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+        super().__init__(*args, **kwargs)
         self.connect("startup", self.setup)  # runs only once on the main instance
 
     @property
@@ -99,7 +100,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
 
             settings.hotkey_show_app = ""  # Remove json file setting so the notification won't show again
             settings.save()
-            notification.set_priority(3)
+            notification.set_priority(Gio.NotificationPriority.URGENT)
             self.send_notification(notification_id, notification)
 
         ExtensionServer.get_instance().start()

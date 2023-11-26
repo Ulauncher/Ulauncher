@@ -41,7 +41,7 @@ class Client:
         self.framer.set_connection(self.conn)
         self.send({"type": "extension:socket_connected", "ext_id": self.extension.extension_id})
 
-        mainloop = GLib.MainLoop.new(None, None)
+        mainloop = GLib.MainLoop.new(None, False)
         mainloop.run()
 
     def on_message(self, _framer, event):
@@ -77,4 +77,5 @@ class Client:
         :param dict response:
         """
         logger.debug('Send message with keys "%s"', set(response))
+        assert self.framer
         self.framer.send(response)

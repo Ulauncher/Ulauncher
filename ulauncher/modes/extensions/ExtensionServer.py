@@ -68,7 +68,7 @@ class ExtensionServer:
         """
         Stops extension server
         """
-        if not self.is_running():
+        if not self.service:
             raise ServerIsNotRunningError
 
         self.service.stop()
