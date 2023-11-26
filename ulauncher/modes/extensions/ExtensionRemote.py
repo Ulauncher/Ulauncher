@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import subprocess
@@ -90,7 +92,7 @@ class ExtensionRemote:
             return f"{self.url}/-/archive/{commit}/{repo}-{commit}.tar.gz"
         return f"{self.url}/archive/{commit}.tar.gz"
 
-    def _get_refs(self):
+    def _get_refs(self) -> dict[str, str]:
         refs = {}
         url = f"{self.url}.git" if self.host in ("github.com", "gitlab.com", "codeberg.org") else self.url
         try:
@@ -145,7 +147,9 @@ class ExtensionRemote:
         want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
         """
         remote_refs = self._get_refs()
-        compatible = {ref: sha for ref, sha in remote_refs.items() if satisfies(API_VERSION, ref[4:])}
+        compatible = {
+            ref: sha for ref, sha in remote_refs.items() if ref.startswith("apiv") and satisfies(API_VERSION, ref[4:])
+        }
 
         if compatible:
             return compatible[max(compatible)]
