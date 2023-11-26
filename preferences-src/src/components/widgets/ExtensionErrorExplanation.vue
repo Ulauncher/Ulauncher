@@ -22,9 +22,6 @@
           </p>
         </div>
         <p
-          v-else-if="errorName === 'ExtensionAlreadyInstalledWarning'"
-        >You've already installed this extension.</p>
-        <p
           v-else-if="errorName === 'ExtensionNetworkError'"
         >
           A network error occurred: <b>{{ errorMessage }}</b>

@@ -22,10 +22,6 @@ logger = logging.getLogger()
 db = ExtensionDb.load()
 
 
-class ExtensionAlreadyInstalledWarning(Exception):
-    pass
-
-
 class ExtensionRemoteError(Exception):
     pass
 
@@ -157,14 +153,13 @@ class ExtensionRemote:
         # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
         return remote_refs.get("HEAD", "HEAD")
 
-    def download(self, commit_hash=None, overwrite=False):
+    def download(self, commit_hash=None, warn_if_overwrite=True):
         if not commit_hash:
             commit_hash = self.get_compatible_hash()
         output_dir_exists = isdir(self._dir)
 
-        if output_dir_exists and not overwrite:
-            msg = f'Extension with URL "{self.url}" is already installed.'
-            raise ExtensionAlreadyInstalledWarning(msg)
+        if output_dir_exists and warn_if_overwrite:
+            logger.warning('Extension with URL "%s" is already installed. Overwriting', self.url)
 
         if self._use_git and isdir(self._git_dir):
             os.makedirs(self._dir, exist_ok=True)

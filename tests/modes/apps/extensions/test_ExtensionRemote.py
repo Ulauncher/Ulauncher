@@ -2,7 +2,7 @@ import pytest
 
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote, InvalidExtensionUrlWarning
 
-# @todo: Add missing coverage for _get_refs, get_compatible_hash, download (with ExtensionAlreadyInstalledWarning)
+# @todo: Add missing coverage for _get_refs, get_compatible_hash, download
 
 
 class TestExtensionRemote:

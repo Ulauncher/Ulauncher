@@ -55,7 +55,7 @@ class ExtensionDownloader:
         logger.info('Updating extension "%s" from commit %s to %s', ext_id, ext.last_commit[:8], commit_hash[:8])
 
         remote = ExtensionRemote(ext.url)
-        remote.download(commit_hash, overwrite=True)
+        remote.download(commit_hash, warn_if_overwrite=False)
         return True
 
     def check_update(self, ext_id: str) -> tuple[bool, str]:
