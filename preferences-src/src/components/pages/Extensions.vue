@@ -70,8 +70,8 @@
           ></b-form-input>
         </b-form>
 
-        <div v-if="addingExtension" class="adding-ext-msg">
-          <i class="fa fa-spinner fa-spin"></i> Downloading extension...
+        <div v-if="extensionIsInstalling" class="adding-ext-msg">
+          <i class="fa fa-spinner fa-spin"></i> Installing extension...
         </div>
 
         <div class="error-wrapper" v-if="error && error.name">
@@ -128,7 +128,7 @@ export default {
     return {
       extUrlToDownload: '',
       activeExt: null,
-      addingExtension: false,
+      extensionIsInstalling: false,
       reloading: false,
       error: null,
       extensions: []
@@ -196,18 +196,18 @@ export default {
     },
     addExtension(input) {
       this.extUrlToDownload = input.value
-      this.addingExtension = true
+      this.extensionIsInstalling = true
       this.error = null
       fetchData('prefs:///extension/add', input.value).then(
         data => {
           this.extensions = data
-          this.addingExtension = false
+          this.extensionIsInstalling = false
           this.setActiveByUrl(input.value)
           input.value = ''
           this.$refs.addExtForm.hide()
         },
         err => {
-          this.addingExtension = false
+          this.extensionIsInstalling = false
           this.error = err
         }
       )
