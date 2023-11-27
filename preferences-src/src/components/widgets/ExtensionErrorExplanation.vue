@@ -18,7 +18,7 @@
             <b>{{ errorMessage }}</b>
           </p>
           <p>
-            Please make sure that you are running the latest version of Ulauncher app.
+            Please make sure that the URL you have entered is for a Ulauncher extension, and that you are running the latest version of Ulauncher.
           </p>
         </div>
         <p
