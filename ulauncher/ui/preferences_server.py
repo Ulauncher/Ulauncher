@@ -115,11 +115,12 @@ class PreferencesServer:
         if route_handler:
             # WebKit.URISchemeRequest is very primitive as a server:
             # * It can only read the URL (not the body of a post request)
-            # * It can either send data with status 200 or an error with no data.
+            # * It can either send data with status 200 or an error message which cannot be retrieved in the client.
             # So we have to invent our own ways to handle errors and passing data:
             # 1. Data is sent to the server as URL encoded JSON in the URL query string.
             # (because actual URL params is an old, terrible and lossy standard).
             # 2. The response is sent as an array "[data, error]".
+            # In the future "finish_with_response" (new in version 2.36) could be used
             try:
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
