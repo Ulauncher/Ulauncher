@@ -279,9 +279,8 @@ class PreferencesServer:
         runner = ExtensionRunner.get_instance()
         runner.stop(ext_id)
         runner.run(ext_id)
-        # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
-        # to avoid race condition and needless waiting
-        time.sleep(1)
+        # TODO(friday): Refactor run so we can know when it has completed instead of hard coding  # noqa: TD003
+        time.sleep(0.5)
         return list(get_extensions())
 
     @route("/extension/set-prefs")
