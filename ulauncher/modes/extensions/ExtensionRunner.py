@@ -51,9 +51,9 @@ class ExtensionRunner:
 
     def run_all(self):
         """
-        Finds all extensions in `PATHS.ALL_EXTENSIONS_DIRS` and runs them
+        Finds all extensions and runs them
         """
-        for ext_id, ext_path in extension_finder.iterate(PATHS.ALL_EXTENSIONS_DIRS):
+        for ext_id, ext_path in extension_finder.iterate():
             ext_record = ext_db.get_record(ext_id)
             if ext_record.is_enabled:
                 try:

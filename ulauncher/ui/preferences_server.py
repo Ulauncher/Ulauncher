@@ -63,7 +63,6 @@ def get_extensions(start_extensions=False):
 
         yield {
             **ext_record,
-            "id": ext_id,
             "path": ext_path,
             "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
             "name": manifest.name,
