@@ -50,16 +50,16 @@
       </div>
     </div>
 
-    <details class="installation-instructions" v-if="extension.instructions" :open="extension.runtime_error">
+    <details class="installation-instructions" v-if="extension.instructions" :open="extension.error_type">
       <summary>Installation instructions</summary>
       <div v-html="extension.instructions"></div>
     </details>
 
-    <div class="error-wrapper" v-if="extension.runtime_error && extension.is_enabled">
+    <div class="error-wrapper" v-if="extension.error_type && extension.is_enabled">
       <ext-runtime-error
         :extUrl="extension.url"
-        :errorMessage="extension.runtime_error.message"
-        :errorType="extension.runtime_error.type"
+        :errorMessage="extension.error_message"
+        :errorType="extension.error_type"
       />
     </div>
 

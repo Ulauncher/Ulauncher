@@ -71,7 +71,6 @@ def get_extensions():
             "error": error,
             "is_manageable": extension_finder.is_manageable(ext_path),
             "is_running": is_running,
-            "runtime_error": ext_runner.get_extension_error(ext_id) if not is_running else None,
         }
 
 

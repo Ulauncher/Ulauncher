@@ -13,6 +13,8 @@ class ExtensionRecord(JsonConf):
     commit_hash = ""
     commit_time = ""
     is_enabled = True
+    error_message = ""
+    error_type = ""
 
     def __setitem__(self, key, value):
         if key == "last_commit":

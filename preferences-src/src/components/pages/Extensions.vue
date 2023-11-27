@@ -14,7 +14,7 @@
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
           <b-badge v-if="!ext.is_enabled">Disabled</b-badge>
           <b-badge v-else-if="ext.error" variant="warning">Error</b-badge>
-          <b-badge v-else-if="!ext.is_running && ext.runtime_error" variant="warning">
+          <b-badge v-else-if="!ext.is_running && ext.error_type" variant="warning">
             Crashed
           </b-badge>
           <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
