@@ -41,7 +41,7 @@ def route(path: str):
     return decorator
 
 
-def get_extensions(start_extensions=False):
+def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
     ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
@@ -49,11 +49,8 @@ def get_extensions(start_extensions=False):
         try:
             manifest = ExtensionManifest.load_from_extension_id(ext_id)
             ext_record = ext_db.get_record(ext_id)
-            if start_extensions and ext_record.is_enabled:
-                ExtensionRunner.get_instance().run(ext_id)
-            else:
-                manifest.validate()
-                manifest.check_compatibility()
+            manifest.validate()
+            manifest.check_compatibility()
         except Exception as e:
             error = {"message": str(e), "errorName": type(e).__name__}
 
@@ -267,7 +264,11 @@ class PreferencesServer:
     @route("/extension/get-all")
     def extension_get_all(self, reload: bool):
         logger.info("Handling /extension/get-all")
-        return list(get_extensions(reload))
+        if reload:
+            ExtensionRunner.get_instance().run_all()
+            # TODO(friday): Refactor run_all so we can know when it has completed instead of hard coding  # noqa: TD003
+            time.sleep(0.5)
+        return list(get_extensions())
 
     @route("/extension/add")
     def extension_add(self, url):
