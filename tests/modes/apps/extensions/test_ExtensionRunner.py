@@ -12,6 +12,10 @@ class TestExtensionRunner:
         return ExtensionRunner()
 
     @pytest.fixture(autouse=True)
+    def set_extension_error(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ExtensionRunner.set_extension_error")
+
+    @pytest.fixture(autouse=True)
     def extensions_iterate(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.extension_finder.iterate")
 
@@ -47,6 +51,10 @@ class TestExtensionRunner:
     def time(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.time")
 
+    @pytest.fixture(autouse=True)
+    def ExtensionDb(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionDb.ExtensionDb")
+
     def test_run__basic_execution__is_called(self, runner, SubprocessLauncher):
         extid = "id"
         runner.run(extid)
@@ -62,12 +70,6 @@ class TestExtensionRunner:
         runner.run.assert_any_call("id_1", "path_1")
         runner.run.assert_any_call("id_2", "path_2")
         runner.run.assert_any_call("id_3", "path_3")
-
-    def test_set_extension_error(self, runner):
-        runner.set_extension_error("id_1", ExtensionRuntimeError.Terminated, "message")
-        error = runner.get_extension_error("id_1")
-        assert error["type"] == ExtensionRuntimeError.Terminated.value
-        assert error["message"] == "message"
 
     def test_read_stderr_line(self, runner):
         test_output1 = "Test Output 1"
@@ -100,11 +102,13 @@ class TestExtensionRunner:
         extproc.subprocess.get_if_signaled.return_value = True
         extproc.subprocess.get_term_sig.return_value = 9
         # Check pre-condition
-        assert extid not in runner.extension_errors
+        runner.set_extension_error.assert_not_called()
 
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
         # Confirm error handling
-        assert extid in runner.extension_errors
+        runner.set_extension_error.assert_called_once_with(
+            "id", ExtensionRuntimeError.Terminated, 'Extension "id" was terminated with code 9'
+        )
         assert extid not in runner.extension_procs
 
     def test_handle_wait__rapid_exit(self, runner, time, ProcessErrorExtractor):
@@ -122,7 +126,7 @@ class TestExtensionRunner:
         ProcessErrorExtractor.is_import_error.return_value = True
         ProcessErrorExtractor.get_missing_package_name.return_value = "TestPackage"
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
-        assert extid in runner.extension_errors
+        runner.set_extension_error.assert_called()
         assert extid not in runner.extension_procs
 
     def test_handle_wait__restart(self, runner, time):
@@ -139,7 +143,9 @@ class TestExtensionRunner:
 
         runner.run = mock.Mock()
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
-        assert extid in runner.extension_errors
+        runner.set_extension_error.assert_called_once_with(
+            "id", ExtensionRuntimeError.Exited, 'Extension "id" exited with code 9 after 5.0 seconds. Restarting...'
+        )
         # run() is mocked, so the ExtensionProce won't get readded after "restart"
         assert extid not in runner.extension_procs
         runner.run.assert_called_once()
