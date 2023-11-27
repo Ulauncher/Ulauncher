@@ -191,8 +191,8 @@ class ExtensionRunner:
     def is_running(self, extension_id: str) -> bool:
         return extension_id in self.extension_procs
 
-    def set_extension_error(self, extension_id: str, errorName: ExtensionRuntimeError, message: str):
-        self.extension_errors[extension_id] = {"name": errorName.value, "message": message}
+    def set_extension_error(self, extension_id: str, error_type: ExtensionRuntimeError, message: str):
+        self.extension_errors[extension_id] = {"type": error_type.value, "message": message}
 
     def get_extension_error(self, extension_id: str):
         return self.extension_errors.get(extension_id)

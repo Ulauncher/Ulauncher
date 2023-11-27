@@ -74,11 +74,11 @@
           <i class="fa fa-spinner fa-spin"></i> Installing extension...
         </div>
 
-        <div class="error-wrapper" v-if="error && error.name">
+        <div class="error-wrapper" v-if="error && error.type">
           <ext-error-explanation
             :extUrl="extUrlToDownload"
             :errorMessage="error.message"
-            :errorName="error.name"
+            :errorType="error.type"
           />
         </div>
 

@@ -3,15 +3,15 @@
     <b-alert show variant="warning">
       <small>
         <p
-          v-if="errorName === 'InvalidExtensionUrlWarning'"
+          v-if="errorType === 'InvalidExtensionUrlWarning'"
         >The URL should be a HTTPS git repository link or a path to a local git repository.
         <br>Examples: https://github.com/user/repo.git or https://codeberg.org/user/repo.git</p>
-        <p v-else-if="errorName === 'ExtensionManifestError'">
+        <p v-else-if="errorType === 'ExtensionManifestError'">
           There's an error in manifest.json:
           <br>
           <b>{{ errorMessage }}</b>
         </p>
-        <div v-else-if="errorName === 'ExtensionIncompatibleWarning'">
+        <div v-else-if="errorType === 'ExtensionIncompatibleWarning'">
           <p>
             Version incompatibility error:
             <br>
@@ -22,7 +22,7 @@
           </p>
         </div>
         <p
-          v-else-if="errorName === 'ExtensionNetworkError'"
+          v-else-if="errorType === 'ExtensionNetworkError'"
         >
           A network error occurred: <b>{{ errorMessage }}</b>
           <br><br>Please check that your network is ok, that the repository is not private, and that the extension has all the required files.
@@ -40,7 +40,7 @@
             @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
           >Github issues</a>.
         </p>
-        <p v-if="extUrl && !errorName.endsWith('Warning')">
+        <p v-if="extUrl && !errorType.endsWith('Warning')">
           <br />
           <span v-if="isUpdatable">
             Try
@@ -66,7 +66,7 @@ export default {
   props: {
     isUpdatable: Boolean,
     errorMessage: String,
-    errorName: String,
+    errorType: String,
     extUrl: String
   },
   methods: {

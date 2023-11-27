@@ -59,7 +59,7 @@
       <ext-runtime-error
         :extUrl="extension.url"
         :errorMessage="extension.runtime_error.message"
-        :errorName="extension.runtime_error.name"
+        :errorType="extension.runtime_error.type"
       />
     </div>
 
@@ -68,11 +68,11 @@
         is-updatable
         :extUrl="extension.url"
         :errorMessage="extension.error.message"
-        :errorName="extension.error.name"
+        :errorType="extension.error.type"
       />
     </div>
 
-    <b-alert variant="dark" show v-if="extension.error && extension.error.name === 'ExtensionManifestError'">
+    <b-alert variant="dark" show v-if="extension.error && extension.error.type === 'ExtensionManifestError'">
       <small>
         To find out how to migrate Ulauncher extensions to the latest API version, see
         <a
@@ -156,7 +156,7 @@
         v-if="updateError"
         :extUrl="extension.url"
         :errorMessage="updateError.message"
-        :errorName="updateError.name"
+        :errorType="updateError.type"
       />
     </b-modal>
   </div>

@@ -52,7 +52,7 @@ def get_extensions():
             manifest.validate()
             manifest.check_compatibility()
         except Exception as e:
-            error = {"message": str(e), "errorName": type(e).__name__}
+            error = {"message": str(e), "type": type(e).__name__}
 
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
@@ -125,11 +125,11 @@ class PreferencesServer:
                 args = json.loads(unquote(params.query)) if params.query else []
                 data = json.dumps([route_handler(self, *args)])
             except Exception as e:
-                name = type(e).__name__
-                error = {"message": str(e), "name": name}
-                logging.exception("Preferences server error: %s", name)
+                err_type = type(e).__name__
+                error = {"message": str(e), "type": err_type}
+                logging.exception("Preferences server error: %s", err_type)
 
-                if not name.endswith("Warning"):
+                if not err_type.endswith("Warning"):
                     stack_details = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
                     error["details"] = "\n".join([f"{k}: {v}" for k, v in {**error, **stack_details}.items()])
 

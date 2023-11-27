@@ -66,7 +66,7 @@ class TestExtensionRunner:
     def test_set_extension_error(self, runner):
         runner.set_extension_error("id_1", ExtensionRuntimeError.Terminated, "message")
         error = runner.get_extension_error("id_1")
-        assert error["name"] == ExtensionRuntimeError.Terminated.value
+        assert error["type"] == ExtensionRuntimeError.Terminated.value
         assert error["message"] == "message"
 
     def test_read_stderr_line(self, runner):
