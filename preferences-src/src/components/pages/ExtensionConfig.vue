@@ -77,7 +77,7 @@
         To find out how to migrate Ulauncher extensions to the latest API version, see
         <a
           href
-          @click.prevent="openUrl('https://docs.ulauncher.io/en/latest/extensions/migration.html')"
+          @click.prevent="openUrl('https://docs.ulauncher.io/en/stable/extensions/migration.html')"
         >extension migration docs</a>.
       </small>
     </b-alert>
