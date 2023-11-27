@@ -265,7 +265,7 @@ class PreferencesServer:
     def extension_get_all(self, reload: bool):
         logger.info("Handling /extension/get-all")
         if reload:
-            ExtensionRunner.get_instance().run_all()
+            ExtensionRunner.get_instance().run_all(True)
             # TODO(friday): Refactor run_all so we can know when it has completed instead of hard coding  # noqa: TD003
             time.sleep(0.5)
         return list(get_extensions())

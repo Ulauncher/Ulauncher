@@ -48,13 +48,13 @@ class ExtensionRunner:
         self.extension_procs: dict[str, ExtensionProc] = {}
         self.verbose = get_options().verbose
 
-    def run_all(self):
+    def run_all(self, force=False):
         """
         Finds all extensions and runs them
         """
         for ext_id, ext_path in extension_finder.iterate():
             ext_record = ext_db.get_record(ext_id)
-            if ext_record.is_enabled:
+            if ext_record.is_enabled and (not ext_record.error_type or force):
                 try:
                     self.run(ext_id, ext_path)
                 except Exception:
