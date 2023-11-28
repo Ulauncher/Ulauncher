@@ -3,7 +3,10 @@
     <b-alert show variant="warning">
       <small>
         <p
-          v-if="errorType === 'Terminated'"
+          v-if="errorType === 'Invalid'"
+        >The extension has an invalid manifest. Please report this issue to the extension developer, and attach the logs for details.</p>
+        <p
+          v-else-if="errorType === 'Terminated'"
         >The extension crashed. Ensure that you read and followed the instructions on the extension <a href @click.prevent="openUrlInBrowser(`${extUrl}`)">Github</a> page, and check the error log and report the error otherwise.</p>
         <p
           v-else-if="errorType === 'Incompatible'"

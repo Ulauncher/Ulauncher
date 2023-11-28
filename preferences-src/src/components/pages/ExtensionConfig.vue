@@ -63,26 +63,7 @@
       />
     </div>
 
-    <div class="error-wrapper" v-if="extension.error">
-      <ext-error-explanation
-        is-updatable
-        :extUrl="extension.url"
-        :errorMessage="extension.error.message"
-        :errorType="extension.error.type"
-      />
-    </div>
-
-    <b-alert variant="dark" show v-if="extension.error && extension.error.type === 'ExtensionManifestError'">
-      <small>
-        To find out how to migrate Ulauncher extensions to the latest API version, see
-        <a
-          href
-          @click.prevent="openUrl('https://docs.ulauncher.io/en/stable/extensions/migration.html')"
-        >extension migration docs</a>.
-      </small>
-    </b-alert>
-
-    <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
+    <div class="ext-form" v-if="!extension.error_type && extension.is_running" ref="ext-form">
       <template v-for="(trigger, id) in extension.triggers">
         <b-form-group
           v-if="trigger.keyword"

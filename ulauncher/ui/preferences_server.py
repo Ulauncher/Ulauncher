@@ -45,15 +45,8 @@ def get_extensions():
     ext_runner = ExtensionRunner.get_instance()
     ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
-        error = None
-        try:
-            manifest = ExtensionManifest.load_from_extension_id(ext_id)
-            ext_record = ext_db.get_record(ext_id)
-            manifest.validate()
-            manifest.check_compatibility()
-        except Exception as e:
-            error = {"message": str(e), "type": type(e).__name__}
-
+        manifest = ExtensionManifest.load_from_extension_id(ext_id)
+        ext_record = ext_db.get_record(ext_id)
         is_running = ext_runner.is_running(ext_id)
         # Controller method `get_icon_path` would work, but only running extensions have controllers
         icon = get_icon_path(manifest.icon, base_path=ext_path)
@@ -68,7 +61,6 @@ def get_extensions():
             "instructions": manifest.instructions,
             "preferences": manifest.preferences,
             "triggers": manifest.triggers,
-            "error": error,
             "is_manageable": extension_finder.is_manageable(ext_path),
             "is_running": is_running,
         }

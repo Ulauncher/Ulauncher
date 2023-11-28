@@ -7,7 +7,7 @@
         >The URL should be a HTTPS git repository link or a path to a local git repository.
         <br>Examples: https://github.com/user/repo.git or https://codeberg.org/user/repo.git</p>
         <p v-else-if="errorType === 'ExtensionManifestError'">
-          There's an error in manifest.json:
+          There's an error in the extension manifest:
           <br>
           <b>{{ errorMessage }}</b>
         </p>

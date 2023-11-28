@@ -15,7 +15,11 @@ from gi.repository import Gio, GLib
 from ulauncher.config import PATHS, get_options
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionManifest import (
+    ExtensionIncompatibleWarning,
+    ExtensionManifest,
+    ExtensionManifestError,
+)
 from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.utils.timer import timer
 
@@ -36,6 +40,7 @@ class ExtensionRuntimeError(Enum):
     Exited = "Exited"
     MissingModule = "MissingModule"
     Incompatible = "Incompatible"
+    Invalid = "Invalid"
 
 
 class ExtensionRunner:
@@ -69,8 +74,16 @@ class ExtensionRunner:
             ext_record = ext_db.get_record(extension_id)
             ext_record.update(error_message="", error_type="")  # reset
             manifest = ExtensionManifest.load_from_extension_id(extension_id)
-            manifest.validate()
-            manifest.check_compatibility(verbose=True)
+            try:
+                manifest.validate()
+                manifest.check_compatibility(verbose=True)
+            except ExtensionManifestError as err:
+                self.set_extension_error(extension_id, ExtensionRuntimeError.Invalid, str(err))
+                return
+            except ExtensionIncompatibleWarning as err:
+                self.set_extension_error(extension_id, ExtensionRuntimeError.Incompatible, str(err))
+                return
+
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
