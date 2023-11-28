@@ -133,7 +133,7 @@
         <i class="fa fa-check-circle"></i> Updated
       </div>
 
-      <ext-error-explanation
+      <ext-install-error
         v-if="updateError"
         :extUrl="extension.url"
         :errorMessage="updateError.message"
@@ -146,12 +146,12 @@
 <script>
 import fetchData from '@/fetchData'
 import bus from '@/event-bus'
-import ExtensionErrorExplanation from '@/components/widgets/ExtensionErrorExplanation'
+import ExtensionInstallError from '@/components/widgets/ExtensionInstallError'
 import ExtensionRuntimeError from '@/components/widgets/ExtensionRuntimeError'
 
 export default {
   components: {
-    'ext-error-explanation': ExtensionErrorExplanation,
+    'ext-install-error': ExtensionInstallError,
     'ext-runtime-error': ExtensionRuntimeError
   },
   name: 'extension-config',

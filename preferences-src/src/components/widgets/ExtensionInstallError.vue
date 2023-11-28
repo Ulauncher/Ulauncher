@@ -62,7 +62,7 @@
 import fetchData from '@/fetchData'
 
 export default {
-  name: 'ext-error-explanation',
+  name: 'ext-install-error',
   props: {
     isUpdatable: Boolean,
     errorMessage: String,

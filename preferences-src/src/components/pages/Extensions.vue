@@ -74,7 +74,7 @@
         </div>
 
         <div class="error-wrapper" v-if="error && error.type">
-          <ext-error-explanation
+          <ext-install-error
             :extUrl="extUrlToDownload"
             :errorMessage="error.message"
             :errorType="error.type"
@@ -104,7 +104,7 @@ import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
 import ExtensionConfig from '@/components/pages/ExtensionConfig'
-import ExtensionErrorExplanation from '@/components/widgets/ExtensionErrorExplanation'
+import ExtensionInstallError from '@/components/widgets/ExtensionInstallError'
 
 export default {
   name: 'extensions',
@@ -117,7 +117,7 @@ export default {
   },
   components: {
     'extension-config': ExtensionConfig,
-    'ext-error-explanation': ExtensionErrorExplanation
+    'ext-install-error': ExtensionInstallError
   },
   computed: {
     ...mapState(['prefs']),
