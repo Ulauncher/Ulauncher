@@ -135,10 +135,14 @@ export default {
   },
   methods: {
     fetchData(reload = false) {
+      let currentExtId = null;
+      if (this.activeExt) {
+        currentExtId = this.activeExt.id;
+      }
       fetchData('prefs:///extension/get-all', reload).then(
         data => {
           this.extensions = data
-          this.activeExt = data[0]
+          this.activeExt = data.find(ext => ext.id === currentExtId) || data[0]
           setTimeout(() => {
             this.reloading = false
           }, 500)
