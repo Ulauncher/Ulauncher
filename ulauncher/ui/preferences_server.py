@@ -278,11 +278,12 @@ class PreferencesServer:
     def extension_update_prefs(self, extension_id, data):
         logger.info("Update extension preferences %s to %s", extension_id, data)
         controller = ExtensionServer.get_instance().controllers.get(extension_id)
-        manifest = controller.manifest
-        for id, new_value in data.get("preferences", {}).items():
-            pref = manifest.preferences.get(id)
-            if pref and new_value != pref.value:
-                controller.trigger_event({"type": "event:update_preferences", "args": [id, new_value, pref.value]})
+        manifest = ExtensionManifest.load_from_extension_id(extension_id)
+        if controller:  # send update_preferences only if extension is running
+            for id, new_value in data.get("preferences", {}).items():
+                pref = manifest.preferences.get(id)
+                if pref and new_value != pref.value:
+                    controller.trigger_event({"type": "event:update_preferences", "args": [id, new_value, pref.value]})
         manifest.apply_user_preferences(data)
         manifest.save_user_preferences(extension_id)
 
