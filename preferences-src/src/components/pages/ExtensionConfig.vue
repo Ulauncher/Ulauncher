@@ -58,7 +58,7 @@
       />
     </div>
 
-    <div class="ext-form" v-if="!extension.error_type && extension.is_running" ref="ext-form">
+    <div class="ext-form" v-if="!extension.error_type" ref="ext-form">
       <template v-for="(trigger, id) in extension.triggers">
         <b-form-group
           v-if="trigger.keyword"
