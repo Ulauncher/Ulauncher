@@ -7,6 +7,15 @@
       <div class="ext-info">
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
+        <div class="repo" v-if="extension.url">
+          <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div> 
+          <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div> 
+          <div>
+            <a class="text-muted" href @click.prevent="openUrl(extension.url)">
+              <i class="fa fa-external-link"></i> Open repository
+            </a>
+          </div>
+        </div>
         <div class="notes">
           <span v-if="extension.is_manageable">user installed,</span>
           <span v-if="!extension.is_manageable">externally managed,</span>
@@ -23,30 +32,16 @@
       <div class="saved-notif">
         <i v-if="showSavedMsg" class="fa fa-check-circle"/>
       </div>
-      <div class="menu">
-        <b-dropdown
-          right
-          split
-          class="m-2 menu-button"
-          @click="onDropdownClick"
-          :text="(!extension.is_enabled && 'Enable' || canSave && 'Save') || (canCheckUpdates && 'Check Updates') || (isManageable && 'Remove')"
-        >
-          <b-dropdown-item @click="checkUpdates" v-if="canCheckUpdates && canSave">Check updates</b-dropdown-item>
-          <b-dropdown-item v-if="extension.is_enabled" @click="setIsEnabled(false)">Disable</b-dropdown-item>
-          <b-dropdown-item @click="openRemoveModal" :disabled="!isManageable">Remove</b-dropdown-item>
-          <b-dropdown-divider v-if="extension.url"/>
-          <b-dropdown-item v-if="extension.url" @click="openRepo">Open repository</b-dropdown-item>
-          <b-dropdown-item v-if="extension.url && extension.url.includes('https://')" @click="reportIssue">Report issue</b-dropdown-item>
-          <b-dropdown-divider v-if="extension.url && extension.commit_hash" />
-          <b-dropdown-item disabled v-if="extension.commit_hash">
-            <i class="fa fa-calendar fa-fw"></i>
-            {{ extension.updated_at.slice(0, 10) }}
-          </b-dropdown-item>
-          <b-dropdown-item disabled v-if="extension.commit_hash">
-            <i class="fa fa-code-fork fa-fw"></i>
-            <span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span>
-          </b-dropdown-item>
-        </b-dropdown>
+      <div>
+        <b-button-group>
+          <b-button @click="save" v-if="canSave && !extension.error_type" title="Save"><i class="fa fa-save"></i></b-button>
+          <b-button @click="checkUpdates" v-if="extension.url" title="Check updates"><i class="fa fa-refresh"></i></b-button>
+          <b-button @click="openRemoveModal" v-if="isManageable" title="Remove"><i class="fa fa-trash"></i></b-button>
+        </b-button-group>
+        <label class="toggle" :title="(extension.is_enabled && !extension.error_type) ? 'Disable' : 'Enable'">
+          <input @click="setIsEnabled(!extension.is_enabled)" type="checkbox" :checked="extension.is_enabled && !extension.error_type" :disabled="!!extension.error_type">
+          <span class="slider round"></span>
+        </label>
       </div>
     </div>
 
@@ -174,9 +169,6 @@ export default {
     isManageable() {
       return this.$props.extension.is_manageable
     },
-    canCheckUpdates() {
-      return !!this.$props.extension.url
-    },
     updateOkBtnVariant() {
       if (this.updateState === 'checking-updates') {
         return 'secondary'
@@ -194,24 +186,6 @@ export default {
     }
   },
   methods: {
-    onDropdownClick() {
-      switch (true) {
-        case !this.extension.is_enabled:
-          return this.setIsEnabled(true)
-        case this.canSave:
-          return this.save()
-        case this.canCheckUpdates:
-          return this.checkUpdates()
-        default:
-          return this.openRemoveModal()
-      }
-    },
-    reportIssue() {
-      this.openUrl(`${this.extension.url}/issues`)
-    },
-    openRepo() {
-      this.openUrl(this.extension.url)
-    },
     save() {
       let triggers = {}
       let preferences = {}
@@ -304,8 +278,8 @@ export default {
     openUrl(url) {
       fetchData('prefs:///open/web-url', url)
     },
-    setIsEnabled(is_enables) {
-      fetchData('prefs:///extension/toggle-enabled', this.extension.id, is_enables).then(() => {
+    setIsEnabled(enable) {
+      fetchData('prefs:///extension/toggle-enabled', this.extension.id, enable).then(() => {
           this.$emit('reload')
         },
         err => {
@@ -333,6 +307,7 @@ export default {
 
 .header-info .ext-info {
     flex: 1 0 0;
+    line-height: 1.75;
 }
 
 .header-info .ext-info .ext-name {
@@ -341,6 +316,14 @@ export default {
 .header-info .ext-info .authors {
       font-style: italic;
       opacity: 0.8;
+}
+.header-info .ext-info .repo {
+      font-size: 0.9em;
+      opacity: 0.8;
+      display: flex;
+}
+.header-info .ext-info .repo > div {
+      margin-right: 8px;
 }
 .header-info .ext-info .notes {
       font-size: smaller;
@@ -357,9 +340,6 @@ export default {
     opacity: 0.9;
 }
 
-.header-info .menu {
-    flex: 0 0 0;
-}
 .menu-button {
   white-space: nowrap !important;
 }
@@ -389,7 +369,58 @@ export default {
 .ext-config small {
     font-style: italic;
 }
-.ext-config button {
-    margin-right: 10px;
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 33px;
+}
+
+.toggle input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .2s;
+  transition-timing-function: ease-out;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 25px;
+  width: 25px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .2s;
+  transition-timing-function: ease-out;
+}
+
+input:checked + .slider {
+  background-color: mediumseagreen;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 32px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 </style>
