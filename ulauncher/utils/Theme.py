@@ -115,7 +115,7 @@ class Theme(JsonConf):
             return themes[DEFAULT_THEME]
 
         # Return the first on the list if everything else fails
-        return next(iter(themes))
+        return next(iter(themes.values()))
 
 
 class LegacyTheme(Theme):
