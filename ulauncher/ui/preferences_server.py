@@ -11,7 +11,7 @@ from functools import lru_cache
 from typing import Any, Callable, Generator
 from urllib.parse import unquote, urlparse
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, GLib, Gtk
 
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions import extension_finder
@@ -207,14 +207,13 @@ class PreferencesServer:
     @route("/show/file-chooser")
     def show_file_chooser(self, name, mime_filter):
         logger.info("Show file browser dialog for %s", name)
+        GLib.idle_add(self._show_file_chooser, name, mime_filter)
 
-        # Note: Gnome/Nautilus (43?) has broken the Gtk.FileChooserDialog API,
-        # need to rewrite this
-        fc_title = "Please choose a file"
-        fc_parent_widget = self.client.get_toplevel()
-        fc_action = Gtk.FileChooserAction.OPEN
-        fc_buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
-        fc_dialog = Gtk.FileChooserDialog(fc_title, fc_parent_widget, fc_action, fc_buttons)  # type: ignore[arg-type]
+    def _show_file_chooser(self, name, mime_filter):
+        fc_dialog = Gtk.FileChooserDialog(title="Please choose a file")
+        fc_dialog.add_button("_Open", Gtk.ResponseType.OK)
+        fc_dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        fc_dialog.set_default_response(Gtk.ResponseType.OK)
 
         if mime_filter and isinstance(mime_filter, dict):
             file_filter = Gtk.FileFilter()
@@ -222,8 +221,10 @@ class PreferencesServer:
                 file_filter.set_name(filter_name)
                 file_filter.add_mime_type(filter_mime)
             fc_dialog.add_filter(file_filter)
-        value = fc_dialog.get_filename() if fc_dialog.run() == Gtk.ResponseType.OK else None
-        self.notify_client(name, {"value": value})
+        response = fc_dialog.run()
+        if response == Gtk.ResponseType.OK:
+            value = fc_dialog.get_filename()
+            self.notify_client(name, {"value": value})
         fc_dialog.close()
 
     @route("/open/web-url")
