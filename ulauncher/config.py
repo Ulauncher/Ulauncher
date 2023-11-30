@@ -68,7 +68,9 @@ def get_options():
 
     parser.add_argument("-h", "--help", action="help", help=gettext("Show this help message and exit"))
     parser.add_argument("-v", "--verbose", action="store_true", help=gettext("Show debug messages"))
-    parser.add_argument("--version", action="version", help=gettext("Show version number and exit"), version=f"Ulauncher {VERSION}")  # noqa: E501
+    parser.add_argument(
+        "--version", action="version", help=gettext("Show version number and exit"), version=f"Ulauncher {VERSION}"
+    )
     parser.add_argument("--no-window", action="store_true", help=gettext("Hide window upon application startup"))
     parser.add_argument("--dev", action="store_true", help=gettext("Enables context menu in the Preferences UI"))
     parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)

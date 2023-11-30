@@ -64,7 +64,7 @@ def normalize_expr(expr: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def eval_expr(expr: str) -> int | Decimal:
+def eval_expr(expr: str) -> str:
     """
     >>> eval_expr('2^6')
     64
@@ -80,8 +80,8 @@ def eval_expr(expr: str) -> int | Decimal:
     result = _eval(tree).quantize(Decimal("1e-15"))
     int_result = int(result)
     if result == int_result:
-        return int_result
-    return result.normalize()  # Strip trailing zeros from decimal
+        return str(int_result)
+    return str(result.normalize())  # normalize strips trailing zeros from decimal
 
 
 @lru_cache(maxsize=1000)
@@ -132,9 +132,9 @@ class CalcMode(BaseMode):
     def is_enabled(self, query):
         return _is_enabled(query)
 
-    def handle_query(self, query):
+    def handle_query(self, query: str) -> list[CalcResult]:
         try:
-            result = CalcResult(result=eval_expr(query))
+            result = CalcResult(result=str(eval_expr(query)))
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]
