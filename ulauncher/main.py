@@ -39,7 +39,7 @@ def main(is_dev=False):
 
     if is_dev:
         # Ensure preferences UI is built
-        from setuptools import sandbox
+        from setuptools import sandbox  # type: ignore[import]
 
         sandbox.run_setup("setup.py", ["build_prefs"])
 

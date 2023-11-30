@@ -13,7 +13,7 @@ def _get_matching_blocks_native(query, text):
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
-    from Levenshtein import editops, matching_blocks
+    from Levenshtein import editops, matching_blocks  # type: ignore[import-untyped]
 
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)

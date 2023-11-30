@@ -3,8 +3,6 @@ line-length = 120
 
 [tool.mypy]
 python_version = 3.7
-ignore_missing_imports = true
-check_untyped_defs = false
 
 [tool.pylint.MASTER]
 ignore-patterns="ulauncher,docs,data,scripts,tests"
