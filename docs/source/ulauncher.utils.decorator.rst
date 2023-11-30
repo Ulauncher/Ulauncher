@@ -12,14 +12,6 @@ ulauncher.utils.decorator.debounce module
     :undoc-members:
     :show-inheritance:
 
-ulauncher.utils.decorator.glib\_idle\_add module
-------------------------------------------------
-
-.. automodule:: ulauncher.utils.decorator.glib_idle_add
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher.utils.decorator.run\_async module
 -------------------------------------------
 
