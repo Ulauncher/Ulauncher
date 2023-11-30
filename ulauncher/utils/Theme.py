@@ -46,7 +46,7 @@ CSS_RESET = """
 """
 
 
-def get_themes():
+def get_themes() -> dict[str, Theme]:
     """
     Gets a dict with the theme name as the key and theme as the value
     """
@@ -89,22 +89,22 @@ class Theme(JsonConf):
     name = ""
     base_path = ""  # Runtime value, should not be stored
 
-    def get_css_path(self):
+    def get_css_path(self) -> Path:
         return Path(self.base_path, f"{self.name}.css")
 
-    def get_css(self):
+    def get_css(self) -> str:
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
         return CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
 
-    def validate(self):
+    def validate(self) -> None:
         try:
             assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
         except AssertionError as e:
             raise ThemeError(e) from e
 
     @classmethod
-    def load(cls, theme_name: str):
+    def load(cls, theme_name: str) -> Theme:  # type: ignore[override]
         themes = get_themes()
         if theme_name in themes:
             return themes[theme_name]
@@ -123,11 +123,11 @@ class LegacyTheme(Theme):
     extend_theme = ""
     matched_text_hl_colors: dict[str, str] = {}
 
-    def get_css_path(self):
+    def get_css_path(self) -> Path:
         # `css_file_gtk_3.20+` is the only supported one if both are specified, otherwise css_file is
         return Path(self.base_path, self.get("css_file_gtk_3.20+", self.css_file))
 
-    def get_css(self):
+    def get_css(self) -> str:
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
         css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
@@ -145,7 +145,7 @@ class LegacyTheme(Theme):
             css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
         return css
 
-    def validate(self):
+    def validate(self) -> None:
         try:
             for prop in ["name", "css_file"]:
                 assert self.get(prop), f'"{prop}" is empty'

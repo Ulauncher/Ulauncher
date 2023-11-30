@@ -1,4 +1,5 @@
 import html
+from typing import Any
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
@@ -12,16 +13,16 @@ class ExtensionMode(BaseMode):
         self.extensionServer = ExtensionServer.get_instance()
         self.deferredResultRenderer = DeferredResultRenderer.get_instance()
 
-    def is_enabled(self, query: Query):
+    def is_enabled(self, query: Query) -> bool:
         return bool(self.extensionServer.get_controller_by_keyword(query.keyword)) and " " in query
 
-    def on_query_change(self, _query: Query):
+    def on_query_change(self, _query: Query) -> None:
         """
         Triggered when user changes the query
         """
         self.deferredResultRenderer.on_query_change()
 
-    def handle_query(self, query: Query):
+    def handle_query(self, query: Query) -> Any:
         controller = self.extensionServer.get_controller_by_keyword(query.keyword)
 
         if not controller:
@@ -36,7 +37,7 @@ class ExtensionMode(BaseMode):
         """
         for controller in self.extensionServer.controllers.values():
             for trigger_id, trigger in controller.manifest.triggers.items():
-                action = None
+                action: Any = None
                 if trigger.keyword is None:
                     action = {
                         "type": "event:launch_trigger",

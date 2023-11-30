@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from typing import Generator
 
 from ulauncher.config import PATHS
 
@@ -8,7 +11,7 @@ class ExtensionNotFound(FileNotFoundError):
         super().__init__(f"Extension with id {ext_id} was not found anywhere in search path")
 
 
-def is_extension(ext_path):
+def is_extension(ext_path: str) -> bool:
     """
     Tells whether the argument is an extension directory
     """
@@ -19,7 +22,7 @@ def is_extension(ext_path):
     return all(os.path.isfile(os.path.join(ext_path, file)) for file in expected_files)
 
 
-def is_manageable(ext_path, user_ext_path=PATHS.USER_EXTENSIONS_DIR):
+def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR) -> bool:
     """
     Tells the directory is user-provided extension.
     """
@@ -27,7 +30,7 @@ def is_manageable(ext_path, user_ext_path=PATHS.USER_EXTENSIONS_DIR):
     return os.path.dirname(ext_path) == user_ext_path and is_extension(ext_path)
 
 
-def locate_iter(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
+def locate_iter(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
     """
     Yields all existing directories for given `ext_id`
     """
@@ -37,7 +40,7 @@ def locate_iter(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
             yield os.path.realpath(ext_path)
 
 
-def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
+def locate(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str:
     """
     Locates (an existing) extension directory.
     """
@@ -47,14 +50,16 @@ def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
         raise ExtensionNotFound(ext_id) from None
 
 
-def get_user_dir(ext_id, user_ext_path=PATHS.USER_EXTENSIONS_DIR):
+def get_user_dir(ext_id: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR) -> str:
     """
     Returns path to writable extension directory
     """
     return os.path.realpath(os.path.join(user_ext_path, ext_id))
 
 
-def iterate(exts_dirs=PATHS.ALL_EXTENSIONS_DIRS, duplicates=False):
+def iterate(
+    exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
+) -> Generator[tuple[str, str], None, None]:
     """
     Yields `(extension_id, extension_path)` tuples found in a given extensions dirs
     """

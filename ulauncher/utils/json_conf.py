@@ -26,7 +26,7 @@ class JsonConf(BaseDataClass):
     """
 
     @classmethod
-    def load(cls: type[T], path) -> T:
+    def load(cls: type[T], path: str | Path) -> T:
         data = {}
         file_path = Path(path).resolve()
         key = (file_path, cls)
@@ -38,7 +38,8 @@ class JsonConf(BaseDataClass):
         _file_instances[key] = instance
         return cast(T, instance)
 
-    def save(self, sort_keys=True, indent=2, value_blacklist: list[Any] | None = None) -> bool:
+    def save(self, sort_keys: bool = True, indent: int = 2, value_blacklist: list[Any] | None = None) -> bool:
         file_path = next((key[0] for key, inst in _file_instances.items() if inst == self), None)
+        assert file_path
 
         return json_save(self, file_path, indent, sort_keys, value_blacklist)

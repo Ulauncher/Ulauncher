@@ -46,7 +46,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         return Query(self._query)
 
     @query.setter
-    def query(self, value: str):
+    def query(self, value: str) -> None:
         self._query = value.lstrip()
         if self.window:
             self.window.input.set_text(self._query)

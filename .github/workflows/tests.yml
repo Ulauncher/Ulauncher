@@ -15,7 +15,7 @@ jobs:
       - name: typo
         run: typos .
       - name: mypy
-        run: mypy .
+        run: mypy ulauncher
       - name: pytest
         run: DISPLAY=:1 xvfb-run pytest tests
       - name: build preferences

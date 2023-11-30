@@ -11,14 +11,14 @@ logger = logging.getLogger()
 
 
 @run_async(daemon=True)
-def remove_temp_file(filename: str):
+def remove_temp_file(filename: str) -> None:
     time.sleep(1)  # wait just a bit, because Popen runs file asynchronously
     logger.debug("Deleting a temporary file %s", filename)
     os.remove(filename)
 
 
 @run_async  # must be async because the script may be launching blocking processes like pkexec (issue 1299)
-def run_script(script: str, arg: str):
+def run_script(script: str, arg: str) -> None:
     file_path = f"{tempfile.gettempdir()}/ulauncher_run_script_{time.time()}"
     with open(file_path, "w") as file:
         file.write(script)

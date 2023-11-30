@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 import os
 import os.path
@@ -60,7 +61,9 @@ class ExtensionServer:
             if pended:
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
-            ExtensionController(self.controllers, framer, event.get("ext_id"))
+            ext_id: str | None = event.get("ext_id")
+            assert ext_id
+            ExtensionController(self.controllers, framer, ext_id)
         else:
             logger.debug("Unhandled message received: %s", event)
 

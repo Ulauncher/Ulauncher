@@ -5,5 +5,5 @@ from ulauncher.api.result import Result
 # @todo: Add deprecation warning
 
 
-def RenderResultListAction(results: list[Result]):
+def RenderResultListAction(results: list[Result]) -> list[Result]:
     return results

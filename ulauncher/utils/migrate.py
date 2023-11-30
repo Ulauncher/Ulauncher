@@ -10,6 +10,7 @@ from functools import partial
 from pathlib import Path
 from shutil import rmtree
 from types import ModuleType
+from typing import Any, Callable
 
 from ulauncher.config import FIRST_V6_RUN, PATHS
 from ulauncher.modes.extensions import extension_finder
@@ -20,7 +21,7 @@ _logger = logging.getLogger()
 CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{PATHS.HOME}/.cache"), "ulauncher_cache")  # See issue#40
 
 
-def _load_legacy(path: Path):
+def _load_legacy(path: Path) -> Any | None:
     try:
         if path.suffix == ".db":
             return pickle.loads(path.read_bytes())
@@ -31,7 +32,7 @@ def _load_legacy(path: Path):
     return None
 
 
-def _storeJSON(path, data):
+def _storeJSON(path: str, data: Any) -> bool:
     try:
         Path(path).write_text(json.dumps(data, indent=4))
     except Exception as e:
@@ -40,7 +41,7 @@ def _storeJSON(path, data):
     return True
 
 
-def _migrate_file(from_path, to_path, transform=None, overwrite=False):
+def _migrate_file(from_path: str, to_path: str, transform: Callable | None = None, overwrite: bool = False) -> None:
     if os.path.isfile(from_path) and (overwrite or not os.path.exists(to_path)):
         data = _load_legacy(Path(from_path))
         if data:
@@ -50,7 +51,7 @@ def _migrate_file(from_path, to_path, transform=None, overwrite=False):
             _storeJSON(to_path, data)
 
 
-def _migrate_app_state(old_format):
+def _migrate_app_state(old_format: dict) -> dict:
     new_format = {}
     for app_path, starts in old_format.items():
         # Was changed to use app ids instead of paths as keys
@@ -58,7 +59,7 @@ def _migrate_app_state(old_format):
     return new_format
 
 
-def _migrate_user_prefs(extension_id, user_prefs):
+def _migrate_user_prefs(extension_id: str, user_prefs: dict[str, dict]) -> dict[str, dict]:
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
@@ -73,7 +74,7 @@ def _migrate_user_prefs(extension_id, user_prefs):
     return new_prefs
 
 
-def v5_to_v6():
+def v5_to_v6() -> None:
     # Convert extension prefs to JSON
     EXT_PREFS = Path(PATHS.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
@@ -122,7 +123,7 @@ def v5_to_v6():
             _logger.warning("Couldn't migrate autostart: %s", e)
 
 
-def v5_to_v6_destructive():
+def v5_to_v6_destructive() -> None:
     # Currently optional changes that breaks your conf if you want to revert back to v5 for some reason
     # We probably want to run these later as part of the v7 migration instead.
 

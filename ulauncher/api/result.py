@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
@@ -46,7 +47,7 @@ class Result(BaseDataClass):
     def get_icon(self) -> str | None:
         return self.icon
 
-    def get_highlightable_input(self, query: Query):
+    def get_highlightable_input(self, query: Query) -> str | None:
         if self.keyword and self.keyword == query.keyword:
             return query.argument
         return str(query)
@@ -54,7 +55,7 @@ class Result(BaseDataClass):
     def get_description(self, _query: Query) -> str:
         return self.description
 
-    def on_activation(self, query: Query, alt=False):
+    def on_activation(self, query: Query, alt: bool = False) -> Any:
         """
         Handle the main action
         """

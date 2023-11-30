@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import logging
 import math
@@ -62,7 +64,7 @@ def normalize_expr(expr: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def eval_expr(expr: str):
+def eval_expr(expr: str) -> int | Decimal:
     """
     >>> eval_expr('2^6')
     64
@@ -83,7 +85,7 @@ def eval_expr(expr: str):
 
 
 @lru_cache(maxsize=1000)
-def _is_enabled(query: str):  # noqa: PLR0911
+def _is_enabled(query: str) -> bool:  # noqa: PLR0911
     query = normalize_expr(query)
     try:
         node = ast.parse(query, mode="eval").body

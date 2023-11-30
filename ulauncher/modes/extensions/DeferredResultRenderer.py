@@ -4,6 +4,7 @@ import logging
 from functools import lru_cache, partial
 
 from gi.repository import Gio, GLib
+from typing_extensions import Literal
 
 from ulauncher.api.result import Result
 from ulauncher.utils.timer import TimerContext, timer
@@ -26,7 +27,7 @@ class DeferredResultRenderer:
         """
         return cls()
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.loading: TimerContext | None = None
         self.active_event = None
         self.active_controller = None
@@ -37,7 +38,7 @@ class DeferredResultRenderer:
     def get_active_controller(self):
         return self.active_controller
 
-    def handle_event(self, event, controller):
+    def handle_event(self, event, controller) -> Literal[True]:  # type: ignore[no-untyped-def]
         """
         Schedules "Loading..." message
         """
@@ -51,7 +52,7 @@ class DeferredResultRenderer:
 
         return True
 
-    def handle_response(self, response, controller):
+    def handle_response(self, response, controller) -> None:  # type: ignore[no-untyped-def]
         """
         Calls :func:`response.action.run`
         """
@@ -62,7 +63,7 @@ class DeferredResultRenderer:
         if self.app and hasattr(self.app, "window"):
             GLib.idle_add(self.app.window.handle_event, response.get("action"))
 
-    def on_query_change(self):
+    def on_query_change(self) -> None:
         """
         Cancel "Loading...", reset active_event and active_controller
         """
@@ -70,7 +71,7 @@ class DeferredResultRenderer:
         self.active_event = None
         self.active_controller = None
 
-    def _cancel_loading(self):
+    def _cancel_loading(self) -> None:
         if self.loading:
             self.loading.cancel()
             self.loading = None

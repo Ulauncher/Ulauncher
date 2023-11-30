@@ -69,7 +69,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         self.set_description(result.get_description(query))  # need to run even if there is no descr
         self.highlight_name()
 
-    def set_index(self, index: int):
+    def set_index(self, index: int) -> None:
         """
         Set index for the item and assign shortcut
         """
@@ -124,14 +124,14 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
 
     def on_click(self, _widget, event=None):
         window = self.get_toplevel()
-        window.select_result(self.index)
+        window.select_result(self.index)  # type: ignore[attr-defined]
         alt = bool(event and event.button != 1)  # right click
-        window.handle_event(window.results_nav.activate(self.query, alt=alt))
+        window.handle_event(window.results_nav.activate(self.query, alt=alt))  # type: ignore[attr-defined]
 
     def on_mouse_hover(self, _widget, event):
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
-            self.get_toplevel().select_result(self.index)
+            self.get_toplevel().select_result(self.index)  # type: ignore[attr-defined]
 
     def set_description(self, description):
         description_obj = self.builder.get_object("item-descr")

@@ -9,8 +9,9 @@ from ulauncher.config import PATHS
 
 class CalcResult(Result):
     icon = f"{PATHS.ASSETS}/icons/calculator.png"
+    result: Decimal | int | None = 0
 
-    def __init__(self, result: Decimal | None = None, error: str = "Unknown error"):
+    def __init__(self, result: Decimal | int | None = None, error: str = "Unknown error"):
         super().__init__(result=result, error=error)
         self.name = f"{Decimal(self.result):n}" if self.result is not None else "Error!"
         self.description = "Enter to copy to the clipboard" if self.result is not None else error

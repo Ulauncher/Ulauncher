@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Quick test
         run: |
-          mypy .
+          mypy ulauncher
           DISPLAY=:1 xvfb-run pytest tests
       - name: Build release
         run: |

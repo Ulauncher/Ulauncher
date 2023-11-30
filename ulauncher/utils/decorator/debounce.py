@@ -14,9 +14,9 @@ def debounce(wait):
                 fn(*args, **kwargs)
 
             with contextlib.suppress(AttributeError):
-                debounced.t.cancel()
+                debounced.t.cancel()  # type: ignore[attr-defined]
 
-            debounced.t = timer(wait, call_it)
+            debounced.t = timer(wait, call_it)  # type: ignore[attr-defined]
 
         return debounced
 

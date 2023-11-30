@@ -6,6 +6,7 @@ from typing import Any
 from gi.repository import Gdk, Gtk
 
 from ulauncher.api.result import Result
+from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
@@ -26,11 +27,11 @@ from ulauncher.utils.wm import get_monitor
 logger = logging.getLogger()
 
 
-def handle_event(window, event: bool | list | str | dict[str, Any]) -> bool:  # noqa: PLR0912
+def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, Any]) -> bool:  # noqa: PLR0912
     if isinstance(event, bool):
         return event
     if isinstance(event, list):
-        window.show_results(res if isinstance(res, Result) else Result(**res) for res in event)
+        window.show_results([res if isinstance(res, Result) else Result(**res) for res in event])
         return True
     if isinstance(event, str):
         window.app.query = event
@@ -193,7 +194,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
 
-    def on_input_key_press(self, widget, event) -> bool:  # noqa: PLR0911, PLR0912
+    def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911, PLR0912
         """
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event
@@ -222,8 +223,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if (
             keyname == "BackSpace"
             and not ctrl
-            and not widget.get_selection_bounds()
-            and widget.get_position() == len(self.app.query)
+            and not entry_widget.get_selection_bounds()
+            and entry_widget.get_position() == len(self.app.query)
         ):
             new_query = ModeHandler.get_instance().on_query_backspace(self.app.query)
             if new_query is not None:
@@ -240,11 +241,11 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
 
             if ctrl and keyname == left_alias:
-                widget.set_position(max(0, widget.get_position() - 1))
+                entry_widget.set_position(max(0, entry_widget.get_position() - 1))
                 return True
 
             if ctrl and keyname == right_alias:
-                widget.set_position(widget.get_position() + 1)
+                entry_widget.set_position(entry_widget.get_position() + 1)
                 return True
 
             if keyname in ("Return", "KP_Enter"):
@@ -256,13 +257,13 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
                 return True
         return False
 
-    def on_mouse_down(self, _, event):
+    def on_mouse_down(self, _event_box: Gtk.EventBox, event: Gdk.EventButton) -> None:
         """
         Move the window on drag
         """
         if event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS:
             self.is_dragging = True
-            self.begin_move_drag(event.button, event.x_root, event.y_root, event.time)
+            self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
 
     def on_mouse_up(self, *_):
         self.is_dragging = False
@@ -275,7 +276,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
     def app(self):
         return self.get_application()
 
-    def handle_event(self, event: bool | list | str | dict[str, Any] | None):
+    def handle_event(self, event: bool | list | str | dict[str, Any] | None) -> None:
         if event is None:
             self.hide_and_clear_input()
             return
@@ -283,7 +284,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if not handle_event(self, event):
             self.hide_and_clear_input()
 
-    def apply_css(self, widget):
+    def apply_css(self, widget: Gtk.Widget) -> None:
+        assert self._css_provider
         Gtk.StyleContext.add_provider(
             widget.get_style_context(), self._css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
@@ -356,18 +358,21 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.app.query = ""
 
     def select_result(self, index):
-        self.results_nav.select(index)
+        if self.results_nav:
+            self.results_nav.select(index)
 
     def get_pointer_device(self):
         window = self.get_window()
         assert window
-        return window.get_display().get_device_manager().get_client_pointer()
+        device_mapper = window.get_display().get_device_manager()
+        assert device_mapper
+        return device_mapper.get_client_pointer()
 
     def hide_and_clear_input(self):
         self.input.set_text("")
         self.hide()
 
-    def show_results(self, results):
+    def show_results(self, results: list[Result]) -> None:
         """
         :param list results: list of Result instances
         """
@@ -378,10 +383,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if not self.input.get_text() and self.settings.max_recent_apps:
             results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
-        results = self.create_item_widgets(results, self.app.query)
+        result_widgets = self.create_item_widgets(results, self.app.query)
 
-        if results:
-            for item in results[:limit]:
+        if result_widgets:
+            for item in result_widgets[:limit]:
                 self.result_box.add(item)
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self.app.query)
@@ -394,10 +399,10 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
-        logger.debug("render %s results", len(results))
+        logger.debug("render %s results", len(result_widgets))
 
     @staticmethod
-    def create_item_widgets(items, query):
+    def create_item_widgets(items: list[Result], query: Query) -> list[ResultWidget]:
         results = []
         for index, result in enumerate(items):
             builder = Gtk.Builder()

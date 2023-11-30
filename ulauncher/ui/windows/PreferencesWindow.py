@@ -9,7 +9,7 @@ from ulauncher.utils.WebKit2 import WebKit2
 
 class PreferencesWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs):
-        super().__init__(title="Ulauncher Preferences", window_position="center", **kwargs)
+        super().__init__(title="Ulauncher Preferences", window_position=Gtk.WindowPosition.CENTER, **kwargs)
 
         self.set_default_size(1000, 600)
         self._init_webview()
@@ -52,6 +52,6 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def on_delete(self, *_args, **_kwargs):
         app = self.get_application()
         assert app
-        del app.preferences
+        del app.preferences  # type: ignore[attr-defined]
         self.destroy()
         os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}")

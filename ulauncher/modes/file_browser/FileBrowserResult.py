@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from os.path import basename, dirname, isdir, join
 
 from ulauncher.api.result import Result
@@ -25,7 +27,7 @@ class FileBrowserResult(Result):
             icon=get_icon_from_path(path),
         )
 
-    def get_highlightable_input(self, query: Query):
+    def get_highlightable_input(self, query: Query) -> str | None:
         return basename(query)
 
     def on_activation(self, _, alt=bool):

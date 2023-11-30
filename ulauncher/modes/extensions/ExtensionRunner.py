@@ -49,11 +49,11 @@ class ExtensionRunner:
     def get_instance(cls) -> ExtensionRunner:
         return cls()
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.extension_procs: dict[str, ExtensionProc] = {}
         self.verbose = get_options().verbose
 
-    def run_all(self, force=False):
+    def run_all(self, force: bool = False) -> None:
         """
         Finds all extensions and runs them
         """
@@ -65,7 +65,7 @@ class ExtensionRunner:
                 except Exception:
                     logger.exception("Couldn't start extension '%s'", ext_id)
 
-    def run(self, extension_id: str, ext_path: str | None = None):
+    def run(self, extension_id: str, ext_path: str | None = None) -> None:
         """
         * Validates manifest
         * Runs extension in a new process
@@ -121,10 +121,10 @@ class ExtensionRunner:
             subproc.wait_async(None, self.handle_wait, extension_id)
             self.read_stderr_line(self.extension_procs[extension_id])
 
-    def read_stderr_line(self, extproc: ExtensionProc):
+    def read_stderr_line(self, extproc: ExtensionProc) -> None:
         extproc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, extproc.extension_id)
 
-    def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult, extension_id: str):
+    def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult, extension_id: str) -> None:
         output, _ = error_stream.read_line_finish_utf8(result)
         if output:
             print(output)  # noqa: T201
@@ -136,7 +136,7 @@ class ExtensionRunner:
             extproc.recent_errors.append(output)
         self.read_stderr_line(extproc)
 
-    def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, extension_id: str):
+    def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, extension_id: str) -> None:
         subprocess.wait_finish(result)
         if subprocess.get_if_signaled() and self.extension_procs.get(extension_id):
             code = subprocess.get_term_sig()
@@ -181,7 +181,7 @@ class ExtensionRunner:
         self.extension_procs.pop(extension_id, None)
         self.run(extension_id)
 
-    def stop(self, extension_id: str):
+    def stop(self, extension_id: str) -> None:
         """
         Terminates extension
         """
@@ -194,7 +194,7 @@ class ExtensionRunner:
 
             timer(0.5, partial(self.confirm_termination, extproc))
 
-    def confirm_termination(self, extproc: ExtensionProc):
+    def confirm_termination(self, extproc: ExtensionProc) -> None:
         if extproc.subprocess.get_identifier():
             logger.info("Extension %s still running, sending SIGKILL", extproc.extension_id)
             # It is possible that the process exited between the check above and this signal,
@@ -205,6 +205,6 @@ class ExtensionRunner:
     def is_running(self, extension_id: str) -> bool:
         return extension_id in self.extension_procs
 
-    def set_extension_error(self, extension_id: str, error_type: ExtensionRuntimeError, message: str):
+    def set_extension_error(self, extension_id: str, error_type: ExtensionRuntimeError, message: str) -> None:
         ext_db.get_record(extension_id).update(error_message=message, error_type=error_type.value)
         ext_db.save()

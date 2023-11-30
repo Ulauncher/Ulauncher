@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from ulauncher.api.result import Result
@@ -12,7 +14,7 @@ class ShortcutResult(Result):
     is_default_search = False
     cmd = ""
 
-    def get_highlightable_input(self, query: Query):
+    def get_highlightable_input(self, query: Query) -> str | None:
         return str(query) if self.keyword != query.keyword else None
 
     def get_description(self, query):

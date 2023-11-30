@@ -7,11 +7,11 @@ from shutil import rmtree
 
 
 # This function is the same as Path.is_relative_to in 3.9, but we can't use that yet
-def is_relative_to(child_path: str | os.PathLike, root_path: str | os.PathLike):
+def is_relative_to(child_path: str | os.PathLike, root_path: str | os.PathLike) -> bool:
     return Path(root_path).resolve() in Path(child_path).resolve().parents
 
 
-def untar(archive_path: str, output_path: str, overwrite=True, strip=0) -> None:
+def untar(archive_path: str, output_path: str, overwrite: bool = True, strip: int = 0) -> None:
     if overwrite and os.path.exists(output_path):
         rmtree(output_path)
 

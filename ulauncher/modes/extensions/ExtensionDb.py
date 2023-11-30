@@ -43,7 +43,7 @@ class ExtensionDb(JsonConf):
             value = ExtensionRecord.create(**value)
         super().__setitem__(key, value)
 
-    def get_record(self, ext_id) -> ExtensionRecord:
+    def get_record(self, ext_id: str) -> ExtensionRecord:
         if ext_id not in self:
             self[ext_id] = ExtensionRecord.create(ext_id)
             self.save()

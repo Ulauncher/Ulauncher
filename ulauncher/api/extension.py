@@ -45,7 +45,7 @@ class Extension:
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
             self.subscribe(events["event:update_preferences"], "on_preferences_update")
 
-    def subscribe(self, event_type: type[BaseEvent], listener: str | object):
+    def subscribe(self, event_type: type[BaseEvent], listener: str | object) -> None:
         """
         Example: extension.subscribe(InputTriggerEvent, "on_input")
         """
@@ -78,7 +78,7 @@ class Extension:
 
         return None
 
-    def trigger_event(self, event: dict[str, Any]):
+    def trigger_event(self, event: dict[str, Any]) -> None:
         base_event = self.convert_to_baseevent(event)
         if not base_event:
             self.logger.warning("Dropping unknown event: %s", event)
@@ -112,19 +112,19 @@ class Extension:
         self.subscribe(events["event:update_preferences"], PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_input(self, query: str, trigger_id: str):
+    def on_input(self, query: str, trigger_id: str) -> None:
         pass
 
-    def on_launch(self, trigger_id: str):
+    def on_launch(self, trigger_id: str) -> None:
         pass
 
-    def on_item_enter(self, data):
+    def on_item_enter(self, data: Any) -> None:
         pass
 
-    def on_preferences_update(self, id, value, previous_value):
+    def on_preferences_update(self, id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
 
-    def on_unload(self):
+    def on_unload(self) -> None:
         pass
 
 

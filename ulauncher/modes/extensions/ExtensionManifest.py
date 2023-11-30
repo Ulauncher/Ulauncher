@@ -90,7 +90,7 @@ class ExtensionManifest(JsonConf):
                 value = prefs
         super().__setitem__(key, value)
 
-    def validate(self):
+    def validate(self) -> None:
         """
         Ensure that the manifest is valid (or raise error)
         """
@@ -145,7 +145,7 @@ class ExtensionManifest(JsonConf):
             msg = f"Invalid preferences in Extension manifest: {e}"
             raise ExtensionManifestError(msg) from None
 
-    def check_compatibility(self, verbose=False):
+    def check_compatibility(self, verbose: bool = False) -> None:
         """
         Ensure the extension is compatible with the Ulauncher API (or raise error)
         """
@@ -163,7 +163,7 @@ class ExtensionManifest(JsonConf):
                 msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
                 raise ExtensionIncompatibleWarning(msg)
 
-    def find_matching_trigger(self, **kwargs) -> str | None:
+    def find_matching_trigger(self, **kwargs: dict[str, Any]) -> str | None:
         """
         Get the first trigger matching the arguments, and returns the id
         Ex find_matching_trigger(user_keyword='asdf', icon=None)
@@ -176,14 +176,14 @@ class ExtensionManifest(JsonConf):
         """
         return {id: pref.value for id, pref in self.preferences.items()}
 
-    def save_user_preferences(self, ext_id: str):
+    def save_user_preferences(self, ext_id: str) -> None:
         path = f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"
         triggers = {id: ({"keyword": t.user_keyword} if t.keyword else {}) for id, t in self.triggers.items()}
         file = JsonConf.load(path)
         file.update(triggers=triggers, preferences=self.get_user_preferences())
         file.save()
 
-    def apply_user_preferences(self, user_prefs: dict):
+    def apply_user_preferences(self, user_prefs: dict) -> None:
         for id, pref in self.preferences.items():
             pref.value = user_prefs.get("preferences", {}).get(id, pref.default_value)
 
@@ -192,7 +192,7 @@ class ExtensionManifest(JsonConf):
                 trigger.user_keyword = user_prefs.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
 
     @classmethod
-    def load_from_extension_id(cls, ext_id: str):
+    def load_from_extension_id(cls, ext_id: str) -> ExtensionManifest:
         ext_path = extension_finder.locate(ext_id)
         manifest = super().load(os.path.join(ext_path, "manifest.json"))
         manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))

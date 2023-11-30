@@ -19,7 +19,7 @@ IS_PLASMA = which("kwriteconfig5") and which("systemsettings5") and plasma_servi
 IS_SUPPORTED = "GNOME" in DESKTOP_NAME or DESKTOP_NAME in ("XFCE", "PANTHEON")
 
 
-def _set_hotkey(hotkey: str):
+def _set_hotkey(hotkey: str) -> None:
     if not hotkey:
         return
 

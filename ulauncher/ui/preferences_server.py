@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import json
 import logging
@@ -6,6 +8,7 @@ import os
 import time
 import traceback
 from functools import lru_cache
+from typing import Any, Callable, Generator
 from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, Gtk
@@ -29,18 +32,18 @@ from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
 
 logger = logging.getLogger()
-routes = {}
+routes: dict[str, Callable] = {}
 
 
-def route(path: str):
-    def decorator(handler):
+def route(path: str):  # type: ignore[no-untyped-def]
+    def decorator(handler: Callable) -> Callable:
         routes[path] = handler
         return handler
 
     return decorator
 
 
-def get_extensions():
+def get_extensions() -> Generator[dict[str, Any], None, None]:
     ext_runner = ExtensionRunner.get_instance()
     ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
@@ -90,14 +93,14 @@ class PreferencesServer:
         self.context.set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)  # disable caching
 
     @run_async
-    def request_listener(self, scheme_request):
+    def request_listener(self, scheme_request: Any) -> None:
         """
         Handle requests using custom prefs:// protocol
         To avoid CORS issues both files and api requests has to go through here and you have to use
         the same domain (or skip the domain like now) for all urls, making all urls start with prefs:///
         (In addition some users has had issues with webkit directly loading files from file:///)
         """
-        uri = scheme_request.get_uri()
+        uri: str = scheme_request.get_uri()
         params = urlparse(uri)
         path = params.path.replace("null/", "/")
         route_handler = routes.get(path)
@@ -125,15 +128,15 @@ class PreferencesServer:
 
                 data = json.dumps([None, error])
 
-            stream = Gio.MemoryInputStream.new_from_data(data.encode())
-            scheme_request.finish(stream, -1, "application/json")
+            error_stream = Gio.MemoryInputStream.new_from_data(data.encode())
+            scheme_request.finish(error_stream, -1, "application/json")
             return
 
         if os.path.isfile(path):
             try:
                 [mime_type, _] = mimetypes.guess_type(path)
-                stream = Gio.file_new_for_path(path).read()
-                scheme_request.finish(stream, -1, mime_type)
+                file_stream = Gio.file_new_for_path(path).read()
+                scheme_request.finish(file_stream, -1, mime_type)
             except Exception as e:
                 logger.warning("Couldn't handle file request from '%s' (%s: %s)", uri, type(e).__name__, e)
             else:
@@ -176,9 +179,13 @@ class PreferencesServer:
         self.settings.save()
 
         if prop == "show_indicator_icon":
-            Gio.Application.get_default().toggle_appindicator(value)
+            app = Gio.Application.get_default()
+            assert app
+            app.toggle_appindicator(value)  # type: ignore[attr-defined]
         if prop == "theme_name":
-            Gio.Application.get_default().window.apply_theme()
+            app = Gio.Application.get_default()
+            assert app
+            app.window.apply_theme()  # type: ignore[attr-defined]
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart_enabled to %s", is_enabled)
@@ -200,21 +207,24 @@ class PreferencesServer:
     @route("/show/file-chooser")
     def show_file_chooser(self, name, mime_filter):
         logger.info("Show file browser dialog for %s", name)
-        dialog = Gtk.FileChooserDialog(
-            "Please choose a file",
-            self.client.get_toplevel(),
-            Gtk.FileChooserAction.OPEN,
-            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
-        )
+
+        # Note: Gnome/Nautilus (43?) has broken the Gtk.FileChooserDialog API,
+        # need to rewrite this
+        fc_title = "Please choose a file"
+        fc_parent_widget = self.client.get_toplevel()
+        fc_action = Gtk.FileChooserAction.OPEN
+        fc_buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        fc_dialog = Gtk.FileChooserDialog(fc_title, fc_parent_widget, fc_action, fc_buttons)  # type: ignore[arg-type]
+
         if mime_filter and isinstance(mime_filter, dict):
             file_filter = Gtk.FileFilter()
             for filter_name, filter_mime in mime_filter.items():
                 file_filter.set_name(filter_name)
                 file_filter.add_mime_type(filter_mime)
-            dialog.add_filter(file_filter)
-        value = dialog.get_filename() if dialog.run() == Gtk.ResponseType.OK else None
+            fc_dialog.add_filter(file_filter)
+        value = fc_dialog.get_filename() if fc_dialog.run() == Gtk.ResponseType.OK else None
         self.notify_client(name, {"value": value})
-        dialog.close()
+        fc_dialog.close()
 
     @route("/open/web-url")
     def open_url(self, url):
@@ -251,7 +261,7 @@ class PreferencesServer:
         shortcuts.save()
 
     @route("/extension/get-all")
-    def extension_get_all(self, reload: bool):
+    def extension_get_all(self, reload: bool) -> list[dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
             ExtensionRunner.get_instance().run_all(True)
@@ -260,7 +270,7 @@ class PreferencesServer:
         return list(get_extensions())
 
     @route("/extension/add")
-    def extension_add(self, url):
+    def extension_add(self, url: str) -> list[dict[str, Any]]:
         logger.info("Add extension: %s", url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)

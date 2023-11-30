@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import logging
 import unicodedata
-from difflib import SequenceMatcher
+from difflib import Match, SequenceMatcher
 from functools import lru_cache
 
 logger = logging.getLogger()
 
 
-def _get_matching_blocks_native(query, text):
+def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
     return SequenceMatcher(None, query, text).get_matching_blocks()
 
 
@@ -24,12 +26,12 @@ except ImportError:
 
 
 # convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
-def _normalize(string):
+def _normalize(string: str) -> str:
     return unicodedata.normalize("NFD", string.casefold()).encode("ascii", "ignore").decode("utf-8")
 
 
 @lru_cache(maxsize=1000)
-def get_matching_blocks(query, text):
+def get_matching_blocks(query: str, text: str) -> tuple[list, int]:
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched
@@ -43,7 +45,7 @@ def get_matching_blocks(query, text):
     return output, total_len
 
 
-def get_score(query, text):
+def get_score(query: str, text: str) -> float:
     """
     Uses get_matching_blocks() to figure out how much of the query that matches the text,
     and tries to weight this to slightly favor shorter results and largely favor word matches
@@ -51,7 +53,7 @@ def get_score(query, text):
     """
 
     if not query or not text:
-        return 0
+        return 0.0
 
     query_len = len(query)
     text_len = len(text)

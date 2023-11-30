@@ -20,10 +20,10 @@ class ExtensionController:
     :param list controllers: list of :class:`~ulauncher.modes.extensions.ExtensionController`
     """
 
-    extension_id = None
+    extension_id: str
     manifest: ExtensionManifest
 
-    def __init__(self, controllers, framer, extension_id):
+    def __init__(self, controllers, framer, extension_id: str):  # type: ignore[no-untyped-def]
         if not extension_id:
             msg = "No extension_id provided"
             raise RuntimeError(msg)
@@ -66,7 +66,7 @@ class ExtensionController:
             }
         )
 
-    def trigger_event(self, event: dict[str, Any]):
+    def trigger_event(self, event: dict[str, Any]):  # type: ignore[no-untyped-def]
         """
         Triggers event for an extension
         """
@@ -77,14 +77,14 @@ class ExtensionController:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
 
-    def get_normalized_icon_path(self, icon=None) -> str:
+    def get_normalized_icon_path(self, icon: str | None = None) -> str:
         if not icon:
             icon = self.manifest.icon
         ext_path = extension_finder.locate(self.extension_id)
         expanded_path = icon and os.path.join(ext_path, icon)
         return expanded_path if os.path.isfile(expanded_path) else icon
 
-    def handle_response(self, _framer, response: dict[str, Any]):
+    def handle_response(self, _framer, response: dict[str, Any]):  # type: ignore[no-untyped-def]
         logger.debug(
             'Incoming response with keys "%s" from "%s"',
             set(response),

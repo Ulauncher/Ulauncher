@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from types import SimpleNamespace
 
@@ -23,7 +25,7 @@ class HotkeyDialog(Gtk.MessageDialog):
     _hotkey = ""
 
     def __init__(self):
-        super().__init__(title="Set new hotkey", flags=Gtk.DialogFlags.MODAL)
+        super().__init__(title="Set new hotkey", flags=Gtk.DialogFlags.MODAL)  # type: ignore[call-arg]
         self.add_buttons("Close", Gtk.ResponseType.CLOSE, "Save", Gtk.ResponseType.OK)
         self.set_response_sensitive(RESPONSES.OK, False)
 
@@ -37,7 +39,7 @@ class HotkeyDialog(Gtk.MessageDialog):
         self.connect("response", self.handle_response)
         self.connect("key-press-event", self.on_key_press)
 
-    def handle_response(self, _widget, response_id: int):
+    def handle_response(self, _widget: HotkeyDialog, response_id: int) -> None:
         if response_id == RESPONSES.OK:
             self.save_and_close()
         if response_id == RESPONSES.CLOSE:
@@ -57,7 +59,7 @@ class HotkeyDialog(Gtk.MessageDialog):
     def save_and_close(self):
         self.hide()
 
-    def on_key_press(self, _, event: Gdk.EventKey):
+    def on_key_press(self, _entry_widget: Gtk.Entry, event: Gdk.EventKey) -> None:
         key_name = Gtk.accelerator_name(event.keyval, event.state)
         label = Gtk.accelerator_get_label(event.keyval, event.state)
         breadcrumb = label.split("+")

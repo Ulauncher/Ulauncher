@@ -22,7 +22,7 @@ import os
 import sys
 from datetime import datetime
 
-import sphinx_rtd_theme
+import sphinx_rtd_theme  # type: ignore[import]
 
 sys.path.insert(0, os.path.abspath(".."))
 import ulauncher  # noqa: E402

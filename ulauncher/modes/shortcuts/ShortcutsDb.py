@@ -19,7 +19,7 @@ class Shortcut(JsonConf):
 
 class ShortcutsDb(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
-    def __setitem__(self, key, value: dict, validate_type=True):
+    def __setitem__(self, key: str, value: dict, validate_type: bool = True) -> None:
         if "added" in value and isinstance(value.get("added"), float):
             # convert legacy float timestamps ulauncher used
             value["added"] = int(value["added"])
