@@ -20,6 +20,10 @@ class TestExtensionRunner:
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.extension_finder.iterate")
 
     @pytest.fixture(autouse=True)
+    def extensions_locate(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.extension_finder.locate")
+
+    @pytest.fixture(autouse=True)
     def timer(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.timer")
 

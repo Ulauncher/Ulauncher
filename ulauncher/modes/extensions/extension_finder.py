@@ -37,16 +37,13 @@ def locate_iter(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
             yield os.path.realpath(ext_path)
 
 
-def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS, check=False):
+def locate(ext_id, exts_dirs=PATHS.ALL_EXTENSIONS_DIRS):
     """
     Locates (an existing) extension directory.
     """
-    # TODO @nazarewk: default check to True and resolve all test errors #noqa: TD003
     try:
         return next(locate_iter(ext_id, exts_dirs=exts_dirs))
     except StopIteration:
-        if not check:
-            return None
         raise ExtensionNotFound(ext_id) from None
 
 
