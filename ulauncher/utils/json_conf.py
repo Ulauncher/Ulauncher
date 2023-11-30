@@ -41,4 +41,4 @@ class JsonConf(BaseDataClass):
     def save(self, sort_keys=True, indent=2, value_blacklist: list[Any] | None = None) -> bool:
         file_path = next((key[0] for key, inst in _file_instances.items() if inst == self), None)
 
-        return json_save(self, file_path, sort_keys, indent, value_blacklist)
+        return json_save(self, file_path, indent, sort_keys, value_blacklist)
