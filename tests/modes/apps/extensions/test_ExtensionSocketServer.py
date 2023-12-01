@@ -2,43 +2,43 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer, ServerIsRunningError
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer, ServerIsRunningError
 
 
-class TestExtensionServer:
+class TestExtensionSocketServer:
     @pytest.fixture(autouse=True)
     def SocketService(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.Gio.SocketService")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.Gio.SocketService")
 
     @pytest.fixture(autouse=True)
     def UnixSocketAddress(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.Gio.UnixSocketAddress")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.Gio.UnixSocketAddress")
 
     @pytest.fixture(autouse=True)
-    def ExtensionController(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.ExtensionController")
+    def ExtensionSocketController(self, mocker):
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.ExtensionSocketController")
 
     @pytest.fixture(autouse=True)
     def path_exists(self, mocker):
-        exists = mocker.patch("ulauncher.modes.extensions.ExtensionServer.os.path.exists")
+        exists = mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.os.path.exists")
         exists.return_value = False
         return exists
 
     @pytest.fixture(autouse=True)
     def GObject(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.GObject")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.GObject")
 
     @pytest.fixture(autouse=True)
     def unlink(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.os.unlink")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.os.unlink")
 
     @pytest.fixture(autouse=True)
     def JSONFramer(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionServer.JSONFramer")
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketServer.JSONFramer")
 
     @pytest.fixture
     def server(self):
-        return ExtensionServer()
+        return ExtensionSocketServer()
 
     def test_start(self, server):
         server.start()
@@ -63,7 +63,7 @@ class TestExtensionServer:
         assert id(JSONFramer.return_value) in server.pending
         JSONFramer.return_value.set_connection.assert_called_with(conn)
 
-    def test_handle_registration(self, server, JSONFramer, GObject, ExtensionController):
+    def test_handle_registration(self, server, JSONFramer, GObject, ExtensionSocketController):
         conn = mock.Mock()
         source = mock.Mock()
         server.start()
@@ -74,7 +74,7 @@ class TestExtensionServer:
         server.handle_registration(JSONFramer.return_value, event)
         assert id(JSONFramer.return_value) not in server.pending
         assert GObject.signal_handler_disconnect.call_count == 2
-        ExtensionController.assert_called_once()
+        ExtensionSocketController.assert_called_once()
 
     def test_stop(self, server):
         server.start()

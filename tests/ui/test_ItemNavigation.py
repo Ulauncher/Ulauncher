@@ -18,6 +18,10 @@ class TestItemNavigation:
     def query_history(self, mocker):
         return mocker.patch("ulauncher.ui.ItemNavigation.query_history")
 
+    @pytest.fixture(autouse=True)
+    def json_save(self, mocker):
+        return mocker.patch("ulauncher.ui.ItemNavigation.json_save")
+
     def test_select_is_called(self, nav, items):
         nav.select(1)
         assert nav.index == 1

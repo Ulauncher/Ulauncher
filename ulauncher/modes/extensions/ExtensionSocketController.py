@@ -13,11 +13,9 @@ from ulauncher.utils.decorator.debounce import debounce
 logger = logging.getLogger()
 
 
-class ExtensionController:
+class ExtensionSocketController:
     """
     Handles communication between Ulauncher app and an extension.
-
-    :param list controllers: list of :class:`~ulauncher.modes.extensions.ExtensionController`
     """
 
     extension_id: str

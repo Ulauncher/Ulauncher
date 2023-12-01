@@ -6,8 +6,8 @@ import pytest
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 from ulauncher.ui.UlauncherApp import UlauncherApp
 
 
@@ -32,7 +32,7 @@ class TestDeferredResultRenderer:
 
     @pytest.fixture
     def controller(self):
-        ctrl = mock.create_autospec(ExtensionController)
+        ctrl = mock.create_autospec(ExtensionSocketController)
         ctrl.get_normalized_icon_path = MethodType(lambda _: "/path/to/asdf.png", ctrl)
         return ctrl
 

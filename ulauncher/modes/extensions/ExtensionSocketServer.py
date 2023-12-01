@@ -8,13 +8,17 @@ from functools import lru_cache
 from gi.repository import Gio, GObject
 
 from ulauncher.api.shared.socket_path import get_socket_path
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 from ulauncher.utils.framer import JSONFramer
 
 logger = logging.getLogger()
 
 
-class ExtensionServer:
+class ExtensionSocketServer:
+    socket_path: str
+    service: Gio.SocketService | None
+    controllers: dict[str, ExtensionSocketController]
+
     @classmethod
     @lru_cache(maxsize=None)
     def get_instance(cls):
@@ -64,7 +68,7 @@ class ExtensionServer:
                     GObject.signal_handler_disconnect(framer, msg_id)
             ext_id: str | None = event.get("ext_id")
             assert ext_id
-            ExtensionController(self.controllers, framer, ext_id)
+            ExtensionSocketController(self.controllers, framer, ext_id)
         else:
             logger.debug("Unhandled message received: %s", event)
 
@@ -85,24 +89,13 @@ class ExtensionServer:
         """
         return bool(self.service)
 
-    def get_controllers(self):
-        """
-        :rtype: list of  :class:`~ulauncher.modes.extensions.ExtensionController.ExtensionController`
-        """
-        return self.controllers.values()
+    def get_controllers(self) -> list[ExtensionSocketController]:
+        return list(self.controllers.values())
 
-    def get_controller_by_id(self, extension_id):
-        """
-        :param str extension_id:
-        :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
-        """
+    def get_controller_by_id(self, extension_id: str) -> ExtensionSocketController | None:
         return self.controllers.get(extension_id)
 
-    def get_controller_by_keyword(self, keyword):
-        """
-        :param str keyword:
-        :rtype: ~ulauncher.modes.extensions.ExtensionController.ExtensionController
-        """
+    def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
         for controller in self.controllers.values():
             for trigger in controller.manifest.triggers.values():
                 if keyword and keyword == trigger.user_keyword:
@@ -122,5 +115,5 @@ class ServerIsNotRunningError(RuntimeError):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    server = ExtensionServer.get_instance()
+    server = ExtensionSocketServer.get_instance()
     server.start()

@@ -19,7 +19,7 @@ from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
@@ -285,7 +285,7 @@ class PreferencesServer:
     @route("/extension/set-prefs")
     def extension_update_prefs(self, extension_id, data):
         logger.info("Update extension preferences %s to %s", extension_id, data)
-        controller = ExtensionServer.get_instance().controllers.get(extension_id)
+        controller = ExtensionSocketServer.get_instance().controllers.get(extension_id)
         manifest = ExtensionManifest.load_from_extension_id(extension_id)
         if controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():

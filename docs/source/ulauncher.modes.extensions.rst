@@ -12,10 +12,10 @@ ulauncher\.modes\.extensions\.DeferredResultRenderer module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.extensions\.ExtensionController module
+ulauncher\.modes\.extensions\.ExtensionSocketController module
 --------------------------------------------------------
 
-.. automodule:: ulauncher.modes.extensions.ExtensionController
+.. automodule:: ulauncher.modes.extensions.ExtensionSocketController
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,10 +44,10 @@ ulauncher\.modes\.extensions\.ExtensionMode module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.extensions\.ExtensionServer module
+ulauncher\.modes\.extensions\.ExtensionSocketServer module
 ----------------------------------------------------
 
-.. automodule:: ulauncher.modes.extensions.ExtensionServer
+.. automodule:: ulauncher.modes.extensions.ExtensionSocketServer
     :members:
     :undoc-members:
     :show-inheritance:

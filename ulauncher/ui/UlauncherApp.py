@@ -9,7 +9,7 @@ from gi.repository import Gio, Gtk
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
@@ -103,7 +103,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
             notification.set_priority(Gio.NotificationPriority.URGENT)
             self.send_notification(notification_id, notification)
 
-        ExtensionServer.get_instance().start()
+        ExtensionSocketServer.get_instance().start()
         time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
 

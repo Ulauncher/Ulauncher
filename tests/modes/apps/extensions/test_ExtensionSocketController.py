@@ -3,13 +3,13 @@ from unittest import mock
 import pytest
 
 from ulauncher.api.shared.query import Query
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 
 TEST_EXT_ID = "com.example.test-ext-id"
 MOCK_SETTINGS = {"pref_id": "pref_val"}
 
 
-class TestExtensionController:
+class TestExtensionSocketController:
     @pytest.fixture
     def controllers(self):
         return {}
@@ -17,20 +17,20 @@ class TestExtensionController:
     @pytest.fixture(autouse=True)
     def result_renderer(self, mocker):
         return mocker.patch(
-            "ulauncher.modes.extensions.ExtensionController.DeferredResultRenderer.get_instance"
+            "ulauncher.modes.extensions.ExtensionSocketController.DeferredResultRenderer.get_instance"
         ).return_value
 
     @pytest.fixture(autouse=True)
     def manifest(self, mocker):
         manifest = mocker.patch(
-            "ulauncher.modes.extensions.ExtensionController.ExtensionManifest.load_from_extension_id"
+            "ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load_from_extension_id"
         ).return_value
         manifest.get_user_preferences.return_value = MOCK_SETTINGS
         return manifest
 
     @pytest.fixture
     def controller(self, controllers):
-        controller = ExtensionController(controllers, mock.Mock(), TEST_EXT_ID)
+        controller = ExtensionSocketController(controllers, mock.Mock(), TEST_EXT_ID)
         controller._debounced_send_event = controller._send_event
         return controller
 

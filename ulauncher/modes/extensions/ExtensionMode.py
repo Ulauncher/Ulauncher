@@ -5,16 +5,16 @@ from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 
 
 class ExtensionMode(BaseMode):
     def __init__(self):
-        self.extensionServer = ExtensionServer.get_instance()
+        self.ExtensionSocketServer = ExtensionSocketServer.get_instance()
         self.deferredResultRenderer = DeferredResultRenderer.get_instance()
 
     def is_enabled(self, query: Query) -> bool:
-        return bool(self.extensionServer.get_controller_by_keyword(query.keyword)) and " " in query
+        return bool(self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)) and " " in query
 
     def on_query_change(self, _query: Query) -> None:
         """
@@ -23,7 +23,7 @@ class ExtensionMode(BaseMode):
         self.deferredResultRenderer.on_query_change()
 
     def handle_query(self, query: Query) -> Any:
-        controller = self.extensionServer.get_controller_by_keyword(query.keyword)
+        controller = self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)
 
         if not controller:
             msg = "Invalid extension keyword"
@@ -35,7 +35,7 @@ class ExtensionMode(BaseMode):
         """
         :rtype: Iterable[:class:`~ulauncher.api.result.Result`]
         """
-        for controller in self.extensionServer.controllers.values():
+        for controller in self.ExtensionSocketServer.controllers.values():
             for trigger_id, trigger in controller.manifest.triggers.items():
                 action: Any = None
                 if trigger.keyword is None:

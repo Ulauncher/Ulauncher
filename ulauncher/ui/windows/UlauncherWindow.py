@@ -10,7 +10,7 @@ from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionServer import ExtensionServer
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui.ItemNavigation import ItemNavigation
@@ -59,7 +59,7 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
     elif event_type == "event:activate_custom":
         controller = DeferredResultRenderer.get_instance().get_active_controller()
     elif event_type.startswith("event") and extension_id:
-        controller = ExtensionServer.get_instance().get_controller_by_id(extension_id)
+        controller = ExtensionSocketServer.get_instance().get_controller_by_id(extension_id)
     else:
         logger.warning("Invalid result from mode: %s", type(event).__name__)
 
