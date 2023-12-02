@@ -3,8 +3,8 @@
 **/*~
 **/*#
 .DS_Store
+
 .cache
-ulauncherc
 *.egg-info
 dist
 build
@@ -12,14 +12,9 @@ build
 _build
 .build-checksum
 po
-.coverage
-htmlcov
 node_modules/
-bower_components/
 .tmp/
-aur_key
 *.key
-generated.css
 launchpad.ssh.tar
 .pytest_cache/
 .pylintrc/
@@ -30,7 +25,6 @@ package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-preferences-src/test/unit/coverage
 data/preferences
 .venv
 /nix/result
