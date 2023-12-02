@@ -2,7 +2,7 @@
 
 import os
 
-# These shouldn't be written to, but 
+# These paths shouldn't be written to, but if something goes wrong at least we won't overwrite user confs
 TEST_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "./.tmp/ulauncher_tests"))
 
 mock_xdg_dirs = {
