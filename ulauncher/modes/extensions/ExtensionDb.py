@@ -46,7 +46,6 @@ class ExtensionDb(JsonConf):
     def get_record(self, ext_id: str) -> ExtensionRecord:
         if ext_id not in self:
             self[ext_id] = ExtensionRecord.create(ext_id)
-            self.save()
         return self[ext_id]
 
     @classmethod
