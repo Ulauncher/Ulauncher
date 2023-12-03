@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
-from datetime import datetime
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -13,13 +12,11 @@ from urllib.request import urlopen, urlretrieve
 
 from ulauncher.config import API_VERSION, PATHS
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionIncompatibleWarning, ExtensionManifest
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
-db = ExtensionDb.load()
 
 
 class ExtensionRemoteError(Exception):
@@ -153,7 +150,7 @@ class ExtensionRemote:
         # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
         return remote_refs.get("HEAD", "HEAD")
 
-    def download(self, commit_hash=None, warn_if_overwrite=True):
+    def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = False) -> tuple[str, float]:
         if not commit_hash:
             commit_hash = self.get_compatible_hash()
         output_dir_exists = isdir(self._dir)
@@ -197,12 +194,4 @@ class ExtensionRemote:
                     move(tmp_dir, self._dir)
             commit_timestamp = getmtime(self._dir)
 
-        ext_record = ExtensionRecord.create(
-            id=self.extension_id,
-            commit_hash=commit_hash,
-            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-            updated_at=datetime.now().isoformat(),
-            url=self.url,
-        )
-        db.update({self.extension_id: ext_record})
-        db.save()
+        return commit_hash, commit_timestamp
