@@ -39,7 +39,6 @@ class TestExtensionSocketController:
         manifest.get_user_preferences.return_value = {}
         assert controller.extension_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
-        controller.manifest.validate.assert_called_once()
         controller.framer.send.assert_called_with({"type": "event:legacy_preferences_load", "args": [MOCK_SETTINGS]})
 
     def test_trigger_event__send__is_called(self, controller):

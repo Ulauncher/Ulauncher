@@ -7,7 +7,7 @@ from typing import Any
 
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, ExtensionManifestError
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.utils.decorator.debounce import debounce
 
 logger = logging.getLogger()
@@ -30,12 +30,6 @@ class ExtensionSocketController:
         self.result_renderer = DeferredResultRenderer.get_instance()
         self.extension_id = extension_id
         self.manifest = ExtensionManifest.load_from_extension_id(extension_id)
-        try:
-            self.manifest.validate()
-        except ExtensionManifestError as e:
-            logger.warning("Couldn't connect '%s'. %s: %s", extension_id, type(e).__name__, e)
-            self.framer.close()
-            return
 
         self.controllers[extension_id] = self
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
