@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from shutil import rmtree
 
 from ulauncher.modes.extensions import extension_finder
@@ -61,8 +62,15 @@ class ExtensionController:
     def is_running(self) -> bool:
         return ext_runner.is_running(self.id)
 
-    def download(self) -> None:
-        self.remote.download()
+    def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
+        commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
+        self.record.update(
+            commit_hash=commit_hash,
+            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+            updated_at=datetime.now().isoformat(),
+        )
+        ext_db.update({self.id: self.record})
+        ext_db.save()
 
     def remove(self) -> None:
         if not self.is_manageable:
@@ -93,7 +101,7 @@ class ExtensionController:
             commit_hash[:8],
         )
 
-        self.remote.download(commit_hash, warn_if_overwrite=False)
+        self.download(commit_hash, warn_if_overwrite=False)
         return True
 
     def check_update(self) -> tuple[bool, str]:
