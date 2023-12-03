@@ -194,6 +194,7 @@ class ExtensionManifest(JsonConf):
     @classmethod
     def load_from_extension_id(cls, ext_id: str) -> ExtensionManifest:
         ext_path = extension_finder.locate(ext_id)
+        assert ext_path, f"No extension could be found matching {ext_id}"
         manifest = super().load(os.path.join(ext_path, "manifest.json"))
         manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
         return manifest

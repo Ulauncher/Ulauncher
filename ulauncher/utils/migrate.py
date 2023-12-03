@@ -65,6 +65,7 @@ def _migrate_user_prefs(extension_id: str, user_prefs: dict[str, dict]) -> dict[
         return user_prefs
     new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
     ext_path = extension_finder.locate(extension_id)
+    assert ext_path, f"No extension could be found matching {extension_id}"
     manifest = ExtensionManifest.load(os.path.join(ext_path, "manifest.json"))
     for id, pref in user_prefs.items():
         if manifest.triggers.get(id):

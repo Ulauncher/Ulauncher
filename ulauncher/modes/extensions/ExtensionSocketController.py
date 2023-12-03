@@ -73,6 +73,7 @@ class ExtensionSocketController:
         if not icon:
             icon = self.manifest.icon
         ext_path = extension_finder.locate(self.extension_id)
+        assert ext_path, f"No extension could be found matching {self.extension_id}"
         expanded_path = icon and os.path.join(ext_path, icon)
         return expanded_path if os.path.isfile(expanded_path) else icon
 

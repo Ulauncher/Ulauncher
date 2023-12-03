@@ -6,11 +6,6 @@ from typing import Generator
 from ulauncher.config import PATHS
 
 
-class ExtensionNotFound(FileNotFoundError):
-    def __init__(self, ext_id):
-        super().__init__(f"Extension with id {ext_id} was not found anywhere in search path")
-
-
 def is_extension(ext_path: str) -> bool:
     """
     Tells whether the argument is an extension directory
@@ -40,14 +35,11 @@ def locate_iter(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -
             yield os.path.realpath(ext_path)
 
 
-def locate(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str:
+def locate(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str | None:
     """
     Locates (an existing) extension directory.
     """
-    try:
-        return next(locate_iter(ext_id, exts_dirs=exts_dirs))
-    except StopIteration:
-        raise ExtensionNotFound(ext_id) from None
+    return next(locate_iter(ext_id, exts_dirs=exts_dirs), None)
 
 
 def get_user_dir(ext_id: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR) -> str:

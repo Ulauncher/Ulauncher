@@ -33,6 +33,7 @@ class ExtensionDownloader:
 
     def remove(self, ext_id: str) -> None:
         ext_path = extension_finder.locate(ext_id)
+        assert ext_path, f"No extension could be found matching {ext_id}"
         if not extension_finder.is_manageable(ext_path):
             return
 

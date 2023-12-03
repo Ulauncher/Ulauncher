@@ -27,7 +27,6 @@ class ExtensionRecord(JsonConf):
     def create(cls, id, **kwargs):
         kwargs["id"] = id
         ext_path = extension_finder.locate(id)
-        # TODO @nazarewk: ext_path can be None in the run_all() test  #noqa: TD003
         if ext_path is not None:
             record_file = os.path.join(ext_path, ".extension-record.json")
             if os.path.isfile(record_file):

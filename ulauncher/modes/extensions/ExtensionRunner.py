@@ -89,6 +89,7 @@ class ExtensionRunner:
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
             if not ext_path:
                 ext_path = extension_finder.locate(extension_id)
+            assert ext_path, f"No extension could be found matching {extension_id}"
             cmd = [sys.executable, f"{ext_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
