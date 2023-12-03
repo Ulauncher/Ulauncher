@@ -37,8 +37,15 @@ class ExtensionDownloader:
             return
 
         rmtree(ext_path)
-        if ext_id in self.ext_db:
-            del self.ext_db[ext_id]
+        # Update record to disabled if there is another version of the extension that can be found
+        # Or remove the record otherwise
+        record = self.ext_db.get(ext_id)
+        if record:
+            record.is_enabled = False
+            try:
+                extension_finder.locate(ext_id)
+            except extension_finder.ExtensionNotFound:
+                del self.ext_db[ext_id]
             self.ext_db.save()
 
     def update(self, ext_id: str) -> bool:

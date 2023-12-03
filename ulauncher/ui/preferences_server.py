@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import json
 import logging
 import mimetypes
@@ -312,13 +311,8 @@ class PreferencesServer:
     def extension_remove(self, extension_id):
         logger.info("Remove extension: %s", extension_id)
         runner = ExtensionRunner.get_instance()
-        was_running = runner.is_running(extension_id)
         runner.stop(extension_id)
         ExtensionDownloader.get_instance().remove(extension_id)
-        # if the extension was running, try to start it again (in case it is installed in a different location)
-        if was_running:
-            with contextlib.suppress(extension_finder.ExtensionNotFound):
-                runner.run(extension_id)
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, extension_id, is_enabled):
