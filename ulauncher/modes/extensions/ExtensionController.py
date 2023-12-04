@@ -51,16 +51,15 @@ class ExtensionController:
         return ext_path
 
     @property
-    def full_icon_path(self) -> str:
-        return get_icon_path(self.manifest.icon, base_path=self.path)
-
-    @property
     def is_manageable(self) -> bool:
         return extension_finder.is_manageable(self.path)
 
     @property
     def is_running(self) -> bool:
         return ext_runner.is_running(self.id)
+
+    def get_normalized_icon_path(self, icon: str | None = None) -> str:
+        return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
     def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)

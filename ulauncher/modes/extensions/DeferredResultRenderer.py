@@ -42,7 +42,7 @@ class DeferredResultRenderer:
         """
         Schedules "Loading..." message
         """
-        icon = controller.get_normalized_icon_path()
+        icon = controller.data_controller.get_normalized_icon_path()
         loading_message = Result(name="Loading...", icon=icon)
 
         self._cancel_loading()

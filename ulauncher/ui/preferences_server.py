@@ -48,7 +48,7 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
             "path": ext_path,
             "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
             "name": controller.manifest.name,
-            "icon": controller.full_icon_path,
+            "icon": controller.get_normalized_icon_path(),
             "authors": controller.manifest.authors,
             "instructions": controller.manifest.instructions,
             "preferences": controller.manifest.preferences,
