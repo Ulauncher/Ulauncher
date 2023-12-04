@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-import mimetypes
-from os.path import expanduser, join
+from os.path import expanduser, isfile, join
 
 from gi.repository import Gtk
 
@@ -21,8 +20,9 @@ def get_icon_path(icon, size=32, base_path=""):
             if icon.startswith("/"):
                 return icon
 
-            if "/" in icon or mimetypes.guess_type(icon)[0]:
-                return join(base_path, icon)
+            expanded_path = join(base_path, icon)
+            if isfile(expanded_path):
+                return expanded_path
 
             themed_icon = icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE)
             if themed_icon:

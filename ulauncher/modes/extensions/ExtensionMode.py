@@ -36,6 +36,7 @@ class ExtensionMode(BaseMode):
         :rtype: Iterable[:class:`~ulauncher.api.result.Result`]
         """
         for controller in self.ExtensionSocketServer.controllers.values():
+            data_controller = controller.data_controller
             for trigger_id, trigger in controller.manifest.triggers.items():
                 action: Any = None
                 if trigger.keyword is None:
@@ -51,7 +52,7 @@ class ExtensionMode(BaseMode):
                     yield Result(
                         name=html.escape(trigger.name),
                         description=html.escape(trigger.description),
-                        icon=controller.get_normalized_icon_path(trigger.icon),
+                        icon=data_controller.get_normalized_icon_path(trigger.icon),
                         on_enter=action,
                         searchable=True,
                     )

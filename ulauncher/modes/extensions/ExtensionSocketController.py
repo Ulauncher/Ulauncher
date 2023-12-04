@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import os
 from typing import Any
 
-from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.utils.decorator.debounce import debounce
 
@@ -19,6 +18,7 @@ class ExtensionSocketController:
     """
 
     extension_id: str
+    data_controller: ExtensionController
     manifest: ExtensionManifest
 
     def __init__(self, controllers, framer, extension_id: str):  # type: ignore[no-untyped-def]
@@ -29,6 +29,7 @@ class ExtensionSocketController:
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()
         self.extension_id = extension_id
+        self.data_controller = ExtensionController(extension_id)
         self.manifest = ExtensionManifest.load_from_extension_id(extension_id)
 
         self.controllers[extension_id] = self
@@ -68,14 +69,6 @@ class ExtensionSocketController:
         else:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
-
-    def get_normalized_icon_path(self, icon: str | None = None) -> str:
-        if not icon:
-            icon = self.manifest.icon
-        ext_path = extension_finder.locate(self.extension_id)
-        assert ext_path, f"No extension could be found matching {self.extension_id}"
-        expanded_path = icon and os.path.join(ext_path, icon)
-        return expanded_path if os.path.isfile(expanded_path) else icon
 
     def handle_response(self, _framer, response: dict[str, Any]):  # type: ignore[no-untyped-def]
         logger.debug(

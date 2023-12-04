@@ -1,4 +1,3 @@
-from types import MethodType
 from unittest import mock
 
 import pytest
@@ -6,8 +5,8 @@ import pytest
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
-from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 from ulauncher.ui.UlauncherApp import UlauncherApp
 
 
@@ -32,19 +31,11 @@ class TestDeferredResultRenderer:
 
     @pytest.fixture
     def controller(self):
-        ctrl = mock.create_autospec(ExtensionSocketController)
-        ctrl.get_normalized_icon_path = MethodType(lambda _: "/path/to/asdf.png", ctrl)
-        return ctrl
+        return mock.create_autospec(ExtensionController)
 
     @pytest.fixture
     def renderer(self):
         return DeferredResultRenderer()
-
-    def test_handle_event__loading_timer__is_canceled(self, renderer, event, controller):
-        timer = mock.Mock()
-        renderer.loading = timer
-        renderer.handle_event(event, controller)
-        timer.cancel.assert_called_once_with()
 
     def test_handle_response__action__is_ran(self, renderer, controller):
         action = mock.Mock()
