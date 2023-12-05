@@ -58,12 +58,12 @@ def _migrate_app_state(old_format: dict) -> dict:
     return new_format
 
 
-def _migrate_user_prefs(extension_id: str, user_prefs: dict[str, dict]) -> dict[str, dict]:
+def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict]) -> dict[str, dict]:
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
-    controller = ExtensionController(extension_id)
+    controller = ExtensionController(ext_id)
     for id, pref in user_prefs.items():
         if controller.manifest.triggers.get(id):
             new_prefs["triggers"][id] = {"keyword": pref}

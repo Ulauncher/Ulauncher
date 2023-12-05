@@ -18,34 +18,34 @@ class ExtensionSocketController:
     Handles communication between Ulauncher app and an extension.
     """
 
-    extension_id: str
+    ext_id: str
     data_controller: ExtensionController
     manifest: ExtensionManifest
 
-    def __init__(self, controllers, framer, extension_id: str):  # type: ignore[no-untyped-def]
-        if not extension_id:
-            msg = "No extension_id provided"
+    def __init__(self, controllers, framer, ext_id: str):  # type: ignore[no-untyped-def]
+        if not ext_id:
+            msg = "No ext_id provided"
             raise RuntimeError(msg)
         self.controllers = controllers
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()
-        self.extension_id = extension_id
-        self.data_controller = ExtensionController(extension_id)
-        ext_path = extension_finder.locate(extension_id)
-        assert ext_path, f"No extension could be found matching {extension_id}"
+        self.ext_id = ext_id
+        self.data_controller = ExtensionController(ext_id)
+        ext_path = extension_finder.locate(ext_id)
+        assert ext_path, f"No extension could be found matching {ext_id}"
         self.manifest = ExtensionManifest.load(ext_path)
 
-        self.controllers[extension_id] = self
+        self.controllers[ext_id] = self
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
         self._send_event({"type": "event:legacy_preferences_load", "args": [self.manifest.get_user_preferences()]})
-        logger.info('Extension "%s" connected', extension_id)
+        logger.info('Extension "%s" connected', ext_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
 
     def _send_event(self, event):
-        logger.debug('Send event %s to "%s"', type(event).__name__, self.extension_id)
+        logger.debug('Send event %s to "%s"', type(event).__name__, self.ext_id)
         self.framer.send(event)
 
     def handle_query(self, query):
@@ -58,7 +58,7 @@ class ExtensionSocketController:
         return self.trigger_event(
             {
                 "type": "event:input_trigger",
-                "ext_id": self.extension_id,
+                "ext_id": self.ext_id,
                 "args": [query.argument, trigger_id],
             }
         )
@@ -78,7 +78,7 @@ class ExtensionSocketController:
         logger.debug(
             'Incoming response with keys "%s" from "%s"',
             set(response),
-            self.extension_id,
+            self.ext_id,
         )
         action = response.get("action")
         if isinstance(action, list):
@@ -88,6 +88,6 @@ class ExtensionSocketController:
         self.result_renderer.handle_response(response, self)
 
     def handle_close(self, _framer):
-        logger.info('Extension "%s" disconnected', self.extension_id)
+        logger.info('Extension "%s" disconnected', self.ext_id)
         with contextlib.suppress(Exception):
-            del self.controllers[self.extension_id]
+            del self.controllers[self.ext_id]

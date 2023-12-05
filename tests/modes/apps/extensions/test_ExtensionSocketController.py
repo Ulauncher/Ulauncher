@@ -43,7 +43,7 @@ class TestExtensionSocketController:
     def test_configure__typical(self, controller, controllers, manifest):
         # configure() is called implicitly when constructing the controller.
         manifest.get_user_preferences.return_value = {}
-        assert controller.extension_id == TEST_EXT_ID
+        assert controller.ext_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
         controller.framer.send.assert_called_with({"type": "event:legacy_preferences_load", "args": [MOCK_SETTINGS]})
 

@@ -26,7 +26,7 @@ class TestClient:
     @pytest.fixture
     def extension(self):
         ext = mock.create_autospec(Extension)
-        ext.extension_id = "com.example.test-extension"
+        ext.ext_id = "com.example.test-extension"
         return ext
 
     @pytest.fixture

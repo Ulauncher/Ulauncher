@@ -70,14 +70,14 @@ class ExtensionRemote:
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionUrlWarning(msg) from e
 
-        self.extension_id = ".".join(
+        self.ext_id = ".".join(
             [
                 *reversed(self.host.split(".") if self.host else []),
                 *self.path.split("/"),
             ]
         )
-        self._dir = extension_finder.get_user_dir(self.extension_id)
-        self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.extension_id}.git"
+        self._dir = extension_finder.get_user_dir(self.ext_id)
+        self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.ext_id}.git"
 
     def _get_download_url(self, commit: str) -> str:
         if self.host == "gitlab.com":

@@ -39,7 +39,7 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
 
     event_type = event.get("type", "")
     data = event.get("data")
-    extension_id = event.get("ext_id")
+    ext_id = event.get("ext_id")
     controller = None
     if event_type == "action:open" and data:
         open_detached(data)
@@ -58,8 +58,8 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
         return keep_open
     elif event_type == "event:activate_custom":
         controller = DeferredResultRenderer.get_instance().get_active_controller()
-    elif event_type.startswith("event") and extension_id:
-        controller = ExtensionSocketServer.get_instance().get_controller_by_id(extension_id)
+    elif event_type.startswith("event") and ext_id:
+        controller = ExtensionSocketServer.get_instance().get_controller_by_id(ext_id)
     else:
         logger.warning("Invalid result from mode: %s", type(event).__name__)
 
