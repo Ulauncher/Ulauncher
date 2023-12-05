@@ -31,7 +31,7 @@ class ExtensionController:
     @classmethod
     def create_from_url(cls, url: str) -> ExtensionController:
         remote = ExtensionRemote(url)
-        instance = cls(remote.extension_id)
+        instance = cls(remote.ext_id)
         instance.remote = remote
         instance.record.url = url
         return instance

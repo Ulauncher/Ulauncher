@@ -25,8 +25,8 @@ class Extension:
         logHandler = logging.StreamHandler()
         logHandler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[logHandler])
-        self.extension_id = os.path.basename(os.path.dirname(sys.argv[0]))
-        self.logger = logging.getLogger(self.extension_id)
+        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
+        self.logger = logging.getLogger(self.ext_id)
         self._listeners = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}

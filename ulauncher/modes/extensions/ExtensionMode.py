@@ -43,7 +43,7 @@ class ExtensionMode(BaseMode):
                     action = {
                         "type": "event:launch_trigger",
                         "args": [trigger_id],
-                        "ext_id": controller.extension_id,
+                        "ext_id": controller.ext_id,
                     }
                 elif trigger.user_keyword:
                     action = f"{trigger.user_keyword} "

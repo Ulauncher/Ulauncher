@@ -92,8 +92,8 @@ class ExtensionSocketServer:
     def get_controllers(self) -> list[ExtensionSocketController]:
         return list(self.controllers.values())
 
-    def get_controller_by_id(self, extension_id: str) -> ExtensionSocketController | None:
-        return self.controllers.get(extension_id)
+    def get_controller_by_id(self, ext_id: str) -> ExtensionSocketController | None:
+        return self.controllers.get(ext_id)
 
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
         for controller in self.controllers.values():

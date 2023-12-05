@@ -272,10 +272,10 @@ class PreferencesServer:
         return list(get_extensions())
 
     @route("/extension/set-prefs")
-    def extension_update_prefs(self, extension_id, data):
-        logger.info("Update extension preferences %s to %s", extension_id, data)
-        controller = ExtensionController(extension_id)
-        socket_controller = ExtensionSocketServer.get_instance().controllers.get(extension_id)
+    def extension_update_prefs(self, ext_id, data):
+        logger.info("Update extension preferences %s to %s", ext_id, data)
+        controller = ExtensionController(ext_id)
+        socket_controller = ExtensionSocketServer.get_instance().controllers.get(ext_id)
         if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
                 pref = controller.manifest.preferences.get(id)
@@ -283,29 +283,29 @@ class PreferencesServer:
                     event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
                     socket_controller.trigger_event(event_data)
         controller.manifest.apply_user_preferences(data)
-        controller.manifest.save_user_preferences(extension_id)
+        controller.manifest.save_user_preferences(ext_id)
 
     @route("/extension/check-update")
-    def extension_check_update(self, extension_id):
+    def extension_check_update(self, ext_id):
         logger.info("Checking if extension has an update")
-        return ExtensionController(extension_id).check_update()
+        return ExtensionController(ext_id).check_update()
 
     @route("/extension/update-ext")
-    def extension_update_ext(self, extension_id):
-        logger.info("Update extension: %s", extension_id)
-        controller = ExtensionController(extension_id)
+    def extension_update_ext(self, ext_id):
+        logger.info("Update extension: %s", ext_id)
+        controller = ExtensionController(ext_id)
         controller.stop()
         controller.update()
         controller.start()
 
     @route("/extension/remove")
-    def extension_remove(self, extension_id):
-        logger.info("Remove extension: %s", extension_id)
-        controller = ExtensionController(extension_id)
+    def extension_remove(self, ext_id):
+        logger.info("Remove extension: %s", ext_id)
+        controller = ExtensionController(ext_id)
         controller.remove()
 
     @route("/extension/toggle-enabled")
-    def extension_toggle_enabled(self, extension_id, is_enabled):
-        logger.info("Toggle extension: %s", extension_id)
-        controller = ExtensionController(extension_id)
+    def extension_toggle_enabled(self, ext_id, is_enabled):
+        logger.info("Toggle extension: %s", ext_id)
+        controller = ExtensionController(ext_id)
         controller.toggle_enabled(is_enabled)

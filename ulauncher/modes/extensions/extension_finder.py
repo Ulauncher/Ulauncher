@@ -53,7 +53,7 @@ def iterate(
     exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
 ) -> Generator[tuple[str, str], None, None]:
     """
-    Yields `(extension_id, extension_path)` tuples found in a given extensions dirs
+    Yields `(ext_id, extension_path)` tuples found in a given extensions dirs
     """
     occurrences = set()
     for ext_path in exts_dirs:
