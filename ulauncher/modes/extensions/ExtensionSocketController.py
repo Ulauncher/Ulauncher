@@ -4,6 +4,7 @@ import contextlib
 import logging
 from typing import Any
 
+from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
@@ -30,7 +31,9 @@ class ExtensionSocketController:
         self.result_renderer = DeferredResultRenderer.get_instance()
         self.extension_id = extension_id
         self.data_controller = ExtensionController(extension_id)
-        self.manifest = ExtensionManifest.load_from_extension_id(extension_id)
+        ext_path = extension_finder.locate(extension_id)
+        assert ext_path, f"No extension could be found matching {extension_id}"
+        self.manifest = ExtensionManifest.load(ext_path)
 
         self.controllers[extension_id] = self
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)

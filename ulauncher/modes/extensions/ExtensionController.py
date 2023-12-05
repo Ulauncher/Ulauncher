@@ -42,7 +42,7 @@ class ExtensionController:
 
     @property
     def manifest(self) -> ExtensionManifest:
-        return ExtensionManifest.load_from_extension_id(self.id)
+        return ExtensionManifest.load(self.path)
 
     @property
     def path(self) -> str:

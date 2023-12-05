@@ -73,7 +73,12 @@ class ExtensionRunner:
         if not self.is_running(extension_id):
             ext_record = ext_db.get_record(extension_id)
             ext_record.update(error_message="", error_type="")  # reset
-            manifest = ExtensionManifest.load_from_extension_id(extension_id)
+            if not ext_path:
+                ext_path = extension_finder.locate(extension_id)
+            assert ext_path, f"No extension could be found matching {extension_id}"
+
+            manifest = ExtensionManifest.load(ext_path)
+
             try:
                 manifest.validate()
                 manifest.check_compatibility(verbose=True)
@@ -87,9 +92,6 @@ class ExtensionRunner:
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
             backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
-            if not ext_path:
-                ext_path = extension_finder.locate(extension_id)
-            assert ext_path, f"No extension could be found matching {extension_id}"
             cmd = [sys.executable, f"{ext_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),
