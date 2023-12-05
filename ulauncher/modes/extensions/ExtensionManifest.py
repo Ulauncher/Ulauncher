@@ -162,13 +162,6 @@ class ExtensionManifest(JsonConf):
                 msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
                 raise ExtensionIncompatibleWarning(msg)
 
-    def find_matching_trigger(self, **kwargs: dict[str, Any]) -> str | None:
-        """
-        Get the first trigger matching the arguments, and returns the id
-        Ex find_matching_trigger(user_keyword='asdf', icon=None)
-        """
-        return next((id for id, t in self.triggers.items() if {**t, **kwargs} == t), None)
-
     def get_user_preferences(self) -> dict[str, Any]:
         """
         Get the preferences as an id-value dict
