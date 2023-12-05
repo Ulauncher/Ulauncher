@@ -53,7 +53,8 @@ class ExtensionSocketController:
         Handles user query with a keyword from this extension
         :returns: action object
         """
-        trigger_id = self.manifest.find_matching_trigger(user_keyword=query.keyword)
+        trigger_id = next((id for id, t in self.manifest.triggers.items() if t.user_keyword == query.keyword), None)
+
         return self.trigger_event(
             {
                 "type": "event:input_trigger",
