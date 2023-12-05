@@ -91,7 +91,7 @@ class ExtensionRunner:
 
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
             # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
-            backwards_compatible_preferences = {**triggers, **manifest.get_user_preferences()}
+            backwards_compatible_preferences = {**triggers, **manifest.get_key_value_user_preferences(ext_id)}
             cmd = [sys.executable, f"{ext_path}/main.py"]
             env = {
                 "VERBOSE": str(int(self.verbose)),

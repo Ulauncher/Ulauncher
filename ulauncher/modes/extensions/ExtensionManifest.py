@@ -19,13 +19,12 @@ class ExtensionIncompatibleWarning(Exception):
     pass
 
 
-class Preference(JsonConf):
+class ExtensionManifestPreference(JsonConf):
     name = ""
     type = ""
     description = ""
     options: list[dict] = []
     default_value: str | int = ""
-    value: str | int | None = None
     max: int | None = None
     min: int | None = None
 
@@ -34,12 +33,19 @@ class Preference(JsonConf):
         super().__setitem__(key, value, validate_type)
 
 
-class Trigger(JsonConf):
+class ExtensionManifestTrigger(JsonConf):
     name = ""
     description = ""
     keyword = ""
-    user_keyword = ""
     icon = ""
+
+
+class UserPreference(ExtensionManifestPreference):
+    value: str | int | None = None
+
+
+class UserTrigger(ExtensionManifestTrigger):
+    user_keyword = ""
 
 
 class ExtensionManifest(JsonConf):
@@ -49,8 +55,8 @@ class ExtensionManifest(JsonConf):
     icon = ""
     instructions = ""
     input_debounce = 0.05
-    triggers: dict[str, Trigger] = {}
-    preferences: dict[str, Preference] = {}
+    triggers: dict[str, ExtensionManifestTrigger] = {}
+    preferences: dict[str, ExtensionManifestPreference] = {}
 
     def __setitem__(self, key, value):
         # Rename "required_api_version" back to "api_version"
@@ -65,22 +71,22 @@ class ExtensionManifest(JsonConf):
             value = value and float(value.get("query_debounce", -1))
             if value <= 0:
                 return
-        # Convert triggers dicts to Trigger instances
+        # Convert triggers dicts to ExtensionManifestTrigger instances
         if key == "triggers":
-            value = {id: Trigger(trigger) for id, trigger in value.items()}
-        # Convert preferences dicts to Preference instances (and Triggers if it's old shortcuts)
+            value = {id: ExtensionManifestTrigger(trigger) for id, trigger in value.items()}
+        # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
         if key == "preferences":
             if isinstance(value, dict):
-                value = {id: Preference(pref) for id, pref in value.items()}
+                value = {id: ExtensionManifestPreference(pref) for id, pref in value.items()}
             elif isinstance(value, list):  # APIv2 backwards compatibility
                 prefs = {}
                 for p in value:
                     id = p.get("id")
-                    pref = Preference(p, id=None)
+                    pref = ExtensionManifestPreference(p, id=None)
                     if pref.type != "keyword":
                         prefs[id] = pref
                     else:
-                        self.triggers[id] = Trigger(
+                        self.triggers[id] = ExtensionManifestTrigger(
                             name=pref.name,
                             description=pref.description,
                             keyword=pref.default_value,
@@ -162,31 +168,44 @@ class ExtensionManifest(JsonConf):
                 msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
                 raise ExtensionIncompatibleWarning(msg)
 
-    def get_user_preferences(self) -> dict[str, Any]:
+    def _get_raw_preferences(self, ext_id: str) -> JsonConf:
+        return JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json")
+
+    def get_user_preferences(self, ext_id: str) -> dict[str, UserPreference]:
+        user_prefs_json = self._get_raw_preferences(ext_id)
+        user_prefs = {}
+        for id, pref in self.preferences.items():
+            # copy to avoid mutating
+            user_pref = UserPreference(**pref)
+            user_pref.value = user_prefs_json.get("preferences", {}).get(id, pref.default_value)
+            user_prefs[id] = user_pref
+        return user_prefs
+
+    def get_user_triggers(self, ext_id: str) -> dict[str, UserTrigger]:
+        user_prefs_json = self._get_raw_preferences(ext_id)
+        user_triggers = {}
+        for id, trigger in self.triggers.items():
+            combined_trigger = UserTrigger(trigger)
+            if trigger.keyword:
+                user_keyword = user_prefs_json.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
+                combined_trigger.user_keyword = user_keyword
+            user_triggers[id] = combined_trigger
+
+        return user_triggers
+
+    def get_key_value_user_preferences(self, ext_id: str) -> dict[str, str | int | None]:
         """
         Get the preferences as an id-value dict
         """
-        return {id: pref.value for id, pref in self.preferences.items()}
+        return {id: pref.value for id, pref in self.get_user_preferences(ext_id).items()}
 
-    def save_user_preferences(self, ext_id: str) -> None:
-        path = f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"
-        triggers = {id: ({"keyword": t.user_keyword} if t.keyword else {}) for id, t in self.triggers.items()}
-        file = JsonConf.load(path)
-        file.update(triggers=triggers, preferences=self.get_user_preferences())
-        file.save()
-
-    def apply_user_preferences(self, user_prefs: dict) -> None:
-        for id, pref in self.preferences.items():
-            pref.value = user_prefs.get("preferences", {}).get(id, pref.default_value)
-
-        for id, trigger in self.triggers.items():
-            if trigger.keyword:
-                trigger.user_keyword = user_prefs.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
+    def save_user_preferences(self, ext_id: str, data: Any) -> None:
+        user_prefs_json = self._get_raw_preferences(ext_id)
+        user_prefs_json.update(data)
+        user_prefs_json.save()
 
     @classmethod
     def load(cls, path: str | Path) -> ExtensionManifest:
         if not str(path).endswith("/manifest.json"):
             path = Path(path, "manifest.json")
-        manifest = super().load(path)
-        manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{path}.json"))
-        return manifest
+        return super().load(path)
