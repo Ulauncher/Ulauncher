@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from shutil import rmtree
+from typing import Any
 
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, UserPreference, UserTrigger
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.utils.get_icon_path import get_icon_path
@@ -57,6 +58,17 @@ class ExtensionController:
     @property
     def is_running(self) -> bool:
         return ext_runner.is_running(self.id)
+
+    @property
+    def user_preferences(self) -> dict[str, UserPreference]:
+        return self.manifest.get_user_preferences(self.id)
+
+    @property
+    def user_triggers(self) -> dict[str, UserTrigger]:
+        return self.manifest.get_user_triggers(self.id)
+
+    def save_user_preferences(self, data: Any) -> None:
+        self.manifest.save_user_preferences(self.id, data)
 
     def get_normalized_icon_path(self, icon: str | None = None) -> str:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)

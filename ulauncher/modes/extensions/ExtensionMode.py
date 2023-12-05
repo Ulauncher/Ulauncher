@@ -37,7 +37,7 @@ class ExtensionMode(BaseMode):
         """
         for controller in self.ExtensionSocketServer.controllers.values():
             data_controller = controller.data_controller
-            for trigger_id, trigger in controller.manifest.get_user_triggers(data_controller.id).items():
+            for trigger_id, trigger in data_controller.user_triggers.items():
                 action: Any = None
                 if trigger.keyword is None:
                     action = {
