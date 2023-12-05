@@ -21,9 +21,15 @@ class TestExtensionSocketController:
         ).return_value
 
     @pytest.fixture(autouse=True)
+    def extension_finder(self, mocker):
+        ef = mocker.patch("ulauncher.modes.extensions.ExtensionSocketController.extension_finder")
+        ef.locate = lambda ext_id: f"./.tmp/ulauncher_tests/{ext_id}"
+        return ef
+
+    @pytest.fixture(autouse=True)
     def manifest(self, mocker):
         manifest = mocker.patch(
-            "ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load_from_extension_id"
+            "ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load"
         ).return_value
         manifest.get_user_preferences.return_value = MOCK_SETTINGS
         return manifest

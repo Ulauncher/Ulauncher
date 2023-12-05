@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import logging
-import os
+from pathlib import Path
 from typing import Any
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.modes.extensions import extension_finder
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
@@ -192,9 +191,9 @@ class ExtensionManifest(JsonConf):
                 trigger.user_keyword = user_prefs.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
 
     @classmethod
-    def load_from_extension_id(cls, ext_id: str) -> ExtensionManifest:
-        ext_path = extension_finder.locate(ext_id)
-        assert ext_path, f"No extension could be found matching {ext_id}"
-        manifest = super().load(os.path.join(ext_path, "manifest.json"))
-        manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{ext_id}.json"))
+    def load(cls, path: str | Path) -> ExtensionManifest:
+        if not str(path).endswith("/manifest.json"):
+            path = Path(path, "manifest.json")
+        manifest = super().load(path)
+        manifest.apply_user_preferences(JsonConf.load(f"{PATHS.EXTENSIONS_CONFIG}/{path}.json"))
         return manifest
