@@ -51,8 +51,8 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
             "icon": controller.get_normalized_icon_path(),
             "authors": controller.manifest.authors,
             "instructions": controller.manifest.instructions,
-            "preferences": controller.manifest.preferences,
-            "triggers": controller.manifest.triggers,
+            "preferences": controller.manifest.get_user_preferences(ext_id),
+            "triggers": controller.manifest.get_user_triggers(ext_id),
             "is_manageable": controller.is_manageable,
             "is_running": controller.is_running,
         }
@@ -278,12 +278,11 @@ class PreferencesServer:
         socket_controller = ExtensionSocketServer.get_instance().controllers.get(ext_id)
         if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
-                pref = controller.manifest.preferences.get(id)
+                pref = controller.manifest.get_user_preferences(ext_id).get(id)
                 if pref and new_value != pref.value:
                     event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
                     socket_controller.trigger_event(event_data)
-        controller.manifest.apply_user_preferences(data)
-        controller.manifest.save_user_preferences(ext_id)
+        controller.manifest.save_user_preferences(ext_id, data)
 
     @route("/extension/check-update")
     def extension_check_update(self, ext_id):

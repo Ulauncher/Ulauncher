@@ -31,7 +31,7 @@ class TestExtensionSocketController:
         manifest = mocker.patch(
             "ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load"
         ).return_value
-        manifest.get_user_preferences.return_value = MOCK_SETTINGS
+        manifest.get_key_value_user_preferences.return_value = MOCK_SETTINGS
         return manifest
 
     @pytest.fixture
@@ -42,7 +42,7 @@ class TestExtensionSocketController:
 
     def test_configure__typical(self, controller, controllers, manifest):
         # configure() is called implicitly when constructing the controller.
-        manifest.get_user_preferences.return_value = {}
+        manifest.get_key_value_user_preferences.return_value = {}
         assert controller.ext_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
         controller.framer.send.assert_called_with({"type": "event:legacy_preferences_load", "args": [MOCK_SETTINGS]})

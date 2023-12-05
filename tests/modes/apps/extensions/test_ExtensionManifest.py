@@ -75,12 +75,6 @@ class TestExtensionManifest:
         manifest = ExtensionManifest(preferences={"ns": {"k": "v"}})
         assert json_stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
 
-    def test_get_user_preferences(self):
-        manifest = ExtensionManifest(
-            preferences={"txt": {"type": "text", "value": "asdf"}, "num": {"type": "number", "value": 11}}
-        )
-        assert manifest.get_user_preferences() == {"txt": "asdf", "num": 11}
-
     def test_manifest_backwards_compatibility(self):
         em = ExtensionManifest(
             required_api_version="3",

@@ -97,7 +97,7 @@ class ExtensionSocketServer:
 
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
         for controller in self.controllers.values():
-            for trigger in controller.manifest.triggers.values():
+            for trigger in controller.manifest.get_user_triggers(controller.ext_id).values():
                 if keyword and keyword == trigger.user_keyword:
                     return controller
 
