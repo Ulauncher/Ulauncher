@@ -54,7 +54,7 @@ class ExtensionSocketController:
         Handles user query with a keyword from this extension
         :returns: action object
         """
-        triggers = self.manifest.get_user_triggers(self.ext_id)
+        triggers = self.data_controller.user_triggers
         trigger_id = next((id for id, t in triggers.items() if t.user_keyword == query.keyword), None)
 
         return self.trigger_event(
