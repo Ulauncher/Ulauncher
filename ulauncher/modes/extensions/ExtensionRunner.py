@@ -94,8 +94,6 @@ class ExtensionRunner:
             env = {
                 "VERBOSE": str(int(self.verbose)),
                 "PYTHONPATH": PATHS.APPLICATION,
-                "EXTENSION_ICON": manifest.icon,
-                "EXTENSION_PATH": ext_path,
                 "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(",", ":")),
             }
 

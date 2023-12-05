@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from ulauncher.api.shared.query import Query
@@ -21,15 +20,6 @@ class Result(BaseDataClass):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        # This part only runs when initialized from an extensions
-        ext_path = os.environ.get("EXTENSION_PATH")
-        env_icon = os.environ.get("EXTENSION_ICON")
-        if ext_path:
-            if not self.icon and env_icon:
-                self.icon = env_icon
-            if self.icon and os.path.isfile(f"{ext_path}/{self.icon}"):
-                self.icon = f"{ext_path}/{self.icon}"
 
     def __setitem__(self, key, value):
         if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str)):
