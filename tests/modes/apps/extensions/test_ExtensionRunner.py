@@ -61,7 +61,7 @@ class TestExtensionRunner:
 
     def test_run__basic_execution__is_called(self, runner, SubprocessLauncher):
         extid = "id"
-        runner.run(extid)
+        runner.run(extid, "path")
         SubprocessLauncher.new.assert_called_once()
         extproc = runner.extension_procs[extid]
         extproc.subprocess.wait_async.assert_called_once()
@@ -81,7 +81,7 @@ class TestExtensionRunner:
         extid = "id"
         read_line_finish_utf8 = mock.Mock()
 
-        runner.run(extid)
+        runner.run(extid, "path")
         extproc = runner.extension_procs[extid]
         extproc.error_stream.read_line_finish_utf8 = read_line_finish_utf8
 
@@ -101,7 +101,7 @@ class TestExtensionRunner:
     def test_handle_wait__signaled(self, runner):
         extid = "id"
 
-        runner.run(extid)
+        runner.run(extid, "path")
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = True
         extproc.subprocess.get_term_sig.return_value = 9
@@ -121,7 +121,7 @@ class TestExtensionRunner:
         starttime = curtime - 0.5
         time.return_value = starttime
 
-        runner.run(extid)
+        runner.run(extid, "path")
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -139,7 +139,7 @@ class TestExtensionRunner:
         starttime = curtime - 5
         time.return_value = starttime
 
-        runner.run(extid)
+        runner.run(extid, "path")
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -155,7 +155,7 @@ class TestExtensionRunner:
     def test_stop(self, runner, timer):
         extid = "id"
 
-        runner.run(extid)
+        runner.run(extid, "path")
         extproc = runner.extension_procs[extid]
         runner.stop(extid)
         assert extid not in runner.extension_procs

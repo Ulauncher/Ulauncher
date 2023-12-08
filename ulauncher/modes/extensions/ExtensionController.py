@@ -132,7 +132,7 @@ class ExtensionController:
             self.stop()
 
     def start(self):
-        ext_runner.run(self.id)
+        ext_runner.run(self.id, self.path)
 
     def stop(self):
         ext_runner.stop(self.id)

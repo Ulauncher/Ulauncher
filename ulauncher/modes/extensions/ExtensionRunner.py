@@ -65,7 +65,7 @@ class ExtensionRunner:
                 except Exception:
                     logger.exception("Couldn't start extension '%s'", ext_id)
 
-    def run(self, ext_id: str, ext_path: str | None = None) -> None:
+    def run(self, ext_id: str, ext_path: str) -> None:
         """
         * Validates manifest
         * Runs extension in a new process
@@ -73,9 +73,6 @@ class ExtensionRunner:
         if not self.is_running(ext_id):
             ext_record = ext_db.get_record(ext_id)
             ext_record.update(error_message="", error_type="")  # reset
-            if not ext_path:
-                ext_path = extension_finder.locate(ext_id)
-            assert ext_path, f"No extension could be found matching {ext_id}"
 
             manifest = ExtensionManifest.load(ext_path)
 
