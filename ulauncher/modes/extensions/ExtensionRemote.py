@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
 
 from ulauncher.config import API_VERSION, PATHS
-from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionIncompatibleWarning, ExtensionManifest
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
@@ -76,7 +75,7 @@ class ExtensionRemote:
                 *self.path.split("/"),
             ]
         )
-        self._dir = extension_finder.get_user_dir(self.ext_id)
+        self._dir = f"{PATHS.USER_EXTENSIONS_DIR}/{self.ext_id}"
         self._git_dir = f"{PATHS.USER_EXTENSIONS_DIR}/.git/{self.ext_id}.git"
 
     def _get_download_url(self, commit: str) -> str:
