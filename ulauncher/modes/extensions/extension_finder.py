@@ -42,13 +42,6 @@ def locate(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str
     return next(locate_iter(ext_id, exts_dirs=exts_dirs), None)
 
 
-def get_user_dir(ext_id: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR) -> str:
-    """
-    Returns path to writable extension directory
-    """
-    return os.path.realpath(os.path.join(user_ext_path, ext_id))
-
-
 def iterate(
     exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
 ) -> Generator[tuple[str, str], None, None]:
