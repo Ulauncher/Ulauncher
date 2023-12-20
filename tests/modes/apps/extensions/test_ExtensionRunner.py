@@ -48,10 +48,6 @@ class TestExtensionRunner:
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.DataInputStream")
 
     @pytest.fixture
-    def ProcessErrorExtractor(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ProcessErrorExtractor")
-
-    @pytest.fixture
     def time(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.time")
 
@@ -115,7 +111,7 @@ class TestExtensionRunner:
         )
         assert extid not in runner.extension_procs
 
-    def test_handle_wait__rapid_exit(self, runner, time, ProcessErrorExtractor):
+    def test_handle_wait__rapid_exit(self, runner, time):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 0.5
@@ -127,8 +123,6 @@ class TestExtensionRunner:
         extproc.subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
 
-        ProcessErrorExtractor.is_import_error.return_value = True
-        ProcessErrorExtractor.get_missing_package_name.return_value = "TestPackage"
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
         runner.set_extension_error.assert_called()
         assert extid not in runner.extension_procs
