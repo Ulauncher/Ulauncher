@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from shutil import rmtree
-from typing import Any
+from typing import Any, Generator
 
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
@@ -39,6 +39,11 @@ class ExtensionController:
         instance.remote = remote
         instance.record.url = url
         return instance
+
+    @classmethod
+    def iterate(cls) -> Generator[ExtensionController, None, None]:
+        for ext_id, ext_path in extension_finder.iterate():
+            yield ExtensionController(ext_id, ext_path)
 
     @property
     def record(self) -> ExtensionRecord:

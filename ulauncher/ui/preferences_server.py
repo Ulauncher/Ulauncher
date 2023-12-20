@@ -15,7 +15,6 @@ from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
@@ -255,8 +254,10 @@ class PreferencesServer:
     def extension_get_all(self, reload: bool) -> list[dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
-            ExtensionRunner.get_instance().run_all(True)
-            # TODO(friday): Refactor run_all so we can know when it has completed instead of hard coding  # noqa: TD003
+            for controller in ExtensionController.iterate():
+                if controller.record.is_enabled:
+                    controller.start()
+            # TODO(friday): Refactor so we can know when it has completed instead of hard coding  # noqa: TD003
             time.sleep(0.5)
         return list(get_extensions())
 

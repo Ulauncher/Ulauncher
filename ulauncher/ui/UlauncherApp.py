@@ -8,7 +8,7 @@ from gi.repository import Gio, Gtk
 
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
@@ -105,7 +105,9 @@ class UlauncherApp(Gtk.Application, AppIndicator):
 
         ExtensionSocketServer.get_instance().start()
         time.sleep(0.01)
-        ExtensionRunner.get_instance().run_all()
+        for controller in ExtensionController.iterate():
+            if controller.record.is_enabled and not controller.record.error_type:
+                controller.start()
 
     def show_launcher(self):
         if not self.window:
