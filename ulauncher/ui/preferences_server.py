@@ -292,10 +292,7 @@ class PreferencesServer:
     @route("/extension/update-ext")
     def extension_update_ext(self, ext_id):
         logger.info("Update extension: %s", ext_id)
-        controller = ExtensionController(ext_id)
-        controller.stop()
-        controller.update()
-        controller.start()
+        ExtensionController(ext_id).update()
 
     @route("/extension/remove")
     def extension_remove(self, ext_id):
