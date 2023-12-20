@@ -13,7 +13,6 @@ from typing import NamedTuple
 from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
-from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionManifest import (
     ExtensionIncompatibleWarning,
@@ -51,18 +50,6 @@ class ExtensionRunner:
     def __init__(self) -> None:
         self.extension_procs: dict[str, ExtensionProc] = {}
         self.verbose = get_options().verbose
-
-    def run_all(self, force: bool = False) -> None:
-        """
-        Finds all extensions and runs them
-        """
-        for ext_id, ext_path in extension_finder.iterate():
-            ext_record = ext_db.get_record(ext_id)
-            if ext_record.is_enabled and (not ext_record.error_type or force):
-                try:
-                    self.run(ext_id, ext_path)
-                except Exception:
-                    logger.exception("Couldn't start extension '%s'", ext_id)
 
     def run(self, ext_id: str, ext_path: str) -> None:
         """
