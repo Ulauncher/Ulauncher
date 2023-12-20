@@ -25,31 +25,31 @@ def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR)
     return os.path.dirname(ext_path) == user_ext_path and is_extension(ext_path)
 
 
-def locate_iter(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
+def locate_iter(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
     """
     Yields all existing directories for given `ext_id`
     """
-    for exts_dir in exts_dirs:
+    for exts_dir in ext_dirs:
         ext_path = os.path.join(exts_dir, ext_id)
         if is_extension(ext_path):
             yield os.path.realpath(ext_path)
 
 
-def locate(ext_id: str, exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str | None:
+def locate(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str | None:
     """
     Locates (an existing) extension directory.
     """
-    return next(locate_iter(ext_id, exts_dirs=exts_dirs), None)
+    return next(locate_iter(ext_id, ext_dirs=ext_dirs), None)
 
 
 def iterate(
-    exts_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
+    ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
 ) -> Generator[tuple[str, str], None, None]:
     """
     Yields `(ext_id, extension_path)` tuples found in a given extensions dirs
     """
     occurrences = set()
-    for ext_path in exts_dirs:
+    for ext_path in ext_dirs:
         if not os.path.exists(ext_path):
             continue
         for entry in os.scandir(ext_path):
