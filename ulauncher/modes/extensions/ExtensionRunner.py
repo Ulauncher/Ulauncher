@@ -20,7 +20,6 @@ from ulauncher.modes.extensions.ExtensionManifest import (
     ExtensionManifest,
     ExtensionManifestError,
 )
-from ulauncher.modes.extensions.ProcessErrorExtractor import ProcessErrorExtractor
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -152,23 +151,22 @@ class ExtensionRunner:
         runtime = time() - extproc.start_time
         code = subprocess.get_exit_status()
         if runtime < 1:
-            error_msg = f'Extension "{ext_id}" exited instantly with code {code}'
-            logger.error(error_msg)
-            self.set_extension_error(ext_id, ExtensionRuntimeError.Terminated, error_msg)
+            default_error_msg = f'Extension "{ext_id}" exited instantly with code {code}'
             lasterr = "\n".join(extproc.recent_errors)
-            error_info = ProcessErrorExtractor(lasterr)
-            logger.error('Extension "%s" failed with an error: %s', ext_id, error_info.error)
-            if error_info.is_import_error():
-                package_name = error_info.get_missing_package_name()
+            logger.error('Extension "%s" failed with an error: %s', ext_id, lasterr)
+            if "ModuleNotFoundError" in lasterr:
+                package_name = lasterr.split("'")[1]
                 if package_name == "ulauncher":
                     logger.error(
                         "Extension tried to import Ulauncher modules which have been moved or removed. "
                         "This is likely Ulauncher internals which were not part of the extension API. "
                         "Extensions importing these can break at any Ulauncher release."
                     )
-                    self.set_extension_error(ext_id, ExtensionRuntimeError.Incompatible, error_msg)
+                    self.set_extension_error(ext_id, ExtensionRuntimeError.Incompatible, default_error_msg)
                 elif package_name:
                     self.set_extension_error(ext_id, ExtensionRuntimeError.MissingModule, package_name)
+            else:
+                self.set_extension_error(ext_id, ExtensionRuntimeError.Terminated, default_error_msg)
 
             self.extension_procs.pop(ext_id, None)
             return
