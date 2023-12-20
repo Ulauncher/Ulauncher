@@ -102,6 +102,7 @@ class ExtensionController:
         :returns: False if already up-to-date, True if was updated
         """
         has_update, commit_hash = self.check_update()
+        was_running = self.is_running
         if not has_update:
             return False
 
@@ -112,7 +113,12 @@ class ExtensionController:
             commit_hash[:8],
         )
 
+        self.stop()
         self.download(commit_hash, warn_if_overwrite=False)
+
+        if was_running:
+            self.start()
+
         return True
 
     def check_update(self) -> tuple[bool, str]:
