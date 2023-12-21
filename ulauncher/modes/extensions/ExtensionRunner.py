@@ -135,9 +135,9 @@ class ExtensionRunner:
             logger.info("Exited process %s for %s has already been removed.", subprocess, ext_id)
             return
 
-        runtime = time() - extproc.start_time
+        uptime_seconds = time() - extproc.start_time
         code = subprocess.get_exit_status()
-        if runtime < 1:
+        if uptime_seconds < 1:
             default_error_msg = f'Extension "{ext_id}" exited instantly with code {code}'
             lasterr = "\n".join(extproc.recent_errors)
             logger.error('Extension "%s" failed with an error: %s', ext_id, lasterr)
@@ -158,7 +158,7 @@ class ExtensionRunner:
             self.extension_procs.pop(ext_id, None)
             return
 
-        error_msg = f'Extension "{ext_id}" exited with code {code} after {runtime} seconds.'
+        error_msg = f'Extension "{ext_id}" exited with code {code} after {uptime_seconds} seconds.'
         self.set_extension_error(ext_id, ExtensionRuntimeError.Exited, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(ext_id, None)
