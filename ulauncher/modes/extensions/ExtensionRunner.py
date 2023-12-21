@@ -105,20 +105,20 @@ class ExtensionRunner:
             subproc.wait_async(None, self.handle_wait, ext_id)
             self.read_stderr_line(self.extension_procs[ext_id])
 
-    def read_stderr_line(self, extproc: ExtensionProc) -> None:
-        extproc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, extproc.ext_id)
+    def read_stderr_line(self, proc: ExtensionProc) -> None:
+        proc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, proc.ext_id)
 
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult, ext_id: str) -> None:
         output, _ = error_stream.read_line_finish_utf8(result)
         if output:
             print(output)  # noqa: T201
-        extproc = self.extension_procs.get(ext_id)
-        if not extproc:
+        proc = self.extension_procs.get(ext_id)
+        if not proc:
             logger.debug("Extension process context for %s no longer present", ext_id)
             return
         if output:
-            extproc.recent_errors.append(output)
-        self.read_stderr_line(extproc)
+            proc.recent_errors.append(output)
+        self.read_stderr_line(proc)
 
     def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, ext_id: str) -> None:
         subprocess.wait_finish(result)
@@ -130,16 +130,16 @@ class ExtensionRunner:
             self.extension_procs.pop(ext_id, None)
             return
 
-        extproc = self.extension_procs.get(ext_id)
-        if not extproc or id(extproc.subprocess) != id(subprocess):
+        proc = self.extension_procs.get(ext_id)
+        if not proc or id(proc.subprocess) != id(subprocess):
             logger.info("Exited process %s for %s has already been removed.", subprocess, ext_id)
             return
 
-        uptime_seconds = time() - extproc.start_time
+        uptime_seconds = time() - proc.start_time
         code = subprocess.get_exit_status()
         if uptime_seconds < 1:
             default_error_msg = f'Extension "{ext_id}" exited instantly with code {code}'
-            lasterr = "\n".join(extproc.recent_errors)
+            lasterr = "\n".join(proc.recent_errors)
             logger.error('Extension "%s" failed with an error: %s', ext_id, lasterr)
             if "ModuleNotFoundError" in lasterr:
                 package_name = lasterr.split("'")[1]
@@ -169,20 +169,20 @@ class ExtensionRunner:
         """
         if self.is_running(ext_id):
             logger.info('Terminating extension "%s"', ext_id)
-            extproc = self.extension_procs[ext_id]
+            proc = self.extension_procs[ext_id]
             self.extension_procs.pop(ext_id, None)
 
-            extproc.subprocess.send_signal(signal.SIGTERM)
+            proc.subprocess.send_signal(signal.SIGTERM)
 
-            timer(0.5, partial(self.confirm_termination, extproc))
+            timer(0.5, partial(self.confirm_termination, proc))
 
-    def confirm_termination(self, extproc: ExtensionProc) -> None:
-        if extproc.subprocess.get_identifier():
-            logger.info("Extension %s still running, sending SIGKILL", extproc.ext_id)
+    def confirm_termination(self, proc: ExtensionProc) -> None:
+        if proc.subprocess.get_identifier():
+            logger.info("Extension %s still running, sending SIGKILL", proc.ext_id)
             # It is possible that the process exited between the check above and this signal,
             # luckily the subprocess library handles the signal delivery in race-free way, so this
             # is safe to do.
-            extproc.subprocess.send_signal(signal.SIGKILL)
+            proc.subprocess.send_signal(signal.SIGKILL)
 
     def is_running(self, ext_id: str) -> bool:
         return ext_id in self.extension_procs
