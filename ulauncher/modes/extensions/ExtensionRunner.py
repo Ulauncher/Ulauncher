@@ -148,7 +148,7 @@ class ExtensionRunner:
 
         extproc = self.extension_procs.get(extension_id)
         if not extproc or id(extproc.subprocess) != id(subprocess):
-            logger.info("Exited process %s for %s has already been removed. Not restarting.", subprocess, extension_id)
+            logger.info("Exited process %s for %s has already been removed.", subprocess, extension_id)
             return
 
         runtime = time() - extproc.start_time
@@ -175,11 +175,10 @@ class ExtensionRunner:
             self.extension_procs.pop(extension_id, None)
             return
 
-        error_msg = f'Extension "{extension_id}" exited with code {code} after {runtime} seconds. Restarting...'
+        error_msg = f'Extension "{extension_id}" exited with code {code} after {runtime} seconds.'
         self.set_extension_error(extension_id, ExtensionRuntimeError.Exited, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(extension_id, None)
-        self.run(extension_id)
 
     def stop(self, extension_id: str) -> None:
         """

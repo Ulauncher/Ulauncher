@@ -133,7 +133,7 @@ class TestExtensionRunner:
         runner.set_extension_error.assert_called()
         assert extid not in runner.extension_procs
 
-    def test_handle_wait__restart(self, runner, time):
+    def test_handle_wait(self, runner, time):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 5
@@ -148,11 +148,9 @@ class TestExtensionRunner:
         runner.run = mock.Mock()
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
         runner.set_extension_error.assert_called_once_with(
-            "id", ExtensionRuntimeError.Exited, 'Extension "id" exited with code 9 after 5.0 seconds. Restarting...'
+            "id", ExtensionRuntimeError.Exited, 'Extension "id" exited with code 9 after 5.0 seconds.'
         )
-        # run() is mocked, so the ExtensionProce won't get readded after "restart"
         assert extid not in runner.extension_procs
-        runner.run.assert_called_once()
 
     def test_stop(self, runner, timer):
         extid = "id"
