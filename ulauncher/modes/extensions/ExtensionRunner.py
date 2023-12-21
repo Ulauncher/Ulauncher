@@ -120,8 +120,7 @@ class ExtensionRunner:
             proc.recent_errors.append(output)
         self.read_stderr_line(proc)
 
-    def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, ext_id: str) -> None:
-        subprocess.wait_finish(result)
+    def handle_wait(self, subprocess: Gio.Subprocess, _result: Gio.AsyncResult, ext_id: str) -> None:
         if subprocess.get_if_signaled() and self.extension_procs.get(ext_id):
             kill_signal = subprocess.get_term_sig()
             error_msg = f'Extension "{ext_id}" was terminated with signal {kill_signal}'
