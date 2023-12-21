@@ -139,8 +139,8 @@ class ExtensionRunner:
     def handle_wait(self, subprocess: Gio.Subprocess, result: Gio.AsyncResult, extension_id: str) -> None:
         subprocess.wait_finish(result)
         if subprocess.get_if_signaled() and self.extension_procs.get(extension_id):
-            code = subprocess.get_term_sig()
-            error_msg = f'Extension "{extension_id}" was terminated with code {code}'
+            kill_signal = subprocess.get_term_sig()
+            error_msg = f'Extension "{extension_id}" was terminated with signal {kill_signal}'
             logger.error(error_msg)
             self.set_extension_error(extension_id, ExtensionRuntimeError.Terminated, error_msg)
             self.extension_procs.pop(extension_id, None)

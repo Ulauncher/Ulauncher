@@ -111,7 +111,7 @@ class TestExtensionRunner:
         runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
         # Confirm error handling
         runner.set_extension_error.assert_called_once_with(
-            "id", ExtensionRuntimeError.Terminated, 'Extension "id" was terminated with code 9'
+            "id", ExtensionRuntimeError.Terminated, 'Extension "id" was terminated with signal 9'
         )
         assert extid not in runner.extension_procs
 
