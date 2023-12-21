@@ -78,7 +78,7 @@ class TestExtensionRunner:
         assert extproc.recent_errors[0] == test_output2
         assert extproc.error_stream.read_line_async.call_count == 3
 
-    def test_handle_wait__signaled(self, runner):
+    def test_handle_exit__signaled(self, runner):
         extid = "id"
 
         runner.run(extid, "path")
@@ -88,14 +88,14 @@ class TestExtensionRunner:
         # Check pre-condition
         runner.set_extension_error.assert_not_called()
 
-        runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
+        runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         # Confirm error handling
         runner.set_extension_error.assert_called_once_with(
             "id", ExtensionRuntimeError.Terminated, 'Extension "id" was terminated with signal 9'
         )
         assert extid not in runner.extension_procs
 
-    def test_handle_wait__rapid_exit(self, runner, time):
+    def test_handle_exit__rapid_exit(self, runner, time):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 0.5
@@ -107,11 +107,11 @@ class TestExtensionRunner:
         extproc.subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
 
-        runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
+        runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         runner.set_extension_error.assert_called()
         assert extid not in runner.extension_procs
 
-    def test_handle_wait(self, runner, time):
+    def test_handle_exit(self, runner, time):
         extid = "id"
         curtime = 100.0
         starttime = curtime - 5
@@ -124,7 +124,7 @@ class TestExtensionRunner:
         time.return_value = curtime
 
         runner.run = mock.Mock()
-        runner.handle_wait(extproc.subprocess, mock.Mock(), extid)
+        runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         runner.set_extension_error.assert_called_once_with(
             "id", ExtensionRuntimeError.Exited, 'Extension "id" exited with code 9 after 5.0 seconds.'
         )
