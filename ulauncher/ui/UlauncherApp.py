@@ -106,7 +106,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         ExtensionSocketServer.get_instance().start()
         time.sleep(0.01)
         for controller in ExtensionController.iterate():
-            if controller.record.is_enabled and not controller.record.error_type:
+            if controller.is_enabled and not controller.has_error:
                 controller.start()
 
     def show_launcher(self):

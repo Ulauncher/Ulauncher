@@ -24,6 +24,7 @@ USER_STATE_DIR = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/s
 USER_EXTENSIONS_DIR = os.path.join(USER_DATA_DIR, "extensions")
 ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS_DIR, *[os.path.join(p, "ulauncher", "extensions") for p in XDG_DATA_DIRS]]
 EXTENSIONS_CONFIG_DIR = os.path.join(USER_CONFIG_DIR, "ext_preferences")
+EXTENSIONS_STATE_DIR = os.path.join(USER_STATE_DIR, "ext_state")
 USER_THEMES = os.path.join(USER_CONFIG_DIR, "user-themes")
 SYSTEM_THEMES = os.path.join(SYSTEM_DATA_DIR, "themes")
 VERSION = ulauncher.version
@@ -40,6 +41,7 @@ class _PATHS_CLASS:
     USER_EXTENSIONS_DIR = USER_EXTENSIONS_DIR
     ALL_EXTENSIONS_DIRS = ALL_EXTENSIONS_DIRS
     EXTENSIONS_CONFIG = EXTENSIONS_CONFIG_DIR
+    EXTENSIONS_STATE = EXTENSIONS_STATE_DIR
     USER_THEMES = USER_THEMES
     SYSTEM_THEMES = SYSTEM_THEMES
 
