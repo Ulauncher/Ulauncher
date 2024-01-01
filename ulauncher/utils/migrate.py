@@ -14,6 +14,7 @@ from typing import Any, Callable
 
 from ulauncher.config import FIRST_V6_RUN, PATHS
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.utils.json_utils import json_load
 from ulauncher.utils.systemd_controller import SystemdController
 
 _logger = logging.getLogger()
@@ -106,6 +107,14 @@ def v5_to_v6() -> None:
         settings.update(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
         settings.save()
 
+    # Migrate extension state to individual files
+    extension_db = json_load(f"{PATHS.CONFIG}/extensions.json")
+    for controller in ExtensionController.iterate():
+        # only if they don't already exist
+        if not controller.state.id and controller.id in extension_db:
+            controller.state.update(extension_db[controller.id])
+            controller.state.save()
+
     # Migrate autostart conf from XDG autostart file to systemd
     if FIRST_V6_RUN:
         try:
@@ -131,6 +140,7 @@ def v5_to_v6_destructive() -> None:
         *Path(CACHE_PATH).rglob("*.db"),
         *Path(PATHS.DATA).rglob("*.db"),
         *Path(PATHS.DATA).rglob("last.log"),
+        Path(f"{PATHS.CONFIG}/extensions.json"),
     ]
     if cleanup_list:
         print("Removing deprecated data files:")  # noqa: T201

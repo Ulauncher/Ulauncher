@@ -43,7 +43,7 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
         controller = ExtensionController(ext_id)
 
         yield {
-            **controller.record,
+            **controller.state,
             "path": ext_path,
             "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
             "name": controller.manifest.name,
@@ -255,7 +255,7 @@ class PreferencesServer:
         logger.info("Handling /extension/get-all")
         if reload:
             for controller in ExtensionController.iterate():
-                if controller.record.is_enabled:
+                if controller.is_enabled:
                     controller.start()
             # TODO(friday): Refactor so we can know when it has completed instead of hard coding  # noqa: TD003
             time.sleep(0.5)
