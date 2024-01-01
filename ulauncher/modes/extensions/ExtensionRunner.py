@@ -38,6 +38,32 @@ class ExtensionProc(NamedTuple):
     error_stream: Gio.DataInputStream
     recent_errors: deque
 
+    def extract_error(self) -> tuple[ExtensionRuntimeError, str]:
+        if self.subprocess.get_if_signaled():
+            kill_signal = self.subprocess.get_term_sig()
+            return "Terminated", f'Extension "{self.ext_id}" was terminated with signal {kill_signal}'
+
+        uptime_seconds = time() - self.start_time
+        code = self.subprocess.get_exit_status()
+        error_msg = "\n".join(self.recent_errors)
+        logger.error('Extension "%s" exited with an error: %s', self.ext_id, error_msg)
+        if "ModuleNotFoundError" in error_msg:
+            package_name = error_msg.split("'")[1]
+            if package_name == "ulauncher":
+                logger.error(
+                    "Extension tried to import Ulauncher modules which have been moved or removed. "
+                    "This is likely Ulauncher internals which were not part of the extension API. "
+                    "Extensions importing these can break at any Ulauncher release."
+                )
+                return "Incompatible", error_msg
+            if package_name:
+                return "MissingModule", package_name
+        if uptime_seconds < 1:
+            return "Terminated", error_msg
+
+        error_msg = f'Extension "{self.ext_id}" exited with code {code} after {uptime_seconds} seconds.'
+        return "Exited", error_msg
+
 
 class ExtensionRunner:
     @classmethod
@@ -91,17 +117,18 @@ class ExtensionRunner:
                 err_msg = "Subprocess must be created with Gio.SubprocessFlags.STDERR_PIPE"
                 raise AssertionError(err_msg)
             error_line_str = Gio.DataInputStream.new(error_input_stream)
-            self.extension_procs[ext_id] = ExtensionProc(
+            proc = ExtensionProc(
                 ext_id=ext_id,
                 subprocess=subproc,
                 start_time=t_start,
                 error_stream=error_line_str,
                 recent_errors=deque(maxlen=1),
             )
+            self.extension_procs[ext_id] = proc
             logger.debug("Launched %s using Gio.Subprocess", ext_id)
 
             subproc.wait_async(None, self.handle_exit, ext_id)
-            self.read_stderr_line(self.extension_procs[ext_id])
+            self.read_stderr_line(proc)
 
     def read_stderr_line(self, proc: ExtensionProc) -> None:
         proc.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr, proc.ext_id)
@@ -119,44 +146,12 @@ class ExtensionRunner:
         self.read_stderr_line(proc)
 
     def handle_exit(self, subprocess: Gio.Subprocess, _result: Gio.AsyncResult, ext_id: str) -> None:
-        if subprocess.get_if_signaled() and self.extension_procs.get(ext_id):
-            kill_signal = subprocess.get_term_sig()
-            error_msg = f'Extension "{ext_id}" was terminated with signal {kill_signal}'
-            logger.error(error_msg)
-            self.set_extension_error(ext_id, "Terminated", error_msg)
-            self.extension_procs.pop(ext_id, None)
-            return
-
         proc = self.extension_procs.get(ext_id)
         if not proc or id(proc.subprocess) != id(subprocess):
             logger.info("Exited process %s for %s has already been removed.", subprocess, ext_id)
             return
-
-        uptime_seconds = time() - proc.start_time
-        code = subprocess.get_exit_status()
-        if uptime_seconds < 1:
-            default_error_msg = f'Extension "{ext_id}" exited instantly with code {code}'
-            lasterr = "\n".join(proc.recent_errors)
-            logger.error('Extension "%s" failed with an error: %s', ext_id, lasterr)
-            if "ModuleNotFoundError" in lasterr:
-                package_name = lasterr.split("'")[1]
-                if package_name == "ulauncher":
-                    logger.error(
-                        "Extension tried to import Ulauncher modules which have been moved or removed. "
-                        "This is likely Ulauncher internals which were not part of the extension API. "
-                        "Extensions importing these can break at any Ulauncher release."
-                    )
-                    self.set_extension_error(ext_id, "Incompatible", default_error_msg)
-                elif package_name:
-                    self.set_extension_error(ext_id, "MissingModule", package_name)
-            else:
-                self.set_extension_error(ext_id, "Terminated", default_error_msg)
-
-            self.extension_procs.pop(ext_id, None)
-            return
-
-        error_msg = f'Extension "{ext_id}" exited with code {code} after {uptime_seconds} seconds.'
-        self.set_extension_error(ext_id, "Exited", error_msg)
+        error_type, error_msg = proc.extract_error()
+        self.set_extension_error(ext_id, error_type, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(ext_id, None)
 
