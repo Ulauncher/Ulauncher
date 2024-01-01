@@ -7,7 +7,7 @@ import sys
 from collections import deque
 from functools import lru_cache, partial
 from time import time
-from typing import NamedTuple
+from typing import Callable, NamedTuple
 
 if sys.version_info >= (3, 8):
     from typing import Literal
@@ -19,7 +19,6 @@ else:
 from gi.repository import Gio, GLib
 
 from ulauncher.config import PATHS, get_options
-from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
 from ulauncher.modes.extensions.ExtensionManifest import (
     ExtensionIncompatibleWarning,
     ExtensionManifest,
@@ -28,7 +27,9 @@ from ulauncher.modes.extensions.ExtensionManifest import (
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
-ext_db = ExtensionDb.load()
+
+
+ErrorHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
 
 
 class ExtensionProc(NamedTuple):
@@ -37,6 +38,7 @@ class ExtensionProc(NamedTuple):
     start_time: float
     error_stream: Gio.DataInputStream
     recent_errors: deque
+    error_handler: ErrorHandlerCallback | None
 
     def extract_error(self) -> tuple[ExtensionRuntimeError, str]:
         if self.subprocess.get_if_signaled():
@@ -75,25 +77,24 @@ class ExtensionRunner:
         self.extension_procs: dict[str, ExtensionProc] = {}
         self.verbose = get_options().verbose
 
-    def run(self, ext_id: str, ext_path: str) -> None:
+    def run(self, ext_id: str, ext_path: str, error_handler: ErrorHandlerCallback | None = None) -> None:
         """
         * Validates manifest
         * Runs extension in a new process
         """
         if not self.is_running(ext_id):
-            ext_record = ext_db.get_record(ext_id)
-            ext_record.update(error_message="", error_type="")  # reset
-
             manifest = ExtensionManifest.load(ext_path)
 
             try:
                 manifest.validate()
                 manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
-                self.set_extension_error(ext_id, "Invalid", str(err))
+                if error_handler:
+                    error_handler("Invalid", str(err))
                 return
             except ExtensionIncompatibleWarning as err:
-                self.set_extension_error(ext_id, "Incompatible", str(err))
+                if error_handler:
+                    error_handler("Incompatible", str(err))
                 return
 
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
@@ -119,6 +120,7 @@ class ExtensionRunner:
             error_line_str = Gio.DataInputStream.new(error_input_stream)
             proc = ExtensionProc(
                 ext_id=ext_id,
+                error_handler=error_handler,
                 subprocess=subproc,
                 start_time=t_start,
                 error_stream=error_line_str,
@@ -151,9 +153,10 @@ class ExtensionRunner:
             logger.info("Exited process %s for %s has already been removed.", subprocess, ext_id)
             return
         error_type, error_msg = proc.extract_error()
-        self.set_extension_error(ext_id, error_type, error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(ext_id, None)
+        if proc.error_handler:
+            proc.error_handler(error_type, error_msg)
 
     def stop(self, ext_id: str) -> None:
         """
@@ -178,7 +181,3 @@ class ExtensionRunner:
 
     def is_running(self, ext_id: str) -> bool:
         return ext_id in self.extension_procs
-
-    def set_extension_error(self, ext_id: str, error_type: ExtensionRuntimeError, message: str) -> None:
-        ext_db.get_record(ext_id).update(error_message=message, error_type=error_type)
-        ext_db.save()
