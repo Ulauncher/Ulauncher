@@ -6,7 +6,6 @@ from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 
 TEST_EXT_ID = "com.example.test-ext-id"
-MOCK_SETTINGS = {"pref_id": "pref_val"}
 
 
 class TestExtensionSocketController:
@@ -30,11 +29,7 @@ class TestExtensionSocketController:
 
     @pytest.fixture(autouse=True)
     def manifest(self, mocker):
-        manifest = mocker.patch(
-            "ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load"
-        ).return_value
-        manifest.get_key_value_user_preferences.return_value = MOCK_SETTINGS
-        return manifest
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketController.ExtensionManifest.load").return_value
 
     @pytest.fixture
     def controller(self, controllers):
@@ -42,12 +37,11 @@ class TestExtensionSocketController:
         controller._debounced_send_event = controller._send_event
         return controller
 
-    def test_configure__typical(self, controller, controllers, manifest):
+    def test_configure__typical(self, controller, controllers):
         # configure() is called implicitly when constructing the controller.
-        manifest.get_key_value_user_preferences.return_value = {}
         assert controller.ext_id == TEST_EXT_ID
         assert controllers[TEST_EXT_ID] == controller
-        controller.framer.send.assert_called_with({"type": "event:legacy_preferences_load", "args": [MOCK_SETTINGS]})
+        controller.framer.send.assert_called_with({"type": "event:legacy_preferences_load", "args": [{}]})
 
     def test_trigger_event__send__is_called(self, controller):
         event = {}
