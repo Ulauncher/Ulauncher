@@ -12,10 +12,6 @@ class TestExtensionRunner:
         return ExtensionRunner()
 
     @pytest.fixture(autouse=True)
-    def set_extension_error(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ExtensionRunner.set_extension_error")
-
-    @pytest.fixture(autouse=True)
     def timer(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.timer")
 
@@ -42,10 +38,6 @@ class TestExtensionRunner:
     @pytest.fixture
     def time(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.time")
-
-    @pytest.fixture(autouse=True)
-    def ExtensionDb(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionDb.ExtensionDb")
 
     def test_run__basic_execution__is_called(self, runner, SubprocessLauncher):
         extid = "id"
@@ -80,19 +72,18 @@ class TestExtensionRunner:
 
     def test_handle_exit__signaled(self, runner):
         extid = "id"
+        err_cb = mock.Mock()
 
-        runner.run(extid, "path")
+        runner.run(extid, "path", err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = True
         extproc.subprocess.get_term_sig.return_value = 9
         # Check pre-condition
-        runner.set_extension_error.assert_not_called()
+        err_cb.assert_not_called()
 
         runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         # Confirm error handling
-        runner.set_extension_error.assert_called_once_with(
-            "id", "Terminated", 'Extension "id" was terminated with signal 9'
-        )
+        err_cb.assert_called_once_with("Terminated", 'Extension "id" was terminated with signal 9')
         assert extid not in runner.extension_procs
 
     def test_handle_exit__rapid_exit(self, runner, time):
@@ -100,15 +91,16 @@ class TestExtensionRunner:
         curtime = 100.0
         starttime = curtime - 0.5
         time.return_value = starttime
+        err_cb = mock.Mock()
 
-        runner.run(extid, "path")
+        runner.run(extid, "path", err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
 
         runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
-        runner.set_extension_error.assert_called()
+        err_cb.assert_called()
         assert extid not in runner.extension_procs
 
     def test_handle_exit(self, runner, time):
@@ -116,8 +108,9 @@ class TestExtensionRunner:
         curtime = 100.0
         starttime = curtime - 5
         time.return_value = starttime
+        err_cb = mock.Mock()
 
-        runner.run(extid, "path")
+        runner.run(extid, "path", err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -125,9 +118,7 @@ class TestExtensionRunner:
 
         runner.run = mock.Mock()
         runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
-        runner.set_extension_error.assert_called_once_with(
-            "id", "Exited", 'Extension "id" exited with code 9 after 5.0 seconds.'
-        )
+        err_cb.assert_called_once_with("Exited", 'Extension "id" exited with code 9 after 5.0 seconds.')
         assert extid not in runner.extension_procs
 
     def test_stop(self, runner, timer):

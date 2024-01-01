@@ -149,7 +149,13 @@ class ExtensionController:
             self.stop()
 
     def start(self):
-        ext_runner.run(self.id, self.path)
+        if not self.is_running:
+            def error_handler(error_type: str, error_msg: str) -> None:
+                self.record.update(error_type=error_type, error_message=error_msg)
+                ext_db.save()
+
+            error_handler("", "")
+            ext_runner.run(self.id, self.path, error_handler)
 
     def stop(self):
         ext_runner.stop(self.id)
