@@ -176,7 +176,7 @@ class ExtensionController:
 
             error_handler("", "")
 
-            prefs = self.manifest.get_key_value_user_preferences(self.id)
+            prefs = {id: pref.value for id, pref in self.user_preferences.items()}
             triggers = {id: t.keyword for id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}

@@ -193,12 +193,6 @@ class ExtensionManifest(JsonConf):
 
         return user_triggers
 
-    def get_key_value_user_preferences(self, ext_id: str) -> dict[str, str | int | None]:
-        """
-        Get the preferences as an id-value dict
-        """
-        return {id: pref.value for id, pref in self.get_user_preferences(ext_id).items()}
-
     def save_user_preferences(self, ext_id: str, data: Any) -> None:
         user_prefs_json = self._get_raw_preferences(ext_id)
         user_prefs_json.update(data)

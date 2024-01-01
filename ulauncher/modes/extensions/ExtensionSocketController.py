@@ -39,7 +39,7 @@ class ExtensionSocketController:
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
-        prefs = self.manifest.get_key_value_user_preferences(ext_id)
+        prefs = {id: pref.value for id, pref in self.manifest.get_user_preferences(ext_id).items()}
         self._send_event({"type": "event:legacy_preferences_load", "args": [prefs]})
         logger.info('Extension "%s" connected', ext_id)
         self.framer.connect("message_parsed", self.handle_response)
