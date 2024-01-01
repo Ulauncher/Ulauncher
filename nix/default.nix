@@ -126,7 +126,7 @@ let
           io.ulauncher.Ulauncher.desktop \
         --replace gapplication ${glib}/bin/gapplication
       substituteInPlace \
-          ulauncher/modes/extensions/ExtensionRunner.py \
+          ulauncher/modes/extensions/ExtensionController.py \
         --replace 'from ulauncher.config import PATHS,' 'from ulauncher.config import' \
         --replace '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
 

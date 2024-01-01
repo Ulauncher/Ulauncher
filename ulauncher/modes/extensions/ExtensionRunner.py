@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 import signal
 import sys
@@ -18,12 +17,6 @@ else:
 
 from gi.repository import Gio, GLib
 
-from ulauncher.config import PATHS, get_options
-from ulauncher.modes.extensions.ExtensionManifest import (
-    ExtensionIncompatibleWarning,
-    ExtensionManifest,
-    ExtensionManifestError,
-)
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -75,40 +68,23 @@ class ExtensionRunner:
 
     def __init__(self) -> None:
         self.extension_procs: dict[str, ExtensionProc] = {}
-        self.verbose = get_options().verbose
 
-    def run(self, ext_id: str, ext_path: str, error_handler: ErrorHandlerCallback | None = None) -> None:
+    def run(
+        self,
+        ext_id: str,
+        ext_path: str,
+        env: dict[str, str] | None = None,
+        error_handler: ErrorHandlerCallback | None = None,
+    ) -> None:
         """
         * Validates manifest
         * Runs extension in a new process
         """
         if not self.is_running(ext_id):
-            manifest = ExtensionManifest.load(ext_path)
-
-            try:
-                manifest.validate()
-                manifest.check_compatibility(verbose=True)
-            except ExtensionManifestError as err:
-                if error_handler:
-                    error_handler("Invalid", str(err))
-                return
-            except ExtensionIncompatibleWarning as err:
-                if error_handler:
-                    error_handler("Incompatible", str(err))
-                return
-
-            triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
-            # Preferences used to also contain keywords, so adding them back to avoid breaking v2 code
-            backwards_compatible_preferences = {**triggers, **manifest.get_key_value_user_preferences(ext_id)}
             cmd = [sys.executable, f"{ext_path}/main.py"]
-            env = {
-                "VERBOSE": str(int(self.verbose)),
-                "PYTHONPATH": PATHS.APPLICATION,
-                "EXTENSION_PREFERENCES": json.dumps(backwards_compatible_preferences, separators=(",", ":")),
-            }
 
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
-            for env_name, env_value in env.items():
+            for env_name, env_value in (env or {}).items():
                 launcher.setenv(env_name, env_value, True)
 
             t_start = time()

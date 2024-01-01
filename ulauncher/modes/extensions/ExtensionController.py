@@ -1,13 +1,21 @@
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime
 from shutil import rmtree
 from typing import Any, Generator
 
+from ulauncher.config import PATHS, get_options
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionDb import ExtensionDb, ExtensionRecord
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest, UserPreference, UserTrigger
+from ulauncher.modes.extensions.ExtensionManifest import (
+    ExtensionIncompatibleWarning,
+    ExtensionManifest,
+    ExtensionManifestError,
+    UserPreference,
+    UserTrigger,
+)
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.utils.get_icon_path import get_icon_path
@@ -15,6 +23,7 @@ from ulauncher.utils.get_icon_path import get_icon_path
 logger = logging.getLogger()
 ext_db = ExtensionDb.load()
 ext_runner = ExtensionRunner.get_instance()
+verbose_logging: bool = get_options().verbose
 
 
 class ExtensionControllerError(Exception):
@@ -150,12 +159,34 @@ class ExtensionController:
 
     def start(self):
         if not self.is_running:
+
             def error_handler(error_type: str, error_msg: str) -> None:
                 self.record.update(error_type=error_type, error_message=error_msg)
                 ext_db.save()
 
+            try:
+                self.manifest.validate()
+                self.manifest.check_compatibility(verbose=True)
+            except ExtensionManifestError as err:
+                error_handler("Invalid", str(err))
+                return
+            except ExtensionIncompatibleWarning as err:
+                error_handler("Incompatible", str(err))
+                return
+
             error_handler("", "")
-            ext_runner.run(self.id, self.path, error_handler)
+
+            prefs = self.manifest.get_key_value_user_preferences(self.id)
+            triggers = {id: t.keyword for id, t in self.manifest.triggers.items() if t.keyword}
+            # backwards compatible v2 preferences format (with keywords added back)
+            v2_prefs = {**triggers, **prefs}
+            env = {
+                "VERBOSE": str(int(verbose_logging)),
+                "PYTHONPATH": PATHS.APPLICATION,
+                "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+            }
+
+            ext_runner.run(self.id, self.path, env, error_handler)
 
     def stop(self):
         ext_runner.stop(self.id)

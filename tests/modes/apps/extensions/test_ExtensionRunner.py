@@ -16,18 +16,6 @@ class TestExtensionRunner:
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.timer")
 
     @pytest.fixture(autouse=True)
-    def get_options(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.get_options")
-
-    @pytest.fixture(autouse=True)
-    def ExtensionManifest(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.ExtensionManifest")
-
-    @pytest.fixture(autouse=True)
-    def json_dumps(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.json.dumps", return_value="{}")
-
-    @pytest.fixture(autouse=True)
     def SubprocessLauncher(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionRunner.Gio.SubprocessLauncher")
 
@@ -74,7 +62,7 @@ class TestExtensionRunner:
         extid = "id"
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", err_cb)
+        runner.run(extid, "path", {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = True
         extproc.subprocess.get_term_sig.return_value = 9
@@ -93,7 +81,7 @@ class TestExtensionRunner:
         time.return_value = starttime
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", err_cb)
+        runner.run(extid, "path", {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -110,7 +98,7 @@ class TestExtensionRunner:
         time.return_value = starttime
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", err_cb)
+        runner.run(extid, "path", {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
