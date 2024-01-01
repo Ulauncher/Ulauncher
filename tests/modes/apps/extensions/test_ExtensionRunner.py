@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner, ExtensionRuntimeError
+from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 
 
 class TestExtensionRunner:
@@ -91,7 +91,7 @@ class TestExtensionRunner:
         runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         # Confirm error handling
         runner.set_extension_error.assert_called_once_with(
-            "id", ExtensionRuntimeError.Terminated, 'Extension "id" was terminated with signal 9'
+            "id", "Terminated", 'Extension "id" was terminated with signal 9'
         )
         assert extid not in runner.extension_procs
 
@@ -126,7 +126,7 @@ class TestExtensionRunner:
         runner.run = mock.Mock()
         runner.handle_exit(extproc.subprocess, mock.Mock(), extid)
         runner.set_extension_error.assert_called_once_with(
-            "id", ExtensionRuntimeError.Exited, 'Extension "id" exited with code 9 after 5.0 seconds.'
+            "id", "Exited", 'Extension "id" exited with code 9 after 5.0 seconds.'
         )
         assert extid not in runner.extension_procs
 

@@ -5,10 +5,16 @@ import logging
 import signal
 import sys
 from collections import deque
-from enum import Enum
 from functools import lru_cache, partial
 from time import time
 from typing import NamedTuple
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+
+    ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "Incompatible", "Invalid"]
+else:
+    ExtensionRuntimeError = str
 
 from gi.repository import Gio, GLib
 
@@ -31,14 +37,6 @@ class ExtensionProc(NamedTuple):
     start_time: float
     error_stream: Gio.DataInputStream
     recent_errors: deque
-
-
-class ExtensionRuntimeError(Enum):
-    Terminated = "Terminated"
-    Exited = "Exited"
-    MissingModule = "MissingModule"
-    Incompatible = "Incompatible"
-    Invalid = "Invalid"
 
 
 class ExtensionRunner:
@@ -66,10 +64,10 @@ class ExtensionRunner:
                 manifest.validate()
                 manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
-                self.set_extension_error(ext_id, ExtensionRuntimeError.Invalid, str(err))
+                self.set_extension_error(ext_id, "Invalid", str(err))
                 return
             except ExtensionIncompatibleWarning as err:
-                self.set_extension_error(ext_id, ExtensionRuntimeError.Incompatible, str(err))
+                self.set_extension_error(ext_id, "Incompatible", str(err))
                 return
 
             triggers = {id: t.keyword for id, t in manifest.triggers.items() if t.keyword}
@@ -125,7 +123,7 @@ class ExtensionRunner:
             kill_signal = subprocess.get_term_sig()
             error_msg = f'Extension "{ext_id}" was terminated with signal {kill_signal}'
             logger.error(error_msg)
-            self.set_extension_error(ext_id, ExtensionRuntimeError.Terminated, error_msg)
+            self.set_extension_error(ext_id, "Terminated", error_msg)
             self.extension_procs.pop(ext_id, None)
             return
 
@@ -148,17 +146,17 @@ class ExtensionRunner:
                         "This is likely Ulauncher internals which were not part of the extension API. "
                         "Extensions importing these can break at any Ulauncher release."
                     )
-                    self.set_extension_error(ext_id, ExtensionRuntimeError.Incompatible, default_error_msg)
+                    self.set_extension_error(ext_id, "Incompatible", default_error_msg)
                 elif package_name:
-                    self.set_extension_error(ext_id, ExtensionRuntimeError.MissingModule, package_name)
+                    self.set_extension_error(ext_id, "MissingModule", package_name)
             else:
-                self.set_extension_error(ext_id, ExtensionRuntimeError.Terminated, default_error_msg)
+                self.set_extension_error(ext_id, "Terminated", default_error_msg)
 
             self.extension_procs.pop(ext_id, None)
             return
 
         error_msg = f'Extension "{ext_id}" exited with code {code} after {uptime_seconds} seconds.'
-        self.set_extension_error(ext_id, ExtensionRuntimeError.Exited, error_msg)
+        self.set_extension_error(ext_id, "Exited", error_msg)
         logger.error(error_msg)
         self.extension_procs.pop(ext_id, None)
 
@@ -187,5 +185,5 @@ class ExtensionRunner:
         return ext_id in self.extension_procs
 
     def set_extension_error(self, ext_id: str, error_type: ExtensionRuntimeError, message: str) -> None:
-        ext_db.get_record(ext_id).update(error_message=message, error_type=error_type.value)
+        ext_db.get_record(ext_id).update(error_message=message, error_type=error_type)
         ext_db.save()
