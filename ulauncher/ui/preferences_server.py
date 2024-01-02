@@ -40,7 +40,7 @@ def route(path: str):  # type: ignore[no-untyped-def]
 
 def get_extensions() -> Generator[dict[str, Any], None, None]:
     for ext_id, ext_path in extension_finder.iterate():
-        controller = ExtensionController(ext_id)
+        controller = ExtensionController.create(ext_id)
 
         yield {
             **controller.state,
@@ -275,7 +275,7 @@ class PreferencesServer:
     @route("/extension/set-prefs")
     def extension_update_prefs(self, ext_id, data):
         logger.info("Update extension preferences %s to %s", ext_id, data)
-        controller = ExtensionController(ext_id)
+        controller = ExtensionController.create(ext_id)
         socket_controller = ExtensionSocketServer.get_instance().controllers.get(ext_id)
         if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
@@ -288,21 +288,21 @@ class PreferencesServer:
     @route("/extension/check-update")
     def extension_check_update(self, ext_id):
         logger.info("Checking if extension has an update")
-        return ExtensionController(ext_id).check_update()
+        return ExtensionController.create(ext_id).check_update()
 
     @route("/extension/update-ext")
     def extension_update_ext(self, ext_id):
         logger.info("Update extension: %s", ext_id)
-        ExtensionController(ext_id).update()
+        ExtensionController.create(ext_id).update()
 
     @route("/extension/remove")
     def extension_remove(self, ext_id):
         logger.info("Remove extension: %s", ext_id)
-        controller = ExtensionController(ext_id)
+        controller = ExtensionController.create(ext_id)
         controller.remove()
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, ext_id, is_enabled):
         logger.info("Toggle extension: %s", ext_id)
-        controller = ExtensionController(ext_id)
+        controller = ExtensionController.create(ext_id)
         controller.toggle_enabled(is_enabled)

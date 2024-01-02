@@ -64,7 +64,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict]) -> dict[str, d
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
-    controller = ExtensionController(ext_id)
+    controller = ExtensionController.create(ext_id)
     for id, pref in user_prefs.items():
         if controller.manifest.triggers.get(id):
             new_prefs["triggers"][id] = {"keyword": pref}

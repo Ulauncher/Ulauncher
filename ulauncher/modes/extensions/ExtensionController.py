@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from shutil import rmtree
 from typing import Any, Generator
+from weakref import WeakValueDictionary
 
 from ulauncher.config import PATHS, get_options
 from ulauncher.modes.extensions import extension_finder
@@ -44,7 +45,7 @@ class ExtensionState(JsonConf):
 logger = logging.getLogger()
 ext_runner = ExtensionRunner.get_instance()
 verbose_logging: bool = get_options().verbose
-
+controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 
 class ExtensionControllerError(Exception):
     pass
@@ -64,6 +65,15 @@ class ExtensionController:
             self.remote = ExtensionRemote(self.state.url)
 
     @classmethod
+    def create(cls, ext_id: str, path: str | None = None):
+        cached_controller = controller_cache.get(ext_id)
+        if cached_controller:
+            return cached_controller
+        new_controller = cls(ext_id, path)
+        controller_cache[ext_id] = new_controller
+        return new_controller
+
+    @classmethod
     def create_from_url(cls, url: str) -> ExtensionController:
         remote = ExtensionRemote(url)
         instance = cls(remote.ext_id)
@@ -74,7 +84,7 @@ class ExtensionController:
     @classmethod
     def iterate(cls) -> Generator[ExtensionController, None, None]:
         for ext_id, ext_path in extension_finder.iterate():
-            yield ExtensionController(ext_id, ext_path)
+            yield ExtensionController.create(ext_id, ext_path)
 
     @property
     def state(self) -> ExtensionState:

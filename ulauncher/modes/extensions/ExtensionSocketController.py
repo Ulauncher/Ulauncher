@@ -30,7 +30,7 @@ class ExtensionSocketController:
         self.framer = framer
         self.result_renderer = DeferredResultRenderer.get_instance()
         self.ext_id = ext_id
-        self.data_controller = ExtensionController(ext_id)
+        self.data_controller = ExtensionController.create(ext_id)
         ext_path = extension_finder.locate(ext_id)
         assert ext_path, f"No extension could be found matching {ext_id}"
         self.manifest = ExtensionManifest.load(ext_path)
