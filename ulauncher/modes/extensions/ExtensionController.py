@@ -23,9 +23,12 @@ class ExtensionControllerError(Exception):
 
 class ExtensionController:
     id: str
+    _path: str | None
 
-    def __init__(self, ext_id: str):
+    def __init__(self, ext_id: str, path: str | None = None):
         self.id = ext_id
+        self._path = path
+
         if self.record.url:
             self.remote = ExtensionRemote(self.record.url)
 
@@ -47,9 +50,10 @@ class ExtensionController:
 
     @property
     def path(self) -> str:
-        ext_path = extension_finder.locate(self.id)
-        assert ext_path, f"No extension could be found matching {self.id}"
-        return ext_path
+        if not self._path:
+            self._path = extension_finder.locate(self.id)
+        assert self._path, f"No extension could be found matching {self.id}"
+        return self._path
 
     @property
     def is_manageable(self) -> bool:
@@ -89,13 +93,15 @@ class ExtensionController:
 
         self.stop()
         rmtree(self.path)
-        # Update record to disabled if there is another version of the extension that can be found
-        # Or remove the record otherwise
-        if self.record:
+        # Regenerate cached path in case extension still exists (installed elsewhere)
+        self._path = extension_finder.locate(self.id)
+
+        # If ^, then disable, else delete from db
+        if self._path:
             self.record.is_enabled = False
-            if not extension_finder.locate(self.id):
-                del ext_db[self.id]
-            ext_db.save()
+        else:
+            del ext_db[self.id]
+        ext_db.save()
 
     def update(self) -> bool:
         """
