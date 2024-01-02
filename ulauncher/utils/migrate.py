@@ -13,8 +13,7 @@ from types import ModuleType
 from typing import Any, Callable
 
 from ulauncher.config import FIRST_V6_RUN, PATHS
-from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.utils.systemd_controller import SystemdController
 
 _logger = logging.getLogger()
@@ -64,11 +63,9 @@ def _migrate_user_prefs(extension_id: str, user_prefs: dict[str, dict]) -> dict[
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
-    ext_path = extension_finder.locate(extension_id)
-    assert ext_path, f"No extension could be found matching {extension_id}"
-    manifest = ExtensionManifest.load(os.path.join(ext_path, "manifest.json"))
+    controller = ExtensionController(extension_id)
     for id, pref in user_prefs.items():
-        if manifest.triggers.get(id):
+        if controller.manifest.triggers.get(id):
             new_prefs["triggers"][id] = {"keyword": pref}
         else:
             new_prefs["preferences"][id] = pref

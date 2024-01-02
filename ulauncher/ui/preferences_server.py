@@ -14,15 +14,12 @@ from gi.repository import Gio, GLib, Gtk
 
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
-from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader
-from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
-from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
@@ -43,27 +40,21 @@ def route(path: str):  # type: ignore[no-untyped-def]
 
 
 def get_extensions() -> Generator[dict[str, Any], None, None]:
-    ext_runner = ExtensionRunner.get_instance()
-    ext_db = ExtensionDb.load()
     for ext_id, ext_path in extension_finder.iterate():
-        manifest = ExtensionManifest.load_from_extension_id(ext_id)
-        ext_record = ext_db.get_record(ext_id)
-        is_running = ext_runner.is_running(ext_id)
-        # Controller method `get_icon_path` would work, but only running extensions have controllers
-        icon = get_icon_path(manifest.icon, base_path=ext_path)
+        controller = ExtensionController(ext_id)
 
         yield {
-            **ext_record,
+            **controller.record,
             "path": ext_path,
             "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
-            "name": manifest.name,
-            "icon": icon,
-            "authors": manifest.authors,
-            "instructions": manifest.instructions,
-            "preferences": manifest.preferences,
-            "triggers": manifest.triggers,
-            "is_manageable": extension_finder.is_manageable(ext_path),
-            "is_running": is_running,
+            "name": controller.manifest.name,
+            "icon": controller.full_icon_path,
+            "authors": controller.manifest.authors,
+            "instructions": controller.manifest.instructions,
+            "preferences": controller.manifest.preferences,
+            "triggers": controller.manifest.triggers,
+            "is_manageable": controller.is_manageable,
+            "is_running": controller.is_running,
         }
 
 
@@ -272,11 +263,10 @@ class PreferencesServer:
     @route("/extension/add")
     def extension_add(self, url: str) -> list[dict[str, Any]]:
         logger.info("Add extension: %s", url)
-        downloader = ExtensionDownloader.get_instance()
-        ext_id = downloader.download(url)
-        runner = ExtensionRunner.get_instance()
-        runner.stop(ext_id)
-        runner.run(ext_id)
+        controller = ExtensionController.create_from_url(url)
+        controller.download()
+        controller.stop()
+        controller.start()
         # TODO(friday): Refactor run so we can know when it has completed instead of hard coding  # noqa: TD003
         time.sleep(0.5)
         return list(get_extensions())
@@ -284,48 +274,38 @@ class PreferencesServer:
     @route("/extension/set-prefs")
     def extension_update_prefs(self, extension_id, data):
         logger.info("Update extension preferences %s to %s", extension_id, data)
-        controller = ExtensionSocketServer.get_instance().controllers.get(extension_id)
-        manifest = ExtensionManifest.load_from_extension_id(extension_id)
-        if controller:  # send update_preferences only if extension is running
+        controller = ExtensionController(extension_id)
+        socket_controller = ExtensionSocketServer.get_instance().controllers.get(extension_id)
+        if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
-                pref = manifest.preferences.get(id)
+                pref = controller.manifest.preferences.get(id)
                 if pref and new_value != pref.value:
-                    controller.trigger_event({"type": "event:update_preferences", "args": [id, new_value, pref.value]})
-        manifest.apply_user_preferences(data)
-        manifest.save_user_preferences(extension_id)
+                    event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
+                    socket_controller.trigger_event(event_data)
+        controller.manifest.apply_user_preferences(data)
+        controller.manifest.save_user_preferences(extension_id)
 
     @route("/extension/check-update")
     def extension_check_update(self, extension_id):
         logger.info("Checking if extension has an update")
-        return ExtensionDownloader.get_instance().check_update(extension_id)
+        return ExtensionController(extension_id).check_update()
 
     @route("/extension/update-ext")
     def extension_update_ext(self, extension_id):
         logger.info("Update extension: %s", extension_id)
-        runner = ExtensionRunner.get_instance()
-        runner.stop(extension_id)
-        ExtensionDownloader.get_instance().update(extension_id)
-        runner.run(extension_id)
+        controller = ExtensionController(extension_id)
+        controller.stop()
+        controller.update()
+        controller.start()
 
     @route("/extension/remove")
     def extension_remove(self, extension_id):
         logger.info("Remove extension: %s", extension_id)
-        runner = ExtensionRunner.get_instance()
-        runner.stop(extension_id)
-        ExtensionDownloader.get_instance().remove(extension_id)
+        controller = ExtensionController(extension_id)
+        controller.remove()
 
     @route("/extension/toggle-enabled")
     def extension_toggle_enabled(self, extension_id, is_enabled):
         logger.info("Toggle extension: %s", extension_id)
-        ext_db = ExtensionDb.load()
-        ext_state = ext_db.get(extension_id)
-        if ext_state:
-            ext_state.is_enabled = is_enabled
-        else:
-            logger.warning("Trying to disable an extension '%s' that is not installed", extension_id)
-        ext_db.save()
-        runner = ExtensionRunner.get_instance()
-        if ext_state.is_enabled:
-            runner.run(extension_id)
-        else:
-            runner.stop(extension_id)
+        controller = ExtensionController(extension_id)
+        controller.toggle_enabled(is_enabled)
