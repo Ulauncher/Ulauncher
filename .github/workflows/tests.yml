@@ -20,6 +20,9 @@ jobs:
         run: DISPLAY=:1 xvfb-run pytest tests
       - name: build preferences
         run: ./setup.py build_prefs --force
+      - uses: cachix/install-nix-action@v22
+      - name: nix build
+        run: nix build --out-link nix/result --show-trace --print-build-logs .#default
       - name: build docs
         run: |
           cd docs
