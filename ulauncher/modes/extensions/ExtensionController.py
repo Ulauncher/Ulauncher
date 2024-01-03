@@ -93,7 +93,7 @@ class ExtensionController:
         state = ExtensionState.load(self._state_path)
         # if id is missing it means no state exists, look for extension defaults
         if not state.id:
-            defaults = json_load(f"{self.path}/.extension-record.json")
+            defaults = json_load(f"{self.path}/.default-state.json")
             state.update(defaults)
             state.id = self.id
         return state
