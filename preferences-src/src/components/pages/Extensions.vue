@@ -157,9 +157,10 @@ export default {
     addExtDialog() {
       this.$refs.addExtForm.show()
     },
-    reload() {
+    // force reload = try to start any extensions that are not disabled but not running
+    reload(force = false) {
       this.reloading = true
-      this.fetchData(true)
+      this.fetchData(force)
     },
     openUrlInBrowser(url) {
       fetchData('prefs:///open/web-url', url)
