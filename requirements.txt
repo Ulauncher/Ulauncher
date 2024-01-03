@@ -2,7 +2,8 @@ black
 build
 mypy==1.7.0
 PyGObject-stubs
-pytest==7.4.3
+pytest==7.4.4
+pytest-asyncio==0.23.3
 pytest-mock==3.12.0
-ruff==0.1.6
+ruff==0.1.11
 typos
