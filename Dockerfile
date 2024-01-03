@@ -66,12 +66,7 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarnpkg
 RUN mv node_modules /var
 
-# create user to avoid build output to be owned by root
-RUN useradd ulauncher --create-home --shell /bin/bash
-RUN usermod -c "Ulauncher" ulauncher
-# Need sudo to run dpkg-buildpackage for some reason, so adding passwordless sudo for ulauncher user
-RUN echo "ulauncher ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-USER ulauncher
-WORKDIR /home/ulauncher/Ulauncher
+RUN usermod -c "Ulauncher" root
+RUN git config --global --add safe.directory /root/ulauncher
 
-RUN git config --global --add safe.directory /home/ulauncher/Ulauncher
+WORKDIR /root/ulauncher

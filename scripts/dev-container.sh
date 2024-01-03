@@ -3,6 +3,7 @@
 # Use podman (recommended) if it exists, else docker
 # Any files created with docker is then owned by root, not the host user
 RUNNER=$(command -v podman || command -v docker)
+CONTAINER_HOME=/root
 
 ##########################################################
 # Runs Docker container to run build scripts from this dir
@@ -26,10 +27,10 @@ dev-container () {
   exec $RUNNER run \
     --rm \
     -it \
-    -v $(pwd):/home/ulauncher/Ulauncher${vol_suffix} \
-    -v $HOME/.bash_history:/home/ulauncher/.bash_history${vol_suffix} \
+    -v "$(pwd):$CONTAINER_HOME/ulauncher${vol_suffix}" \
+    -v "$HOME/.bash_history:$CONTAINER_HOME/.bash_history${vol_suffix}" \
     -p 3002:3002 \
     --name ulauncher \
-    docker.io/$BUILD_IMAGE \
+    "docker.io/$BUILD_IMAGE" \
     bash
 }
