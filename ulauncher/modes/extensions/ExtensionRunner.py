@@ -72,7 +72,7 @@ class ExtensionRunner:
     def run(
         self,
         ext_id: str,
-        ext_path: str,
+        cmd: list[str],
         env: dict[str, str] | None = None,
         error_handler: ErrorHandlerCallback | None = None,
     ) -> None:
@@ -81,8 +81,6 @@ class ExtensionRunner:
         * Runs extension in a new process
         """
         if not self.is_running(ext_id):
-            cmd = [sys.executable, f"{ext_path}/main.py"]
-
             launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
             for env_name, env_value in (env or {}).items():
                 launcher.setenv(env_name, env_value, True)

@@ -29,7 +29,7 @@ class TestExtensionRunner:
 
     def test_run__basic_execution__is_called(self, runner, SubprocessLauncher):
         extid = "id"
-        runner.run(extid, "path")
+        runner.run(extid, ["mock/path/to/ext"])
         SubprocessLauncher.new.assert_called_once()
         extproc = runner.extension_procs[extid]
         extproc.subprocess.wait_async.assert_called_once()
@@ -41,7 +41,7 @@ class TestExtensionRunner:
         extid = "id"
         read_line_finish_utf8 = mock.Mock()
 
-        runner.run(extid, "path")
+        runner.run(extid, ["mock/path/to/ext"])
         extproc = runner.extension_procs[extid]
         extproc.error_stream.read_line_finish_utf8 = read_line_finish_utf8
 
@@ -62,7 +62,7 @@ class TestExtensionRunner:
         extid = "id"
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", {}, err_cb)
+        runner.run(extid, ["mock/path/to/ext"], {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = True
         extproc.subprocess.get_term_sig.return_value = 9
@@ -81,7 +81,7 @@ class TestExtensionRunner:
         time.return_value = starttime
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", {}, err_cb)
+        runner.run(extid, ["mock/path/to/ext"], {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -98,7 +98,7 @@ class TestExtensionRunner:
         time.return_value = starttime
         err_cb = mock.Mock()
 
-        runner.run(extid, "path", {}, err_cb)
+        runner.run(extid, ["mock/path/to/ext"], {}, err_cb)
         extproc = runner.extension_procs[extid]
         extproc.subprocess.get_if_signaled.return_value = False
         extproc.subprocess.get_exit_status.return_value = 9
@@ -112,7 +112,7 @@ class TestExtensionRunner:
     def test_stop(self, runner, timer):
         extid = "id"
 
-        runner.run(extid, "path")
+        runner.run(extid, ["mock/path/to/ext"])
         extproc = runner.extension_procs[extid]
         runner.stop(extid)
         assert extid not in runner.extension_procs
