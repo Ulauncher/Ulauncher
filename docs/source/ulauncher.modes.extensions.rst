@@ -28,10 +28,10 @@ ulauncher\.modes\.extensions\.ExtensionManifest module
     :undoc-members:
     :show-inheritance:
 
-ulauncher\.modes\.extensions\.ExtensionRunner module
+ulauncher\.modes\.extensions\.ExtensionRuntime module
 ----------------------------------------------------
 
-.. automodule:: ulauncher.modes.extensions.ExtensionRunner
+.. automodule:: ulauncher.modes.extensions.ExtensionRuntime
     :members:
     :undoc-members:
     :show-inheritance:
