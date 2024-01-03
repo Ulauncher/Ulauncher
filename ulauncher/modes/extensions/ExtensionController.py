@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 from shutil import rmtree
@@ -47,6 +48,7 @@ ext_runner = ExtensionRunner.get_instance()
 verbose_logging: bool = get_options().verbose
 controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 
+
 class ExtensionControllerError(Exception):
     pass
 
@@ -65,7 +67,7 @@ class ExtensionController:
             self.remote = ExtensionRemote(self.state.url)
 
     @classmethod
-    def create(cls, ext_id: str, path: str | None = None):
+    def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
         cached_controller = controller_cache.get(ext_id)
         if cached_controller:
             return cached_controller
@@ -221,6 +223,7 @@ class ExtensionController:
 
             error_handler("", "")
 
+            cmd = [sys.executable, f"{self.path}/main.py"]
             prefs = {id: pref.value for id, pref in self.user_preferences.items()}
             triggers = {id: t.keyword for id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)
@@ -231,7 +234,7 @@ class ExtensionController:
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }
 
-            ext_runner.run(self.id, self.path, env, error_handler)
+            ext_runner.run(self.id, cmd, env, error_handler)
 
     def stop(self):
         ext_runner.stop(self.id)
