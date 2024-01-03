@@ -19,7 +19,7 @@ from ulauncher.modes.extensions.ExtensionManifest import (
     UserTrigger,
 )
 from ulauncher.modes.extensions.ExtensionRemote import ExtensionRemote
-from ulauncher.modes.extensions.ExtensionRunner import ExtensionRunner
+from ulauncher.modes.extensions.ExtensionRuntime import ExtensionRuntime
 from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
@@ -44,9 +44,9 @@ class ExtensionState(JsonConf):
 
 
 logger = logging.getLogger()
-ext_runner = ExtensionRunner.get_instance()
 verbose_logging: bool = get_options().verbose
 controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
+extension_runtimes: dict[str, ExtensionRuntime] = {}
 
 
 class ExtensionControllerError(Exception):
@@ -123,7 +123,7 @@ class ExtensionController:
 
     @property
     def is_running(self) -> bool:
-        return ext_runner.is_running(self.id)
+        return self.id in extension_runtimes
 
     @property
     def user_preferences(self) -> dict[str, UserPreference]:
@@ -208,6 +208,7 @@ class ExtensionController:
         if not self.is_running:
 
             def error_handler(error_type: str, error_msg: str) -> None:
+                extension_runtimes.pop(self.id, None)
                 self.state.update(error_type=error_type, error_message=error_msg)
                 self.state.save()
 
@@ -234,7 +235,9 @@ class ExtensionController:
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }
 
-            ext_runner.run(self.id, cmd, env, error_handler)
+            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, error_handler)
 
-    def stop(self):
-        ext_runner.stop(self.id)
+    def stop(self) -> None:
+        runtime = extension_runtimes.pop(self.id, None)
+        if runtime:
+            runtime.stop()  # type: ignore[unused-coroutine]
