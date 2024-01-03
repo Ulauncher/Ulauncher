@@ -62,6 +62,7 @@ let
   packages.tests.python = pp: (with pp; [
     black
     mock
+    (pygobject-stubs.overridePythonAttrs (old: { PYGOBJECT_STUB_CONFIG = "Gtk3,Gdk3,Soup2"; }))
     pytest
     pytest-mock
   ]);
