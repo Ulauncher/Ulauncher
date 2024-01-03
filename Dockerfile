@@ -17,6 +17,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y keyboard-configuration
 RUN apt install -y software-properties-common
 RUN apt install -y git
 RUN apt install -y vim
+RUN apt install -y curl
 RUN apt install -y wget
 RUN apt install -y rsync
 RUN apt install -y xvfb
