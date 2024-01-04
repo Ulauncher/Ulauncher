@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 
-# Use podman (recommended) if it exists, else docker
-# Any files created with docker is then owned by root, not the host user
+# Use podman if it exists, else docker
 RUNNER=$(command -v podman || command -v docker)
-CONTAINER_HOME=/root
+SHELL_CMD=bash
+
+# Workaround for Docker to avoid generated files getting owned by root (not needed for podman)
+if [[ "$RUNNER" == $(command -v docker) ]]; then 
+    SHELL_CMD="sudo -H -u ulauncher bash"
+    if [[ $(id -u) != 1000 ]]; then 
+        SHELL_CMD="usermod -u $(id -u) ulauncher; $SHELL_CMD"
+    fi;
+    if [[ $(id -g) != 1000 ]]; then 
+        SHELL_CMD="groupmod -g $(id -g) ulauncher; $SHELL_CMD"
+    fi;
+fi;
 
 ##########################################################
 # Runs Docker container to run build scripts from this dir
@@ -28,9 +38,9 @@ dev-container () {
     --rm \
     -it \
     -v "$(pwd):/ulauncher${vol_suffix}" \
-    -v "$HOME/.bash_history:$CONTAINER_HOME/.bash_history${vol_suffix}" \
+    -v "$HOME/.bash_history:/home/ulauncher/.bash_history${vol_suffix}" \
     -p 3002:3002 \
     --name ulauncher \
     "docker.io/$BUILD_IMAGE" \
-    bash
+    sh -c "$SHELL_CMD"
 }

@@ -68,4 +68,7 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarnpkg
 RUN mv node_modules /var
 
+# Create an unprivileged user to run as when testing and building locally (so generated files will not be owned by root on the host)
+RUN useradd ulauncher --shell /bin/bash --home-dir /home/ulauncher --create-home --uid 1000 --user-group
+
 WORKDIR /ulauncher
