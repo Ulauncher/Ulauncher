@@ -68,4 +68,4 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarnpkg
 RUN mv node_modules /var
 
-WORKDIR /root/ulauncher
+WORKDIR /ulauncher
