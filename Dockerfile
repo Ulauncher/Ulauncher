@@ -4,6 +4,8 @@ FROM ubuntu:20.04
 
 LABEL maintainer="ulauncher.app@gmail.com"
 
+# These vars are used by the debchange (dch) changelog generator 
+ENV NAME=Ulauncher
 ENV EMAIL=ulauncher.app@gmail.com
 
 # NOTE: Keep lines separate. One "RUN" per dependency/change
@@ -65,8 +67,5 @@ RUN pip3 install -r docs/requirements.txt
 # Cache node_modules to make builds faster
 RUN yarnpkg
 RUN mv node_modules /var
-
-RUN usermod -c "Ulauncher" root
-RUN git config --global --add safe.directory /root/ulauncher
 
 WORKDIR /root/ulauncher
