@@ -13,7 +13,7 @@ ulauncher\.modes\.extensions\.DeferredResultRenderer module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionSocketController module
---------------------------------------------------------
+--------------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionSocketController
     :members:
@@ -29,7 +29,7 @@ ulauncher\.modes\.extensions\.ExtensionManifest module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionRuntime module
-----------------------------------------------------
+-----------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionRuntime
     :members:
@@ -45,7 +45,7 @@ ulauncher\.modes\.extensions\.ExtensionMode module
     :show-inheritance:
 
 ulauncher\.modes\.extensions\.ExtensionSocketServer module
-----------------------------------------------------
+----------------------------------------------------------
 
 .. automodule:: ulauncher.modes.extensions.ExtensionSocketServer
     :members:
