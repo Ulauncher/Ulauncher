@@ -15,6 +15,7 @@ jobs:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
           LAUNCHPAD_PUB_KEY: ${{ secrets.LAUNCHPAD_PUB_KEY }}
           LAUNCHPAD_SECRET_KEY: ${{ secrets.LAUNCHPAD_SECRET_KEY }}
+          GPGKEY: ${{ secrets.DEB_GPGKEY }}
           PPA: agornostal/ulauncher
         shell: bash
         run: |

@@ -5,7 +5,7 @@
 ######################
 build-deb () {
     # Args:
-    #   $1 --signed | --upload
+    #   $1 --upload (optional)
     #
     # Env vars:
     #   PPA required for upload
@@ -14,7 +14,6 @@ build-deb () {
 
     set -e
 
-    GPGKEY=${GPGKEY:-B96482D36BD735B0}
     version=$(./ul version)
     # Debian prerelease separator is "~" instead of "-" (semver prerelease separator)
     deb_version=$(echo "$version" | tr "-" "~")
@@ -80,7 +79,7 @@ build-deb () {
     else
         rm debian/changelog || true
         dch --create --no-multimaint --package ulauncher --newversion=$deb_version --empty --distribution focal
-        if [ "$1" = "--signed" ]; then
+        if [ -z "$GPGKEY" ]; then
             info "Building signed deb package"
             dpkg-buildpackage -tc -us -sa -k$GPGKEY
         else
