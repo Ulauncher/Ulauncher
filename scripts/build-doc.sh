@@ -6,5 +6,5 @@ build-doc () {
     cd docs
 
     sphinx-apidoc -d 5 -o source ../ulauncher
-    make html
+    sphinx-build -M html . _build
 }
