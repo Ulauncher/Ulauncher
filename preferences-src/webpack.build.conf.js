@@ -1,5 +1,4 @@
 var { resolve } = require('path')
-var { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 var { DefinePlugin } = require('webpack')
 var baseConfig = require('./webpack.base.conf')
 var CopyPlugin = require('copy-webpack-plugin')
@@ -35,10 +34,5 @@ var webpackConfig = Object.assign({}, baseConfig, {
     })
   ]
 })
-
-// Run `yarn run analyze` to generate the bundle analyzer report
-if (process.env.npm_lifecycle_event === 'analyze') {
-  webpackConfig.plugins.push(new BundleAnalyzerPlugin())
-}
 
 module.exports = webpackConfig
