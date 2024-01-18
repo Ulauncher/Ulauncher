@@ -29,10 +29,13 @@ jobs:
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           tar -xvf scripts/launchpad.ssh.tar -C /
-          RELEASE=jammy   ./ul build-deb --upload # 22.04 LTS EOL 2027-04
-          RELEASE=focal   ./ul build-deb --upload # 20.04 LTS EOL 2025-04
-          RELEASE=mantic  ./ul build-deb --upload # 23.10     EOL 2024-07
-          RELEASE=lunar   ./ul build-deb --upload # 23.04     EOL 2024-01
+          gpg --import "$SRCDIR/scripts/launchpad-public.key"
+          gpg --import "$SRCDIR/scripts/launchpad-secret.key"
+          # jammy  22.04 LTS EOL 2027-04
+          # focal  20.04 LTS EOL 2025-04
+          # mantic 23.10     EOL 2024-07
+          # lunar  23.04     EOL 2024-01
+          ./ul release-deb jammy focal mantic lunar
 
       - name: Publish to AUR
         if: "${{ !contains(github.ref_name, '-') }}"
