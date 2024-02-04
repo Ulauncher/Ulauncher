@@ -4,14 +4,12 @@
 # Builds tar.gz file with (un)install script and Ulauncher src
 ##############################################################
 build-targz () {
-    version=$(./ul version)
-
-    echo "#########################################"
-    echo "# Building ulauncher v$version sdist #"
-    echo "#########################################"
-
-    ./setup.py build_prefs --force
-    rm -rf ulauncher.egg-info # https://stackoverflow.com/a/59686298/633921
-    python3 -m build --sdist
-    echo "Build sdist to ./dist"
+    VERSION=$(./ul version)
+    ./setup.py build_prefs
+    # copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
+    cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") -  > .tarignore
+    # create archive with .tarignore
+    tar --transform "s|^\.|ulauncher-${VERSION}|" --exclude-vcs --exclude-ignore-recursive=.tarignore -hzcf "dist/ulauncher-${VERSION}.tar.gz" .
+	rm .tarignore
+	echo -e "Built source dist tarball to ./dist/ulauncher-${VERSION}.tar.gz"
 }
