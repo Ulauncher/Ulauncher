@@ -146,10 +146,6 @@ let
       export HOME=$TMPDIR
 
       substituteInPlace \
-          scripts/tests.sh \
-        --replace ' pytest ' ' pytest -p no:cacheprovider '
-
-      substituteInPlace \
           tests/modes/shortcuts/test_RunScript.py \
         --replace '#!/bin/bash' '#!${stdenv.shell}'
 

@@ -12,9 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Quick test
-        run: |
-          mypy ulauncher
-          DISPLAY=:1 xvfb-run pytest tests
+        run: ./ul test
       - name: Build release
         run: |
           VERSION=$(./ul version)
