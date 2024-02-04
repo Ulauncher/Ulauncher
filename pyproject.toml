@@ -24,12 +24,12 @@ extend-exclude = ["preferences-src/static"]
 [tool.ruff]
 line-length = 120
 target-version = "py37" # py37 is the lowest supported option
-ignore = [
+lint.ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
   "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
   "TCH001", "TCH002", "TCH003" # Performance best practice that does nothing for our use
 ]
-select = [
+lint.select = [
   "A",        # flake8-builtins
   "ARG",      # flake8-unused-arguments
   "B",        # flake8-bugbear
@@ -71,18 +71,18 @@ select = [
 ]
 
 # Relax some linting rules for tests
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
   "PLR2004",  # Allow direct comparison with integers (magic-value)
   "SLF001",   # Allow accessing private members (obj._hello)
   "T201"      # Allow print statements
 ]
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 10
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 
-[tool.ruff.flake8-builtins]
+[tool.ruff.lint.flake8-builtins]
 builtins-ignorelist = ["id"]
