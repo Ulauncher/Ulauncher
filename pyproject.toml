@@ -12,6 +12,15 @@ ignore-patterns="ulauncher,docs,data,scripts,tests"
 [tool.pylint."MESSAGES CONTROL"]
 disable="all"
 
+[tool.typos.default]
+extend-ignore-re = [
+  # prevent correcting gir to git  
+  "gir1.2",
+]
+
+[tool.typos.files]
+extend-exclude = ["preferences-src/static"]
+
 [tool.ruff]
 line-length = 120
 target-version = "py37" # py37 is the lowest supported option
