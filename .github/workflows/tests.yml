@@ -17,7 +17,7 @@ jobs:
       - name: mypy
         run: mypy ulauncher
       - name: pytest
-        run: DISPLAY=:1 xvfb-run pytest tests
+        run: ./ul test-pytest
       - name: build preferences
         run: ./setup.py build_prefs --force
       - uses: cachix/install-nix-action@v22

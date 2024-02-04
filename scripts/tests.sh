@@ -29,10 +29,9 @@ test-pytest () {
     echo '[ test: pytest ]'
     if ! command -v xvfb-run >/dev/null
     then
-        pytest tests
+        pytest -p no:cacheprovider tests
     else
         # Use xvfb-run (virtual X server environment)
-        xvfb-run --auto-servernum pytest tests
+        xvfb-run --auto-servernum pytest -p no:cacheprovider tests
     fi
 }
-
