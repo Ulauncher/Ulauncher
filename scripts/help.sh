@@ -32,11 +32,11 @@ help () {
 
 The commands below are useful for maintainers:
 
+  ${bold}./ul sdist
+    ${dim}Builds a tar.gz archive with the source code${normal}
+
   ${bold}./ul build-deb
     ${dim}Builds a deb package or uploads new Ulauncher version to PPA in Launchpad${normal}
-
-  ${bold}./ul build-targz
-    ${dim}Builds a targz archive with the source code${normal}
 
   ${bold}./ul build-doc
     ${dim}Builds API docs for extensions using sphinx${normal}

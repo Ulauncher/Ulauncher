@@ -28,9 +28,9 @@ main () {
     edit-ui) edit-ui $2 ;;
     build-deb) build-deb ;;
     release-deb) release-deb "${@:2}" ;;
+    sdist) build-targz ;;
     build-nix) exec nix build --out-link nix/result --show-trace --print-build-logs "${@:2}" '.#default' ;;
     build-nix-dev) exec nix build --out-link nix/dev --show-trace --print-build-logs "${@:2}" '.#development' ;;
-    build-targz) build-targz $2 ;;
     build-doc) build-doc ;;
     watch-doc) watch-doc ;;
 
