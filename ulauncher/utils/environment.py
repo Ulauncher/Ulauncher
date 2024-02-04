@@ -4,6 +4,7 @@ Module for detecting the display protocol.
 These constants are in a standalone module to minimize the dependencies so that
 ulauncher.utils.xinit can safely use it.
 """
+
 import csv
 import logging
 import os

@@ -1,6 +1,7 @@
 """
 Simple module to call XInitThreads() to properly support multi-threaded X11 applications.
 """
+
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 
 if IS_X11_COMPATIBLE:
