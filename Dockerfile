@@ -70,7 +70,12 @@ RUN pip3 install -r docs/requirements.txt
 RUN yarnpkg
 RUN mv node_modules /var
 
+# Create container dir for the repo root dir to mount to
+# This is needed because dpkg-buildpackage is stupid and outputs are hard coded to be the parent dir
+RUN mkdir src
+RUN chmod 777 src
+
 # Create an unprivileged user to run as when testing and building locally (so generated files will not be owned by root on the host)
 RUN useradd ulauncher --shell /bin/bash --home-dir /home/ulauncher --create-home --uid 1000 --user-group
 
-WORKDIR /ulauncher
+WORKDIR /src/ulauncher

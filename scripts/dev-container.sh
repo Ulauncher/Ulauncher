@@ -37,7 +37,7 @@ dev-container () {
   exec $RUNNER run \
     --rm \
     -it \
-    -v "$(pwd):/ulauncher${vol_suffix}" \
+    -v "$(pwd):/src/ulauncher${vol_suffix}" \
     -v "$HOME/.bash_history:/home/ulauncher/.bash_history${vol_suffix}" \
     -p 3002:3002 \
     --name ulauncher \
