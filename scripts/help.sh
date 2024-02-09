@@ -26,9 +26,6 @@ help () {
     ${dim}Sends a signal to Ulauncher. SIGHUP by default
     May be useful for debugging themes: Ulauncher handles SIGHUP by re-applying theme files${normal}
 
-  ${bold}./ul edit-ui
-    ${dim}Starts glade${normal}
-
 
 The commands below are useful for maintainers:
 
