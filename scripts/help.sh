@@ -39,9 +39,6 @@ The commands below are useful for maintainers:
     ${dim}Builds a deb package or uploads new Ulauncher version to PPA in Launchpad${normal}
 
   ${bold}./ul build-doc
-    ${dim}Builds API docs for extensions using sphinx${normal}
-
-  ${bold}./ul watch-doc
-    ${dim}Runs './ul build-doc' when *.py and *.rst files change${normal}"
+    ${dim}Builds API docs for extensions using sphinx${normal}"
 
 }

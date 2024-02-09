@@ -8,7 +8,6 @@
 . scripts/build-targz.sh
 . scripts/build-doc.sh
 . scripts/send-signal.sh
-. scripts/watch-doc.sh
 . scripts/edit-ui.sh
 
 
@@ -32,7 +31,6 @@ main () {
     build-nix) exec nix build --out-link nix/result --show-trace --print-build-logs "${@:2}" '.#default' ;;
     build-nix-dev) exec nix build --out-link nix/dev --show-trace --print-build-logs "${@:2}" '.#development' ;;
     build-doc) build-doc ;;
-    watch-doc) watch-doc ;;
 
     *)
       echo "${red}[!] Unrecognized command '${1}'${normal}"
