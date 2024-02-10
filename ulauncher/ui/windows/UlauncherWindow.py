@@ -6,7 +6,6 @@ from typing import Any
 from gi.repository import Gdk, Gtk
 
 from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
@@ -15,8 +14,6 @@ from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.LayerShell import LayerShellOverlay
-
-# these imports are needed for Gtk to find widget classes
 from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.load_icon_surface import load_icon_surface
@@ -383,11 +380,9 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         if not self.input.get_text() and self.settings.max_recent_apps:
             results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
-        result_widgets = self.create_item_widgets(results, self.app.query)
-
-        if result_widgets:
-            for item in result_widgets[:limit]:
-                self.result_box.add(item)
+        if results:
+            for index, result in enumerate(results[:limit]):
+                self.result_box.add(ResultWidget(result, index, self.app.query))
             self.results_nav = ItemNavigation(self.result_box.get_children())
             self.results_nav.select_default(self.app.query)
 
@@ -399,20 +394,4 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
-        logger.debug("render %s results", len(result_widgets))
-
-    @staticmethod
-    def create_item_widgets(items: list[Result], query: Query) -> list[ResultWidget]:
-        results = []
-        for index, result in enumerate(items):
-            builder = Gtk.Builder()
-            builder.set_translation_domain("ulauncher")
-            builder.add_from_file(f"{PATHS.ASSETS}/ui/result.ui")
-
-            item_frame: ResultWidget | None = builder.get_object("item-frame")  # type: ignore[assignment]
-            assert item_frame
-            item_frame.initialize(builder, result, index, query)
-
-            results.append(item_frame)
-
-        return results
+        logger.debug("render %s results", len(results))

@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import logging
 from html import unescape
-from types import SimpleNamespace
-from typing import Any
 
 from gi.repository import Gtk, Pango
 
+from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
@@ -18,55 +17,76 @@ ELLIPSIZE_FORCE_AT_LENGTH = 20
 logger = logging.getLogger()
 
 
-class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
-    __gtype_name__ = "ResultWidget"
-
+class ResultWidget(Gtk.EventBox):
     index: int = 0
-    builder: Any
     name: str
     query: Query
-    result: Any
-    item_box: Any
-    compact = False
+    result: Result
+    item_box: Gtk.EventBox
+    shortcut_label: Gtk.Label
+    title_box: Gtk.Box
+    text_container: Gtk.Box
 
-    def initialize(self, builder: Any, result: Any, index: int, query: Query) -> None:
-        self.builder = builder
-        item_frame = self.builder.get_object("item-frame")
-        item_frame.connect("button-release-event", self.on_click)
-        item_frame.connect("enter_notify_event", self.on_mouse_hover)
-
-        self.item_box = builder.get_object("item-box")
+    def __init__(self, result: Result, index: int, query: Query):
         self.result = result
-        self.compact = result.compact
         self.query = query
-        self.set_index(index)
         text_scaling_factor = get_text_scaling_factor()
+        icon_size = 25 if result.compact else 40
+        inner_margin_x = 12 * text_scaling_factor
+        outer_margin_x = 18 * text_scaling_factor
+        margin_y = (3 if result.compact else 5) * text_scaling_factor
 
-        item_container = builder.get_object("item-container")
-        item_container.get_style_context().add_class("small-result-item")
-        item_name = builder.get_object("name_wrapper")
+        super().__init__()
+        self.get_style_context().add_class("item-frame")
+        self.connect("button-release-event", self.on_click)
+        self.connect("enter_notify_event", self.on_mouse_hover)
 
-        sizes = SimpleNamespace(
-            icon=40,
-            inner_margin_x=12 * text_scaling_factor,
-            outer_margin_x=18 * text_scaling_factor,
-            margin_y=5 * text_scaling_factor,
+        self.item_box = Gtk.EventBox()
+        self.item_box.get_style_context().add_class("item-box")
+        self.add(self.item_box)
+        item_container = Gtk.Box()
+        item_container.get_style_context().add_class("item-container")
+        self.item_box.add(item_container)
+
+        icon = Gtk.Image()
+        icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, self.get_scale_factor()))
+        icon.get_style_context().add_class("item-icon")
+        item_container.pack_start(icon, False, True, 0)
+
+        self.text_container = Gtk.Box(
+            width_request=350 * text_scaling_factor,
+            margin_start=inner_margin_x,
+            margin_end=inner_margin_x,
+            orientation=Gtk.Orientation.VERTICAL,
         )
+        item_container.pack_start(self.text_container, True, True, 0)
 
-        if self.compact:
-            sizes.icon = 25
-            sizes.margin_y = 3 * text_scaling_factor
+        self.shortcut_label = Gtk.Label(justify=Gtk.Justification.RIGHT, width_request=44, margin_end=5)
+        self.shortcut_label.get_style_context().add_class("item-shortcut")
+        self.shortcut_label.get_style_context().add_class("item-text")
+        item_container.pack_end(self.shortcut_label, False, True, 0)
 
-        item_container.set_property("margin-start", sizes.outer_margin_x)
-        item_container.set_property("margin-end", sizes.outer_margin_x)
-        item_container.set_property("margin-top", sizes.margin_y)
-        item_container.set_property("margin-bottom", sizes.margin_y)
-        item_name.set_property("margin-start", sizes.inner_margin_x)
-        item_name.set_property("margin-end", sizes.inner_margin_x)
-        item_name.set_property("width-request", 350 * text_scaling_factor)
+        self.set_index(index)
 
-        self.set_icon(load_icon_surface(result.icon, sizes.icon, self.get_scale_factor()))
-        self.set_description(result.get_description(query))  # need to run even if there is no descr
+        item_container.get_style_context().add_class("small-result-item")
+
+        self.title_box = Gtk.Box()
+        self.title_box.get_style_context().add_class("item-name")
+        self.title_box.get_style_context().add_class("item-text")
+        self.text_container.pack_start(self.title_box, False, True, 0)
+
+        item_container.set_property("margin-start", outer_margin_x)
+        item_container.set_property("margin-end", outer_margin_x)
+        item_container.set_property("margin-top", margin_y)
+        item_container.set_property("margin-bottom", margin_y)
+
+        descr = result.get_description(query)
+        if descr and not result.compact:
+            descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
+            descr_label.get_style_context().add_class("item-descr")
+            descr_label.get_style_context().add_class("item-text")
+            descr_label.set_text(unescape(descr))
+            self.text_container.pack_start(descr_label, False, True, 0)
         self.highlight_name()
 
     def set_index(self, index: int) -> None:
@@ -76,7 +96,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         jump_keys = Settings.load().get_jump_keys()
         if index < len(jump_keys):
             self.index = index
-            self.set_shortcut(f"Alt+{jump_keys[index]}")
+            self.shortcut_label.set_text(f"Alt+{jump_keys[index]}")
 
     def select(self):
         self.item_box.get_style_context().add_class("selected")
@@ -86,7 +106,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         self.item_box.get_style_context().remove_class("selected")
 
     def scroll_to_focus(self):
-        viewport = self.item_box.get_ancestor(Gtk.Viewport)
+        viewport: Gtk.Viewport = self.get_ancestor(Gtk.Viewport)  # type: ignore[assignment]
         viewport_height = viewport.get_allocation().height
         scroll_y = viewport.get_vadjustment().get_value()
         allocation = self.get_allocation()
@@ -96,15 +116,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         elif viewport_height + scroll_y < bottom:  # Scroll down if the widget is below visible area
             viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
-    def set_icon(self, icon):
-        """
-        :param PixBuf icon:
-        """
-        if icon:
-            self.builder.get_object("item-icon").set_from_surface(icon)
-
     def highlight_name(self) -> None:
-        item = self.builder.get_object("item-name")
         highlightable_input = self.result.get_highlightable_input(self.query)
         if highlightable_input and (self.result.searchable or self.result.highlightable):
             labels = []
@@ -120,7 +132,7 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
             labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
         for label in labels:
-            item.pack_start(label, False, False, 0)
+            self.title_box.pack_start(label, False, False, 0)
 
     def on_click(self, _widget, event=None):
         window = self.get_toplevel()
@@ -132,17 +144,3 @@ class ResultWidget(Gtk.EventBox):  # type: ignore[name-defined]
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
             self.get_toplevel().select_result(self.index)  # type: ignore[attr-defined]
-
-    def set_description(self, description):
-        description_obj = self.builder.get_object("item-descr")
-
-        if description and not self.compact:
-            description_obj.set_text(unescape(description))
-        else:
-            description_obj.destroy()  # remove description label
-
-    def set_shortcut(self, text):
-        self.builder.get_object("item-shortcut").set_text(text)
-
-    def get_keyword(self):
-        return self.result.keyword
