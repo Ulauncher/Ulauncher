@@ -1,6 +1,10 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    types: [opened, edited]
 
 jobs:
   tests:
