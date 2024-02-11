@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           echo "Ref type: $GITHUB_REF_TYPE"
-          VERSION=$(./ul version)
+          VERSION=$(make version)
           echo "Version: $VERSION"
           # If release name contains prerelease-separator "-", use ulauncher-dev PPA
           if [[ "$VERSION" == *-* ]]; then PPA="agornostal/ulauncher-dev"; fi
@@ -29,14 +29,20 @@ jobs:
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
           tar -xvf scripts/launchpad.ssh.tar -C /
-          gpg --import "$SRCDIR/scripts/launchpad-public.key"
-          gpg --import "$SRCDIR/scripts/launchpad-secret.key"
+          gpg --import "scripts/launchpad-public.key"
+          gpg --import "scripts/launchpad-secret.key"
           # noble  24.04 LTS EOL 2029-04
           # jammy  22.04 LTS EOL 2027-04
           # focal  20.04 LTS EOL 2025-04
           # mantic 23.10     EOL 2024-07
           # lunar  23.04     EOL 2024-01
-          ./ul release-deb noble jammy focal mantic lunar
+          for DISTRO in $(echo "noble jammy focal mantic lunar"); do
+            DEB_VERSION="$(echo "$VERSION" | tr "-" "~")-0ubuntu1ppa1~$DISTRO"
+            make deb DEB_VERSION=$DEB_VERSION DEB_DISTRO=$DISTRO DPKG_ARGS="--post-clean --build=source -sa --sign-key=${GPGKEY}"
+            echo "Uploading to launchpad PPA:${PPA}"
+            dput -f "ppa:${PPA}" dist/*.changes
+            rm dist/*
+          done;
 
       - name: Publish to AUR
         if: "${{ !contains(github.ref_name, '-') }}"

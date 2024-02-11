@@ -1,11 +1,14 @@
 # based off https://github.com/NixOS/nixpkgs/blob/e44462d6021bfe23dfb24b775cc7c390844f773d/pkgs/applications/misc/ulauncher/default.nix#L4-L4
 { lib
+, bash
 , buildEnv
 , fetchFromGitHub
 , gdk-pixbuf
 , git
 , glib
 , gnome
+, gnumake
+, gnused
 , gobject-introspection
 , gtk-layer-shell
 , gtk3
@@ -157,7 +160,7 @@ let
     checkPhase = ''
       runHook preCheck
 
-      ./ul test
+      make test
 
       runHook postCheck
     '';

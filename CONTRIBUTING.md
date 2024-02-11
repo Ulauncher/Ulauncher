@@ -28,7 +28,7 @@ For the v6 branch you need the the following to setup the local build environmen
   Install the development dependencies:
 
   ```sh
-  sudo apt update && sudo apt install git yarnpkg python3-setuptools debhelper dh-python
+  sudo apt update && sudo apt install git bash make sed yarnpkg python3-setuptools debhelper dh-python
   ```
 
   Install the Python testing packages (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
@@ -59,7 +59,7 @@ For the v6 branch you need the the following to setup the local build environmen
   Install the development and testing dependencies:
 
   ```sh
-  sudo pacman -Syu --needed git yarn mypy ruff typos python-{build,black,pytest,pytest-mock,setuptools}
+  sudo pacman -Syu --needed git bash make sed yarn mypy ruff typos python-{build,black,pytest,pytest-mock,setuptools}
   ```
 
   To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
@@ -79,13 +79,13 @@ For the v6 branch you need the the following to setup the local build environmen
 <details>
   <summary>Nix package manager / NixOS</summary>
 
-1. build your development interpreter with `./ul build-nix-dev`
+1. build your development interpreter with `make nix-build-dev`
 2. use the development interpreter (`./nix/dev/bin/python`) by either of:
    - pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
    - using it directly from repository root (otherwise you will use the version of code built with environment),
 3. rebuild the interpreter when project dependencies change,
 
-Alternatively you can run the current code directly `./ul run-nix <arg1> <arg2...>`, without any IDE completion.
+Alternatively you can run the current code directly `make nix-run ARGS="<arg1> <arg2...>"`, without any IDE completion.
 
 Jetbrains IDEs will have trouble discovering GTK objects (`from gi.repository import ...` are underlined red).
 You will need to instruct it to build stub files from binaries by:
@@ -114,6 +114,6 @@ Use the Ulauncher working branch (v6), and verify that the issue or feature hasn
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
 
-There are some more helpful developer and maintainer commands provided by the `ul` wrapper. `./ul` lists all of them, but most of them are only useful to the maintainers and/or requires docker/podman.
+There are some more helpful developer and maintainer commands provided by using our `make` targets. Run `make` to lists them all.
 
 If you have any questions, feel free to ask in a our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.

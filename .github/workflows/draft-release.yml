@@ -11,23 +11,21 @@ jobs:
     container: ulauncher/build-image:6.0
     steps:
       - uses: actions/checkout@v3
-      - name: Quick test
-        run: ./ul test
+      - name: Test
+        run: make test
       - name: Build release
         run: |
-          VERSION=$(./ul version)
-          DEB_VERSION=$(echo "$VERSION" | tr "-" "~")
+          VERSION=$(make version)
           echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache
-          ./ul sdist
-          mv dist/ulauncher*.tar.gz ulauncher_$VERSION.tar.gz
-          ./ul build-deb --signed
-          cp /tmp/ulauncher*.deb ulauncher_${VERSION}_all.deb
+          make deb
+          # make sure to run make sdist after make deb because make deb overwrites the tarball
+          make sdist
 
       - name: Make draft GitHub release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: |
-            *.tar.gz
-            *.deb
+            dist/*.tar.gz
+            dist/*.deb

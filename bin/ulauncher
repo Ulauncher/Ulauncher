@@ -43,4 +43,4 @@ except ModuleNotFoundError:
             "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
         )
 
-main(IS_DEV)
+main()

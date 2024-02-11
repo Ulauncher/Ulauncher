@@ -15,7 +15,7 @@ from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
 
 
-def main(is_dev=False):
+def main():
     """
     Main function that starts everything
     """
@@ -30,12 +30,6 @@ def main(is_dev=False):
         # --no-window flag prevents the app from starting.
         print("The --hide-window argument has been renamed to --no-window")  # noqa: T201
         sys.exit(2)
-
-    if is_dev:
-        # Ensure preferences UI is built
-        from setuptools import sandbox  # type: ignore[import]
-
-        sandbox.run_setup("setup.py", ["build_prefs"])
 
     # Set up global logging for stdout and file
     file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode="w+")
