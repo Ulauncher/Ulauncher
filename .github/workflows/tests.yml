@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: ['*']
+    branches:
+      - "*"
   pull_request:
-    types: [opened, edited]
 
 jobs:
   tests:

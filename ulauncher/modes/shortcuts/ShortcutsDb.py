@@ -23,6 +23,7 @@ class Shortcut(JsonConf):
             value = re.sub(r"/media/(.*?)-icon", "/icons/\\1", value)
         super().__setitem__(key, value)
 
+
 class ShortcutsDb(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
     def __setitem__(self, key: str, value: dict, validate_type: bool = True) -> None:
