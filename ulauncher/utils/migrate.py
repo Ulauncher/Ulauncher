@@ -159,20 +159,3 @@ def v5_to_v6_destructive() -> None:
     _logger.info("Pruning settings")
     settings.update({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
     settings.save()
-
-    # Update icon locations for shortcuts.json generated before v6
-    # (v6 created symlinks for them for backwards compatibility, but when v6 comes we should delete the symlinks)
-    shortcuts_conf = Path(f"{PATHS.CONFIG}/shortcuts.json")
-    shortcuts_text = shortcuts_conf.read_text()
-    shortcuts_replace = {
-        "/media/google-search-icon.png": "/icons/google-search.png",
-        "/media/stackoverflow-icon.svg": "/icons/stackoverflow.svg",
-        "/media/wikipedia-icon.png": "/icons/wikipedia.png",
-    }
-
-    for old_path, new_path in shortcuts_replace.items():
-        if old_path in shortcuts_text:
-            _logger.info('Updating shortcut icon from "%s" to "%s"', old_path, new_path)
-            shortcuts_text.replace(old_path, new_path)
-
-    shortcuts_conf.write_text(shortcuts_text)

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from time import time
 
@@ -16,6 +17,11 @@ class Shortcut(JsonConf):
     added = 0
     id = ""
 
+    def __setitem__(self, key, value):
+        # icon path has changed in v6, from /media/{google-search,stackoverflow,wikipedia}-icon.svg to /icons/*.svg
+        if key == "icon":
+            value = re.sub(r"/media/(.*?)-icon", "/icons/\\1", value)
+        super().__setitem__(key, value)
 
 class ShortcutsDb(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
