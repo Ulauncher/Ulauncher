@@ -24,7 +24,6 @@ You can only change colors in themes. Changing element sizes is not possible due
 #. Rename the copied directory and change the name and display_name in ``manifest.json``
 #. Open Ulauncher Preferences and select your theme
 #. Edit colors in CSS files
-#. Tell Ulauncher to re-read theme files by running ``kill -HUP <PID>``
 #. Press ``Ctrl+Space`` (or your hotkey) to check the result
 #. Repeat 6 - 8 until you get a desired result
 
