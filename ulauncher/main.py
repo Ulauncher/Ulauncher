@@ -15,7 +15,7 @@ from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
 
 
-def main():
+def main() -> None:
     """
     Main function that starts everything
     """
@@ -73,8 +73,8 @@ def main():
         logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
 
     # log uncaught exceptions
-    def except_hook(exctype, value, tb):
-        logger.error("Uncaught exception", exc_info=(exctype, value, tb))
+    def except_hook(exctype, value, traceback):
+        logger.error("Uncaught exception", exc_info=(exctype, value, traceback))
 
     sys.excepthook = except_hook
 

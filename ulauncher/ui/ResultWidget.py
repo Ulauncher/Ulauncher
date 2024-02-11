@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from html import unescape
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gdk, Gtk, Pango
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
@@ -32,8 +32,8 @@ class ResultWidget(Gtk.EventBox):
         self.query = query
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
-        inner_margin_x = 12 * text_scaling_factor
-        outer_margin_x = 18 * text_scaling_factor
+        inner_margin_x = int(12.0 * text_scaling_factor)
+        outer_margin_x = int(18.0 * text_scaling_factor)
         margin_y = (3 if result.compact else 5) * text_scaling_factor
 
         super().__init__()
@@ -54,7 +54,7 @@ class ResultWidget(Gtk.EventBox):
         item_container.pack_start(icon, False, True, 0)
 
         self.text_container = Gtk.Box(
-            width_request=350 * text_scaling_factor,
+            width_request=int(350.0 * text_scaling_factor),
             margin_start=inner_margin_x,
             margin_end=inner_margin_x,
             orientation=Gtk.Orientation.VERTICAL,
@@ -98,14 +98,14 @@ class ResultWidget(Gtk.EventBox):
             self.index = index
             self.shortcut_label.set_text(f"Alt+{jump_keys[index]}")
 
-    def select(self):
+    def select(self) -> None:
         self.item_box.get_style_context().add_class("selected")
         self.scroll_to_focus()
 
-    def deselect(self):
+    def deselect(self) -> None:
         self.item_box.get_style_context().remove_class("selected")
 
-    def scroll_to_focus(self):
+    def scroll_to_focus(self) -> None:
         viewport: Gtk.Viewport = self.get_ancestor(Gtk.Viewport)  # type: ignore[assignment]
         viewport_height = viewport.get_allocation().height
         scroll_y = viewport.get_vadjustment().get_value()
@@ -134,13 +134,13 @@ class ResultWidget(Gtk.EventBox):
         for label in labels:
             self.title_box.pack_start(label, False, False, 0)
 
-    def on_click(self, _widget, event=None):
+    def on_click(self, _widget: Gtk.Widget, event: Gdk.EventCrossing | None = None) -> None:
         window = self.get_toplevel()
         window.select_result(self.index)  # type: ignore[attr-defined]
         alt = bool(event and event.button != 1)  # right click
         window.handle_event(window.results_nav.activate(self.query, alt=alt))  # type: ignore[attr-defined]
 
-    def on_mouse_hover(self, _widget, event):
+    def on_mouse_hover(self, _widget: Gtk.Widget, event: Gdk.EventCrossing) -> None:
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
             self.get_toplevel().select_result(self.index)  # type: ignore[attr-defined]

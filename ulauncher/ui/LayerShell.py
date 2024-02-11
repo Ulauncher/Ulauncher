@@ -23,7 +23,7 @@ class LayerShellOverlay(Gtk.Window):
     """
 
     @classmethod
-    def is_supported(cls):
+    def is_supported(cls) -> bool:
         """Check if running under a wayland compositor that supports the layer shell extension"""
         return GtkLayerShell is not None and GtkLayerShell.is_supported()
 
@@ -31,7 +31,7 @@ class LayerShellOverlay(Gtk.Window):
         super().__init__(*args, **kwargs)
         self._use_layer_shell = False
 
-    def enable_layer_shell(self):
+    def enable_layer_shell(self) -> None:
         assert self.__class__.is_supported(), "Should be supported to enable"
         self._use_layer_shell = True
 
@@ -42,10 +42,10 @@ class LayerShellOverlay(Gtk.Window):
         GtkLayerShell.set_exclusive_zone(self, 0)
 
     @property
-    def layer_shell_enabled(self):
+    def layer_shell_enabled(self) -> bool:
         return self._use_layer_shell
 
-    def set_vertical_position(self, pos_y):
+    def set_vertical_position(self, pos_y: float) -> None:
         # Set vertical position and anchor to the top edge, will be centered horizontally
         # by default
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)

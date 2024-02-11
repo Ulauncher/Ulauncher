@@ -16,7 +16,7 @@ class SystemdController:
     def __init__(self, unit: str):
         self.unit = unit
 
-    def can_start(self):
+    def can_start(self) -> bool:
         """
         :returns: True if unit exists and can start
         """
@@ -30,13 +30,13 @@ class SystemdController:
             status = systemctl_run("show", self.unit)
         return "CanStart=yes" in status
 
-    def is_active(self):
+    def is_active(self) -> bool:
         """
         :returns: True if unit is currently running
         """
         return systemctl_run("is-active", self.unit) == "active"
 
-    def is_enabled(self):
+    def is_enabled(self) -> bool:
         """
         :returns: True if unit is set to start automatically
         """
@@ -48,7 +48,7 @@ class SystemdController:
         """
         return systemctl_run("restart", self.unit)
 
-    def toggle(self, status):
+    def toggle(self, status: bool) -> None:
         """
         Enable or disable unit
 

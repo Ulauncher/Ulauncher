@@ -15,7 +15,7 @@ from ulauncher.utils.systemd_controller import SystemdController
 logger = logging.getLogger()
 launch_command = f"gapplication launch {APP_ID}"
 plasma_service_controller = SystemdController("plasma-kglobalaccel")
-IS_PLASMA = which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active()
+IS_PLASMA = bool(which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active())
 IS_SUPPORTED = "GNOME" in DESKTOP_NAME or DESKTOP_NAME in ("XFCE", "PANTHEON")
 
 
@@ -68,15 +68,15 @@ def _set_hotkey(hotkey: str) -> None:
 
 class HotkeyController:
     @staticmethod
-    def is_supported():
+    def is_supported() -> bool:
         return IS_SUPPORTED or IS_PLASMA
 
     @staticmethod
-    def is_plasma():
+    def is_plasma() -> bool:
         return IS_PLASMA
 
     @staticmethod
-    def show_dialog():
+    def show_dialog() -> None:
         if IS_PLASMA:
             launch_detached(["systemsettings5", "kcm_keys"])
         elif IS_SUPPORTED:

@@ -299,15 +299,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.set_visual(visual)
 
     def position_window(self):
-        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
-        geo = monitor.get_geometry()
-        max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
-        window_width = 750
-        pos_x = geo.width * 0.5 - window_width * 0.5 + geo.x
-        pos_y = geo.y + geo.height * 0.12
-        self.set_property("width-request", window_width)
-        self.scroll_container.set_property("max-content-height", max_height)
-
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -325,10 +316,20 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
         self.set_visual(visual)
         self.apply_theme()
 
-        if self.layer_shell_enabled:
-            self.set_vertical_position(pos_y)
-        else:
-            self.move(pos_x, pos_y)
+        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
+        if monitor:
+            geo = monitor.get_geometry()
+            max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
+            window_width = 750
+            pos_x = int(geo.width * 0.5 - window_width * 0.5 + geo.x)
+            pos_y = int(geo.y + geo.height * 0.12)
+            self.set_property("width-request", window_width)
+            self.scroll_container.set_property("max-content-height", max_height)
+
+            if self.layer_shell_enabled:
+                self.set_vertical_position(pos_y)
+            else:
+                self.move(pos_x, pos_y)
 
     def show(self):
         self.present()
@@ -381,9 +382,12 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
         if results:
+            result_widgets: list[ResultWidget] = []
             for index, result in enumerate(results[:limit]):
-                self.result_box.add(ResultWidget(result, index, self.app.query))
-            self.results_nav = ItemNavigation(self.result_box.get_children())
+                result_widget = ResultWidget(result, index, self.app.query)
+                result_widgets.append(result_widget)
+                self.result_box.add(result_widget)
+            self.results_nav = ItemNavigation(result_widgets)
             self.results_nav.select_default(self.app.query)
 
             self.result_box.set_margin_bottom(10)

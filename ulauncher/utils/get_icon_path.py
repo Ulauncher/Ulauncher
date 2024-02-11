@@ -9,7 +9,7 @@ icon_theme = Gtk.IconTheme.get_default()  # type: ignore[attr-defined]
 logger = logging.getLogger()
 
 
-def get_icon_path(icon, size=32, base_path=""):
+def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
     """
     :param str icon:
     :rtype: str

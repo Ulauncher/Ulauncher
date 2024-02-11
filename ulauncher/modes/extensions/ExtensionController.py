@@ -136,7 +136,7 @@ class ExtensionController:
     def save_user_preferences(self, data: Any) -> None:
         self.manifest.save_user_preferences(self.id, data)
 
-    def get_normalized_icon_path(self, icon: str | None = None) -> str:
+    def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
     def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:

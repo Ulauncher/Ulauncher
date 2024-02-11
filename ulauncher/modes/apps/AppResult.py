@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import operator
 from os.path import basename
 
@@ -18,6 +20,8 @@ class AppResult(Result):
     """
 
     searchable = True
+    _app_id = ""
+    _executable = ""
 
     def __init__(self, app_info):
         super().__init__(
@@ -33,7 +37,7 @@ class AppResult(Result):
         )
 
     @staticmethod
-    def from_id(app_id):
+    def from_id(app_id: str) -> AppResult | None:
         try:
             app_info = Gio.DesktopAppInfo.new(app_id)
             return AppResult(app_info)
@@ -41,7 +45,7 @@ class AppResult(Result):
             return None
 
     @staticmethod
-    def get_top_app_ids():
+    def get_top_app_ids() -> list[str]:
         """
         Returns list of app ids sorted by launch count
         """
@@ -60,13 +64,13 @@ class AppResult(Result):
         """
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
-    def get_searchable_fields(self):
-        frequency_weight = 1
+    def get_searchable_fields(self) -> list[tuple[str, float]]:
+        frequency_weight = 1.0
         sorted_app_ids = AppResult.get_top_app_ids()
         count = len(sorted_app_ids)
         if count:
             index = sorted_app_ids.index(self._app_id) if self._app_id in sorted_app_ids else count
-            frequency_weight = 1 - (index / count * 0.1) + 0.05
+            frequency_weight = 1.0 - (index / count * 0.1) + 0.05
 
         return [
             (self.name, 1 * frequency_weight),

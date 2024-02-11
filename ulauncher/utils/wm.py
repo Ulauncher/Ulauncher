@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
@@ -15,7 +17,7 @@ if IS_X11:
         logger.debug("Wnck is not installed")
 
 
-def get_monitor(use_mouse_position=False):
+def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
     """
     :rtype: class:Gdk.Monitor
     """
@@ -34,21 +36,21 @@ def get_monitor(use_mouse_position=False):
     return display.get_primary_monitor() or display.get_monitor(0)
 
 
-def get_text_scaling_factor():
+def get_text_scaling_factor() -> float:
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
     # Text_scaling allow fractional scaling
     return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")
 
 
-def get_windows_stacked():
+def get_windows_stacked() -> list[Wnck.Window]:
     try:
         wnck_screen = Wnck.Screen.get_default()
         wnck_screen.force_update()
-        return reversed(wnck_screen.get_windows_stacked())
+        return list(reversed(wnck_screen.get_windows_stacked()))
     except NameError:
         return []
 
 
-def get_xserver_time():
+def get_xserver_time() -> int:
     return GdkX11.x11_get_server_time(Gdk.get_default_root_window())
