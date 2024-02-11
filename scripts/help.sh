@@ -22,11 +22,6 @@ help () {
   ${bold}./ul test
     ${dim}Runs all test-* commands${normal}
 
-  ${bold}./ul send-signal [SIGNAL]
-    ${dim}Sends a signal to Ulauncher. SIGHUP by default
-    May be useful for debugging themes: Ulauncher handles SIGHUP by re-applying theme files${normal}
-
-
 The commands below are useful for maintainers:
 
   ${bold}./ul sdist

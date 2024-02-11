@@ -161,7 +161,6 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
 
         self.set_keep_above(True)
         self.position_window()
-        self.apply_theme()
 
         # this will trigger to show frequent apps if necessary
         self.show_results([])
@@ -324,6 +323,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
+        self.apply_theme()
 
         if self.layer_shell_enabled:
             self.set_vertical_position(pos_y)

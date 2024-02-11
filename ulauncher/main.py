@@ -2,7 +2,6 @@ import contextlib
 import logging
 import signal
 import sys
-from functools import partial
 
 import gi
 from gi.repository import GLib, Gtk
@@ -14,11 +13,6 @@ from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
-
-
-def reload_config(app, logger):
-    logger.info("Reloading config")
-    app.window.apply_theme()
 
 
 def main(is_dev=False):
@@ -95,7 +89,6 @@ def main(is_dev=False):
 
     app = UlauncherApp.get_instance()
 
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGHUP, partial(reload_config, app, logger), None)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
 
     with contextlib.suppress(KeyboardInterrupt):
