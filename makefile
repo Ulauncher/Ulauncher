@@ -140,7 +140,7 @@ sdist: prefs # Build a source tarball
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
   # copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
-	cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
+	cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\nul\n") - > .tarignore
 	mkdir -p dist
 	# create archive with .tarignore
 	tar --transform 's|^\.|ulauncher|' --exclude-vcs --exclude-ignore-recursive=.tarignore -zcf dist/ulauncher-${VERSION}.tar.gz .

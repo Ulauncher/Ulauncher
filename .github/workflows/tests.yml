@@ -26,7 +26,7 @@ jobs:
         run: make prefs FORCE=1
       - uses: cachix/install-nix-action@v22
       - name: nix build
-        run: make nix-build
+        run: nix build --out-link nix/result --show-trace --print-build-logs .#default
       - name: build docs
         run: make docs
 

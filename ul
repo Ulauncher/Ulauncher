@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# deprecated wrapper around make, only needed in nix
+make "$@"

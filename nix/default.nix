@@ -160,7 +160,7 @@ let
     checkPhase = ''
       runHook preCheck
 
-      make test
+      ./ul test
 
       runHook postCheck
     '';
