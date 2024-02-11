@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from functools import lru_cache
 
-import cairo
 from gi.repository import Gdk, GdkPixbuf
 
 from ulauncher.config import PATHS
@@ -15,12 +14,7 @@ DEFAULT_EXE_ICON = f"{PATHS.ASSETS}/icons/executable.png"
 
 
 @lru_cache(maxsize=50)
-def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> cairo.Surface:
-    """
-    :param str icon:
-    :param int size:
-    :rtype: :class:`GtkPixbuf`
-    """
+def load_icon_surface(icon: str, size: int, scaling_factor: int = 1):  # type: ignore[no-untyped-def]
     real_size = size * scaling_factor
     try:
         icon_path = get_icon_path(icon, real_size) or DEFAULT_EXE_ICON
