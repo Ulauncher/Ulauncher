@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
-# Run this to build this image:
-# source scripts/common.sh && docker build -t $BUILD_IMAGE .
+# Run `make docker` to build this image
 
 LABEL maintainer="ulauncher.app@gmail.com"
 

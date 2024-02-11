@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 
-import subprocess
-import sys
 from pathlib import Path
-from shutil import rmtree, which
 
-from setuptools import Command, find_packages, setup
-from setuptools.command.build_py import build_py
+from setuptools import find_packages, setup
 
 icons = {
     "app": "data/icons/system/default/ulauncher.svg",
@@ -33,54 +29,6 @@ def data_files_from_path(target_path, source_path):
         yield f"{target_path}/{relative_file.parent}", [f"{source_path}/{relative_file}"]
 
 
-class build_preferences(Command):
-    description = "Build Ulauncher preferences (Vue.js app)"
-    user_options = [
-        ("force", None, "Rebuild even if source has no modifications since last build"),
-    ]
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        src = Path("preferences-src")
-        dst = Path("data/preferences")
-
-        if "--force" in sys.argv and dst.is_dir():
-            # Need to do this in particular to avoid packaging node_modules if the user has
-            # been switching between building Ulauncher v5 and v6
-            rmtree(dst)
-
-        if not src.is_dir():
-            msg = f"{src.resolve()} directory missing."
-            raise NotADirectoryError(msg)
-
-        sourceModified = max(p.stat().st_mtime for p in Path.cwd().glob("preferences-src/**/*"))
-
-        if dst.is_dir() and dst.stat().st_mtime > sourceModified:
-            print("Detected no changes to Preferences since last build.")  # noqa: T201
-            return
-
-        yarnbin = which("yarn") or which("yarnpkg")
-        subprocess.run(["sh", "-c", f"cd preferences-src; {yarnbin}; {yarnbin} build"], check=True)
-
-
-class build_wrapper(build_py, Command):
-    user_options = [
-        ("with-preferences", None, "Also build preferences (when building from git tree)"),
-    ]
-
-    def run(self):
-        # Build Preferences before python package build
-        if "--with-preferences" in sys.argv:
-            build_preferences.run(self)
-
-        build_py.run(self)
-
-
 setup(
     packages=find_packages(exclude=["docs", "tests", "conftest.py"]),
     # These will be placed in /usr
@@ -104,5 +52,4 @@ setup(
         # Recursively add data as share/ulauncher
         *data_files_from_path("share/ulauncher", "data"),
     ],
-    cmdclass={"build_py": build_wrapper, "build_prefs": build_preferences},
 )

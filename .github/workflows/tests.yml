@@ -13,22 +13,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: black
-        run: black --diff --check .
+        run: make black
       - name: ruff
-        run: ruff check .
+        run: make ruff
       - name: typo
-        run: typos .
+        run: make typos
       - name: mypy
-        run: mypy ulauncher
+        run: make mypy
       - name: pytest
-        run: ./ul test-pytest
+        run: make pytest
       - name: build preferences
-        run: ./setup.py build_prefs --force
+        run: make prefs FORCE=1
       - uses: cachix/install-nix-action@v22
       - name: nix build
         run: nix build --out-link nix/result --show-trace --print-build-logs .#default
       - name: build docs
-        run: |
-          cd docs
-          sphinx-apidoc -d 5 -o source ../ulauncher
-          sphinx-build -M html . _build
+        run: make docs
+
