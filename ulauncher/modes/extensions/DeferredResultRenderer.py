@@ -4,7 +4,6 @@ import logging
 from functools import lru_cache, partial
 
 from gi.repository import Gio, GLib
-from typing_extensions import Literal
 
 from ulauncher.api.result import Result
 from ulauncher.utils.timer import TimerContext, timer
@@ -38,7 +37,7 @@ class DeferredResultRenderer:
     def get_active_controller(self):
         return self.active_controller
 
-    def handle_event(self, event, controller) -> Literal[True]:  # type: ignore[no-untyped-def]
+    def handle_event(self, event, controller):
         """
         Schedules "Loading..." message
         """
