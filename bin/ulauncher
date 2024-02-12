@@ -2,6 +2,7 @@
 import locale
 import os
 import sys
+import traceback
 from pathlib import Path
 
 locale.textdomain("ulauncher")
@@ -38,6 +39,7 @@ except ModuleNotFoundError:
             "For more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280"
         ))
     else:
+        traceback.print_exc(file=sys.stderr)
         sys.exit(
             format_err("Ulauncher is not properly installed on your system.") +
             "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
