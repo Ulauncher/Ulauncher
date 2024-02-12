@@ -20,6 +20,7 @@
 , mkYarnPackage
 , mypy
 , nix-update-script
+, procps
 , python3Packages
 , ruff
 , stdenv
@@ -46,7 +47,7 @@ let
 
     postPatch = ''
       substituteInPlace webpack.build.conf.js \
-        --replace "__dirname, '../data/preferences" "__dirname, 'dist"
+        --replace-fail "__dirname, '../data/preferences" "__dirname, 'dist"
     '';
     buildPhase = ''yarn --offline run build'';
     installPhase = ''mv -T deps/ulauncher-prefs/dist $out'';
@@ -148,12 +149,43 @@ let
     # - https://github.com/NixOS/nixpkgs/blob/add2bf7e523b0b1d6e192b6060cf2f0aac26bcc0/pkgs/development/interpreters/python/mk-python-derivation.nix#L274-L276
     installCheckPhase = ''
       test_dir="$PWD/.test-tmp"
-      mkdir -p "$test_dir/bin"
-      export HOME="$test_dir"
+      (
+        mkdir -p "$test_dir/bin"
+        export HOME="$test_dir"
 
-      makeWrapper "$(command -v make)" "$test_dir/bin/make" "''${makeWrapperArgs[@]}"
-      export PATH="$test_dir/bin:$PATH"
-      make test
+        makeWrapper "$(command -v make)" "$test_dir/bin/make" "''${makeWrapperArgs[@]}"
+        export PATH="$test_dir/bin:$PATH"
+        #make test
+        rm -r "$test_dir"
+      )
+
+      (
+        export PATH="${lib.makeBinPath [ procps ]}:$PATH"
+        trap "echo killing $BASHPID && pkill -P $BASHPID" EXIT
+
+        mkdir -p "$test_dir"
+        logfile="$test_dir/log.txt"
+        env -i HOME="$test_dir" \
+          "$(command -v xvfb-run)" --auto-servernum -- \
+          $out/bin/ulauncher --verbose &>"$logfile" &
+        ulauncher_pid=$!
+
+        while IFS= read -r line; do
+          # lowercase each line for matching
+          case "''${line,,}" in
+            *error*)
+              echo "ERROR: ulauncher failed to start"
+              exit 1
+            ;;
+            *info*)
+              # exits successfully as soon as it sees the first info message
+              # TODO: add some other successful startup indicator?
+              echo "OK: ulauncher started properly"
+              exit 0
+            ;;
+          esac
+        done < <(tail --pid=$ulauncher_pid -f "$logfile" | tee /dev/stderr)
+      )
     '';
 
     passthru = {

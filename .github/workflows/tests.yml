@@ -25,8 +25,9 @@ jobs:
       - name: build preferences
         run: make prefs FORCE=1
       - uses: cachix/install-nix-action@v22
-      - name: nix build
-        run: nix build --out-link nix/result --show-trace --print-build-logs .#default
+      - name: make nix-build
+        run: make nix-build
+        timeout-minutes: 5
       - name: build docs
         run: make docs
 
