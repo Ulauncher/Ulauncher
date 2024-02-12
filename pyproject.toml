@@ -14,7 +14,7 @@ disable="all"
 
 [tool.typos.default]
 extend-ignore-re = [
-  # prevent correcting gir to git  
+  # prevent correcting gir to git
   "gir1.2",
 ]
 
@@ -86,3 +86,7 @@ fixture-parentheses = false
 
 [tool.ruff.lint.flake8-builtins]
 builtins-ignorelist = ["id"]
+
+[tool.pytest.ini_options]
+log_cli = true
+

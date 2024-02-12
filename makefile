@@ -101,7 +101,7 @@ pytest: # Run unit tests
 		pytest -p no:cacheprovider tests
 	else
 		echo -e "xvfb-run detected. Running pytest in a virtual X server environment."
-		xvfb-run --auto-servernum pytest -p no:cacheprovider tests
+		xvfb-run --auto-servernum -- pytest -p no:cacheprovider tests
 	fi
 
 format: # Auto format the code
@@ -140,7 +140,7 @@ sdist: prefs # Build a source tarball
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
   # copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
-	cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\nul\n") - > .tarignore
+	cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
 	# create archive with .tarignore
 	tar --transform 's|^\.|ulauncher|' --exclude-vcs --exclude-ignore-recursive=.tarignore -zcf dist/ulauncher-${VERSION}.tar.gz .
@@ -165,10 +165,10 @@ deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: 
 	echo -e "Package saved to ${BOLD}${GREEN}./dist/ulauncher_${DEB_VERSION}_all.deb${RESET}"
 
 nix-run: # Build and run Ulauncher Nix package
-	exec nix run --show-trace --print-build-logs '.#default' -- "$(ARGS)"
+	exec nix run --show-trace --print-build-logs '.#default' -- $(ARGS)
 
 nix-build-dev: # Build Ulauncher Nix package for development
-	exec nix build --out-link nix/dev --show-trace --print-build-logs "$(ARGS)" '.#development'
+	exec nix build --out-link nix/dev --show-trace --print-build-logs $(ARGS) '.#development'
 
 nix-build: # Build Ulauncher Nix package
-	exec nix build --out-link nix/result --show-trace --print-build-logs "$(ARGS)" '.#default'
+	exec nix build --out-link nix/result --show-trace --print-build-logs $(ARGS) '.#default'

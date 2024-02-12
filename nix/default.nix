@@ -25,11 +25,11 @@
 , stdenv
 , systemd
 , typos
-, yarn
 , webkitgtk
 , wrapGAppsHook
 , xdg-utils
 , xvfb-run
+, yarn
 , withXorg ? true
 }:
 let
@@ -53,14 +53,6 @@ let
     distPhase = "true";
   };
 
-  # piece of shared makeWrapperArgs modifications to reuse in multiple places
-  wrapperArgs = ''
-    "''${makeWrapperArgs[@]}"
-    "''${gappsWrapperArgs[@]}"
-    ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
-    --set-default ULAUNCHER_SYSTEM_PREFIX "$out"
-  '';
-
   packages.preferences.dev = [ yarn ];
   packages.tests.python = pp: (with pp; [
     black
@@ -82,7 +74,7 @@ let
     inherit version pname;
     src = src.python;
 
-    nativeBuildInputs = with python3Packages; [
+    nativeBuildInputs = [
       gdk-pixbuf
       gobject-introspection
       intltool
@@ -101,7 +93,7 @@ let
       libwnck
     ];
 
-    # runtime dependencies (binaries prepended to PATH)
+    # runtime dependencies / binaries prepended to PATH
     propagatedBuildInputs = with python3Packages; [
       levenshtein
       mock
@@ -117,62 +109,55 @@ let
 
     nativeCheckInputs = packages.tests.all python3Packages;
 
-    patches = [
-      # ./some.patch
-    ];
-
     postPatch = ''
       patchShebangs bin/ulauncher-toggle
 
       substituteInPlace \
           bin/ulauncher-toggle \
           io.ulauncher.Ulauncher.desktop \
-        --replace gapplication ${glib}/bin/gapplication
+        --replace-fail gapplication ${glib}/bin/gapplication
+
       substituteInPlace \
           ulauncher/modes/extensions/ExtensionController.py \
-        --replace '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
+        --replace-fail '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
 
       substituteInPlace \
           ulauncher.service \
           io.ulauncher.Ulauncher.service \
-        --replace "/usr" "$out"
+        --replace-fail "/usr" "$out"
 
       ln -s "${preferencesPackage}" data/preferences
-    '';
-
-    doCheck = true;
-
-    preCheck = ''
-      patchShebangs ul
-      export PYTHONPATH=$PYTHONPATH:$out/${python3Packages.python.sitePackages}
-
-      export HOME=$TMPDIR
 
       substituteInPlace \
           tests/modes/shortcuts/test_RunScript.py \
-        --replace '#!/bin/bash' '#!${stdenv.shell}'
-
-      # this is required to run tests
-      ulWrapperArgs=(${wrapperArgs})
-      wrapProgram ul "''${ulWrapperArgs[@]}"
-    '';
-
-    checkPhase = ''
-      runHook preCheck
-
-      ./ul test
-
-      runHook postCheck
+        --replace-fail '#!/bin/bash' '#!${stdenv.shell}'
     '';
 
     # do not double wrap
     dontWrapGApps = true;
     preFixup = ''
-      makeWrapperArgs=(${wrapperArgs})
+      makeWrapperArgs+=(
+        "''${gappsWrapperArgs[@]}"
+        ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
+        --set-default ULAUNCHER_SYSTEM_PREFIX "$out"
+      )
+    '';
+
+    doCheck = true;
+    # Python packages don't have a checkPhase, only an installCheckPhase:
+    # - https://github.com/NixOS/nixpkgs/blob/add2bf7e523b0b1d6e192b6060cf2f0aac26bcc0/pkgs/development/interpreters/python/mk-python-derivation.nix#L274-L276
+    installCheckPhase = ''
+      test_dir="$PWD/.test-tmp"
+      mkdir -p "$test_dir/bin"
+      export HOME="$test_dir"
+
+      makeWrapper "$(command -v make)" "$test_dir/bin/make" "''${makeWrapperArgs[@]}"
+      export PATH="$test_dir/bin:$PATH"
+      make test
     '';
 
     passthru = {
-      # won't be updateable until release
+      # won't be updateable until release?
       # updateScript = nix-update-script { };
       env = buildEnv {
         name = "${pname}-${version}-development";
