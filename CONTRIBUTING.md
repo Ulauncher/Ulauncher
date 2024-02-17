@@ -79,13 +79,13 @@ For the v6 branch you need the the following to setup the local build environmen
 <details>
   <summary>Nix package manager / NixOS</summary>
 
-1. build your development interpreter with `./ul nix-build-dev`
+1. build your development interpreter with `make nix-build-dev`
 2. use the development interpreter (`./nix/dev/bin/python`) by either of:
    - pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
    - using it directly from repository root (otherwise you will use the version of code built with environment),
 3. rebuild the interpreter when project dependencies change,
 
-Alternatively you can run the current code directly `./ul nix-run ARGS="<arg1> <arg2...>"`, without any IDE completion.
+Alternatively you can run the current code directly `make nix-run ARGS="<arg1> <arg2...>"`, without any IDE completion.
 
 Jetbrains IDEs will have trouble discovering GTK objects (`from gi.repository import ...` are underlined red).
 You will need to instruct it to build stub files from binaries by:
