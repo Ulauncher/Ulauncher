@@ -33,7 +33,7 @@ export default {
           icon: 'fa-github',
           label: 'Troubleshooting',
           text: 'List of common problems and workarounds',
-          url: 'https://github.com/Ulauncher/Ulauncher/discussions/991'
+          url: 'https://github.com/Ulauncher/Ulauncher/discussions/categories/troubleshooting'
         },
         {
           icon: 'fa-github',
