@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this report!
+        **Thank you for taking the time to fill out this report!**
   - type: input
     id: environment
     attributes:
@@ -30,23 +30,21 @@ body:
     id: communication-guidelines
     attributes:
       label: Communication guidelines
-      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/HEAD/CODE_OF_CONDUCT.md) and [troubleshooting page](https://github.com/Ulauncher/Ulauncher/discussions/991)?
+      description: Did you read the [communication guidelines](https://github.com/Ulauncher/Ulauncher/blob/HEAD/CODE_OF_CONDUCT.md) and [troubleshooting category](https://github.com/Ulauncher/Ulauncher/discussions/categories/troubleshooting)?
       options:
         - label: I have read and agree with Ulauncher's communication guidelines and checked the troubleshooting page for self-help.
           required: true
-  - type: checkboxes
-    id: no-extension
-    attributes:
-      label: Not an extension issue
-      description: Ulauncher does not support or maintain third party extensions. If you have issues with extensions you should read and follow their dependency installation instructions and file any issues on their issue trackers.
-      options:
-        - label: This issue applies to the Ulauncher application, not a specific extension.
+        - label: I have tried to understand the error message and help myself, before reporting it.
+          required: true
+        - label: My issue description has clear steps for how to reproduce the issue.
+          required: true
+        - label: This issue applies to the whole Ulauncher application, not for a specific extension.
           required: true
   - type: checkboxes
     id: latest
     attributes:
       label: Ulauncher v6
-      description: Please test with the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure the bug hasn't already been fixed. Ulauncher v6 doesn't have a release yet, but it's miles ahead of v5.
+      description: Please test with the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure the bug hasn't already been fixed. Ulauncher v6 doesn't have a stable release yet, but it's miles ahead of v5.
       options:
         - label: I have made sure the bug isn't already fixed in v6.
-          required: true
+          required: false

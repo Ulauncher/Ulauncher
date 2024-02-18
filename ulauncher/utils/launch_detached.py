@@ -13,7 +13,7 @@ if not use_systemd_run:
         "This may result in applications launched by Ulauncher to depend on the main\n"
         "process (Ulauncher) and forced to exit prematurely if Ulauncher exits or crashes.\n"
         "Most likely this is caused by using an outdated or or misconfigured system.\n\n"
-        "For more details see https://github.com/Ulauncher/Ulauncher/discussions/991"
+        "For more details see https://github.com/Ulauncher/Ulauncher/discussions/1352"
     )
 
 

@@ -29,7 +29,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
                 return themed_icon.get_filename()
 
     except Exception as err:
-        logger.warning("Error '%s' occured when trying to load icon path '%s'.", err, icon)
+        logger.warning("Error '%s' occurred when trying to load icon path '%s'.", err, icon)
         logger.info("If this happens often, please see https://github.com/Ulauncher/Ulauncher/discussions/1346")
 
     return None
