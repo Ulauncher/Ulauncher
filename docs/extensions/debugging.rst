@@ -1,42 +1,13 @@
-Debugging & Logging
+Testing & Logging
 ===================
 
-Run Extension Separately
-------------------------
+To test an extension, copy it to ~/.local/share/ulauncher/extensions/your-extension
 
-You don't have to restart Ulauncher every time a change is made to your extension.
-For your convenience there is a flag ``--no-extension`` that prevents extensions from starting automatically.
-
-First, start Ulauncher with the following command::
+Then restart Ulauncher with the following command::
 
   ulauncher --no-extensions --dev -v
 
-Then find in the logs command to run your extension. It should look like this::
-
-  VERBOSE=1 ULAUNCHER_WS_API=ws://127.0.0.1:5050/ulauncher-demo PYTHONPATH=/home/username/projects/ulauncher /usr/bin/python /home/username/.local/share/ulauncher/extensions/ulauncher-demo/main.py
-
-Now when you need to restart your extension hit ``Ctrl+C`` and run the last command again.
-
-
-Debugging With `ipdb <https://github.com/gotcha/ipdb>`_
--------------------------------------------------------
-
-Here is the easiest way to set a breakpoint and execute code line by line:
-
-1. Install ipdb
-
-  ::
-
-    sudo pip install ipdb
-
-2. In your code add this line wherever you need to break
-
-  ::
-
-    import ipdb; ipdb.set_trace()
-
-3. Restart extension
-
+When you need to restart your extension hit ``Ctrl+C`` and run the last command again.
 
 
 Set up Logger
