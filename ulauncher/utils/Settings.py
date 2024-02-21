@@ -18,6 +18,7 @@ class Settings(JsonConf):
     terminal_command = ""
     theme_name = "light"
     arrow_key_aliases = "hjkl"
+    status_icon_name = "ulauncher-indicator-symbolic"
 
     # Convert dash to underscore
     def __setitem__(self, key, value):

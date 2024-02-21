@@ -1,4 +1,7 @@
+import logging
+
 import gi
+from gi.repository import Gio, Gtk
 
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click
@@ -25,7 +28,9 @@ except (AssertionError, ImportError, ValueError):
         except (ImportError, ValueError):
             AyatanaIndicator = None
 
-from gi.repository import Gio, Gtk
+from ulauncher.utils.Settings import Settings
+
+logger = logging.getLogger()
 
 
 def _create_menu_item(label, command):
@@ -47,16 +52,26 @@ class AppIndicator(Gio.Application):
             menu.append(_create_menu_item("Exit", lambda *_: self.quit()))
             menu.show_all()
 
+        gtk_icon_theme = Gtk.IconTheme.get_default()
+        icon_name = "find"  # standard find icon, in case the app is not installed
+
+        # check preferred, fallback on default v6 icon name, then the v5 icon name if v5 is installed
+        for _icon in list({Settings.load().status_icon_name, "ulauncher-indicator-symbolic", "ulauncher-indicator"}):
+            if gtk_icon_theme.has_icon(_icon):
+                icon_name = _icon
+                break
+            logger.warning("Could not find Ulauncher icon %s", _icon)
+
         if XApp:
             self._indicator = XApp.StatusIcon()
-            self._indicator.set_icon_name("ulauncher-indicator")
+            self._indicator.set_icon_name(icon_name)
             # Show menu on right click and show launcher on left click
             self._indicator.set_secondary_menu(menu)
             self._indicator.connect("activate", lambda *_: self.activate())
 
         elif AyatanaIndicator:
             self._indicator = AyatanaIndicator.Indicator.new(
-                "ulauncher", "ulauncher-indicator", AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
+                "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
             )
             # libappindicator can't / won't distinguish between left and right clicks
             # Show menu on left or right click and show launcher on middle click
