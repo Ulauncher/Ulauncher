@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import gi
 from gi.repository import Gio, Gtk
@@ -28,9 +29,12 @@ except (AssertionError, ImportError, ValueError):
         except (ImportError, ValueError):
             AyatanaIndicator = None
 
+from ulauncher.config import PATHS
 from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
+icon_asset_path = f"{PATHS.ASSETS}/icons/system/status"
+default_icon_name = Settings.status_icon_name  # intentionally using the class, not the instance, to get the default
 
 
 def _create_menu_item(label, command):
@@ -54,15 +58,27 @@ class AppIndicator(Gio.Application):
 
         gtk_icon_theme = Gtk.IconTheme.get_default()
         icon_name = "find"  # standard find icon, in case the app is not installed
+        icon_dir = ""
+        icons = list({Settings.load().status_icon_name, default_icon_name, "ulauncher-indicator"})
 
         # check preferred, fallback on default v6 icon name, then the v5 icon name if v5 is installed
-        for _icon in list({Settings.load().status_icon_name, "ulauncher-indicator-symbolic", "ulauncher-indicator"}):
+        for _icon in icons:
+            # check installed icon
             if gtk_icon_theme.has_icon(_icon):
                 icon_name = _icon
+                break
+            # check asset dir icon
+            if Path(f"{icon_asset_path}/{_icon}.svg").is_file():
+                icon_name = _icon
+                icon_dir = icon_asset_path
                 break
             logger.warning("Could not find Ulauncher icon %s", _icon)
 
         if XApp:
+            if icon_dir:
+                # Xapp supports loading from path instead of icon name
+                icon_name = f"{icon_dir}/{icon_name}.svg"
+
             self._indicator = XApp.StatusIcon()
             self._indicator.set_icon_name(icon_name)
             # Show menu on right click and show launcher on left click
@@ -70,9 +86,14 @@ class AppIndicator(Gio.Application):
             self._indicator.connect("activate", lambda *_: self.activate())
 
         elif AyatanaIndicator:
-            self._indicator = AyatanaIndicator.Indicator.new(
-                "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
-            )
+            if icon_dir:
+                self._indicator = AyatanaIndicator.Indicator.new_with_path(
+                    "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS, icon_dir
+                )
+            else:
+                self._indicator = AyatanaIndicator.Indicator.new(
+                    "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
+                )
             # libappindicator can't / won't distinguish between left and right clicks
             # Show menu on left or right click and show launcher on middle click
             self._indicator.set_menu(menu)
