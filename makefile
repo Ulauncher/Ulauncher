@@ -8,6 +8,8 @@ VERSION = $(shell eval 'python3 -c "import ulauncher; print(ulauncher.version)"'
 DPKG_ARGS := "--post-clean --build=all --no-sign"
 DEB_VERSION = $(subst -,~,$(VERSION))
 DEB_DISTRO := focal
+DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
+DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 
 # cli font vars
 BOLD := \\e[1m
@@ -149,6 +151,8 @@ sdist: prefs # Build a source tarball
 
 deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: $`make deb DEB_DISTRO=focal`
 	@set -euo pipefail
+	export NAME=${DEB_PACKAGER_NAME}
+	export EMAIL=${DEB_PACKAGER_EMAIL}
 	if [ -z $(shell eval "command -v dpkg-buildpackage") ]; then
 		echo -e "${BOLD}${RED}You need dpkg-buildpackage to build the .deb${RESET}"
 		exit 1

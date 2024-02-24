@@ -3,10 +3,6 @@ FROM ubuntu:20.04
 
 LABEL maintainer="ulauncher.app@gmail.com"
 
-# These vars are used by the debchange (dch) changelog generator 
-ENV NAME=Ulauncher
-ENV EMAIL=ulauncher.app@gmail.com
-
 # NOTE: Keep lines separate. One "RUN" per dependency/change
 # https://stackoverflow.com/a/47451019/633921
 
@@ -75,6 +71,6 @@ RUN mkdir src
 RUN chmod 777 src
 
 # Create an unprivileged user to run as when testing and building locally (so generated files will not be owned by root on the host)
-RUN useradd ulauncher --shell /bin/bash --home-dir /home/ulauncher --create-home --uid 1000 --user-group
+RUN useradd ulauncher --shell /bin/bash --home-dir /home/ulauncher --create-home --uid 1000 --user-group --comment Ulauncher
 
 WORKDIR /src/ulauncher
