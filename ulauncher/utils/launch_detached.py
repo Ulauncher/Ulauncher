@@ -4,6 +4,8 @@ from shutil import which
 
 from gi.repository import GLib
 
+from ulauncher.utils.systemd_controller import SystemdController
+
 logger = logging.getLogger()
 use_systemd_run = which("systemd-run") and os.system("systemd-run --user --scope true  2> /dev/null") == 0
 
@@ -18,8 +20,11 @@ if not use_systemd_run:
 
 
 def launch_detached(cmd):
-    if use_systemd_run:
-        cmd = ["systemd-run", "--user", "--scope", *cmd]
+    cmd = (
+        ["systemd-run", "--user", "--scope", *cmd]
+        if SystemdController("ulauncher").is_active()
+        else ["setsid", "nohup", *cmd]
+    )
 
     env = dict(os.environ.items())
     # Make sure GDK apps aren't forced to use x11 on wayland due to ulauncher's need to run
@@ -33,7 +38,8 @@ def launch_detached(cmd):
             argv=cmd,
             envp=envp,
             flags=GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.SEARCH_PATH,
-            child_setup=None if use_systemd_run else os.setsid,
+            standard_output=True,
+            standard_error=True,
         )
     except Exception:
         logger.exception('Could not launch "%s"', cmd)
