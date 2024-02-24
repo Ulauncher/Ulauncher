@@ -18,7 +18,7 @@ jobs:
           VERSION=$(make version)
           echo "Building Ulauncher version: $VERSION"
           ln -s /var/node_modules preferences-src # use node modules from cache
-          make deb
+          make deb DEB_DISTRO=focal
           # make sure to run make sdist after make deb because make deb overwrites the tarball
           make sdist
 

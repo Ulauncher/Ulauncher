@@ -7,7 +7,7 @@ ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION = $(shell eval 'python3 -c "import ulauncher; print(ulauncher.version)"')
 DPKG_ARGS := "--post-clean --build=all --no-sign"
 DEB_VERSION = $(subst -,~,$(VERSION))
-DEB_DISTRO := focal
+DEB_DISTRO = $(shell eval lsb_release -sc)
 DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 
