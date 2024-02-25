@@ -30,4 +30,4 @@ def find_extensions(ext_dir):
                         dir, api_version_range, api_version
                     )
             except Exception as e:
-                logger.error('Ignoring extension %s (has a broken manifest.json file): %s', ext_dir, e)
+                logger.error('Ignoring extension %s (has a broken manifest.json file): %s', dir, e)
