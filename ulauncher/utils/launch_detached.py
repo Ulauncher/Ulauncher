@@ -6,7 +6,6 @@ from gi.repository import GLib
 
 from ulauncher.utils.systemd_controller import SystemdController
 
-
 logger = logging.getLogger()
 
 
@@ -30,7 +29,7 @@ def detach_child():
     # called, so this redirection prevents the child process from exiting when
     # ulauncher is interrupted. Unlike "nohup", stdout and stderr are not sent
     # to a file but sent to /dev/null instead.
-    null_fp = open("/dev/null", "w+b")
+    null_fp = open("/dev/null", "w+b") # noqa: SIM115
     null_fd = null_fp.fileno()
     for fp in [sys.stdin, sys.stdout, sys.stderr]:
         orig_fd = fp.fileno()
