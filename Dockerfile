@@ -6,9 +6,12 @@ LABEL maintainer="ulauncher.app@gmail.com"
 # NOTE: Keep lines separate. One "RUN" per dependency/change
 # https://stackoverflow.com/a/47451019/633921
 
+ENV LANG=C.UTF.8
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt update --fix-missing
-RUN DEBIAN_FRONTEND=noninteractive apt install -y tzdata
-RUN DEBIAN_FRONTEND=noninteractive apt install -y keyboard-configuration
+RUN apt install -y tzdata
+RUN apt install -y keyboard-configuration
 
 # CLI dependencies for building and testing
 RUN apt install -y software-properties-common
