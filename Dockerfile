@@ -19,9 +19,8 @@ RUN apt install -y git
 RUN apt install -y vim
 RUN apt install -y curl
 RUN apt install -y wget
-RUN apt install -y rsync
 RUN apt install -y xvfb
-RUN apt install -y python3.8-venv
+#RUN apt install -y python3-venv
 
 # deb package build dependencies and helpers
 RUN apt install -y debhelper
@@ -36,11 +35,9 @@ RUN apt install -y python3-paramiko
 # App dependencies
 RUN apt install -y gobject-introspection
 RUN apt install -y python3-all
-RUN apt install -y python3-levenshtein
 RUN apt install -y python3-setuptools
 RUN apt install -y python3-gi
 RUN apt install -y python3-gi-cairo
-RUN apt install -y gir1.2-wnck-3.0
 RUN apt install -y gir1.2-glib-2.0
 RUN apt install -y gir1.2-gtk-3.0
 RUN apt install -y gir1.2-webkit2-4.0
