@@ -1,3 +1,29 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ulauncher"
+description = "Application launcher for Linux"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "GPL-3"}
+authors = [
+  {name = "Aleksandr Gornostal"},
+  {name = "Albin Larsson"},
+  {name = "Troy Curtis"},
+]
+urls.Homepage = "http://ulauncher.io/"
+urls.Documentation = "https://docs.ulauncher.io/"
+urls.Repository = "https://github.com/Ulauncher/Ulauncher.git"
+urls.Issues = "https://github.com/Ulauncher/Ulauncher/issues"
+keywords = [ "linux", "desktop", "application", "launcher", "gtk" ]
+dependencies = [ "PyGObject", "pycairo", "python-Levenshtein" ]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ulauncher.version"}
+
 [tool.black]
 line-length = 120
 
