@@ -1,3 +1,2 @@
-Sphinx==7.1.2
+Sphinx
 sphinx_rtd_theme
-watchdog
