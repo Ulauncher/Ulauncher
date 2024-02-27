@@ -15,13 +15,16 @@ def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
-    from Levenshtein import editops, matching_blocks  # type: ignore[import, import-untyped]
+    from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found, import-untyped]
 
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)
 
 except ImportError:
-    logger.warning("Levenshtein is missing or outdated. Falling back to slower fuzzy-finding method.")
+    logger.info(
+        "Using fuzzy-matching with Native Python SequenceMatcher module. "
+        "optional dependency 'python-Levenshtein' is recommended for better performance"
+    )
     _get_matching_blocks = _get_matching_blocks_native
 
 
