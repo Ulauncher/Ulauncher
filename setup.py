@@ -34,4 +34,7 @@ setup(
         *data_files_from_path("share/ulauncher", "data"),
         *data_files_from_path("share/icons/hicolor/scalable", "data/icons/system"),
     ],
+    # can also be specified in pyproject.toml as tool.setuptools.script-files,
+    # but it seems to be both "discouraged" and broken
+    scripts=["bin/ulauncher", "bin/ulauncher-toggle"],
 )
