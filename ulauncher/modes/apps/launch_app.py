@@ -5,10 +5,9 @@ from pathlib import Path
 
 from gi.repository import Gio
 
-from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.Settings import Settings
-from ulauncher.utils.wm import get_windows_stacked, get_xserver_time
+from ulauncher.utils.wm import try_raise_app
 
 logger = logging.getLogger()
 
@@ -23,16 +22,9 @@ def launch_app(desktop_entry_name):
     # strip field codes %f, %F, %u, %U, etc
     app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
     app_wm_id = (app.get_string("StartupWMClass") or Path(app_exec).name).lower()
-    if app_exec and IS_X11 and (settings.raise_if_started or app.get_boolean("SingleMainWindow")):
-        for win in get_windows_stacked():
-            win_app_wm_id = (win.get_class_group_name() or "").lower()
-            if win_app_wm_id == "thunar" and win.get_name().startswith("Bulk Rename"):
-                # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
-                win_app_wm_id = "thunar --bulk-rename"
-            if win_app_wm_id == app_wm_id:
-                logger.info("Raising application %s", app_wm_id)
-                win.activate(get_xserver_time())
-                return
+    prefer_raise = settings.raise_if_started or app.get_boolean("SingleMainWindow")
+    if prefer_raise and app_exec and try_raise_app(app_wm_id):
+        return
 
     if app.get_boolean("DBusActivatable"):
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching

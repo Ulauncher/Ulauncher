@@ -14,6 +14,7 @@ if IS_X11:
         gi.require_version("Wnck", "3.0")
         from gi.repository import Wnck  # type: ignore[attr-defined]
     except (ImportError, ValueError):
+        Wnck = None
         logger.debug("Wnck is not installed")
 
 
@@ -43,14 +44,21 @@ def get_text_scaling_factor() -> float:
     return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")
 
 
-def get_windows_stacked() -> list[Wnck.Window]:
-    try:
+def try_raise_app(app_id: str) -> bool:
+    """
+    Try to raise an app by id (str) and return whether successful
+    Currently only supports X11 via Wnck
+    """
+    if IS_X11 and Wnck:
         wnck_screen = Wnck.Screen.get_default()
         wnck_screen.force_update()
-        return list(reversed(wnck_screen.get_windows_stacked()))
-    except NameError:
-        return []
-
-
-def get_xserver_time() -> int:
-    return GdkX11.x11_get_server_time(Gdk.get_default_root_window())
+        for win in reversed(wnck_screen.get_windows_stacked()):
+            win_app_wm_id = (win.get_class_group_name() or "").lower()
+            if win_app_wm_id == "thunar" and win.get_name().startswith("Bulk Rename"):
+                # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
+                win_app_wm_id = "thunar --bulk-rename"
+            if win_app_wm_id == app_id:
+                logger.info("Raising application %s", app_id)
+                win.activate(GdkX11.x11_get_server_time(Gdk.get_default_root_window()))
+                return True
+    return False
