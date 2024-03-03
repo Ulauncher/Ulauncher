@@ -16,7 +16,7 @@ Package: ulauncher
 Architecture: all
 Depends: ${misc:Depends},
  ${python3:Depends},
- libgtk-3-0 (>= 3.10),
+ libgtk-3-0 (>= 3.22),
  gir1.2-gtk-3.0,
  gir1.2-webkit2-4.0,
  gir1.2-glib-2.0,
