@@ -41,7 +41,7 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo add-apt-repository universe
-  sudo apt install python3-{all,gi} gobject-introspection \
+  sudo apt install python3-{all,gi,gi-cairo} gobject-introspection \
     gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0,gtklayershell-0.1}
   ```
 
