@@ -35,7 +35,6 @@ RUN apt install -y python3-paramiko
 # App dependencies
 RUN apt install -y gobject-introspection
 RUN apt install -y python3-all
-RUN apt install -y python3-setuptools
 RUN apt install -y python3-gi
 RUN apt install -y python3-gi-cairo
 RUN apt install -y gir1.2-glib-2.0
@@ -43,6 +42,7 @@ RUN apt install -y gir1.2-gtk-3.0
 RUN apt install -y gir1.2-webkit2-4.0
 
 # Workaround only needed for 20.04 and older: https://github.com/pypa/setuptools/issues/2956
+# Replace with python3-setuptools after upgrading to 22.04
 RUN apt install -y python3
 RUN apt install -y python3-dev
 RUN apt install -y build-essential
