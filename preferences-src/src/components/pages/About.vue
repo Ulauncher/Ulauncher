@@ -35,7 +35,7 @@
     <div class="col-8">
       <section class="text-container copyright-text" v-if="!isCreditsShown">
         <div class="selectable">
-          <p>Copyright (C) Aleksandr Gornostal &lt;ulauncher.app@gmail.com&gt;</p>
+          <p>Copyright (C) Aleksandr Gornostal</p>
           <p>Ulauncher is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3, as published by the Free Software Foundation.</p>
           <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See the GNU General Public License for more details.</p>
         </div>
@@ -48,17 +48,17 @@
           <h2>Maintainers:</h2>
           <p>
             <ul>
-              <li>@friday &lt;github.com/friday&gt;</li>
-              <li>@troycurtisjr &lt;github.com/troycurtisjr&gt;</li>
-              <li>Aleksandr Gornostal &lt;ulauncher.app@gmail.com&gt; </li>
+              <li>Aleksandr Gornostal</li>
+              <li>Albin Larsson</li>
+              <li>Troy Curtis</li>
             </ul>
           </p>
 
           <h2>Contributors:</h2>
           <p>
             <ul>
-              <li>Igor Yatsenko &lt;yatsenko.igor@gmail.com&gt;</li>
-              <li>Eugene Chulkov &lt;genechulkov@gmail.com&gt;</li>
+              <li>Igor Yatsenko</li>
+              <li>Eugene Chulkov</li>
             </ul>
           </p>
         </div>

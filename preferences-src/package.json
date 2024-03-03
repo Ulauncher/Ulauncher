@@ -1,7 +1,6 @@
 {
   "name": "ulauncher-prefs",
   "version": "3.0.0",
-  "author": "Aleksandr Gornostal <ulauncher.app@gmail.com>",
   "private": true,
   "scripts": {
     "build": "node build.js"
