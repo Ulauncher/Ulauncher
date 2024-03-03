@@ -17,7 +17,7 @@ For the v6 branch you need the the following to setup the local build environmen
 * Git
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-setuptools (if you have pip, you have it already)
-* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **wnck is new for v6**)
+* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-ewmh is new for v6**)
 * Optionally install [pygobject-stubs](https://github.com/pygobject/pygobject-stubs). Note that pygobject-stubs can only be installed for Gtk3 OR Gtk4. The only way to switch is to reinstall. Ulauncher uses Gtk3, but Gtk4 is the default. Rather than requiring users to install it for Gtk3 we are currently ignoring the mypy errors for all the incompatible places.
 
 #### Distro specific instructions
@@ -41,8 +41,8 @@ For the v6 branch you need the the following to setup the local build environmen
 
   ```sh
   sudo add-apt-repository universe
-  sudo apt install python3-{all,gi,gi-cairo} gobject-introspection \
-    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,wnck-3.0,gtklayershell-0.1}
+  sudo apt install python3-{all,gi,gi-cairo,ewmh} gobject-introspection \
+    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,gtklayershell-0.1}
   ```
 
 </details>
@@ -71,7 +71,7 @@ For the v6 branch you need the the following to setup the local build environmen
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
-  sudo pacman -Syu --needed gtk3 webkit2gtk-4.1 libwnck3 gtk-layer-shell python-{cairo,gobject}
+  sudo pacman -Syu --needed gtk3 webkit2gtk-4.1 gtk-layer-shell python-{cairo,gobject,ewmh}
   ```
 
 </details>

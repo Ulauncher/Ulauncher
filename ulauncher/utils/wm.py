@@ -9,13 +9,12 @@ from ulauncher.utils.environment import IS_X11
 logger = logging.getLogger()
 if IS_X11:
     try:
-        import gi
+        from ewmh import EWMH
 
-        gi.require_version("Wnck", "3.0")
-        from gi.repository import Wnck  # type: ignore[attr-defined]
+        ewmh = EWMH()
     except (ImportError, ValueError):
-        Wnck = None
-        logger.debug("Wnck is not installed")
+        ewmh = None
+        logger.debug("EWMH is not installed")
 
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
@@ -47,18 +46,19 @@ def get_text_scaling_factor() -> float:
 def try_raise_app(app_id: str) -> bool:
     """
     Try to raise an app by id (str) and return whether successful
-    Currently only supports X11 via Wnck
+    Currently only supports X11 via EWMH/Xlib
     """
-    if IS_X11 and Wnck:
-        wnck_screen = Wnck.Screen.get_default()
-        wnck_screen.force_update()
-        for win in reversed(wnck_screen.get_windows_stacked()):
-            win_app_wm_id = (win.get_class_group_name() or "").lower()
-            if win_app_wm_id == "thunar" and win.get_name().startswith("Bulk Rename"):
+    if IS_X11 and ewmh:
+        for win in reversed(ewmh.getClientListStacking()):
+            class_id, class_name = win.get_wm_class()
+            win_app_id = (class_id or "").lower()
+            if win_app_id == "thunar" and win.get_wm_name().startswith("Bulk Rename"):
                 # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
-                win_app_wm_id = "thunar --bulk-rename"
-            if win_app_wm_id == app_id:
+                # Also, note that get_wm_name is unreliable, but it works for Thunar https://github.com/parkouss/pyewmh/issues/15
+                win_app_id = "thunar --bulk-rename"
+            if app_id == win_app_id or app_id == class_name.lower():
                 logger.info("Raising application %s", app_id)
-                win.activate(GdkX11.x11_get_server_time(Gdk.get_default_root_window()))
+                ewmh.setActiveWindow(win)
+                ewmh.display.flush()
                 return True
     return False
