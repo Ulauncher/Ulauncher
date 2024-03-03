@@ -9,12 +9,13 @@ from ulauncher.utils.environment import IS_X11
 logger = logging.getLogger()
 if IS_X11:
     try:
-        from ewmh import EWMH
+        # Import will fail if Xlib is not installed
+        from Xlib.display import Display as XlibDisplay  # type: ignore[import-untyped]
 
-        ewmh = EWMH()
-    except (ImportError, ValueError):
-        ewmh = None
-        logger.debug("EWMH is not installed")
+        from ulauncher.utils.ewmh import EWMH
+
+    except ModuleNotFoundError:
+        XlibDisplay = None
 
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
@@ -48,7 +49,8 @@ def try_raise_app(app_id: str) -> bool:
     Try to raise an app by id (str) and return whether successful
     Currently only supports X11 via EWMH/Xlib
     """
-    if IS_X11 and ewmh:
+    if IS_X11 and XlibDisplay:
+        ewmh = EWMH()
         for win in reversed(ewmh.getClientListStacking()):
             class_id, class_name = win.get_wm_class()
             win_app_id = (class_id or "").lower()

@@ -99,7 +99,7 @@ let
       pygobject3
       requests
     ] ++ lib.optionals withXorg [
-      ewmh
+      xlib
     ] ++ [
       git
       glib

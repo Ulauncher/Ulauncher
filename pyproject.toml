@@ -18,7 +18,7 @@ urls.Documentation = "https://docs.ulauncher.io/"
 urls.Repository = "https://github.com/Ulauncher/Ulauncher.git"
 urls.Issues = "https://github.com/Ulauncher/Ulauncher/issues"
 keywords = [ "linux", "desktop", "application", "launcher", "gtk" ]
-dependencies = [ "PyGObject", "pycairo" ]
+dependencies = [ "PyGObject", "pycairo", "python-xlib" ]
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
