@@ -34,7 +34,7 @@ from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
 icon_asset_path = f"{PATHS.ASSETS}/icons/system/status"
-default_icon_name = Settings.status_icon_name  # intentionally using the class, not the instance, to get the default
+default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default
 
 
 def _create_menu_item(label, command):
@@ -59,7 +59,7 @@ class AppIndicator(Gio.Application):
         gtk_icon_theme = Gtk.IconTheme.get_default()
         icon_name = "find"  # standard find icon, in case the app is not installed
         icon_dir = ""
-        icons = list({Settings.load().status_icon_name, default_icon_name, "ulauncher-indicator"})
+        icons = list({Settings.load().tray_icon_name, default_icon_name, "ulauncher-indicator"})
 
         # check preferred, fallback on default v6 icon name, then the v5 icon name if v5 is installed
         for _icon in icons:

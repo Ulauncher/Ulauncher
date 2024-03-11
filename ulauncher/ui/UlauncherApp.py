@@ -73,7 +73,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
         settings = Settings.load()
         self.hold()  # Keep the app running even without a window
 
-        if settings.show_indicator_icon:
+        if settings.show_tray_icon:
             self.toggle_appindicator(True)
 
         if FIRST_RUN or settings.hotkey_show_app:

@@ -129,13 +129,13 @@
     <table>
       <tr>
         <td>
-          <label for="show-indicator-icon">Show icon in the panel</label>
+          <label for="show-tray-icon">Show tray icon</label>
           <small>
             <p>Requires optional dependency XApp (recommended), AppIndicator3 or AyatanaAppindicator3</p>
           </small>
         </td>
         <td>
-          <b-form-checkbox id="show-indicator-icon" v-model="show_indicator_icon"></b-form-checkbox>
+          <b-form-checkbox id="show-tray-icon" v-model="show_tray_icon"></b-form-checkbox>
         </td>
       </tr>
 
@@ -219,7 +219,7 @@ export default {
       'enable_application_mode',
       'raise_if_started',
       'render_on_screen',
-      'show_indicator_icon',
+      'show_tray_icon',
       'max_recent_apps',
       'terminal_command',
       'theme_name',

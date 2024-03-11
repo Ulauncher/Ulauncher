@@ -167,7 +167,7 @@ class PreferencesServer:
         self.settings.update({prop: value})
         self.settings.save()
 
-        if prop == "show_indicator_icon":
+        if prop == "show_tray_icon":
             app = Gio.Application.get_default()
             assert app
             app.toggle_appindicator(value)  # type: ignore[attr-defined]

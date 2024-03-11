@@ -14,14 +14,16 @@ class Settings(JsonConf):
     max_recent_apps = 0
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"
-    show_indicator_icon = True
+    show_tray_icon = True
     terminal_command = ""
     theme_name = "light"
     arrow_key_aliases = "hjkl"
-    status_icon_name = "ulauncher-indicator-symbolic"
+    tray_icon_name = "ulauncher-indicator-symbolic"
 
     # Convert dash to underscore
     def __setitem__(self, key, value):
+        if key.replace("-", "_") == "show_indicator_icon":
+            key = "show_tray_icon"
         super().__setitem__(key.replace("-", "_"), value)
 
     def get_jump_keys(self):

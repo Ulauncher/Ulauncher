@@ -55,11 +55,11 @@ class TestPreferencesServer:
         server.client = webview
         return server
 
-    def test_apply_settings_show_indicator_icon(self, prefs_server):
-        prefs_server.apply_settings("show_indicator_icon", False)
+    def test_apply_settings_show_tray_icon(self, prefs_server):
+        prefs_server.apply_settings("show_tray_icon", False)
         Gio.Application.get_default().toggle_appindicator.assert_called_with(False)
-        assert prefs_server.settings.show_indicator_icon is False
-        assert load_json().get("show_indicator_icon") is False
+        assert prefs_server.settings.show_tray_icon is False
+        assert load_json().get("show_tray_icon") is False
 
     def test_set_autostart(self, prefs_server, autostart_pref):
         prefs_server.apply_autostart(True)
