@@ -16,7 +16,6 @@
 , libX11
 , libappindicator
 , librsvg
-, libwnck
 , mkYarnPackage
 , mypy
 , nix-update-script
@@ -90,8 +89,6 @@ let
       libappindicator
       librsvg
       webkitgtk
-    ] ++ lib.optionals withXorg [
-      libwnck
     ];
 
     # runtime dependencies / binaries prepended to PATH
@@ -101,6 +98,8 @@ let
       pycairo
       pygobject3
       requests
+    ] ++ lib.optionals withXorg [
+      xlib
     ] ++ [
       git
       glib
