@@ -1,5 +1,5 @@
 # Eventually we should switch to define these in pyproject.toml and import with
-# tomllib (py3.11) w fallback to tomli: https://github.com/Ulauncher/Ulauncher/blob/1cdaeb4d28eacfddda887690072d4e3ecd02baff/ulauncher/__init__.py#L4-L15
+# tomllib (py3.11) w fallback to tomli (PR 1312)
 # importlib.metadata (Py3.8) also works (but just for version): importlib.metadata.version("ulauncher")
 
 
