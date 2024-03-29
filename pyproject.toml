@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ulauncher"
+version = "6.0.0-beta5"
 description = "Application launcher for Linux"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -18,11 +19,14 @@ urls.Documentation = "https://docs.ulauncher.io/"
 urls.Repository = "https://github.com/Ulauncher/Ulauncher.git"
 urls.Issues = "https://github.com/Ulauncher/Ulauncher/issues"
 keywords = [ "linux", "desktop", "application", "launcher", "gtk" ]
-dependencies = [ "PyGObject", "pycairo", "python-xlib" ]
-dynamic = ["version"]
+dependencies = [ "PyGObject", "pycairo", "python-xlib", "tomli;python_version < '3.11'" ]
 
-[tool.setuptools.dynamic]
-version = {attr = "ulauncher.version"}
+[tool.gobject.pin_versions]
+Gtk = "3.0"
+Gdk = "3.0"
+GdkX11 = "3.0"
+GdkPixbuf = "2.0"
+Pango = "1.0"
 
 [tool.black]
 line-length = 120
