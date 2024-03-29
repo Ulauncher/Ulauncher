@@ -108,7 +108,7 @@ pytest: # Run unit tests
 
 format: # Auto format the code
 	black .
-	ruff . --fix
+	ruff check . --fix
 
 #=Build Commands
 
