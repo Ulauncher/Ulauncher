@@ -17,7 +17,7 @@ def is_extension(ext_path: str) -> bool:
     return all(os.path.isfile(os.path.join(ext_path, file)) for file in expected_files)
 
 
-def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS_DIR) -> bool:
+def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS) -> bool:
     """
     Tells the directory is user-provided extension.
     """

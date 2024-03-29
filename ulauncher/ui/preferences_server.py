@@ -223,8 +223,8 @@ class PreferencesServer:
 
     @route("/open/extensions-dir")
     def open_extensions_dir(self):
-        logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS_DIR)
-        open_detached(PATHS.USER_EXTENSIONS_DIR)
+        logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS)
+        open_detached(PATHS.USER_EXTENSIONS)
 
     @route("/shortcut/get-all")
     def shortcut_get_all(self):
