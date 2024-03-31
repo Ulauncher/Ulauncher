@@ -180,7 +180,7 @@ Basic API Concepts
 
 The result above has name and description, but it doesn't have any action for when it's activated. The easiest way to add an action is with ``on_enter``.
 
-  :code:`on_enter` an action that will run when the result is activated with anter keypress (or by clicking).
+  :code:`on_enter` an action that will run when the result is activated with enter keypress (or by clicking).
 
   ::
 
