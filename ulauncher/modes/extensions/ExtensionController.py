@@ -55,6 +55,7 @@ class ExtensionControllerError(Exception):
 
 class ExtensionController:
     id: str
+    state: ExtensionState | None
     _path: str | None
     _state_path: Path
 
@@ -62,6 +63,12 @@ class ExtensionController:
         self.id = ext_id
         self._path = path
         self._state_path = Path(f"{PATHS.EXTENSIONS_STATE}/{self.id}.json")
+        self.state = ExtensionState.load(self._state_path)
+
+        if not self.state.id:
+            self.state.id = self.id
+            defaults = json_load(f"{path}/.default-state.json")
+            self.state.update(defaults)
 
         if self.state.url:
             self.remote = ExtensionRemote(self.state.url)
@@ -87,16 +94,6 @@ class ExtensionController:
     def iterate(cls) -> Generator[ExtensionController, None, None]:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)
-
-    @property
-    def state(self) -> ExtensionState:
-        state = ExtensionState.load(self._state_path)
-        # if id is missing it means no state exists, look for extension defaults
-        if not state.id:
-            defaults = json_load(f"{self.path}/.default-state.json")
-            state.update(defaults)
-            state.id = self.id
-        return state
 
     @property
     def manifest(self) -> ExtensionManifest:
