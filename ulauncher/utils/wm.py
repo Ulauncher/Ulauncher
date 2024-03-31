@@ -10,7 +10,7 @@ logger = logging.getLogger()
 if IS_X11:
     try:
         # Import will fail if Xlib is not installed
-        from Xlib.display import Display as XlibDisplay  # type: ignore[import-untyped]
+        from Xlib.display import Display as XlibDisplay
 
         from ulauncher.utils.ewmh import EWMH
 

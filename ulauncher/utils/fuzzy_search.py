@@ -15,9 +15,7 @@ def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
-    # Need to type: ignore[import-untyped, import-not-found], here, but mypy doesn't handle that
-    # https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
-    from Levenshtein import editops, matching_blocks  # type: ignore  # noqa: PGH003
+    from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found]
 
     def _get_matching_blocks(query, text):
         return matching_blocks(editops(query, text), query, text)
