@@ -31,6 +31,7 @@ line-length = 120
 python_version = "3.7"
 check_untyped_defs = true
 disallow_incomplete_defs = true
+disable_error_code = "import-untyped"
 
 [tool.pylint.MASTER]
 ignore-patterns="ulauncher,docs,data,scripts,tests"
