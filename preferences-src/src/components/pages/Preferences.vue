@@ -179,6 +179,19 @@
           <b-form-input style="width:500px" id="terminal-exec" v-model="terminal_command"></b-form-input>
         </td>
       </tr>
+      <tr>
+        <td>
+          <label for="copy-hook">Copy-hook</label>
+          <small>
+            <p>
+              A command to run after copying. Can be for example <code>xdotool key ctrl+v</code> on X11, which will trigger pasting, assuming your keyboard combination to paste is ctrl+v.
+            </p>
+          </small>
+        </td>
+        <td>
+          <b-form-input style="width:500px" id="copy-hook" v-model="copy_hook"></b-form-input>
+        </td>
+      </tr>
     </table>
   </div>
 </template>
@@ -221,6 +234,7 @@ export default {
       'render_on_screen',
       'show_tray_icon',
       'max_recent_apps',
+      'copy_hook',
       'terminal_command',
       'theme_name',
     ].map(name => ([name, {
