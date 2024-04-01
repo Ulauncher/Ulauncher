@@ -116,6 +116,18 @@
 
       <tr>
         <td>
+          <label for="base-width">Window width</label>
+          <small>
+            <p>Window width (in pixels). Min: 540, Max: 2000</p>
+          </small>
+        </td>
+        <td>
+          <b-form-input style="width:380px" id="base-width" v-model.number="base_width" type="number" min="540" max="2000"></b-form-input>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="show-recent-apps">Number of frequent apps to show</label>
         </td>
         <td>
@@ -229,6 +241,7 @@ export default {
       'disable_desktop_filters',
       'grab_mouse_pointer',
       'jump_keys',
+      'base_width',
       'enable_application_mode',
       'raise_if_started',
       'render_on_screen',
@@ -242,6 +255,9 @@ export default {
         return this.prefs[name]
       },
       set(value) {
+        if (name === 'base_width' && (value < 540 || value > 2000)) {
+          return
+        }
         return fetchData('prefs:///set', name, value).then(
           () => {
             this.setPrefs({[name]: value})
