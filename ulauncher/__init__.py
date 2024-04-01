@@ -3,7 +3,7 @@
 # importlib.metadata (Py3.8) also works (but just for version): importlib.metadata.version("ulauncher")
 
 
-version = "6.0.0-beta5"
+version = "6.0.0-beta6"
 gi_versions = {
     "Gtk": "3.0",
     "Gdk": "3.0",
