@@ -50,6 +50,6 @@ class TestClient:
         client.on_close(mock.Mock())
         extension.trigger_event.assert_called_with({"type": "event:unload"})
 
-    def test_send__ws_send__is_called(self, client):
+    def test_send__framer_send__is_called(self, client):
         client.send({"hello": "world"})
         client.framer.send.assert_called_with({"hello": "world"})
