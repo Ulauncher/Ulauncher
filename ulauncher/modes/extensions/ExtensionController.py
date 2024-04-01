@@ -55,7 +55,7 @@ class ExtensionControllerError(Exception):
 
 class ExtensionController:
     id: str
-    state: ExtensionState | None
+    state: ExtensionState
     _path: str | None
     _state_path: Path
 
