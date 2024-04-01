@@ -18,6 +18,7 @@ class Settings(JsonConf):
     terminal_command = ""
     theme_name = "light"
     arrow_key_aliases = "hjkl"
+    copy_hook = ""
     tray_icon_name = "ulauncher-indicator-symbolic"
 
     # Convert dash to underscore

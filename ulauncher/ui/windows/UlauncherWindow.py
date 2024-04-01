@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import subprocess
 from typing import Any
 
 from gi.repository import Gdk, Gtk
@@ -45,6 +46,11 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
         clipboard.set_text(data, -1)
         clipboard.store()
         window.hide_and_clear_input()
+        copy_hook = Settings.load().copy_hook
+        if copy_hook:
+            logger.info("Running copy hook: %s", copy_hook)
+            subprocess.Popen(["sh", "-c", copy_hook])
+
     elif event_type == "action:legacy_run_script" and isinstance(data, list):
         run_script(*data)
     elif event_type == "action:legacy_run_many" and isinstance(data, list):
