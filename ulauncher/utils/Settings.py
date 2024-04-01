@@ -12,6 +12,7 @@ class Settings(JsonConf):
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
     enable_application_mode = True
     max_recent_apps = 0
+    base_width = 750
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"
     show_tray_icon = True
