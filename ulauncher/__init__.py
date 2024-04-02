@@ -1,7 +1,4 @@
-# Eventually we should switch to define these in pyproject.toml and import with
-# tomllib (py3.11) w fallback to tomli (PR 1312)
-# importlib.metadata (Py3.8) also works (but just for version): importlib.metadata.version("ulauncher")
-
+# Eventually switch to define the version/gi_versions in pyproject.toml? see PR 1312
 
 version = "6.0.0-beta6"
 gi_versions = {
