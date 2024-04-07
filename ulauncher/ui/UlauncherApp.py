@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+import weakref
 
 from gi.repository import Gio, Gtk
 
@@ -25,7 +26,7 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     _query = ""
     window: UlauncherWindow | None = None
-    preferences: PreferencesWindow | None = None
+    _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
     _appindicator: AppIndicator | None = None
 
     def __call__(cls, *args, **kwargs):
@@ -115,11 +116,14 @@ class UlauncherApp(Gtk.Application):
         if self.window:
             self.window.hide()
 
-        if self.preferences:
-            self.preferences.present(page)
+        preferences = self._preferences and self._preferences()
+
+        if preferences:
+            preferences.present(page)
         else:
-            self.preferences = PreferencesWindow(application=self)
-            self.preferences.show(page)
+            preferences = PreferencesWindow(application=self)
+            self._preferences = weakref.ref(preferences)
+            preferences.show(page)
 
     def activate_query(self, _action, variant, *_):
         self.activate()

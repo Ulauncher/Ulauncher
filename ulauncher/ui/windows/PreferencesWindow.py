@@ -50,8 +50,5 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         super().show()
 
     def on_delete(self, *_args, **_kwargs):
-        app = self.get_application()
-        assert app
-        del app.preferences  # type: ignore[attr-defined]
         self.destroy()
         os.system(f"pkill -f WebKitNetworkProcess -P {os.getpid()}")
