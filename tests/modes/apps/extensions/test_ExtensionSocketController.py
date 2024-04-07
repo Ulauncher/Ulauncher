@@ -15,9 +15,7 @@ class TestExtensionSocketController:
 
     @pytest.fixture(autouse=True)
     def result_renderer(self, mocker):
-        return mocker.patch(
-            "ulauncher.modes.extensions.ExtensionSocketController.DeferredResultRenderer.get_instance"
-        ).return_value
+        return mocker.patch("ulauncher.modes.extensions.ExtensionSocketController.DeferredResultRenderer").return_value
 
     @pytest.fixture(autouse=True)
     def ec_extension_finder(self, mocker):

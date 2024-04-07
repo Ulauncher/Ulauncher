@@ -30,7 +30,7 @@ class TestPreferencesServer:
 
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
-        app = UlauncherApp.get_instance()
+        app = UlauncherApp()
         app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
         app.toggle_appindicator = mock.MagicMock()
         return app.window

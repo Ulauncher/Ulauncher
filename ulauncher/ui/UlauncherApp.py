@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import time
-from functools import lru_cache
 
 from gi.repository import Gio, Gtk
 
@@ -13,12 +12,14 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
 
 
+@class_singleton
 class UlauncherApp(Gtk.Application):
     """
     Main Ulauncher application (singleton)
@@ -31,11 +32,6 @@ class UlauncherApp(Gtk.Application):
     window: UlauncherWindow | None = None
     preferences: PreferencesWindow | None = None
     _appindicator: AppIndicator | None = None
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls):
-        return cls()
 
     def __init__(self, *args, **kwargs):
         kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
@@ -104,7 +100,7 @@ class UlauncherApp(Gtk.Application):
             notification.set_priority(Gio.NotificationPriority.URGENT)
             self.send_notification(notification_id, notification)
 
-        ExtensionSocketServer.get_instance().start()
+        ExtensionSocketServer().start()
         time.sleep(0.01)
         for controller in ExtensionController.iterate():
             if controller.is_enabled and not controller.has_error:

@@ -28,7 +28,7 @@ class ExtensionSocketController:
             raise RuntimeError(msg)
         self.controllers = controllers
         self.framer = framer
-        self.result_renderer = DeferredResultRenderer.get_instance()
+        self.result_renderer = DeferredResultRenderer()
         self.ext_id = ext_id
         self.data_controller = ExtensionController.create(ext_id)
         ext_path = extension_finder.locate(ext_id)

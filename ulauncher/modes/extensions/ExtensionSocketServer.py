@@ -3,26 +3,22 @@ from __future__ import annotations
 import logging
 import os
 import os.path
-from functools import lru_cache
 
 from gi.repository import Gio, GObject
 
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
+from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.framer import JSONFramer
 
 logger = logging.getLogger()
 
 
+@class_singleton
 class ExtensionSocketServer:
     socket_path: str
     service: Gio.SocketService | None
     controllers: dict[str, ExtensionSocketController]
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls):
-        return cls()
 
     def __init__(self):
         self.service = None
@@ -102,5 +98,5 @@ class ExtensionSocketServer:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    server = ExtensionSocketServer.get_instance()
+    server = ExtensionSocketServer()
     server.start()

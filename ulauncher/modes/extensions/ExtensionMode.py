@@ -10,8 +10,8 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 
 class ExtensionMode(BaseMode):
     def __init__(self):
-        self.ExtensionSocketServer = ExtensionSocketServer.get_instance()
-        self.deferredResultRenderer = DeferredResultRenderer.get_instance()
+        self.ExtensionSocketServer = ExtensionSocketServer()
+        self.deferredResultRenderer = DeferredResultRenderer()
 
     def is_enabled(self, query: Query) -> bool:
         return bool(self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)) and " " in query

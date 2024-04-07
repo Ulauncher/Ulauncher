@@ -27,7 +27,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             hardware_acceleration_policy=WebKit2.HardwareAccelerationPolicy.NEVER,
         )
 
-        server = PreferencesServer.get_instance()
+        server = PreferencesServer()
         self.webview = WebKit2.WebView(settings=settings, web_context=server.context)
         server.client = self.webview
         self.add(self.webview)

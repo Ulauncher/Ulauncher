@@ -60,9 +60,9 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
                 keep_open = True
         return keep_open
     elif event_type == "event:activate_custom":
-        controller = DeferredResultRenderer.get_instance().get_active_controller()
+        controller = DeferredResultRenderer().get_active_controller()
     elif event_type.startswith("event") and ext_id:
-        controller = ExtensionSocketServer.get_instance().get_controller_by_id(ext_id)
+        controller = ExtensionSocketServer().get_controller_by_id(ext_id)
     else:
         logger.warning("Invalid result from mode: %s", type(event).__name__)
 
@@ -195,7 +195,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
         if self.is_visible():
             # input_changed can trigger when hiding window
-            self.handle_event(ModeHandler.get_instance().on_query_change(self.app.query))
+            self.handle_event(ModeHandler().on_query_change(self.app.query))
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911, PLR0912
         """
@@ -229,7 +229,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.app.query)
         ):
-            new_query = ModeHandler.get_instance().on_query_backspace(self.app.query)
+            new_query = ModeHandler().on_query_backspace(self.app.query)
             if new_query is not None:
                 self.app.query = new_query
                 return True

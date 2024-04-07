@@ -13,7 +13,7 @@ from ulauncher.ui.UlauncherApp import UlauncherApp
 class TestDeferredResultRenderer:
     @pytest.fixture(autouse=True)
     def UlauncherWindow(self, mocker):
-        app = UlauncherApp.get_instance()
+        app = UlauncherApp()
         app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
         return app.window
 

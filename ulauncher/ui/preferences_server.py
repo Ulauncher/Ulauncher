@@ -6,7 +6,6 @@ import mimetypes
 import os
 import time
 import traceback
-from functools import lru_cache
 from typing import Any, Callable, Generator
 from urllib.parse import unquote, urlparse
 
@@ -18,6 +17,7 @@ from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
+from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
@@ -57,6 +57,7 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
         }
 
 
+@class_singleton
 class PreferencesServer:
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
@@ -68,11 +69,6 @@ class PreferencesServer:
     """
 
     client: WebKit2.WebView
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls):
-        return cls()
 
     def __init__(self):
         self.autostart_pref = SystemdController("ulauncher")
@@ -272,7 +268,7 @@ class PreferencesServer:
     def extension_update_prefs(self, ext_id, data):
         logger.info("Update extension preferences %s to %s", ext_id, data)
         controller = ExtensionController.create(ext_id)
-        socket_controller = ExtensionSocketServer.get_instance().controllers.get(ext_id)
+        socket_controller = ExtensionSocketServer().controllers.get(ext_id)
         if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
                 pref = controller.user_preferences.get(id)
