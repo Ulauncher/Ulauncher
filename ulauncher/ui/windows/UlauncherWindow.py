@@ -45,7 +45,7 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(data, -1)
         clipboard.store()
-        window.hide_and_clear_input()
+        window.hide()
         copy_hook = Settings.load().copy_hook
         if copy_hook:
             logger.info("Running copy hook: %s", copy_hook)
@@ -178,7 +178,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def on_focus_out(self, *_):
         if not self.is_dragging:
-            self.hide()
+            self.hide(clear_input=False)
 
     def on_focus_in(self, *_args):
         if self.settings.grab_mouse_pointer:
@@ -216,7 +216,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             )
 
         if keyname == "Escape":
-            self.hide()
+            self.hide(clear_input=False)
             return True
 
         if ctrl and keyname == "comma":
@@ -280,12 +280,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return self.get_application()
 
     def handle_event(self, event: bool | list | str | dict[str, Any] | None) -> None:
-        if event is None:
-            self.hide_and_clear_input()
-            return
-
-        if not handle_event(self, event):
-            self.hide_and_clear_input()
+        if event is None or not handle_event(self, event):
+            self.hide()
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider
@@ -354,11 +350,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.grab_focus()
         super().show()
 
-    def hide(self, *args, **kwargs):
-        """Override the hide method to ensure the pointer grab is released."""
+    def hide(self, clear_input=True):
+        if clear_input:
+            self.input.set_text("")
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
-        super().hide(*args, **kwargs)
+        super().hide()
         if self.settings.clear_previous_query:
             self.app.query = ""
 
@@ -372,10 +369,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         device_mapper = window.get_display().get_device_manager()
         assert device_mapper
         return device_mapper.get_client_pointer()
-
-    def hide_and_clear_input(self):
-        self.input.set_text("")
-        self.hide()
 
     def show_results(self, results: list[Result]) -> None:
         """

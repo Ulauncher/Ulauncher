@@ -114,7 +114,7 @@ class UlauncherApp(Gtk.Application):
         if not isinstance(page, str):
             page = None  # show_preferences is also bound to an event, passing a widget as the first arg
         if self.window:
-            self.window.hide()
+            self.window.hide(clear_input=False)
 
         preferences = self._preferences and self._preferences()
 
