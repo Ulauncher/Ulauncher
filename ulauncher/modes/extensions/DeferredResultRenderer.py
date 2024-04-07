@@ -1,30 +1,23 @@
 from __future__ import annotations
 
 import logging
-from functools import lru_cache, partial
+from functools import partial
 
 from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result
+from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.timer import TimerContext, timer
 
 logger = logging.getLogger()
 
 
-class DeferredResultRenderer:
+class DeferredResultRenderer(metaclass=Singleton):
     """
     Handles asynchronous render for extensions
     """
 
     LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls) -> DeferredResultRenderer:
-        """
-        Returns singleton instance
-        """
-        return cls()
 
     def __init__(self) -> None:
         self.loading: TimerContext | None = None

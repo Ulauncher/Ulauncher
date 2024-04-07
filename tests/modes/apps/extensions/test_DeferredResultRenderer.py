@@ -9,11 +9,12 @@ from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.ui.UlauncherApp import UlauncherApp
 
+app = UlauncherApp()
+
 
 class TestDeferredResultRenderer:
     @pytest.fixture(autouse=True)
     def UlauncherWindow(self, mocker):
-        app = UlauncherApp.get_instance()
         app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
         return app.window
 

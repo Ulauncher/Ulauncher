@@ -1,23 +1,18 @@
 import logging
-from functools import lru_cache
 
 from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
+from ulauncher.utils.singleton import Singleton
 
 logger = logging.getLogger()
 
 
-class ModeHandler:
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls):
-        return cls([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
-
-    def __init__(self, modes):
-        self.modes = modes
+class ModeHandler(metaclass=Singleton):
+    def __init__(self):
+        self.modes = [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()]
 
     def on_query_change(self, query):
         """

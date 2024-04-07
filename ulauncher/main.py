@@ -81,7 +81,7 @@ def main() -> None:
     # Migrate user data to v6 compatible
     v5_to_v6()
 
-    app = UlauncherApp.get_instance()
+    app = UlauncherApp()
 
     def handler():
         app.quit()

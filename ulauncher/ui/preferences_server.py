@@ -6,7 +6,6 @@ import mimetypes
 import os
 import time
 import traceback
-from functools import lru_cache
 from typing import Any, Callable, Generator
 from urllib.parse import unquote, urlparse
 
@@ -22,6 +21,7 @@ from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
@@ -57,7 +57,7 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
         }
 
 
-class PreferencesServer:
+class PreferencesServer(metaclass=Singleton):
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop
@@ -68,11 +68,6 @@ class PreferencesServer:
     """
 
     client: WebKit2.WebView
-
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_instance(cls):
-        return cls()
 
     def __init__(self):
         self.autostart_pref = SystemdController("ulauncher")
@@ -272,7 +267,7 @@ class PreferencesServer:
     def extension_update_prefs(self, ext_id, data):
         logger.info("Update extension preferences %s to %s", ext_id, data)
         controller = ExtensionController.create(ext_id)
-        socket_controller = ExtensionSocketServer.get_instance().controllers.get(ext_id)
+        socket_controller = ExtensionSocketServer().controllers.get(ext_id)
         if socket_controller:  # send update_preferences only if extension is running
             for id, new_value in data.get("preferences", {}).items():
                 pref = controller.user_preferences.get(id)

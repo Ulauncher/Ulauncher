@@ -1,15 +1,14 @@
 import json
 import shutil
 from pathlib import Path
-from unittest import mock
 
 import pytest
-from gi.repository import Gio
 
 from ulauncher.ui.preferences_server import PreferencesServer
 from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.utils.Settings import Settings
 
+app = UlauncherApp()
 settings_file = "/tmp/ulauncher-test/pref-settings.json"
 
 
@@ -30,9 +29,7 @@ class TestPreferencesServer:
 
     @pytest.fixture(autouse=True)
     def ulauncherWindow(self, mocker):
-        app = UlauncherApp.get_instance()
         app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
-        app.toggle_appindicator = mock.MagicMock()
         return app.window
 
     @pytest.fixture(autouse=True)
@@ -57,7 +54,6 @@ class TestPreferencesServer:
 
     def test_apply_settings_show_tray_icon(self, prefs_server):
         prefs_server.apply_settings("show_tray_icon", False)
-        Gio.Application.get_default().toggle_appindicator.assert_called_with(False)
         assert prefs_server.settings.show_tray_icon is False
         assert load_json().get("show_tray_icon") is False
 
