@@ -13,8 +13,8 @@ from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRend
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.shortcuts.run_script import run_script
+from ulauncher.ui import LayerShell
 from ulauncher.ui.ItemNavigation import ItemNavigation
-from ulauncher.ui.LayerShell import LayerShellOverlay
 from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.load_icon_surface import load_icon_surface
@@ -73,10 +73,11 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
     return False
 
 
-class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
+class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider = None
     results_nav = None
     is_dragging = False
+    layer_shell_enabled = False
     settings = Settings.load()
 
     def __init__(self, **kwargs):
@@ -94,8 +95,8 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             **kwargs,
         )
 
-        if LayerShellOverlay.is_supported():
-            self.enable_layer_shell()
+        if LayerShell.is_supported():
+            self.layer_shell_enabled = LayerShell.enable(self)
 
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
@@ -333,7 +334,7 @@ class UlauncherWindow(Gtk.ApplicationWindow, LayerShellOverlay):
             self.scroll_container.set_property("max-content-height", max_height)
 
             if self.layer_shell_enabled:
-                self.set_vertical_position(pos_y)
+                LayerShell.set_vertical_position(self, pos_y)
             else:
                 self.move(pos_x, pos_y)
 

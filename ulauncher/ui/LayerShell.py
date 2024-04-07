@@ -1,9 +1,14 @@
-import logging
+"""
+Allows for a window to opt in to the wayland layer shell protocol.
+
+This disables decorations and displays the window on top of other applications (even if fullscreen).
+Uses the wlr-layer-shell protocol [1]
+
+[1]: https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml
+"""
 
 import gi
 from gi.repository import Gtk
-
-logger = logging.getLogger()
 
 try:
     gi.require_version("GtkLayerShell", "0.1")
@@ -12,41 +17,25 @@ except (ValueError, ImportError):
     GtkLayerShell = None
 
 
-class LayerShellOverlay(Gtk.Window):
-    """
-    Allows for a window to opt in to the wayland layer shell protocol.
+def is_supported() -> bool:
+    """Check if running under a wayland compositor that supports the layer shell extension"""
+    return GtkLayerShell is not None and GtkLayerShell.is_supported()
 
-    This Disables decorations and displays the window on top of other applications (even if fullscreen).
-    Uses the wlr-layer-shell protocol [1]
 
-    [1]: https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml
-    """
+def enable(window: Gtk.Window) -> bool:
+    if not is_supported():
+        return False
 
-    @classmethod
-    def is_supported(cls) -> bool:
-        """Check if running under a wayland compositor that supports the layer shell extension"""
-        return GtkLayerShell is not None and GtkLayerShell.is_supported()
+    GtkLayerShell.init_for_window(window)
+    GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+    GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
+    # Ask to be moved when over some other shell component
+    GtkLayerShell.set_exclusive_zone(window, 0)
+    return True
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._use_layer_shell = False
 
-    def enable_layer_shell(self) -> None:
-        assert self.__class__.is_supported(), "Should be supported to enable"
-        self._use_layer_shell = True
-
-        GtkLayerShell.init_for_window(self)
-        GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.EXCLUSIVE)
-        GtkLayerShell.set_layer(self, GtkLayerShell.Layer.OVERLAY)
-        # Ask to be moved when over some other shell component
-        GtkLayerShell.set_exclusive_zone(self, 0)
-
-    @property
-    def layer_shell_enabled(self) -> bool:
-        return self._use_layer_shell
-
-    def set_vertical_position(self, pos_y: float) -> None:
-        # Set vertical position and anchor to the top edge, will be centered horizontally
-        # by default
-        GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
-        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, pos_y)
+def set_vertical_position(window: Gtk.Window, pos_y: float) -> None:
+    # Set vertical position and anchor to the top edge, will be centered horizontally
+    # by default
+    GtkLayerShell.set_anchor(window, GtkLayerShell.Edge.TOP, True)
+    GtkLayerShell.set_margin(window, GtkLayerShell.Edge.TOP, pos_y)

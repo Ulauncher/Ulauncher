@@ -8,7 +8,7 @@ from gi.repository import GLib, Gtk
 
 import ulauncher.utils.xinit  # must import this before any GUI libraries are initialized.  # noqa: F401
 from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
-from ulauncher.ui.LayerShell import LayerShellOverlay
+from ulauncher.ui import LayerShell
 from ulauncher.ui.UlauncherApp import UlauncherApp
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
@@ -65,7 +65,7 @@ def main() -> None:
         )
 
     if XDG_SESSION_TYPE != "X11":
-        logger.info("Layer shell: %s", ("Yes" if LayerShellOverlay.is_supported() else "No"))
+        logger.info("Layer shell: %s", ("Yes" if LayerShell.is_supported() else "No"))
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
