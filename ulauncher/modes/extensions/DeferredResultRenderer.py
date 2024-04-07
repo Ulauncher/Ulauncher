@@ -6,14 +6,13 @@ from functools import partial
 from gi.repository import Gio, GLib
 
 from ulauncher.api.result import Result
-from ulauncher.utils.decorator.singleton import class_singleton
+from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.timer import TimerContext, timer
 
 logger = logging.getLogger()
 
 
-@class_singleton
-class DeferredResultRenderer:
+class DeferredResultRenderer(metaclass=Singleton):
     """
     Handles asynchronous render for extensions
     """

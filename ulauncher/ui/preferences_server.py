@@ -17,11 +17,11 @@ from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
-from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
@@ -57,8 +57,7 @@ def get_extensions() -> Generator[dict[str, Any], None, None]:
         }
 
 
-@class_singleton
-class PreferencesServer:
+class PreferencesServer(metaclass=Singleton):
     """
     Handles the "back-end" of the PreferencesWindow's wekit webview
     Because of how the WebKitGtk API is implemented you should never create more than one context for the same mainloop

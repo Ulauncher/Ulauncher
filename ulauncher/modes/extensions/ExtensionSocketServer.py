@@ -8,14 +8,13 @@ from gi.repository import Gio, GObject
 
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
-from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.framer import JSONFramer
+from ulauncher.utils.singleton import Singleton
 
 logger = logging.getLogger()
 
 
-@class_singleton
-class ExtensionSocketServer:
+class ExtensionSocketServer(metaclass=Singleton):
     socket_path: str
     service: Gio.SocketService | None
     controllers: dict[str, ExtensionSocketController]

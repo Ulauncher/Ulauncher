@@ -1,9 +1,8 @@
-from ulauncher.utils.decorator.singleton import class_singleton
+from ulauncher.utils.singleton import Singleton
 
 
 def test_class_singleton():
-    @class_singleton
-    class TestClass:
+    class TestClass(metaclass=Singleton):
         def __init__(self) -> None:
             pass
 

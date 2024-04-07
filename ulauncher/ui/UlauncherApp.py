@@ -12,19 +12,14 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
-from ulauncher.utils.decorator.singleton import class_singleton
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.singleton import get_instance
 
 logger = logging.getLogger()
 
 
-@class_singleton
 class UlauncherApp(Gtk.Application):
-    """
-    Main Ulauncher application (singleton)
-    """
-
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
@@ -32,6 +27,9 @@ class UlauncherApp(Gtk.Application):
     window: UlauncherWindow | None = None
     preferences: PreferencesWindow | None = None
     _appindicator: AppIndicator | None = None
+
+    def __call__(cls, *args, **kwargs):
+        return get_instance(super(), cls, *args, **kwargs)
 
     def __init__(self, *args, **kwargs):
         kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
