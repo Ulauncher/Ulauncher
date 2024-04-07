@@ -34,9 +34,6 @@ class ExtensionSocketServer:
         """
         Starts extension server
         """
-        if self.is_running():
-            raise ServerIsRunningError
-
         self.service = Gio.SocketService.new()
         self.service.connect("incoming", self.handle_incoming)
 
@@ -76,12 +73,10 @@ class ExtensionSocketServer:
         """
         Stops extension server
         """
-        if not self.service:
-            raise ServerIsNotRunningError
-
-        self.service.stop()
-        self.service.close()
-        self.service = None
+        if self.service:
+            self.service.stop()
+            self.service.close()
+            self.service = None
 
     def is_running(self):
         """
@@ -102,14 +97,6 @@ class ExtensionSocketServer:
                     return controller
 
         return None
-
-
-class ServerIsRunningError(RuntimeError):
-    pass
-
-
-class ServerIsNotRunningError(RuntimeError):
-    pass
 
 
 if __name__ == "__main__":

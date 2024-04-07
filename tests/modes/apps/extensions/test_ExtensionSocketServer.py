@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer, ServerIsRunningError
+from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 
 
 class TestExtensionSocketServer:
@@ -49,11 +49,6 @@ class TestExtensionSocketServer:
         path_exists.return_value = True
         server.start()
         unlink.assert_called_once()
-
-    def test_start__server_is_running__exception_raised(self, server):
-        server.start()
-        with pytest.raises(ServerIsRunningError):
-            server.start()
 
     def test_handle_incoming(self, server, JSONFramer):
         conn = mock.Mock()
