@@ -83,7 +83,11 @@ def main() -> None:
 
     app = UlauncherApp.get_instance()
 
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, app.quit)
+    def handler():
+        app.quit()
+        return False
+
+    GLib.unix_signal_add(priority=GLib.PRIORITY_DEFAULT, signum=signal.SIGTERM, handler=handler)
 
     with contextlib.suppress(KeyboardInterrupt):
         app.run(sys.argv)
