@@ -68,12 +68,6 @@ class TestPreferencesServer:
         prefs_server.apply_autostart(False)
         autostart_pref.toggle.assert_called_with(False)
 
-    def test_set_theme_name(self, prefs_server, ulauncherWindow):
-        prefs_server.apply_settings("theme_name", "lime")
-        assert prefs_server.settings.theme_name == "lime"
-        assert load_json().get("theme_name") == "lime"
-        ulauncherWindow.apply_theme.assert_called_with()
-
     def test_set_grab_mouse_pointer_dash_underscore_conversion(self, prefs_server):
         prefs_server.apply_settings("grab-mouse-pointer", True)
         # Verify that setting with dash character is converted to underscore

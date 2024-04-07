@@ -171,10 +171,6 @@ class PreferencesServer:
             app = Gio.Application.get_default()
             assert app
             app.toggle_appindicator(value)  # type: ignore[attr-defined]
-        if prop == "theme_name":
-            app = Gio.Application.get_default()
-            assert app
-            app.window.apply_theme()  # type: ignore[attr-defined]
 
     def apply_autostart(self, is_enabled):
         logger.info("Set autostart_enabled to %s", is_enabled)
