@@ -19,7 +19,7 @@ from ulauncher.utils.Settings import Settings
 logger = logging.getLogger()
 
 
-class UlauncherApp(Gtk.Application, AppIndicator):
+class UlauncherApp(Gtk.Application):
     """
     Main Ulauncher application (singleton)
     """
@@ -30,6 +30,7 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     _query = ""
     window: UlauncherWindow | None = None
     preferences: PreferencesWindow | None = None
+    _appindicator: AppIndicator | None = None
 
     @classmethod
     @lru_cache(maxsize=None)
@@ -129,3 +130,8 @@ class UlauncherApp(Gtk.Application, AppIndicator):
     def activate_query(self, _action, variant, *_):
         self.activate()
         self.query = variant.get_string()
+
+    def toggle_appindicator(self, enable: bool) -> None:
+        if not self._appindicator:
+            self._appindicator = AppIndicator(self)
+        self._appindicator.switch(enable)
