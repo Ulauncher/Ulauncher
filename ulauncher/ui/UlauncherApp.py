@@ -14,11 +14,13 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.singleton import get_instance
 
 logger = logging.getLogger()
+events = EventBus("app")
 
 
 class UlauncherApp(Gtk.Application):
@@ -36,12 +38,14 @@ class UlauncherApp(Gtk.Application):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         super().__init__(*args, **kwargs)
+        events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
     @property
     def query(self) -> Query:
         return Query(self._query)
 
+    @events.on
     def set_query(self, value: str) -> None:
         self._query = value.lstrip()
         if self.window:
@@ -105,16 +109,18 @@ class UlauncherApp(Gtk.Application):
             if controller.is_enabled and not controller.has_error:
                 controller.start()
 
+    @events.on
     def show_launcher(self) -> None:
         if not self.window:
             self.window = UlauncherWindow(application=self)
         self.window.show()
 
+    @events.on
     def show_preferences(self, page: str | None = None) -> None:
+        events.emit("window:hide", clear_input=False)
+
         if not isinstance(page, str):
             page = None  # show_preferences is also bound to an event, passing a widget as the first arg
-        if self.window:
-            self.window.hide(clear_input=False)
 
         preferences = self._preferences and self._preferences()
 
@@ -129,7 +135,12 @@ class UlauncherApp(Gtk.Application):
         self.activate()
         self.set_query(variant.get_string())
 
+    @events.on
     def toggle_appindicator(self, enable: bool) -> None:
         if not self._appindicator:
-            self._appindicator = AppIndicator(self)
+            self._appindicator = AppIndicator()
         self._appindicator.switch(enable)
+
+    @events.on
+    def quit(self) -> None:
+        super().quit()

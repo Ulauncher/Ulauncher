@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import logging
-from functools import partial
 from typing import Any
 
-from gi.repository import Gio, GLib
+from gi.repository import Gio
 
 from ulauncher.api.result import Result
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.timer import TimerContext, timer
 
 logger = logging.getLogger()
+events = EventBus()
 
 
 class DeferredResultRenderer(metaclass=Singleton):
@@ -41,7 +42,7 @@ class DeferredResultRenderer(metaclass=Singleton):
         loading_message = Result(name="Loading...", icon=icon)
 
         self._cancel_loading()
-        self.loading = timer(self.LOADING_DELAY, partial(self.app.window.show_results, [loading_message]))  # type: ignore[attr-defined]
+        self.loading = timer(self.LOADING_DELAY, lambda: events.emit("window:show_results", [loading_message]))
         self.active_event = event
         self.active_controller = controller
 
@@ -55,8 +56,7 @@ class DeferredResultRenderer(metaclass=Singleton):
             return
 
         self._cancel_loading()
-        if self.app and hasattr(self.app, "window"):
-            GLib.idle_add(self.app.window.handle_event, response.get("action"))
+        events.emit("window:handle_event", response.get("action"))
 
     def on_query_change(self) -> None:
         """

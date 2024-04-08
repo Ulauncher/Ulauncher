@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import logging
+import subprocess
+
+from gi.repository import Gdk, Gtk
+
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.apps.AppMode import AppMode
@@ -8,7 +13,11 @@ from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
+from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.Settings import Settings
 
+_logger = logging.getLogger()
+_events = EventBus("action")
 _modes: list[BaseMode] = []
 
 
@@ -63,3 +72,15 @@ def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
     # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
     sorted_ = sorted(searchables, key=lambda i: i.search_score(query), reverse=True)[:limit]
     return list(filter(lambda searchable: searchable.search_score(query) > min_score, sorted_))
+
+
+@_events.on
+def clipboard_store(data: str) -> None:
+    clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+    clipboard.set_text(data, -1)
+    clipboard.store()
+    _events.emit("window:hide")
+    copy_hook = Settings.load().copy_hook
+    if copy_hook:
+        _logger.info("Running copy hook: %s", copy_hook)
+        subprocess.Popen(["sh", "-c", copy_hook])
