@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Sequence, cast
+from typing import Any, Sequence
 
 from gi.repository import Gdk, Gtk
 
@@ -9,14 +9,10 @@ from ulauncher.api.result import Result
 from ulauncher.config import PATHS
 from ulauncher.modes import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
-from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui import LayerShell
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Theme import Theme
@@ -24,47 +20,6 @@ from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
 events = EventBus("window")
-
-
-def handle_event(event: bool | list[Any] | str | dict[str, Any]) -> bool:  # noqa: PLR0912
-    if isinstance(event, bool):
-        return event
-    if isinstance(event, list):
-        events.emit("window:show_results", [res if isinstance(res, Result) else Result(**res) for res in event])
-        return True
-    if isinstance(event, str):
-        events.emit("app:set_query", event)
-        return True
-
-    event_type = event.get("type", "")
-    data = event.get("data")
-    ext_id = event.get("ext_id")
-    controller = None
-    if event_type == "action:open" and data:
-        open_detached(data)
-    elif event_type == "action:clipboard_store" and data:
-        events.emit("action:clipboard_store", data)
-
-    elif event_type == "action:legacy_run_script" and isinstance(data, list):
-        run_script(*data)
-    elif event_type == "action:legacy_run_many" and isinstance(data, list):
-        keep_open = False
-        for action in data:
-            if handle_event(action):
-                keep_open = True
-        return keep_open
-    elif event_type == "event:activate_custom":
-        controller = DeferredResultRenderer().get_active_controller()
-    elif event_type.startswith("event") and ext_id:
-        controller = ExtensionSocketServer().get_controller_by_id(ext_id)
-    else:
-        logger.warning("Invalid result from mode: %s", type(event).__name__)
-
-    if controller:
-        controller.trigger_event(event)
-        return cast(bool, event.get("keep_app_open", False)) if event_type == "event:activate_custom" else True
-
-    return False
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -191,7 +146,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
         if self.is_visible():
             # input_changed can trigger when hiding window
-            self.handle_event(ModeHandler.on_query_change(self.app.query))
+            ModeHandler.on_query_change(self.app.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -273,11 +228,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     @property
     def app(self) -> Any:
         return self.get_application()
-
-    @events.on
-    def handle_event(self, event: bool | list[Any] | str | dict[str, Any] | None) -> None:
-        if event is None or not handle_event(event):
-            self.hide()
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider

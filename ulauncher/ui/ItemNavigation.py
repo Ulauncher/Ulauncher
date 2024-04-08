@@ -67,5 +67,4 @@ class ItemNavigation:
             query_history[str(query)] = result.name
             json_save(query_history, query_history_path)
 
-        evt = result.on_activation(query, alt)
-        events.emit("window:handle_event", evt)
+        events.emit("mode:handle_action", result.on_activation(query, alt))

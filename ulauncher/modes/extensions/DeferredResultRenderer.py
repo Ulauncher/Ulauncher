@@ -56,7 +56,7 @@ class DeferredResultRenderer(metaclass=Singleton):
             return
 
         self._cancel_loading()
-        events.emit("window:handle_event", response.get("action"))
+        events.emit("mode:handle_action", response.get("action"))
 
     def on_query_change(self) -> None:
         """
