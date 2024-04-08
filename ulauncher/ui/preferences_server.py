@@ -248,7 +248,7 @@ class PreferencesServer(metaclass=Singleton):
             for controller in ExtensionController.iterate():
                 if controller.is_enabled:
                     controller.start()
-            # TODO(friday): Refactor so we can know when it has completed instead of hard coding  # noqa: TD003
+            # TODO(friday): Refactor so we can know when it has completed instead of hard coding
             time.sleep(0.5)
         return list(get_extensions())
 
@@ -259,7 +259,7 @@ class PreferencesServer(metaclass=Singleton):
         controller.download()
         controller.stop()
         controller.start()
-        # TODO(friday): Refactor run so we can know when it has completed instead of hard coding  # noqa: TD003
+        # TODO(friday): Refactor run so we can know when it has completed instead of hard coding
         time.sleep(0.5)
         return list(get_extensions())
 
