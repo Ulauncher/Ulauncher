@@ -8,7 +8,7 @@ from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.json_utils import json_load, json_save
 
 query_history_path = f"{PATHS.STATE}/query_history.json"
-query_history = json_load(query_history_path)
+query_history: dict[str, str] = json_load(query_history_path)
 
 
 class ItemNavigation:
