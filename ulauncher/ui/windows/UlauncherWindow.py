@@ -8,10 +8,10 @@ from gi.repository import Gdk, Gtk
 
 from ulauncher.api.result import Result
 from ulauncher.config import PATHS
+from ulauncher.modes import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
-from ulauncher.modes.ModeHandler import ModeHandler
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui import LayerShell
 from ulauncher.ui.ItemNavigation import ItemNavigation
@@ -195,7 +195,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
         if self.is_visible():
             # input_changed can trigger when hiding window
-            self.handle_event(ModeHandler().on_query_change(self.app.query))
+            self.handle_event(ModeHandler.on_query_change(self.app.query))
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911, PLR0912
         """
@@ -229,7 +229,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.app.query)
         ):
-            new_query = ModeHandler().on_query_backspace(self.app.query)
+            new_query = ModeHandler.on_query_backspace(self.app.query)
             if new_query is not None:
                 self.app.query = new_query
                 return True

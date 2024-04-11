@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import logging
-
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.apps.AppMode import AppMode
@@ -10,56 +8,58 @@ from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
-from ulauncher.utils.singleton import Singleton
 
-logger = logging.getLogger()
+_modes: list[BaseMode] = []
 
 
-class ModeHandler(metaclass=Singleton):
-    modes: list[BaseMode]
+def get_modes():
+    global _modes  # noqa: PLW0603
+    if not _modes:
+        _modes = [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()]
+    return _modes
 
-    def __init__(self):
-        self.modes = [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()]
 
-    def on_query_change(self, query: Query) -> bool | list[Result]:
-        """
-        Iterate over all search modes and run first enabled.
-        """
-        for _mode in self.modes:
-            _mode.on_query_change(query)
+def on_query_change(query: Query) -> bool | list[Result]:
+    """
+    Iterate over all search modes and run first enabled.
+    """
+    for mode in get_modes():
+        mode.on_query_change(query)
 
-        mode = self.get_mode_from_query(query)
-        result = mode and mode.handle_query(query)
-        # TODO(friday): Get rid of this (only used in DeferredResultRenderer.handle_event)
-        if isinstance(result, bool):
-            return result
-        if result:
-            return [*result]
-        # No mode selected, which means search
-        results = self.search(query)
-        # If the search result is empty, add the default items for all other modes (only shortcuts currently)
-        if not results and query:
-            for mode in self.modes:
-                results.extend(mode.get_fallback_results())
-        return results
+    active_mode = get_mode_from_query(query)
+    result = active_mode and active_mode.handle_query(query)
+    # TODO(friday): Get rid of this (only used in DeferredResultRenderer.handle_event)
+    if isinstance(result, bool):
+        return result
+    if result:
+        return [*result]
+    # No mode selected, which means search
+    results = search(query)
+    # If the search result is empty, add the default items for all other modes (only shortcuts currently)
+    if not results and query:
+        for mode in get_modes():
+            res = mode.get_fallback_results()
+            results.extend(res)
+    return results
 
-    def on_query_backspace(self, query: Query) -> str | None:
-        mode = self.get_mode_from_query(query)
-        if not mode:
-            return None
-        return mode.on_query_backspace(query)
 
-    def get_mode_from_query(self, query: Query) -> BaseMode | None:
-        for mode in self.modes:
-            if mode.is_enabled(query):
-                return mode
-        return None
+def on_query_backspace(query: Query) -> str | None:
+    mode = get_mode_from_query(query)
+    return mode.on_query_backspace(query) if mode else None
 
-    def search(self, query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
-        searchables: list[Result] = []
-        for mode in self.modes:
-            searchables.extend([*mode.get_triggers()])
 
-        # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
-        sorted_ = sorted(searchables, key=lambda i: i.search_score(query), reverse=True)[:limit]
-        return list(filter(lambda searchable: searchable.search_score(query) > min_score, sorted_))
+def get_mode_from_query(query: Query) -> BaseMode | None:
+    for mode in get_modes():
+        if mode.is_enabled(query):
+            return mode
+    return None
+
+
+def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
+    searchables: list[Result] = []
+    for mode in get_modes():
+        searchables.extend([*mode.get_triggers()])
+
+    # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
+    sorted_ = sorted(searchables, key=lambda i: i.search_score(query), reverse=True)[:limit]
+    return list(filter(lambda searchable: searchable.search_score(query) > min_score, sorted_))
