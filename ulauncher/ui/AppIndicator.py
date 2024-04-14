@@ -1,10 +1,9 @@
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import gi
 from gi.repository import GObject, Gtk
-from pyparsing import Any
 
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click

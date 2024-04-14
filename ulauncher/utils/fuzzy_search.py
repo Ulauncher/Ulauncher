@@ -18,7 +18,7 @@ try:
     from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found, unused-ignore]
 
     def _get_matching_blocks(query: str, text: str) -> list[tuple[int, int, int]]:
-        return matching_blocks(editops(query, text), query, text)
+        return matching_blocks(editops(query, text), query, text)  # type: ignore[no-any-return, unused-ignore]
 
 except ImportError:
     logger.info(
