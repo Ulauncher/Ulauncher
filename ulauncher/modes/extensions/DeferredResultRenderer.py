@@ -3,15 +3,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gio
-
 from ulauncher.api.result import Result
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.timer import TimerContext, timer
 
 logger = logging.getLogger()
-events = EventBus()
+events = EventBus("extension")
 
 
 class DeferredResultRenderer(metaclass=Singleton):
@@ -24,15 +22,15 @@ class DeferredResultRenderer(metaclass=Singleton):
     def __init__(self) -> None:
         self.loading: TimerContext | None = None
         self.active_event: dict[str, Any] | None = None
-        self.active_controller: Any | None = None
-        app = Gio.Application.get_default()
-        assert app
-        self.app = app
+        self.active_controller: Any | None = None  # Socket controller
+        events.set_self(self)
 
-    def get_active_controller(
-        self,
-    ) -> Any | None:
-        return self.active_controller
+    @events.on
+    def trigger_event(self, event: dict[str, Any]) -> None:
+        if self.active_controller:
+            self.active_controller.trigger_event(event)
+            if not event.get("keep_app_open"):
+                events.emit("window:hide")
 
     def handle_event(self, event: dict[str, Any], controller: Any) -> bool:
         """
@@ -58,6 +56,7 @@ class DeferredResultRenderer(metaclass=Singleton):
         self._cancel_loading()
         events.emit("mode:handle_action", response.get("action"))
 
+    @events.on
     def on_query_change(self) -> None:
         """
         Cancel "Loading...", reset active_event and active_controller

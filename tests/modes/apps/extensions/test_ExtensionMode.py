@@ -12,10 +12,6 @@ class TestExtensionMode:
     def extServer(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.ExtensionMode.ExtensionSocketServer").return_value
 
-    @pytest.fixture(autouse=True)
-    def resultRenderer(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.ExtensionMode.DeferredResultRenderer").return_value
-
     def test_is_enabled__controller_is_running__returns_true(self, extServer):
         controller = mock.create_autospec(ExtensionSocketController)
         extServer.get_controller_by_keyword.return_value = controller

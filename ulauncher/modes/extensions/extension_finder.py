@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 from typing import Generator
 
@@ -52,8 +53,10 @@ def iterate(
     for ext_path in ext_dirs:
         if not os.path.exists(ext_path):
             continue
-        for entry in os.scandir(ext_path):
-            ext_id = entry.name
-            if is_extension(entry.path) and (duplicates or ext_id not in occurrences):
-                occurrences.add(ext_id)
-                yield ext_id, os.path.realpath(entry.path)
+        # For some reason os.path.exists ^ doesn't skip the iteration for pytest
+        with contextlib.suppress(FileNotFoundError):
+            for entry in os.scandir(ext_path):
+                ext_id = entry.name
+                if is_extension(entry.path) and (duplicates or ext_id not in occurrences):
+                    occurrences.add(ext_id)
+                    yield ext_id, os.path.realpath(entry.path)

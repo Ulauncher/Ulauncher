@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from typing import Any, cast
+from typing import Any
 
 from gi.repository import Gdk, Gtk
 
@@ -11,7 +11,6 @@ from ulauncher.api.shared.query import Query
 from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcMode import CalcMode
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
@@ -118,10 +117,7 @@ def _handle_action(event: dict[str, Any]) -> bool:
                 keep_open = True
         return keep_open
     elif event_type == "event:activate_custom":
-        controller = DeferredResultRenderer().get_active_controller()
-        if controller:
-            controller.trigger_event(event)
-            return cast(bool, event.get("keep_app_open", False))
+        _events.emit("extension:trigger_event", event)
     elif event_type.startswith("event") and ext_id:
         controller = ExtensionSocketServer().get_controller_by_id(ext_id)
         if controller:

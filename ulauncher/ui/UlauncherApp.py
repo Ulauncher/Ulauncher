@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time
 import weakref
 from typing import Any, cast
 
@@ -9,8 +8,6 @@ from gi.repository import Gio, GLib, Gtk
 
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
@@ -102,12 +99,6 @@ class UlauncherApp(Gtk.Application):
             settings.save()
             notification.set_priority(Gio.NotificationPriority.URGENT)
             self.send_notification(notification_id, notification)
-
-        ExtensionSocketServer().start()
-        time.sleep(0.01)
-        for controller in ExtensionController.iterate():
-            if controller.is_enabled and not controller.has_error:
-                controller.start()
 
     @events.on
     def show_launcher(self) -> None:
