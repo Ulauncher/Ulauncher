@@ -1,16 +1,17 @@
 import contextlib
+from typing import Any, Callable
 
 from ulauncher.utils.timer import timer
 
 
-def debounce(wait):
+def debounce(wait: float) -> Callable[..., Callable[..., None]]:
     """Decorator that will postpone a functions
     execution until after wait seconds
     have elapsed since the last time it was invoked."""
 
-    def decorator(fn):
-        def debounced(*args, **kwargs):
-            def call_it():
+    def decorator(fn: Callable[..., None]) -> Callable[..., None]:
+        def debounced(*args: Any, **kwargs: Any) -> None:
+            def call_it() -> None:
                 fn(*args, **kwargs)
 
             with contextlib.suppress(AttributeError):

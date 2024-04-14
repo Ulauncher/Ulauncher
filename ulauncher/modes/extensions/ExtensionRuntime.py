@@ -26,7 +26,7 @@ class ExtensionRuntime:
     subprocess: Gio.Subprocess
     start_time: float
     error_stream: Gio.DataInputStream
-    recent_errors: deque
+    recent_errors: deque[str]
     error_handler: ErrorHandlerCallback | None
 
     def __init__(

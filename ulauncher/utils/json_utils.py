@@ -11,7 +11,7 @@ logger = logging.getLogger()
 
 
 # remove json nulls
-def sanitize_json(d):
+def sanitize_json(d: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None}
 
 

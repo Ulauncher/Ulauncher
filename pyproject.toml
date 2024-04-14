@@ -28,10 +28,11 @@ version = {attr = "ulauncher.version"}
 line-length = 120
 
 [tool.mypy]
-python_version = "3.7"
-check_untyped_defs = true
-disallow_incomplete_defs = true
+python_version = "3.8"
+strict = true
 disable_error_code = "import-untyped"
+implicit_reexport = true
+disallow_untyped_calls = false
 
 [tool.pylint.MASTER]
 ignore-patterns="ulauncher,docs,data,scripts,tests"

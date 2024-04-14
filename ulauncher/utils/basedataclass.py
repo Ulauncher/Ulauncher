@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from copy import deepcopy
+from typing import Any
 
 
-class BaseDataClass(dict):
+class BaseDataClass(dict):  # type: ignore [type-arg]
     """
     BaseDataClass
 
@@ -26,7 +29,7 @@ class BaseDataClass(dict):
     print(Person(first_name=John, last_name="Wayne").full_name()) # John Wayne
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__()
         # loop through class inheritance chain and add class props (defaults) as to the instance
         # this is the same as the python dataclass decorators does
@@ -43,22 +46,22 @@ class BaseDataClass(dict):
         # set values
         self.update(*args, **kwargs)
 
-    def __dir__(self):  # For IDE autocompletion
+    def __dir__(self) -> list[str]:  # For IDE autocompletion
         return dir(type(self)) + list(self.keys())
 
-    def __delattr__(self, name):
-        del self[name]
+    def __delattr__(self, key: str) -> None:
+        del self[key]
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> Any:
         try:
             return self[key]
         except KeyError:
             return super().__getattribute__(key)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         self[key] = value
 
-    def __setitem__(self, key, value, validate_type=True):
+    def __setitem__(self, key: str, value: Any, validate_type: bool = True) -> None:
         if hasattr(self.__class__, key):
             if key.startswith("__"):
                 msg = f'Invalid property "{key}". Must not override class property.'
@@ -75,6 +78,6 @@ class BaseDataClass(dict):
         super().__setitem__(key, value)
 
     # Make sure everything flows through __setitem__
-    def update(self, *args, **kwargs):
+    def update(self, *args: Any, **kwargs: Any) -> None:
         for k, v in dict(*args, **kwargs).items():
             self[k] = v

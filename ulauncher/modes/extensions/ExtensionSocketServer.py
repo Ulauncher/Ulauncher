@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import os.path
+from typing import Any
 
 from gi.repository import Gio, GObject
 
@@ -18,14 +19,15 @@ class ExtensionSocketServer(metaclass=Singleton):
     socket_path: str
     service: Gio.SocketService | None
     controllers: dict[str, ExtensionSocketController]
+    pending: dict[int, tuple[JSONFramer, int, int]]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.service = None
         self.socket_path = get_socket_path()
         self.controllers = {}
         self.pending = {}
 
-    def start(self):
+    def start(self) -> None:
         """
         Starts extension server
         """
@@ -42,17 +44,17 @@ class ExtensionSocketServer(metaclass=Singleton):
         self.pending = {}
         self.controllers = {}
 
-    def handle_incoming(self, _service, conn, _source):
+    def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
         framer = JSONFramer()
         msg_handler_id = framer.connect("message_parsed", self.handle_registration)
         closed_handler_id = framer.connect("closed", self.handle_pending_close)
         self.pending[id(framer)] = (framer, msg_handler_id, closed_handler_id)
         framer.set_connection(conn)
 
-    def handle_pending_close(self, framer):
+    def handle_pending_close(self, framer: JSONFramer) -> None:
         self.pending.pop(id(framer))
 
-    def handle_registration(self, framer, event):
+    def handle_registration(self, framer: JSONFramer, event: dict[str, Any]) -> None:
         if isinstance(event, dict) and event.get("type") == "extension:socket_connected":
             pended = self.pending.pop(id(framer))
             if pended:
@@ -64,7 +66,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         else:
             logger.debug("Unhandled message received: %s", event)
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stops extension server
         """
@@ -73,7 +75,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service.close()
             self.service = None
 
-    def is_running(self):
+    def is_running(self) -> bool:
         """
         :rtype: bool
         """

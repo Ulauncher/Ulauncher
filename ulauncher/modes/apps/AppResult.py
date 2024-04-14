@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import logging
 import operator
 from os.path import basename
 
 from gi.repository import Gio
 
 from ulauncher.api.result import Result
+from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.utils.json_utils import json_load, json_save
 
+logger = logging.getLogger()
 app_starts_path = f"{PATHS.STATE}/app_starts.json"
 app_starts = json_load(app_starts_path)
 
@@ -23,7 +26,7 @@ class AppResult(Result):
     _app_id = ""
     _executable = ""
 
-    def __init__(self, app_info):
+    def __init__(self, app_info: Gio.DesktopAppInfo):
         super().__init__(
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
@@ -40,9 +43,11 @@ class AppResult(Result):
     def from_id(app_id: str) -> AppResult | None:
         try:
             app_info = Gio.DesktopAppInfo.new(app_id)
+            assert app_info
             return AppResult(app_info)
-        except TypeError:
-            return None
+        except (TypeError, AssertionError):
+            logger.debug("Could not load app '%s' (probably uninstalled)", app_id)
+        return None
 
     @staticmethod
     def get_top_app_ids() -> list[str]:
@@ -53,7 +58,7 @@ class AppResult(Result):
         return [*map(operator.itemgetter(0), sorted_tuples)]
 
     @staticmethod
-    def get_most_frequent(limit=5):
+    def get_most_frequent(limit: int = 5) -> list[AppResult]:
         """
         Returns most frequent apps
 
@@ -79,7 +84,7 @@ class AppResult(Result):
             *[(k, 0.6 * frequency_weight) for k in self.keywords],
         ]
 
-    def on_activation(self, *_):
+    def on_activation(self, _query: Query, _alt: bool = False) -> bool:
         starts = app_starts.get(self._app_id, 0)
         app_starts[self._app_id] = starts + 1
         json_save(app_starts, app_starts_path)

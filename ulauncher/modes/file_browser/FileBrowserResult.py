@@ -20,7 +20,7 @@ class FileBrowserResult(Result):
     :param ~str path:
     """
 
-    def __init__(self, path):
+    def __init__(self, path: str) -> None:
         super().__init__(
             path=path,
             name=basename(path),
@@ -30,7 +30,7 @@ class FileBrowserResult(Result):
     def get_highlightable_input(self, query: Query) -> str | None:
         return basename(query)
 
-    def on_activation(self, _, alt=bool):
+    def on_activation(self, _query: Query, alt: bool = False) -> str | dict[str, str] | list[Result]:
         if not alt:
             if isdir(self.path):
                 return join(fold_user_path(self.path), "")

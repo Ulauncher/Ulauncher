@@ -12,7 +12,7 @@ from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 _modes: list[BaseMode] = []
 
 
-def get_modes():
+def get_modes() -> list[BaseMode]:
     global _modes  # noqa: PLW0603
     if not _modes:
         _modes = [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()]

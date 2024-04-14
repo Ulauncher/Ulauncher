@@ -7,12 +7,12 @@ import os
 import sys
 import threading
 from collections import defaultdict
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
-from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, events
+from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -21,13 +21,13 @@ class Extension:
     Manages extension runtime
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         logHandler = logging.StreamHandler()
         logHandler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[logHandler])
         self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.ext_id)
-        self._listeners = defaultdict(list)
+        self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}
         with contextlib.suppress(Exception):
@@ -56,7 +56,7 @@ class Extension:
 
         self._listeners[event_type].append((listener, method_name))
 
-    def convert_to_baseevent(self, event: dict) -> BaseEvent | None:
+    def convert_to_baseevent(self, event: dict[str, Any]) -> BaseEvent | None:
         event_type = event.get("type", "")
         args = event.get("args", [])
         event_constructor = events.get(event_type)
@@ -97,7 +97,7 @@ class Extension:
             args = tuple(base_event.args) if method_name else (base_event, self)
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
-    def run_event_listener(self, event, method, args):
+    def run_event_listener(self, event: dict[str, Any], method: Callable, args: tuple[Any]) -> None:  # type: ignore[type-arg]
         action = method(*args)
         if action is not None:
             # convert iterables to list
@@ -105,7 +105,7 @@ class Extension:
                 action = list(action)
             self._client.send({"event": event, "action": action})
 
-    def run(self):
+    def run(self) -> None:
         """
         Subscribes to events and connects to Ulauncher socket server
         """
@@ -129,5 +129,5 @@ class Extension:
 
 
 class PreferencesUpdateEventListener(EventListener):
-    def on_event(self, event, extension):
+    def on_event(self, event: PreferencesUpdateEvent, extension: Extension) -> None:  # type: ignore[override]
         extension.preferences[event.id] = event.new_value

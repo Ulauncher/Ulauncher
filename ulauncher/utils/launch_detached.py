@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import sys
@@ -9,7 +11,7 @@ from ulauncher.utils.systemd_controller import SystemdController
 logger = logging.getLogger()
 
 
-def detach_child():
+def detach_child() -> None:
     """
     A utility function which runs in the child process launched by spawn_async
     and before execing the supplied command.
@@ -37,7 +39,7 @@ def detach_child():
         os.dup2(null_fd, orig_fd)
 
 
-def launch_detached(cmd):
+def launch_detached(cmd: list[str]) -> None:
     use_systemd_run = SystemdController("ulauncher").is_active()
     if use_systemd_run:
         cmd = ["systemd-run", "--user", "--scope", *cmd]
@@ -60,5 +62,5 @@ def launch_detached(cmd):
         logger.exception('Could not launch "%s"', cmd)
 
 
-def open_detached(path_or_url):
+def open_detached(path_or_url: str) -> None:
     launch_detached(["xdg-open", path_or_url])

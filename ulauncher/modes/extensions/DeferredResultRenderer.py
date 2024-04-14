@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from functools import partial
+from typing import Any
 
 from gi.repository import Gio, GLib
 
@@ -21,16 +22,18 @@ class DeferredResultRenderer(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.loading: TimerContext | None = None
-        self.active_event = None
-        self.active_controller = None
+        self.active_event: dict[str, Any] | None = None
+        self.active_controller: Any | None = None
         app = Gio.Application.get_default()
         assert app
         self.app = app
 
-    def get_active_controller(self):
+    def get_active_controller(
+        self,
+    ) -> Any | None:
         return self.active_controller
 
-    def handle_event(self, event, controller):
+    def handle_event(self, event: dict[str, Any], controller: Any) -> bool:
         """
         Schedules "Loading..." message
         """
@@ -44,7 +47,7 @@ class DeferredResultRenderer(metaclass=Singleton):
 
         return True
 
-    def handle_response(self, response, controller) -> None:  # type: ignore[no-untyped-def]
+    def handle_response(self, response: dict[str, Any], controller: Any) -> None:
         """
         Calls :func:`response.action.run`
         """

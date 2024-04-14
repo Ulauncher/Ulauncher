@@ -1,8 +1,10 @@
 import logging
 from pathlib import Path
+from typing import Callable
 
 import gi
 from gi.repository import GObject, Gtk
+from pyparsing import Any
 
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click
@@ -17,13 +19,13 @@ except (AssertionError, ImportError, ValueError):
     XApp = None
     try:
         gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3  # type: ignore[attr-defined]
+        from gi.repository import AppIndicator3  # type: ignore[attr-defined, unused-ignore]
 
         AyatanaIndicator = AppIndicator3
     except (ImportError, ValueError):
         try:
             gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3  # type: ignore  # noqa: PGH003
+            from gi.repository import AyatanaAppIndicator3  # type: ignore[attr-defined, unused-ignore]
 
             AyatanaIndicator = AyatanaAppIndicator3
         except (ImportError, ValueError):
@@ -37,14 +39,14 @@ icon_asset_path = f"{PATHS.ASSETS}/icons/system/status"
 default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default
 
 
-def _create_menu_item(label, command):
+def _create_menu_item(label: str, handler: Callable[[Any], None]) -> Gtk.MenuItem:
     menu_item = Gtk.MenuItem(label=label)
-    menu_item.connect("activate", command)
+    menu_item.connect("activate", handler)
     return menu_item
 
 
 class AppIndicator(GObject.Object):
-    def __init__(self, app, *args, **kwargs):
+    def __init__(self, app: Any, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         if self.supports_appindicator():
             show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: app.activate())

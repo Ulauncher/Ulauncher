@@ -1,8 +1,9 @@
 from functools import wraps
 from threading import Thread
+from typing import Any, Callable
 
 
-def run_async(*args, **kwargs):
+def run_async(*args: Any, **kwargs: Any) -> Any:
     """
     Function decorator, intended to make "func" run in a new thread (asynchronously).
 
@@ -27,9 +28,9 @@ def run_async(*args, **kwargs):
     """
     daemon = kwargs.get("daemon", False)
 
-    def _run_async(func):
+    def _run_async(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def async_func(*args, **kwargs):
+        def async_func(*args: Any, **kwargs: Any) -> Thread:
             func_hl = Thread(target=func, args=args, kwargs=kwargs)
             func_hl.daemon = daemon
             func_hl.start()

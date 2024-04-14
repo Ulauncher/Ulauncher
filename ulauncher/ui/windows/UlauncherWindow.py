@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from typing import Any
+from typing import Any, Sequence, cast
 
 from gi.repository import Gdk, Gtk
 
@@ -25,14 +25,14 @@ from ulauncher.utils.wm import get_monitor
 logger = logging.getLogger()
 
 
-def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, Any]) -> bool:  # noqa: PLR0912
+def handle_event(window: UlauncherWindow, event: bool | list[Any] | str | dict[str, Any]) -> bool:  # noqa: PLR0912
     if isinstance(event, bool):
         return event
     if isinstance(event, list):
         window.show_results([res if isinstance(res, Result) else Result(**res) for res in event])
         return True
     if isinstance(event, str):
-        window.app.query = event
+        window.app.set_query(event)
         return True
 
     event_type = event.get("type", "")
@@ -68,7 +68,7 @@ def handle_event(window: UlauncherWindow, event: bool | list | str | dict[str, A
 
     if controller:
         controller.trigger_event(event)
-        return event.get("keep_app_open", False) if event_type == "event:activate_custom" else True
+        return cast(bool, event.get("keep_app_open", False)) if event_type == "event:activate_custom" else True
 
     return False
 
@@ -80,7 +80,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     layer_shell_enabled = False
     settings = Settings.load()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             decorated=False,
             deletable=False,
@@ -158,11 +158,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
         self.window_frame.show_all()
 
-        self.connect("focus-in-event", self.on_focus_in)
-        self.connect("focus-out-event", self.on_focus_out)
+        self.connect("focus-in-event", lambda *_: self.on_focus_in())
+        self.connect("focus-out-event", lambda *_: self.on_focus_out())
         event_box.connect("button-press-event", self.on_mouse_down)
-        self.connect("button-release-event", self.on_mouse_up)
-        self.input.connect("changed", self.on_input_changed)
+        self.connect("button-release-event", lambda *_: self.on_mouse_up())
+        self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
         prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
 
@@ -176,19 +176,19 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # GTK Signal Handlers
     ######################################
 
-    def on_focus_out(self, *_):
+    def on_focus_out(self) -> None:
         if not self.is_dragging:
             self.hide(clear_input=False)
 
-    def on_focus_in(self, *_args):
+    def on_focus_in(self) -> None:
         if self.settings.grab_mouse_pointer:
             ptr_dev = self.get_pointer_device()
-            result = ptr_dev.grab(
-                self.get_window(), Gdk.GrabOwnership.NONE, True, Gdk.EventMask.ALL_EVENTS_MASK, None, 0
-            )
+            gdk_window = self.get_window()
+            assert gdk_window, "Could not get the gdk.window to focus in"
+            result = ptr_dev.grab(gdk_window, Gdk.GrabOwnership.NONE, True, Gdk.EventMask.ALL_EVENTS_MASK, None, 0)
             logger.debug("Focus in event, grabbing pointer: %s", result)
 
-    def on_input_changed(self, _):
+    def on_input_changed(self) -> None:
         """
         Triggered by user input
         """
@@ -197,7 +197,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # input_changed can trigger when hiding window
             self.handle_event(ModeHandler.on_query_change(self.app.query))
 
-    def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911, PLR0912
+    def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
         Triggered by user key press
         Return True to stop other handlers from being invoked for the event
@@ -207,10 +207,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()
 
-        if len(self.settings.arrow_key_aliases) == 4:  # noqa: PLR2004
-            left_alias, down_alias, up_alias, right_alias = [*self.settings.arrow_key_aliases]  # type: ignore[misc]
-        else:
-            left_alias, down_alias, up_alias, right_alias = [None] * 4
+        use_arrow_key_aliases = len(self.settings.arrow_key_aliases) == 4  # noqa: PLR2004
+        arrow_key_aliases = [*self.settings.arrow_key_aliases] if use_arrow_key_aliases else [None] * 4
+        left_alias, down_alias, up_alias, right_alias = arrow_key_aliases
+        if not use_arrow_key_aliases:
             logger.warning(
                 "Invalid value for arrow_key_aliases: %s, expected four letters", self.settings.arrow_key_aliases
             )
@@ -231,7 +231,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ):
             new_query = ModeHandler.on_query_backspace(self.app.query)
             if new_query is not None:
-                self.app.query = new_query
+                self.app.set_query(new_query)
                 return True
 
         if self.results_nav:
@@ -268,7 +268,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.is_dragging = True
             self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
 
-    def on_mouse_up(self, *_):
+    def on_mouse_up(self) -> None:
         self.is_dragging = False
 
     ######################################
@@ -276,10 +276,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @property
-    def app(self):
+    def app(self) -> Any:
         return self.get_application()
 
-    def handle_event(self, event: bool | list | str | dict[str, Any] | None) -> None:
+    def handle_event(self, event: bool | list[Any] | str | dict[str, Any] | None) -> None:
         if event is None or not handle_event(self, event):
             self.hide()
 
@@ -291,7 +291,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
 
-    def apply_theme(self):
+    def apply_theme(self) -> None:
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
         theme_css = Theme.load(self.settings.theme_name).get_css().encode()
@@ -301,7 +301,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if visual:
             self.set_visual(visual)
 
-    def position_window(self):
+    def position_window(self) -> None:
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -334,7 +334,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             else:
                 self.move(pos_x, pos_y)
 
-    def show(self):
+    def show(self) -> None:
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
         # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
@@ -350,27 +350,27 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.grab_focus()
         super().show()
 
-    def hide(self, clear_input=True):
+    def hide(self, clear_input: bool = True) -> None:
         if clear_input:
             self.input.set_text("")
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
         super().hide()
         if self.settings.clear_previous_query:
-            self.app.query = ""
+            self.app.set_query("")
 
-    def select_result(self, index):
+    def select_result(self, index: int) -> None:
         if self.results_nav:
             self.results_nav.select(index)
 
-    def get_pointer_device(self):
+    def get_pointer_device(self) -> Gdk.Device:
         window = self.get_window()
         assert window
         device_mapper = window.get_display().get_device_manager()
         assert device_mapper
         return device_mapper.get_client_pointer()
 
-    def show_results(self, results: list[Result]) -> None:
+    def show_results(self, results: Sequence[Result]) -> None:
         """
         :param list results: list of Result instances
         """

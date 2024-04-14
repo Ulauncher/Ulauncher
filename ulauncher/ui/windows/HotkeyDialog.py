@@ -24,7 +24,7 @@ MODIFIERS = (
 class HotkeyDialog(Gtk.MessageDialog):
     _hotkey = ""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(title="Set new hotkey", flags=Gtk.DialogFlags.MODAL)  # type: ignore[call-arg]
         self.add_buttons("Close", Gtk.ResponseType.CLOSE, "Save", Gtk.ResponseType.OK)
         self.set_response_sensitive(RESPONSES.OK, False)
@@ -45,18 +45,18 @@ class HotkeyDialog(Gtk.MessageDialog):
         if response_id == RESPONSES.CLOSE:
             self.close()
 
-    def set_hotkey(self, key_name=""):
+    def set_hotkey(self, key_name: str = "") -> None:
         label = Gtk.accelerator_get_label(*Gtk.accelerator_parse(key_name))
         self._hotkey = key_name
         self._hotkey_input.set_text(label)
         self._hotkey_input.set_position(-1)
         self.set_response_sensitive(RESPONSES.OK, bool(key_name))
 
-    def close(self):
+    def close(self) -> None:
         self._hotkey = ""
         self.hide()
 
-    def save_and_close(self):
+    def save_and_close(self) -> None:
         self.hide()
 
     def on_key_press(self, _entry_widget: Gtk.Entry, event: Gdk.EventKey) -> None:
@@ -75,6 +75,6 @@ class HotkeyDialog(Gtk.MessageDialog):
         if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
             self.set_hotkey(key_name)
 
-    def run(self):
+    def run(self) -> str:
         super().run()
         return self._hotkey

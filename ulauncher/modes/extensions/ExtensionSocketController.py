@@ -4,11 +4,13 @@ import contextlib
 import logging
 from typing import Any
 
+from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.utils.decorator.debounce import debounce
+from ulauncher.utils.framer import JSONFramer
 
 logger = logging.getLogger()
 
@@ -22,12 +24,12 @@ class ExtensionSocketController:
     data_controller: ExtensionController
     manifest: ExtensionManifest
 
-    def __init__(self, controllers, framer, ext_id: str):  # type: ignore[no-untyped-def]
+    def __init__(self, controllers: dict[str, ExtensionSocketController], framer: JSONFramer, ext_id: str) -> None:
         if not ext_id:
             msg = "No ext_id provided"
             raise RuntimeError(msg)
         self.controllers = controllers
-        self.framer = framer
+        self.framer: JSONFramer = framer
         self.result_renderer = DeferredResultRenderer()
         self.ext_id = ext_id
         self.data_controller = ExtensionController.create(ext_id)
@@ -45,11 +47,11 @@ class ExtensionSocketController:
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
 
-    def _send_event(self, event):
+    def _send_event(self, event: dict[str, Any]) -> None:
         logger.debug('Send event %s to "%s"', type(event).__name__, self.ext_id)
         self.framer.send(event)
 
-    def handle_query(self, query):
+    def handle_query(self, query: Query) -> bool:
         """
         Handles user query with a keyword from this extension
         :returns: action object
@@ -65,7 +67,7 @@ class ExtensionSocketController:
             }
         )
 
-    def trigger_event(self, event: dict[str, Any]):  # type: ignore[no-untyped-def]
+    def trigger_event(self, event: dict[str, Any]) -> bool:
         """
         Triggers event for an extension
         """
@@ -76,7 +78,7 @@ class ExtensionSocketController:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
 
-    def handle_response(self, _framer, response: dict[str, Any]):  # type: ignore[no-untyped-def]
+    def handle_response(self, _framer: JSONFramer, response: dict[str, Any]) -> None:
         logger.debug(
             'Incoming response with keys "%s" from "%s"',
             set(response),
@@ -89,7 +91,7 @@ class ExtensionSocketController:
 
         self.result_renderer.handle_response(response, self)
 
-    def handle_close(self, _framer):
+    def handle_close(self, _framer: JSONFramer) -> None:
         logger.info('Extension "%s" disconnected', self.ext_id)
         with contextlib.suppress(Exception):
             del self.controllers[self.ext_id]

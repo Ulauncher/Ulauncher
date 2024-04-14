@@ -7,7 +7,7 @@ from shutil import rmtree
 
 
 # This function is the same as Path.is_relative_to in 3.9, but we can't use that yet
-def is_relative_to(child_path: str | os.PathLike, root_path: str | os.PathLike) -> bool:
+def is_relative_to(child_path: str | os.PathLike[str], root_path: str | os.PathLike[str]) -> bool:
     return Path(root_path).resolve() in Path(child_path).resolve().parents
 
 

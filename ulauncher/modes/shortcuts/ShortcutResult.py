@@ -17,7 +17,7 @@ class ShortcutResult(Result):
     def get_highlightable_input(self, query: Query) -> str | None:
         return str(query) if self.keyword != query.keyword else None
 
-    def get_description(self, query):
+    def get_description(self, query: Query) -> str:
         description = "" if self.cmd.startswith("#!") else self.cmd
 
         if self.is_default_search:
@@ -32,7 +32,7 @@ class ShortcutResult(Result):
 
         return description.replace("%s", "...")
 
-    def on_activation(self, query, _alt=False):
+    def on_activation(self, query: Query, _alt: bool = False) -> bool | str | dict[str, str]:
         if query.keyword == self.keyword and query.argument:
             argument = query.argument
         elif self.is_default_search:

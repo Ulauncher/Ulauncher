@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import logging
 import random
 
 
-def mkcolor(color, bold=False):
+def mkcolor(color: int, bold: bool = False) -> str:
     if bold:
-        color = f"1;{color}"
+        color = f"1;{color}"  # type: ignore[assignment]
     return f"\x1b[{color}m"
 
 
@@ -17,10 +19,10 @@ class ColoredFormatter(logging.Formatter):
         logging.CRITICAL: ("⚠️", 31),  # red
     }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         # Great reference for terminal colors: https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
         symbol, level_color = self.formats.get(record.levelno, ("", 0))
-        prefix = f"{symbol}  {mkcolor(level_color, True)}{record.levelname}{mkcolor(0)}"
+        prefix = f"{symbol}  {mkcolor(int(level_color), True)}{record.levelname}{mkcolor(0)}"
         if record.name != "root":
             # Ensure the same name gets the same color every time
             random.seed(record.name)

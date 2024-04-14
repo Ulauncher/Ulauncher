@@ -18,10 +18,10 @@ class Result(BaseDataClass):
     keyword = ""
     icon = ""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str)):
             msg = f"Invalid {key} argument. Expected bool, dict or string"
             raise KeyError(msg)
@@ -45,17 +45,17 @@ class Result(BaseDataClass):
     def get_description(self, _query: Query) -> str:
         return self.description
 
-    def on_activation(self, query: Query, alt: bool = False) -> Any:
+    def on_activation(self, query: Query, alt: bool = False) -> bool | str | dict[str, str] | list[Result]:
         """
         Handle the main action
         """
         handler = getattr(self, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION)
         return handler(query) if callable(handler) else handler
 
-    def get_searchable_fields(self):
-        return [(self.name, 1), (self.description, 0.8)]
+    def get_searchable_fields(self) -> list[tuple[str, float]]:
+        return [(self.name, 1.0), (self.description, 0.8)]
 
-    def search_score(self, query):
+    def search_score(self, query: str) -> float:
         if not self.searchable:
             return 0
         return max(get_score(query, field) * weight for field, weight in self.get_searchable_fields() if field)

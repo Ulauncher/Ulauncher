@@ -8,7 +8,7 @@ from typing import Any
 custom_data_store: dict[int, Any] = {}
 
 
-def ExtensionCustomAction(data, keep_app_open=False):
+def ExtensionCustomAction(data: Any, keep_app_open: bool = False) -> dict[str, Any]:
     ref = id(data)
     custom_data_store[ref] = data
     return {"type": "event:activate_custom", "ref": ref, "keep_app_open": keep_app_open}

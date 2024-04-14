@@ -17,7 +17,7 @@ SPECIAL_DIRS = {
 }
 
 
-def get_icon_from_path(path):
+def get_icon_from_path(path: str) -> str:
     if Path(path).is_dir():
         return SPECIAL_DIRS.get(path) or "folder"
 

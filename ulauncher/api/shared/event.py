@@ -58,7 +58,7 @@ class ItemEnterEvent(BaseEvent):
     :param str data:
     """
 
-    def get_data(self):
+    def get_data(self) -> Any:
         """
         :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
         """
@@ -87,7 +87,7 @@ class PreferencesUpdateEvent(BaseEvent):
     old_value = None
     new_value = None
 
-    def __init__(self, args):
+    def __init__(self, args: Any) -> None:
         super().__init__(args)
         self.id, self.new_value, self.old_value = args
 
@@ -101,7 +101,7 @@ class PreferencesEvent(BaseEvent):
 
     preferences = None
 
-    def __init__(self, args):
+    def __init__(self, args: list[Any]) -> None:
         super().__init__(args)
         self.preferences = args[0]
 

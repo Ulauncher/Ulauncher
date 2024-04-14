@@ -1,5 +1,5 @@
 import html
-from typing import Any
+from typing import Any, Generator
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
@@ -9,7 +9,7 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 
 
 class ExtensionMode(BaseMode):
-    def __init__(self):
+    def __init__(self) -> None:
         self.ExtensionSocketServer = ExtensionSocketServer()
         self.deferredResultRenderer = DeferredResultRenderer()
 
@@ -31,7 +31,7 @@ class ExtensionMode(BaseMode):
 
         return controller.handle_query(query)
 
-    def get_triggers(self):
+    def get_triggers(self) -> Generator[Result, None, None]:
         """
         :rtype: Iterable[:class:`~ulauncher.api.result.Result`]
         """

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import contextlib
 import logging
 import signal
 import sys
+from types import TracebackType
 
 import gi
 from gi.repository import GLib, Gtk
@@ -73,7 +76,7 @@ def main() -> None:
         logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
 
     # log uncaught exceptions
-    def except_hook(exctype, value, traceback):
+    def except_hook(exctype: type[BaseException], value: BaseException, traceback: TracebackType | None) -> None:
         logger.error("Uncaught exception", exc_info=(exctype, value, traceback))
 
     sys.excepthook = except_hook
@@ -83,7 +86,7 @@ def main() -> None:
 
     app = UlauncherApp()
 
-    def handler():
+    def handler() -> bool:
         app.quit()
         return False
 

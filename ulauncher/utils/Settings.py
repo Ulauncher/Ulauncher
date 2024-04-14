@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from ulauncher.config import PATHS
 from ulauncher.utils.json_conf import JsonConf
 
@@ -23,15 +27,15 @@ class Settings(JsonConf):
     tray_icon_name = "ulauncher-indicator-symbolic"
 
     # Convert dash to underscore
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key.replace("-", "_") == "show_indicator_icon":
             key = "show_tray_icon"
         super().__setitem__(key.replace("-", "_"), value)
 
-    def get_jump_keys(self):
+    def get_jump_keys(self) -> list[str]:
         # convert to list and filter out duplicates
         return list(dict.fromkeys(list(self.jump_keys)))
 
     @classmethod
-    def load(cls):
+    def load(cls) -> Settings:  # type: ignore[override]
         return super().load(_settings_file)

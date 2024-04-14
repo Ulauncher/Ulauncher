@@ -6,7 +6,7 @@ import mimetypes
 import os
 import time
 import traceback
-from typing import Any, Callable, Generator
+from typing import Any, Callable, Generator, TypeVar
 from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, GLib, Gtk
@@ -25,12 +25,15 @@ from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
 
+P1 = TypeVar("P1")
+P2 = TypeVar("P2")
 logger = logging.getLogger()
-routes: dict[str, Callable] = {}
+routes: dict[str, Any] = {}
 
 
-def route(path: str):  # type: ignore[no-untyped-def]
-    def decorator(handler: Callable) -> Callable:
+# Python generics doesn't support this case, so we have to declare with ... and Any
+def route(path: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(handler: Callable[..., Any]) -> Callable[..., Any]:
         routes[path] = handler
         return handler
 
@@ -68,7 +71,7 @@ class PreferencesServer:
 
     client: WebKit2.WebView
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.autostart_pref = SystemdController("ulauncher")
         self.settings = Settings.load()
         self.context = WebKit2.WebContext()
@@ -127,7 +130,7 @@ class PreferencesServer:
 
         logger.warning("Unhandled request from '%s'.", uri)
 
-    def notify_client(self, name, data):
+    def notify_client(self, name: str, data: Any) -> None:
         self.client.run_javascript(f'onNotification("{name}", {json.dumps(data)})')
 
     ######################################
@@ -135,7 +138,7 @@ class PreferencesServer:
     ######################################
 
     @route("/get/all")
-    def get_all(self):
+    def get_all(self) -> dict[str, Any]:
         logger.info("API call /get/all")
         export_settings = self.settings.copy()
         export_settings["available_themes"] = [{"value": name, "text": name} for name in get_themes()]
@@ -151,7 +154,7 @@ class PreferencesServer:
         return export_settings
 
     @route("/set")
-    def apply_settings(self, prop, value):
+    def apply_settings(self, prop: str, value: Any) -> None:
         logger.info("Setting %s to %s", prop, value)
         # This setting is not stored to the config
         if prop == "autostart_enabled":
@@ -166,7 +169,7 @@ class PreferencesServer:
             assert app
             app.toggle_appindicator(value)  # type: ignore[attr-defined]
 
-    def apply_autostart(self, is_enabled):
+    def apply_autostart(self, is_enabled: bool) -> None:
         logger.info("Set autostart_enabled to %s", is_enabled)
         if is_enabled and not self.autostart_pref.can_start():
             msg = "Unable to turn on autostart preference"
@@ -179,16 +182,16 @@ class PreferencesServer:
             raise RuntimeError(msg) from err
 
     @route("/show/hotkey-dialog")
-    def show_hotkey_dialog(self):
+    def show_hotkey_dialog(self) -> None:
         logger.info("Show hotkey-dialog")
         HotkeyController.show_dialog()
 
     @route("/show/file-chooser")
-    def show_file_chooser(self, name, mime_filter):
+    def show_file_chooser(self, name: str, mime_filter: dict[str, str]) -> None:
         logger.info("Show file browser dialog for %s", name)
         GLib.idle_add(self._show_file_chooser, name, mime_filter)
 
-    def _show_file_chooser(self, name, mime_filter):
+    def _show_file_chooser(self, name: str, mime_filter: dict[str, str]) -> None:
         fc_dialog = Gtk.FileChooserDialog(title="Please choose a file")
         fc_dialog.add_button("_Open", Gtk.ResponseType.OK)
         fc_dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
@@ -207,17 +210,17 @@ class PreferencesServer:
         fc_dialog.close()
 
     @route("/open/web-url")
-    def open_url(self, url):
+    def open_url(self, url: str) -> None:
         logger.info("Open Web URL %s", url)
         open_detached(url)
 
     @route("/open/extensions-dir")
-    def open_extensions_dir(self):
+    def open_extensions_dir(self) -> None:
         logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS)
         open_detached(PATHS.USER_EXTENSIONS)
 
     @route("/shortcut/get-all")
-    def shortcut_get_all(self):
+    def shortcut_get_all(self) -> list[dict[str, Any]]:
         logger.info("Handling /shortcut/get-all")
         shortcuts = []
         for shortcut in ShortcutsDb.load().values():
@@ -227,14 +230,14 @@ class PreferencesServer:
         return shortcuts
 
     @route("/shortcut/update")
-    def shortcut_update(self, shortcut):
+    def shortcut_update(self, shortcut: dict[str, Any]) -> None:
         logger.info("Add/Update shortcut: %s", json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
         shortcuts[shortcut["id"]] = shortcut
         shortcuts.save()
 
     @route("/shortcut/remove")
-    def shortcut_remove(self, shortcut_id):
+    def shortcut_remove(self, shortcut_id: str) -> None:
         logger.info("Remove shortcut: %s", json.dumps(shortcut_id))
         shortcuts = ShortcutsDb.load()
         del shortcuts[shortcut_id]
@@ -263,7 +266,7 @@ class PreferencesServer:
         return list(get_extensions())
 
     @route("/extension/set-prefs")
-    def extension_update_prefs(self, ext_id, data):
+    def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
         logger.info("Update extension preferences %s to %s", ext_id, data)
         controller = ExtensionController.create(ext_id)
         socket_controller = ExtensionSocketServer().controllers.get(ext_id)
@@ -276,23 +279,23 @@ class PreferencesServer:
         controller.save_user_preferences(data)
 
     @route("/extension/check-update")
-    def extension_check_update(self, ext_id):
+    def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
         logger.info("Checking if extension has an update")
         return ExtensionController.create(ext_id).check_update()
 
     @route("/extension/update-ext")
-    def extension_update_ext(self, ext_id):
+    def extension_update_ext(self, ext_id: str) -> None:
         logger.info("Update extension: %s", ext_id)
         ExtensionController.create(ext_id).update()
 
     @route("/extension/remove")
-    def extension_remove(self, ext_id):
+    def extension_remove(self, ext_id: str) -> None:
         logger.info("Remove extension: %s", ext_id)
         controller = ExtensionController.create(ext_id)
         controller.remove()
 
     @route("/extension/toggle-enabled")
-    def extension_toggle_enabled(self, ext_id, is_enabled):
+    def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
         logger.info("Toggle extension: %s", ext_id)
         controller = ExtensionController.create(ext_id)
         controller.toggle_enabled(is_enabled)

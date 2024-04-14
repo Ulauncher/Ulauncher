@@ -15,9 +15,9 @@ def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
 # with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
 try:
-    from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found]
+    from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found, unused-ignore]
 
-    def _get_matching_blocks(query, text):
+    def _get_matching_blocks(query: str, text: str) -> list[tuple[int, int, int]]:
         return matching_blocks(editops(query, text), query, text)
 
 except ImportError:
@@ -25,7 +25,7 @@ except ImportError:
         "Using fuzzy-matching with Native Python SequenceMatcher module. "
         "optional dependency 'python-Levenshtein' is recommended for better performance"
     )
-    _get_matching_blocks = _get_matching_blocks_native
+    _get_matching_blocks = _get_matching_blocks_native  # type: ignore[assignment]
 
 
 # convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
@@ -34,7 +34,7 @@ def _normalize(string: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def get_matching_blocks(query: str, text: str) -> tuple[list, int]:
+def get_matching_blocks(query: str, text: str) -> tuple[list[tuple[int, str]], int]:
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched

@@ -5,11 +5,11 @@ from subprocess import check_output
 logger = logging.getLogger()
 
 
-def systemctl_run(*args):
+def systemctl_run(*args: str) -> str:
     try:
         return check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
     except Exception:
-        return False
+        return ""
 
 
 class SystemdController:
@@ -42,11 +42,11 @@ class SystemdController:
         """
         return systemctl_run("is-enabled", self.unit) == "enabled"
 
-    def restart(self):
+    def restart(self) -> None:
         """
         :returns: Restart the service
         """
-        return systemctl_run("restart", self.unit)
+        systemctl_run("restart", self.unit)
 
     def toggle(self, status: bool) -> None:
         """

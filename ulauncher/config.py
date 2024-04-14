@@ -25,7 +25,7 @@ os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
 
 @lru_cache(maxsize=None)
-def get_options():
+def get_options() -> argparse.Namespace:
     """Command Line options for the initial ulauncher (daemon) call"""
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all

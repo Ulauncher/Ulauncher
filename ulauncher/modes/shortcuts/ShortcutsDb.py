@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import re
 from pathlib import Path
 from time import time
+from typing import Any
 
 from ulauncher.config import PATHS
 from ulauncher.utils.fold_user_path import fold_user_path
@@ -17,7 +20,7 @@ class Shortcut(JsonConf):
     added = 0
     id = ""
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         # icon path has changed in v6, from /media/{google-search,stackoverflow,wikipedia}-icon.svg to /icons/*.svg
         if key == "icon":
             value = re.sub(r"/media/(.*?)-icon", "/icons/\\1", value)
@@ -26,7 +29,7 @@ class Shortcut(JsonConf):
 
 class ShortcutsDb(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
-    def __setitem__(self, key: str, value: dict, validate_type: bool = True) -> None:
+    def __setitem__(self, key: str, value: dict[str, Any], validate_type: bool = True) -> None:
         if "added" in value and isinstance(value.get("added"), float):
             # convert legacy float timestamps ulauncher used
             value["added"] = int(value["added"])
@@ -35,7 +38,7 @@ class ShortcutsDb(JsonConf):
         super().__setitem__(key, Shortcut(value), validate_type)
 
     @classmethod
-    def load(cls):
+    def load(cls) -> ShortcutsDb:  # type: ignore[override]
         file_path = Path(f"{PATHS.CONFIG}/shortcuts.json")
         instance = super().load(file_path)
         if not file_path.exists():

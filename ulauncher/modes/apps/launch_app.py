@@ -12,19 +12,23 @@ from ulauncher.utils.wm import try_raise_app
 logger = logging.getLogger()
 
 
-def launch_app(desktop_entry_name):
+def launch_app(desktop_entry_name: str) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
     app = Gio.DesktopAppInfo.new(desktop_entry_name)
-    assert app
+    if not app:
+        logger.error("Could not load app %s", desktop_entry_name)
+        return False
     app_exec = app.get_commandline()
-    assert app_exec
+    if not app_exec:
+        logger.error("Could not get Exec for app %s", app_id)
+        return False
     # strip field codes %f, %F, %u, %U, etc
     app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
     app_wm_id = (app.get_string("StartupWMClass") or Path(app_exec).name).lower()
     prefer_raise = settings.raise_if_started or app.get_boolean("SingleMainWindow")
     if prefer_raise and app_exec and try_raise_app(app_wm_id):
-        return
+        return True
 
     if app.get_boolean("DBusActivatable"):
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
@@ -45,3 +49,4 @@ def launch_app(desktop_entry_name):
     else:
         logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, cmd)
         launch_detached(cmd)
+    return True

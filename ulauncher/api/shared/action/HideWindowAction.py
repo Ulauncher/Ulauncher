@@ -1,3 +1,3 @@
 # @todo: Add deprecation warning
-def HideWindowAction():
+def HideWindowAction() -> bool:
     return False

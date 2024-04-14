@@ -3,8 +3,9 @@ from __future__ import annotations
 import logging
 import time
 import weakref
+from typing import Any, cast
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, GLib, Gtk
 
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
@@ -29,35 +30,34 @@ class UlauncherApp(Gtk.Application):
     _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
     _appindicator: AppIndicator | None = None
 
-    def __call__(cls, *args, **kwargs):
-        return get_instance(super(), cls, *args, **kwargs)
+    def __call__(cls, *args: Any, **kwargs: Any) -> UlauncherApp:
+        return cast(UlauncherApp, get_instance(super(), cls, *args, **kwargs))
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         super().__init__(*args, **kwargs)
-        self.connect("startup", self.setup)  # runs only once on the main instance
+        self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
     @property
     def query(self) -> Query:
         return Query(self._query)
 
-    @query.setter
-    def query(self, value: str) -> None:
+    def set_query(self, value: str) -> None:
         self._query = value.lstrip()
         if self.window:
             self.window.input.set_text(self._query)
             self.window.input.set_position(-1)
 
-    def do_startup(self):
+    def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
         Gio.ActionMap.add_action_entries(
             self, [("show-preferences", self.show_preferences, None), ("set-query", self.activate_query, "s")]
         )
 
-    def do_activate(self, *_args, **_kwargs):
+    def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
         self.show_launcher()
 
-    def do_command_line(self, *args, **_kwargs):
+    def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
         # We need to use "--no-window" from the unique CLI invocation here,
         # Can't use config.get_options(), because that's the daemon's initial cli arguments
         if "--no-window" not in args[0].get_arguments():
@@ -65,7 +65,7 @@ class UlauncherApp(Gtk.Application):
 
         return 0
 
-    def setup(self, _):
+    def setup(self) -> None:
         settings = Settings.load()
         self.hold()  # Keep the app running even without a window
 
@@ -105,12 +105,12 @@ class UlauncherApp(Gtk.Application):
             if controller.is_enabled and not controller.has_error:
                 controller.start()
 
-    def show_launcher(self):
+    def show_launcher(self) -> None:
         if not self.window:
             self.window = UlauncherWindow(application=self)
         self.window.show()
 
-    def show_preferences(self, page=None, *_):
+    def show_preferences(self, page: str | None = None) -> None:
         if not isinstance(page, str):
             page = None  # show_preferences is also bound to an event, passing a widget as the first arg
         if self.window:
@@ -125,9 +125,9 @@ class UlauncherApp(Gtk.Application):
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
 
-    def activate_query(self, _action, variant, *_):
+    def activate_query(self, _action: Any, variant: GLib.Variant, *_: Any) -> None:
         self.activate()
-        self.query = variant.get_string()
+        self.set_query(variant.get_string())
 
     def toggle_appindicator(self, enable: bool) -> None:
         if not self._appindicator:

@@ -35,7 +35,7 @@ class ExtensionState(JsonConf):
     error_message = ""
     error_type = ""
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key == "last_commit":
             key = "commit_hash"
         if key == "last_commit_time":
@@ -201,7 +201,7 @@ class ExtensionController:
         else:
             self.stop()
 
-    def start(self):
+    def start(self) -> None:
         if not self.is_running:
 
             def error_handler(error_type: str, error_msg: str) -> None:

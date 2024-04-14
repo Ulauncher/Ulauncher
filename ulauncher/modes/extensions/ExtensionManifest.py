@@ -23,12 +23,12 @@ class ExtensionManifestPreference(JsonConf):
     name = ""
     type = ""
     description = ""
-    options: list[dict] = []
+    options: list[dict[str, Any]] = []
     default_value: str | int = ""
     max: int | None = None
     min: int | None = None
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         validate_type = key in ["name", "type", "description", "options"]
         super().__setitem__(key, value, validate_type)
 
@@ -58,7 +58,7 @@ class ExtensionManifest(JsonConf):
     triggers: dict[str, ExtensionManifestTrigger] = {}
     preferences: dict[str, ExtensionManifestPreference] = {}
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         # Rename "required_api_version" back to "api_version"
         if key == "required_api_version":
             key = "api_version"

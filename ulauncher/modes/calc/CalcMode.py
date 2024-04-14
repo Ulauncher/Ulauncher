@@ -114,13 +114,13 @@ def _eval(node: ast.expr) -> Decimal:
     if isinstance(node, ast.Num):  # <number>
         return Decimal(str(node.n))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
-        return operators[type(node.op)](_eval(node.left), _eval(node.right))  # type: ignore[operator]
+        return operators[type(node.op)](_eval(node.left), _eval(node.right))  # type: ignore[no-any-return, operator]
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
-        return operators[type(node.op)](_eval(node.operand))  # type: ignore[operator]
+        return operators[type(node.op)](_eval(node.operand))  # type: ignore[no-any-return, operator]
     if isinstance(node, ast.Name) and node.id in constants:  # <name>
         return constants[node.id]
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in functions:  # <func>(<args>)
-        value = functions[node.func.id](_eval(node.args[0]))  # type: ignore[operator]
+        value = Decimal(functions[node.func.id](_eval(node.args[0])))  # type: ignore[operator]
         if isinstance(value, float):
             value = Decimal(value)
         return value
@@ -129,7 +129,7 @@ def _eval(node: ast.expr) -> Decimal:
 
 
 class CalcMode(BaseMode):
-    def is_enabled(self, query):
+    def is_enabled(self, query: str) -> bool:
         return _is_enabled(query)
 
     def handle_query(self, query: str) -> list[CalcResult]:

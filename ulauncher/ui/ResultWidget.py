@@ -134,7 +134,7 @@ class ResultWidget(Gtk.EventBox):
         for label in labels:
             self.title_box.pack_start(label, False, False, 0)
 
-    def on_click(self, _widget: Gtk.Widget, event: Gdk.EventCrossing | None = None) -> None:
+    def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
         window = self.get_toplevel()
         window.select_result(self.index)  # type: ignore[attr-defined]
         alt = bool(event and event.button != 1)  # right click

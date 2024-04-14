@@ -41,7 +41,9 @@ def _storeJSON(path: str, data: Any) -> bool:
     return True
 
 
-def _migrate_file(from_path: str, to_path: str, transform: Callable | None = None, overwrite: bool = False) -> None:
+def _migrate_file(
+    from_path: str, to_path: str, transform: Callable[[Any], Any] | None = None, overwrite: bool = False
+) -> None:
     if os.path.isfile(from_path) and (overwrite or not os.path.exists(to_path)):
         data = _load_legacy(Path(from_path))
         if data:
@@ -51,7 +53,7 @@ def _migrate_file(from_path: str, to_path: str, transform: Callable | None = Non
             _storeJSON(to_path, data)
 
 
-def _migrate_app_state(old_format: dict) -> dict:
+def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
     new_format = {}
     for app_path, starts in old_format.items():
         # Was changed to use app ids instead of paths as keys
@@ -59,11 +61,11 @@ def _migrate_app_state(old_format: dict) -> dict:
     return new_format
 
 
-def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict]) -> dict[str, dict]:
+def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
-    new_prefs: dict[str, dict] = {"preferences": {}, "triggers": {}}
+    new_prefs: dict[str, dict[str, Any]] = {"preferences": {}, "triggers": {}}
     controller = ExtensionController.create(ext_id)
     for id, pref in user_prefs.items():
         if controller.manifest.triggers.get(id):
