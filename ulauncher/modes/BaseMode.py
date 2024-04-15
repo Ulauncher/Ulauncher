@@ -24,8 +24,7 @@ class BaseMode:
         """
         return None
 
-    # TODO(friday): Get rid of bool type (only used in DeferredResultRenderer.handle_event to keep window open)
-    def handle_query(self, _query: Query) -> bool | Iterable[Result]:
+    def handle_query(self, _query: Query) -> Iterable[Result]:
         return []
 
     def get_triggers(self) -> Iterable[Result]:
