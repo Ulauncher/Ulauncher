@@ -5,6 +5,8 @@ from typing import Any, Callable
 import gi
 from gi.repository import GObject, Gtk
 
+from ulauncher.utils.eventbus import EventBus
+
 # Status icon support is optional. It'll work if you install XApp or AppIndicator3
 # Only XApp supports activating the launcher on left click and showing the menu on right click
 try:
@@ -34,6 +36,7 @@ from ulauncher.config import PATHS
 from ulauncher.utils.Settings import Settings
 
 logger = logging.getLogger()
+events = EventBus()
 icon_asset_path = f"{PATHS.ASSETS}/icons/system/status"
 default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default
 
@@ -45,16 +48,16 @@ def _create_menu_item(label: str, handler: Callable[[Any], None]) -> Gtk.MenuIte
 
 
 class AppIndicator(GObject.Object):
-    def __init__(self, app: Any, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         if self.supports_appindicator():
-            show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: app.activate())
+            show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: events.emit("app:show_launcher"))
             menu = Gtk.Menu()
             menu.append(show_menu_item)
-            menu.append(_create_menu_item("Preferences", lambda *_: app.show_preferences()))
-            menu.append(_create_menu_item("About", lambda *_: app.show_preferences("about")))
+            menu.append(_create_menu_item("Preferences", lambda *_: events.emit("app:show_preferences")))
+            menu.append(_create_menu_item("About", lambda *_: events.emit("app:show_preferences", "about")))
             menu.append(Gtk.SeparatorMenuItem())
-            menu.append(_create_menu_item("Exit", lambda *_: app.quit()))
+            menu.append(_create_menu_item("Exit", lambda *_: events.emit("app:quit")))
             menu.show_all()
 
         gtk_icon_theme = Gtk.IconTheme.get_default()
@@ -84,7 +87,7 @@ class AppIndicator(GObject.Object):
             self._indicator.set_icon_name(icon_name)
             # Show menu on right click and show launcher on left click
             self._indicator.set_secondary_menu(menu)
-            self._indicator.connect("activate", lambda *_: app.activate())
+            self._indicator.connect("activate", lambda *_: events.emit("app:show_launcher"))
 
         elif AyatanaIndicator:
             if icon_dir:

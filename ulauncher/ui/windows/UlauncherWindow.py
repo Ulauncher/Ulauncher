@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-import subprocess
-from typing import Any, Sequence, cast
+from typing import Any, Sequence
 
 from gi.repository import Gdk, Gtk
 
@@ -10,67 +9,17 @@ from ulauncher.api.result import Result
 from ulauncher.config import PATHS
 from ulauncher.modes import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
-from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.ui import LayerShell
 from ulauncher.ui.ItemNavigation import ItemNavigation
 from ulauncher.ui.ResultWidget import ResultWidget
-from ulauncher.utils.launch_detached import open_detached
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
-
-
-def handle_event(window: UlauncherWindow, event: bool | list[Any] | str | dict[str, Any]) -> bool:  # noqa: PLR0912
-    if isinstance(event, bool):
-        return event
-    if isinstance(event, list):
-        window.show_results([res if isinstance(res, Result) else Result(**res) for res in event])
-        return True
-    if isinstance(event, str):
-        window.app.set_query(event)
-        return True
-
-    event_type = event.get("type", "")
-    data = event.get("data")
-    ext_id = event.get("ext_id")
-    controller = None
-    if event_type == "action:open" and data:
-        open_detached(data)
-    elif event_type == "action:clipboard_store" and data:
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(data, -1)
-        clipboard.store()
-        window.hide()
-        copy_hook = Settings.load().copy_hook
-        if copy_hook:
-            logger.info("Running copy hook: %s", copy_hook)
-            subprocess.Popen(["sh", "-c", copy_hook])
-
-    elif event_type == "action:legacy_run_script" and isinstance(data, list):
-        run_script(*data)
-    elif event_type == "action:legacy_run_many" and isinstance(data, list):
-        keep_open = False
-        for action in data:
-            if handle_event(window, action):
-                keep_open = True
-        return keep_open
-    elif event_type == "event:activate_custom":
-        controller = DeferredResultRenderer().get_active_controller()
-    elif event_type.startswith("event") and ext_id:
-        controller = ExtensionSocketServer().get_controller_by_id(ext_id)
-    else:
-        logger.warning("Invalid result from mode: %s", type(event).__name__)
-
-    if controller:
-        controller.trigger_event(event)
-        return cast(bool, event.get("keep_app_open", False)) if event_type == "event:activate_custom" else True
-
-    return False
+events = EventBus("window")
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -94,6 +43,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             window_position=Gtk.WindowPosition.CENTER,
             **kwargs,
         )
+
+        events.set_self(self)
 
         if LayerShell.is_supported():
             self.layer_shell_enabled = LayerShell.enable(self)
@@ -164,7 +115,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.connect("button-release-event", lambda *_: self.on_mouse_up())
         self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
-        prefs_btn.connect("clicked", lambda *_: self.app.show_preferences())
+        prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
         self.set_keep_above(True)
         self.position_window()
@@ -195,7 +146,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
         if self.is_visible():
             # input_changed can trigger when hiding window
-            self.handle_event(ModeHandler.on_query_change(self.app.query))
+            ModeHandler.on_query_change(self.app.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -220,7 +171,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return True
 
         if ctrl and keyname == "comma":
-            self.app.show_preferences()
+            events.emit("app:show_preferences")
             return True
 
         if (
@@ -252,8 +203,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 return True
 
             if keyname in ("Return", "KP_Enter"):
-                result = self.results_nav.activate(self.app.query, alt=alt)
-                self.handle_event(result)
+                self.results_nav.activate(self.app.query, alt=alt)
                 return True
             if alt and event.string in jump_keys:
                 self.select_result(jump_keys.index(event.string))
@@ -278,10 +228,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     @property
     def app(self) -> Any:
         return self.get_application()
-
-    def handle_event(self, event: bool | list[Any] | str | dict[str, Any] | None) -> None:
-        if event is None or not handle_event(self, event):
-            self.hide()
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider
@@ -350,6 +296,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.grab_focus()
         super().show()
 
+    @events.on
     def hide(self, clear_input: bool = True) -> None:
         if clear_input:
             self.input.set_text("")
@@ -370,6 +317,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         assert device_mapper
         return device_mapper.get_client_pointer()
 
+    @events.on
     def show_results(self, results: Sequence[Result]) -> None:
         """
         :param list results: list of Result instances

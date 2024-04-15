@@ -18,6 +18,7 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
@@ -28,7 +29,8 @@ from ulauncher.utils.WebKit2 import WebKit2
 P1 = TypeVar("P1")
 P2 = TypeVar("P2")
 logger = logging.getLogger()
-routes: dict[str, Any] = {}
+events = EventBus()
+routes: dict[str, Callable[..., Any]] = {}
 
 
 # Python generics doesn't support this case, so we have to declare with ... and Any
@@ -165,9 +167,7 @@ class PreferencesServer:
         self.settings.save()
 
         if prop == "show_tray_icon":
-            app = Gio.Application.get_default()
-            assert app
-            app.toggle_appindicator(value)  # type: ignore[attr-defined]
+            events.emit("app:toggle_appindicator", value)
 
     def apply_autostart(self, is_enabled: bool) -> None:
         logger.info("Set autostart_enabled to %s", is_enabled)

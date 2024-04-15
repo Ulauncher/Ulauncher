@@ -4,23 +4,22 @@ from typing import Any, Generator
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.BaseMode import BaseMode
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
+from ulauncher.utils.eventbus import EventBus
+
+events = EventBus()
+ExtensionSocketServer().start()
 
 
 class ExtensionMode(BaseMode):
     def __init__(self) -> None:
         self.ExtensionSocketServer = ExtensionSocketServer()
-        self.deferredResultRenderer = DeferredResultRenderer()
 
     def is_enabled(self, query: Query) -> bool:
         return bool(self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)) and " " in query
 
     def on_query_change(self, _query: Query) -> None:
-        """
-        Triggered when user changes the query
-        """
-        self.deferredResultRenderer.on_query_change()
+        events.emit("extension:on_query_change")
 
     def handle_query(self, query: Query) -> Any:
         controller = self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)

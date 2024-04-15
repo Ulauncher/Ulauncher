@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
-
 from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.ui.ResultWidget import ResultWidget
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load, json_save
 
+events = EventBus()
 query_history_path = f"{PATHS.STATE}/query_history.json"
 query_history: dict[str, str] = json_load(query_history_path)
 
@@ -60,14 +60,11 @@ class ItemNavigation:
         next_result = (self.index or 0) + 1
         self.select(next_result if next_result < len(self.result_widgets) else 0)
 
-    def activate(self, query: Query, alt: bool = False) -> Any:
-        """
-        Return boolean - True if Ulauncher window should be kept open
-        """
+    def activate(self, query: Query, alt: bool = False) -> None:
         assert self.selected_item
         result = self.selected_item.result
         if query and not alt and result.searchable:
             query_history[str(query)] = result.name
             json_save(query_history, query_history_path)
 
-        return result.on_activation(query, alt)
+        events.emit("mode:handle_action", result.on_activation(query, alt))

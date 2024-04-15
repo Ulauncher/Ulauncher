@@ -6,13 +6,14 @@ from typing import Any
 
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.DeferredResultRenderer import DeferredResultRenderer
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
 from ulauncher.utils.decorator.debounce import debounce
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
 
 logger = logging.getLogger()
+events = EventBus()
 
 
 class ExtensionSocketController:
@@ -30,7 +31,6 @@ class ExtensionSocketController:
             raise RuntimeError(msg)
         self.controllers = controllers
         self.framer: JSONFramer = framer
-        self.result_renderer = DeferredResultRenderer()
         self.ext_id = ext_id
         self.data_controller = ExtensionController.create(ext_id)
         ext_path = extension_finder.locate(ext_id)
@@ -76,7 +76,9 @@ class ExtensionSocketController:
             self._send_event(event)
         else:
             self._debounced_send_event(event)
-        return self.result_renderer.handle_event(event, self)
+
+        events.emit("extension:handle_event", event, self)
+        return True
 
     def handle_response(self, _framer: JSONFramer, response: dict[str, Any]) -> None:
         logger.debug(
@@ -89,7 +91,7 @@ class ExtensionSocketController:
             for result in action:
                 result["icon"] = self.data_controller.get_normalized_icon_path(result["icon"])
 
-        self.result_renderer.handle_response(response, self)
+        events.emit("extension:handle_response", response, self)
 
     def handle_close(self, _framer: JSONFramer) -> None:
         logger.info('Extension "%s" disconnected', self.ext_id)
