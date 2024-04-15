@@ -126,7 +126,11 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     @events.on
     def handle_response(self, response: dict[str, Any], controller: ExtensionSocketController) -> None:
-        if self.active_controller != controller or self.active_event != response.get("event"):
+        if not self.active_controller and not self.active_event:
+            self.active_event = response.get("event")
+            self.active_controller = controller
+        elif self.active_controller != controller or self.active_event != response.get("event"):
+            logger.warning("Received response from different controller or event")
             return
 
         self._cancel_loading()
