@@ -6,6 +6,7 @@ from typing import Any, Sequence
 from gi.repository import Gdk, Gtk
 
 from ulauncher.api.result import Result
+from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
 from ulauncher.modes import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
@@ -143,10 +144,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        self.app._query = self.input.get_text().lstrip()  # noqa: SLF001
+        events.emit("app:set_query", self.input.get_text(), update_input=False)
         if self.is_visible():
             # input_changed can trigger when hiding window
-            ModeHandler.on_query_change(self.app.query)
+            ModeHandler.on_query_change(self.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -178,11 +179,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             keyname == "BackSpace"
             and not ctrl
             and not entry_widget.get_selection_bounds()
-            and entry_widget.get_position() == len(self.app.query)
+            and entry_widget.get_position() == len(self.query)
         ):
-            new_query = ModeHandler.on_query_backspace(self.app.query)
+            new_query = ModeHandler.on_query_backspace(self.query)
             if new_query is not None:
-                self.app.set_query(new_query)
+                events.emit("app:set_query", new_query)
                 return True
 
         if self.results_nav:
@@ -203,7 +204,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 return True
 
             if keyname in ("Return", "KP_Enter"):
-                self.results_nav.activate(self.app.query, alt=alt)
+                self.results_nav.activate(self.query, alt=alt)
                 return True
             if alt and event.string in jump_keys:
                 self.select_result(jump_keys.index(event.string))
@@ -226,8 +227,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @property
-    def app(self) -> Any:
-        return self.get_application()
+    def query(self) -> Query:
+        return self.get_application().query  # type: ignore[no-any-return, union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider
@@ -290,7 +291,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         self.position_window()
 
-        if not self.app.query:
+        if not self.query:
             # make sure frequent apps are shown if necessary
             self.show_results([])
 
@@ -305,7 +306,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.get_pointer_device().ungrab(0)
         super().hide()
         if self.settings.clear_previous_query:
-            self.app.set_query("")
+            events.emit("app:set_query", "")
 
     def select_result(self, index: int) -> None:
         if self.results_nav:
@@ -333,11 +334,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if results:
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(results[:limit]):
-                result_widget = ResultWidget(result, index, self.app.query)
+                result_widget = ResultWidget(result, index, self.query)
                 result_widgets.append(result_widget)
                 self.result_box.add(result_widget)
             self.results_nav = ItemNavigation(result_widgets)
-            self.results_nav.select_default(self.app.query)
+            self.results_nav.select_default(self.query)
 
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)

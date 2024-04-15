@@ -43,9 +43,9 @@ class UlauncherApp(Gtk.Application):
         return Query(self._query)
 
     @events.on
-    def set_query(self, value: str) -> None:
+    def set_query(self, value: str, update_input: bool = True) -> None:
         self._query = value.lstrip()
-        if self.window:
+        if update_input and self.window:
             self.window.input.set_text(self._query)
             self.window.input.set_position(-1)
 
