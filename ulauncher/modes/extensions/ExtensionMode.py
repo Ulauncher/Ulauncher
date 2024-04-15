@@ -39,7 +39,7 @@ class ExtensionMode(BaseMode):
             data_controller = controller.data_controller
             for trigger_id, trigger in data_controller.user_triggers.items():
                 action: Any = None
-                if trigger.keyword is None:
+                if not trigger.keyword:
                     action = {
                         "type": "event:launch_trigger",
                         "args": [trigger_id],
