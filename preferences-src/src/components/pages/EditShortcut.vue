@@ -40,16 +40,16 @@ echo "This also works: $@"</code></pre>
       </b-form-group>
 
       <b-form-group>
-        <b-form-checkbox v-model="localIsDefaultSearch">Default search</b-form-checkbox>
+        <b-form-checkbox v-model="localRunWithoutArgument">Static shortcut</b-form-checkbox>
         <small class="form-text text-muted">
-          <p>Suggest this shortcut when no results found</p>
+          <p>The shortcut doesn't take any argument.</p>
         </small>
       </b-form-group>
 
       <b-form-group>
-        <b-form-checkbox v-model="localRunWithoutArgument">Run without arguments</b-form-checkbox>
+        <b-form-checkbox v-model="localIsDefaultSearch" :disabled="localRunWithoutArgument">Include in fallback for search results</b-form-checkbox>
         <small class="form-text text-muted">
-          <p>Allows you to type in a keyword and press Enter to run a shortcut</p>
+          <p>Suggest this shortcut when no results found.</p>
         </small>
       </b-form-group>
 
@@ -84,7 +84,7 @@ export default {
       localName: this.name,
       localKeyword: this.keyword,
       localCmd: this.cmd,
-      localIsDefaultSearch: !!this.is_default_search,
+      localIsDefaultSearch: !this.run_without_argument && !!this.is_default_search,
       localRunWithoutArgument: !!this.run_without_argument,
       validate: false,
       cmdDescriptionExpanded: false
