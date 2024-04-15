@@ -10,11 +10,6 @@ settings = Settings.load()
 
 class TestPreferencesServer:
     @pytest.fixture(autouse=True)
-    def ulauncherWindow(self, mocker):
-        app.window = mocker.patch("ulauncher.ui.windows.UlauncherWindow.UlauncherWindow").return_value
-        return app.window
-
-    @pytest.fixture(autouse=True)
     def autostart_pref(self, mocker):
         return mocker.patch("ulauncher.ui.preferences_server.SystemdController").return_value
 
