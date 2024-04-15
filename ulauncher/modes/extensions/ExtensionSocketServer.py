@@ -7,13 +7,18 @@ from typing import Any
 
 from gi.repository import Gio, GObject
 
+from ulauncher.api.result import Result
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
 from ulauncher.utils.singleton import Singleton
+from ulauncher.utils.timer import TimerContext, timer
 
+LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
 logger = logging.getLogger()
+events = EventBus("extension")
 
 
 class ExtensionSocketServer(metaclass=Singleton):
@@ -21,12 +26,16 @@ class ExtensionSocketServer(metaclass=Singleton):
     service: Gio.SocketService | None
     controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
+    active_controller: ExtensionSocketController | None = None
+    active_event: dict[str, Any] | None = None
+    current_loading_timer: TimerContext | None = None
 
     def __init__(self) -> None:
         self.service = None
         self.socket_path = get_socket_path()
         self.controllers = {}
         self.pending = {}
+        events.set_self(self)
 
     def start(self) -> None:
         self.service = Gio.SocketService.new()
@@ -96,6 +105,42 @@ class ExtensionSocketServer(metaclass=Singleton):
                     return controller
 
         return None
+
+    def _cancel_loading(self) -> None:
+        if self.current_loading_timer:
+            self.current_loading_timer.cancel()
+            self.current_loading_timer = None
+
+    @events.on
+    def on_query_change(self) -> None:
+        self._cancel_loading()
+        self.active_event = None
+        self.active_controller = None
+
+    @events.on
+    def trigger_event(self, event: dict[str, Any]) -> None:
+        if self.active_controller:
+            self.active_controller.trigger_event(event)
+            if not event.get("keep_app_open"):
+                events.emit("window:hide")
+
+    @events.on
+    def handle_response(self, response: dict[str, Any], controller: ExtensionSocketController) -> None:
+        if self.active_controller != controller or self.active_event != response.get("event"):
+            return
+
+        self._cancel_loading()
+        events.emit("mode:handle_action", response.get("action"))
+
+    @events.on
+    def handle_event(self, event: dict[str, Any], controller: ExtensionSocketController) -> None:
+        icon = controller.data_controller.get_normalized_icon_path() or ""
+        loading_message = Result(name="Loading...", icon=icon)
+
+        self._cancel_loading()
+        self.current_loading_timer = timer(LOADING_DELAY, lambda: events.emit("window:show_results", [loading_message]))
+        self.active_event = event
+        self.active_controller = controller
 
 
 if __name__ == "__main__":

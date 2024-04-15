@@ -4,14 +4,6 @@ ulauncher\.modes\.extensions package
 Submodules
 ----------
 
-ulauncher\.modes\.extensions\.DeferredResultRenderer module
------------------------------------------------------------
-
-.. automodule:: ulauncher.modes.extensions.DeferredResultRenderer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ulauncher\.modes\.extensions\.ExtensionSocketController module
 --------------------------------------------------------------
 
