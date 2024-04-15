@@ -20,13 +20,14 @@ class ShortcutResult(Result):
     def get_description(self, query: Query) -> str:
         description = "" if self.cmd.startswith("#!") else self.cmd
 
+        if self.run_without_argument:
+            return "Press Enter to run the shortcut"
+
         if self.is_default_search:
             return description.replace("%s", query)
 
         if query.keyword == self.keyword and query.argument:
             return description.replace("%s", query.argument)
-        if query.keyword == self.keyword and self.run_without_argument:
-            return "Press Enter to run the shortcut"
         if query.keyword == self.keyword and not query.argument:
             return "Type in your query and press Enter..."
 
