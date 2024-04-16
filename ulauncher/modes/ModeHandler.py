@@ -23,6 +23,7 @@ from ulauncher.utils.Settings import Settings
 _logger = logging.getLogger()
 _events = EventBus("mode")
 _modes: list[BaseMode] = []
+_triggers: list[Result] = []
 
 
 def get_modes() -> list[BaseMode]:
@@ -65,13 +66,15 @@ def get_mode_from_query(query: Query) -> BaseMode | None:
     return None
 
 
-def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
-    searchables: list[Result] = []
+def refresh_triggers() -> None:
+    _triggers.clear()
     for mode in get_modes():
-        searchables.extend([*mode.get_triggers()])
+        _triggers.extend([*mode.get_triggers()])
 
+
+def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
     # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
-    sorted_ = sorted(searchables, key=lambda i: i.search_score(query), reverse=True)[:limit]
+    sorted_ = sorted(_triggers, key=lambda i: i.search_score(query), reverse=True)[:limit]
     return list(filter(lambda searchable: searchable.search_score(query) > min_score, sorted_))
 
 
