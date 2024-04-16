@@ -282,7 +282,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.move(pos_x, pos_y)
 
     def show(self) -> None:
-        ModeHandler.refresh_triggers()
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
         # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
