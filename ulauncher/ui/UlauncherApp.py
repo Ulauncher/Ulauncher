@@ -55,6 +55,7 @@ class UlauncherApp(Gtk.Application):
             self,
             [
                 ("show-preferences", lambda *_: self.show_preferences(), None),
+                ("toggle-tray-icon", lambda *args: self.toggle_tray_icon(args[1].get_boolean()), "b"),
                 ("set-query", lambda *args: self.activate_query(args[1].get_string()), "s"),
             ],
         )
