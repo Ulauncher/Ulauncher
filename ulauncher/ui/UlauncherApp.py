@@ -4,7 +4,7 @@ import logging
 import weakref
 from typing import Any, cast
 
-from gi.repository import Gio, GLib, Gtk
+from gi.repository import Gio, Gtk
 
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
@@ -52,7 +52,11 @@ class UlauncherApp(Gtk.Application):
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
         Gio.ActionMap.add_action_entries(
-            self, [("show-preferences", self.show_preferences, None), ("set-query", self.activate_query, "s")]
+            self,
+            [
+                ("show-preferences", lambda *_: self.show_preferences(), None),
+                ("set-query", lambda *args: self.activate_query(args[1].get_string()), "s"),
+            ],
         )
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
@@ -110,9 +114,6 @@ class UlauncherApp(Gtk.Application):
     def show_preferences(self, page: str | None = None) -> None:
         events.emit("window:hide", clear_input=False)
 
-        if not isinstance(page, str):
-            page = None  # show_preferences is also bound to an event, passing a widget as the first arg
-
         preferences = self._preferences and self._preferences()
 
         if preferences:
@@ -122,9 +123,9 @@ class UlauncherApp(Gtk.Application):
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
 
-    def activate_query(self, _action: Any, variant: GLib.Variant, *_: Any) -> None:
+    def activate_query(self, query: str) -> None:
         self.activate()
-        self.set_query(variant.get_string())
+        self.set_query(query)
 
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
