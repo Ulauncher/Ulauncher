@@ -71,7 +71,7 @@ class UlauncherApp(Gtk.Application):
         self.hold()  # Keep the app running even without a window
 
         if settings.show_tray_icon:
-            self.toggle_appindicator(True)
+            self.toggle_tray_icon(True)
 
         if FIRST_RUN or settings.hotkey_show_app:
             if HotkeyController.is_supported():
@@ -127,7 +127,7 @@ class UlauncherApp(Gtk.Application):
         self.set_query(variant.get_string())
 
     @events.on
-    def toggle_appindicator(self, enable: bool) -> None:
+    def toggle_tray_icon(self, enable: bool) -> None:
         if not self._appindicator:
             self._appindicator = AppIndicator()
         self._appindicator.switch(enable)

@@ -167,7 +167,7 @@ class PreferencesServer:
         self.settings.save()
 
         if prop == "show_tray_icon":
-            events.emit("app:toggle_appindicator", value)
+            events.emit("app:toggle_tray_icon", value)
 
     def apply_autostart(self, is_enabled: bool) -> None:
         logger.info("Set autostart_enabled to %s", is_enabled)
