@@ -1,4 +1,4 @@
-## Communication
+# Communication
 
 Please read our General communication guidelines [here](CODE_OF_CONDUCT.md#General_communication_guidelines).
 
@@ -81,14 +81,15 @@ For the v6 branch you need the the following to setup the local build environmen
 
 1. build your development interpreter with `make nix-build-dev`
 2. use the development interpreter (`./nix/dev/bin/python`) by either of:
-   - pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
-   - using it directly from repository root (otherwise you will use the version of code built with environment),
+   * pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
+   * using it directly from repository root (otherwise you will use the version of code built with environment),
 3. rebuild the interpreter when project dependencies change,
 
 Alternatively you can run the current code directly `make nix-run ARGS="<arg1> <arg2...>"`, without any IDE completion.
 
 Jetbrains IDEs will have trouble discovering GTK objects (`from gi.repository import ...` are underlined red).
 You will need to instruct it to build stub files from binaries by:
+
 1. placing your cursor over red-underlined import,
 2. pressing `Alt+Enter` to invoke a dropdown menu with suggested fixes,
 3. selecting `Generate stubs for binary module gi.repository.Gtk`
