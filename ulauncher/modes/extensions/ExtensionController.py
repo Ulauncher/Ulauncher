@@ -179,6 +179,8 @@ class ExtensionController:
 
         self.stop()
         self.download(commit_hash, warn_if_overwrite=False)
+        self.error_message = ""
+        self.error_type = ""
 
         if was_running:
             self.start()
