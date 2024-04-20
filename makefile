@@ -43,7 +43,11 @@ version: # Print the Ulauncher version
 	@echo ${VERSION}
 
 run: prefs # Run ulauncher from source
-	@./bin/ulauncher -v --dev
+	@if [ -n $(shell eval "command -v systemctl") ]; then
+		systemctl --user stop ulauncher || true
+	fi
+	killall -eq ulauncher || true
+	./bin/ulauncher -v --dev
 
 run-container: # Start a bash session in the Ulauncher Docker build container (Ubuntu)
 	@set -euo pipefail
