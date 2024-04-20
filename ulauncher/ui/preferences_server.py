@@ -6,7 +6,7 @@ import mimetypes
 import os
 import time
 import traceback
-from typing import Any, Callable, Generator, TypeVar
+from typing import Any, Callable, Generator
 from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, GLib, Gtk
@@ -26,8 +26,6 @@ from ulauncher.utils.systemd_controller import SystemdController
 from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
 
-P1 = TypeVar("P1")
-P2 = TypeVar("P2")
 logger = logging.getLogger()
 events = EventBus()
 routes: dict[str, Callable[..., Any]] = {}
