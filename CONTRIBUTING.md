@@ -100,7 +100,7 @@ You will need to instruct it to build stub files from binaries by:
 
 1. `git clone` the repository locally
 1. Open a terminal window and cd into the ulauncher repository root directory.
-1. Run `make run` to start the app, so you can test it. If you had Ulauncher running before, this command will also attempt to stop that instance first, because there can only be once Ulauncher instance running.
+1. Run `make run` to start the app, so you can test it. If you had Ulauncher running before, this command will also attempt to stop that instance first, because there can only be one Ulauncher instance running.
 1. When you are done testing or want to restart, press ctrl+c to stop the Ulauncher process. And you can then start it normally again (`systemctl --user start ulauncher` if uing systemd).
 
 ### How to contribute
