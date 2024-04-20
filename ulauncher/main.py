@@ -76,8 +76,8 @@ def main() -> None:
         logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
 
     # log uncaught exceptions
-    def except_hook(exctype: type[BaseException], value: BaseException, traceback: TracebackType | None) -> None:
-        logger.error("Uncaught exception", exc_info=(exctype, value, traceback))
+    def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
+        logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))
 
     sys.excepthook = except_hook
 
