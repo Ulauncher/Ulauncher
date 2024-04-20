@@ -142,6 +142,8 @@ class ExtensionController:
             commit_hash=commit_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
             updated_at=datetime.now().isoformat(),
+            error_type="",
+            error_message="",
         )
         self.state.save()
 
@@ -179,11 +181,7 @@ class ExtensionController:
 
         self.stop()
         self.download(commit_hash, warn_if_overwrite=False)
-        self.error_message = ""
-        self.error_type = ""
-
-        if was_running:
-            self.start()
+        self.toggle_enabled(was_running)
 
         return True
 
@@ -196,7 +194,7 @@ class ExtensionController:
         return has_update, commit_hash
 
     def toggle_enabled(self, enabled: bool) -> None:
-        self.state.is_enabled = enabled
+        self.state.update(is_enabled=enabled, error_type="", error_message="")
         self.state.save()
         if enabled:
             self.start()
