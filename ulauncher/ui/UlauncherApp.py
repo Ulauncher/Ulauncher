@@ -86,24 +86,26 @@ class UlauncherApp(Gtk.Application):
                 if HotkeyController.setup_default(hotkey):
                     display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(hotkey))
                     body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
-                    notification_id = "de_hotkey_auto_created"
-                    notification = Gio.Notification.new("Global shortcut created")
-                    notification.set_default_action("-")  # Add non-existing action to prevent activating on click
-                    notification.set_body(body)
-
+                    self.show_notification("de_hotkey_auto_created", "Global shortcut created", body)
             else:
-                notification_id = "de_hotkey_unsupported"
-                notification = Gio.Notification.new("Cannot create global shortcut")
-                notification.set_default_action("app.show-preferences")
-                notification.set_body(
+                body = (
                     "Ulauncher doesn't support setting global keyboard shortcuts for your desktop. "
                     "There are more details on this in the preferences view (click here to open)."
+                )
+                self.show_notification(
+                    "de_hotkey_unsupported", "Cannot create global shortcut", body, "app.show-preferences"
                 )
 
             settings.hotkey_show_app = ""  # Remove json file setting so the notification won't show again
             settings.save()
-            notification.set_priority(Gio.NotificationPriority.URGENT)
-            self.send_notification(notification_id, notification)
+
+    def show_notification(self, notification_id: str | None, title: str, body: str, default_action: str = "-") -> None:
+        notification = Gio.Notification.new(title)
+        # Defaults to non-existing action "-" to prevent activating on click
+        notification.set_default_action(default_action)
+        notification.set_body(body)
+        notification.set_priority(Gio.NotificationPriority.URGENT)
+        self.send_notification(notification_id, notification)
 
     @events.on
     def show_launcher(self) -> None:
