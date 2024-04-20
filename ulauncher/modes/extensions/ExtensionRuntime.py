@@ -78,7 +78,7 @@ class ExtensionRuntime:
         if output:
             print(output)  # noqa: T201
             self.recent_errors.append(output)
-        self.read_stderr_line()
+            self.read_stderr_line()
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
         error_type, error_msg = self.extract_error()
