@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import sys
@@ -56,6 +57,7 @@ class ExtensionControllerError(Exception):
 class ExtensionController:
     id: str
     state: ExtensionState
+    is_running: bool = False
     _path: str | None
     _state_path: Path
 
@@ -119,10 +121,6 @@ class ExtensionController:
         return extension_finder.is_manageable(self.path)
 
     @property
-    def is_running(self) -> bool:
-        return self.id in extension_runtimes
-
-    @property
     def user_preferences(self) -> dict[str, UserPreference]:
         return self.manifest.get_user_preferences(self.id)
 
@@ -136,7 +134,7 @@ class ExtensionController:
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
-    def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
+    async def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
         self.state.update(
             commit_hash=commit_hash,
@@ -147,11 +145,11 @@ class ExtensionController:
         )
         self.state.save()
 
-    def remove(self) -> None:
+    async def remove(self) -> None:
         if not self.is_manageable:
             return
 
-        self.stop()
+        await self.stop()
         rmtree(self.path)
         # Regenerate cached path in case extension still exists (installed elsewhere)
         self._path = extension_finder.locate(self.id)
@@ -163,11 +161,11 @@ class ExtensionController:
         elif self._state_path.is_file():
             self._state_path.unlink()
 
-    def update(self) -> bool:
+    async def update(self) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
-        has_update, commit_hash = self.check_update()
+        has_update, commit_hash = await self.check_update()
         was_running = self.is_running
         if not has_update:
             return False
@@ -179,13 +177,11 @@ class ExtensionController:
             commit_hash[:8],
         )
 
-        self.stop()
-        self.download(commit_hash, warn_if_overwrite=False)
-        self.toggle_enabled(was_running)
+        await self.stop()
+        await self.download(commit_hash, warn_if_overwrite=False)
+        return await self.toggle_enabled(was_running)
 
-        return True
-
-    def check_update(self) -> tuple[bool, str]:
+    async def check_update(self) -> tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """
@@ -193,18 +189,19 @@ class ExtensionController:
         has_update = self.state.commit_hash != commit_hash
         return has_update, commit_hash
 
-    def toggle_enabled(self, enabled: bool) -> None:
+    async def toggle_enabled(self, enabled: bool) -> bool:
         self.state.update(is_enabled=enabled, error_type="", error_message="")
         self.state.save()
         if enabled:
-            self.start()
-        else:
-            self.stop()
+            return await self.start()
+        await self.stop()
+        return False
 
-    def start(self) -> None:
+    def start_detached(self) -> None:
         if not self.is_running:
 
             def error_handler(error_type: str, error_msg: str) -> None:
+                self.is_running = False
                 extension_runtimes.pop(self.id, None)
                 self.state.update(error_type=error_type, error_message=error_msg)
                 self.state.save()
@@ -234,7 +231,18 @@ class ExtensionController:
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, error_handler)
 
-    def stop(self) -> None:
+    async def start(self) -> bool:
+        self.start_detached()
+        for _ in range(100):
+            if self.has_error:
+                return False
+            if self.is_running:
+                return True
+            await asyncio.sleep(0.1)
+        return False
+
+    async def stop(self) -> None:
         runtime = extension_runtimes.pop(self.id, None)
         if runtime:
-            runtime.stop()  # type: ignore[unused-coroutine]
+            await runtime.stop()
+            self.is_running = False

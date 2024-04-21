@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import mimetypes
 import os
-import time
 import traceback
-from typing import Any, Callable
+from typing import Any, Callable, Coroutine
 from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, GLib, Gtk
@@ -28,12 +28,14 @@ from ulauncher.utils.WebKit2 import WebKit2
 
 logger = logging.getLogger()
 events = EventBus()
-routes: dict[str, Callable[..., Any]] = {}
+routes: dict[str, Callable[..., Coroutine[Any, Any, Any]]] = {}
 
 
 # Python generics doesn't support this case, so we have to declare with ... and Any
-def route(path: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    def decorator(handler: Callable[..., Any]) -> Callable[..., Any]:
+def route(
+    path: str,
+) -> Callable[[Callable[..., Coroutine[Any, Any, Any]]], Callable[..., Coroutine[Any, Any, Any]]]:
+    def decorator(handler: Callable[..., Coroutine[Any, Any, Any]]) -> Callable[..., Coroutine[Any, Any, Any]]:
         routes[path] = handler
         return handler
 
@@ -99,7 +101,7 @@ class PreferencesServer:
             # In the future "finish_with_response" (new in version 2.36) could be used
             try:
                 args = json.loads(unquote(params.query)) if params.query else []
-                data = json.dumps([route_handler(self, *args)])
+                data = json.dumps([asyncio.run(route_handler(self, *args))])
             except Exception as e:
                 err_type = type(e).__name__
                 error = {"message": str(e), "type": err_type}
@@ -135,7 +137,7 @@ class PreferencesServer:
     ######################################
 
     @route("/get/all")
-    def get_all(self) -> dict[str, Any]:
+    async def get_all(self) -> dict[str, Any]:
         logger.info("API call /get/all")
         export_settings = self.settings.copy()
         export_settings["available_themes"] = [{"value": name, "text": name} for name in get_themes()]
@@ -151,7 +153,7 @@ class PreferencesServer:
         return export_settings
 
     @route("/set")
-    def apply_settings(self, prop: str, value: Any) -> None:
+    async def apply_settings(self, prop: str, value: Any) -> None:
         logger.info("Setting %s to %s", prop, value)
         # This setting is not stored to the config
         if prop == "autostart_enabled":
@@ -177,12 +179,12 @@ class PreferencesServer:
             raise RuntimeError(msg) from err
 
     @route("/show/hotkey-dialog")
-    def show_hotkey_dialog(self) -> None:
+    async def show_hotkey_dialog(self) -> None:
         logger.info("Show hotkey-dialog")
         HotkeyController.show_dialog()
 
     @route("/show/file-chooser")
-    def show_file_chooser(self, name: str, mime_filter: dict[str, str]) -> None:
+    async def show_file_chooser(self, name: str, mime_filter: dict[str, str]) -> None:
         logger.info("Show file browser dialog for %s", name)
         GLib.idle_add(self._show_file_chooser, name, mime_filter)
 
@@ -205,17 +207,17 @@ class PreferencesServer:
         fc_dialog.close()
 
     @route("/open/web-url")
-    def open_url(self, url: str) -> None:
+    async def open_url(self, url: str) -> None:
         logger.info("Open Web URL %s", url)
         open_detached(url)
 
     @route("/open/extensions-dir")
-    def open_extensions_dir(self) -> None:
+    async def open_extensions_dir(self) -> None:
         logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS)
         open_detached(PATHS.USER_EXTENSIONS)
 
     @route("/shortcut/get-all")
-    def shortcut_get_all(self) -> list[dict[str, Any]]:
+    async def shortcut_get_all(self) -> list[dict[str, Any]]:
         logger.info("Handling /shortcut/get-all")
         shortcuts = []
         for shortcut in ShortcutsDb.load().values():
@@ -225,43 +227,38 @@ class PreferencesServer:
         return shortcuts
 
     @route("/shortcut/update")
-    def shortcut_update(self, shortcut: dict[str, Any]) -> None:
+    async def shortcut_update(self, shortcut: dict[str, Any]) -> None:
         logger.info("Add/Update shortcut: %s", json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
         shortcuts[shortcut["id"]] = shortcut
         shortcuts.save()
 
     @route("/shortcut/remove")
-    def shortcut_remove(self, shortcut_id: str) -> None:
+    async def shortcut_remove(self, shortcut_id: str) -> None:
         logger.info("Remove shortcut: %s", json.dumps(shortcut_id))
         shortcuts = ShortcutsDb.load()
         del shortcuts[shortcut_id]
         shortcuts.save()
 
     @route("/extension/get-all")
-    def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
+    async def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
-            for controller in ExtensionController.iterate():
-                if controller.is_enabled:
-                    controller.start()
-            # TODO(friday): Refactor so we can know when it has completed instead of hard coding
-            time.sleep(0.5)
+            tasks = [controller.start() for controller in ExtensionController.iterate() if controller.is_enabled]
+            await asyncio.gather(*tasks)
         return {ex.id: get_extension_data(ex) for ex in ExtensionController.iterate()}
 
     @route("/extension/add")
-    def extension_add(self, url: str) -> dict[str, Any]:
+    async def extension_add(self, url: str) -> dict[str, Any]:
         logger.info("Add extension: %s", url)
         controller = ExtensionController.create_from_url(url)
-        controller.download()
-        controller.stop()
-        controller.start()
-        # TODO(friday): Refactor run so we can know when it has completed instead of hard coding
-        time.sleep(0.5)
+        await controller.download()
+        await controller.stop()
+        await controller.start()
         return get_extension_data(controller)
 
     @route("/extension/set-prefs")
-    def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
+    async def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
         logger.info("Update extension preferences %s to %s", ext_id, data)
         controller = ExtensionController.create(ext_id)
         socket_controller = ExtensionSocketServer().controllers.get(ext_id)
@@ -274,23 +271,26 @@ class PreferencesServer:
         controller.save_user_preferences(data)
 
     @route("/extension/check-update")
-    def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
+    async def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
         logger.info("Checking if extension has an update")
-        return ExtensionController.create(ext_id).check_update()
+        controller = ExtensionController.create(ext_id)
+        return await controller.check_update()
 
     @route("/extension/update-ext")
-    def extension_update_ext(self, ext_id: str) -> None:
+    async def extension_update_ext(self, ext_id: str) -> dict[str, Any]:
         logger.info("Update extension: %s", ext_id)
-        ExtensionController.create(ext_id).update()
+        controller = ExtensionController.create(ext_id)
+        await controller.update()
+        return get_extension_data(controller)
 
     @route("/extension/remove")
-    def extension_remove(self, ext_id: str) -> None:
+    async def extension_remove(self, ext_id: str) -> None:
         logger.info("Remove extension: %s", ext_id)
         controller = ExtensionController.create(ext_id)
-        controller.remove()
+        await controller.remove()
 
     @route("/extension/toggle-enabled")
-    def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
+    async def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
         logger.info("Toggle extension: %s", ext_id)
         controller = ExtensionController.create(ext_id)
-        controller.toggle_enabled(is_enabled)
+        await controller.toggle_enabled(is_enabled)

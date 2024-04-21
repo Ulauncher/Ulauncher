@@ -53,7 +53,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         time.sleep(0.01)
         for controller in ExtensionController.iterate():
             if controller.is_enabled and not controller.has_error:
-                controller.start()
+                controller.start_detached()
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
         framer = JSONFramer()
@@ -74,6 +74,8 @@ class ExtensionSocketServer(metaclass=Singleton):
             ext_id: str | None = event.get("ext_id")
             assert ext_id
             ExtensionSocketController(self.controllers, framer, ext_id)
+            # TODO: This is ugly, but we have no other way to detect the extension started successfully
+            ExtensionController.create(ext_id).is_running = True
         else:
             logger.debug("Unhandled message received: %s", event)
 
