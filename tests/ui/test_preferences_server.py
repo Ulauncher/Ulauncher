@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from ulauncher.ui.preferences_server import PreferencesServer
@@ -26,7 +28,7 @@ class TestPreferencesServer:
         return server
 
     def test_apply_settings_show_tray_icon(self, prefs_server):
-        prefs_server.apply_settings("show_tray_icon", False)
+        asyncio.run(prefs_server.apply_settings("show_tray_icon", False))
         assert prefs_server.settings.show_tray_icon is False
         assert settings.show_tray_icon is False
 
@@ -39,5 +41,5 @@ class TestPreferencesServer:
 
     def test_set_grab_mouse_pointer_dash_underscore_conversion(self, prefs_server):
         # Verify that setting with dash character is converted to underscore
-        prefs_server.apply_settings("grab-mouse-pointer", True)
+        asyncio.run(prefs_server.apply_settings("grab-mouse-pointer", True))
         assert settings.grab_mouse_pointer is True
