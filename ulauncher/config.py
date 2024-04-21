@@ -32,7 +32,7 @@ def get_options() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         None,
         None,
-        "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",
+        "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
     )
 
