@@ -20,6 +20,7 @@ RUN apt install -y vim
 RUN apt install -y curl
 RUN apt install -y wget
 RUN apt install -y xvfb
+RUN apt install -y help2man
 RUN apt install -y python3-venv
 
 # deb package build dependencies and helpers

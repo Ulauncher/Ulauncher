@@ -29,7 +29,12 @@ def get_options() -> argparse.Namespace:
     """Command Line options for the initial ulauncher (daemon) call"""
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
-    parser = argparse.ArgumentParser(None, None, "Ulauncher is an application launcher.", add_help=False)
+    parser = argparse.ArgumentParser(
+        None,
+        None,
+        "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",
+        add_help=False,
+    )
 
     parser.add_argument("-h", "--help", action="help", help=gettext("Show this help message and exit"))
     parser.add_argument("-v", "--verbose", action="store_true", help=gettext("Show debug messages"))

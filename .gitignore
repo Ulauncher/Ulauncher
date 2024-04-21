@@ -30,3 +30,4 @@ data/preferences
 .venv
 /nix/result
 /nix/dev
+ulauncher.1.gz

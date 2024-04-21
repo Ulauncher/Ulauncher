@@ -116,7 +116,7 @@ format: # Auto format the code
 
 #=Build Commands
 
-.PHONY: prefs docker docs sdist deb nix-run nix-build-dev nix-build
+.PHONY: prefs docker docs sdist manpage deb nix-run nix-build-dev nix-build
 
 docs: ## Build the API docs
 	@set -euo pipefail
@@ -142,11 +142,11 @@ prefs: # Build the preferences web app
 	${YARN_BIN}
 	${YARN_BIN} build
 
-sdist: prefs # Build a source tarball
+sdist: manpage prefs # Build a source tarball
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
   # copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
-	cat .gitignore | grep -v data/preferences | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
+	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
 	# create archive with .tarignore
 	tar --transform 's|^\.|ulauncher|' --exclude-vcs --exclude-ignore-recursive=.tarignore -zcf dist/ulauncher-${VERSION}.tar.gz .
@@ -180,3 +180,12 @@ nix-build-dev: # Build Ulauncher Nix package for development
 
 nix-build: # Build Ulauncher Nix package
 	exec nix build --out-link nix/result --show-trace --print-build-logs $(ARGS) '.#default'
+
+manpage: # Generate manpage
+	@if [ -z $(shell eval "command -v help2man") ]; then
+		echo -e "${BOLD}${RED}You need help2man to (re)generate the manpage${RESET}"
+		exit 1
+	fi
+	help2man --section=1 --name="Feature rich application Launcher for Linux" --no-info ./bin/ulauncher > ulauncher.1
+	echo -e "Generated manpage to ${BOLD}${GREEN}./ulauncher.1${RESET}"
+	echo -e "You can preview it with ${BOLD}${GREEN}man -l ulauncher.1${RESET}"

@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 
+from gzip import GzipFile
 from pathlib import Path
+from shutil import copyfileobj
 
 from setuptools import find_packages, setup
+
+
+def gzip_file(source_file: str) -> str:
+    # This is actually must easier from the cli: python -m gzip --best ulauncher.1
+    output_file = f"{source_file}.gz"
+    dst_gzip = GzipFile(filename=output_file, mode="wb", compresslevel=9)
+    with open(source_file, "rb") as src_file:
+        copyfileobj(src_file, dst_gzip)
+    dst_gzip.close()
+    return output_file
 
 
 def data_files_from_path(target_path, source_path):
@@ -28,6 +40,7 @@ setup(
     data_files=[
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
         ("share/dbus-1/services", ["io.ulauncher.Ulauncher.service"]),
+        ("share/man/man1", [gzip_file("ulauncher.1")]),
         ("lib/systemd/user", ["ulauncher.service"]),
         ("share/licenses/ulauncher", ["LICENSE"]),
         # Recursively add data as share/ulauncher, then icons
