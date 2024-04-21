@@ -1,3 +1,5 @@
+# Ignore type errors for the AppIndicator deps
+# mypy: disable-error-code="attr-defined"
 import logging
 from pathlib import Path
 from typing import Any, Callable
@@ -11,22 +13,22 @@ from ulauncher.utils.eventbus import EventBus
 # Only XApp supports activating the launcher on left click and showing the menu on right click
 try:
     gi.require_version("XApp", "1.0")
-    from gi.repository import XApp  # type: ignore[attr-defined]
+    from gi.repository import XApp
 
     # Older versions of XApp doesn't have StatusIcon
     assert hasattr(XApp, "StatusIcon")
     AyatanaIndicator = None
 except (AssertionError, ImportError, ValueError):
-    XApp = None
+    XApp = None  # type: ignore[assignment, unused-ignore]
     try:
         gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3  # type: ignore[attr-defined, unused-ignore]
+        from gi.repository import AppIndicator3
 
         AyatanaIndicator = AppIndicator3
     except (ImportError, ValueError):
         try:
             gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3  # type: ignore[attr-defined, unused-ignore]
+            from gi.repository import AyatanaAppIndicator3
 
             AyatanaIndicator = AyatanaAppIndicator3
         except (ImportError, ValueError):
@@ -110,4 +112,5 @@ class AppIndicator(GObject.Object):
         if XApp:
             self._indicator.set_visible(status)
         elif AyatanaIndicator:
-            self._indicator.set_status(getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE"))
+            status = getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE")
+            self._indicator.set_status(status)
