@@ -3,12 +3,9 @@
     <div class="left-nav col-4">
       <ul class="ext-list">
         <li
-          v-for="(ext, idx) in extensions"
+          v-for="ext in extensions"
           v-bind:key="ext.id"
-          :class="{
-            active: ext.id == activeExt.id,
-            last: idx == extensions.length - 1
-          }"
+          :class="{active: ext.id == activeExtId}"
           @click="selectExtension(ext)"
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
@@ -19,7 +16,7 @@
           <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
           <span>{{ ext.name }}</span>
         </li>
-        <li class="link" @click="addExtDialog">
+        <li class="link" style="margin-top:25px" @click="addExtDialog">
           <b>
             <i class="fa fa-plus"></i>
             <span>Add extension</span>
@@ -94,7 +91,7 @@
     </div>
 
     <div class="col-8 ext-view">
-      <extension-config v-if="activeExt" @removed="onRemoved" v-on:reload="reload" :extension="activeExt"></extension-config>
+      <extension-config v-if="activeExtId" @removed="removeExtension" v-on:reload="reload" :extension="extensions[activeExtId]"></extension-config>
     </div>
   </div>
 </template>
@@ -111,9 +108,13 @@ export default {
   created() {
     this.fetchData()
     bus.$on('extension/get-all', this.fetchData)
+    bus.$on('extension/update-extension', this.updateExtension)
+    bus.$on('extension/remove', this.removeExtension)
   },
   beforeDestroy() {
     bus.$off('extension/get-all', this.fetchData)
+    bus.$off('extension/update-extension', this.updateExtension)
+    bus.$off('extension/remove', this.removeExtension)
   },
   components: {
     'extension-config': ExtensionConfig,
@@ -126,23 +127,24 @@ export default {
   data() {
     return {
       extUrlToDownload: '',
-      activeExt: null,
+      activeExtId: null,
       extensionIsInstalling: false,
       reloading: false,
       error: null,
-      extensions: []
+      extensions: {}
     }
   },
   methods: {
+    updateExtension(extension) {
+      this.extensions[extension.id] = extension
+    },
     fetchData(reload = false) {
-      let currentExtId = null;
-      if (this.activeExt) {
-        currentExtId = this.activeExt.id;
-      }
       fetchData('prefs:///extension/get-all', reload).then(
-        data => {
-          this.extensions = data
-          this.activeExt = data.find(ext => ext.id === currentExtId) || data[0]
+        extensions => {
+          this.extensions = extensions;
+          if (!(this.activeExtId in extensions)) {
+            this.activeExtId = Object.keys(extensions)[0]
+          }
           setTimeout(() => {
             this.reloading = false
           }, 500)
@@ -166,24 +168,11 @@ export default {
       fetchData('prefs:///open/web-url', url)
     },
     selectExtension(ext) {
-      this.activeExt = ext
+      this.activeExtId = ext.id
     },
-    onRemoved(id) {
-      for (let i = 0; i < this.extensions.length; i++) {
-        if (this.extensions[i].id === id) {
-          this.$delete(this.extensions, i)
-          this.activeExt = this.extensions.length ? this.extensions[0] : null
-          break
-        }
-      }
-    },
-    setActiveByUrl(url) {
-      for (let i = 0; i < this.extensions.length; i++) {
-        if (this.extensions[i].url === url) {
-          this.activeExt = this.extensions[i]
-          break
-        }
-      }
+    removeExtension(id) {
+      this.$delete(this.extensions, id)
+      this.activeExtId = Object.keys(this.extensions)[0]
     },
     onModalOk(e) {
       let input = this.$refs.repoUrl.$el
@@ -203,10 +192,10 @@ export default {
       this.extensionIsInstalling = true
       this.error = null
       fetchData('prefs:///extension/add', input.value).then(
-        data => {
-          this.extensions = data
+        extension => {
           this.extensionIsInstalling = false
-          this.setActiveByUrl(input.value)
+          this.activeExtId = extension.id
+          this.extensions[extension.id] = extension;
           input.value = ''
           this.$refs.addExtForm.hide()
         },
@@ -289,9 +278,6 @@ export default {
       text-decoration: underline;
 }
 
-.ext-list li.last {
-      margin-bottom: 25px;
-}
 .ext-list li.api-version {
       cursor: default;
       font-size: 15px;

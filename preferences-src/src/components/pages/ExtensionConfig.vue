@@ -237,7 +237,7 @@ export default {
       fetchData('prefs:///extension/remove', this.extension.id).then(
         () => {
           this.$emit('removed', this.extension.id)
-          bus.$emit('extension/get-all')
+          bus.$emit('extension/remove', this.extension.id)
         },
         err => {
           bus.$emit('error', err)
@@ -265,9 +265,9 @@ export default {
       this.updateError = null
       this.updateState = 'updating'
       fetchData('prefs:///extension/update-ext', this.extension.id).then(
-        () => {
+        (extension) => {
           this.updateState = 'updated'
-          bus.$emit('extension/get-all')
+          bus.$emit('extension/update-extension', extension)
         },
         err => {
           this.updateState = null

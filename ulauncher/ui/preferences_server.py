@@ -6,7 +6,7 @@ import mimetypes
 import os
 import time
 import traceback
-from typing import Any, Callable, Generator
+from typing import Any, Callable
 from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, GLib, Gtk
@@ -40,23 +40,20 @@ def route(path: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     return decorator
 
 
-def get_extensions() -> Generator[dict[str, Any], None, None]:
-    for ext_id, ext_path in extension_finder.iterate():
-        controller = ExtensionController.create(ext_id)
-
-        yield {
-            **controller.state,
-            "path": ext_path,
-            "duplicate_paths": [entry for entry in extension_finder.locate_iter(ext_id) if entry != ext_path],
-            "name": controller.manifest.name,
-            "icon": controller.get_normalized_icon_path(),
-            "authors": controller.manifest.authors,
-            "instructions": controller.manifest.instructions,
-            "preferences": controller.user_preferences,
-            "triggers": controller.user_triggers,
-            "is_manageable": controller.is_manageable,
-            "is_running": controller.is_running,
-        }
+def get_extension_data(controller: ExtensionController) -> dict[str, Any]:
+    return {
+        **controller.state,
+        "path": controller.path,
+        "duplicate_paths": [entry for entry in extension_finder.locate_iter(controller.id) if entry != controller.path],
+        "name": controller.manifest.name,
+        "icon": controller.get_normalized_icon_path(),
+        "authors": controller.manifest.authors,
+        "instructions": controller.manifest.instructions,
+        "preferences": controller.user_preferences,
+        "triggers": controller.user_triggers,
+        "is_manageable": controller.is_manageable,
+        "is_running": controller.is_running,
+    }
 
 
 class PreferencesServer:
@@ -242,7 +239,7 @@ class PreferencesServer:
         shortcuts.save()
 
     @route("/extension/get-all")
-    def extension_get_all(self, reload: bool) -> list[dict[str, Any]]:
+    def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
             for controller in ExtensionController.iterate():
@@ -250,10 +247,10 @@ class PreferencesServer:
                     controller.start()
             # TODO(friday): Refactor so we can know when it has completed instead of hard coding
             time.sleep(0.5)
-        return list(get_extensions())
+        return {ex.id: get_extension_data(ex) for ex in ExtensionController.iterate()}
 
     @route("/extension/add")
-    def extension_add(self, url: str) -> list[dict[str, Any]]:
+    def extension_add(self, url: str) -> dict[str, Any]:
         logger.info("Add extension: %s", url)
         controller = ExtensionController.create_from_url(url)
         controller.download()
@@ -261,7 +258,7 @@ class PreferencesServer:
         controller.start()
         # TODO(friday): Refactor run so we can know when it has completed instead of hard coding
         time.sleep(0.5)
-        return list(get_extensions())
+        return get_extension_data(controller)
 
     @route("/extension/set-prefs")
     def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
