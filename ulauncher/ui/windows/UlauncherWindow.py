@@ -252,7 +252,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        shadow_size = 20 if visual else 0
+        composited = screen.is_composited()
+        logger.debug("Screen RGBA visual: %s", visual)
+        logger.debug("Screen is composited: %s", composited)
+        shadow_size = 20 if composited else 0
         self.window_frame.set_properties(
             margin_top=shadow_size,
             margin_bottom=shadow_size,
