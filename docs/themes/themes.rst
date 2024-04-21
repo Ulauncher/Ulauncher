@@ -18,7 +18,7 @@ Creating Custom Color Themes
 
 You can only change colors in themes. Changing element sizes is not possible due to restrictions in the GTK+ API.
 
-#. Take a look at how the `built-in themes <https://github.com/Ulauncher/Ulauncher/tree/dev/data/themes>`_ are written
+#. Take a look at how the `built-in themes <https://github.com/Ulauncher/Ulauncher/tree/HEAD/data/themes>`_ are written
 #. Ensure that you have the user theme directory ``mkdir -p ~/.config/ulauncher/user-themes``
 #. Copy an existing theme directory to this directory.
 #. Rename the copied directory and change the name and display_name in ``manifest.json``
