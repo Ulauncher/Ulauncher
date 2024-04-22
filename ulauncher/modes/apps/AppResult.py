@@ -88,4 +88,6 @@ class AppResult(Result):
         starts = app_starts.get(self._app_id, 0)
         app_starts[self._app_id] = starts + 1
         json_save(app_starts, app_starts_path)
-        return launch_app(self._app_id)
+        if not launch_app(self._app_id):
+            logger.error("Could not launch app %s", self._app_id)
+        return True
