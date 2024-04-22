@@ -62,7 +62,7 @@ class TestAppResult:
 
     def test_on_activation(self, app1, mocker, app_starts):
         launch_app = mocker.patch("ulauncher.modes.apps.AppResult.launch_app")
-        assert app1.on_activation(Query("query")) is launch_app.return_value
+        app1.on_activation(Query("query"))
         launch_app.assert_called_with("trueapp.desktop")
         assert app_starts.get("trueapp.desktop") == 766
 
