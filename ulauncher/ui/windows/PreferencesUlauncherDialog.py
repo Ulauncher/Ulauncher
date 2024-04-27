@@ -12,10 +12,9 @@ import gi
 gi.require_version('Gio', '2.0')
 gi.require_version('GLib', '2.0')
 gi.require_version('Gtk', '3.0')
-gi.require_version('WebKit2', '4.0')
 
 # pylint: disable=wrong-import-position,unused-argument
-from gi.repository import Gio, Gtk, WebKit2, GLib  # type: ignore
+from gi.repository import Gio, Gtk, GLib  # type: ignore
 
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.ui.windows.HotkeyDialog import HotkeyDialog
@@ -39,6 +38,7 @@ from ulauncher.utils.wayland import is_wayland
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router, get_url_params
 from ulauncher.utils.AutostartPreference import AutostartPreference
+from ulauncher.utils.WebKit2 import WebKit2
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.config import get_data_file, get_options, get_version, EXTENSIONS_DIR
