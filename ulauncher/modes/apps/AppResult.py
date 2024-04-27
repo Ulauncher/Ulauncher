@@ -90,4 +90,4 @@ class AppResult(Result):
         json_save(app_starts, app_starts_path)
         if not launch_app(self._app_id):
             logger.error("Could not launch app %s", self._app_id)
-        return True
+        return False
