@@ -1,3 +1,4 @@
+# pylint: disable-all
 import gi
 
 # The package version refers to the "build environment". Not the actual Webkit version
