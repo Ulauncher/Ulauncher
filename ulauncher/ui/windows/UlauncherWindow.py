@@ -163,7 +163,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     def on_focus_out(self) -> None:
-        if not self.is_dragging:
+        if self.settings.close_on_focus_out and not self.is_dragging:
             self.close(save_query=True)
 
     def on_focus_in(self) -> None:

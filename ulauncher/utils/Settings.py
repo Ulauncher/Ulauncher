@@ -11,6 +11,7 @@ _settings_file = f"{PATHS.CONFIG}/settings.json"
 class Settings(JsonConf):
     disable_desktop_filters = False
     clear_previous_query = True
+    close_on_focus_out = True
     grab_mouse_pointer = False
     hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
