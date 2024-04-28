@@ -62,9 +62,11 @@ class UlauncherApp(Gtk.Application):
         self.show_launcher()
 
     def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
-        # We need to use "--no-window" from the unique CLI invocation here,
+        # We need to use the unique CLI invocation here,
         # Can't use config.get_options(), because that's the daemon's initial cli arguments
-        if "--no-window" not in args[0].get_arguments():
+        args = args[0].get_arguments()
+        # --no-window was a temporary name in the v6 beta (never released stable)
+        if "--daemon" not in args and "--no-window" not in args:
             self.activate()
 
         return 0

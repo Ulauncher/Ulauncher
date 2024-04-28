@@ -28,12 +28,13 @@ os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
 @dataclass
 class Arguments:
+    daemon: bool
     dev: bool
     verbose: bool
-    no_window: bool
-    no_window_shadow: bool
     hide_window: bool
     no_extensions: bool
+    no_window: bool
+    no_window_shadow: bool
 
 
 @lru_cache(maxsize=None)
@@ -49,21 +50,24 @@ def get_options() -> Arguments:
     )
 
     parser.add_argument("-h", "--help", action="help", help=gettext("Show this help message and exit"))
-    parser.add_argument("-v", "--verbose", action="store_true", help=gettext("Show debug messages"))
+    parser.add_argument("-v", "--verbose", action="store_true", help=gettext("Show debug log messages"))
     parser.add_argument(
         "--version", action="version", help=gettext("Show version number and exit"), version=f"Ulauncher {VERSION}"
     )
-    parser.add_argument("--no-window", action="store_true", help=gettext("Hide window upon application startup"))
     parser.add_argument(
         "--dev",
         action="store_true",
         help=gettext("Developer mode (enables verbose logging and Preferences UI context menu)"),
     )
+    parser.add_argument(
+        "--daemon", action="store_true", help=gettext("Start Ulauncher in the background, to make it launch faster")
+    )
 
     # deprecated
-    parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
 
     args = Arguments(**vars(parser.parse_args()))
     if args.dev:

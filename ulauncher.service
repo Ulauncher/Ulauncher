@@ -8,7 +8,7 @@ BusName=io.ulauncher.Ulauncher
 Type=dbus
 Restart=always
 RestartSec=1
-ExecStart=/usr/bin/ulauncher --no-window
+ExecStart=/usr/bin/ulauncher --daemon
 
 [Install]
 WantedBy=graphical-session.target

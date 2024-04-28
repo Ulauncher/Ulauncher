@@ -30,8 +30,8 @@ def main() -> None:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
         # from starting a second Ulauncher background process we have to make sure the
-        # --no-window flag prevents the app from starting.
-        print("The --hide-window argument has been renamed to --no-window")  # noqa: T201
+        # --daemon flag prevents the app from starting.
+        print("The --hide-window argument has been renamed to --daemon")  # noqa: T201
         sys.exit(2)
 
     # Set up global logging for stdout and file
