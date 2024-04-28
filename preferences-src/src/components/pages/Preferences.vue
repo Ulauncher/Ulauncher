@@ -167,6 +167,32 @@
 
       <tr>
         <td>
+          <label for="daemonless">Daemonless mode</label>
+          <small>
+            <p>Fully close Ulauncher when the window closes instead of keeping it active in the background.</p>
+          </small>
+        </td>
+        <td>
+          <b-form-checkbox id="daemonless" v-model="daemonless" :disabled="autostart_enabled"></b-form-checkbox>
+          <div v-if="autostart_enabled" class="compat-warning">
+            <b-alert show variant="warning">
+              <small>
+                You need to disable "Launch at login" if you want to enable this option as they are mutually exclusive.
+              </small>
+            </b-alert>
+          </div>
+          <div v-if="daemonless" class="compat-warning">
+            <b-alert show variant="warning">
+              <small>
+                Beware that enabling this feature makes Ulauncher launch slower, and extensions that rely on being able to perform scheduled/background tasks while idle (like `ulauncher-timer`) will not work.
+              </small>
+            </b-alert>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="jump-keys">Jump keys</label>
           <small>
             <p>Set the keys to use for quickly jumping to results</p>
@@ -234,6 +260,7 @@ export default {
       'render_on_screen',
       'show_tray_icon',
       'max_recent_apps',
+      'daemonless',
       'terminal_command',
       'theme_name',
     ].map(name => ([name, {
