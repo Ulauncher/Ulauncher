@@ -55,12 +55,14 @@ def get_options() -> Arguments:
         "--version", action="version", help=gettext("Show version number and exit"), version=f"Ulauncher {VERSION}"
     )
     parser.add_argument(
+        "--daemon",
+        action="store_true",
+        help=gettext("Run Ulauncher as a background process, without initially showing the window"),
+    )
+    parser.add_argument(
         "--dev",
         action="store_true",
         help=gettext("Developer mode (enables verbose logging and Preferences UI context menu)"),
-    )
-    parser.add_argument(
-        "--daemon", action="store_true", help=gettext("Start Ulauncher in the background, to make it launch faster")
     )
 
     # deprecated
