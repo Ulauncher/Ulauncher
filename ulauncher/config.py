@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from dataclasses import dataclass
 from functools import lru_cache
 from gettext import gettext
 
@@ -14,6 +15,7 @@ VERSION = ulauncher.version
 FIRST_RUN = not os.path.exists(PATHS.CONFIG)  # If there is no config dir, assume it's the first run
 FIRST_V6_RUN = not os.path.exists(PATHS.STATE)
 
+
 if not os.path.exists(PATHS.ASSETS):
     raise OSError(PATHS.ASSETS)
 
@@ -24,8 +26,18 @@ os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
 os.makedirs(PATHS.USER_THEMES, exist_ok=True)
 
 
+@dataclass
+class Arguments:
+    dev: bool
+    verbose: bool
+    no_window: bool
+    no_window_shadow: bool
+    hide_window: bool
+    no_extensions: bool
+
+
 @lru_cache(maxsize=None)
-def get_options() -> argparse.Namespace:
+def get_options() -> Arguments:
     """Command Line options for the initial ulauncher (daemon) call"""
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
@@ -42,9 +54,19 @@ def get_options() -> argparse.Namespace:
         "--version", action="version", help=gettext("Show version number and exit"), version=f"Ulauncher {VERSION}"
     )
     parser.add_argument("--no-window", action="store_true", help=gettext("Hide window upon application startup"))
-    parser.add_argument("--dev", action="store_true", help=gettext("Enables context menu in the Preferences UI"))
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help=gettext("Developer mode (enables verbose logging and Preferences UI context menu)"),
+    )
+
+    # deprecated
     parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
 
-    return parser.parse_args()
+    args = Arguments(**vars(parser.parse_args()))
+    if args.dev:
+        args.verbose = True
+
+    return args

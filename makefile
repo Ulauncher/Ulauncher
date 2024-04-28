@@ -47,7 +47,7 @@ run: prefs # Run ulauncher from source
 		systemctl --user stop ulauncher || true
 	fi
 	killall -eq ulauncher || true
-	./bin/ulauncher -v --dev
+	./bin/ulauncher --dev
 
 run-container: # Start a bash session in the Ulauncher Docker build container (Ubuntu)
 	@set -euo pipefail
