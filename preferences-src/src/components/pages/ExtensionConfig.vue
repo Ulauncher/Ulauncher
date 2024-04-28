@@ -39,7 +39,7 @@
           <b-button @click="openRemoveModal" v-if="isManageable" title="Remove"><i class="fa fa-trash"></i></b-button>
         </b-button-group>
         <label class="toggle" :title="(extension.is_enabled && !extension.error_type) ? 'Disable' : 'Enable'">
-          <input @click="setIsEnabled(!extension.is_enabled)" type="checkbox" :checked="extension.is_enabled && !extension.error_type" :disabled="!!extension.error_type">
+          <input @click="setIsEnabled(!extension.is_enabled || !!extension.error_type)" type="checkbox" :checked="extension.is_enabled && !extension.error_type" :disabled="!['', 'Terminated'].includes(extension.error_type)">
           <span class="slider round"></span>
         </label>
       </div>
