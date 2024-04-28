@@ -24,13 +24,13 @@ events = EventBus("window")
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
-    _css_provider = None
-    results_nav = None
+    _css_provider: Gtk.CssProvider | None = None
+    results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         super().__init__(
             decorated=False,
             deletable=False,
@@ -119,10 +119,44 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
         self.set_keep_above(True)
+        # Try setting a transparent background
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        composited = screen.is_composited()
+        logger.debug("Screen RGBA visual: %s", visual)
+        logger.debug("Screen is composited: %s", composited)
+        shadow_size = 20 if composited else 0
+        self.window_frame.set_properties(
+            margin_top=shadow_size,
+            margin_bottom=shadow_size,
+            margin_start=shadow_size,
+            margin_end=shadow_size,
+        )
+        if visual is None:
+            logger.info("Screen does not support alpha channels. Likely not running a compositor.")
+            visual = screen.get_system_visual()
+
+        self.set_visual(visual)
+        self.apply_theme()
+
+        self.present()
+        # note: present_with_time is needed on some DEs to defeat focus stealing protection
+        # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
+        # The correct time to use is the time of the user interaction requesting the focus, but we don't have access
+        # to that, so we use `Gdk.CURRENT_TIME`, which is the same as passing 0.
+        self.present_with_time(Gdk.CURRENT_TIME)
         self.position_window()
 
-        # this will trigger to show frequent apps if necessary
-        self.show_results([])
+        ModeHandler.refresh_triggers()
+
+        if self.query:
+            self.set_input(str(self.query))
+            ModeHandler.on_query_change(self.query)
+        else:
+            # this will trigger to show frequent apps if necessary
+            self.show_results([])
+
+        super().show()
 
     ######################################
     # GTK Signal Handlers
@@ -130,7 +164,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def on_focus_out(self) -> None:
         if not self.is_dragging:
-            self.hide(clear_input=False)
+            self.close(save_query=True)
 
     def on_focus_in(self) -> None:
         if self.settings.grab_mouse_pointer:
@@ -168,7 +202,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             )
 
         if keyname == "Escape":
-            self.hide(clear_input=False)
+            self.close(save_query=True)
             return True
 
         if ctrl and keyname == "comma":
@@ -249,26 +283,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_visual(visual)
 
     def position_window(self) -> None:
-        # Try setting a transparent background
-        screen = self.get_screen()
-        visual = screen.get_rgba_visual()
-        composited = screen.is_composited()
-        logger.debug("Screen RGBA visual: %s", visual)
-        logger.debug("Screen is composited: %s", composited)
-        shadow_size = 20 if composited else 0
-        self.window_frame.set_properties(
-            margin_top=shadow_size,
-            margin_bottom=shadow_size,
-            margin_start=shadow_size,
-            margin_end=shadow_size,
-        )
-        if visual is None:
-            logger.info("Screen does not support alpha channels. Likely not running a compositor.")
-            visual = screen.get_system_visual()
-
-        self.set_visual(visual)
-        self.apply_theme()
-
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         if monitor:
             geo = monitor.get_geometry()
@@ -284,32 +298,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             else:
                 self.move(pos_x, pos_y)
 
-    def show(self) -> None:
-        ModeHandler.refresh_triggers()
-        self.present()
-        # note: present_with_time is needed on some DEs to defeat focus stealing protection
-        # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
-        # The correct time to use is the time of the user interaction requesting the focus, but we don't have access
-        # to that, so we use `Gdk.CURRENT_TIME`, which is the same as passing 0.
-        self.present_with_time(Gdk.CURRENT_TIME)
-        self.position_window()
-
-        if not self.query:
-            # make sure frequent apps are shown if necessary
-            self.show_results([])
-
-        self.input.grab_focus()
-        super().show()
-
     @events.on
-    def hide(self, clear_input: bool = True) -> None:
-        if clear_input:
-            self.input.set_text("")
+    def close(self, save_query: bool = False) -> None:
+        if not save_query or self.settings.clear_previous_query:
+            events.emit("app:set_query", "", update_input=False)
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
-        super().hide()
-        if self.settings.clear_previous_query:
-            events.emit("app:set_query", "")
+        super().close()
 
     def select_result(self, index: int) -> None:
         if self.results_nav:
@@ -321,6 +316,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         device_mapper = window.get_display().get_device_manager()
         assert device_mapper
         return device_mapper.get_client_pointer()
+
+    @events.on
+    def set_input(self, query: str) -> None:
+        self.input.set_text(query)
+        self.input.set_position(-1)
 
     @events.on
     def show_results(self, results: Sequence[Result]) -> None:

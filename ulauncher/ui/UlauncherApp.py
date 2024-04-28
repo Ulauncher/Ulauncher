@@ -25,7 +25,6 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
-    window: UlauncherWindow | None = None
     _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
     _appindicator: AppIndicator | None = None
 
@@ -45,9 +44,8 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
         self._query = value.lstrip()
-        if update_input and self.window:
-            self.window.input.set_text(self._query)
-            self.window.input.set_position(-1)
+        if update_input:
+            events.emit("window:set_input", self._query)
 
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
@@ -109,13 +107,11 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
-        if not self.window:
-            self.window = UlauncherWindow(application=self)
-        self.window.show()
+        UlauncherWindow(application=self)
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        events.emit("window:hide", clear_input=False)
+        events.emit("window:close", save_query=True)
 
         preferences = self._preferences and self._preferences()
 
