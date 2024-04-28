@@ -1,6 +1,6 @@
 # Eventually switch to define the version/gi_versions in pyproject.toml? see PR 1312
 
-version = "6.0.0-beta11"
+version = "6.0.0-beta12"
 gi_versions = {
     "Gtk": "3.0",
     "Gdk": "3.0",
