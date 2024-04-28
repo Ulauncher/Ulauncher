@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import logging
 import weakref
 from typing import Any, cast
