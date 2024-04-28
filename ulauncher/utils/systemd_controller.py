@@ -15,13 +15,13 @@ def systemctl_run(*args: str) -> str:
 class SystemdController:
     def __init__(self, unit: str):
         self.unit = unit
+        self.supported = bool(which("systemctl"))
 
     def can_start(self) -> bool:
         """
         :returns: True if unit exists and can start
         """
-        if not which("systemctl"):
-            logger.warning("systemctl command missing")
+        if not self.supported:
             return False
         status = systemctl_run("show", self.unit)
         if "NeedDaemonReload=yes" in status:
@@ -34,25 +34,21 @@ class SystemdController:
         """
         :returns: True if unit is currently running
         """
-        return systemctl_run("is-active", self.unit) == "active"
+        return self.supported and systemctl_run("is-active", self.unit) == "active"
 
     def is_enabled(self) -> bool:
         """
         :returns: True if unit is set to start automatically
         """
-        return systemctl_run("is-enabled", self.unit) == "enabled"
+        return self.supported and systemctl_run("is-enabled", self.unit) == "enabled"
 
     def restart(self) -> None:
-        """
-        :returns: Restart the service
-        """
-        systemctl_run("restart", self.unit)
+        if self.supported:
+            systemctl_run("restart", self.unit)
 
     def toggle(self, status: bool) -> None:
         """
         Enable or disable unit
-
-        :param bool status:
         """
         if not self.can_start():
             msg = "Autostart is not allowed"

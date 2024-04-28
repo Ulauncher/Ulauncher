@@ -75,7 +75,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     return new_prefs
 
 
-def v5_to_v6() -> None:
+def v5_to_v6() -> None:  # noqa: PLR0912
     # Convert extension prefs to JSON
     EXT_PREFS = Path(PATHS.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
@@ -126,7 +126,12 @@ def v5_to_v6() -> None:
                 autostart_config = ConfigParser()
                 autostart_config.read(AUTOSTART_FILE)
                 if autostart_config["Desktop Entry"]["X-GNOME-Autostart-enabled"] == "true":
-                    systemd_unit.toggle(True)
+                    if systemd_unit.can_start():
+                        systemd_unit.toggle(True)
+                    elif systemd_unit.supported:
+                        _logger.warning("Can't enable systemd unit. Not installed")
+                    else:
+                        _logger.warning("Can't enable systemd unit. Systemd does not have systemd")
             _logger.info("Applied autostart settings to systemd")
         except Exception as e:
             _logger.warning("Couldn't migrate autostart: %s", e)
