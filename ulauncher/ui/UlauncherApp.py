@@ -26,6 +26,7 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     _query = ""
+    _window: weakref.ReferenceType[UlauncherWindow] | None = None
     _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
     _appindicator: AppIndicator | None = None
 
@@ -110,14 +111,15 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
-        # close existing window first (if any). suppress crash if no instance has been created
-        with contextlib.suppress(TypeError):
-            events.emit("window:close", save_query=True)
-        UlauncherWindow(application=self)
+        window = self._window and self._window()
+        if not window:
+            self._window = weakref.ref(UlauncherWindow(application=self))
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        events.emit("window:close", save_query=True)
+        window = self._window and self._window()
+        if window:
+            window.close(save_query=True)
 
         preferences = self._preferences and self._preferences()
 

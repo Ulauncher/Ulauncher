@@ -305,6 +305,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.settings.grab_mouse_pointer:
             self.get_pointer_device().ungrab(0)
         super().close()
+        events.set_self(None)
+        self.destroy()
 
     def select_result(self, index: int) -> None:
         if self.results_nav:
