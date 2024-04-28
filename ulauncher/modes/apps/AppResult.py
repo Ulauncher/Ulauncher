@@ -14,7 +14,7 @@ from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
 app_starts_path = f"{PATHS.STATE}/app_starts.json"
-app_starts = json_load(app_starts_path)
+app_starts: dict[str, int] = json_load(app_starts_path)
 
 
 class AppResult(Result):
