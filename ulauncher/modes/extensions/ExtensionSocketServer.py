@@ -124,7 +124,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         if self.active_controller:
             self.active_controller.trigger_event(event)
             if not event.get("keep_app_open"):
-                events.emit("window:hide")
+                events.emit("window:close")
 
     @events.on
     def handle_response(self, response: dict[str, Any], controller: ExtensionSocketController) -> None:

@@ -83,7 +83,7 @@ def clipboard_store(data: str) -> None:
     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
     clipboard.set_text(data, -1)
     clipboard.store()
-    _events.emit("window:hide")
+    _events.emit("window:close")
     copy_hook = Settings.load().copy_hook
     if copy_hook:
         _logger.info("Running copy hook: %s", copy_hook)
@@ -98,7 +98,7 @@ def handle_action(event: bool | list[Any] | str | dict[str, Any] | None) -> None
     elif isinstance(event, str):
         _events.emit("app:set_query", event)
     elif event in (None, False) or (isinstance(event, dict) and not _handle_action(event)):
-        _events.emit("window:hide")
+        _events.emit("window:close")
 
 
 def _handle_action(event: dict[str, Any]) -> bool:
