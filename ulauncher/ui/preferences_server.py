@@ -291,6 +291,6 @@ class PreferencesServer:
 
     @route("/extension/toggle-enabled")
     async def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
-        logger.info("Toggle extension: %s", ext_id)
+        logger.info("Toggle extension: %s on: %s", ext_id, is_enabled)
         controller = ExtensionController.create(ext_id)
         await controller.toggle_enabled(is_enabled)

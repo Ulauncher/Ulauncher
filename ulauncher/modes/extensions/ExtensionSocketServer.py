@@ -132,6 +132,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.active_event = response.get("event")
             self.active_controller = controller
         elif self.active_controller != controller or self.active_event != response.get("event"):
+            # This can happen if the extension was killed from a task manager
             logger.warning("Received response from different controller or event")
             return
 
