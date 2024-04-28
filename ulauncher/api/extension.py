@@ -87,7 +87,8 @@ class Extension:
         event_type = type(base_event)
         listeners = self._listeners[event_type]
 
-        if not listeners:
+        # Ignore deprecated/useless PreferencesEvent event
+        if not listeners and event_type.__name__ != "PreferencesEvent":
             self.logger.debug("No listeners for event %s", event_type.__name__)
 
         for listener, method_name in listeners:
