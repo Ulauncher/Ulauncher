@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 import weakref
 from typing import Any, cast
@@ -109,6 +110,9 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
+        # close existing window first (if any). suppress crash if no instance has been created
+        with contextlib.suppress(TypeError):
+            events.emit("window:close", save_query=True)
         UlauncherWindow(application=self)
 
     @events.on
