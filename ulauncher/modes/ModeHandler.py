@@ -89,19 +89,24 @@ def clipboard_store(data: str) -> None:
 
 
 @_events.on
-def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:
+def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> None:
+    if not _handle_action(action):
+        _events.emit("window:close")
+
+
+def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:  # noqa: PLR0911
+    if action is True:
+        return True
+    if action in (False, None):
+        return False
     if isinstance(action, list):
         results = [res if isinstance(res, Result) else Result(**res) for res in action]
         _events.emit("window:show_results", results)
-    elif isinstance(action, str):
+        return True
+    if isinstance(action, str):
         _events.emit("app:set_query", action)
-    elif action in (None, False) or (isinstance(action, dict) and not _handle_dict_action(action)):
-        _events.emit("window:close")
-        return False
-    return True
+        return True
 
-
-def _handle_dict_action(action: dict[str, Any]) -> bool:
     event_type = action.get("type", "")
     data = action.get("data")
     if event_type == "action:open" and data:
@@ -113,7 +118,7 @@ def _handle_dict_action(action: dict[str, Any]) -> bool:
     elif event_type == "action:legacy_run_many" and isinstance(data, list):
         keep_open = False
         for action in data:
-            if _handle_dict_action(action):
+            if _handle_action(action):
                 keep_open = True
         return keep_open
     elif event_type == "action:activate_custom":
