@@ -12,7 +12,6 @@ from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcMode import CalcMode
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.file_browser.FileBrowserMode import FileBrowserMode
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
@@ -90,43 +89,38 @@ def clipboard_store(data: str) -> None:
 
 
 @_events.on
-def handle_action(event: bool | list[Any] | str | dict[str, Any] | None) -> None:
-    if isinstance(event, list):
-        results = [res if isinstance(res, Result) else Result(**res) for res in event]
+def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:
+    if isinstance(action, list):
+        results = [res if isinstance(res, Result) else Result(**res) for res in action]
         _events.emit("window:show_results", results)
-    elif isinstance(event, str):
-        _events.emit("app:set_query", event)
-    elif event in (None, False) or (isinstance(event, dict) and not _handle_action(event)):
+    elif isinstance(action, str):
+        _events.emit("app:set_query", action)
+    elif action in (None, False) or (isinstance(action, dict) and not _handle_dict_action(action)):
         _events.emit("window:close")
+        return False
+    return True
 
 
-def _handle_action(event: dict[str, Any]) -> bool:
-    event_type = event.get("type", "")
-    data = event.get("data")
-    ext_id = event.get("ext_id")
-    controller = None
+def _handle_dict_action(action: dict[str, Any]) -> bool:
+    event_type = action.get("type", "")
+    data = action.get("data")
     if event_type == "action:open" and data:
         open_detached(data)
     elif event_type == "action:clipboard_store" and data:
         clipboard_store(data)
-
     elif event_type == "action:legacy_run_script" and isinstance(data, list):
         run_script(*data)
     elif event_type == "action:legacy_run_many" and isinstance(data, list):
         keep_open = False
         for action in data:
-            if _handle_action(action):
+            if _handle_dict_action(action):
                 keep_open = True
         return keep_open
-    elif event_type == "event:activate_custom":
-        _events.emit("extension:trigger_event", event)
-    elif event_type.startswith("event") and ext_id:
-        controller = ExtensionSocketServer().get_controller_by_id(ext_id)
-        if controller:
-            controller.trigger_event(event)
-            return True
+    elif event_type == "action:activate_custom":
+        _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
+        return action.get("keep_app_open") is True
 
     else:
-        _logger.warning("Invalid result from mode: %s", type(event).__name__)
+        _logger.warning("Invalid action from mode: %s", type(action).__name__)
 
     return False
