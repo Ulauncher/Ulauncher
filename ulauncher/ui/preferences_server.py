@@ -5,6 +5,7 @@ import json
 import logging
 import mimetypes
 import os
+import subprocess
 import traceback
 from typing import Any, Callable, Coroutine
 from urllib.parse import unquote, urlparse
@@ -18,7 +19,6 @@ from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServ
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
-from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.Settings import Settings
@@ -27,7 +27,6 @@ from ulauncher.utils.Theme import get_themes
 from ulauncher.utils.WebKit2 import WebKit2
 
 logger = logging.getLogger()
-events = EventBus()
 routes: dict[str, Callable[..., Coroutine[Any, Any, Any]]] = {}
 
 
@@ -164,7 +163,11 @@ class PreferencesServer:
         self.settings.save()
 
         if prop == "show_tray_icon":
-            events.emit("app:toggle_tray_icon", value)
+            # Need to support running as a separate app runtime, and send Dbus events to the launcher runtime
+            # This is kind of ugly, but it's way easier working with the CLI than the Gio Dbus interface
+            json_value = "true" if value else "false"
+            cmd = ["gapplication", "action", "io.ulauncher.Ulauncher", "toggle-tray-icon", json_value]
+            subprocess.run(cmd, check=False)
 
     def apply_autostart(self, is_enabled: bool) -> None:
         logger.info("Set autostart_enabled to %s", is_enabled)

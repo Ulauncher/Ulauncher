@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+import contextlib
+import locale
+import os
+import sys
+import traceback
+from pathlib import Path
+
+import gi
+
+with contextlib.suppress(ModuleNotFoundError):
+    gi.require_versions({"Gtk": "3.0"})
+
+from gi.repository import Gtk
+
+locale.textdomain("ulauncher")
+
+
+def format_err(text: str):
+    return f"\033[01;31m{text}\033[01;0m\n"
+
+
+if sys.version_info.major != 3:  # noqa: PLR2004
+    sys.exit(format_err("Ulauncher requires Python version 3."))
+
+# Add project root directory (enable symlink and trunk execution)
+PYTHONPATH = os.getenv("PYTHONPATH", "")
+PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
+IS_DEV = PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path
+
+# Running in developer environment path
+if IS_DEV:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
+    os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
+
+try:
+    from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
+except ModuleNotFoundError:
+    ulauncher_module_path = list(Path("/usr/lib/").glob("python*/site-packages/ulauncher"))
+    if os.path.isfile("/etc/arch-release") and ulauncher_module_path:
+        sys.path.append(str(ulauncher_module_path[-1].parent))
+        from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
+        sys.stderr.write(format_err(
+            "Your Arch Linux system Python version is updated after installing Ulauncher.\n"
+            "Please do a clean reinstall of Ulauncher, and any other AUR packages that may be affected by this.\n"
+            "For more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280"
+        ))
+    else:
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(
+            format_err("Ulauncher is not properly installed on your system.") +
+            "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
+        )
+
+preferences = PreferencesWindow()
+preferences.connect("destroy", Gtk.main_quit)
+preferences.show()
+Gtk.main()

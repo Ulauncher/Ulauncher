@@ -10,7 +10,7 @@ from ulauncher.ui.preferences_server import PreferencesServer
 from ulauncher.utils.WebKit2 import WebKit2
 
 
-class PreferencesWindow(Gtk.ApplicationWindow):
+class PreferencesWindow(Gtk.Window):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(title="Ulauncher Preferences", window_position=Gtk.WindowPosition.CENTER, **kwargs)
 

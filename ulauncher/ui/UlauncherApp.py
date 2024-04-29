@@ -125,7 +125,7 @@ class UlauncherApp(Gtk.Application):
         if preferences:
             preferences.present(page)
         else:
-            preferences = PreferencesWindow(application=self)
+            preferences = PreferencesWindow()
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
 
