@@ -27,9 +27,8 @@ _triggers: list[Result] = []
 
 
 def get_modes() -> list[BaseMode]:
-    global _modes  # noqa: PLW0603
     if not _modes:
-        _modes = [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()]
+        _modes.extend([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
     return _modes
 
 
