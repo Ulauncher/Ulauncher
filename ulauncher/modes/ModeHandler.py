@@ -94,7 +94,7 @@ def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> Non
         _events.emit("window:close")
 
 
-def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:  # noqa: PLR0911
+def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:  # noqa: PLR0911, PLR0912
     if action is True:
         return True
     if action in (False, None):
@@ -107,23 +107,24 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
         _events.emit("app:set_query", action)
         return True
 
-    event_type = action.get("type", "")
-    data = action.get("data")
-    if event_type == "action:open" and data:
-        open_detached(data)
-    elif event_type == "action:clipboard_store" and data:
-        clipboard_store(data)
-    elif event_type == "action:legacy_run_script" and isinstance(data, list):
-        run_script(*data)
-    elif event_type == "action:legacy_run_many" and isinstance(data, list):
-        keep_open = False
-        for action in data:
-            if _handle_action(action):
-                keep_open = True
-        return keep_open
-    elif event_type == "action:activate_custom":
-        _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
-        return action.get("keep_app_open") is True
+    if isinstance(action, dict):
+        event_type = action.get("type", "")
+        data = action.get("data")
+        if event_type == "action:open" and data:
+            open_detached(data)
+        elif event_type == "action:clipboard_store" and data:
+            clipboard_store(data)
+        elif event_type == "action:legacy_run_script" and isinstance(data, list):
+            run_script(*data)
+        elif event_type == "action:legacy_run_many" and isinstance(data, list):
+            keep_open = False
+            for action in data:
+                if _handle_action(action):
+                    keep_open = True
+            return keep_open
+        elif event_type == "action:activate_custom":
+            _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
+            return action.get("keep_app_open") is True
 
     else:
         _logger.warning("Invalid action from mode: %s", type(action).__name__)
