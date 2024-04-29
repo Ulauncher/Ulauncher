@@ -10,10 +10,12 @@ _listeners: dict[str, set[Callable[..., Any]]] = defaultdict(set)
 class EventBus:
     namespace: str | None = None
     self_arg: Any = None
+    skip_if_not_bound: bool
 
-    def __init__(self, namespace: str | None = None) -> None:
+    def __init__(self, namespace: str | None = None, skip_if_not_bound: bool = False) -> None:
         # namespace is only used for on
         self.namespace = namespace
+        self.skip_if_not_bound = skip_if_not_bound
 
     def set_self(self, self_arg: Any) -> None:
         self.self_arg = self_arg
@@ -24,6 +26,8 @@ class EventBus:
     def on(self, listener: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(listener)
         def wrapper(*args: Any, **kwargs: Any) -> None:
+            if self.skip_if_not_bound and not self.self_arg:
+                return
             if self.self_arg:
                 args = (self.self_arg, *args)
             listener(*args, **kwargs)

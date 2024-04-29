@@ -20,7 +20,7 @@ from ulauncher.utils.Theme import Theme
 from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
-events = EventBus("window")
+events = EventBus("window", True)
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
