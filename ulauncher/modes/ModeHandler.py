@@ -112,17 +112,20 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
         data = action.get("data")
         if event_type == "action:open" and data:
             open_detached(data)
-        elif event_type == "action:clipboard_store" and data:
+            return False
+        if event_type == "action:clipboard_store" and data:
             clipboard_store(data)
-        elif event_type == "action:legacy_run_script" and isinstance(data, list):
+            return False
+        if event_type == "action:legacy_run_script" and isinstance(data, list):
             run_script(*data)
-        elif event_type == "action:legacy_run_many" and isinstance(data, list):
+            return False
+        if event_type == "action:legacy_run_many" and isinstance(data, list):
             keep_open = False
             for action in data:
                 if _handle_action(action):
                     keep_open = True
             return keep_open
-        elif event_type == "action:activate_custom":
+        if event_type == "action:activate_custom":
             _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
             return action.get("keep_app_open") is True
 
