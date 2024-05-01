@@ -39,6 +39,7 @@ class TestExtensionMode:
 
     def test_handle_query__controller_handle_query__is_called(self, extServer):
         controller = mock.create_autospec(ExtensionSocketController)
+        controller.ext_id = "com.example.asdf.ghjk"
         extServer.get_controller_by_keyword.return_value = controller
         mode = ExtensionMode()
         query = mock.create_autospec(Query)
@@ -48,6 +49,7 @@ class TestExtensionMode:
 
     def test_handle_query__controller_handle_query__is_returned(self, extServer):
         controller = mock.create_autospec(ExtensionSocketController)
+        controller.ext_id = "com.example.asdf.ghjk"
         extServer.get_controller_by_keyword.return_value = controller
         mode = ExtensionMode()
         query = mock.create_autospec(Query)

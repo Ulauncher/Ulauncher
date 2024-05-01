@@ -86,11 +86,6 @@ class ExtensionSocketController:
             set(response),
             self.ext_id,
         )
-        action = response.get("action")
-        if isinstance(action, list):
-            for result in action:
-                result["icon"] = self.data_controller.get_normalized_icon_path(result["icon"])
-
         events.emit("extension:handle_response", response, self)
 
     def handle_close(self, _framer: JSONFramer) -> None:

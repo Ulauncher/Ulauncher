@@ -7,7 +7,6 @@ from typing import Any
 
 from gi.repository import Gio, GObject
 
-from ulauncher.api.result import Result
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
@@ -129,15 +128,14 @@ class ExtensionSocketServer(metaclass=Singleton):
             return
 
         self._cancel_loading()
-        events.emit("mode:handle_action", response.get("action"))
+        events.emit("extension_mode:handle_action", response.get("action"))
 
     @events.on
     def handle_event(self, event: dict[str, Any], controller: ExtensionSocketController) -> None:
-        icon = controller.data_controller.get_normalized_icon_path() or ""
-        loading_message = Result(name="Loading...", icon=icon)
-
         self._cancel_loading()
-        self.current_loading_timer = timer(LOADING_DELAY, lambda: events.emit("window:show_results", [loading_message]))
+        self.current_loading_timer = timer(
+            LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
+        )
         self.active_event = event
         self.active_controller = controller
 
