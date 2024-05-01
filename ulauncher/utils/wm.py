@@ -19,9 +19,6 @@ if IS_X11:
 
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
-    """
-    :rtype: class:Gdk.Monitor
-    """
     display = Gdk.Display.get_default()
     assert display
 

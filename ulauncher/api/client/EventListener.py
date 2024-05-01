@@ -15,9 +15,5 @@ class EventListener:
         self, event: ulauncher.api.shared.event.BaseEvent, extension: ulauncher.api.extension.Extension
     ) -> Any:
         """
-        :param ~ulauncher.api.shared.event.BaseEvent event: event that listener was subscribed to
-        :param ~ulauncher.api.Extension extension:
-
-        :rtype: bool, strict, dict or None
         :return: Action to run
         """

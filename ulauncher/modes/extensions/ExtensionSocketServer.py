@@ -80,18 +80,12 @@ class ExtensionSocketServer(metaclass=Singleton):
             logger.debug("Unhandled message received: %s", event)
 
     def stop(self) -> None:
-        """
-        Stops extension server
-        """
         if self.service:
             self.service.stop()
             self.service.close()
             self.service = None
 
     def is_running(self) -> bool:
-        """
-        :rtype: bool
-        """
         return bool(self.service)
 
     def get_controllers(self) -> list[ExtensionSocketController]:

@@ -31,9 +31,6 @@ class ExtensionMode(BaseMode):
         return controller.handle_query(query)
 
     def get_triggers(self) -> Generator[Result, None, None]:
-        """
-        :rtype: Iterable[:class:`~ulauncher.api.result.Result`]
-        """
         for controller in self.ExtensionSocketServer.controllers.values():
             data_controller = controller.data_controller
             for trigger_id, trigger in data_controller.user_triggers.items():

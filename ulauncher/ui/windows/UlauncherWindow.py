@@ -326,9 +326,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @events.on
     def show_results(self, results: Sequence[Result]) -> None:
-        """
-        :param list results: list of Result instances
-        """
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 

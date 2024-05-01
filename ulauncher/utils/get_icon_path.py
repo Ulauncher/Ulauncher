@@ -10,10 +10,6 @@ logger = logging.getLogger()
 
 
 def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
-    """
-    :param str icon:
-    :rtype: str
-    """
     try:
         if icon and isinstance(icon, str):
             icon = expanduser(icon)

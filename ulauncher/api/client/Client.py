@@ -18,12 +18,6 @@ logger = logging.getLogger()
 
 
 class Client:
-    """
-    Instantiated in extension code and manages data transfer from/to Ulauncher app
-
-    :param ~ulauncher.api.Extension extension:
-    """
-
     def __init__(self, extension: ulauncher.api.Extension) -> None:
         self.socket_path = get_socket_path()
         self.extension = extension
@@ -51,9 +45,6 @@ class Client:
     def on_message(self, _framer: JSONFramer, event: dict[str, Any]) -> None:
         """
         Parses message from Ulauncher and triggers extension event
-
-        :param ulauncher.utils.framer.JSONFramer framer:
-        :param ulauncher.api.shared.events.Event event:
         """
         logger.debug("Incoming event %s", type(event).__name__)
         try:
@@ -64,10 +55,7 @@ class Client:
     def on_close(self, _framer: JSONFramer) -> None:
         """
         Terminates extension process on client disconnect.
-
-        Triggers :class:`~ulauncher.api.shared.event.UnloadEvent` for graceful shutdown
-
-        :param ulauncher.utils.framer.JSONFramer framer:
+        Triggers unload event for graceful shutdown
         """
         logger.warning("Connection closed. Exiting")
         self.extension.trigger_event({"type": "event:unload"})
@@ -75,11 +63,6 @@ class Client:
         timer(0.5, partial(os._exit, 0))
 
     def send(self, response: Any) -> None:
-        """
-        Sends response to Ulauncher
-
-        :param dict response:
-        """
         logger.debug('Send message with keys "%s"', set(response))
         assert self.framer
         self.framer.send(response)

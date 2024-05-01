@@ -34,19 +34,12 @@ class KeywordQueryEvent(BaseEvent):
         super().__init__([self.query])
 
     def get_keyword(self) -> str:
-        """
-        :rtype: str
-        """
         return self.query.keyword
 
     def get_query(self) -> Query:
         return self.query
 
     def get_argument(self) -> str:
-        """
-        :rtype: str
-        :returns: None if arguments were not specified
-        """
         return self.query.argument
 
 

@@ -16,10 +16,6 @@ class FileBrowserResult(Result):
     highlightable = True
     path = ""
 
-    """
-    :param ~str path:
-    """
-
     def __init__(self, path: str) -> None:
         super().__init__(
             path=path,
