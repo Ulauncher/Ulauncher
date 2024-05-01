@@ -37,9 +37,9 @@ class ShortcutResult(Result):
         if query.keyword == self.keyword and query.argument:
             argument = query.argument
         elif self.is_default_search:
-            argument = query
+            argument = str(query)
         else:
-            argument = None
+            argument = ""
 
         command = self.cmd.strip()
         if argument and not self.run_without_argument:
