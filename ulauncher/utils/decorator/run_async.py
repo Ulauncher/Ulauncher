@@ -3,45 +3,27 @@ from threading import Thread
 from typing import Any, Callable
 
 
-def run_async(*args: Any, **kwargs: Any) -> Any:
+def run_async(func: Callable[..., Any]) -> Callable[..., Thread]:
     """
-    Function decorator, intended to make "func" run in a new thread (asynchronously).
+    Function decorator, intended to make a callable run in a separate thread (asynchronously).
+    We still need this because asyncio is absolutely garbage when you want to know
+    something will run to completion, but don't want to await it from the main thread
 
-    :rtype: :class:`threading.Thread`
-
-    Examples:
+    Example:
 
     >>> @run_async
-    >>> def task1():
+    >>> def task():
     >>>     do_something
     >>>
-    >>> @run_async(daemon=True)
-    >>> def task2():
-    >>>     do_something_too
-    >>>
-    >>> t1 = task1()
-    >>> t2 = task2()
+    >>> t = task()
     >>> ...
-    >>> t1.join()
-    >>> t2.join()
-
+    >>> t.join()  # (await)
     """
-    daemon = kwargs.get("daemon", False)
 
-    def _run_async(func: Callable[..., Any]) -> Callable[..., Any]:
-        @wraps(func)
-        def async_func(*args: Any, **kwargs: Any) -> Thread:
-            func_hl = Thread(target=func, args=args, kwargs=kwargs)
-            func_hl.daemon = daemon
-            func_hl.start()
-            return func_hl
+    @wraps(func)
+    def async_func(*args: Any, **kwargs: Any) -> Thread:
+        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
 
-        return async_func
-
-    if len(args) == 1 and not kwargs and callable(args[0]):
-        # No arguments, this is the decorator
-        # Set default values for the arguments
-        return _run_async(args[0])
-
-    # This is just returning the decorator
-    return _run_async
+    return async_func
