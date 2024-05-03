@@ -97,6 +97,15 @@ class ExtensionController:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)
 
+    @classmethod
+    def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
+        for controller in controller_cache.values():
+            for trigger in controller.user_triggers.values():
+                if controller.is_running and keyword and keyword == trigger.user_keyword:
+                    return controller
+
+        return None
+
     @property
     def manifest(self) -> ExtensionManifest:
         return ExtensionManifest.load(self.path)

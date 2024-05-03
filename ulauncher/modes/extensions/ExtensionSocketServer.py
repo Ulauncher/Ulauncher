@@ -85,11 +85,9 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service = None
 
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
-        for controller in self.controllers.values():
-            for trigger in controller.data_controller.user_triggers.values():
-                if keyword and keyword == trigger.user_keyword:
-                    return controller
-
+        data_controller = ExtensionController.get_from_keyword(keyword)
+        if data_controller:
+            return self.controllers.get(data_controller.id)
         return None
 
     def _cancel_loading(self) -> None:
