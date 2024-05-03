@@ -73,9 +73,9 @@ class TestExtensionSocketServer:
 
     def test_stop(self, server):
         server.start()
-        assert server.is_running()
+        assert server.service
         service = server.service
         server.stop()
-        assert not server.is_running()
+        assert not server.service
         assert service.stop.call_count == 1
         assert service.close.call_count == 1

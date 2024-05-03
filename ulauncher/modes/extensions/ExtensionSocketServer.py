@@ -84,15 +84,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service.close()
             self.service = None
 
-    def is_running(self) -> bool:
-        return bool(self.service)
-
-    def get_controllers(self) -> list[ExtensionSocketController]:
-        return list(self.controllers.values())
-
-    def get_controller_by_id(self, ext_id: str) -> ExtensionSocketController | None:
-        return self.controllers.get(ext_id)
-
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
         for controller in self.controllers.values():
             for trigger in controller.data_controller.user_triggers.values():
