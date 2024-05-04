@@ -107,6 +107,16 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.active_controller.trigger_event(event)
 
     @events.on
+    def set_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
+        controller = ExtensionSocketServer().controllers.get(ext_id)
+        if controller:
+            for id, new_value in data.get("preferences", {}).items():
+                pref = controller.data_controller.user_preferences.get(id)
+                if pref and new_value != pref.value:
+                    event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
+                    controller.trigger_event(event_data)
+
+    @events.on
     def handle_response(self, response: dict[str, Any], controller: ExtensionSocketController) -> None:
         if not self.active_controller and not self.active_event:
             self.active_event = response.get("event")

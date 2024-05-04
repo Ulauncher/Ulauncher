@@ -14,7 +14,6 @@ from gi.repository import Gio, GLib, Gtk
 from ulauncher.config import API_VERSION, PATHS, VERSION
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer
 from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
@@ -261,14 +260,8 @@ class PreferencesServer:
     async def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
         logger.info("Update extension preferences %s to %s", ext_id, data)
         controller = ExtensionController.create(ext_id)
-        socket_controller = ExtensionSocketServer().controllers.get(ext_id)
-        if socket_controller:  # send update_preferences only if extension is running
-            for id, new_value in data.get("preferences", {}).items():
-                pref = controller.user_preferences.get(id)
-                if pref and new_value != pref.value:
-                    event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
-                    socket_controller.trigger_event(event_data)
         controller.save_user_preferences(data)
+        events.emit("extension:set_preferences", ext_id, data)
 
     @route("/extension/check-update")
     async def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
