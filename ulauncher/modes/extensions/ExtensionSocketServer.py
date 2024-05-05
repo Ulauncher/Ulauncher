@@ -48,10 +48,12 @@ class ExtensionSocketServer(metaclass=Singleton):
         )
         self.pending = {}
         self.controllers = {}
-        def starts_extensions():
+
+        def starts_extensions() -> None:
             for controller in ExtensionController.iterate():
                 if controller.is_enabled and not controller.has_error:
                     controller.start_detached()
+
         GLib.idle_add(starts_extensions)
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:

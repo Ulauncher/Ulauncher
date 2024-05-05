@@ -4,7 +4,7 @@ import logging
 import weakref
 from typing import Any, cast
 
-from gi.repository import Gdk, Gio, Gtk
+from gi.repository import Gio, Gtk
 
 from ulauncher import config
 from ulauncher.api.shared.query import Query
@@ -16,7 +16,6 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.singleton import get_instance
-from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 events = EventBus("app")
@@ -144,7 +143,7 @@ class UlauncherApp(Gtk.Application):
         self._appindicator.switch(enable)
 
     @events.on
-    def toggle_hold(self, value: bool):
+    def toggle_hold(self, value: bool) -> None:
         self.hold() if value else self.release()
 
     @events.on
