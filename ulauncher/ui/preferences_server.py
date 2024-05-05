@@ -154,10 +154,15 @@ class PreferencesServer:
     @route("/set")
     async def apply_settings(self, prop: str, value: Any) -> None:
         logger.info("Setting %s to %s", prop, value)
-        # This setting is not stored to the config
+        # This setting is no longer handled by / persisted to the config as of Ulauncher v6
         if prop == "autostart_enabled":
             self.apply_autostart(value)
             return
+
+        if prop == "daemonless":
+            events.emit("app:toggle_hold", not value)
+            if value is True:
+                self.autostart_pref.stop()
 
         self.settings.update({prop: value})
         self.settings.save()

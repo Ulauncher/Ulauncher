@@ -46,6 +46,10 @@ class SystemdController:
         if self.supported:
             systemctl_run("restart", self.unit)
 
+    def stop(self) -> None:
+        if self.supported:
+            systemctl_run("stop", self.unit)
+
     def toggle(self, status: bool) -> None:
         """
         Enable or disable unit

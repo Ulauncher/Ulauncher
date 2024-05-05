@@ -6,6 +6,9 @@
       <tr>
         <td>
           <label for="autostart">Launch at login</label>
+          <small v-if="daemonless">
+            <p>Enabling this will disable the "Daemonless mode" option.</p>
+          </small>
         </td>
         <td>
           <b-form-checkbox
@@ -169,25 +172,12 @@
         <td>
           <label for="daemonless">Daemonless mode</label>
           <small>
-            <p>Fully close Ulauncher when the window closes instead of keeping it active in the background.</p>
+            <p>Prevents keeping Ulauncher running in the background. Beware that this mode comes with some caveats and is not recommended. <a href="#" @click="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/discussions/1388')">Read more here</a>.</p>
+            <p v-if="autostart_enabled">Enabling this will disable "Launch at login".</p>
           </small>
         </td>
         <td>
-          <b-form-checkbox id="daemonless" v-model="daemonless" :disabled="autostart_enabled"></b-form-checkbox>
-          <div v-if="autostart_enabled" class="compat-warning">
-            <b-alert show variant="warning">
-              <small>
-                You need to disable "Launch at login" if you want to enable this option as they are mutually exclusive.
-              </small>
-            </b-alert>
-          </div>
-          <div v-if="daemonless" class="compat-warning">
-            <b-alert show variant="warning">
-              <small>
-                Beware that enabling this feature makes Ulauncher launch slower, and extensions that rely on being able to perform scheduled/background tasks while idle (like `ulauncher-timer`) will not work.
-              </small>
-            </b-alert>
-          </div>
+          <b-form-checkbox id="daemonless" v-model="daemonless"></b-form-checkbox>
         </td>
       </tr>
 
@@ -268,7 +258,11 @@ export default {
         return this.prefs[name]
       },
       set(value) {
-        if (name === 'base_width' && (value < 540 || value > 2000)) {
+        if (value && name === "daemonless") {
+          this.autostart_enabled = false;
+        } else if (value && name === "autostart_enabled") {
+          this.daemonless = false;
+        } else if (name === 'base_width' && (value < 540 || value > 2000)) {
           return
         }
         return fetchData('prefs:///set', name, value).then(
