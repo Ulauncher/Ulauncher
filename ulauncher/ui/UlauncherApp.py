@@ -6,6 +6,7 @@ from typing import Any, cast
 
 from gi.repository import Gdk, Gio, Gtk
 
+from ulauncher import config
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
 from ulauncher.ui.AppIndicator import AppIndicator
@@ -75,10 +76,12 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
-        self.hold()  # Keep the app running even without a window
+        if not settings.daemonless or config.get_options().daemon:
+            # Keep the app running even without a window
+            self.hold()
 
-        if settings.show_tray_icon:
-            self.toggle_tray_icon(True)
+            if settings.show_tray_icon:
+                self.toggle_tray_icon(True)
 
         if FIRST_RUN or settings.hotkey_show_app:
             if HotkeyController.is_supported():
