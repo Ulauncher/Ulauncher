@@ -153,7 +153,7 @@ class UlauncherApp(Gtk.Application):
         # 0.02s was enough in my local tests
         self.hold()
         events.emit("window:close")
-        timer(0.5, lambda: self.release())
+        timer(0.2, lambda: self.release())
 
     @events.on
     def quit(self) -> None:
