@@ -107,7 +107,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.active_controller.trigger_event(event)
 
     @events.on
-    def set_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
+    def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
         controller = ExtensionSocketServer().controllers.get(ext_id)
         if controller:
             for id, new_value in data.get("preferences", {}).items():
