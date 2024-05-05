@@ -4,7 +4,7 @@ import logging
 import weakref
 from typing import Any, cast
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gdk, Gio, Gtk
 
 from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
@@ -15,6 +15,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.singleton import get_instance
+from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 events = EventBus("app")
@@ -138,6 +139,18 @@ class UlauncherApp(Gtk.Application):
         if not self._appindicator:
             self._appindicator = AppIndicator()
         self._appindicator.switch(enable)
+
+    @events.on
+    def clipboard_store(self, data: str) -> None:
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(data, -1)
+        clipboard.store()
+        # hold the app for a bit to make sure it syncs the clipboard before it exists
+        # there is no gtk event or function for this unfortunately, but 0.5s should be more than enough
+        # 0.02s was enough in my local tests
+        self.hold()
+        events.emit("window:close")
+        timer(0.5, lambda: self.release())
 
     @events.on
     def quit(self) -> None:

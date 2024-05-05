@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gdk, Gtk
-
 from ulauncher.api.result import Result
 from ulauncher.api.shared.query import Query
 from ulauncher.modes.apps.AppMode import AppMode
@@ -76,10 +74,7 @@ def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
 
 @_events.on
 def clipboard_store(data: str) -> None:
-    clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-    clipboard.set_text(data, -1)
-    clipboard.store()
-    _events.emit("window:close")
+    _events.emit("app:clipboard_store", data)
 
 
 @_events.on
