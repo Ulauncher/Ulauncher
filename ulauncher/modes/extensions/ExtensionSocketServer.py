@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import os
-import time
 from typing import Any
 
-from gi.repository import Gio, GObject
+from gi.repository import Gio, GLib, GObject
 
 from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
@@ -49,10 +48,11 @@ class ExtensionSocketServer(metaclass=Singleton):
         )
         self.pending = {}
         self.controllers = {}
-        time.sleep(0.01)
-        for controller in ExtensionController.iterate():
-            if controller.is_enabled and not controller.has_error:
-                controller.start_detached()
+        def starts_extensions():
+            for controller in ExtensionController.iterate():
+                if controller.is_enabled and not controller.has_error:
+                    controller.start_detached()
+        GLib.idle_add(starts_extensions)
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
         framer = JSONFramer()
