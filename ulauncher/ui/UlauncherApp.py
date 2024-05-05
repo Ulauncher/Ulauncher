@@ -144,16 +144,8 @@ class UlauncherApp(Gtk.Application):
         self._appindicator.switch(enable)
 
     @events.on
-    def clipboard_store(self, data: str) -> None:
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        clipboard.set_text(data, -1)
-        clipboard.store()
-        # hold the app for a bit to make sure it syncs the clipboard before it exists
-        # there is no gtk event or function for this unfortunately, but 0.5s should be more than enough
-        # 0.02s was enough in my local tests
-        self.hold()
-        events.emit("window:close")
-        timer(0.2, lambda: self.release())
+    def toggle_hold(self, value: bool):
+        self.hold() if value else self.release()
 
     @events.on
     def quit(self) -> None:
