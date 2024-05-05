@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import subprocess
 from typing import Any
 
 from gi.repository import Gdk, Gtk
@@ -17,7 +16,6 @@ from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.modes.shortcuts.ShortcutMode import ShortcutMode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
-from ulauncher.utils.Settings import Settings
 
 _logger = logging.getLogger()
 _events = EventBus("mode")
@@ -82,10 +80,6 @@ def clipboard_store(data: str) -> None:
     clipboard.set_text(data, -1)
     clipboard.store()
     _events.emit("window:close")
-    copy_hook = Settings.load().copy_hook
-    if copy_hook:
-        _logger.info("Running copy hook: %s", copy_hook)
-        subprocess.Popen(["sh", "-c", copy_hook])
 
 
 @_events.on
