@@ -53,7 +53,7 @@ def get_extension_data(controller: ExtensionController) -> dict[str, Any]:
         "preferences": controller.user_preferences,
         "triggers": controller.user_triggers,
         "is_manageable": controller.is_manageable,
-        "is_running": controller.is_running,
+        "is_stopped": not controller.is_running,
     }
 
 

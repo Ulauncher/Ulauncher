@@ -10,10 +10,10 @@
         >
           <i class="ext-icon" :style="{'background-image': `url('${ext.icon}')`}"></i>
           <b-badge v-if="!ext.is_enabled">Disabled</b-badge>
-          <b-badge v-else-if="!ext.is_running && ext.error_type" variant="warning">
+          <b-badge v-else-if="ext.error_type" variant="warning">
             Error
           </b-badge>
-          <b-badge v-else-if="!ext.is_running">Stopped</b-badge>
+          <b-badge v-else-if="ext.is_stopped">Stopped</b-badge>
           <span>{{ ext.name }}</span>
         </li>
         <li class="link" style="margin-top:25px" @click="addExtDialog">
