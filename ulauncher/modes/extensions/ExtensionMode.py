@@ -16,18 +16,18 @@ ExtensionSocketServer().start()
 
 class ExtensionMode(BaseMode):
     def __init__(self) -> None:
-        self.ExtensionSocketServer = ExtensionSocketServer()
+        self.ext_socket_server = ExtensionSocketServer()
         self.active_ext_id: str | None = None
         events.set_self(self)
 
     def is_enabled(self, query: Query) -> bool:
-        return bool(self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)) and " " in query
+        return bool(self.ext_socket_server.get_controller_by_keyword(query.keyword)) and " " in query
 
     def on_query_change(self, _query: Query) -> None:
         events.emit("extension:on_query_change")
 
     def handle_query(self, query: Query) -> Any:
-        controller = self.ExtensionSocketServer.get_controller_by_keyword(query.keyword)
+        controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
 
         if not controller:
             msg = "Invalid extension keyword"
@@ -49,7 +49,7 @@ class ExtensionMode(BaseMode):
             events.emit("mode:handle_action", action)
 
     def get_triggers(self) -> Generator[Result, None, None]:
-        for controller in self.ExtensionSocketServer.controllers.values():
+        for controller in self.ext_socket_server.controllers.values():
             data_controller = controller.data_controller
             for trigger_id, trigger in data_controller.user_triggers.items():
                 action: Any = None
