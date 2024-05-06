@@ -255,3 +255,8 @@ class ExtensionController:
         if runtime:
             await runtime.stop()
             self.is_running = False
+
+    @classmethod
+    async def stop_all(cls) -> None:
+        jobs = [c.stop() for c in controller_cache.values() if c.is_running]
+        await asyncio.gather(*jobs)
