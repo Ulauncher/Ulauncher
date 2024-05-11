@@ -6,7 +6,7 @@ from ulauncher.modes.calc.CalcResult import CalcResult
 class TestCalcResult:
     @pytest.fixture
     def CopyToClipboardAction(self, mocker):
-        return mocker.patch("ulauncher.modes.calc.CalcResult.CopyToClipboardAction")
+        return mocker.patch("ulauncher.modes.calc.CalcResult.actions.Copy")
 
     def test_get_name(self):
         assert CalcResult(52).name == "52"

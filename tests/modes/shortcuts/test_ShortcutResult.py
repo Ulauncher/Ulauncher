@@ -7,7 +7,7 @@ from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
 class TestShortcutResult:
     @pytest.fixture(autouse=True)
     def OpenAction(self, mocker):
-        return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.OpenAction")
+        return mocker.patch("ulauncher.modes.shortcuts.ShortcutResult.actions.Open")
 
     @pytest.fixture(autouse=True)
     def run_script(self, mocker):

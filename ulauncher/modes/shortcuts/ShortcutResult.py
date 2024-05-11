@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from ulauncher.api.shared.action.OpenAction import OpenAction
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.run_script import run_script
@@ -47,7 +47,7 @@ class ShortcutResult(Result):
 
         if argument or self.run_without_argument:
             if self._is_url():
-                return OpenAction(command)
+                return actions.Open(command)
             run_script(command, argument)
             return False
 

@@ -1,1 +1,1 @@
-from ulauncher.api.shared.action.OpenAction import OpenAction as OpenUrlAction  # noqa: F401
+from ulauncher.internals.actions import Open as OpenUrlAction  # noqa: F401
