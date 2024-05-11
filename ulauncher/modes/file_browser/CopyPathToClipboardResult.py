@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 
 
 class CopyPathToClipboardResult(Result):

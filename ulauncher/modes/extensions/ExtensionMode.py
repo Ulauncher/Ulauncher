@@ -3,8 +3,8 @@ from __future__ import annotations
 import html
 from typing import Any, Generator
 
-from ulauncher.api.result import Result
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketServer import ExtensionSocketServer

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from ulauncher.api.result import Result
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 
 
 class BaseMode:

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.config import PATHS
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 
 
 class CalcResult(Result):

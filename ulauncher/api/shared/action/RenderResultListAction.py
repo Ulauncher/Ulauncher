@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.api.result import Result
+from ulauncher.internals.result import Result
 
 # @todo: Add deprecation warning
 
