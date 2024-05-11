@@ -7,8 +7,8 @@ from typing import Any, cast
 from gi.repository import Gio, Gtk
 
 from ulauncher import config
-from ulauncher.api.shared.query import Query
 from ulauncher.config import APP_ID, FIRST_RUN
+from ulauncher.internals.query import Query
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.ui.windows.PreferencesWindow import PreferencesWindow
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow

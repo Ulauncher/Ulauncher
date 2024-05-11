@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
+from ulauncher.internals.query import Query
 from ulauncher.ui.ResultWidget import ResultWidget
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load, json_save

@@ -6,7 +6,7 @@ from html import unescape
 from gi.repository import Gdk, Gtk, Pango
 
 from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text

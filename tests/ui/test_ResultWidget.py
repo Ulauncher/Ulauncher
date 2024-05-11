@@ -1,7 +1,7 @@
 import pytest
 
 from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.ui.ResultWidget import ResultWidget
 
 

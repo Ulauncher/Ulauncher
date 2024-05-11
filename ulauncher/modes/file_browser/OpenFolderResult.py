@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 
 
 class OpenFolderResult(Result):

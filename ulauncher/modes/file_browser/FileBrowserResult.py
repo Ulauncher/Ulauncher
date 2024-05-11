@@ -4,7 +4,7 @@ from os.path import basename, dirname, isdir, join
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.file_browser.CopyPathToClipboardResult import CopyPathToClipboardResult
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 from ulauncher.modes.file_browser.OpenFolderResult import OpenFolderResult

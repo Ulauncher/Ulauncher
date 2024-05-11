@@ -4,7 +4,7 @@ import re
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.shortcuts.run_script import run_script
 
 

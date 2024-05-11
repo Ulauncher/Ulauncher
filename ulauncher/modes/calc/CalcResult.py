@@ -4,8 +4,8 @@ from decimal import Decimal
 
 from ulauncher.api.result import Result
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
+from ulauncher.internals.query import Query
 
 
 class CalcResult(Result):

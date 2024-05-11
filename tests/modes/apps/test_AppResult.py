@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from gi.repository import Gio
 
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.utils.json_utils import json_load
 

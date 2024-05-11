@@ -1,6 +1,6 @@
 import pytest
 
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.shortcuts.ShortcutResult import ShortcutResult
 
 
