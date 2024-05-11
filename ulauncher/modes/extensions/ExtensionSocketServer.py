@@ -6,12 +6,12 @@ from typing import Any
 
 from gi.repository import Gio, GLib, GObject
 
-from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
 from ulauncher.utils.singleton import Singleton
+from ulauncher.utils.socket_path import get_socket_path
 from ulauncher.utils.timer import TimerContext, timer
 
 LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
