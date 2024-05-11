@@ -5,8 +5,8 @@ from typing import Any
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.apps.AppMode import AppMode
 from ulauncher.modes.BaseMode import BaseMode
 from ulauncher.modes.calc.CalcMode import CalcMode

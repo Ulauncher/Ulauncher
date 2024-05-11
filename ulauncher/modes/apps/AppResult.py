@@ -6,9 +6,9 @@ from os.path import basename
 
 from gi.repository import Gio
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.utils.json_utils import json_load, json_save
 

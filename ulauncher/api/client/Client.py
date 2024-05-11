@@ -10,8 +10,8 @@ from typing import Any
 from gi.repository import Gio, GLib
 
 import ulauncher.api
-from ulauncher.api.shared.socket_path import get_socket_path
 from ulauncher.utils.framer import JSONFramer
+from ulauncher.utils.socket_path import get_socket_path
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()

@@ -1,5 +1,5 @@
 from ulauncher.api.extension import Extension  # noqa: F401
-from ulauncher.api.result import Result
+from ulauncher.internals.result import Result
 
 
 class ExtensionResult(Result):

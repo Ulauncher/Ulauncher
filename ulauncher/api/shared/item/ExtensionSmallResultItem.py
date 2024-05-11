@@ -1,4 +1,4 @@
-from ulauncher.api.result import Result
+from ulauncher.internals.result import Result
 
 
 class ExtensionSmallResultItem(Result):

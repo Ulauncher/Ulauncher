@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 
 
 class BaseEvent:

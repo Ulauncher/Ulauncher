@@ -4,7 +4,7 @@ import contextlib
 import logging
 from typing import Any
 
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.ExtensionController import ExtensionController
 from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest

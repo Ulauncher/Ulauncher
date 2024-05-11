@@ -5,9 +5,9 @@ from typing import Any, Sequence
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes import ModeHandler
 from ulauncher.modes.apps.AppResult import AppResult
 from ulauncher.ui import LayerShell

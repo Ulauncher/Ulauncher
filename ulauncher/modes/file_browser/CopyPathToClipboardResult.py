@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.query import Query
+from ulauncher.internals import actions
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 
 
 class CopyPathToClipboardResult(Result):
@@ -11,4 +11,4 @@ class CopyPathToClipboardResult(Result):
     icon = "edit-copy"
 
     def on_activation(self, _query: Query, _alt: bool = False) -> dict[str, str]:
-        return CopyToClipboardAction(self.path)
+        return actions.Copy(self.path)

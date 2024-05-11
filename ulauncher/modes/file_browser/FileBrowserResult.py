@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from os.path import basename, dirname, isdir, join
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.action.OpenAction import OpenAction
-from ulauncher.api.shared.query import Query
+from ulauncher.internals import actions
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.file_browser.CopyPathToClipboardResult import CopyPathToClipboardResult
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 from ulauncher.modes.file_browser.OpenFolderResult import OpenFolderResult
@@ -31,7 +31,7 @@ class FileBrowserResult(Result):
             if isdir(self.path):
                 return join(fold_user_path(self.path), "")
 
-            return OpenAction(self.path)
+            return actions.Open(self.path)
 
         if isdir(self.path):
             open_folder = OpenFolderResult(name=f'Open Folder "{basename(self.path)}"', path=self.path)

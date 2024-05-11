@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from ulauncher.api.result import Result
-from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
-from ulauncher.api.shared.query import Query
 from ulauncher.config import PATHS
+from ulauncher.internals import actions
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 
 
 class CalcResult(Result):
@@ -18,6 +18,6 @@ class CalcResult(Result):
 
     def on_activation(self, _query: Query, _alt: bool = False) -> bool | dict[str, str]:
         if self.result is not None:
-            return CopyToClipboardAction(str(self.result))
+            return actions.Copy(str(self.result))
 
         return True

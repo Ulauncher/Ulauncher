@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.api.shared.query import Query
+from ulauncher.internals.query import Query
 from ulauncher.modes.extensions.ExtensionMode import ExtensionMode
 from ulauncher.modes.extensions.ExtensionSocketController import ExtensionSocketController
 
