@@ -3,8 +3,8 @@ import asyncio
 import pytest
 
 from ulauncher.ui.preferences_server import PreferencesServer
-from ulauncher.ui.UlauncherApp import UlauncherApp
-from ulauncher.utils.Settings import Settings
+from ulauncher.ui.ulauncher_app import UlauncherApp
+from ulauncher.utils.settings import Settings
 
 app = UlauncherApp()
 settings = Settings.load()

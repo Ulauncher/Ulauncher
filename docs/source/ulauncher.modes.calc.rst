@@ -1,30 +1,29 @@
-ulauncher\.modes\.calc package
-==============================
+ulauncher.modes.calc package
+============================
 
 Submodules
 ----------
 
-ulauncher\.modes\.calc\.CalcMode module
+ulauncher.modes.calc.calc\_mode module
+--------------------------------------
+
+.. automodule:: ulauncher.modes.calc.calc_mode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ulauncher.modes.calc.calc\_result module
 ----------------------------------------
 
-.. automodule:: ulauncher.modes.calc.CalcMode
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ulauncher\.modes\.calc\.CalcResult module
-----------------------------------------------
-
-.. automodule:: ulauncher.modes.calc.CalcResult
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+.. automodule:: ulauncher.modes.calc.calc_result
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: ulauncher.modes.calc
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

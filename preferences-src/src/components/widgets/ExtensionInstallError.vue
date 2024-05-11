@@ -3,7 +3,7 @@
     <b-alert show variant="warning">
       <small>
         <p
-          v-if="errorType === 'InvalidExtensionUrlWarning'"
+          v-if="errorType === 'InvalidExtensionRecoverableError'"
         >The URL should be a HTTPS git repository link or a path to a local git repository.
         <br>Examples: https://github.com/user/repo.git or https://codeberg.org/user/repo.git</p>
         <p v-else-if="errorType === 'ExtensionManifestError'">
@@ -11,7 +11,7 @@
           <br>
           <b>{{ errorMessage }}</b>
         </p>
-        <div v-else-if="errorType === 'ExtensionIncompatibleWarning'">
+        <div v-else-if="errorType === 'ExtensionIncompatibleRecoverableError'">
           <p>
             Version incompatibility error:
             <br>
@@ -40,7 +40,7 @@
             @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
           >Github issues</a>.
         </p>
-        <p v-if="extUrl && !errorType.endsWith('Warning')">
+        <p v-if="extUrl && !errorType.endsWith('RecoverableError')">
           <br />
           <span v-if="isUpdatable">
             Try

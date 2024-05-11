@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: N999
 
 from typing import Any
 
@@ -8,7 +8,7 @@ from typing import Any
 custom_data_store: dict[int, Any] = {}
 
 
-def ExtensionCustomAction(data: Any, keep_app_open: bool = False) -> dict[str, Any]:
+def ExtensionCustomAction(data: Any, keep_app_open: bool = False) -> dict[str, Any]:  # noqa: N802
     ref = id(data)
     custom_data_store[ref] = data
     return {"type": "action:activate_custom", "ref": ref, "keep_app_open": keep_app_open}

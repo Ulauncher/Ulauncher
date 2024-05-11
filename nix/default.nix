@@ -118,8 +118,8 @@ let
         --replace-fail gapplication ${glib}/bin/gapplication
 
       substituteInPlace \
-          ulauncher/modes/extensions/ExtensionController.py \
-        --replace-fail '"PYTHONPATH": PATHS.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
+          ulauncher/modes/extensions/extension_controller.py \
+        --replace-fail '"PYTHONPATH": paths.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
 
       substituteInPlace \
           ulauncher.service \
@@ -129,7 +129,7 @@ let
       ln -s "${preferencesPackage}" data/preferences
 
       substituteInPlace \
-          tests/modes/shortcuts/test_RunScript.py \
+          tests/modes/shortcuts/test_run_script.py \
         --replace-fail '#!/bin/bash' '#!${stdenv.shell}'
     '';
 

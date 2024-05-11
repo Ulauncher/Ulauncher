@@ -1,3 +1,3 @@
-# @todo: Add deprecation warning
-def HideWindowAction() -> bool:
+# @todo: Add deprecation warning  # noqa: N999
+def HideWindowAction() -> bool:  # noqa: N802
     return False

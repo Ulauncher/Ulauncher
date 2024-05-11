@@ -4,7 +4,7 @@ import contextlib
 import os
 from typing import Generator
 
-from ulauncher.config import PATHS
+from ulauncher.config import paths
 
 
 def is_extension(ext_path: str) -> bool:
@@ -18,7 +18,7 @@ def is_extension(ext_path: str) -> bool:
     return all(os.path.isfile(os.path.join(ext_path, file)) for file in expected_files)
 
 
-def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS) -> bool:
+def is_manageable(ext_path: str, user_ext_path: str = paths.USER_EXTENSIONS) -> bool:
     """
     Tells the directory is user-provided extension.
     """
@@ -26,7 +26,7 @@ def is_manageable(ext_path: str, user_ext_path: str = PATHS.USER_EXTENSIONS) -> 
     return os.path.dirname(ext_path) == user_ext_path and is_extension(ext_path)
 
 
-def locate_iter(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
+def locate_iter(ext_id: str, ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
     """
     Yields all existing directories for given `ext_id`
     """
@@ -36,7 +36,7 @@ def locate_iter(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) ->
             yield os.path.realpath(ext_path)
 
 
-def locate(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str | None:
+def locate(ext_id: str, ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS) -> str | None:
     """
     Locates (an existing) extension directory.
     """
@@ -44,7 +44,7 @@ def locate(ext_id: str, ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS) -> str 
 
 
 def iterate(
-    ext_dirs: list[str] = PATHS.ALL_EXTENSIONS_DIRS, duplicates: bool = False
+    ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS, duplicates: bool = False
 ) -> Generator[tuple[str, str], None, None]:
     """
     Yields `(ext_id, extension_path)` tuples found in a given extensions dirs

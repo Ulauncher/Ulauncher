@@ -77,6 +77,7 @@ lint.select = [
   "INP",      # flake8-no-pep420 (ban implicit namespace packages without __init__.py)
   "INT",      # flake8-gettext
   "ISC",      # flake8-implicit-str-concat
+  "N",        # pep8-naming
   "PGH",      # pygrep-hooks
   "PIE",      # flake8-pie
   "PL",       # pylint (same as PLC+PLE+PLR+PLW)
@@ -102,9 +103,9 @@ lint.select = [
 # Relax some linting rules for tests
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
-  "PLR2004",  # Allow direct comparison with integers (magic-value)
-  "SLF001",   # Allow accessing private members (obj._hello)
-  "T201"      # Allow print statements
+  "PLR2004",    # Allow direct comparison with integers (magic-value)
+  "SLF001",     # Allow accessing private members (obj._hello)
+  "T201",       # Allow print statements
 ]
 
 [tool.ruff.lint.pylint]

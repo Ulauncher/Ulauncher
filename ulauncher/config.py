@@ -7,23 +7,23 @@ from functools import lru_cache
 from gettext import gettext
 
 import ulauncher
-from ulauncher import paths as PATHS
+from ulauncher import paths
 
 APP_ID = "io.ulauncher.Ulauncher"
 API_VERSION = "3.0"
 VERSION = ulauncher.version
-FIRST_RUN = not os.path.exists(PATHS.CONFIG)  # If there is no config dir, assume it's the first run
-FIRST_V6_RUN = not os.path.exists(PATHS.STATE)
+FIRST_RUN = not os.path.exists(paths.CONFIG)  # If there is no config dir, assume it's the first run
+FIRST_V6_RUN = not os.path.exists(paths.STATE)
 
 
-if not os.path.exists(PATHS.ASSETS):
-    raise OSError(PATHS.ASSETS)
+if not os.path.exists(paths.ASSETS):
+    raise OSError(paths.ASSETS)
 
-os.makedirs(PATHS.CONFIG, exist_ok=True)
-os.makedirs(PATHS.STATE, exist_ok=True)
-os.makedirs(PATHS.USER_EXTENSIONS, exist_ok=True)
-os.makedirs(PATHS.EXTENSIONS_CONFIG, exist_ok=True)
-os.makedirs(PATHS.USER_THEMES, exist_ok=True)
+os.makedirs(paths.CONFIG, exist_ok=True)
+os.makedirs(paths.STATE, exist_ok=True)
+os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
+os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
+os.makedirs(paths.USER_THEMES, exist_ok=True)
 
 
 @dataclass
