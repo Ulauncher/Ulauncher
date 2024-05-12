@@ -32,7 +32,7 @@ RESET := \\e[0m
 .PHONY: help version run docker
 
 help: # Shows this list of available actions (targets)
-  # Only includes targets with comments, but not if they have Commands with two ## chars
+	# Only includes targets with comments, but not if they have Commands with two ## chars
 	@sed -nr \
 		-e 's|^#=(.*)|\n\1:|p' \
 		-e 's|^([a-zA-Z-]*):([^#]*?\s# (.*))| \1\x1b[35m - \3\x1b[0m|p' \
@@ -43,7 +43,7 @@ version: # Print the Ulauncher version
 	@echo ${VERSION}
 
 run: prefs # Run ulauncher from source
-  # If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
+	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
 	@if [ -n $(shell eval "command -v systemctl") ] && [ "inactive" != $(shell eval "systemctl --user is-active ulauncher") ]; then
 		systemctl --user stop ulauncher
 	else
@@ -125,6 +125,14 @@ docs: ## Build the API docs
 	cd docs
 	sphinx-apidoc -d 5 -o source ../ulauncher
 	sphinx-build -M html . ./_build
+	while true; do
+		read -p "Do you want to preview the generated documentation? (answer y to start a server) " yn
+		case $$yn in
+			[Yy]* ) python -m http.server -d _build/html 3000; break;;
+			[Nn]* ) exit;;
+			* ) exit;;
+		esac
+	done
 
 docker: # Build the docker image (only needed if you make changes to it)
 	docker build -t "${DOCKER_IMAGE}" .
@@ -147,7 +155,7 @@ prefs: # Build the preferences web app
 sdist: manpage prefs # Build a source tarball
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
-  # copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
+	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
 	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
 	# create archive with .tarignore
