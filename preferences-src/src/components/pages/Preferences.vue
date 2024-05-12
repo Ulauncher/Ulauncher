@@ -262,6 +262,8 @@ export default {
           this.autostart_enabled = false;
         } else if (value && name === "autostart_enabled") {
           this.daemonless = false;
+        } else if (name === "max_recent_apps") {
+          value = parseInt(value, 10) || 0 // WebkitGtk doesn't support input[type=number] for some strange reason
         } else if (name === 'base_width' && (value < 540 || value > 2000)) {
           return
         }
