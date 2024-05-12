@@ -42,7 +42,7 @@ Migrating old themes
 #. Copy/move the css file directly to the user theme directory. If you want to keep it compatible with your old theme name, it should have the ``name`` property from manifest.json as it's file name and ``.css`` as the extension.
 
 GTK CSS documentation
-----------
+---------------------
 
 * https://docs.gtk.org/gtk3/css-overview.html
 * https://docs.gtk.org/gtk3/css-properties.html
