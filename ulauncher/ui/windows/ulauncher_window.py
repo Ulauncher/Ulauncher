@@ -11,7 +11,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.ui import layer_shell
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.load_icon_surface import load_icon_surface  # TODO: investigate why this takes ~35-40ms to load
+from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.theme import Theme
 from ulauncher.utils.wm import get_monitor
