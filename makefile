@@ -124,7 +124,6 @@ format: # Auto format the code
 docs: ## Build the API docs
 	@set -euo pipefail
 	cd docs
-	sphinx-apidoc -d 5 -o source ../ulauncher
 	sphinx-build -M html . ./_build
 	if [ -n "${INTERACTIVE}" ]; then
 		python -m http.server -d _build/html 3000
