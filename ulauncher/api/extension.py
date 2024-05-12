@@ -22,9 +22,9 @@ class Extension:
     """
 
     def __init__(self) -> None:
-        logHandler = logging.StreamHandler()
-        logHandler.setFormatter(ColoredFormatter())
-        logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[logHandler])
+        log_handler = logging.StreamHandler()
+        log_handler.setFormatter(ColoredFormatter())
+        logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
         self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.ext_id)
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)

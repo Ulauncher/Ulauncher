@@ -12,13 +12,13 @@ from shutil import rmtree
 from types import ModuleType
 from typing import Any, Callable
 
-from ulauncher.config import FIRST_V6_RUN, PATHS
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
+from ulauncher.config import FIRST_V6_RUN, paths
+from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.utils.json_utils import json_load
 from ulauncher.utils.systemd_controller import SystemdController
 
 _logger = logging.getLogger()
-CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{PATHS.HOME}/.cache"), "ulauncher_cache")  # See issue#40
+CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache"), "ulauncher_cache")  # See issue#40
 
 
 def _load_legacy(path: Path) -> Any | None:
@@ -32,7 +32,7 @@ def _load_legacy(path: Path) -> Any | None:
     return None
 
 
-def _storeJSON(path: str, data: Any) -> bool:
+def _store_json(path: str, data: Any) -> bool:
     try:
         Path(path).write_text(json.dumps(data, indent=4))
     except Exception as e:
@@ -50,7 +50,7 @@ def _migrate_file(
             _logger.info("Migrating %s to %s", from_path, to_path)
             if callable(transform):
                 data = transform(data)
-            _storeJSON(to_path, data)
+            _store_json(to_path, data)
 
 
 def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
@@ -77,31 +77,31 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
 
 def v5_to_v6() -> None:  # noqa: PLR0912
     # Convert extension prefs to JSON
-    EXT_PREFS = Path(PATHS.EXTENSIONS_CONFIG)
+    ext_prefs = Path(paths.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
-    for file in EXT_PREFS.rglob("*.json"):
+    for file in ext_prefs.rglob("*.json"):
         _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
     # Migrate db to JSON without overwrite. So if a JSON file exists it should never be overwritten
     # with data from a db file
-    for file in EXT_PREFS.rglob("*.db"):
+    for file in ext_prefs.rglob("*.db"):
         _migrate_file(str(file), f"{file.parent}/{file.stem}.json", partial(_migrate_user_prefs, file.stem))
 
     # Convert app_stat.db to JSON and put in STATE_DIR
-    _migrate_file(f"{PATHS.DATA}/app_stat_v2.db", f"{PATHS.STATE}/app_starts.json", _migrate_app_state)
+    _migrate_file(f"{paths.DATA}/app_stat_v2.db", f"{paths.STATE}/app_starts.json", _migrate_app_state)
 
     # Convert query_history.db to JSON and put in STATE_DIR
     # Needs a module hack for pickle because v5 stored these as the "ulauncher.search.Query" type
-    MockQuery = ModuleType("Query")
-    MockQuery.Query = str  # type: ignore[attr-defined]
-    sys.modules["ulauncher.search.Query"] = MockQuery
-    _migrate_file(f"{PATHS.DATA}/query_history.db", f"{PATHS.STATE}/query_history.json")
+    mock_query = ModuleType("Query")
+    mock_query.Query = str  # type: ignore[attr-defined]
+    sys.modules["ulauncher.search.Query"] = mock_query
+    _migrate_file(f"{paths.DATA}/query_history.db", f"{paths.STATE}/query_history.json")
     del sys.modules["ulauncher.search.Query"]  # <-- Don't want this hack to remain in the runtime afterwards
 
     # Convert show_recent_apps to max_recent_apps
     # Not using settings class because we don't want to convert the keys
     from ulauncher.utils.json_conf import JsonConf
 
-    settings = JsonConf.load(f"{PATHS.CONFIG}/settings.json")
+    settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
     legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
     if legacy_recent_apps and settings.get("max_recent_apps") is None:
         # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
@@ -110,7 +110,7 @@ def v5_to_v6() -> None:  # noqa: PLR0912
         settings.save()
 
     # Migrate extension state to individual files
-    extension_db = json_load(f"{PATHS.CONFIG}/extensions.json")
+    extension_db = json_load(f"{paths.CONFIG}/extensions.json")
     for controller in ExtensionController.iterate():
         # only if they don't already exist
         if not controller.state.id and controller.id in extension_db:
@@ -121,10 +121,10 @@ def v5_to_v6() -> None:  # noqa: PLR0912
     if FIRST_V6_RUN:
         try:
             systemd_unit = SystemdController("ulauncher")
-            AUTOSTART_FILE = Path(f"{PATHS.CONFIG}/../autostart/ulauncher.desktop").resolve()
-            if os.path.exists(AUTOSTART_FILE) and systemd_unit.can_start():
+            autostart_file = Path(f"{paths.CONFIG}/../autostart/ulauncher.desktop").resolve()
+            if os.path.exists(autostart_file) and systemd_unit.can_start():
                 autostart_config = ConfigParser()
-                autostart_config.read(AUTOSTART_FILE)
+                autostart_config.read(autostart_file)
                 if autostart_config["Desktop Entry"]["X-GNOME-Autostart-enabled"] == "true":
                     if systemd_unit.can_start():
                         systemd_unit.toggle(True)
@@ -143,11 +143,11 @@ def v5_to_v6_destructive() -> None:
 
     # Delete old unused files
     cleanup_list = [
-        *Path(PATHS.CONFIG).parent.rglob("autostart/ulauncher.desktop"),
+        *Path(paths.CONFIG).parent.rglob("autostart/ulauncher.desktop"),
         *Path(CACHE_PATH).rglob("*.db"),
-        *Path(PATHS.DATA).rglob("*.db"),
-        *Path(PATHS.DATA).rglob("last.log"),
-        Path(f"{PATHS.CONFIG}/extensions.json"),
+        *Path(paths.DATA).rglob("*.db"),
+        *Path(paths.DATA).rglob("last.log"),
+        Path(f"{paths.CONFIG}/extensions.json"),
     ]
     if cleanup_list:
         print("Removing deprecated data files:")  # noqa: T201
@@ -162,7 +162,7 @@ def v5_to_v6_destructive() -> None:
     # Delete old preferences
     from ulauncher.utils.json_conf import JsonConf
 
-    settings = JsonConf.load(f"{PATHS.CONFIG}/settings.json")
+    settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
     _logger.info("Pruning settings")
     settings.update({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
     settings.save()

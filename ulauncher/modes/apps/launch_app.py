@@ -6,7 +6,7 @@ from pathlib import Path
 from gi.repository import Gio
 
 from ulauncher.utils.launch_detached import launch_detached
-from ulauncher.utils.Settings import Settings
+from ulauncher.utils.settings import Settings
 from ulauncher.utils.wm import try_raise_app
 
 logger = logging.getLogger()

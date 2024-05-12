@@ -1,29 +1,37 @@
-ulauncher\.modes\.apps package
-==============================
+ulauncher.modes.apps package
+============================
 
 Submodules
 ----------
 
-ulauncher\.modes\.apps\.AppResult module
----------------------------------------------
+ulauncher.modes.apps.app\_mode module
+-------------------------------------
 
-.. automodule:: ulauncher.modes.apps.AppResult
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. automodule:: ulauncher.modes.apps.app_mode
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-ulauncher\.modes\.apps\.AppMode module
----------------------------------------------
+ulauncher.modes.apps.app\_result module
+---------------------------------------
 
-.. automodule:: ulauncher.modes.apps.AppMode
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. automodule:: ulauncher.modes.apps.app_result
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ulauncher.modes.apps.launch\_app module
+---------------------------------------
+
+.. automodule:: ulauncher.modes.apps.launch_app
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: ulauncher.modes.apps
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

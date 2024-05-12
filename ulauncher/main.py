@@ -10,9 +10,9 @@ import gi
 from gi.repository import GLib, Gtk
 
 import ulauncher.utils.xinit  # must import this before any GUI libraries are initialized.  # noqa: F401
-from ulauncher.config import API_VERSION, PATHS, VERSION, get_options
-from ulauncher.ui import LayerShell
-from ulauncher.ui.UlauncherApp import UlauncherApp
+from ulauncher.config import API_VERSION, VERSION, get_options, paths
+from ulauncher.ui import layer_shell
+from ulauncher.ui.ulauncher_app import UlauncherApp
 from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
@@ -35,7 +35,7 @@ def main() -> None:
         sys.exit(2)
 
     # Set up global logging for stdout and file
-    file_handler = logging.FileHandler(f"{PATHS.STATE}/last.log", mode="w+")
+    file_handler = logging.FileHandler(f"{paths.STATE}/last.log", mode="w+")
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.DEBUG if options.verbose else logging.WARNING)
     stream_handler.setFormatter(ColoredFormatter())
@@ -68,7 +68,7 @@ def main() -> None:
         )
 
     if XDG_SESSION_TYPE != "X11":
-        logger.info("Layer shell: %s", ("Yes" if LayerShell.is_supported() else "No"))
+        logger.info("Layer shell: %s", ("Yes" if layer_shell.is_supported() else "No"))
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")

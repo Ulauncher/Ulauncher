@@ -11,19 +11,19 @@ from urllib.parse import unquote, urlparse
 
 from gi.repository import Gio, GLib, Gtk
 
-from ulauncher.config import API_VERSION, PATHS, VERSION
+from ulauncher.config import API_VERSION, VERSION, paths
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.ExtensionController import ExtensionController
-from ulauncher.modes.shortcuts.ShortcutsDb import ShortcutsDb
+from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.shortcuts.shortcuts_db import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.launch_detached import open_detached
-from ulauncher.utils.Settings import Settings
+from ulauncher.utils.settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
-from ulauncher.utils.Theme import get_themes
-from ulauncher.utils.WebKit2 import WebKit2
+from ulauncher.utils.theme import get_themes
+from ulauncher.utils.webkit2 import WebKit2
 
 logger = logging.getLogger()
 events = EventBus()
@@ -106,7 +106,7 @@ class PreferencesServer:
                 error = {"message": str(e), "type": err_type}
                 logging.exception("Preferences server error: %s", err_type)
 
-                if not err_type.endswith("Warning"):
+                if not err_type.endswith("RecoverableError"):
                     stack_details = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
                     error["details"] = "\n".join([f"{k}: {v}" for k, v in {**error, **stack_details}.items()])
 
@@ -217,8 +217,8 @@ class PreferencesServer:
 
     @route("/open/extensions-dir")
     async def open_extensions_dir(self) -> None:
-        logger.info('Open extensions directory "%s" in default file manager.', PATHS.USER_EXTENSIONS)
-        open_detached(PATHS.USER_EXTENSIONS)
+        logger.info('Open extensions directory "%s" in default file manager.', paths.USER_EXTENSIONS)
+        open_detached(paths.USER_EXTENSIONS)
 
     @route("/shortcut/get-all")
     async def shortcut_get_all(self) -> list[dict[str, Any]]:

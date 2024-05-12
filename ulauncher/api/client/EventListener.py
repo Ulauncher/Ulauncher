@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: N999
 
 from typing import Any
 
