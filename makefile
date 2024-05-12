@@ -127,14 +127,7 @@ docs: ## Build the API docs
 	sphinx-apidoc -d 5 -o source ../ulauncher
 	sphinx-build -M html . ./_build
 	if [ -n "${INTERACTIVE}" ]; then
-		while true; do
-			read -p "Do you want to preview the generated documentation? (answer y to start a server) " yn
-			case $$yn in
-				[Yy]* ) python -m http.server -d _build/html 3000; break;;
-				[Nn]* ) exit;;
-				* ) exit;;
-			esac
-		done
+		python -m http.server -d _build/html 3000
 	fi
 
 docker: # Build the docker image (only needed if you make changes to it)
@@ -201,4 +194,6 @@ manpage: # Generate manpage
 	fi
 	help2man --section=1 --name="Feature rich application Launcher for Linux" --no-info ./bin/ulauncher > ulauncher.1
 	echo -e "Generated manpage to ${BOLD}${GREEN}./ulauncher.1${RESET}"
-	echo -e "You can preview it with ${BOLD}${GREEN}man -l ulauncher.1${RESET}"
+	if [ -n "${INTERACTIVE}" ]; then
+		man -l ulauncher.1
+	fi
