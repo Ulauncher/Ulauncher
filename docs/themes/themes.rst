@@ -41,7 +41,7 @@ Migrating old themes
 #. If manifest.json defines ``extend_theme`` and it's not null, then locate that theme and copy the css selectors and properties from it to the top of your theme. Then go through and filter out the duplicated selectors, that your css file already had before (this is likely most of them).
 #. Copy/move the css file directly to the user theme directory. If you want to keep it compatible with your old theme name, it should have the ``name`` property from manifest.json as it's file name and ``.css`` as the extension.
 
-GTK's CSS documentation
+GTK CSS documentation
 ----------
 
 * https://docs.gtk.org/gtk3/css-overview.html
