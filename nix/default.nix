@@ -23,6 +23,7 @@
 , python3Packages
 , setuptools ? python3Packages.setuptools
 , setuptools-scm ? python3Packages.setuptools-scm
+, cython ? python3Packages.cython
 , ruff
 , stdenv
 , systemd
@@ -80,6 +81,7 @@ let
     build-system = [ setuptools ];
 
     nativeBuildInputs = [
+      cython
       setuptools-scm
       gdk-pixbuf
       gobject-introspection
