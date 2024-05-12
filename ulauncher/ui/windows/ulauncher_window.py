@@ -179,9 +179,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.input.get_text(), update_input=False)
-        if self.is_visible():
-            # input_changed can trigger when hiding window
-            mode_handler.on_query_change(self.query)
+        mode_handler.on_query_change(self.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
