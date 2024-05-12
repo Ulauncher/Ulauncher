@@ -3,18 +3,15 @@ from __future__ import annotations
 import logging
 from typing import Any, Sequence
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, GLib, Gtk
 
+import ulauncher
 from ulauncher.config import paths
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes import mode_handler
-from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.ui import layer_shell
-from ulauncher.ui.item_navigation import ItemNavigation
-from ulauncher.ui.result_widget import ResultWidget
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.load_icon_surface import load_icon_surface
+from ulauncher.utils.load_icon_surface import load_icon_surface  # TODO: investigate why this takes ~35-40ms to load
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.theme import Theme
 from ulauncher.utils.wm import get_monitor
@@ -25,7 +22,7 @@ events = EventBus("window", True)
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
-    results_nav: ItemNavigation | None = None
+    results_nav: ulauncher.ui.item_navigation.ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
@@ -147,16 +144,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         self.position_window()
 
-        mode_handler.refresh_triggers()
-
         if self.query:
             self.set_input(str(self.query))
-            mode_handler.on_query_change(self.query)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
 
         super().show()
+        GLib.idle_add(self.init_listeners)
+
+    def init_listeners(self) -> None:
+        from ulauncher.modes import mode_handler
+
+        mode_handler.refresh_triggers()
+        if self.query:
+            mode_handler.on_query_change(self.query)
 
     ######################################
     # GTK Signal Handlers
@@ -179,6 +181,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.input.get_text(), update_input=False)
+        from ulauncher.modes import mode_handler
+
         mode_handler.on_query_change(self.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
@@ -213,6 +217,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.query)
         ):
+            from ulauncher.modes import mode_handler
+
             new_query = mode_handler.on_query_backspace(self.query)
             if new_query is not None:
                 events.emit("app:set_query", new_query)
@@ -329,14 +335,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.input.get_text() and self.settings.max_recent_apps:
+            from ulauncher.modes.apps.app_result import AppResult
+
             results = AppResult.get_most_frequent(self.settings.max_recent_apps)
 
         if results:
+            from ulauncher.ui.result_widget import ResultWidget
+
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(results[:limit]):
                 result_widget = ResultWidget(result, index, self.query)
                 result_widgets.append(result_widget)
                 self.result_box.add(result_widget)
+            from ulauncher.ui.item_navigation import ItemNavigation
+
             self.results_nav = ItemNavigation(result_widgets)
             self.results_nav.select_default(self.query)
 
