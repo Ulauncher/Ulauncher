@@ -3,13 +3,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Sequence
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, GLib, Gtk
 
 import ulauncher
 from ulauncher.config import paths
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes import mode_handler  # TODO: lazy load mode handler or part of it (this is what makes it slow now)
 from ulauncher.ui import layer_shell
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface  # TODO: investigate why this takes ~35-40ms to load
@@ -145,16 +144,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         self.position_window()
 
-        mode_handler.refresh_triggers()
-
         if self.query:
             self.set_input(str(self.query))
-            mode_handler.on_query_change(self.query)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
 
         super().show()
+        GLib.idle_add(self.init_listeners)
+
+    def init_listeners(self) -> None:
+        from ulauncher.modes import mode_handler
+
+        mode_handler.refresh_triggers()
+        if self.query:
+            mode_handler.on_query_change(self.query)
 
     ######################################
     # GTK Signal Handlers
@@ -177,6 +181,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.input.get_text(), update_input=False)
+        from ulauncher.modes import mode_handler
+
         mode_handler.on_query_change(self.query)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
@@ -211,6 +217,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.query)
         ):
+            from ulauncher.modes import mode_handler
+
             new_query = mode_handler.on_query_backspace(self.query)
             if new_query is not None:
                 events.emit("app:set_query", new_query)
