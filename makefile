@@ -32,8 +32,8 @@ RESET := \\e[0m
 .PHONY: help version run docker
 
 help: # Shows this list of available actions (targets)
-	# Only includes targets with comments, but not if they have Commands with two ## chars
-	@sed -nr \
+	@# Only includes targets with comments, but not if they have Commands with two ## chars
+	sed -nr \
 		-e 's|^#=(.*)|\n\1:|p' \
 		-e 's|^([a-zA-Z-]*):([^#]*?\s# (.*))| \1\x1b[35m - \3\x1b[0m|p' \
 		$(lastword $(MAKEFILE_LIST)) \
