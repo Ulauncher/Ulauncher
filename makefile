@@ -126,7 +126,7 @@ docs: ## Build the API docs
 	cd docs
 	sphinx-build -M html . ./_build
 	if [ -n "${INTERACTIVE}" ]; then
-		python -m http.server -d _build/html 3000
+		python -m http.server -d _build/html
 	fi
 
 docker: # Build the docker image (only needed if you make changes to it)
