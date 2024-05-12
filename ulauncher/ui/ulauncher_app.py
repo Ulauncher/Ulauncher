@@ -6,14 +6,12 @@ from typing import Any, cast
 
 from gi.repository import Gio, Gtk
 
+import ulauncher
 from ulauncher import config
 from ulauncher.config import APP_ID, FIRST_RUN
 from ulauncher.internals.query import Query
-from ulauncher.ui.tray_icon import TrayIcon
-from ulauncher.ui.windows.preferences_window import PreferencesWindow
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.singleton import get_instance
 
@@ -27,8 +25,8 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     _query = ""
     _window: weakref.ReferenceType[UlauncherWindow] | None = None
-    _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
-    _tray_icon: TrayIcon | None = None
+    _preferences: weakref.ReferenceType[ulauncher.ui.windows.preferences_window.PreferencesWindow] | None = None
+    _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
         return cast(UlauncherApp, get_instance(super(), self, *args, **kwargs))
@@ -83,6 +81,8 @@ class UlauncherApp(Gtk.Application):
                 self.toggle_tray_icon(True)
 
         if FIRST_RUN or settings.hotkey_show_app:
+            from ulauncher.utils.hotkey_controller import HotkeyController
+
             if HotkeyController.is_supported():
                 hotkey = "<Primary>space"
                 if settings.hotkey_show_app and not HotkeyController.is_plasma():
@@ -128,6 +128,8 @@ class UlauncherApp(Gtk.Application):
         if preferences:
             preferences.present(page)
         else:
+            from ulauncher.ui.windows.preferences_window import PreferencesWindow
+
             preferences = PreferencesWindow(application=self)
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
@@ -139,6 +141,8 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
         if not self._tray_icon:
+            from ulauncher.ui.tray_icon import TrayIcon
+
             self._tray_icon = TrayIcon()
         self._tray_icon.switch(enable)
 

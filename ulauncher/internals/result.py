@@ -4,7 +4,6 @@ from typing import Any
 
 from ulauncher.internals.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
-from ulauncher.utils.fuzzy_search import get_score
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 
@@ -58,4 +57,6 @@ class Result(BaseDataClass):
     def search_score(self, query: str) -> float:
         if not self.searchable:
             return 0
+        from ulauncher.utils.fuzzy_search import get_score
+
         return max(get_score(query, field) * weight for field, weight in self.get_searchable_fields() if field)

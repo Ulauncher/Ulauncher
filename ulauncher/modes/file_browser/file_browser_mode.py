@@ -5,7 +5,6 @@ from pathlib import Path
 
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.file_browser.file_browser_result import FileBrowserResult
-from ulauncher.utils.fuzzy_search import get_score
 
 
 class FileBrowserMode(BaseMode):
@@ -56,6 +55,8 @@ class FileBrowserMode(BaseMode):
 
                 if not query.startswith("."):
                     file_names = self.filter_dot_files(file_names)
+
+                from ulauncher.utils.fuzzy_search import get_score
 
                 sorted_files = sorted(file_names, key=lambda fn: get_score(query, fn), reverse=True)
                 filtered = list(filter(lambda fn: get_score(query, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
