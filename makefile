@@ -1,5 +1,6 @@
 .ONESHELL:
 SHELL := bash
+INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.0
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
 YARN_BIN = $(shell eval 'command -v yarn || command -v yarnpkg')
@@ -125,14 +126,16 @@ docs: ## Build the API docs
 	cd docs
 	sphinx-apidoc -d 5 -o source ../ulauncher
 	sphinx-build -M html . ./_build
-	while true; do
-		read -p "Do you want to preview the generated documentation? (answer y to start a server) " yn
-		case $$yn in
-			[Yy]* ) python -m http.server -d _build/html 3000; break;;
-			[Nn]* ) exit;;
-			* ) exit;;
-		esac
-	done
+	if [ -n "${INTERACTIVE}" ]; then
+		while true; do
+			read -p "Do you want to preview the generated documentation? (answer y to start a server) " yn
+			case $$yn in
+				[Yy]* ) python -m http.server -d _build/html 3000; break;;
+				[Nn]* ) exit;;
+				* ) exit;;
+			esac
+		done
+	fi
 
 docker: # Build the docker image (only needed if you make changes to it)
 	docker build -t "${DOCKER_IMAGE}" .
