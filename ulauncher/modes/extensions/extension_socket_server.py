@@ -52,7 +52,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         def starts_extensions() -> None:
             for controller in ExtensionController.iterate():
                 if controller.is_enabled and not controller.has_error:
-                    controller.start_detached()
+                    controller.start_detached() # 5%
 
         GLib.idle_add(starts_extensions)
 

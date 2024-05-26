@@ -5,7 +5,7 @@ from os.path import expanduser, isfile, join
 
 from gi.repository import Gtk
 
-icon_theme = Gtk.IconTheme.get_default()
+icon_theme = Gtk.IconTheme.get_default() # 16%
 logger = logging.getLogger()
 
 

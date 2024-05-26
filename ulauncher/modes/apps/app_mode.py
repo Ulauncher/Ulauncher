@@ -17,7 +17,7 @@ class AppMode(BaseMode):
         if not settings.enable_application_mode:
             return
 
-        apps: list[Gio.DesktopAppInfo] = Gio.DesktopAppInfo.get_all()  # type: ignore[assignment]
+        apps: list[Gio.DesktopAppInfo] = Gio.DesktopAppInfo.get_all()  # type: ignore[assignment] # 8%
         for app in apps:
             executable = app.get_executable()
             if not executable or not app.get_display_name():

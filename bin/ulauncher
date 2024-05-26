@@ -27,7 +27,7 @@ if IS_DEV:
     os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
 
 try:
-    from ulauncher.main import main
+    from ulauncher.main import main # 44%
 except ModuleNotFoundError:
     ulauncher_module_path = list(Path("/usr/lib/").glob("python*/site-packages/ulauncher"))
     if os.path.isfile("/etc/arch-release") and ulauncher_module_path:
@@ -45,4 +45,4 @@ except ModuleNotFoundError:
             "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
         )
 
-main()
+main() # 55%

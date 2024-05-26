@@ -156,7 +156,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def init_listeners(self) -> None:
         from ulauncher.modes import mode_handler
 
-        mode_handler.refresh_triggers()
+        mode_handler.refresh_triggers() # 10%
         if self.query:
             mode_handler.on_query_change(self.query)
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import asyncio
+import asyncio # 4%
 import json
 import logging
 import sys

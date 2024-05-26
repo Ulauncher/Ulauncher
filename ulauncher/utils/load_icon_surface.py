@@ -21,7 +21,7 @@ def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSur
             from ulauncher.utils.get_icon_path import get_icon_path
 
             icon = get_icon_path(icon, real_size) or DEFAULT_EXE_ICON
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, real_size, real_size)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, real_size, real_size) # 6%
         assert pixbuf
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
     except Exception as e:

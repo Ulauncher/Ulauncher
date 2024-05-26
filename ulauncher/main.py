@@ -68,7 +68,7 @@ def main() -> None:
         )
 
     if XDG_SESSION_TYPE != "X11":
-        logger.info("Layer shell: %s", ("Yes" if layer_shell.is_supported() else "No"))
+        logger.info("Layer shell: %s", ("Yes" if layer_shell.is_supported() else "No")) # 4%
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
@@ -82,7 +82,7 @@ def main() -> None:
     sys.excepthook = except_hook
 
     # Migrate user data to v6 compatible
-    v5_to_v6()
+    v5_to_v6() # 2%
 
     app = UlauncherApp()
 
