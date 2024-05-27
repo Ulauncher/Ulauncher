@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
+from functools import lru_cache
 from os.path import expanduser, isfile, join
 
 from gi.repository import Gtk
 
-icon_theme = Gtk.IconTheme.get_default()
+from ulauncher.utils.file_cache import file_cache
+
 logger = logging.getLogger()
 
+get_icon_theme = lru_cache(maxsize=1)(Gtk.IconTheme.get_default)
 
+
+@file_cache(expiry=timedelta(days=1))
 def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
     try:
         if icon and isinstance(icon, str):
@@ -20,7 +26,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
             if isfile(expanded_path):
                 return expanded_path
 
-            themed_icon = icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE)
+            themed_icon = get_icon_theme().lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE)
             if themed_icon:
                 return themed_icon.get_filename()
 

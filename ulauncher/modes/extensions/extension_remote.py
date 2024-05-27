@@ -8,7 +8,6 @@ from shutil import move, rmtree, which
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
-from urllib.request import urlopen, urlretrieve
 
 from ulauncher.config import API_VERSION, paths
 from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifest
@@ -108,6 +107,8 @@ class ExtensionRemote:
 
                 response = subprocess.check_output(["git", "ls-remote", self._git_dir]).decode().strip().split("\n")
             else:
+                from urllib.request import urlopen
+
                 with urlopen(f"{url}/info/refs?service=git-upload-pack") as reader:
                     response = reader.read().decode().strip().split("\n")
             if response:
@@ -173,6 +174,8 @@ class ExtensionRemote:
 
         else:
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
+                from urllib.request import urlretrieve
+
                 urlretrieve(self._get_download_url(commit_hash), tmp_file.name)
                 with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
                     untar(tmp_file.name, tmp_root_dir)
