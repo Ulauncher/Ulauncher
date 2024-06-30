@@ -264,9 +264,10 @@ class PreferencesServer:
     @route("/extension/set-prefs")
     async def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
         logger.info("Update extension preferences %s to %s", ext_id, data)
-        controller = ExtensionController.create(ext_id)
-        controller.save_user_preferences(data)
         events.emit("extension:update_preferences", ext_id, data)
+        # Note: Must save after emitting because the event above need access to
+        # both the new and old data
+        ExtensionController.create(ext_id).save_user_preferences(data)
 
     @route("/extension/check-update")
     async def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
