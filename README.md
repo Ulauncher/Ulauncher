@@ -5,7 +5,7 @@
 #### ⚠️ This is the branch for the unreleased [v6](https://github.com/Ulauncher/Ulauncher/issues/869) release. If you want the v5 branch version, go [here](https://github.com/Ulauncher/Ulauncher/tree/v5).
 We are currently working on Ulauncher v6, which is a huge rewrite. Until then we're only supporting the existing functionality in v5. No new features or improvements.
 
-We are not yet ready to make releases or pre-releases for Ulauncher 6, as the API is not yet set and further major changes may come.
+We are making pre-releases for Ulauncher 6, but the new extension API is not yet 100% set and further major changes may come.
 
 [Application Launcher for Linux 🐧](https://ulauncher.io)
 ================================
