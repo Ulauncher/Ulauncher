@@ -68,10 +68,13 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     new_prefs: dict[str, dict[str, Any]] = {"preferences": {}, "triggers": {}}
     controller = ExtensionController.create(ext_id)
     for id, pref in user_prefs.items():
-        if controller.manifest.triggers.get(id):
-            new_prefs["triggers"][id] = {"keyword": pref}
-        else:
-            new_prefs["preferences"][id] = pref
+        try:
+            if controller.manifest.triggers.get(id):
+                new_prefs["triggers"][id] = {"keyword": pref}
+            else:
+                new_prefs["preferences"][id] = pref
+        except AssertionError:
+            _logger.warning("Could not convert preferences for extension (probably uninstalled): %s", ext_id)
     return new_prefs
 
 
