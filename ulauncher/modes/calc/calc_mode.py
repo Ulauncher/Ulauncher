@@ -85,7 +85,7 @@ def eval_expr(expr: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def _is_enabled(query: str) -> bool:  # noqa: PLR0911
+def _is_enabled(query: str) -> bool:
     query = normalize_expr(query)
     try:
         node = ast.parse(query, mode="eval").body
@@ -95,9 +95,7 @@ def _is_enabled(query: str) -> bool:  # noqa: PLR0911
             # Check that left and right are valid constants if they are strings
             if isinstance(node.left, ast.Name) and node.left.id not in constants:
                 return False
-            if isinstance(node.right, ast.Name) and node.right.id not in constants:
-                return False
-            return True  # Allow any other variant
+            return not (isinstance(node.right, ast.Name) and node.right.id not in constants)
         if isinstance(node, ast.UnaryOp):
             # Allow for minus, but no other operators
             return isinstance(node.op, ast.USub)

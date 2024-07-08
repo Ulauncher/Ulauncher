@@ -121,8 +121,8 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
             return False
         if event_type == "action:legacy_run_many" and isinstance(data, list):
             keep_open = False
-            for action in data:
-                if _handle_action(action):
+            for action_ in data:
+                if _handle_action(action_):
                     keep_open = True
             return keep_open
         if event_type == "action:activate_custom":

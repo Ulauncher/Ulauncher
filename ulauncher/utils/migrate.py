@@ -78,7 +78,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     return new_prefs
 
 
-def v5_to_v6() -> None:  # noqa: PLR0912
+def v5_to_v6() -> None:
     # Convert extension prefs to JSON
     ext_prefs = Path(paths.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
