@@ -156,7 +156,7 @@
 
       <tr>
         <td>
-          <label for="disable-desktop-filters">Show all apps</label>
+          <label for="disable-desktop-filters">Include foreign desktop apps</label>
           <small>
             <p>
               Display all applications, even if they are configured to not show in the current desktop environment.
