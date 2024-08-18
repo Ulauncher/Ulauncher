@@ -43,7 +43,11 @@ def try_raise_app(app_id: str) -> bool:
 
             ewmh = EWMH()
             for win in reversed(ewmh.getClientListStacking()):
-                class_id, class_name = win.get_wm_class()
+                wm_class = win.get_wm_class()
+                if not wm_class:
+                    logger.warning('Could not get the WM class for "%s". Will not be able to activate it.', app_id)
+                    return False
+                class_id, class_name = wm_class
                 win_app_id = (class_id or "").lower()
                 if win_app_id == "thunar" and win.get_wm_name().startswith("Bulk Rename"):
                     # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
