@@ -11,6 +11,9 @@
         <p
           v-else-if="errorType === 'Incompatible'"
         >The extension is not compatible with this version of Ulauncher. Please report this issue to the extension developer, and attach the logs for details.</p>
+        <p
+          v-else-if="errorType === 'MissingInternals'"
+        >The extension is trying to import internal Ulauncher application methods which are not part of the extension API. This is not supported and it can break the extension any time Ulauncher changes, moves or removes internal code. Please report this issue to the extension developer.</p>
         <p v-else-if="errorType === 'MissingModule'">
           The extension crashed because it could not import module
           <code>{{ errorMessage }}</code>.

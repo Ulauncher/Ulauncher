@@ -11,7 +11,9 @@ from typing import Callable
 if sys.version_info >= (3, 8):
     from typing import Literal
 
-    ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "Incompatible", "Invalid"]
+    ExtensionRuntimeError = Literal[
+        "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
+    ]
 else:
     ExtensionRuntimeError = str
 
@@ -98,12 +100,7 @@ class ExtensionRuntime:
         if "ModuleNotFoundError" in error_msg:
             package_name = error_msg.split("'")[1].split(".")[0]
             if package_name == "ulauncher":
-                logger.error(
-                    "Extension tried to import Ulauncher modules which have been moved or removed. "
-                    "This is likely Ulauncher internals which were not part of the extension API. "
-                    "Extensions importing these can break at any Ulauncher release."
-                )
-                return "Incompatible", error_msg
+                return "MissingInternals", error_msg
             if package_name:
                 return "MissingModule", package_name
         if uptime_seconds < 1:
