@@ -96,7 +96,7 @@ class ExtensionRuntime:
         error_msg = "\n".join(self.recent_errors)
         logger.error('Extension "%s" exited with an error: %s', self.ext_id, error_msg)
         if "ModuleNotFoundError" in error_msg:
-            package_name = error_msg.split("'")[1]
+            package_name = error_msg.split("'")[1].split(".")[0]
             if package_name == "ulauncher":
                 logger.error(
                     "Extension tried to import Ulauncher modules which have been moved or removed. "
