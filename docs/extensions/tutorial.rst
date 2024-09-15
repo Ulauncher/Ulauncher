@@ -105,7 +105,7 @@ Copy the following code to ``main.py``::
 
 
   class DemoExtension(Extension):
-      def on_input(self, input_text, trigger_id):
+      def on_input(self, input_text: str, trigger_id: str):
           for i in range(5):
               yield Result(
                   name='Item %s' % i,
@@ -147,9 +147,9 @@ Basic API Concepts
 
     class DemoExtension(Extension):
 
-        def on_input(self, input_text, trigger_id):
-            # `input_text` (str) is the user input (after the keyword).
-            # `trigger_id` (str) is the id (key) of the trigger, as specified in the manifest.
+        def on_input(self, input_text: str, trigger_id: str):
+            # `input_text` is the user input (after the keyword).
+            # `trigger_id` is the id (key) of the trigger, as specified in the manifest.
 
             ...
 
@@ -161,7 +161,7 @@ Basic API Concepts
   ::
 
     class DemoExtension(Extension):
-        def on_input(self, input_text, trigger_id):
+        def on_input(self, input_text: str, trigger_id: str):
             for i in range(5):
                 yield Result(
                     name='Item %s' % i,
