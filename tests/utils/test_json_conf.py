@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import shutil
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -10,13 +13,13 @@ json_file = "/tmp/ulauncher-test/jsonconf.json"
 
 
 class TestJsonConf:
-    def setup_class(self):
+    def setup_class(self) -> None:
         Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
 
-    def teardown_class(self):
+    def teardown_class(self) -> None:
         shutil.rmtree("/tmp/ulauncher-test")
 
-    def test_attr_methods(self):
+    def test_attr_methods(self) -> None:
         jc = JsonConf()
         assert not hasattr(jc, "a")
         with pytest.raises(AttributeError):
@@ -25,7 +28,7 @@ class TestJsonConf:
         assert hasattr(jc, "a")
         assert jc.a is False
 
-    def test_setting_and_comparison(self):
+    def test_setting_and_comparison(self) -> None:
         jc = JsonConf()
         jc.a = 1
         jc.update({"b": 2}, c=3)
@@ -34,7 +37,7 @@ class TestJsonConf:
         assert JsonConf(b=2, a=1) == JsonConf({"a": 1, "b": 2})
         assert JsonConf(a=1, b=2) != JsonConf({"a": 1})
 
-    def test_new_file_file_cache(self):
+    def test_new_file_file_cache(self) -> None:
         file_path = "/tmp/ulauncher-test/jsonconf_test_cache.json"
         jc1 = JsonConf.load(file_path)
         assert not hasattr(jc1, "a")
@@ -43,7 +46,7 @@ class TestJsonConf:
         assert id(jc2) == id(jc1)  # tests that it's actually the same object in memory
         assert jc2.a == 1
 
-    def test_stringify(self):
+    def test_stringify(self) -> None:
         assert json_stringify(JsonConf(a=1, c=3, b=2)) == '{"a": 1, "b": 2, "c": 3}'
         assert json_stringify(JsonConf(a=1, c=3, b=2), sort_keys=False) == '{"a": 1, "c": 3, "b": 2}'
         assert json_stringify(JsonConf(a=1, b=2), indent=4) == '{\n    "a": 1,\n    "b": 2\n}'
@@ -51,7 +54,7 @@ class TestJsonConf:
         assert json_stringify(conf) == '{"d": 1}'
         assert json_stringify(conf, value_blacklist=[]) == '{"a": null, "b": [], "c": {}, "d": 1}'
 
-    def test_save(self):
+    def test_save(self) -> None:
         jc = JsonConf.load(json_file)
         jc.asdf = "xyz"
         jc.save()
@@ -60,7 +63,7 @@ class TestJsonConf:
         jc.save()
         assert json_load(json_file).get("asdf") == "zyx"
 
-    def test_save_external(self):
+    def test_save_external(self) -> None:
         # Check that JsonConf initiated w or w/o path saves to the path specified,
         # not the instance path
         file_path = "/tmp/ulauncher-test/jsonconf_save_as.json"
@@ -75,18 +78,18 @@ class TestJsonConf:
         assert json_load(file_path).get("bcd") == 234
         assert json_load(json_file).get("bcd") is None
 
-    def test_cannot_override_method(self):
+    def test_cannot_override_method(self) -> None:
         jc = JsonConf()
         with pytest.raises(KeyError):
-            jc.get = 1
+            jc.get = 1  # type: ignore[assignment, method-assign]
         assert callable(jc.get)
 
-    def test_inheritance(self):
+    def test_inheritance(self) -> None:
         class ClassWDefault(JsonConf):
             b = 1
             a = 2
 
-            def sum(self):
+            def sum(self) -> int:
                 return self.a + self.b
 
         class SubclassWDefault(ClassWDefault):
@@ -104,19 +107,19 @@ class TestJsonConf:
         inst.save()
         assert list(json_load(json_ko_file).keys()) == ["a", "b"]
 
-    def test_constructor_is_cloned(self):
+    def test_constructor_is_cloned(self) -> None:
         class ClassWDict(JsonConf):
-            subdict = {}
+            subdict: dict[str, str] = {}
 
         inst = ClassWDict()
         inst.subdict["k"] = "v"
         assert ClassWDict().subdict.get("k") is None
         assert inst.subdict.get("k") == "v"
 
-    def test_setitem_always_used(self):
+    def test_setitem_always_used(self) -> None:
         class UnderscorePrefix(JsonConf):
-            def __setitem__(self, key, value):
-                super().__setitem__("_" + key, value)
+            def __setitem__(self, key: str, value: Any, validate_type: bool = True) -> None:
+                super().__setitem__("_" + key, value, validate_type)
 
         data = UnderscorePrefix({"one": 1})
         data.update({"two": 2})
@@ -124,7 +127,7 @@ class TestJsonConf:
         data["four"] = 4
         assert json_stringify(data, sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'
 
-    def test_file_cache(self):
+    def test_file_cache(self) -> None:
         class C1(JsonConf):
             pass
 
