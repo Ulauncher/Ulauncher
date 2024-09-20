@@ -145,14 +145,13 @@ class ExtensionController:
 
     async def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
-        self.state.update(
+        self.state.save(
             commit_hash=commit_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
             updated_at=datetime.now().isoformat(),
             error_type="",
             error_message="",
         )
-        self.state.save()
 
     async def remove(self) -> None:
         if not self.is_manageable:
@@ -165,8 +164,7 @@ class ExtensionController:
 
         # If ^, then disable, else delete from db
         if self._path:
-            self.state.is_enabled = False
-            self.state.save()
+            self.state.save(is_enabled=False)
         elif self._state_path.is_file():
             self._state_path.unlink()
 
@@ -199,8 +197,7 @@ class ExtensionController:
         return has_update, commit_hash
 
     async def toggle_enabled(self, enabled: bool) -> bool:
-        self.state.update(is_enabled=enabled, error_type="", error_message="")
-        self.state.save()
+        self.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
             return await self.start()
         await self.stop()
@@ -212,8 +209,7 @@ class ExtensionController:
             def error_handler(error_type: str, error_msg: str) -> None:
                 self.is_running = False
                 extension_runtimes.pop(self.id, None)
-                self.state.update(error_type=error_type, error_message=error_msg)
-                self.state.save()
+                self.state.save(error_type=error_type, error_message=error_msg)
 
             try:
                 self.manifest.validate()

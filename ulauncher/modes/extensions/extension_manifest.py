@@ -195,8 +195,7 @@ class ExtensionManifest(JsonConf):
 
     def save_user_preferences(self, ext_id: str, data: Any) -> None:
         user_prefs_json = self._get_raw_preferences(ext_id)
-        user_prefs_json.update(data)
-        user_prefs_json.save()
+        user_prefs_json.save(data)
 
     @classmethod
     def load(cls, path: str | Path) -> ExtensionManifest:

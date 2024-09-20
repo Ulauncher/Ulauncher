@@ -100,8 +100,8 @@ class UlauncherApp(Gtk.Application):
                     "de_hotkey_unsupported", "Cannot create global shortcut", body, "app.show-preferences"
                 )
 
-            settings.hotkey_show_app = ""  # Remove json file setting so the notification won't show again
-            settings.save()
+            # Remove json file setting so the notification won't show again
+            settings.save(hotkey_show_app="")
 
     def show_notification(self, notification_id: str | None, title: str, body: str, default_action: str = "-") -> None:
         notification = Gio.Notification.new(title)

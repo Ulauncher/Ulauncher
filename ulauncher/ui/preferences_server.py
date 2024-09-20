@@ -164,8 +164,7 @@ class PreferencesServer:
             if value is True:
                 self.autostart_pref.stop()
 
-        self.settings.update({prop: value})
-        self.settings.save()
+        self.settings.save({prop: value})
 
         if prop == "show_tray_icon":
             events.emit("app:toggle_tray_icon", value)
@@ -234,15 +233,13 @@ class PreferencesServer:
     async def shortcut_update(self, shortcut: dict[str, Any]) -> None:
         logger.info("Add/Update shortcut: %s", json.dumps(shortcut))
         shortcuts = ShortcutsDb.load()
-        shortcuts[shortcut["id"]] = shortcut
-        shortcuts.save()
+        shortcuts.save({shortcut["id"]: shortcut})
 
     @route("/shortcut/remove")
     async def shortcut_remove(self, shortcut_id: str) -> None:
         logger.info("Remove shortcut: %s", json.dumps(shortcut_id))
         shortcuts = ShortcutsDb.load()
-        del shortcuts[shortcut_id]
-        shortcuts.save()
+        shortcuts.save({shortcut_id: None})
 
     @route("/extension/get-all")
     async def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:

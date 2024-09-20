@@ -109,16 +109,14 @@ def v5_to_v6() -> None:
     if legacy_recent_apps and settings.get("max_recent_apps") is None:
         # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
         # If people haven't changed their settings since 2020 it'll be set to 0
-        settings.update(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
-        settings.save()
+        settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
 
     # Migrate extension state to individual files
     extension_db = json_load(f"{paths.CONFIG}/extensions.json")
     for controller in ExtensionController.iterate():
         # only if they don't already exist
         if not controller.state.id and controller.id in extension_db:
-            controller.state.update(extension_db[controller.id])
-            controller.state.save()
+            controller.state.save(extension_db[controller.id])
 
     # Migrate autostart conf from XDG autostart file to systemd
     if FIRST_V6_RUN:
@@ -167,5 +165,4 @@ def v5_to_v6_destructive() -> None:
 
     settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
     _logger.info("Pruning settings")
-    settings.update({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})
-    settings.save()
+    settings.save({"blacklisted_desktop_dirs": None, "show_recent_apps": None, "show-recent-apps": None})

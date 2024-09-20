@@ -62,6 +62,10 @@ class TestJsonConf:
         jc.update(asdf="zyx")
         jc.save()
         assert json_load(json_file).get("asdf") == "zyx"
+        jc.save(asdf="yxz")
+        assert json_load(json_file).get("asdf") == "yxz"
+        jc.save({"asdf": "xzy"})
+        assert json_load(json_file).get("asdf") == "xzy"
 
     def test_save_external(self) -> None:
         # Check that JsonConf initiated w or w/o path saves to the path specified,
