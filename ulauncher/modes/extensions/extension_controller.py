@@ -87,7 +87,11 @@ class ExtensionController:
     @classmethod
     def create_from_url(cls, url: str) -> ExtensionController:
         remote = ExtensionRemote(url)
-        instance = cls(remote.ext_id)
+        if remote.ext_id in controller_cache:
+            instance = controller_cache[remote.ext_id]
+        else:
+            instance = cls(remote.ext_id)
+            controller_cache[remote.ext_id] = instance
         instance.remote = remote
         instance.state.url = url
         return instance
