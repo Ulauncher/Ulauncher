@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import TypeVar, cast
 
 from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.json_utils import json_load, json_save
@@ -38,8 +38,8 @@ class JsonConf(BaseDataClass):
         _file_instances[key] = instance
         return cast(T, instance)
 
-    def save(self, sort_keys: bool = True, indent: int = 2, value_blacklist: list[Any] | None = None) -> bool:
+    def save(self) -> bool:
         file_path = next((key[0] for key, inst in _file_instances.items() if inst == self), None)
         assert file_path
 
-        return json_save(self, file_path, indent, sort_keys, value_blacklist)
+        return json_save(self, file_path)
