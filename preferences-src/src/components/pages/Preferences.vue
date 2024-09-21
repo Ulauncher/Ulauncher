@@ -79,7 +79,10 @@
 
       <tr>
         <td>
-          <label for="grab_mouse_pointer">Don't hide after losing mouse focus</label>
+          <label for="grab_mouse_pointer">Grab mouse pointer focus</label>
+          <small>
+            <p>Prevents losing focus when using focus modes that follows the mouse to change focus to the window you hover over, ex "Sloppy focus mode".</p>
+          </small>
         </td>
         <td>
           <b-form-checkbox id="grab_mouse_pointer" v-model="grab_mouse_pointer"></b-form-checkbox>
