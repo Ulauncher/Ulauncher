@@ -79,6 +79,15 @@
 
       <tr>
         <td>
+          <label for="close_on_focus_out">Close Ulauncher when losing focus</label>
+        </td>
+        <td>
+          <b-form-checkbox id="close_on_focus_out" v-model="close_on_focus_out"></b-form-checkbox>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           <label for="grab_mouse_pointer">Grab mouse pointer focus</label>
           <small>
             <p>Prevents losing focus when using focus modes that follows the mouse to change focus to the window you hover over, ex "Sloppy focus mode".</p>
@@ -244,6 +253,7 @@ export default {
     ...Object.fromEntries([
       'autostart_enabled',
       'clear_previous_query',
+      'close_on_focus_out',
       'disable_desktop_filters',
       'grab_mouse_pointer',
       'jump_keys',
