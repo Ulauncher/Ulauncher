@@ -135,6 +135,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.set_visual(visual)
         self.apply_theme()
+        self.position_window()
 
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
@@ -142,7 +143,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # The correct time to use is the time of the user interaction requesting the focus, but we don't have access
         # to that, so we use `Gdk.CURRENT_TIME`, which is the same as passing 0.
         self.present_with_time(Gdk.CURRENT_TIME)
-        self.position_window()
+        super().show()
 
         if self.query:
             self.set_input(str(self.query))
@@ -150,7 +151,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # this will trigger to show frequent apps if necessary
             self.show_results([])
 
-        super().show()
         GLib.idle_add(self.init_listeners)
 
     def init_listeners(self) -> None:
