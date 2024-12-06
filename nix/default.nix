@@ -6,7 +6,7 @@
 , gdk-pixbuf
 , git
 , glib
-, gnome
+, adwaita-icon-theme
 , gnumake
 , gnused
 , gobject-introspection
@@ -83,7 +83,7 @@ let
 
     buildInputs = [
       glib
-      gnome.adwaita-icon-theme
+      adwaita-icon-theme
       gtk-layer-shell
       gtk3
       libappindicator
