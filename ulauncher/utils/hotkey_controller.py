@@ -49,7 +49,7 @@ def _set_hotkey(hotkey: str) -> None:
 
         logger.debug("Saving global shortcut '%s' for Gnome", hotkey)
         keybindings.set_value("custom-keybindings", GLib.Variant("as", enabled_keybindings))
-    elif DESKTOP_NAME == "XFCE":
+    elif DESKTOP_ID == "XFCE":
         cmd_prefix = ["xfconf-query", "--channel", "xfce4-keyboard-shortcuts"]
         all_shortcuts = subprocess.check_output([*cmd_prefix, "--list", "--verbose"]).decode().strip().split("\n")
         # Unset existing bindings
