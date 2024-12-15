@@ -15,15 +15,23 @@ from ulauncher.utils.systemd_controller import SystemdController
 logger = logging.getLogger()
 launch_command = f"gapplication launch {APP_ID}"
 plasma_service_controller = SystemdController("plasma-kglobalaccel")
-IS_PLASMA = bool(which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active())
-IS_SUPPORTED = "GNOME" in DESKTOP_NAME or DESKTOP_NAME in ("XFCE", "PANTHEON")
+DESKTOP_ID: str | None = None
+
+if bool(which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active()):
+    DESKTOP_ID = "PLASMA"
+elif DESKTOP_NAME in ("GNOME", "PANTHEON") or DESKTOP_NAME.endswith(":GNOME"):
+    DESKTOP_ID = "GNOME"
+elif DESKTOP_NAME == "XFCE":
+    DESKTOP_ID = "XFCE"
+
+IS_SUPPORTED = bool(DESKTOP_ID)
 
 
 def _set_hotkey(hotkey: str) -> None:
     if not hotkey:
         return
 
-    if DESKTOP_NAME in ("GNOME", "PANTHEON", "BUDGIE:GNOME"):
+    if DESKTOP_ID == "GNOME":
         base_schema = "org.gnome.settings-daemon.plugins.media-keys"
         spec_schema = f"{base_schema}.custom-keybinding"
         spec_path = f"/{spec_schema.replace('.', '/')}s/ulauncher/"
@@ -69,22 +77,22 @@ def _set_hotkey(hotkey: str) -> None:
 class HotkeyController:
     @staticmethod
     def is_supported() -> bool:
-        return IS_SUPPORTED or IS_PLASMA
+        return IS_SUPPORTED
 
     @staticmethod
     def is_plasma() -> bool:
-        return IS_PLASMA
+        return DESKTOP_ID == "PLASMA"
 
     @staticmethod
     def show_dialog() -> None:
-        if IS_PLASMA:
+        if DESKTOP_ID == "PLASMA":
             launch_detached(["systemsettings5", "kcm_keys"])
         elif IS_SUPPORTED:
             _set_hotkey(HotkeyDialog().run())
 
     @staticmethod
     def setup_default(default_hotkey: str) -> bool:
-        if IS_PLASMA:
+        if DESKTOP_ID == "PLASMA":
             hotkey = "Ctrl+Space"
             config_path = ["--file", "kglobalshortcutsrc", "--group", f"{APP_ID}.desktop", "--key"]
             config = subprocess.check_output(["kreadconfig5", *config_path, '"_launch"'])
