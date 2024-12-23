@@ -1,5 +1,6 @@
 black
 build
+lefthook
 mypy
 PyGObject-stubs
 pytest

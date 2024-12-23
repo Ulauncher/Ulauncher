@@ -1,0 +1,25 @@
+# NOTE: These scripts are intended to run very fast , not to become frustrating,
+# pytest was the clear bottleneck (and can't check only staged files), so it was not included.
+
+skip_lfs = true
+
+[pre-commit]
+parallel = true
+
+[pre-commit.commands.typos]
+glob = "*"
+run = "typos --force-exclude {staged_files}"
+
+[pre-commit.commands.black]
+glob = "*.py"
+run = "black {staged_files}"
+stage_fixed = true
+
+[pre-commit.commands.ruff]
+glob = "*.py"
+run = "ruff check --fix {staged_files}"
+stage_fixed = true
+
+[pre-commit.commands.mypy]
+glob = "*.py"
+run = "mypy {staged_files}"
