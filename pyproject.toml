@@ -55,7 +55,7 @@ target-version = "py37" # py37 is the lowest supported option
 lint.ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
   "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
-  "TCH001", "TCH002", "TCH003", # Performance best practice that does nothing for our use
+  "TC001", "TC002", "TC003", # Performance best practice that does nothing for our use
   "TD002", "TD003" # Allow TODOs and FIXMEs without author and link
 ]
 lint.select = [
