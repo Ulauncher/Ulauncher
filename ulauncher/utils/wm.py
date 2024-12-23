@@ -43,6 +43,9 @@ def try_raise_app(app_id: str) -> bool:
 
             ewmh = EWMH()
             for win in reversed(ewmh.getClientListStacking()):
+                if win is None:
+                    logger.warning("Client list stacking result window is None for %s", app_id)
+                    continue
                 wm_class = win.get_wm_class()
                 if not wm_class:
                     logger.warning('Could not get the WM class for "%s". Will not be able to activate it.', app_id)
