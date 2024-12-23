@@ -18,7 +18,7 @@ DESKTOP_NAME = os.environ.get("XDG_CURRENT_DESKTOP", "").upper() or "Unknown Des
 DISTRO = "Unknown Distro"
 IS_X11 = XDG_SESSION_TYPE == "X11"
 # This means either X11 or XWayland
-IS_X11_COMPATIBLE = IS_X11 or GDK_BACKEND and GDK_BACKEND.startswith("X11")
+IS_X11_COMPATIBLE = IS_X11 or (GDK_BACKEND and GDK_BACKEND.startswith("X11"))
 
 try:
     with open(pathlib.Path("/etc/os-release")) as stream:
