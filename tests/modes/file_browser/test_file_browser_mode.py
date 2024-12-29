@@ -11,6 +11,9 @@ class MockDirEntry:
         self._atime = atime
         self._is_file = is_file
 
+    def is_dir(self):
+        return not self._is_file
+
     def is_file(self):
         return self._is_file
 
