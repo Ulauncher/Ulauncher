@@ -14,24 +14,24 @@ class ExtensionEnvironment:
         self.venv_map: dict[str, set[str]] = {
             "test": set(
                     [
-                        "hello==1.0"
+                        "hello==1.0" # this is for testing purposes
                     ]
                 )
         }
 
-    def check_requirements(self) -> bool:
-        """check_requirements
-
-        Args:
-            ext_dir (Path): Path of the extension dir downloaded/cloned.
-
-        Returns:
-            bool: whether a requirements.txt file exists for the extension.
-        """
-
-        if exists(self.ext_dir / "requirements.txt"):
-            return True # it should be requirements.txt only, not requirement.txt
-        return False
+#     def check_requirements(self) -> bool:
+#         """check_requirements
+#
+#         Args:
+#             ext_dir (Path): Path of the extension dir downloaded/cloned.
+#
+#         Returns:
+#             bool: whether a requirements.txt file exists for the extension.
+#         """
+#
+#         if exists(self.ext_dir / "requirements.txt"):
+#             return True # it should be requirements.txt only, not requirement.txt
+#         return False
 
     def prep_extension(self):
         req_path: Path = self.ext_dir / "requirements.txt"
