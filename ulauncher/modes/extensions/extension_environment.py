@@ -9,46 +9,30 @@ from os.path import exists
 
 
 class ExtensionEnvironment:
-    def __init__(self, ext_dir: Path, venv_map: dict[str, set]) -> None:
-        self.ext_dir: Path = ext_dir
-        # self.venv_map: dict[str, set[str]] = {
-        #     "test": set(
-        #             [
-        #                 "hello==1.0" # this is for testing purposes
-        #             ]
-        #         )
-        # }
-
-    # def check_requirements(self) -> bool:
-        """check_requirements
+    def __init__(self, ext_dir: Path) -> None:
+        """_summary_
 
         Args:
-            ext_dir (Path): Path of the extension dir downloaded/cloned.
+            ext_dir (Path): location of the cloned/downloaded extension, usually
+                this is in $HOME/.local/ulauncher/
+            venv_map (dict[str, set]): _description_
+        """
+        self.ext_dir: Path = ext_dir
+
+    def check_requirements(self) -> bool:
+        """ Checks if the extension has a requirements.txt file.
 
         Returns:
-            bool: whether a requirements.txt file exists for the extension.
+            bool: Returns True if the extension contains a requirements.txt file,
+                False otherwise.
         """
 
-        # if exists(self.ext_dir / "requirements.txt"):
-        #     return True # it should be requirements.txt only, not requirement.txt
-        # return False
+        if exists(self.ext_dir / "requirements.txt"):
+            return True # it should be requirements.txt only, not requirement.txt
+        return False
 
     def prep_extension(self):
         req_path: Path = self.ext_dir / "requirements.txt"
-
-        # if not self.check_requirements():
-        #     self.create_sole_venv()
-
-        # with open(req_path, "r", encoding="utf-8") as req_file:
-        #     dependencies: set[str] = set(req_file.readlines())
-
-        # for venv in self.venv_map.keys():
-        #     if dependencies >= self.venv_map.get(venv): # type: ignore
-        #         self.create_sole_venv()
-        #     else:
-        #         continue
-
-            # self.install_ext(venv)
 
     def create_sole_venv(self):
         pass
