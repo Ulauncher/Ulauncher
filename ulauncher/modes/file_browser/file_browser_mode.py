@@ -21,12 +21,17 @@ class FileBrowserMode(BaseMode):
         return f"{query.lstrip()} "[0] in ("~", "/", "$")
 
     def list_files(self, path_str: str, sort_by_atime: bool = False) -> list[str]:
+        _paths: dict[os.DirEntry[str], float | str] = {}  # temporary dict for direntry and sort key
+        for path in os.scandir(path_str):
+            try:
+                _paths[path] = path.stat().st_atime if sort_by_atime else path.name.lower()
+            except OSError:  # ignore broken symlinks etc
+                continue
         paths = sorted(
-            os.scandir(path_str),
+            _paths.keys(),
             reverse=sort_by_atime,
-            key=lambda p: p.stat().st_atime if sort_by_atime else p.name.lower(),
+            key=lambda p: (p.is_dir(), _paths[p]),
         )
-        paths.sort(key=lambda p: p.is_file())
         return [p.name for p in paths]
 
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
