@@ -40,6 +40,9 @@ class ShortcutsDb(JsonConf):
             value["icon"] = fold_user_path(value["icon"])
         super().__setitem__(key, Shortcut(value), validate_type)
 
+    def contains_keyword(self, keyword: str) -> bool:
+        return any(shortcut.keyword == keyword for shortcut in self.values())
+
     @classmethod
     def load(cls) -> ShortcutsDb:  # type: ignore[override]
         file_path = Path(f"{paths.CONFIG}/shortcuts.json")

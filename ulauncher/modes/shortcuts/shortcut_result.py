@@ -6,6 +6,7 @@ from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.run_script import run_script
+from ulauncher.modes.shortcuts.shortcuts_db import ShortcutsDb
 
 
 class ShortcutResult(Result):
@@ -13,17 +14,29 @@ class ShortcutResult(Result):
     run_without_argument = False
     is_default_search = False
     cmd = ""
+    _shortcuts_db = None
+
+    @classmethod
+    def get_shortcuts_db(cls):
+        if cls._shortcuts_db is None:
+            cls._shortcuts_db = ShortcutsDb.load()
+        return cls._shortcuts_db
 
     def get_highlightable_input(self, query: Query) -> str | None:
         return str(query) if self.keyword != query.keyword else None
 
     def get_description(self, query: Query) -> str:
         description = "" if self.cmd.startswith("#!") else self.cmd
-
+        print(self)
         if self.run_without_argument:
             return "Press Enter to run the shortcut"
 
-        if self.is_default_search:
+        if query.startswith(self.keyword):
+            description = description[len(self.keyword) :].strip()
+
+        print(query.argument, query.keyword, self.keyword)
+        shortcuts_db = self.get_shortcuts_db()
+        if self.is_default_search and not shortcuts_db.contains_keyword(query.keyword):
             return description.replace("%s", query)
 
         if query.keyword == self.keyword and query.argument:
