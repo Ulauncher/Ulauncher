@@ -23,13 +23,13 @@ class ShortcutResult(Result):
         if self.run_without_argument:
             return "Press Enter to run the shortcut"
 
-        if self.is_default_search:
-            return description.replace("%s", query)
-
         if query.keyword == self.keyword:
             if not query.argument:
                 return "Type in your query and press Enter..."
             return description.replace("%s", query.argument)
+
+        if self.is_default_search:
+            return description.replace("%s", query)
 
         return description.replace("%s", "...")
 
