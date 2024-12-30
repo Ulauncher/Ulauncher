@@ -30,9 +30,6 @@ class ShortcutResult(Result):
         if self.run_without_argument:
             return "Press Enter to run the shortcut"
 
-        if query.startswith(self.keyword):
-            description = description[len(self.keyword) :].strip()
-
         shortcuts_db = self.get_shortcuts_db()
         if self.is_default_search and not shortcuts_db.contains_keyword(query.keyword):
             return description.replace("%s", query)
