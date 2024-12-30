@@ -4,15 +4,15 @@ Please read our General communication guidelines [here](CODE_OF_CONDUCT.md#Gener
 
 ## Code contributions
 
-Thank you for you interest in contributing to Ulauncher! We very much appreciate it.
+Thank you for your interest in contributing to Ulauncher! We very much appreciate it.
 
-Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straight forward to implement. Other issues may require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
+Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straightforward to implement. Other issues may require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
 
 Although there are no releases for it yet as of writing this, all the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the v6 (default) branch as the base branch and target for new pull requests, and check that your contributions haven't already been fixed there.
 
-### Setup Development Environment
+### Set Up Development Environment
 
-For the v6 branch you need the the following to setup the local build environment:
+For the v6 branch you need the following to set up the local build environment:
 
 * Git
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
@@ -114,6 +114,6 @@ Use the Ulauncher working branch (v6), and verify that the issue or feature hasn
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
 
-There are some more helpful developer and maintainer commands provided by using our `make` targets. Run `make` to lists them all.
+There are some more helpful developer and maintainer commands provided by using our `make` targets. Run `make` to list them all.
 
-If you have any questions, feel free to ask in a our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.
+If you have any questions, feel free to ask in our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.
