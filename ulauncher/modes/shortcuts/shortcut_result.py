@@ -17,7 +17,7 @@ class ShortcutResult(Result):
     _shortcuts_db = None
 
     @classmethod
-    def get_shortcuts_db(cls):
+    def get_shortcuts_db(cls) -> ShortcutsDb:
         if cls._shortcuts_db is None:
             cls._shortcuts_db = ShortcutsDb.load()
         return cls._shortcuts_db
