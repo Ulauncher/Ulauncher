@@ -26,10 +26,10 @@ class ShortcutResult(Result):
         if self.is_default_search:
             return description.replace("%s", query)
 
-        if query.keyword == self.keyword and query.argument:
+        if query.keyword == self.keyword:
+            if not query.argument:
+                return "Type in your query and press Enter..."
             return description.replace("%s", query.argument)
-        if query.keyword == self.keyword and not query.argument:
-            return "Type in your query and press Enter..."
 
         return description.replace("%s", "...")
 
