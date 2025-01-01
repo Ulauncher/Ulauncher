@@ -266,7 +266,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @property
     def query(self) -> Query:
-        return self.get_application().query  # type: ignore[no-any-return, union-attr]
+        return Query(self.get_application().query)  # type: ignore[union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider

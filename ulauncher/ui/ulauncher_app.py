@@ -9,7 +9,6 @@ from gi.repository import Gio, Gtk
 import ulauncher
 from ulauncher import config
 from ulauncher.config import APP_ID, FIRST_RUN
-from ulauncher.internals.query import Query
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -23,7 +22,7 @@ class UlauncherApp(Gtk.Application):
     # Gtk.Applications check if the app is already registered and if so,
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
-    _query = ""
+    query = ""
     _window: weakref.ReferenceType[UlauncherWindow] | None = None
     _preferences: weakref.ReferenceType[ulauncher.ui.windows.preferences_window.PreferencesWindow] | None = None
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
@@ -37,15 +36,11 @@ class UlauncherApp(Gtk.Application):
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
-    @property
-    def query(self) -> Query:
-        return Query(self._query)
-
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
-        self._query = value.lstrip()
+        self.query = value.lstrip()
         if update_input:
-            events.emit("window:set_input", self._query)
+            events.emit("window:set_input", self.query)
 
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
