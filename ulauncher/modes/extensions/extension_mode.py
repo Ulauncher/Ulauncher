@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import html
-from typing import Any, Generator
+from typing import Any, Iterator
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -46,7 +46,7 @@ class ExtensionMode(BaseMode):
         else:
             events.emit("mode:handle_action", action)
 
-    def get_triggers(self) -> Generator[Result, None, None]:
+    def get_triggers(self) -> Iterator[Result]:
         for controller in self.ext_socket_server.controllers.values():
             data_controller = controller.data_controller
             for trigger_id, trigger in data_controller.user_triggers.items():

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Generator
+from typing import Iterator
 
 from ulauncher.utils.fuzzy_search import get_matching_blocks
 
 
-def highlight_text(query: str, text: str) -> Generator[tuple[str, bool], None, None]:
+def highlight_text(query: str, text: str) -> Iterator[tuple[str, bool]]:
     block_index = 0
     for index, chars in get_matching_blocks(query, text)[0]:
         chars_len = len(chars)

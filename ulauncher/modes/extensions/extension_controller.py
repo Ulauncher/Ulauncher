@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from shutil import rmtree
-from typing import Any, Generator
+from typing import Any, Iterator
 from weakref import WeakValueDictionary
 
 from ulauncher.config import get_options, paths
@@ -97,7 +97,7 @@ class ExtensionController:
         return instance
 
     @classmethod
-    def iterate(cls) -> Generator[ExtensionController, None, None]:
+    def iterate(cls) -> Iterator[ExtensionController]:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)
 

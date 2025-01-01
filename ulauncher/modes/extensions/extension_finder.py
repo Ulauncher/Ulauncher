@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import os
-from typing import Generator
+from typing import Iterator
 
 from ulauncher.config import paths
 
@@ -26,7 +26,7 @@ def is_manageable(ext_path: str, user_ext_path: str = paths.USER_EXTENSIONS) -> 
     return os.path.dirname(ext_path) == user_ext_path and is_extension(ext_path)
 
 
-def locate_iter(ext_id: str, ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS) -> Generator[str, None, None]:
+def locate_iter(ext_id: str, ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS) -> Iterator[str]:
     """
     Yields all existing directories for given `ext_id`
     """
@@ -43,9 +43,7 @@ def locate(ext_id: str, ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS) -> str 
     return next(locate_iter(ext_id, ext_dirs=ext_dirs), None)
 
 
-def iterate(
-    ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS, duplicates: bool = False
-) -> Generator[tuple[str, str], None, None]:
+def iterate(ext_dirs: list[str] = paths.ALL_EXTENSIONS_DIRS, duplicates: bool = False) -> Iterator[tuple[str, str]]:
     """
     Yields `(ext_id, extension_path)` tuples found in a given extensions dirs
     """

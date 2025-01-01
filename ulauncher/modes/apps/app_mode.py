@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generator
+from typing import Iterator
 
 from gi.repository import Gio
 
@@ -11,7 +11,7 @@ from ulauncher.utils.settings import Settings
 
 
 class AppMode(BaseMode):
-    def get_triggers(self) -> Generator[AppResult, None, None]:
+    def get_triggers(self) -> Iterator[AppResult]:
         settings = Settings.load()
 
         if not settings.enable_application_mode:
