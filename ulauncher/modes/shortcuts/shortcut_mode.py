@@ -4,11 +4,11 @@ from typing import Any
 
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
-from ulauncher.modes.shortcuts.shortcuts_db import ShortcutsDb
+from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 
 
 class ShortcutMode(BaseMode):
-    shortcuts_db: dict[str, ShortcutResult]
+    shortcuts_db: dict[str, Shortcut]
 
     def __init__(self) -> None:
         self.shortcuts_db = ShortcutsDb.load()
@@ -19,7 +19,7 @@ class ShortcutMode(BaseMode):
         """
         return bool(self._get_active_shortcut(query))
 
-    def _get_active_shortcut(self, query: str) -> ShortcutResult | None:
+    def _get_active_shortcut(self, query: str) -> Shortcut | None:
         for s in self.shortcuts_db.values():
             if query.startswith(f"{s.keyword} ") or (query == s.keyword and s.run_without_argument):
                 return s
