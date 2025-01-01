@@ -34,9 +34,6 @@ def on_query_change(query: Query) -> None:
     """
     Iterate over all search modes and run first enabled.
     """
-    for mode in get_modes():
-        mode.on_query_change(query)
-
     active_mode = get_mode_from_query(query)
     if active_mode:
         handle_action(active_mode.handle_query(query))

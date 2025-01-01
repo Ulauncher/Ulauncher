@@ -13,11 +13,6 @@ class BaseMode:
         """
         return False
 
-    def on_query_change(self, _query: Query) -> None:
-        """
-        Triggered when user changes a search query
-        """
-
     def on_query_backspace(self, _query: Query) -> str | None:
         """
         Return string to override default backspace and set the query to that string
