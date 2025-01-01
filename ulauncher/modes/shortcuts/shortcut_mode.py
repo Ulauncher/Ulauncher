@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
-
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
+
+
+def convert_to_result(shortcut: Shortcut) -> ShortcutResult:
+    return ShortcutResult(**shortcut)
 
 
 class ShortcutMode(BaseMode):
@@ -26,9 +28,6 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def _create_items(self, shortcuts: list[dict[str, Any]]) -> list[ShortcutResult]:
-        return [ShortcutResult(**s) for s in shortcuts]
-
     def handle_query(self, query: str) -> list[ShortcutResult]:
         """
         @return Action object
@@ -38,10 +37,10 @@ class ShortcutMode(BaseMode):
             msg = "Query doesn't match any shortcut"
             raise RuntimeError(msg)
 
-        return [ShortcutResult(**shortcut)]
+        return [convert_to_result(shortcut)]
 
     def get_fallback_results(self) -> list[ShortcutResult]:
-        return self._create_items([s for s in self.shortcuts_db.values() if s["is_default_search"]])
+        return [convert_to_result(s) for s in self.shortcuts_db.values() if s["is_default_search"]]
 
     def get_triggers(self) -> list[ShortcutResult]:
-        return self._create_items(list(self.shortcuts_db.values()))
+        return [convert_to_result(s) for s in self.shortcuts_db.values()]
