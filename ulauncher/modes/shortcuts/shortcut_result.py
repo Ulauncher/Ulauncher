@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import re
-
-from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.shortcuts.run_script import run_script
+from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 
 
 class ShortcutResult(Result):
@@ -41,17 +38,10 @@ class ShortcutResult(Result):
         else:
             argument = ""
 
-        command = self.cmd.strip()
-        if argument and not self.run_without_argument:
-            command = command.replace("%s", argument)
+        if self.run_without_argument or not argument:
+            return run_shortcut(self.cmd)
 
-        if argument or self.run_without_argument:
-            if self._is_url():
-                return actions.open(command)
-            run_script(command, argument)
-            return False
+        if argument:
+            return run_shortcut(self.cmd, argument)
 
         return f"{self.keyword} "
-
-    def _is_url(self) -> bool:
-        return bool(re.match(r"^http(s)?://", self.cmd.strip()))
