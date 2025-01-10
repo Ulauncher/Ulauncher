@@ -86,6 +86,11 @@ def clipboard_store(data: str) -> None:
 
 
 @_events.on
+def activate_result(result: Result, query_str: str, alt: bool) -> None:
+    handle_action(result.on_activation(Query(query_str), alt))
+
+
+@_events.on
 def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> None:
     if not _handle_action(action):
         _events.emit("window:close")
