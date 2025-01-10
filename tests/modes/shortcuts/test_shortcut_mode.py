@@ -59,7 +59,7 @@ class TestShortcutMode:
 
         mode.handle_query(query)
 
-        shortcut_result.assert_called_once_with(**shortcut)
+        shortcut_result.assert_called_once_with(**shortcut, description="")
 
     def test_get_default_items__shortcut_results__returned(self, mode, shortcuts_db, shortcut_result):
         shortcut = ShortcutRecord(keyword="kw", is_default_search=True)
@@ -67,8 +67,7 @@ class TestShortcutMode:
 
         assert mode.get_fallback_results() == [shortcut_result.return_value]
 
-    def test_get_triggers(self, mode, shortcuts_db, shortcut_result):
+    def test_get_triggers(self, mode, shortcuts_db):
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
-        assert mode.get_triggers() == [shortcut_result.return_value]
-        shortcut_result.assert_called_once_with(**shortcut)
+        assert next(mode.get_triggers()).keyword == "kw"

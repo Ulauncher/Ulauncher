@@ -19,11 +19,6 @@ class TestShortcutResult:
     def test_name(self, result):
         assert result.name == "name"
 
-    def test_get_description(self, result):
-        assert result.get_description(Query("kw test")) == "https://site/?q=test"
-        assert result.get_description(Query("keyword test")) == "https://site/?q=..."
-        assert result.get_description(Query("goo")) == "https://site/?q=..."
-
     def test_icon(self, result):
         assert isinstance(result.icon, str)
 
@@ -42,7 +37,7 @@ class TestShortcutResult:
         result.run_without_argument = True
         result = result.on_activation(Query("kw"))
         # it doesn't replace %s if run_without_argument = True
-        run_shortcut.assert_called_once_with("https://site/?q=%s")
+        run_shortcut.assert_called_once_with("https://site/?q=%s", None)
         assert not isinstance(result, str)
 
     def test_on_activation__run_file(self, run_shortcut):

@@ -16,7 +16,7 @@ class Shortcut(JsonConf):
     cmd = ""
     icon = ""
     is_default_search = True
-    run_without_argument = False
+    run_without_argument = False  # Only used in ShortcutTrigger (not Result)
     added = 0
     id = ""
 
