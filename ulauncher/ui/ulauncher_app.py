@@ -129,9 +129,9 @@ class UlauncherApp(Gtk.Application):
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
 
-    def activate_query(self, query: str) -> None:
+    def activate_query(self, query_str: str) -> None:
         self.activate()
-        self.set_query(query)
+        self.set_query(query_str)
 
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:

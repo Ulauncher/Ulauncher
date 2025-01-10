@@ -324,8 +324,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return device_mapper.get_client_pointer()
 
     @events.on
-    def set_input(self, query: str) -> None:
-        self.input.set_text(query)
+    def set_input(self, query_str: str) -> None:
+        self.input.set_text(query_str)
         self.input.set_position(-1)
 
     @events.on

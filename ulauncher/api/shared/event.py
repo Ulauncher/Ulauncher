@@ -29,8 +29,8 @@ class KeywordQueryEvent(BaseEvent):
     Deprecated older variant of InputTriggerEvent
     """
 
-    def __init__(self, query: str):
-        self.query = Query(query)
+    def __init__(self, query_str: str):
+        self.query = Query(query_str)
         super().__init__([self.query])
 
     def get_keyword(self) -> str:

@@ -113,7 +113,7 @@ class Extension:
         self.subscribe(events["event:update_preferences"], PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_input(self, query: str, trigger_id: str) -> None:
+    def on_input(self, query_str: str, trigger_id: str) -> None:
         pass
 
     def on_launch(self, trigger_id: str) -> None:

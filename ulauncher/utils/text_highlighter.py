@@ -5,9 +5,9 @@ from typing import Iterator
 from ulauncher.utils.fuzzy_search import get_matching_blocks
 
 
-def highlight_text(query: str, text: str) -> Iterator[tuple[str, bool]]:
+def highlight_text(query_str: str, text: str) -> Iterator[tuple[str, bool]]:
     block_index = 0
-    for index, chars in get_matching_blocks(query, text)[0]:
+    for index, chars in get_matching_blocks(query_str, text)[0]:
         chars_len = len(chars)
         if index != block_index:
             yield (text[block_index:index], False)

@@ -51,9 +51,9 @@ class Result(BaseDataClass):
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         return [(self.name, 1.0), (self.description, 0.8)]
 
-    def search_score(self, query: str) -> float:
+    def search_score(self, query_str: str) -> float:
         if not self.searchable:
             return 0
         from ulauncher.utils.fuzzy_search import get_score
 
-        return max(get_score(query, field) * weight for field, weight in self.get_searchable_fields() if field)
+        return max(get_score(query_str, field) * weight for field, weight in self.get_searchable_fields() if field)

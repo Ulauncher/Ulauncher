@@ -8,8 +8,8 @@ from functools import lru_cache
 logger = logging.getLogger()
 
 
-def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
-    return SequenceMatcher(None, query, text).get_matching_blocks()
+def _get_matching_blocks_native(query_str: str, text: str) -> list[Match]:
+    return SequenceMatcher(None, query_str, text).get_matching_blocks()
 
 
 # Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
@@ -17,8 +17,8 @@ def _get_matching_blocks_native(query: str, text: str) -> list[Match]:
 try:
     from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found, unused-ignore]
 
-    def _get_matching_blocks(query: str, text: str) -> list[tuple[int, int, int]]:
-        return matching_blocks(editops(query, text), query, text)  # type: ignore[no-any-return, unused-ignore]
+    def _get_matching_blocks(query_str: str, text: str) -> list[tuple[int, int, int]]:
+        return matching_blocks(editops(query_str, text), query_str, text)  # type: ignore[no-any-return, unused-ignore]
 
 except ImportError:
     logger.info(
@@ -34,12 +34,12 @@ def _normalize(string: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def get_matching_blocks(query: str, text: str) -> tuple[list[tuple[int, str]], int]:
+def get_matching_blocks(query_str: str, text: str) -> tuple[list[tuple[int, str]], int]:
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block, number of characters that matched
     """
-    blocks = _get_matching_blocks(_normalize(query), _normalize(text))[:-1]
+    blocks = _get_matching_blocks(_normalize(query_str), _normalize(text))[:-1]
     output = []
     total_len = 0
     for _, text_index, length in blocks:
@@ -48,20 +48,20 @@ def get_matching_blocks(query: str, text: str) -> tuple[list[tuple[int, str]], i
     return output, total_len
 
 
-def get_score(query: str, text: str) -> float:
+def get_score(query_str: str, text: str) -> float:
     """
     Uses get_matching_blocks() to figure out how much of the query that matches the text,
     and tries to weight this to slightly favor shorter results and largely favor word matches
     :returns: number between 0 and 100
     """
 
-    if not query or not text:
+    if not query_str or not text:
         return 0.0
 
-    query_len = len(query)
+    query_len = len(query_str)
     text_len = len(text)
     max_len = max(query_len, text_len)
-    blocks, matching_chars = get_matching_blocks(query, text)
+    blocks, matching_chars = get_matching_blocks(query_str, text)
 
     # Ratio of the query that matches the text
     base_similarity = matching_chars / query_len

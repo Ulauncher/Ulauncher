@@ -85,10 +85,10 @@ def eval_expr(expr: str) -> str:
 
 
 @lru_cache(maxsize=1000)
-def _is_enabled(query: str) -> bool:
-    query = normalize_expr(query)
+def _is_enabled(query_str: str) -> bool:
+    query_str = normalize_expr(query_str)
     try:
-        node = ast.parse(query, mode="eval").body
+        node = ast.parse(query_str, mode="eval").body
         if isinstance(node, ast.Num):
             return True
         if isinstance(node, ast.BinOp):
@@ -104,7 +104,7 @@ def _is_enabled(query: str) -> bool:
     except SyntaxError:
         pass
     except Exception:
-        logger.warning("Calc mode parse error for query: '%s'", query)
+        logger.warning("Calc mode parse error for query: '%s'", query_str)
     return False
 
 
@@ -127,12 +127,12 @@ def _eval(node: ast.expr) -> Decimal:
 
 
 class CalcMode(BaseMode):
-    def is_enabled(self, query: str) -> bool:
-        return _is_enabled(query)
+    def is_enabled(self, query_str: str) -> bool:
+        return _is_enabled(query_str)
 
-    def handle_query(self, query: str) -> list[CalcResult]:
+    def handle_query(self, query_str: str) -> list[CalcResult]:
         try:
-            result = CalcResult(result=str(eval_expr(query)))
+            result = CalcResult(result=str(eval_expr(query_str)))
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]

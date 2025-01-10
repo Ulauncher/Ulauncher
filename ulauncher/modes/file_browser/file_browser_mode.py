@@ -11,14 +11,14 @@ class FileBrowserMode(BaseMode):
     LIMIT = 50
     THRESHOLD = 40
 
-    def is_enabled(self, query: str) -> bool:
+    def is_enabled(self, query_str: str) -> bool:
         """
         Enabled for queries like:
         ~/Downloads
         $USER/Downloads
         /usr/bin/foo
         """
-        return f"{query.lstrip()} "[0] in ("~", "/", "$")
+        return f"{query_str.lstrip()} "[0] in ("~", "/", "$")
 
     def list_files(self, path_str: str, sort_by_atime: bool = False) -> list[str]:
         _paths: dict[os.DirEntry[str], float | str] = {}  # temporary dict for direntry and sort key
@@ -37,9 +37,9 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: str) -> list[FileBrowserResult]:
+    def handle_query(self, query_str: str) -> list[FileBrowserResult]:
         try:
-            path = Path(os.path.expandvars(query.strip())).expanduser()
+            path = Path(os.path.expandvars(query_str.strip())).expanduser()
             results = []
 
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
@@ -72,7 +72,7 @@ class FileBrowserMode(BaseMode):
 
         return results
 
-    def on_query_backspace(self, query: str) -> str | None:
-        if "/" in query and len(query.strip().rstrip("/")) > 1:
-            return os.path.join(Path(query).parent, "")
+    def on_query_backspace(self, query_str: str) -> str | None:
+        if "/" in query_str and len(query_str.strip().rstrip("/")) > 1:
+            return os.path.join(Path(query_str).parent, "")
         return None
