@@ -41,9 +41,6 @@ class Result(BaseDataClass):
             return query.argument
         return str(query)
 
-    def get_description(self, _query: Query) -> str:
-        return self.description
-
     def on_activation(self, query: Query, alt: bool = False) -> bool | str | dict[str, str] | list[Result]:
         """
         Handle the main action

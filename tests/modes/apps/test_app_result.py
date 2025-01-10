@@ -52,7 +52,7 @@ class TestAppResult:
         assert app1.name == "TrueApp - Full Name"
 
     def test_get_description(self, app1):
-        assert app1.get_description(Query("q")) == "Your own yes-man"
+        assert app1.description == "Your own yes-man"
 
     def test_icon(self, app1):
         assert app1.icon == "dialog-yes"

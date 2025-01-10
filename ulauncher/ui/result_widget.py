@@ -80,12 +80,11 @@ class ResultWidget(Gtk.EventBox):
         item_container.set_property("margin-top", margin_y)
         item_container.set_property("margin-bottom", margin_y)
 
-        descr = result.get_description(query)
-        if descr and not result.compact:
+        if result.description and not result.compact:
             descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
             descr_label.get_style_context().add_class("item-descr")
             descr_label.get_style_context().add_class("item-text")
-            descr_label.set_text(unescape(descr))
+            descr_label.set_text(unescape(result.description))
             self.text_container.pack_start(descr_label, False, True, 0)
         self.highlight_name()
 

@@ -15,7 +15,7 @@ class TestCalcResult:
 
     def test_get_description(self):
         assert CalcResult(52).description == "Enter to copy to the clipboard"
-        assert CalcResult(error="message").get_description("q") == "message"
+        assert CalcResult(error="message").description == "message"
 
     def test_on_activation(self, copy_action):
         item = CalcResult(52)
