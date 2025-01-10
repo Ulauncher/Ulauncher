@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from ulauncher.internals.query import Query
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.file_browser.file_browser_result import FileBrowserResult
 
@@ -37,9 +38,9 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query_str: str) -> list[FileBrowserResult]:
+    def handle_query(self, query: Query) -> list[FileBrowserResult]:
         try:
-            path = Path(os.path.expandvars(query_str.strip())).expanduser()
+            path = Path(os.path.expandvars(query.strip())).expanduser()
             results = []
 
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
@@ -56,7 +57,7 @@ class FileBrowserMode(BaseMode):
 
             else:
                 file_names = self.list_files(closest_parent)
-                query = remainder
+                query = Query(remainder)
 
                 if not query.startswith("."):
                     file_names = self.filter_dot_files(file_names)

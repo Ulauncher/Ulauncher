@@ -8,6 +8,7 @@ import re
 from decimal import Decimal
 from functools import lru_cache
 
+from ulauncher.internals.query import Query
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcResult
 
@@ -130,9 +131,9 @@ class CalcMode(BaseMode):
     def is_enabled(self, query_str: str) -> bool:
         return _is_enabled(query_str)
 
-    def handle_query(self, query_str: str) -> list[CalcResult]:
+    def handle_query(self, query: Query) -> list[CalcResult]:
         try:
-            result = CalcResult(result=str(eval_expr(query_str)))
+            result = CalcResult(result=str(eval_expr(query)))
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]

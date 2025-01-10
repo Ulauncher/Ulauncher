@@ -42,16 +42,16 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def handle_query(self, query_str: str) -> list[ShortcutResult]:
+    def handle_query(self, query: Query) -> list[ShortcutResult]:
         """
         @return Action object
         """
-        shortcut = self._get_active_shortcut(query_str)
+        shortcut = self._get_active_shortcut(query)
         if not shortcut:
             msg = "Query doesn't match any shortcut"
             raise RuntimeError(msg)
 
-        return [convert_to_result(shortcut, Query(query_str))]
+        return [convert_to_result(shortcut, query)]
 
     def get_fallback_results(self) -> list[ShortcutResult]:
         return [convert_to_result(s) for s in self.shortcuts_db.values() if s["is_default_search"]]

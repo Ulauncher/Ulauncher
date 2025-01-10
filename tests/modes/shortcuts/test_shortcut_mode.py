@@ -1,5 +1,6 @@
 import pytest
 
+from ulauncher.internals.query import Query
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
 
@@ -46,14 +47,14 @@ class TestShortcutMode:
         assert mode.is_enabled(query)
 
     def test_handle_query__return_value__is(self, mode, shortcuts_db, shortcut_result):
-        query = "kw something"
+        query = Query("kw something")
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.handle_query(query)[0] == shortcut_result.return_value
 
     def test_handle_query__shortcut_result__is_called(self, mode, shortcuts_db, shortcut_result):
-        query = "kw something"
+        query = Query("kw something")
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
