@@ -13,7 +13,7 @@ class BaseMode:
         """
         return False
 
-    def on_query_backspace(self, _query: Query) -> str | None:
+    def on_query_backspace(self, _query_str: str) -> str | None:
         """
         Return string to override default backspace and set the query to that string
         """

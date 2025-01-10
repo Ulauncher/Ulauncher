@@ -7,7 +7,6 @@ from gi.repository import Gdk, GLib, Gtk
 
 import ulauncher
 from ulauncher.config import paths
-from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.ui import layer_shell
 from ulauncher.utils.eventbus import EventBus
@@ -146,7 +145,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         super().show()
 
         if self.query:
-            self.set_input(str(self.query))
+            self.set_input(self.query)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
@@ -265,8 +264,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @property
-    def query(self) -> Query:
-        return Query(self.get_application().query)  # type: ignore[union-attr]
+    def query(self) -> str:
+        return self.get_application().query  # type: ignore[no-any-return, union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         assert self._css_provider

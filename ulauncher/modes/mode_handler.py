@@ -30,32 +30,32 @@ def get_modes() -> list[BaseMode]:
     return _modes
 
 
-def on_query_change(query: Query) -> None:
+def on_query_change(query_str: str) -> None:
     """
     Iterate over all search modes and run first enabled.
     """
-    active_mode = get_mode_from_query(query)
+    active_mode = get_mode_from_query(query_str)
     if active_mode:
-        handle_action(active_mode.handle_query(query))
+        handle_action(active_mode.handle_query(Query(query_str)))
         return
     # No mode selected, which means search
-    results = search(query)
+    results = search(query_str)
     # If the search result is empty, add the default items for all other modes (only shortcuts currently)
-    if not results and query:
+    if not results and query_str:
         for mode in get_modes():
             res = mode.get_fallback_results()
             results.extend(res)
     handle_action(results)
 
 
-def on_query_backspace(query: Query) -> str | None:
-    mode = get_mode_from_query(query)
-    return mode.on_query_backspace(query) if mode else None
+def on_query_backspace(query_str: str) -> str | None:
+    mode = get_mode_from_query(Query(query_str))
+    return mode.on_query_backspace(query_str) if mode else None
 
 
-def get_mode_from_query(query: Query) -> BaseMode | None:
+def get_mode_from_query(query_str: str) -> BaseMode | None:
     for mode in get_modes():
-        if mode.is_enabled(query):
+        if mode.is_enabled(Query(query_str)):
             return mode
     return None
 
@@ -66,10 +66,10 @@ def refresh_triggers() -> None:
         _triggers.extend([*mode.get_triggers()])
 
 
-def search(query: Query, min_score: int = 50, limit: int = 50) -> list[Result]:
+def search(query_str: str, min_score: int = 50, limit: int = 50) -> list[Result]:
     # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
-    sorted_ = sorted(_triggers, key=lambda i: i.search_score(query), reverse=True)[:limit]
-    return list(filter(lambda searchable: searchable.search_score(query) > min_score, sorted_))
+    sorted_ = sorted(_triggers, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
+    return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
 
 @_events.on
