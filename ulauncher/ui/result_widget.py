@@ -27,9 +27,9 @@ class ResultWidget(Gtk.EventBox):
     title_box: Gtk.Box
     text_container: Gtk.Box
 
-    def __init__(self, result: Result, index: int, query: Query):
+    def __init__(self, result: Result, index: int, query_str: str):
         self.result = result
-        self.query = query
+        self.query = Query(query_str)
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
         inner_margin_x = int(12.0 * text_scaling_factor)
