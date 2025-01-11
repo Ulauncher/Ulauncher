@@ -169,11 +169,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def on_focus_in(self) -> None:
         if self.settings.grab_mouse_pointer:
-            ptr_dev = self.get_pointer_device()
-            gdk_window = self.get_window()
-            assert gdk_window, "Could not get the gdk.window to focus in"
-            result = ptr_dev.grab(gdk_window, Gdk.GrabOwnership.NONE, True, Gdk.EventMask.ALL_EVENTS_MASK, None, 0)
-            logger.debug("Focus in event, grabbing pointer: %s", result)
+            self.toggle_grab_pointer_device(True)
 
     def on_input_changed(self) -> None:
         """
@@ -306,7 +302,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if not save_query or self.settings.clear_previous_query:
             events.emit("app:set_query", "", update_input=False)
         if self.settings.grab_mouse_pointer:
-            self.get_pointer_device().ungrab(0)
+            self.toggle_grab_pointer_device(False)
         super().close()
         events.set_self(None)
         self.destroy()
@@ -315,12 +311,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.results_nav:
             self.results_nav.select(index)
 
-    def get_pointer_device(self) -> Gdk.Device:
+    def toggle_grab_pointer_device(self, grab: bool) -> None:
         window = self.get_window()
-        assert window
-        device_mapper = window.get_display().get_device_manager()
-        assert device_mapper
-        return device_mapper.get_client_pointer()
+        device_manager = window and window.get_display().get_device_manager()
+        pointer_device = device_manager and device_manager.get_client_pointer()
+        if not (window and device_manager and pointer_device):
+            logger.warning("Could not get the pointer device.")
+            return
+
+        if not grab:
+            pointer_device.ungrab(0)
+            return
+
+        grab_status = pointer_device.grab(window, Gdk.GrabOwnership.NONE, True, Gdk.EventMask.ALL_EVENTS_MASK, None, 0)
+        logger.debug("Focus in event, grabbing pointer: %s", grab_status)
 
     @events.on
     def set_input(self, query_str: str) -> None:
