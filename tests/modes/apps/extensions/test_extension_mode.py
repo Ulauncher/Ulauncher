@@ -18,7 +18,7 @@ class TestExtensionMode:
         mode = ExtensionMode()
         query = Query("kw something")
 
-        assert mode.is_enabled(query), "Mode is not enabled"
+        assert mode.parse_query_str(query), "Mode is not enabled"
 
     def test_is_enabled__query_only_contains_keyword__returns_false(self, ext_server):
         controller = mock.create_autospec(ExtensionSocketController)
@@ -26,14 +26,14 @@ class TestExtensionMode:
         mode = ExtensionMode()
         query = Query("kw")
 
-        assert not mode.is_enabled(query), "Mode is enabled"
+        assert not mode.parse_query_str(query), "Mode is enabled"
 
     def test_is_enabled__keyword__is_used_to_get_controller(self, ext_server):
         controller = mock.create_autospec(ExtensionSocketController)
         ext_server.get_controller_by_keyword.return_value = controller
         mode = ExtensionMode()
         query = Query("kw something")
-        mode.is_enabled(query)
+        mode.parse_query_str(query)
 
         ext_server.get_controller_by_keyword.assert_called_with("kw")
 

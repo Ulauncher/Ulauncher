@@ -12,14 +12,17 @@ class FileBrowserMode(BaseMode):
     LIMIT = 50
     THRESHOLD = 40
 
-    def is_enabled(self, query_str: str) -> bool:
+    def parse_query_str(self, query_str: str) -> Query | None:
         """
         Enabled for queries like:
         ~/Downloads
         $USER/Downloads
         /usr/bin/foo
         """
-        return f"{query_str.lstrip()} "[0] in ("~", "/", "$")
+        if f"{query_str.lstrip()} "[0] in ("~", "/", "$"):
+            # TODO: Query currently doesn't handle this (there is no prefix)
+            return Query(query_str)
+        return None
 
     def list_files(self, path_str: str, sort_by_atime: bool = False) -> list[str]:
         _paths: dict[os.DirEntry[str], float | str] = {}  # temporary dict for direntry and sort key

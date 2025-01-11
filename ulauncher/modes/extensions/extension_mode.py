@@ -20,8 +20,11 @@ class ExtensionMode(BaseMode):
         self.active_ext_id: str | None = None
         events.set_self(self)
 
-    def is_enabled(self, query: Query) -> bool:
-        return bool(self.ext_socket_server.get_controller_by_keyword(query.keyword)) and " " in query
+    def parse_query_str(self, query_str: str) -> Query | None:
+        query = Query(query_str)
+        if bool(self.ext_socket_server.get_controller_by_keyword(query.keyword)) and " " in query:
+            return query
+        return None
 
     def handle_query(self, query: Query) -> Any:
         events.emit("extension:on_query_change")

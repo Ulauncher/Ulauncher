@@ -29,11 +29,8 @@ class ShortcutMode(BaseMode):
     def __init__(self) -> None:
         self.shortcuts_db = ShortcutsDb.load()
 
-    def is_enabled(self, query_str: str) -> bool:
-        """
-        Return True if mode should be enabled for a query
-        """
-        return bool(self._get_active_shortcut(query_str))
+    def parse_query_str(self, query_str: str) -> Query | None:
+        return Query(query_str) if self._get_active_shortcut(query_str) else None
 
     def _get_active_shortcut(self, query_str: str) -> Shortcut | None:
         for s in self.shortcuts_db.values():

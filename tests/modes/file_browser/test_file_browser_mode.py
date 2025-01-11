@@ -38,16 +38,16 @@ class TestFileBrowserMode:
         return FileBrowserMode()
 
     def test_is_enabled(self, mode):
-        assert mode.is_enabled("~/Downloads")
-        assert mode.is_enabled("~")
-        assert mode.is_enabled("$USER/Videos")
-        assert mode.is_enabled("/usr/bin")
-        assert mode.is_enabled("/")
-        assert mode.is_enabled(" /foo/bar")
+        assert mode.parse_query_str("~/Downloads")
+        assert mode.parse_query_str("~")
+        assert mode.parse_query_str("$USER/Videos")
+        assert mode.parse_query_str("/usr/bin")
+        assert mode.parse_query_str("/")
+        assert mode.parse_query_str(" /foo/bar")
 
-        assert not mode.is_enabled("test")
-        assert not mode.is_enabled("+")
-        assert not mode.is_enabled(" ")
+        assert not mode.parse_query_str("test")
+        assert not mode.parse_query_str("+")
+        assert not mode.parse_query_str(" ")
 
     def test_list_files(self, mode):
         assert mode.list_files("path") == ["a", "B", "c", "D"]
