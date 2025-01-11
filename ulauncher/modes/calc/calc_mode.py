@@ -90,7 +90,7 @@ def _is_enabled(query_str: str) -> bool:
     query_str = normalize_expr(query_str)
     try:
         node = ast.parse(query_str, mode="eval").body
-        if isinstance(node, ast.Num):
+        if isinstance(node, ast.Constant):
             return True
         if isinstance(node, ast.BinOp):
             # Check that left and right are valid constants if they are strings
@@ -110,7 +110,7 @@ def _is_enabled(query_str: str) -> bool:
 
 
 def _eval(node: ast.expr) -> Decimal:
-    if isinstance(node, ast.Num):  # <number>
+    if isinstance(node, ast.Constant):  # <constant> (number)
         return Decimal(str(node.n))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](_eval(node.left), _eval(node.right))  # type: ignore[no-any-return, operator]
