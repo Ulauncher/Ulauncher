@@ -7,11 +7,9 @@ from ulauncher.internals.result import Result
 
 
 class BaseMode:
-    def is_enabled(self, _query: Query) -> bool:
-        """
-        Return True if mode should be enabled for a query
-        """
-        return False
+    def parse_query_str(self, _query_str: str) -> Query | None:
+        """return a Query if the input should be handled by the mode, else None"""
+        return None
 
     def on_query_backspace(self, _query_str: str) -> str | None:
         """

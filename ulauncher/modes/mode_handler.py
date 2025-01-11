@@ -34,9 +34,10 @@ def on_query_change(query_str: str) -> None:
     """
     Iterate over all search modes and run first enabled.
     """
-    active_mode = get_mode_from_query(query_str)
-    if active_mode:
-        handle_action(active_mode.handle_query(Query(query_str)))
+    result = parse_query_str(query_str)
+    if result:
+        active_mode, query = result
+        handle_action(active_mode.handle_query(query))
         return
     # No mode selected, which means search
     results = search(query_str)
@@ -49,14 +50,17 @@ def on_query_change(query_str: str) -> None:
 
 
 def on_query_backspace(query_str: str) -> str | None:
-    mode = get_mode_from_query(Query(query_str))
+    result = parse_query_str(query_str)
+    if result:
+        mode, _query = result
     return mode.on_query_backspace(query_str) if mode else None
 
 
-def get_mode_from_query(query_str: str) -> BaseMode | None:
+def parse_query_str(query_str: str) -> tuple[BaseMode, Query] | None:
     for mode in get_modes():
-        if mode.is_enabled(Query(query_str)):
-            return mode
+        query = mode.parse_query_str(query_str)
+        if query:
+            return mode, query
     return None
 
 
