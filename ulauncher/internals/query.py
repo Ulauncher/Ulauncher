@@ -16,7 +16,9 @@ class Query(str):
         return self._get_components()[1]
 
     def get_keyword(self) -> str:
+        # TODO: Add deprecation warning
         return self.keyword
 
     def get_argument(self, default: str | None = None) -> str | None:
+        # TODO: Add deprecation warning
         return self.argument or default

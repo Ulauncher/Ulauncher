@@ -24,6 +24,7 @@ class InputTriggerEvent(BaseEvent):
     """
 
 
+# TODO: Add deprecation warning
 class KeywordQueryEvent(BaseEvent):
     """
     Deprecated older variant of InputTriggerEvent
