@@ -24,7 +24,7 @@ jobs:
         run: make pytest
       - name: build preferences
         run: make prefs FORCE=1
-      - uses: cachix/install-nix-action@v22
+      - uses: cachix/install-nix-action@v30
       - name: make nix-build
         run: make nix-build
         timeout-minutes: 5
