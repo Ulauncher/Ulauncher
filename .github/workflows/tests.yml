@@ -24,10 +24,13 @@ jobs:
         run: make pytest
       - name: build preferences
         run: make prefs FORCE=1
+      - name: build docs
+        run: make docs
+  nix-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v30
       - name: make nix-build
         run: make nix-build
         timeout-minutes: 5
-      - name: build docs
-        run: make docs
-
