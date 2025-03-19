@@ -59,5 +59,6 @@ def launch_app(desktop_entry_name: str) -> bool:
         logger.error("No command to run %s", app_id)
     else:
         logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, cmd)
-        launch_detached(cmd, app_dir)
+        working_dir = app.get_string("Path") or app_dir
+        launch_detached(cmd, working_dir)
     return True
