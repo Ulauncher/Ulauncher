@@ -39,7 +39,7 @@ def detach_child() -> None:
         os.dup2(null_fd, orig_fd)
 
 
-def launch_detached(cmd: list[str]) -> None:
+def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
     use_systemd_run = SystemdController("ulauncher").is_active()
     if use_systemd_run:
         cmd = ["systemd-run", "--user", "--scope", *cmd]
@@ -57,6 +57,8 @@ def launch_detached(cmd: list[str]) -> None:
             envp=envp,
             flags=GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.SEARCH_PATH,
             child_setup=None if use_systemd_run else detach_child,
+            # the python gi wrapper has a bug, not actually allowing to pass working_directory as None
+            **({"working_directory": working_dir} if working_dir else {}),
         )
     except Exception:
         logger.exception('Could not launch "%s"', cmd)

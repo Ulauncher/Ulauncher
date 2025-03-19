@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+import os
 import re
 import shlex
 from pathlib import Path
@@ -16,6 +19,7 @@ def launch_app(desktop_entry_name: str) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
     app = Gio.DesktopAppInfo.new(desktop_entry_name)
+    app_dir: str | None = None
     if not app:
         logger.error("Could not load app %s", desktop_entry_name)
         return False
@@ -28,6 +32,7 @@ def launch_app(desktop_entry_name: str) -> bool:
     desktop_entry_path = app.get_filename()
     if desktop_entry_path:
         app_exec = app_exec.replace("%k", desktop_entry_path)
+        app_dir = os.path.dirname(desktop_entry_path)
 
     # strip field codes %f, %F, %u, %U, etc
     app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
@@ -54,5 +59,5 @@ def launch_app(desktop_entry_name: str) -> bool:
         logger.error("No command to run %s", app_id)
     else:
         logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, cmd)
-        launch_detached(cmd)
+        launch_detached(cmd, app_dir)
     return True
