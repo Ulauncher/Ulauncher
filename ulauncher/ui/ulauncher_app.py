@@ -28,7 +28,7 @@ class UlauncherApp(Gtk.Application):
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
-        return cast(UlauncherApp, get_instance(super(), self, *args, **kwargs))
+        return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)

@@ -1,4 +1,5 @@
 # mypy: ignore-errors
+# ruff: noqa: PGH004
 # ruff: noqa
 
 """

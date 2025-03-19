@@ -36,7 +36,7 @@ class JsonConf(BaseDataClass):
         instance = _file_instances.get(key, cls())
         instance.update(data)
         _file_instances[key] = instance
-        return cast(T, instance)
+        return cast("T", instance)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
