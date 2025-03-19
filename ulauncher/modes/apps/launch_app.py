@@ -19,10 +19,16 @@ def launch_app(desktop_entry_name: str) -> bool:
     if not app:
         logger.error("Could not load app %s", desktop_entry_name)
         return False
+
     app_exec = app.get_commandline()
     if not app_exec:
         logger.error("Could not get Exec for app %s", app_id)
         return False
+
+    desktop_entry_path = app.get_filename()
+    if desktop_entry_path:
+        app_exec = app_exec.replace("%k", desktop_entry_path)
+
     # strip field codes %f, %F, %u, %U, etc
     app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
     app_wm_id = (app.get_string("StartupWMClass") or Path(app_exec).name).lower()
