@@ -20,7 +20,7 @@ class TestExtensionMode:
 
         assert mode.is_enabled(query), "Mode is not enabled"
 
-    def xtest_is_enabled__query_only_contains_keyword__returns_false(self, ext_server):
+    def test_is_enabled__query_only_contains_keyword__returns_false(self, ext_server):
         controller = mock.create_autospec(ExtensionSocketController)
         ext_server.get_controller_by_keyword.return_value = controller
         mode = ExtensionMode()
