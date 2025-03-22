@@ -8,6 +8,7 @@ from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 class ShortcutResult(Result):
     searchable = True
     is_default_search = False
+    run_without_argument = False
     cmd = ""
 
     def get_highlightable_input(self, query: Query) -> str | None:
@@ -15,4 +16,6 @@ class ShortcutResult(Result):
 
     def on_activation(self, query: Query, _alt: bool = False) -> bool | str | dict[str, str]:
         argument = query.argument or "" if query.keyword == self.keyword else str(query)
-        return run_shortcut(self.cmd, argument or None)
+        if argument or self.run_without_argument:
+            return run_shortcut(self.cmd, argument)
+        return True
