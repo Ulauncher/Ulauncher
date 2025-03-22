@@ -31,17 +31,17 @@ class KeywordQueryEvent(BaseEvent):
     """
 
     def __init__(self, query_str: str):
-        self.query = Query(query_str)
+        self.query = Query.parse_str(query_str)
         super().__init__([self.query])
 
     def get_keyword(self) -> str:
-        return self.query.keyword
+        return self.query.keyword or ""
 
     def get_query(self) -> Query:
         return self.query
 
     def get_argument(self) -> str:
-        return self.query.argument
+        return self.query.argument or ""
 
 
 class ItemEnterEvent(BaseEvent):

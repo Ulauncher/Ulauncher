@@ -30,7 +30,7 @@ def get_modes() -> list[BaseMode]:
     return _modes
 
 
-def on_query_change(query_str: str) -> None:
+def handle_query(query_str: str) -> Query:
     """
     Iterate over all search modes and run first enabled.
     """
@@ -38,7 +38,7 @@ def on_query_change(query_str: str) -> None:
     if result:
         active_mode, query = result
         handle_action(active_mode.handle_query(query))
-        return
+        return query
     # No mode selected, which means search
     results = search(query_str)
     # If the search result is empty, add the default items for all other modes (only shortcuts currently)
@@ -47,13 +47,15 @@ def on_query_change(query_str: str) -> None:
             res = mode.get_fallback_results()
             results.extend(res)
     handle_action(results)
+    return Query(None, query_str)
 
 
 def on_query_backspace(query_str: str) -> str | None:
     result = parse_query_str(query_str)
     if result:
         mode, _query = result
-    return mode.on_query_backspace(query_str) if mode else None
+        return mode.on_query_backspace(query_str)
+    return None
 
 
 def parse_query_str(query_str: str) -> tuple[BaseMode, Query] | None:
@@ -90,8 +92,8 @@ def clipboard_store(data: str) -> None:
 
 
 @_events.on
-def activate_result(result: Result, query_str: str, alt: bool) -> None:
-    handle_action(result.on_activation(Query(query_str), alt))
+def activate_result(result: Result, query: Query, alt: bool) -> None:
+    handle_action(result.on_activation(query, alt))
 
 
 @_events.on

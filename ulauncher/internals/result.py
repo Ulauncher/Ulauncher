@@ -37,7 +37,7 @@ class Result(BaseDataClass):
         return self.icon
 
     def get_highlightable_input(self, query: Query) -> str | None:
-        if self.keyword and self.keyword == query.keyword:
+        if not self.keyword or self.keyword == query.keyword:
             return query.argument
         return str(query)
 
