@@ -16,7 +16,7 @@ def get_description(shortcut: Shortcut, query: Query | None = None) -> str:
         if not query.argument:
             return "Type in your query and press Enter..."
         return description.replace("%s", query.argument)
-    return description.replace("%s", query or "...")
+    return description.replace("%s", str(query) if query else "...")
 
 
 def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> ShortcutResult:
@@ -30,11 +30,12 @@ class ShortcutMode(BaseMode):
         self.shortcuts_db = ShortcutsDb.load()
 
     def parse_query_str(self, query_str: str) -> Query | None:
-        return Query(query_str) if self._get_active_shortcut(query_str) else None
+        query = Query.parse_str(query_str)
+        return query if self._get_active_shortcut(query) else None
 
-    def _get_active_shortcut(self, query_str: str) -> Shortcut | None:
+    def _get_active_shortcut(self, query: Query) -> Shortcut | None:
         for s in self.shortcuts_db.values():
-            if query_str.startswith(f"{s.keyword} ") or (query_str == s.keyword and s.run_without_argument):
+            if query.keyword == s.keyword and (query.is_active or s.run_without_argument):
                 return s
 
         return None

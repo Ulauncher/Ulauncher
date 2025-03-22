@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import pytest
 
+from ulauncher.internals.query import Query
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
 
 
@@ -68,17 +69,17 @@ class TestCalcMode:
         assert eval_expr("asinh(6) + atanh(0.9) + ln(0.7)") == "3.6073243982894"
 
     def test_handle_query(self, mode):
-        assert mode.handle_query("3+2")[0].result == "5"
-        assert mode.handle_query("3+2*")[0].result == "5"
-        assert mode.handle_query("2-2")[0].result == "0"
-        assert mode.handle_query("5%2")[0].result == "1"
+        assert mode.handle_query(Query(None, "3+2"))[0].result == "5"
+        assert mode.handle_query(Query(None, "3+2*"))[0].result == "5"
+        assert mode.handle_query(Query(None, "2-2"))[0].result == "0"
+        assert mode.handle_query(Query(None, "5%2"))[0].result == "1"
 
     def test_handle_query__invalid_expr(self, mode):
-        [invalid_result] = mode.handle_query("3++")
+        [invalid_result] = mode.handle_query(Query(None, "3++"))
         assert invalid_result.name == "Error!"
         assert invalid_result.description == "Invalid expression"
-        assert mode.handle_query("6 2")[0].name == "Error!"
-        assert mode.handle_query("()*2")[0].name == "Error!"
-        assert mode.handle_query("a+b")[0].name == "Error!"
-        assert mode.handle_query("sqrt()+1")[0].name == "Error!"
-        assert mode.handle_query("2pi")[0].name == "Error!"
+        assert mode.handle_query(Query(None, "6 2"))[0].name == "Error!"
+        assert mode.handle_query(Query(None, "()*2"))[0].name == "Error!"
+        assert mode.handle_query(Query(None, "a+b"))[0].name == "Error!"
+        assert mode.handle_query(Query(None, "sqrt()+1"))[0].name == "Error!"
+        assert mode.handle_query(Query(None, "2pi"))[0].name == "Error!"

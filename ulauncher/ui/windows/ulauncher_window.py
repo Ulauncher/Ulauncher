@@ -7,6 +7,7 @@ from gi.repository import Gdk, GLib, Gtk
 
 import ulauncher
 from ulauncher.config import paths
+from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.ui import layer_shell
 from ulauncher.utils.eventbus import EventBus
@@ -25,6 +26,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
+    query: Query = Query(None, "")
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         super().__init__(
@@ -144,8 +146,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         super().show()
 
-        if self.query:
-            self.set_input(self.query)
+        if self.query_str:
+            self.set_input(self.query_str)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
@@ -156,8 +158,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         from ulauncher.modes import mode_handler
 
         mode_handler.refresh_triggers()
-        if self.query:
-            mode_handler.on_query_change(self.query)
+        if self.query_str:
+            self.query = mode_handler.handle_query(self.query_str)
 
     ######################################
     # GTK Signal Handlers
@@ -178,7 +180,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         events.emit("app:set_query", self.input.get_text(), update_input=False)
         from ulauncher.modes import mode_handler
 
-        mode_handler.on_query_change(self.query)
+        self.query = mode_handler.handle_query(self.query_str)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -210,11 +212,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             keyname == "BackSpace"
             and not ctrl
             and not entry_widget.get_selection_bounds()
-            and entry_widget.get_position() == len(self.query)
+            and entry_widget.get_position() == len(self.query_str)
         ):
             from ulauncher.modes import mode_handler
 
-            new_query = mode_handler.on_query_backspace(self.query)
+            new_query = mode_handler.on_query_backspace(self.query_str)
             if new_query is not None:
                 events.emit("app:set_query", new_query)
                 return True
@@ -260,7 +262,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @property
-    def query(self) -> str:
+    def query_str(self) -> str:
         return self.get_application().query  # type: ignore[no-any-return, union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
@@ -352,7 +354,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             from ulauncher.ui.item_navigation import ItemNavigation
 
             self.results_nav = ItemNavigation(result_widgets)
-            self.results_nav.select_default(self.query)
+            self.results_nav.select_default(self.query_str)
 
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
