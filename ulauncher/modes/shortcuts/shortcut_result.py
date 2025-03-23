@@ -17,5 +17,5 @@ class ShortcutResult(Result):
     def on_activation(self, query: Query, _alt: bool = False) -> bool | str | dict[str, str]:
         argument = query.argument or "" if query.keyword == self.keyword else str(query)
         if argument or self.run_without_argument:
-            return run_shortcut(self.cmd, argument)
+            return run_shortcut(self.cmd, argument or None)
         return True
