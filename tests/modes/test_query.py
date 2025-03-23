@@ -3,20 +3,11 @@ from ulauncher.internals.query import Query
 
 class TestQuery:
     def test_keyword(self):
-        assert Query.parse_str("kw").keyword == "kw"
-        assert Query.parse_str("kw arg").keyword == "kw"
-        assert Query("kw", "arg").keyword == "kw"
-        assert Query("kw", None).keyword == "kw"
-        assert not Query(None, None).keyword
+        assert Query("kw arg").keyword == "kw"
+        assert Query("kw").keyword == "kw"
+        assert not Query("").keyword
 
     def test_argument(self):
-        assert Query.parse_str("kw arg").argument == "arg"
-        assert Query("kw", "arg").argument == "arg"
-        assert not Query.parse_str("kw").argument
-        assert not Query("kw", None).argument
-        assert not Query(None, None).argument
-
-    def test_is_active(self):
-        assert Query.parse_str("kw arg").is_active
-        assert Query.parse_str("kw ").is_active
-        assert not Query.parse_str("kw").is_active
+        assert Query("kw arg text").argument == "arg text"
+        assert not Query("kw").argument
+        assert not Query("").argument

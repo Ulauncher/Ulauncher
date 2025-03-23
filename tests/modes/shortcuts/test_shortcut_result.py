@@ -23,25 +23,25 @@ class TestShortcutResult:
         assert isinstance(result.icon, str)
 
     def test_on_activation(self, result, run_shortcut):
-        result = result.on_activation(Query("kw", "test"))
+        result = result.on_activation(Query("kw test"))
         run_shortcut.assert_called_once_with("https://site/?q=%s", "test")
         assert not isinstance(result, str)
 
     def test_on_activation__default_search(self, result, run_shortcut):
         result.is_default_search = True
-        result = result.on_activation(Query(None, "search query"))
+        result = result.on_activation(Query("search query"))
         run_shortcut.assert_called_once_with("https://site/?q=%s", "search query")
         assert not isinstance(result, str)
 
     def test_on_activation__run_without_arguments(self, result, run_shortcut):
         result.run_without_argument = True
-        result = result.on_activation(Query("kw", None))
+        result = result.on_activation(Query("kw"))
         # it doesn't replace %s if run_without_argument = True
         run_shortcut.assert_called_once_with("https://site/?q=%s", None)
         assert not isinstance(result, str)
 
     def test_on_activation__run_file(self, run_shortcut):
         result = ShortcutResult(keyword="kw", name="name", cmd="/usr/bin/something/%s", icon="icon_path")
-        result.on_activation(Query("kw", "query"))
+        result.on_activation(Query("kw query"))
         # Scripts should support both %s and arguments
         run_shortcut.assert_called_once_with("/usr/bin/something/%s", "query")

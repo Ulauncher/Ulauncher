@@ -22,6 +22,9 @@ class FileBrowserResult(Result):
             icon=get_icon_from_path(path),
         )
 
+    def get_highlightable_input(self, query: Query) -> str | None:
+        return basename(query)
+
     def on_activation(self, _query: Query, alt: bool = False) -> str | dict[str, str] | list[Result]:
         if not alt:
             if isdir(self.path):

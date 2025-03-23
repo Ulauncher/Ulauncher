@@ -2,7 +2,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from ulauncher.internals.query import Query
 from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
 
 
@@ -58,10 +57,8 @@ class TestFileBrowserMode:
         assert mode.filter_dot_files(["a", ".b", "c", ".d"]) == ["a", "c"]
 
     def test_handle_query__path_from_q_exists__dir_listing_rendered(self):
-        query = Query(None, "/tmp/")
-        flattened_results = [str(r.path) for r in FileBrowserMode().handle_query(query)]
+        flattened_results = [str(r.path) for r in FileBrowserMode().handle_query("/tmp/")]
         assert flattened_results == ["/tmp/B", "/tmp/D", "/tmp/c", "/tmp/a"]
 
     def test_handle_query__invalid_path__empty_list_rendered(self, mode):
-        query = Query(None, "~~")
-        assert mode.handle_query(query) == []
+        assert mode.handle_query("~~") == []

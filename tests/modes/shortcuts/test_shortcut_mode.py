@@ -47,14 +47,14 @@ class TestShortcutMode:
         assert mode.parse_query_str(query)
 
     def test_handle_query__return_value__is(self, mode, shortcuts_db, shortcut_result):
-        query = Query("kw", "something")
+        query = Query("kw something")
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.handle_query(query)[0] == shortcut_result.return_value
 
     def test_handle_query__shortcut_result__is_called(self, mode, shortcuts_db, shortcut_result):
-        query = Query("kw", "something")
+        query = Query("kw something")
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 

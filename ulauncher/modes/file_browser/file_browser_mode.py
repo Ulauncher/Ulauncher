@@ -20,7 +20,8 @@ class FileBrowserMode(BaseMode):
         /usr/bin/foo
         """
         if f"{query_str.lstrip()} "[0] in ("~", "/", "$"):
-            return Query(None, query_str)
+            # TODO: Query currently doesn't handle this (there is no prefix)
+            return Query(query_str)
         return None
 
     def list_files(self, path_str: str, sort_by_atime: bool = False) -> list[str]:
@@ -42,10 +43,7 @@ class FileBrowserMode(BaseMode):
 
     def handle_query(self, query: Query) -> list[FileBrowserResult]:
         try:
-            path_str = query.argument
-            if not path_str:
-                return []
-            path = Path(os.path.expandvars(path_str.strip())).expanduser()
+            path = Path(os.path.expandvars(query.strip())).expanduser()
             results = []
 
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
@@ -62,15 +60,15 @@ class FileBrowserMode(BaseMode):
 
             else:
                 file_names = self.list_files(closest_parent)
-                query = Query(None, remainder)
+                query = Query(remainder)
 
-                if not path_str.startswith("."):
+                if not query.startswith("."):
                     file_names = self.filter_dot_files(file_names)
 
                 from ulauncher.utils.fuzzy_search import get_score
 
-                sorted_files = sorted(file_names, key=lambda fn: get_score(path_str, fn), reverse=True)
-                filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
+                sorted_files = sorted(file_names, key=lambda fn: get_score(query, fn), reverse=True)
+                filtered = list(filter(lambda fn: get_score(query, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
                 results = [FileBrowserResult(os.path.join(closest_parent, name)) for name in filtered]
 
         except (RuntimeError, OSError):

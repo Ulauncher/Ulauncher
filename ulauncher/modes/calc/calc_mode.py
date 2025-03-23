@@ -129,11 +129,12 @@ def _eval(node: ast.expr) -> Decimal:
 
 class CalcMode(BaseMode):
     def parse_query_str(self, query_str: str) -> Query | None:
-        return Query(None, query_str) if _is_enabled(query_str) else None
+        # TODO: Query is too native to handle Calcmode now (calcmode has no prefix, just arg)
+        return Query(query_str) if _is_enabled(query_str) else None
 
     def handle_query(self, query: Query) -> list[CalcResult]:
         try:
-            result = CalcResult(result=str(eval_expr(query.argument)))
+            result = CalcResult(result=str(eval_expr(query)))
         except Exception:
             result = CalcResult(error="Invalid expression")
         return [result]

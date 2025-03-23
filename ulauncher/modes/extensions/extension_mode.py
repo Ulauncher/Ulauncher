@@ -21,20 +21,17 @@ class ExtensionMode(BaseMode):
         events.set_self(self)
 
     def parse_query_str(self, query_str: str) -> Query | None:
-        query = Query.parse_str(query_str)
-        if query.keyword and query.is_active:
-            controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
-            if controller:
-                return query
+        query = Query(query_str)
+        if bool(self.ext_socket_server.get_controller_by_keyword(query.keyword)) and " " in query:
+            return query
         return None
 
     def handle_query(self, query: Query) -> Any:
-        if query.keyword:
-            events.emit("extension:on_query_change")
-            controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
+        events.emit("extension:on_query_change")
+        controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
 
         if not controller:
-            msg = f"Query not valid for extension mode {query}"
+            msg = "Invalid extension keyword"
             raise RuntimeError(msg)
 
         self.active_ext_id = controller.ext_id

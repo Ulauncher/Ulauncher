@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from ulauncher.config import paths
-from ulauncher.internals.query import Query
 from ulauncher.ui.result_widget import ResultWidget
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load, json_save
@@ -60,12 +59,11 @@ class ItemNavigation:
         next_result = (self.index or 0) + 1
         self.select(next_result if next_result < len(self.result_widgets) else 0)
 
-    def activate(self, query: Query, alt: bool = False) -> None:
+    def activate(self, query_str: str, alt: bool = False) -> None:
         assert self.selected_item
         result = self.selected_item.result
-        query_str = str(query)
         if query_str and not alt and result.searchable:
             query_history[query_str] = result.name
             json_save(query_history, query_history_path)
 
-        events.emit("mode:activate_result", result, query, alt)
+        events.emit("mode:activate_result", result, query_str, alt)
