@@ -214,7 +214,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ):
             from ulauncher.modes import mode_handler
 
-            new_query = mode_handler.on_query_backspace(self.query)
+            new_query = mode_handler.handle_backspace(self.query)
             if new_query is not None:
                 events.emit("app:set_query", new_query)
                 return True

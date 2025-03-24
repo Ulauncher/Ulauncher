@@ -76,7 +76,7 @@ class FileBrowserMode(BaseMode):
 
         return results
 
-    def on_query_backspace(self, query_str: str) -> str | None:
+    def handle_backspace(self, query_str: str) -> str | None:
         if "/" in query_str and len(query_str.strip().rstrip("/")) > 1:
             return os.path.join(Path(query_str).parent, "")
         return None

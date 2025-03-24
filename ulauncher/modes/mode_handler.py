@@ -49,11 +49,11 @@ def on_query_change(query_str: str) -> None:
     handle_action(results)
 
 
-def on_query_backspace(query_str: str) -> str | None:
+def handle_backspace(query_str: str) -> str | None:
     result = parse_query_str(query_str)
     if result:
         mode, _query = result
-    return mode.on_query_backspace(query_str) if mode else None
+    return mode.handle_backspace(query_str) if mode else None
 
 
 def parse_query_str(query_str: str) -> tuple[BaseMode, Query] | None:
