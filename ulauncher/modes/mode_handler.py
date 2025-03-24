@@ -43,8 +43,8 @@ def clipboard_store(data: str) -> None:
 
 
 @_events.on
-def activate_result(result: Result, query_str: str, alt: bool) -> None:
-    handle_action(result.on_activation(Query(query_str), alt))
+def activate_result(result: Result, query: Query, alt: bool) -> None:
+    handle_action(result.on_activation(query, alt))
 
 
 @_events.on

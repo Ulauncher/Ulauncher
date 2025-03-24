@@ -23,7 +23,10 @@ class FileBrowserResult(Result):
         )
 
     def get_highlightable_input(self, query: Query) -> str | None:
-        return basename(query)
+        # only highlight when you put a filter query in after the path (e.g. ~/Downloads/txt)
+        if query.argument:
+            return basename(query.argument)
+        return None
 
     def on_activation(self, _query: Query, alt: bool = False) -> str | dict[str, str] | list[Result]:
         if not alt:

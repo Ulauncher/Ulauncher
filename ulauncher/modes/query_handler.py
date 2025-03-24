@@ -10,7 +10,7 @@ _events = EventBus("query")
 
 class QueryHandler:
     mode: BaseMode | None = None
-    query: Query = Query("")
+    query: Query = Query(None, "")
     triggers: list[Result] = []
 
     def __init__(self) -> None:
@@ -25,7 +25,7 @@ class QueryHandler:
 
     def parse(self, query_str: str) -> None:
         self.mode = None
-        self.query = Query(query_str)
+        self.query = Query(None, query_str)
 
         from ulauncher.modes.mode_handler import get_modes
 
@@ -61,9 +61,9 @@ class QueryHandler:
 
     def handle_backspace(self, query_str: str) -> bool:
         if self.mode:
-            new_query_str = self.mode.handle_backspace(query_str)
-            if new_query_str is not None:
-                self.parse(new_query_str)
-                _events.emit("app:set_query", new_query_str)
+            new_query = self.mode.handle_backspace(query_str)
+            if new_query is not None:
+                self.query = new_query
+                _events.emit("app:set_query", str(new_query))
                 return True
         return False

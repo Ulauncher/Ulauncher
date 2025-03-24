@@ -11,7 +11,7 @@ class BaseMode:
         """return a Query if the input should be handled by the mode, else None"""
         return None
 
-    def handle_backspace(self, _query_str: str) -> str | None:
+    def handle_backspace(self, _query_str: str) -> Query | None:
         """
         Return string to override default backspace and set the query to that string
         """
