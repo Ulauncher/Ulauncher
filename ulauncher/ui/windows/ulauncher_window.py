@@ -8,6 +8,7 @@ from gi.repository import Gdk, GLib, Gtk
 import ulauncher
 from ulauncher.config import paths
 from ulauncher.internals.result import Result
+from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
@@ -25,6 +26,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
+    query_handler = QueryHandler()
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         super().__init__(
@@ -144,8 +146,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         super().show()
 
-        if self.query:
-            self.set_input(self.query)
+        if self.query_str:
+            self.set_input(self.query_str)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
@@ -153,11 +155,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         GLib.idle_add(self.init_listeners)
 
     def init_listeners(self) -> None:
-        from ulauncher.modes import mode_handler
-
-        mode_handler.refresh_triggers()
-        if self.query:
-            mode_handler.on_query_change(self.query)
+        if self.query_str:
+            # force refresh the query handler triggers
+            self.query_handler = QueryHandler()
+            self.query_handler.parse(self.query_str)
+            self.query_handler.handle_change()
 
     ######################################
     # GTK Signal Handlers
@@ -176,9 +178,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.input.get_text(), update_input=False)
-        from ulauncher.modes import mode_handler
-
-        mode_handler.on_query_change(self.query)
+        self.query_handler.parse(self.query_str)
+        self.query_handler.handle_change()
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -210,12 +211,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             keyname == "BackSpace"
             and not ctrl
             and not entry_widget.get_selection_bounds()
-            and entry_widget.get_position() == len(self.query)
+            and entry_widget.get_position() == len(self.query_str)
+            and self.query_handler.handle_backspace(self.query_str)
         ):
-            from ulauncher.modes import mode_handler
-
-            if mode_handler.handle_backspace(self.query):
-                return True
+            return True
 
         if self.results_nav:
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == up_alias):
@@ -235,7 +234,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 return True
 
             if keyname in ("Return", "KP_Enter"):
-                self.results_nav.activate(self.query, alt=alt)
+                self.results_nav.activate(self.query_handler.query, alt=alt)
                 return True
             if alt and event.string in jump_keys:
                 self.select_result(jump_keys.index(event.string))
@@ -258,7 +257,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     @property
-    def query(self) -> str:
+    def query_str(self) -> str:
         return self.get_application().query  # type: ignore[no-any-return, union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
@@ -344,13 +343,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(results[:limit]):
-                result_widget = ResultWidget(result, index, self.query)
+                result_widget = ResultWidget(result, index, self.query_handler.query)
                 result_widgets.append(result_widget)
                 self.result_box.add(result_widget)
             from ulauncher.ui.item_navigation import ItemNavigation
 
             self.results_nav = ItemNavigation(result_widgets)
-            self.results_nav.select_default(self.query)
+            self.results_nav.select_default(self.query_str)
 
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)

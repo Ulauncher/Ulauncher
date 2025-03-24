@@ -21,64 +21,12 @@ from ulauncher.utils.timer import timer
 _logger = logging.getLogger()
 _events = EventBus("mode")
 _modes: list[BaseMode] = []
-_triggers: list[Result] = []
 
 
 def get_modes() -> list[BaseMode]:
     if not _modes:
         _modes.extend([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
     return _modes
-
-
-def on_query_change(query_str: str) -> None:
-    """
-    Iterate over all search modes and run first enabled.
-    """
-    result = parse_query_str(query_str)
-    if result:
-        active_mode, query = result
-        handle_action(active_mode.handle_query(query))
-        return
-    # No mode selected, which means search
-    results = search(query_str)
-    # If the search result is empty, add the default items for all other modes (only shortcuts currently)
-    if not results and query_str:
-        for mode in get_modes():
-            res = mode.get_fallback_results()
-            results.extend(res)
-    handle_action(results)
-
-
-def handle_backspace(query_str: str) -> bool:
-    result = parse_query_str(query_str)
-    if result:
-        mode, _query = result
-        if mode:
-            new_query = mode.handle_backspace(query_str)
-            if new_query is not None:
-                _events.emit("app:set_query", new_query)
-                return True
-    return False
-
-
-def parse_query_str(query_str: str) -> tuple[BaseMode, Query] | None:
-    for mode in get_modes():
-        query = mode.parse_query_str(query_str)
-        if query:
-            return mode, query
-    return None
-
-
-def refresh_triggers() -> None:
-    _triggers.clear()
-    for mode in get_modes():
-        _triggers.extend([*mode.get_triggers()])
-
-
-def search(query_str: str, min_score: int = 50, limit: int = 50) -> list[Result]:
-    # Cast apps to AppResult objects. Default apps to Gio.DesktopAppInfo.get_all()
-    sorted_ = sorted(_triggers, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
-    return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
 
 @_events.on
