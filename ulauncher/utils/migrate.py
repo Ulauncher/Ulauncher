@@ -13,7 +13,7 @@ from types import ModuleType
 from typing import Any, Callable
 
 from ulauncher.config import FIRST_V6_RUN, paths
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionState
 from ulauncher.utils.json_utils import json_load
 from ulauncher.utils.systemd_controller import SystemdController
 
@@ -79,6 +79,13 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
 
 
 def v5_to_v6() -> None:
+    # Migrate extension state to individual files
+    extension_db: dict[str, Any] = json_load(f"{paths.CONFIG}/extensions.json")
+    for legacy_state in extension_db.values():
+        state = ExtensionState.load(f"{paths.EXTENSIONS_STATE}/{legacy_state["id"]}.json")
+        if not state.id:  # don't overwrite if already migrated
+            state.save(legacy_state)
+
     # Convert extension prefs to JSON
     ext_prefs = Path(paths.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
@@ -110,13 +117,6 @@ def v5_to_v6() -> None:
         # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
         # If people haven't changed their settings since 2020 it'll be set to 0
         settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
-
-    # Migrate extension state to individual files
-    extension_db = json_load(f"{paths.CONFIG}/extensions.json")
-    for controller in ExtensionController.iterate():
-        # only if they don't already exist
-        if not controller.state.id and controller.id in extension_db:
-            controller.state.save(extension_db[controller.id])
 
     # Migrate autostart conf from XDG autostart file to systemd
     if FIRST_V6_RUN:
