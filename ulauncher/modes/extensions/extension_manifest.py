@@ -63,19 +63,19 @@ class ExtensionManifest(JsonConf):
         if key == "required_api_version":
             key = "api_version"
         # Rename "developer_name" to "authors"
-        if key == "developer_name":
+        elif key == "developer_name":
             key = "authors"
         # Flatten manifest v2 API "options"
-        if key == "options":
+        elif key == "options":
             key = "input_debounce"
             value = value and float(value.get("query_debounce", -1))
             if value <= 0:
                 return
         # Convert triggers dicts to ExtensionManifestTrigger instances
-        if key == "triggers":
+        elif key == "triggers":
             value = {id: ExtensionManifestTrigger(trigger) for id, trigger in value.items()}
         # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
-        if key == "preferences":
+        elif key == "preferences":
             if isinstance(value, dict):
                 value = {id: ExtensionManifestPreference(pref) for id, pref in value.items()}
             elif isinstance(value, list):  # APIv2 backwards compatibility

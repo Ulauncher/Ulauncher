@@ -39,7 +39,7 @@ class ExtensionState(JsonConf):
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key == "last_commit":
             key = "commit_hash"
-        if key == "last_commit_time":
+        elif key == "last_commit_time":
             key = "commit_time"
         super().__setitem__(key, value)
 
