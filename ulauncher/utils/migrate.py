@@ -82,7 +82,8 @@ def v5_to_v6() -> None:
     # Migrate extension state to individual files
     extension_db: dict[str, Any] = json_load(f"{paths.CONFIG}/extensions.json")
     for legacy_state in extension_db.values():
-        state = ExtensionState.load(f"{paths.EXTENSIONS_STATE}/{legacy_state["id"]}.json")
+        ext_id = legacy_state["id"]
+        state = ExtensionState.load(f"{paths.EXTENSIONS_STATE}/{ext_id}.json")
         if not state.id:  # don't overwrite if already migrated
             state.save(legacy_state)
 
