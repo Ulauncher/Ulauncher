@@ -211,6 +211,7 @@ class ExtensionController:
         if not self.is_running:
 
             def error_handler(error_type: str, error_msg: str) -> None:
+                logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
                 self.is_running = False
                 extension_runtimes.pop(self.id, None)
                 self.state.save(error_type=error_type, error_message=error_msg)
@@ -225,7 +226,7 @@ class ExtensionController:
                 error_handler("Incompatible", str(err))
                 return
 
-            error_handler("", "")
+            self.state.save(error_type="", error_message="")  # clear any previous error
 
             cmd = [sys.executable, f"{self.path}/main.py"]
             prefs = {id: pref.value for id, pref in self.user_preferences.items()}

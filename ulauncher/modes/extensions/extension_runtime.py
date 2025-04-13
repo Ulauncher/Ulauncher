@@ -7,6 +7,7 @@ import sys
 from collections import deque
 from time import time
 from typing import Callable
+from weakref import WeakSet
 
 if sys.version_info >= (3, 8):
     from typing import Literal
@@ -21,6 +22,7 @@ from gi.repository import Gio, GLib
 
 logger = logging.getLogger()
 ErrorHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
+aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()
 
 
 class ExtensionRuntime:
@@ -62,8 +64,9 @@ class ExtensionRuntime:
         Terminates extension
         """
         logger.info('Terminating extension "%s"', self.ext_id)
+        aborted_subprocesses.add(self.subprocess)
         self.subprocess.send_signal(signal.SIGTERM)
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.6)  # wait for graceful shutdown (0.5s)
         if self.subprocess.get_identifier():
             logger.info("Extension %s still running, sending SIGKILL", self.ext_id)
             # It is possible that the process exited between the check above and this signal,
@@ -83,28 +86,28 @@ class ExtensionRuntime:
             self.read_stderr_line()
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
-        error_type, error_msg = self.extract_error()
-        logger.error(error_msg)
+        if self.subprocess in aborted_subprocesses:
+            logger.info('Extension "%s" was stopped by the user', self.ext_id)
+            return
+
         if self.error_handler:
-            self.error_handler(error_type, error_msg)
+            uptime_seconds = time() - self.start_time
+            exit_status = self.subprocess.get_exit_status()
+            error_msg = "\n".join(self.recent_errors)
+            if "ModuleNotFoundError" in error_msg:
+                package_name = error_msg.split("'")[1].split(".")[0]
+                if package_name == "ulauncher":
+                    self.error_handler("MissingInternals", error_msg)
+                    return
+                if package_name:
+                    self.error_handler("MissingModule", package_name)
+                    return
+            if uptime_seconds < 1:
+                logger.error('Extension "%s" terminated before it could start', self.ext_id)
+                self.error_handler("Terminated", error_msg)
+                return
 
-    def extract_error(self) -> tuple[ExtensionRuntimeError, str]:
-        if self.subprocess.get_if_signaled():
-            kill_signal = self.subprocess.get_term_sig()
-            return "Terminated", f'Extension "{self.ext_id}" was terminated with signal {kill_signal}'
+            if not error_msg:
+                error_msg = f'Extension "{self.ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
-        uptime_seconds = time() - self.start_time
-        code = self.subprocess.get_exit_status()
-        error_msg = "\n".join(self.recent_errors)
-        logger.error('Extension "%s" exited with an error: %s', self.ext_id, error_msg)
-        if "ModuleNotFoundError" in error_msg:
-            package_name = error_msg.split("'")[1].split(".")[0]
-            if package_name == "ulauncher":
-                return "MissingInternals", error_msg
-            if package_name:
-                return "MissingModule", package_name
-        if uptime_seconds < 1:
-            return "Terminated", error_msg
-
-        error_msg = f'Extension "{self.ext_id}" exited with code {code} after {uptime_seconds} seconds.'
-        return "Exited", error_msg
+            self.error_handler("Exited", error_msg)

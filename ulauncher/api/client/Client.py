@@ -58,9 +58,12 @@ class Client:
         Triggers unload event for graceful shutdown
         """
         logger.warning("Connection closed. Exiting")
-        self.extension.trigger_event({"type": "event:unload"})
+        self.graceful_unload()
+
+    def graceful_unload(self, status_code: int = 0) -> None:
         # extension has 0.5 sec to save it's state, after that it will be terminated
-        timer(0.5, partial(os._exit, 0))
+        self.extension.trigger_event({"type": "event:unload"})
+        timer(0.5, partial(os._exit, status_code))
 
     def send(self, response: Any) -> None:
         logger.debug('Send message with keys "%s"', set(response))

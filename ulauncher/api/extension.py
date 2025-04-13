@@ -4,6 +4,7 @@ import contextlib
 import json
 import logging
 import os
+import signal
 import sys
 import threading
 from collections import defaultdict
@@ -30,6 +31,7 @@ class Extension:
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}
+        signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.graceful_unload(signal))
         with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
 

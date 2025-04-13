@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime, aborted_subprocesses
 
 
 class TestExtensionRuntime:
@@ -56,16 +56,10 @@ class TestExtensionRuntime:
         err_cb = mock.Mock()
 
         runtime = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
-        runtime.subprocess.get_if_signaled.return_value = True
-        runtime.subprocess.get_term_sig.return_value = 9
-        # Check pre-condition
-        err_cb.assert_not_called()
+        aborted_subprocesses.add(runtime.subprocess)
 
         runtime.handle_exit(runtime.subprocess, mock.Mock())
-        # Confirm error handling
-        err_cb.assert_called_once_with(
-            "Terminated", 'Extension "mock.test_handle_exit__signaled" was terminated with signal 9'
-        )
+        err_cb.assert_not_called()
 
     def test_handle_exit__rapid_exit(self, time):
         extid = "mock.test_handle_exit__rapid_exit"
