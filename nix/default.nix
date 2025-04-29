@@ -119,7 +119,7 @@ let
 
       substituteInPlace \
           ulauncher/modes/extensions/extension_controller.py \
-        --replace-fail '"PYTHONPATH": paths.APPLICATION,' '"PYTHONPATH": ":".join(sys.path),'
+        --replace-fail 'paths.APPLICATION,' '":".join(sys.path),'
 
       substituteInPlace \
           ulauncher.service \

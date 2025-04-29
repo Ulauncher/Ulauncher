@@ -66,6 +66,7 @@ class ExtensionRemote:
             self.url = f"{self.protocol}://{self.host}/{self.path}"
 
         except Exception as e:
+            logger.warning("Invalid URL: %s (%s: %s)", url, type(e).__name__, e)
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionRecoverableError(msg) from e
 
@@ -86,6 +87,7 @@ class ExtensionRemote:
 
     def _get_refs(self) -> dict[str, str]:
         refs = {}
+        ref = None
         url = f"{self.url}.git" if self.host in ("github.com", "gitlab.com", "codeberg.org") else self.url
         try:
             if self._use_git:

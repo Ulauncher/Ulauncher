@@ -12,6 +12,7 @@ from weakref import WeakValueDictionary
 
 from ulauncher.config import get_options, paths
 from ulauncher.modes.extensions import extension_finder
+from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionIncompatibleRecoverableError,
     ExtensionManifest,
@@ -48,10 +49,6 @@ logger = logging.getLogger()
 verbose_logging: bool = get_options().verbose
 controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
-
-
-class ExtensionControllerError(Exception):
-    pass
 
 
 class ExtensionController:
@@ -115,6 +112,10 @@ class ExtensionController:
         return ExtensionManifest.load(self.path)
 
     @property
+    def deps(self) -> ExtensionDependencies:
+        return ExtensionDependencies(self.id, self.path)
+
+    @property
     def path(self) -> str:
         if not self._path:
             self._path = extension_finder.locate(self.id)
@@ -149,6 +150,7 @@ class ExtensionController:
 
     async def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
+        self.deps.install()
         self.state.save(
             commit_hash=commit_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
@@ -228,6 +230,7 @@ class ExtensionController:
 
             self.state.save(error_type="", error_message="")  # clear any previous error
 
+            ext_deps = ExtensionDependencies(self.id, self.path)
             cmd = [sys.executable, f"{self.path}/main.py"]
             prefs = {id: pref.value for id, pref in self.user_preferences.items()}
             triggers = {id: t.keyword for id, t in self.manifest.triggers.items() if t.keyword}
@@ -235,7 +238,7 @@ class ExtensionController:
             v2_prefs = {**triggers, **prefs}
             env = {
                 "VERBOSE": str(int(verbose_logging)),
-                "PYTHONPATH": paths.APPLICATION,
+                "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }
 
