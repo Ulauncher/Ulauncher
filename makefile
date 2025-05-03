@@ -1,7 +1,7 @@
 .ONESHELL:
 SHELL := bash
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
-DOCKER_IMAGE := ulauncher/build-image:6.0
+DOCKER_IMAGE := ulauncher/build-image:6.1
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
 YARN_BIN = $(shell eval 'command -v yarn || command -v yarnpkg')
 ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))

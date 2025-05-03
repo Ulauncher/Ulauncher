@@ -8,7 +8,7 @@ on:
 jobs:
   draft_release:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.0
+    container: ulauncher/build-image:6.1
     steps:
       - uses: actions/checkout@v3
       - name: Test

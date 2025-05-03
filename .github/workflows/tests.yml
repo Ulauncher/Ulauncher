@@ -9,7 +9,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.0
+    container: ulauncher/build-image:6.1
     steps:
       - uses: actions/checkout@v4
       - name: black
