@@ -34,7 +34,7 @@ If not, then you can open Ulauncher and enable "Launch at Login" in the preferen
 
 Please read our [Troubleshooting](https://github.com/Ulauncher/Ulauncher/discussions/categories/troubleshooting) discussion category if you run into issues, and also check our other discussions and issues if you still need help after this.
 
-### Code Contributions
+### Code Contributions And Development Environment
 
 Please see our [Code Contributions](CONTRIBUTING.md) documentation.
 

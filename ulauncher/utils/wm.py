@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
+from gi.repository import Gdk, GdkX11, Gio
 
 from ulauncher.utils.environment import IS_X11
 
@@ -16,8 +16,8 @@ def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
     if use_mouse_position:
         try:
             x11_display = GdkX11.X11Display.get_default()
-            seat = x11_display.get_default_seat()
-            (_, x, y) = seat.get_pointer().get_position()
+            seat = x11_display.get_default_seat()  # type: ignore[union-attr]
+            (_, x, y) = seat.get_pointer().get_position()  # type: ignore[union-attr]
             return display.get_monitor_at_point(x, y)
         except Exception:
             logger.exception("Could not get monitor with X11. Defaulting to first or primary monitor")

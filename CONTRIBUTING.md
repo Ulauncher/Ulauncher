@@ -18,7 +18,6 @@ For the v6 branch you need the following to set up the local build environment:
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-setuptools (if you have pip, you have it already)
 * Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-xlib is new for v6**)
-* Optionally install [pygobject-stubs](https://github.com/pygobject/pygobject-stubs). Note that pygobject-stubs can only be installed for Gtk3 OR Gtk4. The only way to switch is to reinstall. Ulauncher uses Gtk3, but Gtk4 is the default. Rather than requiring users to install it for Gtk3 we are currently ignoring the mypy errors for all the incompatible places.
 
 #### Distro specific instructions
 
@@ -29,12 +28,7 @@ For the v6 branch you need the following to set up the local build environment:
 
   ```sh
   sudo apt update && sudo apt install git bash make sed yarnpkg python3-setuptools debhelper dh-python
-  ```
-
-  Install the Python testing packages (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
-
-  ```sh
-  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install -r requirements.txt
+  make python-venv
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well (requires universe repo):
@@ -59,13 +53,8 @@ For the v6 branch you need the following to set up the local build environment:
   Install the development and testing dependencies:
 
   ```sh
-  sudo pacman -Syu --needed git bash make sed yarn mypy ruff typos python-{build,black,pytest,pytest-mock,setuptools,lefthook}
-  ```
-
-  To get types from pygobject, you need [pygobject-stubs](https://github.com/pygobject/pygobject-stubs) for GTK3. There is a AUR package for this, but it's only for GTK4, so the pip install is recommended (read about the `PIP_BREAK_SYSTEM_PACKAGES` flag [here](https://peps.python.org/pep-0668/)):
-
-  ```sh
-  PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 PIP_BREAK_SYSTEM_PACKAGES=1 pip install --no-cache-dir pygobject-stubs
+  sudo pacman -Syu --needed git bash make sed yarn python-{build,setuptools,lefthook}
+  make python-venv
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
