@@ -30,7 +30,7 @@ RESET := \\e[0m
 
 #=General Commands
 
-.PHONY: help version run docker
+.PHONY: help version run docker python-venv
 
 help: # Shows this list of available actions (targets)
 	@# Only includes targets with comments, but not if they have Commands with two ## chars
@@ -42,6 +42,20 @@ help: # Shows this list of available actions (targets)
 
 version: # Print the Ulauncher version
 	@echo ${VERSION}
+
+python-venv: # Creates a python virtual environment and installs dependencies
+	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
+	python3 -m venv --system-site-packages .venv
+	@echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
+	.venv/bin/python -m pip install -r requirements.txt
+	@echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
+	.venv/bin/python -m pip install pygobject-stubs --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
+	@echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
+	@echo -e "\nTo activate it, run:"
+	@echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
+	@echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish"
+	@echo -e "\nDo the activation each time you open the terminal."
+	@echo "Now you can run make commands in this environment."
 
 run: prefs # Run ulauncher from source
 	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
@@ -84,7 +98,7 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 		"docker.io/${DOCKER_IMAGE}" \
 		sh -c "$$SHELL_CMD";
 
-#=Lint Commands
+#=Lint/test Commands
 
 .PHONY: check black mypy ruff typos pytest test format
 
