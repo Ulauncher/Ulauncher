@@ -26,11 +26,18 @@
         >
           A network error occurred: <b>{{ errorMessage }}</b>
           <br><br>Please check that your network is ok, that the repository is not private, and that the extension has all the required files.
-          <br><br>You can also install extensions manually by adding them to 
+          <br><br>You can also install extensions manually by adding them to
           <a
             href
             @click.prevent="openExtensionsDir()"
           >your extension directory</a>.
+        </p>
+        <p v-else-if="errorType === 'ExtensionDependenciesRecoverableError'">
+          Failed to install extension dependencies:
+          <br />
+          <code style="white-space: pre-line;">{{ errorMessage }}</code>
+          <br /><br />If nothing seems clearly wrong on your end, consider
+          <a href @click.prevent="openUrlInBrowser(`${extUrl}/issues`)">contacting</a> the extension author and let them know about this problem.
         </p>
         <p v-else>
           An unexpected error occurred.

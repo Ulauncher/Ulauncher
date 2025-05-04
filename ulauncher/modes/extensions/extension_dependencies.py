@@ -8,6 +8,10 @@ from os.path import isdir, isfile
 logger = logging.getLogger()
 
 
+class ExtensionDependenciesRecoverableError(Exception):
+    pass
+
+
 class ExtensionDependencies:
     """
     Manages python dependencies of the extension.
@@ -54,13 +58,16 @@ class ExtensionDependencies:
             "--target",
             f"{self.path}/{self.deps_out_subdir}",
         ]
-        logger.info("Installing dependencies for %s. Running: %s", self.ext_id, " ".join(command))
+        command_str = " ".join(command)
+        logger.info("Installing dependencies for %s. Running: %s", self.ext_id, command_str)
 
         try:
             result = subprocess.run(command, check=True, capture_output=True, text=True)
             logger.info("Installation successful. Output: %s", result.stdout)
         except subprocess.CalledProcessError as e:
             logger.exception("Error during installation. Output: %s", e.stderr)
+
+            raise ExtensionDependenciesRecoverableError(f"$ {command_str}\n{e.stderr}") from e  # noqa: TRY003, EM102
 
     def _read_requirements(self) -> str | None:
         """
