@@ -49,7 +49,10 @@ python-venv: # Creates a python virtual environment and installs dependencies
 	@echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
 	.venv/bin/python -m pip install -r requirements.txt
 	@echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
-	.venv/bin/python -m pip install pygobject-stubs --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
+
+	# Update to the latest (v2.13.0) after migration to python>=9 in Dockerfile
+	.venv/bin/python -m pip install pygobject-stubs==2.12.0 --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
+
 	@echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
 	@echo -e "\nTo activate it, run:"
 	@echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"

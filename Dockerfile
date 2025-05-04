@@ -1,4 +1,5 @@
 FROM ubuntu:20.04
+# Update pygobject-stubs version in the makefile after upgrading ubuntu version
 # Run `make docker` to build this image
 
 LABEL maintainer="ulauncher.app@gmail.com"
@@ -75,7 +76,8 @@ COPY [ "docs/requirements.txt", "./docs/" ]
 COPY [ "scripts/dput.cf", "/etc" ]
 
 RUN apt install -y python3-pip
-RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt
+RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install pygobject-stubs --no-cache-dir
 RUN pip3 install -r docs/requirements.txt
 # Cache node_modules to make builds faster
 RUN yarnpkg
