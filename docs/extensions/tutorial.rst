@@ -218,7 +218,7 @@ ExtensionCustomAction
 
 ActionList
   List of actions
-  
+
 
 Custom Action on Item Enter
 ---------------------------
@@ -265,6 +265,21 @@ Custom Action on Item Enter
   Now this will be rendered when you click on any item
 
 
+Dependencies and requirements.txt file
+--------------------------------------
+
+If your extension requires any python dependencies, you can specify them in a ``requirements.txt`` file.
+Ulauncher will install them automatically when the extension is installed.
+
+Avoid specifying development dependencies such as mypy, pytest, etc. in the ``requirements.txt`` file — users don't need them.
+Instead, you can create a separate ``requirements-dev.txt`` file for your development dependencies.
+
+It's a good idea to specify the version of the dependencies you are using to avoid breaking changes in the future.
+For example, if your extension requires the `requests` library, you can create a `requirements.txt` file with the following content::
+
+  requests==2.32.3
+
+Refer to this `requirements.txt documentation <https://pip.pypa.io/en/stable/reference/requirements-file-format/>`_ for more information.
 
 .. NOTE::
   Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation
