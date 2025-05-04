@@ -138,7 +138,7 @@ format: # Auto format the code
 
 .PHONY: prefs docker docs sdist manpage deb nix-run nix-build-dev nix-build
 
-docs: ## Build the API docs
+docs: # Build the API docs
 	@set -euo pipefail
 	cd docs
 	sphinx-build -M html . ./_build
