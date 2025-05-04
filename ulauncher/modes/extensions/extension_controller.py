@@ -4,15 +4,19 @@ import asyncio
 import json
 import logging
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
-from shutil import rmtree
+from shutil import copytree, rmtree
 from typing import Any, Iterator
 from weakref import WeakValueDictionary
 
 from ulauncher.config import get_options, paths
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_dependencies import (
+    ExtensionDependencies,
+    ExtensionDependenciesRecoverableError,
+)
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionIncompatibleRecoverableError,
     ExtensionManifest,
@@ -148,9 +152,17 @@ class ExtensionController:
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
-    async def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
+    async def install(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
-        self.deps.install()
+
+        # install python dependencies from requirements.txt
+        # or remove the downloaded extension files to avoid broken state
+        try:
+            self.deps.install()
+        except ExtensionDependenciesRecoverableError:
+            await self.remove()
+            raise
+
         self.state.save(
             commit_hash=commit_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
@@ -190,8 +202,21 @@ class ExtensionController:
             commit_hash[:8],
         )
 
-        await self.stop()
-        await self.download(commit_hash, warn_if_overwrite=False)
+        # Backup extension files. If update fails, restore from backup
+        with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
+            # use local variable, because self.path property will call locate() on a non-existing path
+            ext_path = self.path
+            copytree(ext_path, backup_dir, dirs_exist_ok=True)
+
+            try:
+                await self.stop()
+                await self.install(commit_hash, warn_if_overwrite=False)
+            except Exception:
+                logger.exception("Failed to update extension. Restoring from backup.")
+                copytree(backup_dir, ext_path, dirs_exist_ok=True)
+                await self.toggle_enabled(was_running)
+                raise
+
         return await self.toggle_enabled(was_running)
 
     async def check_update(self) -> tuple[bool, str]:
