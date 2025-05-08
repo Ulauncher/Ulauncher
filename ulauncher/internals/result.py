@@ -9,13 +9,24 @@ DEFAULT_ACTION = True  #  keep window open and do nothing
 
 
 class Result(BaseDataClass):
-    compact = False
-    highlightable = False
+    """
+    Use this class to define a result item to be displayed in response to a query or other event.
+    Return `list[Result]` from the `on_input` or `on_item_enter` methods of the `Extension` subclass.
+
+    :param on_enter: The action to be performed when the result is activated.
+                     Should be a return value of the `ExtensionCustomAction` function.
+    :param on_alt_enter: The action to be performed when the result is activated with the Alt key pressed.
+    """
+
+    compact = False  #: If True, the result will be displayed in a single line without a title
+    highlightable = False  #: If True, a substring matching the query will be highlighted
     searchable = False
-    name = ""
-    description = ""
+    name = ""  #: The name of the result item
+    description = ""  #: The description of the result item. Used only if `compact` is False
     keyword = ""
-    icon = ""
+    icon = (
+        ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
+    )
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)

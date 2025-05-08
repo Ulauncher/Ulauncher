@@ -19,7 +19,11 @@ from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 class Extension:
     """
-    Manages extension runtime
+    Manages extension runtime.
+    Used only within the extension process to handle events and communicate with Ulauncher.
+
+    Create a subclass of this class and implement the methods you need.
+    The methods are called when the corresponding event is triggered.
     """
 
     def __init__(self) -> None:
@@ -98,6 +102,7 @@ class Extension:
             # We can use method_name to determine if listener was added the old way or the new class method way
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
             args = tuple(base_event.args) if method_name else (base_event, self)
+            # Run in a separate thread to avoid blocking the message listener thread (client.py)
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
     def run_event_listener(self, event: dict[str, Any], method: Callable, args: tuple[Any]) -> None:  # type: ignore[type-arg]
