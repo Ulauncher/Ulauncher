@@ -20,7 +20,7 @@ Basically they get the same rights as a user that runs Ulauncher.
 
 Extension API v2 (current) enables extension developers to write **custom handlers for keywords**.
 
-.. figure:: https://i.imgur.com/bc2bzZ8.png
+.. figure:: https://i.imgur.com/QI8jkEP.png
   :align: center
 
   "ti" is a keyword, the rest of the query is an argument in this case.
@@ -28,27 +28,32 @@ Extension API v2 (current) enables extension developers to write **custom handle
 With Extension API it is possible to capture event when user enters "ti<Space>" into the input
 and then render any results below the input box.
 
-Extensions can define preferences in ``manifest.json`` that can be overridden by a user
-from Ulauncher Preferences window.
+Extensions can define preferences and other settings via ``manifest.json``. Users will be able to override them in Ulauncher Preferences window.
 
 It is also possible to capture item click (enter) event and run a custom function to respond to that event.
 
 What Extensions Cannot Do
 -------------------------
 
-They cannot modify behaviour or look of Ulauncher app.
+They cannot modify behaviour or look of Ulauncher app (see :doc:`../themes/themes` for that).
 They can only be used to handle an input that starts with a keyword, which extension developers define in a manifest file.
 
-Ulauncher ⇄ Extension Communication Layer
------------------------------------------
+Ulauncher ⇄ Extension Communication
+-----------------------------------
 
-Ulauncher communicates to extensions using stream Unix sockets.
+Ulauncher implements a client-server architecture. Ulauncher is a server and extensions are clients.
 
-For developer convenience there is an abstraction layer over the socket interface
-that reduces amount of boilerplate code in extensions.
+Communication is done using JSON messages over Unix sockets.
+For developer convenience there is an abstraction layer (Python classes and functions) available by importing ``ulauncher.api`` module.
+It reduces amount of boilerplate code in extensions.
 
 
-.. figure:: https://imgur.com/Wzb6KUz.png
+Message And Control Flow
+------------------------
+
+The following diagram shows how control over responses to user input is passed between Ulauncher and extensions.
+
+.. figure:: https://imgur.com/FrgFj2C.png
   :align: center
 
-  Message flow
+  Message flow (diagram `source <https://app.colibridiagrams.net/sequence/#diagram=A4QwTgLglgxloDsIAICqBnApmAUKSs8ISaANiAK4IwAW2e40ciKAogB4SYLpQD2CHDgzYAtAD5U5KrWwAuZBACewTOmRQEyAI4VsSnAj5dkfAG7YylanTALMnMCBgR1Aa0xKA7nzAATAB0EYj9kWRg3dSgAM2RiJWQHLh5+BCCYYmQaENJMDQhhaRsxcQ5k3gEFLAQ-dQBJBGAKCAAVMCgAcw7sVgskQ2M880sy7gqEBQEAfU0mlABbTAgaPlCodQh2ruxMPwGTYbBkUZTKrJy1RL6UACME4DBMfE0OoJBkUnWUPljH9ApSCgoFx5ugcCdxhIpNZZHZkI8IBQwDw4h8vqZYkkxql4WoAa4NFpprNmoUYbYoVg4Y8apZ3p90N9YsDMKCgtVbgllnksadBCIwFCirCqphci51JkWfMyTIKaVONizptOt0wPUQawkD1rvshhYjhDUgpsjVchs6FduAUjQIheT5MgABR8YDQAQgUikJQASlxiORkuQCEwXjRjIxuP+gPQQA>`_)

@@ -1,5 +1,5 @@
-Extension Development Tutorial
-==============================
+Tutorial
+========
 
 Creating a Project
 ------------------
@@ -12,7 +12,7 @@ Create a new local git repository::
   git init demo-extension
   cd demo-extension
   # example .gitignore (you likely will want to use your own)
-  printf "*tmp*\n__pycache__\n.cache\n.mypy_cache\n*.pyc\n*.pyo" > .gitignore
+  printf "*tmp*\n__pycache__\n.cache\n.mypy_cache\n*.pyc\n*.pyo\n.venv" > .gitignore
   touch manifest.json main.py
 
 * :file:`.gitignore` is for ignoring file paths for common cached files and similar that you don't want to add to your repo.
@@ -62,7 +62,7 @@ Triggers
 
 ``keyword``
   The extension default keyword (users can override this).
-  Specify a keyword if you want the trigger to be an "input trigger" and ask let the user type text that's passed to your extension's ``on_input``-method (takes two arguments "input_text" and "trigger_id").
+  Specify a keyword if you want the trigger to be an "input trigger" and let the user type text that's passed to your extension's ``on_input``-method (takes two arguments "input_text" and "trigger_id").
   If you instead want it to be a "launch trigger" and trigger immediately when activated, then leave the keyword out. Then you can listen to it with your extensions ``on_launch``-method (takes only "trigger_id").
 
 ``icon``
@@ -116,7 +116,6 @@ Copy the following code to ``main.py``::
       DemoExtension().run()
 
 .. TIP:: If you don't want to use ``yield``, you can also return a list of Results.
-
 
 To test your extension, install your extension using the system path as the url. Ex ``file:///home/me/mycode/demo-extension`` or just ``/home/me/mycode/demo-extension``
 Ulauncher only installs from git repositories, so you need to commit your changes.
@@ -223,6 +222,8 @@ ActionList
 Custom Action on Item Enter
 ---------------------------
 
+Often built-in :doc:`actions` are not enough and you need to define your own action on item enter. Here's how to do it.
+
 **1. Pass custom data with ExtensionCustomAction**
 
   Instantiate :class:`~ulauncher.api.Result`
@@ -240,7 +241,7 @@ Custom Action on Item Enter
   ``data`` is passed to your callback function. It can be any type.
 
 
-**2. Define a new listener**
+**2. Define ``on_item_enter``**
 
   ::
 
@@ -280,6 +281,11 @@ For example, if your extension requires the `requests` library, you can create a
   requests==2.32.3
 
 Refer to this `requirements.txt documentation <https://pip.pypa.io/en/stable/reference/requirements-file-format/>`_ for more information.
+
+Learn from examples
+-------------------
+
+TODO: add links to examples
 
 .. NOTE::
   Please take `a short survey <https://goo.gl/forms/wcIRCTjQXnO0M8Lw2>`_ to help us build greater API and documentation

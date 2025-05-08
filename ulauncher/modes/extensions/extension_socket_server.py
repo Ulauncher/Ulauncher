@@ -16,6 +16,9 @@ from ulauncher.utils.timer import TimerContext, timer
 
 LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
 logger = logging.getLogger()
+
+# This event bus is used to communicate between the ExtensionSocketServer class and the rest of the app
+# Communication further down to the extension level is done through Gio.SocketService and Unix sockets
 events = EventBus("extension")
 
 

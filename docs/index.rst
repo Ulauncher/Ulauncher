@@ -7,7 +7,36 @@
 ====================================================================
 
 .. NOTE::
-  To find out how to migrate your extension from API v1 to v2 navigate to :doc:`extensions/migration`
+  To find out how to migrate your extension from Ulauncher 5 and below (API v2) to Ulauncher 6 (API v3) navigate to :doc:`extensions/migration`
+
+
+Extension
+=========
+
+.. toctree::
+   :caption: Extensions
+   :hidden:
+
+   extensions/intro
+   extensions/tutorial
+   extensions/api-reference
+   extensions/debugging
+   extensions/migration
+
+:doc:`extensions/intro`
+    Understand what Ulauncher extensions are and how they work.
+
+:doc:`extensions/tutorial`
+    A step-by-step guide to creating extension by example.
+
+:doc:`extensions/api-reference`
+    Description of Python functions and classes available for creating your extensions.
+
+:doc:`extensions/debugging`
+    Debugging tips.
+
+:doc:`extensions/migration`
+    How to migrate from one version of Extension API to a new one.
 
 
 Custom Color Themes
@@ -21,43 +50,6 @@ Custom Color Themes
 
 :doc:`themes/themes`
     Create your own color themes
-
-
-Extension Development Guide
-===========================
-
-.. toctree::
-   :caption: Extension Development Guide
-   :hidden:
-
-   extensions/intro
-   extensions/tutorial
-   extensions/events
-   extensions/actions
-   extensions/examples
-   extensions/debugging
-   extensions/migration
-
-:doc:`extensions/intro`
-    Understand what Ulauncher extensions are and how they work.
-
-:doc:`extensions/tutorial`
-    Create your first extension in under 5 minutes.
-
-:doc:`extensions/events`
-    Events that your extensions can subscribe to and handle.
-
-:doc:`extensions/actions`
-    Actions that your extensions perform in response to events.
-
-:doc:`extensions/examples`
-    Learn from other Ulauncher extensions.
-
-:doc:`extensions/debugging`
-    Debugging tips.
-
-:doc:`extensions/migration`
-    How to migrate from one version of Extension API to a new one.
 
 
 Indexes and tables

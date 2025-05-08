@@ -18,6 +18,17 @@ logger = logging.getLogger()
 
 
 class Client:
+    """
+    Communication layers:
+    → Extension subclass
+    • This class
+    → (OS) Unix socket
+    → (Ulauncher process) ExtensionSocketServer
+    → ExtensionSocketController
+    → EventBus
+    → the rest of Ulauncher
+    """
+
     def __init__(self, extension: ulauncher.api.Extension) -> None:
         self.socket_path = get_socket_path()
         self.extension = extension
@@ -46,7 +57,7 @@ class Client:
         """
         Parses message from Ulauncher and triggers extension event
         """
-        logger.debug("Incoming event %s", type(event).__name__)
+        logger.debug("Incoming event: %s", event)
         try:
             self.extension.trigger_event(event)
         except Exception:
