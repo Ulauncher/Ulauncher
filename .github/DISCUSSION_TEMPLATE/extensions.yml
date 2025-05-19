@@ -1,0 +1,27 @@
+body:
+  - type: markdown
+    attributes:
+      value: >
+        🧩 Please follow the template, and use the name of your extension as the title.
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: The URL to your extension repository.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Description
+      description: Describe what the extension does, any prerequisites or dependencies it might have and how to install them.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshot(s)
+      description: >-
+        Please add screenshots of the extension in action. This is a great way
+        to show off your extension and help others understand how it works.
+        Make screenshots on a white background. You can use <about:blank> for that.
+    validations:
+      required: true
