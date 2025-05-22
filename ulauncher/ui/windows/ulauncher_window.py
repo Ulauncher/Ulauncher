@@ -148,6 +148,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         if self.query_str:
             self.set_input(self.query_str)
+            self.input.select_region(0, -1)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
