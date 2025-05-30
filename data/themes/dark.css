@@ -1,7 +1,7 @@
 /**
  * App Window
  */
-@define-color bg_color #393D40;
+@define-color bg_color #393d40;
 @define-color window_shadow rgba(0, 0, 0, 0.5);
 @define-color window_bg @bg_color;
 @define-color window_border_color #393939;
@@ -10,7 +10,7 @@
 /**
  * Input
  */
-@define-color selected_bg_color #4B5053;
+@define-color selected_bg_color #4b5053;
 @define-color selected_fg_color #d5d5d5;
 @define-color input_color #ddd;
 @define-color caret_color darker(@input_color);
@@ -18,9 +18,9 @@
 /**
  * Result items
  */
-@define-color item_name #B3BAB8;
+@define-color item_name #b3bab8;
 @define-color item_text #999;
-@define-color item_box_selected #4B5053;
+@define-color item_box_selected #4b5053;
 @define-color item_text_selected #ccc;
 @define-color item_name_selected #bbb;
 @define-color item_shortcut_color #777;

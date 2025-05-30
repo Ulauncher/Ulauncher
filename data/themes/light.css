@@ -1,7 +1,7 @@
 /**
  * App Window
  */
-@define-color bg_color #F2F2F2;
+@define-color bg_color #f2f2f2;
 @define-color window_shadow rgba(0, 0, 0, 0.5);
 @define-color window_bg @bg_color;
 @define-color window_border_color #b1b1b1;
@@ -20,7 +20,7 @@
  */
 @define-color item_name #333;
 @define-color item_text lighter(@item_name);
-@define-color item_box_selected #D6D6D6;
+@define-color item_box_selected #d6d6d6;
 @define-color item_text_selected darker(@item_text);
 @define-color item_name_selected @item_name;
 @define-color item_shortcut_color #777;

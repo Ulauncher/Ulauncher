@@ -1,7 +1,7 @@
 /**
  * App Window
  */
-@define-color bg_color #41403C;
+@define-color bg_color #41403c;
 @define-color window_shadow rgba(0, 0, 0, 0.5);
 @define-color window_bg @bg_color;
 @define-color window_border_color #3b3b3b;
@@ -10,7 +10,7 @@
 /**
  * Input
  */
-@define-color selected_bg_color #DA481E;
+@define-color selected_bg_color #da481e;
 @define-color selected_fg_color lighter(#ffcbbd);
 @define-color input_color #ddd;
 @define-color caret_color darker(@input_color);
