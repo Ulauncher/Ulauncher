@@ -27,6 +27,8 @@
 @define-color item_shortcut_shadow darker(@bg_color);
 @define-color item_shortcut_color_sel #99ccff;
 @define-color item_shortcut_shadow_sel darker(@item_box_selected);
+@define-color item_highlight #99ccff;
+@define-color item_highlight_selected @item_highlight;
 
 .app {
   box-shadow: 0 0 5px @window_shadow;
@@ -59,8 +61,11 @@
   font-size: 120%;
   color: @item_name;
 }
+.item-highlight {
+  color: @item_highlight;
+}
 
-/* Small result item  */
+/* Small result item */
 .small-result-item .item-name {
   font-size: 100%;
 }
@@ -78,6 +83,9 @@
 .selected.item-box .item-name {
   color: @item_name_selected;
 }
+.selected.item-box .item-highlight {
+  color: @item_highlight_selected;
+}
 .item-shortcut {
   color: @item_shortcut_color;
   text-shadow: 1px 1px 1px @item_shortcut_shadow;
@@ -93,8 +101,4 @@
 }
 .prefs-btn:hover {
   background-color: @prefs_background;
-}
-
-.item-highlight {
-  color: #99ccff
 }
