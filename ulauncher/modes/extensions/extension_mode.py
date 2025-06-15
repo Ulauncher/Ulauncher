@@ -53,15 +53,14 @@ class ExtensionMode(BaseMode):
             events.emit("mode:handle_action", action)
 
     def get_triggers(self) -> Iterator[Result]:
-        for controller in self.ext_socket_server.controllers.values():
-            data_controller = controller.data_controller
-            for trigger_id, trigger in data_controller.user_triggers.items():
+        for ext in ExtensionController.iterate():
+            for trigger_id, trigger in ext.user_triggers.items():
                 action: Any = None
                 if not trigger.keyword:
                     action = {
                         "type": "event:launch_trigger",
                         "args": [trigger_id],
-                        "ext_id": controller.ext_id,
+                        "ext_id": ext.id,
                     }
                 elif trigger.user_keyword:
                     action = f"{trigger.user_keyword} "
@@ -70,7 +69,7 @@ class ExtensionMode(BaseMode):
                     yield Result(
                         name=html.escape(trigger.name),
                         description=html.escape(trigger.description),
-                        icon=data_controller.get_normalized_icon_path(trigger.icon),
+                        icon=ext.get_normalized_icon_path(trigger.icon),
                         on_enter=action,
                         searchable=True,
                     )
