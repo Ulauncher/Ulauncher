@@ -25,7 +25,7 @@
 , stdenv
 , systemd
 , typos
-, webkitgtk
+, webkitgtk_4_1
 , wrapGAppsHook
 , xdg-utils
 , xvfb-run
@@ -88,7 +88,7 @@ let
       gtk3
       libappindicator
       librsvg
-      webkitgtk
+      webkitgtk_4_1
     ];
 
     # runtime dependencies / binaries prepended to PATH
