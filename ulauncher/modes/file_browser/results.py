@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.internals import actions
+from ulauncher.api import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 
@@ -10,7 +10,7 @@ class CopyPath(Result):
     name = "Copy Path to Clipboard"
     icon = "edit-copy"
 
-    def on_activation(self, _query: Query, _alt: bool = False) -> dict[str, str]:
+    def on_activation(self, _query: Query, _alt: bool = False) -> actions.Action[str]:
         return actions.copy(self.path)
 
 
@@ -19,5 +19,5 @@ class OpenFolder(Result):
     icon = "system-file-manager"
     path = ""
 
-    def on_activation(self, _query: Query, _alt: bool = False) -> dict[str, str]:
+    def on_activation(self, _query: Query, _alt: bool = False) -> actions.Action[str]:
         return actions.open(self.path)

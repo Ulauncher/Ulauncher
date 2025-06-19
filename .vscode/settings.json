@@ -1,18 +1,19 @@
 {
-    "files.exclude": {
-        "**/__pycache__": true,
-        "**/node_modules": true,
-        ".idea": true,
-        ".mypy_cache": true,
-        ".pytest_cache": true,
-        ".vscode": true,
-        "**/dist": true,
-        "**/build": true
-    },
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/node_modules": true,
+    ".idea": true,
+    ".mypy_cache": true,
+    ".pytest_cache": true,
+    ".vscode": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  }
 }
-

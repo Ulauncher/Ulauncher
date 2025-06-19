@@ -10,9 +10,9 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterator
 
+from ulauncher.api.actions import custom_data_store
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 

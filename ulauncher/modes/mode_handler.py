@@ -54,16 +54,17 @@ def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> Non
 
 
 def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:  # noqa: PLR0911, PLR0912
+    """
+    Returns True when the app window should remain open after the action is executed.
+    """
     if action is True:
         return True
     if action in (False, None):
         return False
     if isinstance(action, list):
+        # TODO: remove support for passing a list of results in actions in v7
         results = [res if isinstance(res, Result) else Result(**res) for res in action]
         _events.emit("window:show_results", results)
-        return True
-    if isinstance(action, str):
-        _events.emit("app:set_query", action)
         return True
 
     if isinstance(action, dict):
@@ -72,6 +73,9 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
         if event_type == "action:open" and data:
             open_detached(data)
             return False
+        if event_type == "action:set_query" and data:
+            _events.emit("app:set_query", data)
+            return True
         if event_type == "action:clipboard_store" and data:
             clipboard_store(data)
             return False
@@ -84,9 +88,9 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
                 if _handle_action(action_):
                     keep_open = True
             return keep_open
-        if event_type == "action:activate_custom":
-            _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
-            return action.get("keep_app_open") is True
+        if event_type == "action:activate_custom" and isinstance(data, dict):
+            _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": data.get("ref")})
+            return data.get("keep_app_open") is True
 
     else:
         _logger.warning("Invalid action from mode: %s", type(action).__name__)
