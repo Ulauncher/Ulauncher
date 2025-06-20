@@ -52,7 +52,12 @@ extend-exclude = ["preferences-src/static"]
 [tool.ruff]
 line-length = 120
 target-version = "py37" # py37 is the lowest supported option
-lint.ignore = [
+
+[tool.ruff.lint]
+pylint = { max-args = 10}
+flake8-builtins = { builtins-ignorelist = ["id"] }
+flake8-pytest-style = {fixture-parentheses = false}
+ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
   "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors. 
   "PLC0415",  # Allow imports outside of top-level for performance reasons
@@ -62,7 +67,7 @@ lint.ignore = [
   "TD002", "TD003" # Allow TODOs and FIXMEs without author and link
 ]
 # See https://docs.astral.sh/ruff/rules/
-lint.select = [
+select = [
   "A",        # flake8-builtins
   "ANN204",   # flake8-annotations (204 covers __init__, __new__, and __call__. All the other rules are covered by mypy)
   "ARG",      # flake8-unused-arguments
@@ -118,23 +123,11 @@ lint.select = [
   "Q",        # flake8-quotes
   "YTT",      # flake8-2020
 ]
-
-# Relax some linting rules for tests
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = [
+per-file-ignores = {"tests/**/*.py" = [ # Relax some linting rules for tests
   "PLR2004",    # Allow direct comparison with integers (magic-value)
   "SLF001",     # Allow accessing private members (obj._hello)
   "T201",       # Allow print statements
-]
-
-[tool.ruff.lint.pylint]
-max-args = 10
-
-[tool.ruff.lint.flake8-pytest-style]
-fixture-parentheses = false
-
-[tool.ruff.lint.flake8-builtins]
-builtins-ignorelist = ["id"]
+]}
 
 [tool.pytest.ini_options]
 log_cli = true
