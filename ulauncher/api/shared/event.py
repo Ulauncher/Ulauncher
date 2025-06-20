@@ -8,7 +8,7 @@ from ulauncher.internals.query import Query
 class BaseEvent:
     args: list[Any] = []
 
-    def __init__(self, args: list[Any]):
+    def __init__(self, args: list[Any]) -> None:
         self.args = args
 
 
@@ -30,7 +30,7 @@ class KeywordQueryEvent(BaseEvent):
     Deprecated older variant of InputTriggerEvent
     """
 
-    def __init__(self, query_str: str):
+    def __init__(self, query_str: str) -> None:
         self.query = Query.parse_str(query_str)
         super().__init__([self.query])
 

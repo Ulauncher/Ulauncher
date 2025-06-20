@@ -11,7 +11,7 @@ class TestCalcMode:
     def mode(self):
         return CalcMode()
 
-    def test_is_enabled(self, mode):
+    def test_is_enabled(self, mode) -> None:
         assert mode.parse_query_str("5")
         assert mode.parse_query_str("-5")
         assert mode.parse_query_str("5+")
@@ -39,18 +39,18 @@ class TestCalcMode:
         assert not mode.parse_query_str("pi2")
         assert not mode.parse_query_str("cospitanagamma")
 
-    def test_eval_expr_no_floating_point_errors(self):
+    def test_eval_expr_no_floating_point_errors(self) -> None:
         assert eval_expr("110 / 3") == "36.666666666666667"
         assert eval_expr("1.1 + 2.2") == "3.3"
         assert eval_expr("sin(pi)") == "0"
         assert abs(Decimal(eval_expr("e**2")) - Decimal(eval_expr("exp(2)"))) < Decimal("1e-10")
 
-    def test_eval_expr_rounding(self):
+    def test_eval_expr_rounding(self) -> None:
         assert str(eval_expr("3.300 + 7.1")) == "10.4"
         assert str(eval_expr("5.5 + 3.50")) == "9"
         assert str(eval_expr("10 / 3.0")) == "3.333333333333333"
 
-    def test_eval_expr_syntax_variation(self):
+    def test_eval_expr_syntax_variation(self) -> None:
         assert eval_expr("5.5 * 10") == "55"
         assert eval_expr("12 / 1,5") == eval_expr("12 / 1.5") == "8"
         assert eval_expr("3 ** 2") == eval_expr("3^2") == "9"
@@ -68,13 +68,13 @@ class TestCalcMode:
         assert eval_expr("sinh(acos(0.4") == "1.436961780213685"
         assert eval_expr("asinh(6) + atanh(0.9) + ln(0.7)") == "3.6073243982894"
 
-    def test_handle_query(self, mode):
+    def test_handle_query(self, mode) -> None:
         assert mode.handle_query(Query(None, "3+2"))[0].result == "5"
         assert mode.handle_query(Query(None, "3+2*"))[0].result == "5"
         assert mode.handle_query(Query(None, "2-2"))[0].result == "0"
         assert mode.handle_query(Query(None, "5%2"))[0].result == "1"
 
-    def test_handle_query__invalid_expr(self, mode):
+    def test_handle_query__invalid_expr(self, mode) -> None:
         [invalid_result] = mode.handle_query(Query(None, "3++"))
         assert invalid_result.name == "Error!"
         assert invalid_result.description == "Invalid expression"

@@ -8,12 +8,12 @@ logger = logging.getLogger()
 def systemctl_run(*args: str) -> str:
     try:
         return check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
-    except Exception:
+    except Exception:  # noqa: BLE001
         return ""
 
 
 class SystemdController:
-    def __init__(self, unit: str):
+    def __init__(self, unit: str) -> None:
         self.unit = unit
         self.supported = bool(which("systemctl"))
 

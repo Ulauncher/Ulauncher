@@ -10,7 +10,7 @@ class TestTimer:
     def glib(self, mocker):
         return mocker.patch("ulauncher.utils.timer.GLib")
 
-    def test_timer_subsecond(self, glib):
+    def test_timer_subsecond(self, glib) -> None:
         func = mock.Mock()
         subsecond_time = 0.5
         ctx = timer(subsecond_time, func)
@@ -21,7 +21,7 @@ class TestTimer:
         ctx.cancel()
         src.destroy.assert_called_once()
 
-    def test_timer_second(self, glib):
+    def test_timer_second(self, glib) -> None:
         func = mock.Mock()
         seconds_time = 2
         ctx = timer(seconds_time, func)

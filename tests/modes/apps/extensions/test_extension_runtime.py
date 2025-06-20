@@ -20,7 +20,7 @@ class TestExtensionRuntime:
     def time(self, mocker):
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.time")
 
-    def test_run__basic_execution__is_called(self, subprocess_launcher):
+    def test_run__basic_execution__is_called(self, subprocess_launcher) -> None:
         extid = "mock.test_run__basic_execution__is_called"
 
         runtime = ExtensionRuntime(extid, ["mock/path/to/ext"])
@@ -29,7 +29,7 @@ class TestExtensionRuntime:
         runtime.subprocess.wait_async.assert_called_once()
         runtime.error_stream.read_line_async.assert_called_once()
 
-    def test_read_stderr_line(self):
+    def test_read_stderr_line(self) -> None:
         test_output1 = "Test Output 1"
         test_output2 = "Test Output 2"
         extid = "mock.test_read_stderr_line"
@@ -51,7 +51,7 @@ class TestExtensionRuntime:
         assert runtime.recent_errors[0] == test_output2
         assert runtime.error_stream.read_line_async.call_count == 3
 
-    def test_handle_exit__signaled(self):
+    def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"
         err_cb = mock.Mock()
 
@@ -61,7 +61,7 @@ class TestExtensionRuntime:
         runtime.handle_exit(runtime.subprocess, mock.Mock())
         err_cb.assert_not_called()
 
-    def test_handle_exit__rapid_exit(self, time):
+    def test_handle_exit__rapid_exit(self, time) -> None:
         extid = "mock.test_handle_exit__rapid_exit"
         curtime = 100.0
         starttime = curtime - 0.5
@@ -76,7 +76,7 @@ class TestExtensionRuntime:
         runtime.handle_exit(runtime.subprocess, mock.Mock())
         err_cb.assert_called()
 
-    def test_handle_exit(self, time):
+    def test_handle_exit(self, time) -> None:
         extid = "mock.test_handle_exit"
         err_cb = mock.Mock()
         curtime = 100.0
@@ -92,7 +92,7 @@ class TestExtensionRuntime:
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
 
-    def test_stop(self):
+    def test_stop(self) -> None:
         extid = "mock.test_stop"
         err_cb = mock.Mock()
         runtime = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)

@@ -1,7 +1,7 @@
 from ulauncher.utils.text_highlighter import highlight_text as hl
 
 
-def test_highlight_text():
+def test_highlight_text() -> None:
     assert list(hl("fifox", "Firefox")) == [("Fi", True), ("re", False), ("fox", True)]
     assert list(hl("hell wo", "hello world")) == [("hell", True), ("o", False), (" wo", True), ("rld", False)]
     assert list(hl("dome", "Documents")) == [("Do", True), ("cu", False), ("me", True), ("nts", False)]

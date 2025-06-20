@@ -27,7 +27,7 @@ def _load_legacy(path: Path) -> Any | None:
             return pickle.loads(path.read_bytes())
         if path.suffix == ".json":
             return json.loads(path.read_text())
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         _logger.warning('Could not migrate file "%s": %s', str(path), e)
     return None
 
@@ -35,7 +35,7 @@ def _load_legacy(path: Path) -> Any | None:
 def _store_json(path: str, data: Any) -> bool:
     try:
         Path(path).write_text(json.dumps(data, indent=4))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         _logger.warning('Could not store JSON file "%s": %s', path, e)
         return False
     return True
@@ -135,7 +135,7 @@ def v5_to_v6() -> None:
                     else:
                         _logger.warning("Can't enable systemd unit. Systemd does not have systemd")
             _logger.info("Applied autostart settings to systemd")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             _logger.warning("Couldn't migrate autostart: %s", e)
 
 

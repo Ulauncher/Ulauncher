@@ -31,7 +31,7 @@ class ExtensionNetworkError(Exception):
 
 
 class ExtensionRemote:
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         try:
             self._use_git = bool(which("git"))
             self.url = url.strip().lower()

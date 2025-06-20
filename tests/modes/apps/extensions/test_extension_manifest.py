@@ -21,61 +21,61 @@ class TestExtensionManifest:
             "triggers": {"keyword": {"name": "Timer", "keyword": "ti"}},
         }
 
-    def test_open__manifest_file__is_read(self):
+    def test_open__manifest_file__is_read(self) -> None:
         ext_path = os.path.dirname(os.path.abspath(__file__))
         manifest = ExtensionManifest.load(f"{ext_path}/test_extension/manifest.json")
         assert manifest.name == "Test Extension"
 
-    def test_validate__name_empty__exception_raised(self):
+    def test_validate__name_empty__exception_raised(self) -> None:
         manifest = ExtensionManifest({"api_version": "1"})
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
-    def test_validate__valid_manifest__no_exceptions_raised(self, valid_manifest):
+    def test_validate__valid_manifest__no_exceptions_raised(self, valid_manifest) -> None:
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
 
-    def test_validate__prefs_incorrect_type__exception_raised(self, valid_manifest):
+    def test_validate__prefs_incorrect_type__exception_raised(self, valid_manifest) -> None:
         valid_manifest["preferences"] = {"id": {"type": "incorrect"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
-    def test_validate__type_kw_empty_name__exception_raised(self, valid_manifest):
+    def test_validate__type_kw_empty_name__exception_raised(self, valid_manifest) -> None:
         valid_manifest["preferences"] = {"id": {"type": "incorrect", "keyword": "kw"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
-    def test_validate__raises_error_if_empty_default_value_for_keyword(self, valid_manifest):
+    def test_validate__raises_error_if_empty_default_value_for_keyword(self, valid_manifest) -> None:
         valid_manifest["preferences"] = {"id": {"type": "keyword", "name": "My Keyword"}}
         manifest = ExtensionManifest(valid_manifest)
         with pytest.raises(ExtensionManifestError):
             manifest.validate()
 
-    def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, valid_manifest):
+    def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self, valid_manifest) -> None:
         valid_manifest["preferences"] = {
             "city": {"type": "input", "name": "City"},
         }
         manifest = ExtensionManifest(valid_manifest)
         manifest.validate()
 
-    def test_check_compatibility__manifest_version_0__exception_raised(self):
+    def test_check_compatibility__manifest_version_0__exception_raised(self) -> None:
         manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
         with pytest.raises(ExtensionIncompatibleRecoverableError):
             manifest.check_compatibility()
 
-    def test_check_compatibility__api_version__no_exceptions(self):
+    def test_check_compatibility__api_version__no_exceptions(self) -> None:
         manifest = ExtensionManifest({"name": "Test", "api_version": "3"})
         manifest.check_compatibility()
 
-    def test_defaults_not_included_in_stringify(self):
+    def test_defaults_not_included_in_stringify(self) -> None:
         # Ensure defaults don't leak
         assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
         manifest = ExtensionManifest(preferences={"ns": {"k": "v"}})
         assert json_stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
 
-    def test_manifest_backwards_compatibility(self):
+    def test_manifest_backwards_compatibility(self) -> None:
         em = ExtensionManifest(
             required_api_version="3",
             developer_name="John",

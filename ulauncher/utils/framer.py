@@ -39,7 +39,7 @@ class JSONFramer(GObject.GObject):
 
     READ_SIZE = 65000
 
-    def __init__(self):
+    def __init__(self) -> None:
         GObject.GObject.__init__(self)
         self._conn: Gio.SocketConnection | None = None
         self._canceller = Gio.Cancellable.new()

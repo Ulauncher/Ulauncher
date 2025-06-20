@@ -14,10 +14,10 @@ ENTRIES_DIR = Path(__file__).parent.joinpath("mock_desktop_entries").resolve()
 
 
 class TestAppResult:
-    def setup_class(self):
+    def setup_class(self) -> None:
         Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
 
-    def teardown_class(self):
+    def teardown_class(self) -> None:
         shutil.rmtree("/tmp/ulauncher-test")
 
     @pytest.fixture(autouse=True)
@@ -48,24 +48,24 @@ class TestAppResult:
         app_starts.update({"falseapp.desktop": 3000, "trueapp.desktop": 765})
         return mocker.patch("ulauncher.modes.apps.app_result.app_starts", new=app_starts)
 
-    def test_get_name(self, app1):
+    def test_get_name(self, app1) -> None:
         assert app1.name == "TrueApp - Full Name"
 
-    def test_get_description(self, app1):
+    def test_get_description(self, app1) -> None:
         assert app1.description == "Your own yes-man"
 
-    def test_icon(self, app1):
+    def test_icon(self, app1) -> None:
         assert app1.icon == "dialog-yes"
 
-    def test_search_score(self, app1):
+    def test_search_score(self, app1) -> None:
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_on_activation(self, app1, mocker, app_starts):
+    def test_on_activation(self, app1, mocker, app_starts) -> None:
         launch_app = mocker.patch("ulauncher.modes.apps.app_result.launch_app")
         app1.on_activation(Query(None, "query"))
         launch_app.assert_called_with("trueapp.desktop")
         assert app_starts.get("trueapp.desktop") == 766
 
-    def test_get_most_frequent(self):
+    def test_get_most_frequent(self) -> None:
         assert len(AppResult.get_most_frequent()) == 2
         assert AppResult.get_most_frequent()[0].name == "FalseApp - Full Name"

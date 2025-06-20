@@ -10,7 +10,7 @@ class TestExtensionRemote:
     def remote(self) -> ExtensionRemote:
         return ExtensionRemote("https://github.com/Ulauncher/ulauncher-timer")
 
-    def test_valid_urls_ext_id(self):
+    def test_valid_urls_ext_id(self) -> None:
         assert ExtensionRemote("https://host.tld/user/repo").ext_id == "tld.host.user.repo"
         assert ExtensionRemote("http://host/user/repo").ext_id == "host.user.repo"
         assert ExtensionRemote("https://host.org/user/repo.git").ext_id == "org.host.user.repo.git"
@@ -21,11 +21,11 @@ class TestExtensionRemote:
         assert ExtensionRemote("https://gitlab.com/user/repo.git").ext_id == "com.gitlab.user.repo"
         assert ExtensionRemote("https://other.host/a/b/c/d").ext_id == "host.other.a.b.c.d"
 
-    def test_invalid_url(self):
+    def test_invalid_url(self) -> None:
         with pytest.raises(InvalidExtensionRecoverableError):
             ExtensionRemote("INVALID URL")
 
-    def test_get_download_url(self):
+    def test_get_download_url(self) -> None:
         assert (
             ExtensionRemote("https://github.com/user/repo")._get_download_url("master")
             == "https://github.com/user/repo/archive/master.tar.gz"

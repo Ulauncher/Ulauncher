@@ -104,7 +104,7 @@ def _is_enabled(query_str: str) -> bool:
             return node.func.id in functions
     except SyntaxError:
         pass
-    except Exception:
+    except Exception:  # noqa: BLE001
         logger.warning("Calc mode parse error for query: '%s'", query_str)
     return False
 
@@ -134,6 +134,6 @@ class CalcMode(BaseMode):
     def handle_query(self, query: Query) -> list[CalcResult]:
         try:
             result = CalcResult(result=str(eval_expr(query.argument)))
-        except Exception:
+        except Exception:  # noqa: BLE001
             result = CalcResult(error="Invalid expression")
         return [result]

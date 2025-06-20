@@ -104,7 +104,7 @@ class PreferencesServer:
             except Exception as e:
                 err_type = type(e).__name__
                 error = {"message": str(e), "type": err_type}
-                logging.exception("Preferences server error: %s", err_type)
+                logger.exception("Preferences server error: %s", err_type)
 
                 if not err_type.endswith("RecoverableError"):
                     stack_details = {"stack trace": f"```\n{traceback.format_exc()}\n```"}
@@ -121,7 +121,7 @@ class PreferencesServer:
                 [mime_type, _] = mimetypes.guess_type(path)
                 file_stream = Gio.file_new_for_path(path).read()
                 scheme_request.finish(file_stream, -1, mime_type)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Couldn't handle file request from '%s' (%s: %s)", uri, type(e).__name__, e)
             else:
                 return

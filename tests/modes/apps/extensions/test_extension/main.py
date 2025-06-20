@@ -3,7 +3,7 @@ import sys
 from time import sleep
 
 
-def exit_gracefully(_signum, _frame):
+def exit_gracefully(_signum, _frame) -> None:
     print("On SIGTERM")
     sleep(3)
 

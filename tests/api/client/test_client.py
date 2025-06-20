@@ -36,20 +36,20 @@ class TestClient:
         client.client = sock_client
         return client
 
-    def test_connect__connect_is_called(self, client, mainloop):
+    def test_connect__connect_is_called(self, client, mainloop) -> None:
         client.connect()
         client.client.connect.assert_called_once()
         client.framer.send.assert_called_once()
         mainloop.return_value.run.assert_called_once()
 
-    def test_on_message__trigger_event__is_called(self, client, extension):
+    def test_on_message__trigger_event__is_called(self, client, extension) -> None:
         client.on_message(mock.Mock(), {"hello": "world"})
         extension.trigger_event.assert_called_with({"hello": "world"})
 
-    def test_on_close__unload_event__is_triggered(self, client, extension):
+    def test_on_close__unload_event__is_triggered(self, client, extension) -> None:
         client.on_close(mock.Mock())
         extension.trigger_event.assert_called_with({"type": "event:unload"})
 
-    def test_send__framer_send__is_called(self, client):
+    def test_send__framer_send__is_called(self, client) -> None:
         client.send({"hello": "world"})
         client.framer.send.assert_called_with({"hello": "world"})

@@ -7,12 +7,12 @@ from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
 
 
 class MockDirEntry:
-    def __init__(self, name, atime, is_file=True):
+    def __init__(self, name, atime, is_file=True) -> None:
         self.name = name
         self._atime = atime
         self._is_file = is_file
 
-    def is_dir(self):
+    def is_dir(self) -> bool:
         return not self._is_file
 
     def is_file(self):
@@ -38,7 +38,7 @@ class TestFileBrowserMode:
     def mode(self):
         return FileBrowserMode()
 
-    def test_is_enabled(self, mode):
+    def test_is_enabled(self, mode) -> None:
         assert mode.parse_query_str("~/Downloads")
         assert mode.parse_query_str("~")
         assert mode.parse_query_str("$USER/Videos")
@@ -50,18 +50,18 @@ class TestFileBrowserMode:
         assert not mode.parse_query_str("+")
         assert not mode.parse_query_str(" ")
 
-    def test_list_files(self, mode):
+    def test_list_files(self, mode) -> None:
         assert mode.list_files("path") == ["a", "B", "c", "D"]
         assert mode.list_files("path", sort_by_atime=True) == ["B", "D", "c", "a"]
 
-    def test_filter_dot_files(self, mode):
+    def test_filter_dot_files(self, mode) -> None:
         assert mode.filter_dot_files(["a", ".b", "c", ".d"]) == ["a", "c"]
 
-    def test_handle_query__path_from_q_exists__dir_listing_rendered(self):
+    def test_handle_query__path_from_q_exists__dir_listing_rendered(self) -> None:
         query = Query(None, "/tmp/")
         flattened_results = [str(r.path) for r in FileBrowserMode().handle_query(query)]
         assert flattened_results == ["/tmp/B", "/tmp/D", "/tmp/c", "/tmp/a"]
 
-    def test_handle_query__invalid_path__empty_list_rendered(self, mode):
+    def test_handle_query__invalid_path__empty_list_rendered(self, mode) -> None:
         query = Query(None, "~~")
         assert mode.handle_query(query) == []

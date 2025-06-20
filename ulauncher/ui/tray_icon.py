@@ -50,7 +50,7 @@ def _create_menu_item(label: str, handler: Callable[[Any], None]) -> Gtk.MenuIte
 
 
 class TrayIcon(GObject.Object):
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if self.supports_appindicator():
             show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: events.emit("app:show_launcher"))

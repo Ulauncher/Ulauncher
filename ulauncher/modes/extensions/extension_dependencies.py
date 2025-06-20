@@ -22,7 +22,7 @@ class ExtensionDependencies:
 
     deps_out_subdir: str = ".dependencies"
 
-    def __init__(self, ext_id: str, path: str):
+    def __init__(self, ext_id: str, path: str) -> None:
         self.ext_id = ext_id
         self.path = path
 

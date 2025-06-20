@@ -2,11 +2,11 @@ from ulauncher.utils.settings import Settings
 
 
 class TestSettings:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         assert Settings().theme_name == "light"
         assert Settings(theme_name="asdf").theme_name == "asdf"
 
-    def test_dash_to_underscore(self):
+    def test_dash_to_underscore(self) -> None:
         s = Settings()
         assert s.theme_name == "light"
         s.update({"theme-name": "asdf"})

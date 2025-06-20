@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 from gzip import GzipFile
 from pathlib import Path
 from shutil import copyfileobj
+from typing import Iterator
 
 from setuptools import find_packages, setup
 
@@ -17,10 +19,10 @@ def gzip_file(source_file: str) -> str:
     return output_file
 
 
-def data_files_from_path(target_path, source_path):
+def data_files_from_path(target_path: str, source_path: str) -> Iterator[tuple[str, list[str]]]:
     # Creates a list of valid entries for data_files weird custom format
     # Recurses over the real_path and adds it's content to package_path
-    def _iter(directory):
+    def _iter(directory: Path) -> Iterator[Path]:
         for path in directory.iterdir():
             resolved = path.resolve()
             if resolved.is_dir():

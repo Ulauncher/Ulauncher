@@ -22,7 +22,7 @@ class AppResult(Result):
     _app_id = ""
     _executable = ""
 
-    def __init__(self, app_info: Gio.DesktopAppInfo):
+    def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
         super().__init__(
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",

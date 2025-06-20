@@ -62,7 +62,7 @@ class ExtensionController:
     _path: str | None
     _state_path: Path
 
-    def __init__(self, ext_id: str, path: str | None = None):
+    def __init__(self, ext_id: str, path: str | None = None) -> None:
         self.id = ext_id
         self._path = path
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")

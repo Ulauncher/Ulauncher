@@ -40,17 +40,17 @@ class TestExtensionSocketServer:
     def server(self):
         return ExtensionSocketServer()
 
-    def test_start(self, server):
+    def test_start(self, server) -> None:
         server.start()
         server.service.connect.assert_called_once()
         server.service.add_address.assert_called_once()
 
-    def test_start__clean_socket(self, server, path_exists, unlink):
+    def test_start__clean_socket(self, server, path_exists, unlink) -> None:
         path_exists.return_value = True
         server.start()
         unlink.assert_called_once()
 
-    def test_handle_incoming(self, server, jsonframer):
+    def test_handle_incoming(self, server, jsonframer) -> None:
         conn = mock.Mock()
         source = mock.Mock()
         server.start()
@@ -58,7 +58,7 @@ class TestExtensionSocketServer:
         assert id(jsonframer.return_value) in server.pending
         jsonframer.return_value.set_connection.assert_called_with(conn)
 
-    def test_handle_registration(self, server, jsonframer, gobject, extension_socket_controller):
+    def test_handle_registration(self, server, jsonframer, gobject, extension_socket_controller) -> None:
         conn = mock.Mock()
         source = mock.Mock()
         server.start()
@@ -71,7 +71,7 @@ class TestExtensionSocketServer:
         assert gobject.signal_handler_disconnect.call_count == 2
         extension_socket_controller.assert_called_once()
 
-    def test_stop(self, server):
+    def test_stop(self, server) -> None:
         server.start()
         assert server.service
         service = server.service

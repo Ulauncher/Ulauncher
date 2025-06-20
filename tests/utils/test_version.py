@@ -2,7 +2,7 @@ from ulauncher.utils.version import satisfies, valid_range
 
 
 class TestVersion:
-    def test_valid_range(self):
+    def test_valid_range(self) -> None:
         assert valid_range("1.0")
         assert valid_range("1.x")
         assert valid_range("~1.x")
@@ -16,7 +16,7 @@ class TestVersion:
         assert not valid_range("1-2")  # Invalid hyphen range format (incompatible with semver library)
         assert not valid_range("1||2")  # Valid in semver, but don't want to support this
 
-    def test_satisfies(self):
+    def test_satisfies(self) -> None:
         assert satisfies("1.5", "1")
         assert satisfies("1.5", "1.x")
         assert satisfies("1.5", "1.0")

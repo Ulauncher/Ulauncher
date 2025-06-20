@@ -60,7 +60,7 @@ class Client:
         logger.debug("Incoming event: %s", event)
         try:
             self.extension.trigger_event(event)
-        except Exception:
+        except Exception:  # noqa: BLE001
             traceback.print_exc(file=sys.stderr)
 
     def on_close(self, _framer: JSONFramer) -> None:

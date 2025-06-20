@@ -27,7 +27,7 @@ class ResultWidget(Gtk.EventBox):
     title_box: Gtk.Box
     text_container: Gtk.Box
 
-    def __init__(self, result: Result, index: int, query: Query):
+    def __init__(self, result: Result, index: int, query: Query) -> None:
         self.result = result
         self.query = query
         text_scaling_factor = get_text_scaling_factor()

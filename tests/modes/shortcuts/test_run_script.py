@@ -6,7 +6,7 @@ from ulauncher.modes.shortcuts.run_script import run_script
 
 
 class TestRunScriptAction:
-    def test_run_with_arg(self):
+    def test_run_with_arg(self) -> None:
         test_file = f"/tmp/ulauncher_test_{randint(1, 111111)}"
         arg = "hello world"
         # RunScriptAction only supports bash argument placeholders ("$@" or "$1")
