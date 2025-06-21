@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+import ulauncher.interfaces
 from ulauncher.config import paths
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
@@ -16,7 +17,7 @@ class CalcResult(Result):
         self.name = f"{Decimal(self.result):n}" if self.result is not None else "Error!"
         self.description = "Enter to copy to the clipboard" if self.result is not None else error
 
-    def on_activation(self, _query: Query, _alt: bool = False) -> bool | dict[str, str]:
+    def on_activation(self, _query: Query, _alt: bool = False) -> ulauncher.interfaces.ActionMetadata:
         if self.result is not None:
             return actions.copy(str(self.result))
 

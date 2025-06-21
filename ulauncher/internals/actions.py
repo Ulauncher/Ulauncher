@@ -3,10 +3,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import ulauncher.interfaces
+
 logger = logging.getLogger()
 
 
-def copy(text: str) -> dict[str, str]:
+def copy(text: str) -> ulauncher.interfaces.ActionMetadata:
     if not text:
         msg = "Copy argument cannot be empty"
         logger.error(msg)
@@ -18,7 +20,7 @@ def copy(text: str) -> dict[str, str]:
     return {"type": "action:clipboard_store", "data": text}
 
 
-def open(item: str) -> dict[str, str]:  # noqa: A001
+def open(item: str) -> ulauncher.interfaces.ActionMetadata:  # noqa: A001
     if not item:
         msg = "Open argument cannot be empty"
         logger.error(msg)
@@ -30,7 +32,7 @@ def open(item: str) -> dict[str, str]:  # noqa: A001
     return {"type": "action:open", "data": item}
 
 
-def run_script(script: str, args: str = "") -> dict[str, str | list[str]]:
+def run_script(script: str, args: str = "") -> ulauncher.interfaces.ActionMetadata:
     if not script:
         msg = "Script argument cannot be empty"
         logger.error(msg)
@@ -42,5 +44,5 @@ def run_script(script: str, args: str = "") -> dict[str, str | list[str]]:
     return {"type": "action:legacy_run_script", "data": [script, args]}
 
 
-def action_list(actions: list[Any]) -> dict[str, Any]:
+def action_list(actions: list[Any]) -> ulauncher.interfaces.ActionMetadata:
     return {"type": "action:legacy_run_many", "data": actions}

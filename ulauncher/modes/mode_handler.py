@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from gi.repository import Gdk, Gtk
 
+import ulauncher.interfaces
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_mode import AppMode
@@ -48,27 +48,27 @@ def activate_result(result: Result, query: Query, alt: bool) -> None:
 
 
 @_events.on
-def handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> None:
-    if not _handle_action(action):
+def handle_action(action_metadata: ulauncher.interfaces.ActionMetadata | None) -> None:
+    if not _handle_action(action_metadata):
         _events.emit("window:close")
 
 
-def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bool:  # noqa: PLR0911, PLR0912
-    if action is True:
+def _handle_action(action_metadata: ulauncher.interfaces.ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
+    if action_metadata is True:
         return True
-    if action in (False, None):
+    if action_metadata in (False, None):
         return False
-    if isinstance(action, list):
-        results = [res if isinstance(res, Result) else Result(**res) for res in action]
+    if isinstance(action_metadata, list):
+        results = [res if isinstance(res, Result) else Result(**res) for res in action_metadata]
         _events.emit("window:show_results", results)
         return True
-    if isinstance(action, str):
-        _events.emit("app:set_query", action)
+    if isinstance(action_metadata, str):
+        _events.emit("app:set_query", action_metadata)
         return True
 
-    if isinstance(action, dict):
-        event_type = action.get("type", "")
-        data = action.get("data")
+    if isinstance(action_metadata, dict):
+        event_type = action_metadata.get("type", "")
+        data = action_metadata.get("data")
         if event_type == "action:open" and data:
             open_detached(data)
             return False
@@ -85,10 +85,12 @@ def _handle_action(action: bool | list[Any] | str | dict[str, Any] | None) -> bo
                     keep_open = True
             return keep_open
         if event_type == "action:activate_custom":
-            _events.emit("extension:trigger_event", {"type": "event:activate_custom", "ref": action.get("ref")})
-            return action.get("keep_app_open") is True
+            _events.emit(
+                "extension:trigger_event", {"type": "event:activate_custom", "ref": action_metadata.get("ref")}
+            )
+            return action_metadata.get("keep_app_open") is True
 
     else:
-        _logger.warning("Invalid action from mode: %s", type(action).__name__)
+        _logger.warning("Invalid action from mode: %s", type(action_metadata).__name__)
 
     return False

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from os.path import basename, dirname, isdir, join
 
+import ulauncher.interfaces
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -28,7 +29,7 @@ class FileBrowserResult(Result):
             return basename(query.argument)
         return None
 
-    def on_activation(self, _query: Query, alt: bool = False) -> str | dict[str, str] | list[Result]:
+    def on_activation(self, _query: Query, alt: bool = False) -> ulauncher.interfaces.ActionMetadata:
         if not alt:
             if isdir(self.path):
                 return join(fold_user_path(self.path), "")

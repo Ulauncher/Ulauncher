@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import ulauncher.interfaces
 from ulauncher.internals.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 
@@ -52,7 +53,7 @@ class Result(BaseDataClass):
             return query.argument
         return str(query)
 
-    def on_activation(self, query: Query, alt: bool = False) -> bool | str | dict[str, str] | list[Result]:
+    def on_activation(self, query: Query, alt: bool = False) -> ulauncher.interfaces.ActionMetadata:
         """
         Handle the main action
         """
