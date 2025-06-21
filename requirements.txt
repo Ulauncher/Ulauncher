@@ -4,5 +4,5 @@ lefthook
 mypy
 pytest
 pytest-mock
-ruff
+ruff >= 0.12.0
 typos
