@@ -333,11 +333,11 @@ label {
   cursor: pointer;
 }
 label + small {
-    position: relative;
-    top: -5px;
-    line-height: 1.3em;
-    display: block;
-    color: #888;
+  position: relative;
+  top: -5px;
+  line-height: 1.3em;
+  display: block;
+  color: #888;
 }
 #hotkey-show-app {
   cursor: pointer;

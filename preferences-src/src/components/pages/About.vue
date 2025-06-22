@@ -100,31 +100,31 @@ export default {
 }
 
 .about-container .logo-label {
-    margin: 20px 0 5px 0;
-    font-size: 20px;
-    color: #507caf;
+  margin: 20px 0 5px 0;
+  font-size: 20px;
+  color: #507caf;
 }
 
 .about-container .api-version {
-    font-size: 15px;
-    color: #888;
-    text-shadow: 1px 1px 1px #fff;
+  font-size: 15px;
+  color: #888;
+  text-shadow: 1px 1px 1px #fff;
 }
 
 .about-container .text-container {
-    padding: 30px 35px 30px 35px;
-    border: 1px solid #7ec183;
-    border-radius: 8px;
-    font-size: 0.95em;
-    color: #858585;
+  padding: 30px 35px 30px 35px;
+  border: 1px solid #7ec183;
+  border-radius: 8px;
+  font-size: 0.95em;
+  color: #858585;
 }
 
 .about-container .credits-text {
-    text-align: left;
+  text-align: left;
 }
 
 .about-container .logo svg {
-    width: 190px;
-    height: 190px;
+  width: 190px;
+  height: 190px;
 }
 </style>

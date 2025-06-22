@@ -64,46 +64,46 @@ export default {
 }
 
 .item .outer-circle {
-    display: block;
-    width: 94px;
-    height: 94px;
-    background: var(--main-grey);
-    border-radius: 50%;
-    text-align: center;
-    margin: 0 auto;
+  display: block;
+  width: 94px;
+  height: 94px;
+  background: var(--main-grey);
+  border-radius: 50%;
+  text-align: center;
+  margin: 0 auto;
 }
 
 .item .inner-circle {
-    margin-top: 7px;
-    display: inline-block;
-    width: 80px;
-    height: 80px;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    text-align: center;
-    background: #fff;
-    color: var(--main-grey);
+  margin-top: 7px;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  text-align: center;
+  background: #fff;
+  color: var(--main-grey);
 }
 
 .item .inner-circle .fa-icon {
-      margin-top: 10px;
-      color: var(--main-grey);
-      font-size: 54px;
+  margin-top: 10px;
+  color: var(--main-grey);
+  font-size: 54px;
 }
 
 .item .label {
-    text-transform: uppercase;
-    padding: 20px 0 12px 0;
-    font-size: 0.9em;
-    text-align: center;
-    cursor: pointer;
+  text-transform: uppercase;
+  padding: 20px 0 12px 0;
+  font-size: 0.9em;
+  text-align: center;
+  cursor: pointer;
 }
 
 .item .text {
-    color: #a7a7a7;
-    text-align: center;
-    font-size: 0.9em;
-    visibility: hidden;
+  color: #a7a7a7;
+  text-align: center;
+  font-size: 0.9em;
+  visibility: hidden;
 }
 
 .item:hover .outer-circle {

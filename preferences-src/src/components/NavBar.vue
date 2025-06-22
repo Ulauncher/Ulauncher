@@ -41,7 +41,6 @@ li {
 }
 a {
   outline: 0 !important;
-
   position: relative;
   display: inline-block;
   height: 100%;
@@ -54,23 +53,23 @@ a {
 }
 
 a:hover {
-    color: #4675ab;
-    text-decoration: none !important;
+  color: #4675ab;
+  text-decoration: none !important;
 }
 
 a.router-link-exact-active {
-    color: var(--dark-blue);
+  color: var(--dark-blue);
 }
 
 a.router-link-exact-active:after {
-      content: '';
-      position: absolute;
-      top: calc(var(--header-height) - var(--underline-height));
-      left: 0;
-      display: inline-block;
-      height: var(--underline-height);
-      width: 100%;
-      background: var(--dark-blue);
+  content: '';
+  position: absolute;
+  top: calc(var(--header-height) - var(--underline-height));
+  left: 0;
+  display: inline-block;
+  height: var(--underline-height);
+  width: 100%;
+  background: var(--dark-blue);
 }
 
 i {

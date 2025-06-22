@@ -298,46 +298,46 @@ export default {
 }
 
 .header-info .logo {
-    flex: 0 0 70px;
+  flex: 0 0 70px;
 }
 
 .header-info .logo img {
-      width: 55px;
+  width: 55px;
 }
 
 .header-info .ext-info {
-    flex: 1 0 0;
-    line-height: 1.75;
+  flex: 1 0 0;
+  line-height: 1.75;
 }
 
 .header-info .ext-info .ext-name {
-      font-size: 1.3em;
+  font-size: 1.3em;
 }
 .header-info .ext-info .authors {
-      font-style: italic;
-      opacity: 0.8;
+  font-style: italic;
+  opacity: 0.8;
 }
 .header-info .ext-info .repo {
-      font-size: 0.9em;
-      opacity: 0.8;
-      display: flex;
+  font-size: 0.9em;
+  opacity: 0.8;
+  display: flex;
 }
 .header-info .ext-info .repo > div {
-      margin-right: 8px;
+  margin-right: 8px;
 }
 .header-info .ext-info .notes {
-      font-size: smaller;
-      font-style: italic;
-      opacity: 0.8;
+  font-size: smaller;
+  font-style: italic;
+  opacity: 0.8;
 }
 
 .header-info .saved-notif {
-    flex: 0 0 20px;
-    font-size: 20px;
-    position: relative;
-    right: 0;
-    top: 10px;
-    opacity: 0.9;
+  flex: 0 0 20px;
+  font-size: 20px;
+  position: relative;
+  right: 0;
+  top: 10px;
+  opacity: 0.9;
 }
 
 .menu-button {
@@ -358,16 +358,16 @@ export default {
   padding-top: 15px;
 }
 .ext-form .row {
-    display: block;
+  display: block;
 }
 .error-wrapper {
   margin-top: 20px;
 }
 .ext-config h1 {
-    font-size: 1.3em;
+  font-size: 1.3em;
 }
 .ext-config small {
-    font-style: italic;
+  font-style: italic;
 }
 
 .toggle {

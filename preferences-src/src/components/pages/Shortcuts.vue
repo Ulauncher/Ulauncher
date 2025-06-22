@@ -97,13 +97,13 @@ button { cursor: pointer }
   padding-left: 8px;
 }
 .add-link i {
-    margin-right: 5px;
-    display: inline-block;
+  margin-right: 5px;
+  display: inline-block;
 }
 
 .add-link:hover {
-    color: #015aa7;
-    text-decoration: underline;
+  color: #015aa7;
+  text-decoration: underline;
 }
 .limited-width {
   white-space: nowrap;
@@ -116,24 +116,24 @@ button { cursor: pointer }
   position: relative;
 }
 .cmd .text-wrapper {
-    display: table;
-    table-layout: fixed;
-    width:100%;
+  display: table;
+  table-layout: fixed;
+  width:100%;
 }
 
 .cmd .text-wrapper .text {
-      display: table-cell;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      font-family: monospace;
+  display: table-cell;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: monospace;
 }
 
 .cmd .actions {
-    position: absolute;
-    display: none;
-    top: -4px;
-    right: 0;
+  position: absolute;
+  display: none;
+  top: -4px;
+  right: 0;
 }
 tr:hover .actions {
   display: block;

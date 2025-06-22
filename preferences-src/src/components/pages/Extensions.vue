@@ -234,58 +234,57 @@ export default {
 }
 .ext-list {
   --list-icon-size: 17px;
-
   list-style: none;
   padding: 0;
   margin: 0;
   margin-bottom: 10px;
 }
 .ext-list li {
-    cursor: pointer;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    text-align: left;
-    position: relative;
-    padding: 3px 0;
-    margin: 3px 0;
-    color: #555;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  position: relative;
+  padding: 3px 0;
+  margin: 3px 0;
+  color: #555;
 }
 
 .ext-list li i {
-      margin-right: 5px;
-      width: var(--list-icon-size);
-      height: var(--list-icon-size);
+  margin-right: 5px;
+  width: var(--list-icon-size);
+  height: var(--list-icon-size);
 }
 
 .ext-list li .ext-icon {
-      display: inline-block;
-      background-repeat: no-repeat;
-      background-size: var(--list-icon-size) var(--list-icon-size);
-      position: relative;
-      top: 3px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: var(--list-icon-size) var(--list-icon-size);
+  position: relative;
+  top: 3px;
 }
 
 .ext-list li.active,
 .ext-list li:active,
 .ext-list li:hover {
-      color: var(--dark-blue);
+  color: var(--dark-blue);
 }
 
 .ext-list li.active span,
 .ext-list li:active span,
 .ext-list li:hover span {
-      text-decoration: underline;
+  text-decoration: underline;
 }
 
 .ext-list li.api-version {
-      cursor: default;
-      font-size: 15px;
-      color: #888;
-      text-shadow: 1px 1px 1px #fff;
+  cursor: default;
+  font-size: 15px;
+  color: #888;
+  text-shadow: 1px 1px 1px #fff;
 }
 
 .ext-list .link {
-    font-style: italic;
+  font-style: italic;
 }
 </style>
