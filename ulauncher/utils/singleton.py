@@ -11,6 +11,5 @@ def get_instance(supercls: Any, cls: Any, *args: Any, **kwargs: Any) -> Any:
 
 # Use with metaclass=Singleton (not possible when inheriting from Gtk classes for example)
 class Singleton(type):
-
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         return get_instance(super(), cls, *args, **kwargs)

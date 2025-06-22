@@ -118,9 +118,9 @@ class ExtensionManifest(JsonConf):
                 default = p.default_value
                 assert p.name, f'"{id}" missing non-optional field "name"'
                 assert p.type, f'"{id}" missing non-optional field "type"'
-                assert (
-                    p.type in valid_types
-                ), f'"{id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
+                assert p.type in valid_types, (
+                    f'"{id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
+                )
                 assert p.min is None or p.type == "number", f'"min" specified for "{id}", which is not a number type'
                 assert p.max is None or p.type == "number", f'"max" specified for "{id}", which is not a number type'
                 if p.type == "checkbox" and default:
@@ -128,21 +128,21 @@ class ExtensionManifest(JsonConf):
                 if p.type == "number":
                     assert isinstance(default, int), f'"{id}" default_value must be a non-decimal number'
                     assert not isinstance(default, bool), f'"{id}" default_value must be a non-decimal number'
-                    assert not p.min or isinstance(
-                        p.min, int
-                    ), f'"{id}" "min" value must be non-decimal number if specified'
-                    assert not p.max or isinstance(
-                        p.min, int
-                    ), f'"{id}" "max" value must be non-decimal number if specified'
-                    assert (
-                        not p.min or not p.max or p.min < p.max
-                    ), f'"{id}" "min" value must be lower than "max" if specified'
-                    assert (
-                        not default or not p.max or default <= p.max
-                    ), f'"{id}" "default_value" must not be higher than "max"'
-                    assert (
-                        not default or not p.min or default >= p.min
-                    ), f'"{id}" "min" value must not be higher than "default_value"'
+                    assert not p.min or isinstance(p.min, int), (
+                        f'"{id}" "min" value must be non-decimal number if specified'
+                    )
+                    assert not p.max or isinstance(p.min, int), (
+                        f'"{id}" "max" value must be non-decimal number if specified'
+                    )
+                    assert not p.min or not p.max or p.min < p.max, (
+                        f'"{id}" "min" value must be lower than "max" if specified'
+                    )
+                    assert not default or not p.max or default <= p.max, (
+                        f'"{id}" "default_value" must not be higher than "max"'
+                    )
+                    assert not default or not p.min or default >= p.min, (
+                        f'"{id}" "min" value must not be higher than "default_value"'
+                    )
                 if p.type == "select":
                     assert isinstance(p.options, list), f'"{id}" options field must be a list'
                     assert p.options, f'"{id}" option cannot be empty for select type'

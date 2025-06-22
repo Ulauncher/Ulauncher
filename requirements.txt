@@ -1,4 +1,3 @@
-black
 build
 lefthook
 mypy

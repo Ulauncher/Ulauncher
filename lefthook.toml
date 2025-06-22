@@ -4,20 +4,21 @@
 skip_lfs = true
 
 [pre-commit]
+# make sure to only run one job with stage_fixed, or disable parallel
+# otherwise one job might might overwrite the changes of another job
+# and jobs can fail because a previous job created the git lockfile,
 parallel = true
 
 [pre-commit.commands.typos]
 glob = "*"
 run = "typos --force-exclude {staged_files}"
 
-[pre-commit.commands.black]
-glob = "*.py"
-run = "black {staged_files}"
-stage_fixed = true
-
 [pre-commit.commands.ruff]
 glob = "*.py"
-run = "ruff check --fix {staged_files}"
+run = """
+  ruff check --fix {staged_files}
+  ruff format {staged_files}
+  """
 stage_fixed = true
 
 [pre-commit.commands.mypy]

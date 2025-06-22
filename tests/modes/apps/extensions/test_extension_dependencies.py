@@ -14,7 +14,9 @@ def extension_dependencies() -> ExtensionDependencies:
 @patch("ulauncher.modes.extensions.extension_dependencies.isfile", return_value=True)
 @patch("ulauncher.modes.extensions.extension_dependencies.isdir", return_value=True)
 def test_get_dependencies_path(
-    mock_isdir: MagicMock, mock_isfile: MagicMock, extension_dependencies: ExtensionDependencies  # noqa: ARG001
+    mock_isdir: MagicMock,  # noqa: ARG001
+    mock_isfile: MagicMock,  # noqa: ARG001
+    extension_dependencies: ExtensionDependencies,
 ) -> None:
     deps_path = extension_dependencies.get_dependencies_path()
     assert deps_path == "/fake/path/.dependencies"

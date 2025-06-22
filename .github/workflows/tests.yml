@@ -12,8 +12,6 @@ jobs:
     container: ulauncher/build-image:6.2
     steps:
       - uses: actions/checkout@v4
-      - name: black
-        run: make black
       - name: ruff
         run: make ruff
       - name: typo
