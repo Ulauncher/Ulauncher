@@ -149,7 +149,7 @@ export default {
     'ext-install-error': ExtensionInstallError,
     'ext-runtime-error': ExtensionRuntimeError
   },
-  name: 'extension-config',
+  name: 'extension-preferences',
   props: ['extension'],
   data() {
     return {

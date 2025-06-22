@@ -91,7 +91,7 @@
     </div>
 
     <div class="col-8 ext-view">
-      <extension-config v-if="activeExtId" @removed="removeExtension" v-on:reload="reload" :extension="extensions[activeExtId]"></extension-config>
+      <extension-preferences v-if="activeExtId" @removed="removeExtension" v-on:reload="reload" :extension="extensions[activeExtId]"></extension-preferences>
     </div>
   </div>
 </template>
@@ -100,7 +100,7 @@
 import fetchData from '@/fetchData'
 import bus from '@/event-bus'
 import { mapState, mapGetters } from 'vuex'
-import ExtensionConfig from '@/components/pages/ExtensionConfig'
+import ExtensionPreferences from '@/components/pages/ExtensionPreferences'
 import ExtensionInstallError from '@/components/widgets/ExtensionInstallError'
 
 export default {
@@ -117,7 +117,7 @@ export default {
     bus.$off('extension/remove', this.removeExtension)
   },
   components: {
-    'extension-config': ExtensionConfig,
+    'extension-preferences': ExtensionPreferences,
     'ext-install-error': ExtensionInstallError
   },
   computed: {
