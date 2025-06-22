@@ -103,20 +103,18 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 
 #=Lint/test Commands
 
-.PHONY: check black mypy ruff typos pytest test format
+.PHONY: check mypy ruff typos pytest test format
 
-check: black mypy ruff typos # Run all linters
+check: typos ruff mypy # Run all linters
 
 test: check pytest # Run all linters and test
-
-black: # Lint with black (formatting checker)
-	black --diff --check .
 
 mypy: # Lint with mypy (type checker)
 	mypy ulauncher
 
 ruff: # Lint with ruff
 	ruff check .
+	ruff format --check .
 
 typos: # Lint with typos (typo checker)
 	typos .
@@ -131,8 +129,8 @@ pytest: # Run unit tests
 	fi
 
 format: # Auto format the code
-	black .
 	ruff check . --fix
+	ruff format .
 
 #=Build Commands
 

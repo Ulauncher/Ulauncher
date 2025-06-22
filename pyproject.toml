@@ -24,9 +24,6 @@ dynamic = ["version"]
 [tool.setuptools.dynamic]
 version = {attr = "ulauncher.version"}
 
-[tool.black]
-line-length = 120
-
 [tool.mypy]
 python_version = "3.8"
 strict = true
@@ -76,7 +73,7 @@ select = [
   "B",        # flake8-bugbear
   "BLE",      # flake8-blind-except
   "C4",       # flake8-comprehensions
-  # "COM",    # flake8-commas (we use black for formatting, so this would conflict)
+  # "COM",    # flake8-commas (we use ruff format instead)
   # "CPY",    # flake8-copyright (enforces copyright headers in python files)
   # "DTZ",    # flake8-datetimez (too focused on enforcing time zone argument, which we don't need)
   # "D",      # pydocstyle (validates, formats and enforces docstrings)
