@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, Union
+
+from typing_extensions import TypeAlias
 
 from ulauncher.internals.query import Query
+
+ExtensionPreferenceValue: TypeAlias = Union[str, int, bool]
+ExtensionPreferences: TypeAlias = Dict[str, ExtensionPreferenceValue]
 
 
 class BaseEvent:
@@ -71,15 +76,11 @@ class UnloadEvent(BaseEvent):
 class PreferencesUpdateEvent(BaseEvent):
     """
     Is triggered when user updates preference through Preferences window
-
-    :param str id:
-    :param str old_value:
-    :param str new_value:
     """
 
-    id = None
-    old_value = None
-    new_value = None
+    id: str
+    old_value: ExtensionPreferenceValue
+    new_value: ExtensionPreferenceValue
 
     def __init__(self, args: Any) -> None:
         super().__init__(args)
@@ -93,9 +94,9 @@ class PreferencesEvent(BaseEvent):
     :param dict preferences:
     """
 
-    preferences = None
+    preferences: ExtensionPreferences
 
-    def __init__(self, args: list[Any]) -> None:
+    def __init__(self, args: list[ExtensionPreferences]) -> None:
         super().__init__(args)
         self.preferences = args[0]
 
