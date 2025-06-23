@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Union
-
-from typing_extensions import TypeAlias
+from typing import Any, Dict, TypeAlias, Union  # type: ignore[attr-defined]
 
 from ulauncher.internals.query import Query
 
