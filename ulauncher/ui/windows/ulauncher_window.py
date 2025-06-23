@@ -235,7 +235,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 return True
 
             if keyname in ("Return", "KP_Enter"):
-                self.results_nav.activate(self.query_handler.query, alt=alt)
+                self.results_nav.activate(alt)
                 return True
             if alt and event.string in jump_keys:
                 self.select_result(jump_keys.index(event.string))
@@ -349,8 +349,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.result_box.add(result_widget)
             from ulauncher.ui.item_navigation import ItemNavigation
 
-            self.results_nav = ItemNavigation(result_widgets)
-            self.results_nav.select_default(self.query_str)
+            self.results_nav = ItemNavigation(self.query_handler, result_widgets)
+            self.results_nav.select_default()
 
             self.result_box.set_margin_bottom(10)
             self.result_box.set_margin_top(3)
