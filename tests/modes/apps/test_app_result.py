@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import shutil
 from pathlib import Path
+from typing import Any, Iterator
 
 import pytest
 from gi.repository import Gio
@@ -21,50 +24,56 @@ class TestAppResult:
         shutil.rmtree("/tmp/ulauncher-test")
 
     @pytest.fixture(autouse=True)
-    def patch_desktop_app_info_new(self, mocker):
-        def mkappinfo(app_id):
+    def patch_desktop_app_info_new(self, mocker: Any) -> Any:
+        def mkappinfo(app_id: str) -> Gio.DesktopAppInfo | None:
             return Gio.DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
 
         return mocker.patch("ulauncher.modes.apps.app_result.Gio.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
-    def patch_desktop_app_info_get_all(self, mocker):
-        def get_all_appinfo():
-            return map(Gio.DesktopAppInfo.new, ["trueapp.desktop", "falseapp.desktop"])
+    def patch_desktop_app_info_get_all(self, mocker: Any) -> Any:
+        def get_all_appinfo() -> Iterator[Gio.DesktopAppInfo]:
+            for path in ["trueapp.desktop", "falseapp.desktop"]:
+                app_info = Gio.DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}")
+                if app_info:
+                    yield app_info
 
         return mocker.patch("ulauncher.modes.apps.app_result.Gio.DesktopAppInfo.get_all", new=get_all_appinfo)
 
     @pytest.fixture
-    def app1(self):
+    def app1(self) -> AppResult | None:
         return AppResult.from_id("trueapp.desktop")
 
     @pytest.fixture
-    def app2(self):
+    def app2(self) -> AppResult | None:
         return AppResult.from_id("falseapp.desktop")
 
     @pytest.fixture(autouse=True)
-    def app_starts(self, mocker):
+    def app_starts(self, mocker: Any) -> Any:
         app_starts = json_load("/tmp/ulauncher-test/app_starts.json")
         app_starts.update({"falseapp.desktop": 3000, "trueapp.desktop": 765})
         return mocker.patch("ulauncher.modes.apps.app_result.app_starts", new=app_starts)
 
-    def test_get_name(self, app1) -> None:
+    def test_get_name(self, app1: AppResult) -> None:
         assert app1.name == "TrueApp - Full Name"
 
-    def test_get_description(self, app1) -> None:
+    def test_get_description(self, app1: AppResult) -> None:
         assert app1.description == "Your own yes-man"
 
-    def test_icon(self, app1) -> None:
+    def test_icon(self, app1: AppResult) -> None:
         assert app1.icon == "dialog-yes"
 
-    def test_search_score(self, app1) -> None:
+    def test_search_score(self, app1: AppResult) -> None:
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_on_activation(self, app1, mocker, app_starts) -> None:
+    def test_bump(self, app1: AppResult, app_starts: dict[str, int]) -> None:
+        app1.bump_starts()
+        assert app_starts.get("trueapp.desktop") == 766
+
+    def test_on_activation(self, app1: AppResult, mocker: Any) -> None:
         launch_app = mocker.patch("ulauncher.modes.apps.app_result.launch_app")
         app1.on_activation(Query(None, "query"))
         launch_app.assert_called_with("trueapp.desktop")
-        assert app_starts.get("trueapp.desktop") == 766
 
     def test_get_most_frequent(self) -> None:
         assert len(AppResult.get_most_frequent()) == 2

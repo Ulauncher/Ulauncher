@@ -8,10 +8,10 @@ from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
 
 class TestCalcMode:
     @pytest.fixture
-    def mode(self):
+    def mode(self) -> CalcMode:
         return CalcMode()
 
-    def test_is_enabled(self, mode) -> None:
+    def test_is_enabled(self, mode: CalcMode) -> None:
         assert mode.parse_query_str("5")
         assert mode.parse_query_str("-5")
         assert mode.parse_query_str("5+")
@@ -68,18 +68,24 @@ class TestCalcMode:
         assert eval_expr("sinh(acos(0.4") == "1.436961780213685"
         assert eval_expr("asinh(6) + atanh(0.9) + ln(0.7)") == "3.6073243982894"
 
-    def test_handle_query(self, mode) -> None:
+    def test_handle_query(self, mode: CalcMode) -> None:
         assert mode.handle_query(Query(None, "3+2"))[0].result == "5"
         assert mode.handle_query(Query(None, "3+2*"))[0].result == "5"
         assert mode.handle_query(Query(None, "2-2"))[0].result == "0"
         assert mode.handle_query(Query(None, "5%2"))[0].result == "1"
 
-    def test_handle_query__invalid_expr(self, mode) -> None:
-        [invalid_result] = mode.handle_query(Query(None, "3++"))
-        assert invalid_result.name == "Error!"
-        assert invalid_result.description == "Invalid expression"
-        assert mode.handle_query(Query(None, "6 2"))[0].name == "Error!"
-        assert mode.handle_query(Query(None, "()*2"))[0].name == "Error!"
-        assert mode.handle_query(Query(None, "a+b"))[0].name == "Error!"
-        assert mode.handle_query(Query(None, "sqrt()+1"))[0].name == "Error!"
-        assert mode.handle_query(Query(None, "2pi"))[0].name == "Error!"
+    def test_handle_query__invalid_expr(self, mode: CalcMode) -> None:
+        bad_queries = [
+            "3++",
+            "6 2",
+            "()*2",
+            "a+b",
+            "sqrt()+1",
+            "2pi",
+        ]
+
+        for query_str in bad_queries:
+            query = Query(None, query_str)
+            result = mode.handle_query(query)[0]
+            assert result.name == "Error!"
+            assert result.description == "Invalid expression"
