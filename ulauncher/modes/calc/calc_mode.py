@@ -104,8 +104,8 @@ def _is_enabled(query_str: str) -> bool:
             return node.func.id in functions
     except SyntaxError:
         pass
-    except Exception:  # noqa: BLE001
-        logger.warning("Calc mode parse error for query: '%s'", query_str)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Calc mode parse error for query: '%s', (%s)", query_str, e)
     return False
 
 
