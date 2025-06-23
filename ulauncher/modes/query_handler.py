@@ -15,6 +15,7 @@ class QueryHandler:
     mode: BaseMode | None = None
     query: Query = Query(None, "")
     triggers: list[Result] = []
+    trigger_mode_map: dict[int, BaseMode] = {}
 
     def __init__(self) -> None:
         self.reload_triggers()
@@ -23,8 +24,11 @@ class QueryHandler:
         from ulauncher.modes.mode_handler import get_modes
 
         self.triggers.clear()
+        self.trigger_mode_map.clear()
         for mode in get_modes():
-            self.triggers.extend([*mode.get_triggers()])
+            for trigger in mode.get_triggers():
+                self.triggers.append(trigger)
+                self.trigger_mode_map[id(trigger)] = mode
 
     def parse(self, query_str: str) -> None:
         self.mode = None
