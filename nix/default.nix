@@ -96,7 +96,6 @@ let
       mock
       pycairo
       pygobject3
-      requests
     ] ++ lib.optionals withXorg [
       xlib
     ] ++ [
