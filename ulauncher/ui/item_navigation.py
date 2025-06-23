@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ulauncher.config import paths
-from ulauncher.internals.query import Query
+from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui.result_widget import ResultWidget
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load, json_save
@@ -16,11 +16,12 @@ class ItemNavigation:
     Performs navigation through found results
     """
 
+    query_handler: QueryHandler
     result_widgets: list[ResultWidget]
-
     index = 0
 
-    def __init__(self, result_widgets: list[ResultWidget]) -> None:
+    def __init__(self, query_handler: QueryHandler, result_widgets: list[ResultWidget]) -> None:
+        self.query_handler = query_handler
         self.result_widgets = result_widgets
 
     @property
@@ -29,19 +30,19 @@ class ItemNavigation:
             return self.result_widgets[self.index]
         return None
 
-    def get_default(self, query_str: str) -> int:
+    def get_default(self) -> int:
         """
         Get the index of the result that should be selected (0 by default)
         """
-        previous_pick = query_history.get(query_str)
+        previous_pick = query_history.get(str(self.query_handler.query))
 
         for index, widget in enumerate(self.result_widgets):
             if widget.result.searchable and widget.result.name == previous_pick:
                 return index
         return 0
 
-    def select_default(self, query_str: str) -> None:
-        self.select(self.get_default(query_str))
+    def select_default(self) -> None:
+        self.select(self.get_default())
 
     def select(self, index: int) -> None:
         if not 0 < index < len(self.result_widgets):
@@ -60,12 +61,12 @@ class ItemNavigation:
         next_result = (self.index or 0) + 1
         self.select(next_result if next_result < len(self.result_widgets) else 0)
 
-    def activate(self, query: Query, alt: bool = False) -> None:
+    def activate(self, alt: bool = False) -> None:
         assert self.selected_item
         result = self.selected_item.result
-        query_str = str(query)
+        query_str = str(self.query_handler.query)
         if query_str and not alt and result.searchable:
             query_history[query_str] = result.name
             json_save(query_history, query_history_path)
 
-        events.emit("mode:activate_result", result, query, alt)
+        events.emit("mode:activate_result", result, self.query_handler.query, alt)
