@@ -134,6 +134,6 @@ class CalcMode(BaseMode):
     def handle_query(self, query: Query) -> list[CalcResult]:
         try:
             result = CalcResult(result=str(eval_expr(query.argument)))
-        except Exception:  # noqa: BLE001
+        except (SyntaxError, TypeError, IndexError):
             result = CalcResult(error="Invalid expression")
         return [result]
