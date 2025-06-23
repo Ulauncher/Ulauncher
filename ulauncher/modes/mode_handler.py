@@ -4,9 +4,8 @@ import logging
 
 from gi.repository import Gdk, Gtk
 
-import ulauncher.interfaces
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.apps.app_mode import AppMode
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_mode import CalcMode
@@ -48,12 +47,12 @@ def activate_result(result: Result, query: Query, alt: bool) -> None:
 
 
 @_events.on
-def handle_action(action_metadata: ulauncher.interfaces.ActionMetadata | None) -> None:
+def handle_action(action_metadata: ActionMetadata | None) -> None:
     if not _handle_action(action_metadata):
         _events.emit("window:close")
 
 
-def _handle_action(action_metadata: ulauncher.interfaces.ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
+def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
     if action_metadata is True:
         return True
     if action_metadata in (False, None):

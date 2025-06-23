@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, List, TypeAlias, Union  # type: ignore[attr-defined]
 
-import ulauncher.interfaces
 from ulauncher.internals.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
+
+"""
+ActionMetadata describes the action to be performed by the Ulauncher app.
+It can be a dict with any value that can be serialized to JSON.
+"""
+ActionMetadata: TypeAlias = Union[List["Result"], Dict[str, Any], bool, str]
 
 
 class Result(BaseDataClass):
@@ -53,7 +58,7 @@ class Result(BaseDataClass):
             return query.argument
         return str(query)
 
-    def on_activation(self, query: Query, alt: bool = False) -> ulauncher.interfaces.ActionMetadata:
+    def on_activation(self, query: Query, alt: bool = False) -> ActionMetadata:
         """
         Handle the main action
         """

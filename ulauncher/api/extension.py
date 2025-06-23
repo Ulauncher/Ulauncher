@@ -10,11 +10,11 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterator
 
-import ulauncher.interfaces
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -107,7 +107,7 @@ class Extension:
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
     def run_event_listener(
-        self, event: dict[str, Any], method: Callable[..., ulauncher.interfaces.ActionMetadata], args: tuple[Any]
+        self, event: dict[str, Any], method: Callable[..., ActionMetadata], args: tuple[Any]
     ) -> None:
         action_metadata = method(*args)
         if action_metadata is not None:

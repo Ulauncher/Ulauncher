@@ -24,7 +24,4 @@ stage_fixed = true
 [pre-commit.commands.mypy]
 root = "ulauncher"
 glob = "*.py"
-# counter-intuitive, but need to exclude the interfaces module (if staged), or the actual
-# type (inside the pyi) will fail to load by the other staged files
-exclude = "interfaces.py"
 run = "mypy {staged_files}"
