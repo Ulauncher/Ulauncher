@@ -70,10 +70,13 @@ class AppResult(Result):
             *[(k, 0.6 * frequency_weight) for k in self.keywords],
         ]
 
-    def on_activation(self, _query: Query, _alt: bool = False) -> bool:
+    def bump_starts(self) -> None:
         starts = app_starts.get(self._app_id, 0)
         app_starts[self._app_id] = starts + 1
         json_save(app_starts, app_starts_path)
+
+    def on_activation(self, _query: Query, _alt: bool = False) -> bool:
+        self.bump_starts()
         if not launch_app(self._app_id):
             logger.error("Could not launch app %s", self._app_id)
         return False
