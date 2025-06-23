@@ -22,5 +22,6 @@ run = """
 stage_fixed = true
 
 [pre-commit.commands.mypy]
-glob = "ulauncher/*.py"
+root = "ulauncher"
+glob = "*.py"
 run = "mypy {staged_files}"

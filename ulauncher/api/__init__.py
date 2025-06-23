@@ -1,5 +1,6 @@
-from ulauncher.api.extension import Extension  # noqa: F401
-from ulauncher.internals.result import Result
+# ruff: noqa: F401
+from ulauncher.api.extension import Extension
+from ulauncher.internals.result import ActionMetadata, Result
 
 
 class ExtensionResult(Result):

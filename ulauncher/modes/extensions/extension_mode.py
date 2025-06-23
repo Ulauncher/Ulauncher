@@ -4,7 +4,7 @@ import html
 from typing import Any, Iterator
 
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
@@ -41,16 +41,16 @@ class ExtensionMode(BaseMode):
         return controller.handle_query(query)
 
     @events.on
-    def handle_action(self, action: bool | list[Any] | str | dict[str, Any] | None) -> None:
-        if self.active_ext_id and isinstance(action, list):
+    def handle_action(self, action_metadata: ActionMetadata | None) -> None:
+        if self.active_ext_id and isinstance(action_metadata, list):
             controller = ExtensionController(self.active_ext_id)
-            for result in action:
+            for result in action_metadata:
                 result["icon"] = controller.get_normalized_icon_path(result.get("icon"))
 
-            results = [Result(**res) for res in action]
+            results = [Result(**res) for res in action_metadata]
             events.emit("window:show_results", results)
         else:
-            events.emit("mode:handle_action", action)
+            events.emit("mode:handle_action", action_metadata)
 
     def get_triggers(self) -> Iterator[Result]:
         for ext in ExtensionController.iterate():

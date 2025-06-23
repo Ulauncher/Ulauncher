@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, Union
 
-from typing_extensions import TypeAlias
-
 from ulauncher.internals.query import Query
 
-ExtensionPreferenceValue: TypeAlias = Union[str, int, bool]
-ExtensionPreferences: TypeAlias = Dict[str, ExtensionPreferenceValue]
+ExtensionPreferenceValue = Union[str, int, bool]
+ExtensionPreferences = Dict[str, ExtensionPreferenceValue]
 
 
 class BaseEvent:

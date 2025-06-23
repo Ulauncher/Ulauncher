@@ -14,6 +14,7 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -105,12 +106,14 @@ class Extension:
             # Run in a separate thread to avoid blocking the message listener thread (client.py)
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
-    def run_event_listener(self, event: dict[str, Any], method: Callable, args: tuple[Any]) -> None:  # type: ignore[type-arg]
-        action = method(*args)
-        if action is not None:
+    def run_event_listener(
+        self, event: dict[str, Any], method: Callable[..., ActionMetadata], args: tuple[Any]
+    ) -> None:
+        action_metadata = method(*args)
+        if action_metadata is not None:
             # convert iterables to list
-            if isinstance(action, Iterator):
-                action = list(action)
+            if isinstance(action_metadata, Iterator):
+                action = list(action_metadata)
             self._client.send({"event": event, "action": action})
 
     def run(self) -> None:
