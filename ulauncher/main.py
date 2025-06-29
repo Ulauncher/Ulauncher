@@ -77,7 +77,7 @@ def main() -> None:
 
     # log uncaught exceptions
     def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
-        logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))  # noqa: LOG014
+        logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))
 
     sys.excepthook = except_hook
 
