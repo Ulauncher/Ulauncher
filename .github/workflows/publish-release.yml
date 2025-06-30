@@ -31,11 +31,12 @@ jobs:
           tar -xvf scripts/launchpad.ssh.tar -C /
           gpg --import "scripts/launchpad-public.key"
           gpg --import "scripts/launchpad-secret.key"
-          # noble    24.04 LTS EOL 2029-04
-          # jammy    22.04 LTS EOL 2027-04
+          # noble    24.04 LTS EOL 2029-06
+          # jammy    22.04 LTS EOL 2027-06
+          # plucky   25.04     EOL 2026-01
           # oracular 24.10     EOL 2025-07
-          # focal    20.04 LTS EOL 2025-04
-          for DISTRO in $(echo "noble jammy oracular focal mantic"); do
+          # focal    20.04 LTS EOL 2025-05
+          for DISTRO in $(echo "noble jammy oracular focal plucky"); do
             DEB_VERSION="$(echo "$VERSION" | tr "-" "~")-0ubuntu1ppa1~$DISTRO"
             make deb DEB_VERSION=$DEB_VERSION DEB_DISTRO=$DISTRO DPKG_ARGS="--post-clean --build=source -sa --sign-key=${GPGKEY}"
             echo "Uploading to launchpad PPA:${PPA}"
