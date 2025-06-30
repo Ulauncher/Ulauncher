@@ -113,8 +113,8 @@ class Extension:
         if action_metadata is not None:
             # convert iterables to list
             if isinstance(action_metadata, Iterator):
-                action = list(action_metadata)
-            self._client.send({"event": event, "action": action})
+                action_metadata = [*action_metadata]
+            self._client.send({"event": event, "action": action_metadata})
 
     def run(self) -> None:
         """
