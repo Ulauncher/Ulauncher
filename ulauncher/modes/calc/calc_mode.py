@@ -112,7 +112,8 @@ def _is_enabled(query_str: str) -> bool:
 
 def _eval(node: ast.expr) -> int | float | Decimal:
     if isinstance(node, ast.Constant):  # <constant> (number)
-        return Decimal(str(node.n))
+        value = node.value if hasattr(node, "value") else node.n  # older versions of python has .n instead of .value
+        return Decimal(str(value))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         operator = operators.get(type(node.op))
         if not operator:
