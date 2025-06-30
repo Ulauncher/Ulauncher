@@ -107,7 +107,7 @@ class Extension:
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
     def run_event_listener(
-        self, event: dict[str, Any], method: Callable[..., ActionMetadata], args: tuple[Any]
+        self, event: dict[str, Any], method: Callable[..., ActionMetadata | None], args: tuple[Any]
     ) -> None:
         action_metadata = method(*args)
         if action_metadata is not None:
