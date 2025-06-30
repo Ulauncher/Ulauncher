@@ -10,6 +10,7 @@ from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
 
+DEFAULT_ACTION = True  #  keep window open and do nothing
 events = EventBus("extension_mode")
 ExtensionSocketServer().start()
 
@@ -73,3 +74,11 @@ class ExtensionMode(BaseMode):
                         on_enter=action,
                         searchable=True,
                     )
+
+    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
+        """
+        Called when a result is activated.
+        Override this method to handle the activation of a result.
+        """
+        handler = getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION)
+        return handler(query) if callable(handler) else handler

@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import logging
 import os
+from os.path import basename, dirname, expandvars, isdir, join
 from pathlib import Path
 
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.file_browser.file_browser_result import FileBrowserResult
+from ulauncher.modes.file_browser.results import CopyPath, FileBrowserResult, OpenFolder
+from ulauncher.utils.fold_user_path import fold_user_path
+
+logger = logging.getLogger()
 
 
 class FileBrowserMode(BaseMode):
@@ -45,7 +52,7 @@ class FileBrowserMode(BaseMode):
             path_str = query.argument
             if not path_str:
                 return []
-            path = Path(os.path.expandvars(path_str.strip())).expanduser()
+            path = Path(expandvars(path_str.strip())).expanduser()
             results = []
 
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
@@ -57,7 +64,7 @@ class FileBrowserMode(BaseMode):
             elif not remainder:
                 file_names = self.list_files(str(path), sort_by_atime=True)
                 for name in self.filter_dot_files(file_names)[: self.LIMIT]:
-                    file = os.path.join(closest_parent, name)
+                    file = join(closest_parent, name)
                     results.append(FileBrowserResult(file))
 
             else:
@@ -71,7 +78,7 @@ class FileBrowserMode(BaseMode):
 
                 sorted_files = sorted(file_names, key=lambda fn: get_score(path_str, fn), reverse=True)
                 filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
-                results = [FileBrowserResult(os.path.join(closest_parent, name)) for name in filtered]
+                results = [FileBrowserResult(join(closest_parent, name)) for name in filtered]
 
         except (RuntimeError, OSError):
             results = []
@@ -80,5 +87,24 @@ class FileBrowserMode(BaseMode):
 
     def handle_backspace(self, query_str: str) -> Query | None:
         if "/" in query_str and len(query_str.strip().rstrip("/")) > 1:
-            return Query(None, os.path.join(Path(query_str).parent, ""))
+            return Query(None, join(Path(query_str).parent, ""))
         return None
+
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMetadata:
+        if isinstance(result, CopyPath):
+            return actions.copy(result.path)
+        if isinstance(result, OpenFolder):
+            return actions.open(result.path)
+        if isinstance(result, FileBrowserResult):
+            if not alt:
+                if isdir(result.path):
+                    return join(fold_user_path(result.path), "")
+
+                return actions.open(result.path)
+            if isdir(result.path):
+                open_folder = OpenFolder(name=f'Open Folder "{basename(result.path)}"', path=result.path)
+            else:
+                open_folder = OpenFolder(name="Open Containing Folder", path=dirname(result.path))
+            return [open_folder, CopyPath(path=result.path)]
+        logger.error("Unexpected File Browser Mode result type '%s'", result)
+        return True

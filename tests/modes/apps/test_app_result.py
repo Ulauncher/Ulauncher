@@ -7,7 +7,6 @@ from typing import Any, Iterator
 import pytest
 from gi.repository import Gio
 
-from ulauncher.internals.query import Query
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.utils.json_utils import json_load
 
@@ -69,11 +68,6 @@ class TestAppResult:
     def test_bump(self, app1: AppResult, app_starts: dict[str, int]) -> None:
         app1.bump_starts()
         assert app_starts.get("trueapp.desktop") == 766
-
-    def test_on_activation(self, app1: AppResult, mocker: Any) -> None:
-        launch_app = mocker.patch("ulauncher.modes.apps.app_result.launch_app")
-        app1.on_activation(Query(None, "query"))
-        launch_app.assert_called_with("trueapp.desktop")
 
     def test_get_most_frequent(self) -> None:
         assert len(AppResult.get_most_frequent()) == 2

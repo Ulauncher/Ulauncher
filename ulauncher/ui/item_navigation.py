@@ -69,4 +69,4 @@ class ItemNavigation:
             query_history[query_str] = result.name
             json_save(query_history, query_history_path)
 
-        events.emit("mode:activate_result", result, self.query_handler.query, alt)
+        self.query_handler.activate_result(result, alt)

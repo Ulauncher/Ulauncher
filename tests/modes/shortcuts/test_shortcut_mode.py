@@ -6,6 +6,7 @@ import pytest
 from ulauncher.internals.query import Query
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
+from ulauncher.modes.shortcuts.shortcut_trigger import ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
 
 
@@ -19,6 +20,10 @@ class TestShortcutMode:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutsDb.load").return_value
 
     @pytest.fixture(autouse=True)
+    def run_shortcut(self, mocker: MagicMock) -> Any:
+        return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.run_shortcut")
+
+    @pytest.fixture(autouse=False)
     def shortcut_result(self, mocker: MagicMock) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutResult")
 
@@ -90,3 +95,32 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
         assert next(mode.get_triggers()).keyword == "kw"
+
+    def test_activate_trigger(self, mode: ShortcutMode) -> None:
+        query = Query("kw", None)
+        result = ShortcutTrigger(keyword="kw")
+        assert mode.activate_result(result, query, False) == "kw "
+
+    def test_activate_trigger_no_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+        query = Query("kw", None)
+        result = ShortcutTrigger(keyword="kw", cmd="/bin/asdf", run_without_argument=True)
+        mode.activate_result(result, query, False)
+        run_shortcut.assert_called_once_with("/bin/asdf")
+
+    def test_activate_shortcutresult_cmd(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+        query = Query("kw", "arg")
+        result = ShortcutResult(keyword="kw", cmd="/bin/asdf")
+        mode.activate_result(result, query, False)
+        run_shortcut.assert_called_once_with("/bin/asdf", "arg")
+
+    def test_activate_shortcutresult_cmd_missing_arg(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+        query = Query("kw", None)
+        result = ShortcutResult(keyword="kw", cmd="/bin/asdf")
+        mode.activate_result(result, query, False)
+        run_shortcut.assert_not_called()
+
+    def test_activate_shortcutresult_cmd_run_without_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+        query = Query("kw", None)
+        result = ShortcutResult(keyword="kw", cmd="/bin/asdf", run_without_argument=True)
+        mode.activate_result(result, query, False)
+        run_shortcut.assert_called_once_with("/bin/asdf", None)

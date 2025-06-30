@@ -5,8 +5,6 @@ from typing import Any, Dict, List, Union
 from ulauncher.internals.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 
-DEFAULT_ACTION = True  #  keep window open and do nothing
-
 """
 ActionMetadata describes the action to be performed by the Ulauncher app.
 It can be a dict with any value that can be serialized to JSON.
@@ -57,13 +55,6 @@ class Result(BaseDataClass):
         if not self.keyword or self.keyword == query.keyword:
             return query.argument
         return str(query)
-
-    def on_activation(self, query: Query, alt: bool = False) -> ActionMetadata:
-        """
-        Handle the main action
-        """
-        handler = getattr(self, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION)
-        return handler(query) if callable(handler) else handler
 
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         return [(self.name, 1.0), (self.description, 0.8)]

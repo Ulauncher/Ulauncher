@@ -7,9 +7,7 @@ from os.path import basename
 from gi.repository import Gio
 
 from ulauncher.config import paths
-from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
@@ -74,9 +72,3 @@ class AppResult(Result):
         starts = app_starts.get(self._app_id, 0)
         app_starts[self._app_id] = starts + 1
         json_save(app_starts, app_starts_path)
-
-    def on_activation(self, _query: Query, _alt: bool = False) -> bool:
-        self.bump_starts()
-        if not launch_app(self._app_id):
-            logger.error("Could not launch app %s", self._app_id)
-        return False

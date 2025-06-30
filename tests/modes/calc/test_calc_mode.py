@@ -1,4 +1,6 @@
 from decimal import Decimal
+from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -10,6 +12,10 @@ class TestCalcMode:
     @pytest.fixture
     def mode(self) -> CalcMode:
         return CalcMode()
+
+    @pytest.fixture
+    def copy_action(self, mocker: MagicMock) -> Any:
+        return mocker.patch("ulauncher.modes.calc.calc_mode.actions.copy")
 
     def test_is_enabled(self, mode: CalcMode) -> None:
         assert mode.parse_query_str("5")
@@ -74,7 +80,14 @@ class TestCalcMode:
         assert mode.handle_query(Query(None, "2-2"))[0].result == "0"
         assert mode.handle_query(Query(None, "5%2"))[0].result == "1"
 
-    def test_handle_query__invalid_expr(self, mode: CalcMode) -> None:
+    def test_handle_query__copy_action_called(self, mode: CalcMode, copy_action: MagicMock) -> None:
+        query = Query(None, "3+2")
+        result = mode.handle_query(query)[0]
+        assert result.result == "5"
+        mode.activate_result(result, query, False)
+        copy_action.assert_called_once_with("5")
+
+    def test_handle_query__invalid_expr(self, mode: CalcMode, copy_action: MagicMock) -> None:
         bad_queries = [
             "3++",
             "6 2",
@@ -89,3 +102,5 @@ class TestCalcMode:
             result = mode.handle_query(query)[0]
             assert result.name == "Error!"
             assert result.description == "Invalid expression"
+            assert mode.activate_result(result, query, False) is True
+            assert not copy_action.called
