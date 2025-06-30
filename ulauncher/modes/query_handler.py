@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
+
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
 _events = EventBus("query")
+logger = logging.getLogger()
 
 
 class QueryHandler:
@@ -47,7 +50,10 @@ class QueryHandler:
         from ulauncher.modes.mode_handler import get_modes, handle_action
 
         if self.mode:
-            handle_action(self.mode.handle_query(self.query))
+            try:
+                handle_action(self.mode.handle_query(self.query))
+            except Exception:
+                logger.exception("Mode '%s' triggered an error while handling query '%s'", self.mode, self.query)
             return
 
         # No mode selected, which means search
