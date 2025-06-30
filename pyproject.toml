@@ -7,7 +7,7 @@ name = "ulauncher"
 description = "Application launcher for Linux"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "GPL-3"}
+license = {text = "GPL-3.0-only"}
 authors = [
   {name = "Aleksandr Gornostal"},
   {name = "Albin Larsson"},
