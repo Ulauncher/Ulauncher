@@ -7,13 +7,14 @@ import operator as op
 import re
 from decimal import Decimal
 from functools import lru_cache
+from typing import Callable
 
 from ulauncher.internals.query import Query
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcResult
 
 # supported operators
-operators = {
+operators: dict[type, Callable[..., int | float]] = {
     ast.Add: op.add,
     ast.Sub: op.sub,
     ast.Mult: op.mul,
@@ -24,7 +25,7 @@ operators = {
     ast.Mod: op.mod,
 }
 
-functions = {
+functions: dict[str, Callable[..., float | Decimal]] = {
     "sqrt": Decimal.sqrt,
     "exp": Decimal.exp,
     "ln": Decimal.ln,
@@ -78,7 +79,7 @@ def eval_expr(expr: str) -> str:
     """
     expr = normalize_expr(expr)
     tree = ast.parse(expr, mode="eval").body
-    result = _eval(tree).quantize(Decimal("1e-15"))
+    result = Decimal(_eval(tree)).quantize(Decimal("1e-15"))
     int_result = int(result)
     if result == int_result:
         return str(int_result)
@@ -109,20 +110,30 @@ def _is_enabled(query_str: str) -> bool:
     return False
 
 
-def _eval(node: ast.expr) -> Decimal:
+def _eval(node: ast.expr) -> int | float | Decimal:
     if isinstance(node, ast.Constant):  # <constant> (number)
         return Decimal(str(node.n))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
-        return operators[type(node.op)](_eval(node.left), _eval(node.right))  # type: ignore[no-any-return, operator]
+        operator = operators.get(type(node.op))
+        if not operator:
+            msg = f"Unsupported operator: {node.op}"
+            raise TypeError(msg)
+        return operator(_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
-        return operators[type(node.op)](_eval(node.operand))  # type: ignore[no-any-return, operator]
+        operator = operators.get(type(node.op))
+        if not operator:
+            msg = f"Unsupported operator: {node.op}"
+            raise TypeError(msg)
+        return operator(_eval(node.operand))
     if isinstance(node, ast.Name) and node.id in constants:  # <name>
         return constants[node.id]
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in functions:  # <func>(<args>)
-        value = Decimal(functions[node.func.id](_eval(node.args[0])))  # type: ignore[operator]
-        if isinstance(value, float):
-            value = Decimal(value)
-        return value
+        func = functions.get(node.func.id)
+        if func:
+            value = Decimal(func(_eval(node.args[0])))
+            if isinstance(value, float):
+                value = Decimal(value)
+            return value
 
     raise TypeError(node)
 
@@ -135,5 +146,6 @@ class CalcMode(BaseMode):
         try:
             result = CalcResult(result=str(eval_expr(query.argument)))
         except (SyntaxError, TypeError, IndexError):
+            logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
             result = CalcResult(error="Invalid expression")
         return [result]
