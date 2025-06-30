@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import logging
 from typing import Iterator
 
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
 from ulauncher.modes.shortcuts.shortcut_trigger import ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
+
+logger = logging.getLogger()
 
 
 def get_description(shortcut: Shortcut, query: Query | None = None) -> str:
@@ -57,3 +61,16 @@ class ShortcutMode(BaseMode):
     def get_triggers(self) -> Iterator[Result]:
         for shortcut in self.shortcuts_db.values():
             yield ShortcutTrigger(**shortcut, description=get_description(shortcut))
+
+    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata:
+        if isinstance(result, ShortcutTrigger):
+            if not result.run_without_argument:
+                return f"{result.keyword} "
+            return run_shortcut(result.cmd)
+        if isinstance(result, ShortcutResult):
+            argument = query.argument or "" if query.keyword == result.keyword else str(query)
+            if argument or result.run_without_argument:
+                return run_shortcut(result.cmd, argument or None)
+            return True
+        logger.error("Unexpected result type for Shortcut mode '%s'", result)
+        return True

@@ -4,7 +4,6 @@ import logging
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.apps.app_mode import AppMode
 from ulauncher.modes.base_mode import BaseMode
@@ -39,11 +38,6 @@ def clipboard_store(data: str) -> None:
     _events.emit("app:toggle_hold", True)
     _events.emit("window:close")
     timer(0.25, lambda: _events.emit("app:toggle_hold", False))
-
-
-@_events.on
-def activate_result(result: Result, query: Query, alt: bool) -> None:
-    handle_action(result.on_activation(query, alt))
 
 
 @_events.on

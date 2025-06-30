@@ -1,4 +1,4 @@
-from ulauncher.modes.file_browser.file_browser_result import FileBrowserResult
+from ulauncher.modes.file_browser.results import FileBrowserResult
 
 
 class TestFileBrowserResult:

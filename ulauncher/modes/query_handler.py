@@ -7,6 +7,7 @@ from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
+logger = logging.getLogger()
 _events = EventBus("query")
 logger = logging.getLogger()
 
@@ -77,3 +78,13 @@ class QueryHandler:
                 _events.emit("app:set_query", str(new_query))
                 return True
         return False
+
+    def activate_result(self, result: Result, alt: bool = False) -> None:
+        mode = self.trigger_mode_map.get(id(result), self.mode)
+        if not mode:
+            logger.warning("Cannot activate result '%s' because no mode is set", result)
+            return
+
+        from ulauncher.modes.mode_handler import handle_action
+
+        handle_action(mode.activate_result(result, self.query, alt))
