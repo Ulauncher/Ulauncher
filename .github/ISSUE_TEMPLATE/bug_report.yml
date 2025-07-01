@@ -44,7 +44,7 @@ body:
     id: latest
     attributes:
       label: Ulauncher v6
-      description: Please test with the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure the bug hasn't already been fixed. Ulauncher v6 doesn't have a stable release yet, but it's miles ahead of v5.
+      description: Please test in [Ulauncher v6 (beta)](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure the bug hasn't already been fixed. Note that Ulauncher v6 doesn't have a stable release yet.
       options:
         - label: I have made sure the bug isn't already fixed in v6.
           required: false

@@ -33,7 +33,7 @@ body:
     id: latest
     attributes:
       label: Ulauncher v6
-      description: Please test the [Ulauncher v6 branch](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure this hasn't already been implemeted. Note that Ulauncher v6 doesn't have a release yet.
+      description: Please test in [Ulauncher v6 (beta)](https://github.com/Ulauncher/Ulauncher/issues/869) or at least read through this post to ensure this hasn't already been implemented. Note that Ulauncher v6 doesn't have a stable release yet.
       options:
         - label: I have checked and couldn't find my suggestion in v6.
           required: true

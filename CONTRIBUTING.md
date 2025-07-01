@@ -8,7 +8,7 @@ Thank you for your interest in contributing to Ulauncher! We very much appreciat
 
 Issues with the [contributor-friendly](https://github.com/Ulauncher/Ulauncher/labels/contributor-friendly) label are more straightforward to implement. Other issues may require in-depth knowledge of the Ulauncher architecture. Before you put the work in, you may want to ask about it in [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions), to ensure that it's a feature or improvement we want.
 
-Although there are no releases for it yet as of writing this, all the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So use the v6 (default) branch as the base branch and target for new pull requests, and check that your contributions haven't already been fixed there.
+Although there are no releases for it yet as of writing this, all the active development is happening for Ulauncher [v6](https://github.com/Ulauncher/Ulauncher/milestone/7). So please check that your contributions haven't already been fixed there.
 
 ### Set Up Development Environment
 
@@ -94,12 +94,12 @@ You will need to instruct it to build stub files from binaries by:
 
 ### How to contribute
 
-Use the Ulauncher working branch (v6), and verify that the issue or feature hasn't already been resolved there.
+Use the Ulauncher main branch, and verify that the issue or feature hasn't already been fixed there.
 
 1. Follow the steps above to set up and test locally, but fork the Ulauncher repo and git clone from that fork instead (or change/add the remote to your fork).
 1. When you are ready to contribute code, create a new branch for your PR.
 1. Commit and push your changes. When possible, try to make your changes so that each commit changes just one thing, and please use [Conventional Commits](https://www.conventionalcommits.org/) for your commit messages.
-1. Create a pull request (provide the relevant information suggested by the template). Use the v6 branch as the base branch and target.
+1. Create a pull request (provide the relevant information suggested by the template). Use the main branch as the base branch and target.
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
 
