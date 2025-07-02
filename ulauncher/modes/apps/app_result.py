@@ -17,7 +17,7 @@ app_starts: dict[str, int] = json_load(app_starts_path)
 
 class AppResult(Result):
     searchable = True
-    _app_id = ""
+    app_id = ""
     _executable = ""
 
     def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
@@ -26,7 +26,7 @@ class AppResult(Result):
             icon=app_info.get_string("Icon") or "",
             description=app_info.get_description() or app_info.get_generic_name() or "",
             keywords=app_info.get_keywords(),
-            _app_id=app_info.get_id(),
+            app_id=app_info.get_id(),
             # TryExec is what we actually want (name of/path to exec), but it's often not specified
             # get_executable uses Exec, which is always specified, but it will return the actual executable.
             # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
@@ -58,7 +58,7 @@ class AppResult(Result):
         sorted_app_ids = AppResult.get_top_app_ids()
         count = len(sorted_app_ids)
         if count:
-            index = sorted_app_ids.index(self._app_id) if self._app_id in sorted_app_ids else count
+            index = sorted_app_ids.index(self.app_id) if self.app_id in sorted_app_ids else count
             frequency_weight = 1.0 - (index / count * 0.1) + 0.05
 
         return [
@@ -69,6 +69,6 @@ class AppResult(Result):
         ]
 
     def bump_starts(self) -> None:
-        starts = app_starts.get(self._app_id, 0)
-        app_starts[self._app_id] = starts + 1
+        starts = app_starts.get(self.app_id, 0)
+        app_starts[self.app_id] = starts + 1
         json_save(app_starts, app_starts_path)
