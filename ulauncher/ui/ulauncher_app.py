@@ -54,6 +54,7 @@ class UlauncherApp(Gtk.Application):
         )
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
+        logger.debug("Activated via gapplication")
         self.show_launcher()
 
     def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
