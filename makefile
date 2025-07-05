@@ -113,8 +113,7 @@ mypy: # Lint with mypy (type checker)
 	mypy ulauncher
 
 ruff: # Lint with ruff
-	ruff check .
-	ruff format --check .
+	ruff check . && ruff format --check .
 
 typos: # Lint with typos (typo checker)
 	typos .
