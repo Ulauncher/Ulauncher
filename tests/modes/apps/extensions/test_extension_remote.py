@@ -1,6 +1,13 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
-from ulauncher.modes.extensions.extension_remote import ExtensionRemote, InvalidExtensionRecoverableError
+from ulauncher.modes.extensions.extension_remote import (
+    ExtensionRemote,
+    InvalidExtensionRecoverableError,
+    UrlParseResult,
+    parse_extension_url,
+)
 
 # @todo: Add missing coverage for _get_refs, get_compatible_hash, download
 
@@ -34,3 +41,148 @@ class TestExtensionRemote:
             ExtensionRemote("https://gitlab.com/user/repo")._get_download_url("master")
             == "https://gitlab.com/user/repo/-/archive/master/repo-master.tar.gz"
         )
+
+
+class TestParseExtensionUrl:
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_https_url(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("https://example.com/user/repo")
+
+        assert result == UrlParseResult(
+            use_git=True, url="https://example.com/user/repo", path="user/repo", protocol="https", host="example.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_http_url_converts_to_https(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("http://example.com/user/repo")
+
+        assert result == UrlParseResult(
+            use_git=True, url="https://example.com/user/repo", path="user/repo", protocol="https", host="example.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_ssh_url_reformatting(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("git@github.com:user/repo")
+
+        assert result == UrlParseResult(
+            use_git=False,  # don't use git for github, gitlab, codeberg URLs
+            url="https://github.com/user/repo",
+            path="user/repo",
+            protocol="https",
+            host="github.com",
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    @patch("ulauncher.modes.extensions.extension_remote.isdir")
+    def test_local_file_path(self, mock_isdir: MagicMock, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        mock_isdir.return_value = True
+        result = parse_extension_url("/local/path/to/extension")
+
+        assert result == UrlParseResult(
+            use_git=True,
+            url="file:///local/path/to/extension",
+            path="local/path/to/extension",
+            protocol="file",
+            host="",
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_github_url_sanitization(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("https://github.com/user/repo/blob/master")
+
+        assert result == UrlParseResult(
+            use_git=False, url="https://github.com/user/repo", path="user/repo", protocol="https", host="github.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_gitlab_url_sanitization(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("https://gitlab.com/user/repo/issues")
+
+        assert result == UrlParseResult(
+            use_git=False, url="https://gitlab.com/user/repo", path="user/repo", protocol="https", host="gitlab.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_codeberg_url_sanitization(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("https://codeberg.org/user/repo/wiki")
+
+        assert result == UrlParseResult(
+            use_git=False,
+            url="https://codeberg.org/user/repo",
+            path="user/repo",
+            protocol="https",
+            host="codeberg.org",
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_git_extension_removal(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("https://github.com/user/repo.git")
+
+        assert result == UrlParseResult(
+            use_git=False, url="https://github.com/user/repo", path="user/repo", protocol="https", host="github.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_no_git_available(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = None
+        result = parse_extension_url("https://example.com/user/repo")
+
+        assert result == UrlParseResult(
+            use_git=False, url="https://example.com/user/repo", path="user/repo", protocol="https", host="example.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_url_with_whitespace(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        result = parse_extension_url("  https://example.com/user/repo  ")
+
+        assert result == UrlParseResult(
+            use_git=True, url="https://example.com/user/repo", path="user/repo", protocol="https", host="example.com"
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    @patch("ulauncher.modes.extensions.extension_remote.isdir")
+    def test_file_protocol_url(self, mock_isdir: MagicMock, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        mock_isdir.return_value = True
+        result = parse_extension_url("file:///local/path/to/extension")
+
+        assert result == UrlParseResult(
+            use_git=True,
+            url="file:///local/path/to/extension",
+            path="local/path/to/extension",
+            protocol="file",
+            host="",
+        )
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    @patch("ulauncher.modes.extensions.extension_remote.isdir")
+    def test_invalid_local_path_raises_assertion_error(self, mock_isdir: MagicMock, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+        mock_isdir.return_value = False
+
+        with pytest.raises(AssertionError):
+            parse_extension_url("/nonexistent/path")
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_empty_path_raises_assertion_error(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+
+        with pytest.raises(AssertionError):
+            parse_extension_url("https://example.com/")
+
+    @patch("ulauncher.modes.extensions.extension_remote.which")
+    def test_no_host_no_file_protocol_raises_assertion_error(self, mock_which: MagicMock) -> None:
+        mock_which.return_value = "/usr/bin/git"
+
+        with pytest.raises(AssertionError):
+            # This creates a URL with no host but protocol is https
+            parse_extension_url("https:///user/repo")
