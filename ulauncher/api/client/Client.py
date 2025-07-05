@@ -40,6 +40,7 @@ class Client:
         """
         Connects to the extension server and blocks thread
         """
+        logger.debug("Connecting to socket_path %s", self.socket_path)
         self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)  # type: ignore[assignment]
         if not self.conn:
             msg = f"Failed to connect to socket_path {self.socket_path}"
