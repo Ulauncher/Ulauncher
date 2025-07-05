@@ -8,10 +8,10 @@
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
         <div class="repo" v-if="extension.url">
-          <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div> 
-          <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div> 
+          <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div>
+          <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div>
           <div>
-            <a class="text-muted" href @click.prevent="openUrl(extension.url)">
+            <a class="text-muted" href @click.prevent="openUrl(extension.url)" :title="extension.url">
               <i class="fa fa-external-link"></i> Open repository
             </a>
           </div>
@@ -377,7 +377,7 @@ export default {
   height: 33px;
 }
 
-.toggle input { 
+.toggle input {
   opacity: 0;
   width: 0;
   height: 0;

@@ -145,3 +145,19 @@ class TestJsonConf:
         assert not hasattr(c1, "unique_cache_key")
         assert hasattr(c2a, "unique_cache_key")
         assert hasattr(c2b, "unique_cache_key")
+
+    def test_load_always_reads_file(self) -> None:
+        class C1(JsonConf):
+            pass
+
+        c1 = C1.load(json_file)
+        c1.a = 1
+        c1.save()
+
+        # write a different value directly to the file
+        with open(json_file, "w") as f:
+            f.write('{"a": 2}')
+
+        # load again
+        c1 = C1.load(json_file)
+        assert c1.a == 2  # should read the value from the file, not the cached instance
