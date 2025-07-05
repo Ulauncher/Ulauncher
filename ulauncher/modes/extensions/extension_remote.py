@@ -6,6 +6,7 @@ import subprocess
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tempfile import NamedTemporaryFile, TemporaryDirectory
+from typing import TypedDict
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
@@ -33,38 +34,16 @@ class ExtensionNetworkError(Exception):
 class ExtensionRemote:
     def __init__(self, url: str) -> None:
         try:
-            self._use_git = bool(which("git"))
-            self.url = url.strip().lower()
-            # Reformat to URL format if it's SSH
-            if self.url.startswith("git@"):
-                self.url = "git://" + self.url[4:].replace(":", "/")
+            parsed = parse_extension_url(url)
+            self.use_git = parsed["use_git"]
+            self.url = parsed["url"]
+            self.path = parsed["path"]
+            self.protocol = parsed["protocol"]
+            self.host = parsed["host"]
 
-            url_parts = urlparse(self.url)
-            self.path = url_parts.path[1:]
-
-            if url_parts.scheme in ("", "file"):
-                assert isdir(url_parts.path)
-                self.host = ""
-                self.protocol = "file"
-            else:
-                if url_parts.scheme != "https":
-                    logger.warning('Unsupported URL protocol: "%s". Will attempt to use HTTPS', url_parts.scheme)
-                self.host = url_parts.netloc
-                self.protocol = "https"
-
-            assert self.path
-            assert self.host or self.protocol == "file"
-
-            if self.host in ("github.com", "gitlab.com", "codeberg.org"):
-                # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
-                user, repo, *_ = self.path.split("/", 2)
-                if repo.endswith(".git"):
-                    repo = repo[:-4]
-                self.path = f"{user}/{repo}"
-                self._use_git = False
-
-            self.url = f"{self.protocol}://{self.host}/{self.path}"
-
+            if not self.use_git and self.protocol != "https":
+                msg = f"Unsupported protocol {self.protocol} for {self.url}. Only HTTPS is supported."
+                raise InvalidExtensionRecoverableError(msg)
         except Exception as e:
             logger.warning("Invalid URL: %s (%s: %s)", url, type(e).__name__, e)
             msg = f"Invalid URL: {url}"
@@ -90,7 +69,7 @@ class ExtensionRemote:
         ref = None
         url = f"{self.url}.git" if self.host in ("github.com", "gitlab.com", "codeberg.org") else self.url
         try:
-            if self._use_git:
+            if self.use_git:
                 if isdir(self._git_dir):
                     subprocess.run(
                         [
@@ -159,7 +138,7 @@ class ExtensionRemote:
         if output_dir_exists and warn_if_overwrite:
             logger.warning('Extension with URL "%s" is already installed. Overwriting', self.url)
 
-        if self._use_git and isdir(self._git_dir):
+        if self.use_git and isdir(self._git_dir):
             os.makedirs(self._dir, exist_ok=True)
             subprocess.run(
                 ["git", f"--git-dir={self._git_dir}", f"--work-tree={self._dir}", "checkout", commit_hash, "."],
@@ -196,3 +175,57 @@ class ExtensionRemote:
             commit_timestamp = getmtime(self._dir)
 
         return commit_hash, commit_timestamp
+
+
+class UrlParseResult(TypedDict):
+    use_git: bool
+    url: str
+    path: str
+    protocol: str
+    host: str
+
+
+def parse_extension_url(url: str) -> UrlParseResult:
+    """
+    Parses the extension URL and returns a dictionary.
+    Raises AssertionError if the URL is invalid.
+    """
+    use_git = bool(which("git"))
+    url = url.strip().lower()
+    # Reformat to URL format if it's SSH
+    if url.startswith("git@"):
+        url = "git://" + url[4:].replace(":", "/")
+
+    url_parts = urlparse(url)
+    path = url_parts.path[1:]
+
+    if url_parts.scheme in ("", "file"):
+        assert isdir(url_parts.path)
+        host = ""
+        protocol = "file"
+    else:
+        if url_parts.scheme != "https":
+            logger.warning('Unsupported URL protocol: "%s". Will attempt to use HTTPS', url_parts.scheme)
+        host = url_parts.netloc
+        protocol = "https"
+
+    assert path
+    assert host or protocol == "file"
+
+    if host in ("github.com", "gitlab.com", "codeberg.org"):
+        # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
+        user, repo, *_ = path.split("/", 2)
+        if repo.endswith(".git"):
+            repo = repo[:-4]
+        path = f"{user}/{repo}"
+        use_git = False
+
+    url = f"{protocol}://{host}/{path}"
+
+    return UrlParseResult(
+        use_git=use_git,
+        url=url,
+        path=path,
+        protocol=protocol,
+        host=host,
+    )
