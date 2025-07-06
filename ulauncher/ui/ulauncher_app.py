@@ -36,6 +36,12 @@ class UlauncherApp(Gtk.Application):
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
+        # Enable accessibility support
+        settings = Gtk.Settings.get_default()
+        if settings:
+            settings.set_property("gtk-enable-animations", True)
+            settings.set_property("gtk-enable-accels", True)
+
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
         self.query = value.lstrip()
@@ -105,6 +111,12 @@ class UlauncherApp(Gtk.Application):
         notification.set_default_action(default_action)
         notification.set_body(body)
         notification.set_priority(Gio.NotificationPriority.URGENT)
+
+        # Make notifications accessible
+        # The a11y-notification property is not standard but some screen readers may use it
+        if hasattr(notification, "set_attribute"):
+            notification.set_attribute("a11y-notification", "true")
+
         self.send_notification(notification_id, notification)
 
     @events.on

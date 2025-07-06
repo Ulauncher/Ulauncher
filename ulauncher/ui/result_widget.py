@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 from html import unescape
 
-from gi.repository import Gdk, Gtk, Pango
+from gi.repository import Atk, Gdk, Gtk, Pango
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
+from ulauncher.utils.accessibility import announce_for_screen_reader, make_focusable, set_accessible_props
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
@@ -41,6 +42,15 @@ class ResultWidget(Gtk.EventBox):
         self.connect("button-release-event", self.on_click)
         self.connect("enter_notify_event", self.on_mouse_hover)
 
+        # Set accessibility properties
+        make_focusable(self)
+        set_accessible_props(
+            self,
+            role=Atk.Role.LIST_ITEM,
+            name=result.name,
+            description=result.description if result.description else f"Result item {index + 1}",
+        )
+
         self.item_box = Gtk.EventBox()
         self.item_box.get_style_context().add_class("item-box")
         self.add(self.item_box)
@@ -48,10 +58,16 @@ class ResultWidget(Gtk.EventBox):
         item_container.get_style_context().add_class("item-container")
         self.item_box.add(item_container)
 
+        # Make the item box focusable for keyboard navigation
+        make_focusable(self.item_box)
+
         icon = Gtk.Image()
         icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, self.get_scale_factor()))
         icon.get_style_context().add_class("item-icon")
         item_container.pack_start(icon, False, True, 0)
+
+        # Add accessibility properties to the icon
+        set_accessible_props(icon, role=Atk.Role.ICON, name=f"{result.name} icon")
 
         self.text_container = Gtk.Box(
             width_request=int(350.0 * text_scaling_factor),
@@ -101,6 +117,12 @@ class ResultWidget(Gtk.EventBox):
         self.item_box.get_style_context().add_class("selected")
         self.scroll_to_focus()
 
+        # Set focus for accessibility
+        self.item_box.grab_focus()
+
+        # Announce selection to screen readers
+        announce_for_screen_reader(self, f"Selected: {self.result.name}")
+
     def deselect(self) -> None:
         self.item_box.get_style_context().remove_class("selected")
 
@@ -139,7 +161,13 @@ class ResultWidget(Gtk.EventBox):
         alt = bool(event and event.button != 1)  # right click
         window.results_nav.activate(self.query, alt=alt)  # type: ignore[attr-defined]
 
+        # Announce activation to screen readers
+        announce_for_screen_reader(self, f"Activated: {self.result.name}")
+
     def on_mouse_hover(self, _widget: Gtk.Widget, event: Gdk.EventCrossing) -> None:
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
             self.get_toplevel().select_result(self.index)  # type: ignore[attr-defined]
+
+            # Announce hover to screen readers
+            announce_for_screen_reader(self, f"Focused: {self.result.name}")

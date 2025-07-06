@@ -3,13 +3,14 @@ from __future__ import annotations
 import logging
 from typing import Any, Sequence
 
-from gi.repository import Gdk, GLib, Gtk
+from gi.repository import Atk, Gdk, GLib, Gtk
 
 import ulauncher
 from ulauncher.config import paths
 from ulauncher.internals.result import Result
 from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
+from ulauncher.utils.accessibility import announce_for_screen_reader, make_focusable, set_accessible_props
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
@@ -43,6 +44,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             **kwargs,
         )
 
+        # Set accessibility role and properties for the main window
+        set_accessible_props(
+            self, role=Atk.Role.APPLICATION, name="Ulauncher", description="Application launcher for Linux"
+        )
+
         events.set_self(self)
 
         if layer_shell.is_supported():
@@ -72,6 +78,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             margin_end=20,
             receives_default=True,
         )
+        # Add accessibility properties
+        set_accessible_props(
+            self.input, role=Atk.Role.TEXT, name="Search input", description="Type to search for applications and files"
+        )
+        make_focusable(self.input)
 
         prefs_btn = Gtk.Button(
             name="prefs_btn",
@@ -82,6 +93,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             valign=Gtk.Align.CENTER,
             margin_end=15,
         )
+        # Add accessibility properties
+        set_accessible_props(
+            prefs_btn, role=Atk.Role.PUSH_BUTTON, name="Preferences", description="Open Ulauncher preferences"
+        )
+        make_focusable(prefs_btn)
 
         input_box.pack_start(self.input, True, True, 0)
         input_box.pack_end(prefs_btn, False, False, 0)
@@ -93,7 +109,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             propagate_natural_height=True,
             shadow_type=Gtk.ShadowType.IN,
         )
+        # Add accessibility properties
+        set_accessible_props(
+            self.scroll_container, role=Atk.Role.SCROLL_PANE, name="Results", description="List of search results"
+        )
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        # Add accessibility properties
+        set_accessible_props(
+            self.result_box, role=Atk.Role.LIST, name="Search results", description="List of search results"
+        )
         self.scroll_container.add(self.result_box)
 
         window_container.pack_start(event_box, True, True, 0)
@@ -273,6 +297,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
         theme_css = Theme.load(self.settings.theme_name).get_css().encode()
+
+        # convert theme_css bytes to string
+        theme_str = theme_css.decode("utf-8", errors="replace")
+        # print line 147. Use enumerate
+        for line_number, line in enumerate(theme_str.splitlines(), start=1):
+            if 144 <= line_number <= 146:
+                print(f">>> {line_number}: {line}")
+
         self._css_provider.load_from_data(theme_css)
         self.apply_css(self)
         visual = self.get_screen().get_rgba_visual()
@@ -356,8 +388,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.result_box.set_margin_top(3)
             self.apply_css(self.result_box)
             self.scroll_container.show_all()
+
+            # Update accessibility for screen readers
+            announce_for_screen_reader(self.result_box, f"{len(results)} search results found")
         else:
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
+
+            # Update accessibility for screen readers - no results
+            announce_for_screen_reader(self.result_box, "No search results found")
+
         logger.debug("render %s results", len(results))
