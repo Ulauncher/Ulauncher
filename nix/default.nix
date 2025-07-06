@@ -53,6 +53,8 @@ let
     distPhase = "true";
   };
 
+  format = "other";
+
   packages.preferences.dev = [ yarn ];
   packages.tests.python = pp: (with pp; [
     mock
