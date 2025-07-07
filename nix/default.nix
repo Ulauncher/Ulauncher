@@ -21,6 +21,8 @@
 , nix-update-script
 , procps
 , python3Packages
+, setuptools ? python3Packages.setuptools
+, setuptools-scm ? python3Packages.setuptools-scm
 , ruff
 , stdenv
 , systemd
@@ -53,6 +55,7 @@ let
     distPhase = "true";
   };
 
+
   packages.preferences.dev = [ yarn ];
   packages.tests.python = pp: (with pp; [
     mock
@@ -73,7 +76,11 @@ let
     inherit version pname;
     src = src.python;
 
+    pyproject = true;
+    build-system = [ setuptools ];
+
     nativeBuildInputs = [
+      setuptools-scm
       gdk-pixbuf
       gobject-introspection
       intltool
