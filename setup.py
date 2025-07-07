@@ -6,7 +6,7 @@ from pathlib import Path
 from shutil import copyfileobj
 from typing import Iterator
 
-from setuptools import find_packages, setup
+import setuptools
 
 
 def gzip_file(source_file: str) -> str:
@@ -36,8 +36,8 @@ def data_files_from_path(target_path: str, source_path: str) -> Iterator[tuple[s
         yield f"{target_path}/{relative_file.parent}", [f"{source_path}/{relative_file}"]
 
 
-setup(
-    packages=find_packages(exclude=["docs", "tests", "conftest.py"]),
+setuptools.setup(
+    packages=setuptools.find_packages(exclude=["docs", "tests", "conftest.py"]),
     # These will be placed in /usr
     data_files=[
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
