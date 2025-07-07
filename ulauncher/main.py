@@ -81,6 +81,13 @@ def main() -> None:
 
     sys.excepthook = except_hook
 
+    # Ensure that Ulauncher v5 is not running
+    # TODO: Remove this 4-6 months after v6 release
+    # Import here because of the dependency on the logger setup
+    from ulauncher.utils.v5_killer import kill_ulauncher_v5
+
+    kill_ulauncher_v5()
+
     # Migrate user data to v6 compatible
     v5_to_v6()
 
