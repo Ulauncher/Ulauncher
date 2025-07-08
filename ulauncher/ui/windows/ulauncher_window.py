@@ -115,6 +115,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.connect("button-release-event", lambda *_: self.on_mouse_up())
         self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
+        self.connect("draw", self.on_initial_draw)
+
         prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
         self.set_keep_above(True)
@@ -153,22 +155,22 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # this will trigger to show frequent apps if necessary
             self.show_results([])
 
-        GLib.idle_add(self.deferred_init)
-
     def deferred_init(self) -> None:
         if self.query_str:
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
             self.input.select_region(0, -1)
-
-            # force refresh the query handler triggers
-            self.query_handler = QueryHandler()
-            self.query_handler.parse(self.query_str)
-            self.query_handler.handle_change()
+        self.query_handler.load_triggers()
+        self.query_handler.update(self.query_str)
 
     ######################################
     # GTK Signal Handlers
     ######################################
+
+    def on_initial_draw(self, *_: tuple[Any]) -> None:
+        logger.info("Window shown")
+        self.disconnect_by_func(self.on_initial_draw)
+        GLib.idle_add(self.deferred_init)
 
     def on_focus_out(self) -> None:
         if self.settings.close_on_focus_out and not self.is_dragging:
@@ -183,8 +185,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.input.get_text(), update_input=False)
-        self.query_handler.parse(self.query_str)
-        self.query_handler.handle_change()
+        self.query_handler.update(self.query_str)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
