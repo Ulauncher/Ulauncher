@@ -12,12 +12,12 @@ from ulauncher.utils.eventbus import EventBus
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 events = EventBus("extension_mode")
-ExtensionSocketServer().start()
 
 
 class ExtensionMode(BaseMode):
     def __init__(self) -> None:
         self.ext_socket_server = ExtensionSocketServer()
+        ExtensionSocketServer().start()
         self.active_ext_id: str | None = None
         events.set_self(self)
 
