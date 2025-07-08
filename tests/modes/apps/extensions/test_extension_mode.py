@@ -5,12 +5,15 @@ import pytest
 from ulauncher.internals.query import Query
 from ulauncher.modes.extensions.extension_mode import ExtensionMode
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
+from ulauncher.modes.extensions.extension_socket_server import events as ess_events
 
 
 class TestExtensionMode:
     @pytest.fixture(autouse=True)
     def ext_server(self, mocker):
-        return mocker.patch("ulauncher.modes.extensions.extension_mode.ExtensionSocketServer").return_value
+        ess = mocker.patch("ulauncher.modes.extensions.extension_mode.ExtensionSocketServer").return_value
+        ess_events.set_self(ess)
+        return ess
 
     def test_is_enabled__controller_is_running__returns_true(self, ext_server) -> None:
         controller = mock.create_autospec(ExtensionSocketController)
