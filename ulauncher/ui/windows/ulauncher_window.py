@@ -29,6 +29,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     query_handler = QueryHandler()
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
+        logger.info("Opening Ulauncher window")
         super().__init__(
             decorated=False,
             deletable=False,
@@ -300,6 +301,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @events.on
     def close(self, save_query: bool = False) -> None:
+        logger.info("Closing Ulauncher window")
         if not save_query or self.settings.clear_previous_query:
             events.emit("app:set_query", "", update_input=False)
         if self.settings.grab_mouse_pointer:
