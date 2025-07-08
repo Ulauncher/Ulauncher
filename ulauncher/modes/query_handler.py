@@ -64,7 +64,7 @@ class QueryHandler:
         # No mode selected, which means search
         results = self.search_triggers()
         # If the search result is empty, add the default items for all other modes (only shortcuts currently)
-        if not results and self.query:
+        if not results and str(self.query):
             for mode in get_modes():
                 res = mode.get_fallback_results()
                 results.extend(res)
