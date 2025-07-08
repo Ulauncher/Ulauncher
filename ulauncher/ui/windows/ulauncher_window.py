@@ -148,15 +148,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         if self.query_str:
             self.set_input(self.query_str)
-            self.input.select_region(0, -1)
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
 
-        GLib.idle_add(self.init_listeners)
+        GLib.idle_add(self.deferred_init)
 
-    def init_listeners(self) -> None:
+    def deferred_init(self) -> None:
         if self.query_str:
+            # select all text in the input field.
+            # used when user turns off "start with blank query" setting
+            self.input.select_region(0, -1)
+
             # force refresh the query handler triggers
             self.query_handler = QueryHandler()
             self.query_handler.parse(self.query_str)
