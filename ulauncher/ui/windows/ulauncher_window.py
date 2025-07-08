@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+from datetime import datetime
 import logging
 from typing import Any, Sequence
 
@@ -154,6 +156,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         else:
             # this will trigger to show frequent apps if necessary
             self.show_results([])
+
+        self.track_startup()
+
+    def track_startup(self) -> None:
+        started_at = datetime.fromisoformat(os.environ["STARTED_AT"])
+        now = datetime.now()
+        startup_time = (now - started_at).total_seconds() * 1000  # convert to milliseconds
+        logger.info("Ulauncher started in %d ms", startup_time)
 
     def deferred_init(self) -> None:
         if self.query_str:
