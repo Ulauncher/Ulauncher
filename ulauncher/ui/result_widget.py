@@ -61,7 +61,7 @@ class ResultWidget(Gtk.EventBox):
         )
         item_container.pack_start(self.text_container, True, True, 0)
 
-        self.shortcut_label = Gtk.Label(justify=Gtk.Justification.RIGHT, width_request=44, margin_end=5)
+        self.shortcut_label = Gtk.Label(justify=Gtk.Justification.RIGHT, width_request=44)
         self.shortcut_label.get_style_context().add_class("item-shortcut")
         self.shortcut_label.get_style_context().add_class("item-text")
         item_container.pack_end(self.shortcut_label, False, True, 0)
