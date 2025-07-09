@@ -11,7 +11,7 @@
           <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div>
           <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div>
           <div>
-            <a class="text-muted" href @click.prevent="openUrl(extension.url)">
+            <a class="text-muted" href @click.prevent="openUrl(extension.url)" :title="extension.url">
               <i class="fa fa-external-link"></i> Open repository
             </a>
           </div>
