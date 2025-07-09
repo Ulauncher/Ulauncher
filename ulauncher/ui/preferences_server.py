@@ -251,7 +251,7 @@ class PreferencesServer:
     @route("/extension/add")
     async def extension_add(self, url: str) -> dict[str, Any]:
         logger.info("Add extension: %s", url)
-        controller = ExtensionController.create_from_url(url)
+        controller = await ExtensionController.create_from_url(url)
         await controller.install()
         await controller.stop()
         await controller.start()

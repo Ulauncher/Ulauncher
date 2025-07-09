@@ -87,13 +87,24 @@ class ExtensionController:
         return new_controller
 
     @classmethod
-    def create_from_url(cls, url: str) -> ExtensionController:
+    async def create_from_url(cls, url: str) -> ExtensionController:
+        instance: ExtensionController | None = None
         remote = ExtensionRemote(url)
+
         if remote.ext_id in controller_cache:
             instance = controller_cache[remote.ext_id]
-        else:
+
+        # If the instance exists, but the URL does not match,
+        # it means the extension was installed from a different URL or path
+        # and we need to replace it with the new one to avoid conflicts (issue #1324)
+        if instance and remote.url != url:
+            await instance.remove()
+            controller_cache.pop(remote.ext_id, None)
+
+        if not instance:
             instance = cls(remote.ext_id)
             controller_cache[remote.ext_id] = instance
+
         instance.remote = remote
         instance.state.url = url
         instance.state.browser_url = remote.browser_url or ""

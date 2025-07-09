@@ -35,6 +35,7 @@ class UrlParseResult(BaseDataClass):
     ext_id: str
     remote_url: str
     browser_url: str | None = None
+    remote_upstream_url: str | None = None
     download_url_template: str | None = None
 
 
@@ -49,6 +50,9 @@ class ExtensionRemote(UrlParseResult):
             logger.warning("Invalid URL: %s (%s: %s)", url, type(e).__name__, e)
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionRecoverableError(msg) from e
+
+        if self.remote_upstream_url:
+            self.ext_id = parse_extension_url(self.remote_upstream_url).ext_id
 
         self._dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
@@ -177,6 +181,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     input_url_is_ssl = False
     input_url = input_url.strip()
     remote_url = input_url.lower()
+    remote_upstream_url: str | None = None
     # Convert SSH endpoint to URL
     # This might not be a real supported URL for the remote host, but we still need this step to proceed
     if remote_url.startswith("git@"):
@@ -193,6 +198,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     if url_parts.scheme in ("", "file"):
         assert isdir(url_parts.path)
         browser_url = remote_url = f"file:///{path}"
+        remote_upstream_url = get_remote_upstream_url(path)
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
         # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
@@ -219,6 +225,26 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     return UrlParseResult(
         ext_id=ext_id,
         remote_url=remote_url,
+        remote_upstream_url=remote_upstream_url,
         browser_url=browser_url,
         download_url_template=download_url_template,
     )
+
+
+def get_remote_upstream_url(path: str) -> str | None:
+    """
+    Returns git remote URL for the given path.
+    Returns None if the path is not a git repository
+    or if the remote URL is not set for the name "origin".
+    """
+    try:
+        output = (
+            subprocess.check_output(["git", "-C", path, "remote", "get-url", "origin"], stderr=subprocess.PIPE)
+            .decode()
+            .strip()
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning("Failed to get git remote URL for %s: %s", path, e.stderr.decode().strip())
+        return None
+    else:
+        return output if output else None

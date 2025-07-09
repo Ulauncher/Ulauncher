@@ -1,3 +1,5 @@
+import subprocess
+import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -5,6 +7,7 @@ import pytest
 from ulauncher.modes.extensions.extension_remote import (
     ExtensionRemote,
     InvalidExtensionRecoverableError,
+    get_remote_upstream_url,
     parse_extension_url,
 )
 
@@ -97,3 +100,27 @@ class TestParseExtensionUrl:
         assert parse_extension_url("https://github.com/user/repo/tree/HEAD").ext_id == "com.github.user.repo"
         assert parse_extension_url("https://gitlab.com/user/repo.git").ext_id == "com.gitlab.user.repo"
         assert parse_extension_url("https://other.host/a/b/c/d").ext_id == "host.other.a.b.c.d"
+
+
+class TestGitRemoteUrl:
+    def test_git_remote_url_with_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            subprocess.run(["git", "init"], cwd=temp_dir, check=True)
+
+            test_url = "https://github.com/user/repo.git"
+            subprocess.run(["git", "remote", "add", "origin", test_url], cwd=temp_dir, check=True)
+
+            result = get_remote_upstream_url(temp_dir)
+            assert result == test_url
+
+    def test_git_remote_url_without_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            subprocess.run(["git", "init"], cwd=temp_dir, check=True)
+
+            result = get_remote_upstream_url(temp_dir)
+            assert result is None
+
+    def test_git_remote_url_not_a_git_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = get_remote_upstream_url(temp_dir)
+            assert result is None
