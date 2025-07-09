@@ -73,7 +73,11 @@ class ResultWidget(Gtk.EventBox):
         self.title_box = Gtk.Box()
         self.title_box.get_style_context().add_class("item-name")
         self.title_box.get_style_context().add_class("item-text")
-        self.text_container.pack_start(self.title_box, False, True, 0)
+
+        # title_box should fill vertical space if there's no description
+        should_expand = not result.compact and not result.description
+
+        self.text_container.pack_start(self.title_box, should_expand, True, 0)
 
         item_container.set_property("margin-start", outer_margin_x)
         item_container.set_property("margin-end", outer_margin_x)
