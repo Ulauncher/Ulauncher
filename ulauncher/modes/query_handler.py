@@ -4,6 +4,8 @@ import logging
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
+from ulauncher.modes.apps.app_mode import AppMode
+from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
@@ -92,6 +94,11 @@ class QueryHandler:
 
     def activate_result(self, result: Result, alt: bool = False) -> None:
         mode = self.trigger_mode_map.get(id(result), self.mode)
+        # TODO: This is a quickfix. The problem is window calls "get_most_frequent" from AppResult directly,
+        # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
+        # for us to be aware of the mode that is being used.
+        if not mode and isinstance(result, AppResult):
+            mode = AppMode()
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
