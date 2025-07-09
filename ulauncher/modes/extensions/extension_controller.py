@@ -51,7 +51,7 @@ class ExtensionState(JsonConf):
 
 logger = logging.getLogger()
 verbose_logging: bool = get_options().verbose
-controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
+controller_registry: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 
 
@@ -78,21 +78,32 @@ class ExtensionController:
 
     @classmethod
     def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
-        cached_controller = controller_cache.get(ext_id)
-        if cached_controller:
-            return cached_controller
+        controller = controller_registry.get(ext_id)
+        if controller:
+            return controller
         new_controller = cls(ext_id, path)
-        controller_cache[ext_id] = new_controller
+        controller_registry[ext_id] = new_controller
         return new_controller
 
     @classmethod
-    def create_from_url(cls, url: str) -> ExtensionController:
+    async def create_from_url(cls, url: str) -> ExtensionController:
+        instance: ExtensionController | None = None
         remote = ExtensionRemote(url)
-        if remote.ext_id in controller_cache:
-            instance = controller_cache[remote.ext_id]
-        else:
+
+        if remote.ext_id in controller_registry:
+            instance = controller_registry[remote.ext_id]
+
+        # If the instance exists, but the URL does not match,
+        # it means the extension was installed from a different URL or path
+        # and we need to replace it with the new one to avoid conflicts (issue #1324)
+        if instance and remote.url != url:
+            await instance.remove()
+            controller_registry.pop(remote.ext_id, None)
+
+        if not instance:
             instance = cls(remote.ext_id)
-            controller_cache[remote.ext_id] = instance
+            controller_registry[remote.ext_id] = instance
+
         instance.remote = remote
         instance.state.url = url
         return instance
@@ -104,7 +115,7 @@ class ExtensionController:
 
     @classmethod
     def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
-        for controller in controller_cache.values():
+        for controller in controller_registry.values():
             for trigger in controller.user_triggers.values():
                 if controller.is_running and keyword and keyword == trigger.user_keyword:
                     return controller
@@ -287,5 +298,5 @@ class ExtensionController:
 
     @classmethod
     async def stop_all(cls) -> None:
-        jobs = [c.stop() for c in controller_cache.values() if c.is_running]
+        jobs = [c.stop() for c in controller_registry.values() if c.is_running]
         await asyncio.gather(*jobs)

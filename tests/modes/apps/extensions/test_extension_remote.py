@@ -1,3 +1,5 @@
+import subprocess
+import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -6,6 +8,8 @@ from ulauncher.modes.extensions.extension_remote import (
     ExtensionRemote,
     InvalidExtensionRecoverableError,
     UrlParseResult,
+    generate_extension_id,
+    git_remote_url,
     parse_extension_url,
 )
 
@@ -186,3 +190,40 @@ class TestParseExtensionUrl:
         with pytest.raises(AssertionError):
             # This creates a URL with no host but protocol is https
             parse_extension_url("https:///user/repo")
+
+
+class TestGenerateExtensionId:
+    def test_with_host_and_path(self) -> None:
+        assert generate_extension_id("github.com", "user/repo") == "com.github.user.repo"
+        assert generate_extension_id("example.co.uk", "user/repo") == "uk.co.example.user.repo"
+        assert generate_extension_id("gitlab.com", "group/subgroup/repo") == "com.gitlab.group.subgroup.repo"
+
+    def test_with_empty_host(self) -> None:
+        assert generate_extension_id("", "local/path/to/extension") == "local.path.to.extension"
+
+    def test_with_single_component_host_and_path(self) -> None:
+        assert generate_extension_id("localhost", "extension") == "localhost.extension"
+
+
+class TestGitRemoteUrl:
+    def test_git_remote_url_with_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            subprocess.run(["git", "init"], cwd=temp_dir, check=True)
+
+            test_url = "https://github.com/user/repo.git"
+            subprocess.run(["git", "remote", "add", "origin", test_url], cwd=temp_dir, check=True)
+
+            result = git_remote_url(temp_dir)
+            assert result == test_url
+
+    def test_git_remote_url_without_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            subprocess.run(["git", "init"], cwd=temp_dir, check=True)
+
+            result = git_remote_url(temp_dir)
+            assert result is None
+
+    def test_git_remote_url_not_a_git_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = git_remote_url(temp_dir)
+            assert result is None

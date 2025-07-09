@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+from contextlib import suppress
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -32,16 +33,18 @@ class ExtensionNetworkError(Exception):
 
 
 class ExtensionRemote:
+    url: str
+
     def __init__(self, url: str) -> None:
         try:
             parsed = parse_extension_url(url)
-            self.use_git = parsed["use_git"]
+            self._use_git = parsed["use_git"]
             self.url = parsed["url"]
             self.path = parsed["path"]
             self.protocol = parsed["protocol"]
             self.host = parsed["host"]
 
-            if not self.use_git and self.protocol != "https":
+            if not self._use_git and self.protocol != "https":
                 msg = f"Unsupported protocol {self.protocol} for {self.url}. Only HTTPS is supported."
                 raise InvalidExtensionRecoverableError(msg)  # noqa: TRY301
         except Exception as e:
@@ -49,12 +52,14 @@ class ExtensionRemote:
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionRecoverableError(msg) from e
 
-        self.ext_id = ".".join(
-            [
-                *reversed(self.host.split(".") if self.host else []),
-                *self.path.split("/"),
-            ]
-        )
+        self.ext_id = generate_extension_id(self.host, self.path)
+
+        # Regenerate extension ID using the git remote URL found in the local path
+        with suppress(Exception):
+            if self.protocol == "file" and (git_remote := git_remote_url(f"/{self.path}")):
+                remote_parsed = parse_extension_url(git_remote)
+                self.ext_id = generate_extension_id(remote_parsed["host"], remote_parsed["path"])
+
         self._dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
 
@@ -69,7 +74,7 @@ class ExtensionRemote:
         ref = None
         url = f"{self.url}.git" if self.host in ("github.com", "gitlab.com", "codeberg.org") else self.url
         try:
-            if self.use_git:
+            if self._use_git:
                 if isdir(self._git_dir):
                     subprocess.run(
                         [
@@ -138,7 +143,7 @@ class ExtensionRemote:
         if output_dir_exists and warn_if_overwrite:
             logger.warning('Extension with URL "%s" is already installed. Overwriting', self.url)
 
-        if self.use_git and isdir(self._git_dir):
+        if self._use_git and isdir(self._git_dir):
             os.makedirs(self._dir, exist_ok=True)
             subprocess.run(
                 ["git", f"--git-dir={self._git_dir}", f"--work-tree={self._dir}", "checkout", commit_hash, "."],
@@ -175,6 +180,34 @@ class ExtensionRemote:
             commit_timestamp = getmtime(self._dir)
 
         return commit_hash, commit_timestamp
+
+
+def generate_extension_id(host: str, path: str) -> str:
+    return ".".join(
+        [
+            *reversed(host.split(".") if host else []),
+            *path.split("/"),
+        ]
+    )
+
+
+def git_remote_url(path: str) -> str | None:
+    """
+    Returns git remote URL for the given path.
+    Returns None if the path is not a git repository
+    or if the remote URL is not set for the name "origin".
+    """
+    try:
+        output = (
+            subprocess.check_output(["git", "-C", path, "remote", "get-url", "origin"], stderr=subprocess.PIPE)
+            .decode()
+            .strip()
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning("Failed to get git remote URL for %s: %s", path, e.stderr.decode().strip())
+        return None
+    else:
+        return output if output else None
 
 
 class UrlParseResult(TypedDict):
