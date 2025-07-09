@@ -30,8 +30,7 @@ class JsonConf(BaseDataClass):
         data = {}
         file_path = Path(path).resolve()
         key = (file_path, cls)
-        if key not in _file_instances:
-            data = json_load(file_path)
+        data = json_load(file_path)
 
         instance = _file_instances.get(key, cls())
         instance.update(data)
