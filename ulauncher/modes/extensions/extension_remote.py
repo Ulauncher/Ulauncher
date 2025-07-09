@@ -43,7 +43,7 @@ class ExtensionRemote:
 
             if not self.use_git and self.protocol != "https":
                 msg = f"Unsupported protocol {self.protocol} for {self.url}. Only HTTPS is supported."
-                raise InvalidExtensionRecoverableError(msg)
+                raise InvalidExtensionRecoverableError(msg)  # noqa: TRY301
         except Exception as e:
             logger.warning("Invalid URL: %s (%s: %s)", url, type(e).__name__, e)
             msg = f"Invalid URL: {url}"

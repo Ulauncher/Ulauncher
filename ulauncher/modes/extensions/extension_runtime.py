@@ -3,23 +3,14 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
-import sys
 from collections import deque
 from time import time
-from typing import Callable
+from typing import Callable, Literal
 from weakref import WeakSet
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-
-    ExtensionRuntimeError = Literal[
-        "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
-    ]
-else:
-    ExtensionRuntimeError = str
 
 from gi.repository import Gio, GLib
 
+ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"]
 logger = logging.getLogger()
 ErrorHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
 aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()

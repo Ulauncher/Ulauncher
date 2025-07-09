@@ -48,7 +48,7 @@ extend-exclude = ["preferences-src/static"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py37" # py37 is the lowest supported option
+target-version = "py38"
 
 [tool.ruff.lint]
 pylint = { max-args = 10}
@@ -56,7 +56,7 @@ flake8-builtins = { builtins-ignorelist = ["id"] }
 flake8-pytest-style = {fixture-parentheses = false}
 ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
-  "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors. 
+  "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors.
   "PLC0415",  # Allow imports outside of top-level for performance reasons
   "PYI019",   # Don't want to require typing_extensions and/or py 3.11
   "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
