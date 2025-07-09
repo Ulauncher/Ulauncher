@@ -198,16 +198,12 @@ def parse_extension_url(url: str) -> UrlParseResult:
 
     url_parts = urlparse(url)
     path = url_parts.path[1:]
+    host = url_parts.netloc
+    protocol = "https"
 
     if url_parts.scheme in ("", "file"):
         assert isdir(url_parts.path)
-        host = ""
         protocol = "file"
-    else:
-        if url_parts.scheme != "https":
-            logger.warning('Unsupported URL protocol: "%s". Will attempt to use HTTPS', url_parts.scheme)
-        host = url_parts.netloc
-        protocol = "https"
 
     assert path
     assert host or protocol == "file"
