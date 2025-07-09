@@ -54,7 +54,7 @@ class SystemdController:
         """
         Enable or disable unit
         """
-        if not self.can_start():
+        if status and not self.can_start():
             msg = "Autostart is not allowed"
             raise OSError(msg)
 
