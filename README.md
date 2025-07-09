@@ -21,7 +21,7 @@ For more info or download links see [ulauncher.io](https://ulauncher.io)
 
 ### Run Ulauncher on startup
 
-If your distribution uses [Systemd](https://www.freedesktop.org/wiki/Software/systemd/) and the packages includes [ulauncher.service](ulauncher.service), then you can run `ulauncher` on startup by running:
+If your distribution uses [Systemd](https://systemd.io/) and the packages includes [ulauncher.service](ulauncher.service), then you can run `ulauncher` on startup by running:
 
 ```
 systemctl --user enable --now ulauncher
