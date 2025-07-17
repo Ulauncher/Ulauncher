@@ -13,7 +13,7 @@ import ulauncher.utils.xinit  # must import this before any GUI libraries are in
 from ulauncher.config import API_VERSION, VERSION, get_options, paths
 from ulauncher.ui import layer_shell
 from ulauncher.ui.ulauncher_app import UlauncherApp
-from ulauncher.utils.environment import DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
+from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
 
@@ -68,7 +68,17 @@ def main() -> None:
         )
 
     if XDG_SESSION_TYPE != "X11":
-        logger.info("Layer shell: %s", ("Yes" if layer_shell.is_supported() else "No"))
+        layer_shell_supported = layer_shell.is_supported()
+        logger.info("Layer shell: %s", ("Yes" if layer_shell_supported else "No"))
+        if not layer_shell_supported and DESKTOP_ID == "PLASMA":
+            logger.warning(
+                "\n"
+                "\n╔═════════════════════════════════════════════════════════════════════════════╗"
+                "\n║ Plasma Desktop needs Layer Shell to render Ulauncher correctly on Wayland.  ║"
+                "\n║  See https://github.com/Ulauncher/Ulauncher/discussions/1501 for details.   ║"
+                "\n╚═════════════════════════════════════════════════════════════════════════════╝"
+                "\n\n"
+            )
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
     if options.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
