@@ -126,19 +126,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         is_composited = screen.is_composited()
         logger.debug("Screen RGBA visual: %s", visual)
         logger.debug("Screen is composited: %s", is_composited)
-        shadow_size = 20 if is_composited else 0
-        self.window_frame.set_properties(
-            margin_top=shadow_size,
-            margin_bottom=shadow_size,
-            margin_start=shadow_size,
-            margin_end=shadow_size,
-        )
         if visual is None:
             logger.info("Screen does not support alpha channels. Likely not running a compositor.")
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
-        self.apply_theme()
+        self.apply_theme(is_composited)
         self.position_window()
 
         self.present()
@@ -274,11 +267,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
 
-    def apply_theme(self) -> None:
+    def apply_theme(self, is_composited: bool) -> None:
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        theme_css = Theme.load(self.settings.theme_name).get_css().encode()
-        self._css_provider.load_from_data(theme_css)
+        theme_css = Theme.load(self.settings.theme_name).get_css()
+        if not is_composited:
+            theme_css += "\n.app { box-shadow: initial; }"
+        self._css_provider.load_from_data(theme_css.encode())
         self.apply_css(self)
         visual = self.get_screen().get_rgba_visual()
         if visual:
@@ -286,6 +281,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def position_window(self) -> None:
         base_height = 100  # roughly the size of Ulauncher with no results
+        margin = 20
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         if monitor:
             geo = monitor.get_geometry()
@@ -300,6 +296,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 layer_shell.set_vertical_position(self, pos_y)
             else:
                 self.move(pos_x, pos_y)
+
+        self.window_frame.set_properties(
+            margin_top=margin,
+            margin_bottom=margin,
+            margin_start=margin,
+            margin_end=margin,
+        )
 
     @events.on
     def close(self, save_query: bool = False) -> None:
