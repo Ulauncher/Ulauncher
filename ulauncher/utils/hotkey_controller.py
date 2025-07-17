@@ -2,29 +2,20 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from shutil import which
 
 from gi.repository import Gio, GLib
 
 from ulauncher.config import APP_ID
 from ulauncher.ui.windows.hotkey_dialog import HotkeyDialog
-from ulauncher.utils.environment import DESKTOP_NAME
+from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.systemd_controller import SystemdController
 
 logger = logging.getLogger()
 launch_command = f"gapplication launch {APP_ID}"
-plasma_service_controller = SystemdController("plasma-kglobalaccel")
-DESKTOP_ID: str | None = None
 
-if bool(which("kwriteconfig5") and which("systemsettings5") and plasma_service_controller.is_active()):
-    DESKTOP_ID = "PLASMA"
-elif DESKTOP_NAME in ("GNOME", "PANTHEON") or DESKTOP_NAME.endswith(":GNOME"):
-    DESKTOP_ID = "GNOME"
-elif DESKTOP_NAME == "XFCE":
-    DESKTOP_ID = "XFCE"
 
-IS_SUPPORTED = bool(DESKTOP_ID)
+IS_SUPPORTED = DESKTOP_ID in ("GNOME", "XFCE", "PLASMA")
 
 
 def _set_hotkey(hotkey: str) -> None:
@@ -106,7 +97,9 @@ class HotkeyController:
             logger.debug("Executing kwriteconfig5 commands to add Plasma global shortcut for '%s'", hotkey)
             subprocess.run(["kwriteconfig5", *config_path, "_k_friendly_name", "Ulauncher"], check=True)
             subprocess.run(["kwriteconfig5", *config_path, "_launch", f"{hotkey},none,Ulauncher"], check=True)
-            plasma_service_controller.restart()
+            plasma_service_controller = SystemdController("plasma-kglobalaccel")
+            if plasma_service_controller.can_start():
+                plasma_service_controller.restart()
             return True
         if IS_SUPPORTED:
             _set_hotkey(default_hotkey)
