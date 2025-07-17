@@ -285,10 +285,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_visual(visual)
 
     def position_window(self) -> None:
+        base_height = 100  # roughly the size of Ulauncher with no results
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         if monitor:
             geo = monitor.get_geometry()
-            max_height = geo.height - (geo.height * 0.15) - 100  # 100 is roughly the height of the text input
+            max_height = geo.height * 0.85 - base_height
             window_width = self.settings.base_width
             pos_x = int(geo.width * 0.5 - window_width * 0.5 + geo.x)
             pos_y = int(geo.y + geo.height * 0.12)
