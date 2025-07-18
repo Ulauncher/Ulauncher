@@ -10,6 +10,7 @@ from ulauncher import paths
 from ulauncher.internals.result import Result
 from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
+from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
@@ -126,21 +127,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         is_composited = screen.is_composited()
         logger.debug("Screen RGBA visual: %s", visual)
         logger.debug("Screen is composited: %s", is_composited)
-        shadow_size = 20 if is_composited else 0
-        self.window_frame.set_properties(
-            margin_top=shadow_size,
-            margin_bottom=shadow_size,
-            margin_start=shadow_size,
-            margin_end=shadow_size,
-        )
         if visual is None:
             logger.info("Screen does not support alpha channels. Likely not running a compositor.")
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
         self.apply_theme()
-        self.position_window()
-
+        self.position_window(is_composited)
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
         # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
@@ -284,22 +277,41 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if visual:
             self.set_visual(visual)
 
-    def position_window(self) -> None:
+    def position_window(self, is_composited: bool) -> None:
         base_height = 100  # roughly the height of Ulauncher with no results
+        margin_x = margin_y = 0.0 if is_composited else 20.0
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
+
         if monitor:
             monitor_size = monitor.get_geometry()
-            max_height = monitor_size.height * 0.85 - base_height
             window_width = self.settings.base_width
-            pos_x = int(monitor_size.width * 0.5 - window_width * 0.5 + monitor_size.x)
-            pos_y = int(monitor_size.y + monitor_size.height * 0.12)
-            self.set_property("width-request", window_width)
+            max_height = monitor_size.height * 0.85 - base_height
             self.scroll_container.set_property("max-content-height", max_height)
 
-            if self.layer_shell_enabled:
-                layer_shell.set_vertical_position(self, pos_y)
+            # Use the full width of the monitor for the window, and center the visible window
+            # needed because Gnome Wayland assumes you want to positions new windows next to
+            # the topmost window if any, instead of centering it.
+            if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
+                margin_x = (monitor_size.width - window_width) / 2
+                self.set_property("width-request", monitor_size.width)
+
             else:
-                self.move(pos_x, pos_y)
+                pos_x = int(monitor_size.width * 0.5 - window_width * 0.5 + monitor_size.x)
+                pos_y = int(monitor_size.y + monitor_size.height * 0.12)
+                self.set_property("width-request", window_width)
+
+                if self.layer_shell_enabled:
+                    layer_shell.set_vertical_position(self, pos_y)
+                else:
+                    self.move(pos_x, pos_y)
+
+        if is_composited:
+            self.window_frame.set_properties(
+                margin_top=margin_y,
+                margin_bottom=margin_y,
+                margin_start=margin_x,
+                margin_end=margin_x,
+            )
 
     @events.on
     def close(self, save_query: bool = False) -> None:
