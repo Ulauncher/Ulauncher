@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Sequence
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_mode import AppMode
-from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
@@ -64,6 +64,15 @@ class QueryHandler:
         sorted_ = sorted(self.triggers, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
         return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
+    def get_most_frequent_apps(self, limit: int) -> Sequence[Result]:
+        """Called if the query is empty (on startup or when you delete the query)"""
+        app_mode = AppMode()
+        top_apps = AppMode.get_most_frequent(limit)
+        for app in top_apps:
+            self.trigger_mode_map[id(app)] = app_mode
+
+        return top_apps
+
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import get_modes, handle_action
 
@@ -94,11 +103,6 @@ class QueryHandler:
 
     def activate_result(self, result: Result, alt: bool = False) -> None:
         mode = self.trigger_mode_map.get(id(result), self.mode)
-        # TODO: This is a quickfix. The problem is window calls "get_most_frequent" from AppResult directly,
-        # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
-        # for us to be aware of the mode that is being used.
-        if not mode and isinstance(result, AppResult):
-            mode = AppMode()
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return

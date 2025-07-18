@@ -342,9 +342,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.input.get_text() and self.settings.max_recent_apps:
-            from ulauncher.modes.apps.app_result import AppResult
-
-            results = AppResult.get_most_frequent(self.settings.max_recent_apps)
+            results = self.query_handler.get_most_frequent_apps(self.settings.max_recent_apps)
 
         if results:
             from ulauncher.ui.result_widget import ResultWidget

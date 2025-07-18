@@ -48,11 +48,6 @@ class AppResult(Result):
         sorted_tuples = sorted(app_starts.items(), key=operator.itemgetter(1), reverse=True)
         return [*map(operator.itemgetter(0), sorted_tuples)]
 
-    @staticmethod
-    def get_most_frequent(limit: int = 5) -> list[AppResult]:
-        # TODO: rename to `get_most_recent` and update method to remove old apps
-        return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
-
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         frequency_weight = 1.0
         sorted_app_ids = AppResult.get_top_app_ids()

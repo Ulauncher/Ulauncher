@@ -68,7 +68,3 @@ class TestAppResult:
     def test_bump(self, app1: AppResult, app_starts: dict[str, int]) -> None:
         app1.bump_starts()
         assert app_starts.get("trueapp.desktop") == 766
-
-    def test_get_most_frequent(self) -> None:
-        assert len(AppResult.get_most_frequent()) == 2
-        assert AppResult.get_most_frequent()[0].name == "FalseApp - Full Name"
