@@ -285,14 +285,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_visual(visual)
 
     def position_window(self) -> None:
-        base_height = 100  # roughly the size of Ulauncher with no results
+        base_height = 100  # roughly the height of Ulauncher with no results
         monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
         if monitor:
-            geo = monitor.get_geometry()
-            max_height = geo.height * 0.85 - base_height
+            monitor_size = monitor.get_geometry()
+            max_height = monitor_size.height * 0.85 - base_height
             window_width = self.settings.base_width
-            pos_x = int(geo.width * 0.5 - window_width * 0.5 + geo.x)
-            pos_y = int(geo.y + geo.height * 0.12)
+            pos_x = int(monitor_size.width * 0.5 - window_width * 0.5 + monitor_size.x)
+            pos_y = int(monitor_size.y + monitor_size.height * 0.12)
             self.set_property("width-request", window_width)
             self.scroll_container.set_property("max-content-height", max_height)
 
