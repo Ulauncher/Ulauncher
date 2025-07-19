@@ -25,6 +25,17 @@ class JsonConf(BaseDataClass):
     File paths are stored in an external reference object, which is not part of the data.
     """
 
+    def __setitem__(self, key: str, value: dict[str, Any], validate_type: bool = True) -> None:
+        if hasattr(self.__class__, key):
+            class_val = getattr(self.__class__, key)
+            # WARNING: this logic does not work with union types or nullable types,
+            # since it derives the type from the initial class value
+            if validate_type and not isinstance(value, type(class_val)):
+                msg = f'"{key}" must be of type {type(class_val).__name__}, {type(value).__name__} given.'
+                raise KeyError(msg)
+
+        super().__setitem__(key, value)
+
     @classmethod
     def load(cls: type[T], path: str | Path) -> T:
         data = {}

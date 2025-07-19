@@ -35,7 +35,7 @@ class Result(BaseDataClass):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
+    def __setitem__(self, key: str, value: Any) -> None:
         if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str)):
             msg = f"Invalid {key} argument. Expected bool, dict or string"
             raise KeyError(msg)
