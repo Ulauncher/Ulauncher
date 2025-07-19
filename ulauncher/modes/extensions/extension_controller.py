@@ -34,6 +34,7 @@ from ulauncher.utils.json_utils import json_load
 class ExtensionState(JsonConf):
     id = ""
     url = ""
+    browser_url = ""
     updated_at = ""
     commit_hash = ""
     commit_time = ""
@@ -75,6 +76,7 @@ class ExtensionController:
 
         if self.state.url:
             self.remote = ExtensionRemote(self.state.url)
+            self.state.browser_url = self.remote.browser_url or ""
 
     @classmethod
     def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
@@ -94,6 +96,7 @@ class ExtensionController:
             controller_cache[remote.ext_id] = instance
         instance.remote = remote
         instance.state.url = url
+        instance.state.browser_url = remote.browser_url or ""
         return instance
 
     @classmethod
