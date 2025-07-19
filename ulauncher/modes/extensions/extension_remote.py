@@ -34,6 +34,7 @@ class ExtensionNetworkError(Exception):
 class UrlParseResult(BaseDataClass):
     ext_id: str
     remote_url: str
+    browser_url: str | None = None
     download_url_template: str | None = None
 
 
@@ -171,6 +172,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     Parses the extension URL and returns a dictionary.
     Raises AssertionError if the URL is invalid.
     """
+    browser_url: str | None = None
     download_url_template: str | None = None
     input_url_is_ssl = False
     input_url = input_url.strip()
@@ -190,7 +192,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
 
     if url_parts.scheme in ("", "file"):
         assert isdir(url_parts.path)
-        remote_url = f"file://{host}/{path}"
+        browser_url = remote_url = f"file:///{path}"
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
         # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
@@ -198,7 +200,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
         if repo.endswith(".git"):
             repo = repo[:-4]
         path = f"{user}/{repo}"
-        base_url = f"https://{host}/{path}"
+        browser_url = base_url = f"https://{host}/{path}"
         remote_url = f"{base_url}.git"
         download_url_template = (
             f"{base_url}/-/archive/[commit]/{repo}-[commit].tar.gz"
@@ -217,5 +219,6 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     return UrlParseResult(
         ext_id=ext_id,
         remote_url=remote_url,
+        browser_url=browser_url,
         download_url_template=download_url_template,
     )
