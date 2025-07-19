@@ -147,10 +147,19 @@ class CalcMode(BaseMode):
 
     def handle_query(self, query: Query) -> list[CalcResult]:
         try:
-            result = CalcResult(result=str(eval_expr(query.argument)))
+            calc_result = str(eval_expr(query.argument))
+            result = CalcResult(
+                name=f"{Decimal(calc_result):n}",
+                description="Enter to copy to the clipboard",
+                result=calc_result,
+            )
         except (SyntaxError, TypeError, IndexError):
             logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
-            result = CalcResult(error="Invalid expression")
+            result = CalcResult(
+                name="Error!",
+                description="Invalid expression",
+            )
+
         return [result]
 
     def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata:
