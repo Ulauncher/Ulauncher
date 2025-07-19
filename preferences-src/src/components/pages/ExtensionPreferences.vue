@@ -10,10 +10,16 @@
         <div class="repo" v-if="extension.url">
           <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div>
           <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div>
-          <div>
-            <a class="text-muted" href @click.prevent="openUrl(extension.url)" :title="extension.url">
+          <div v-if="extension.browser_url">
+            <a class="text-muted" href @click.prevent="openUrl(extension.browser_url)" :title="extension.browser_url">
               <i class="fa fa-external-link"></i> Open repository
             </a>
+          </div>
+          <div v-if="!extension.browser_url">
+            <i class="fa fa-copy"></i>
+            <a class="text-muted" href @click.prevent
+             v-clipboard:copy="extension.url"
+             :title="'Click to copy: ' + extension.url">Copy url</a>
           </div>
         </div>
         <div class="notes">
@@ -59,7 +65,7 @@
 
     <div class="error-wrapper" v-if="extension.error_type && extension.is_enabled">
       <ext-runtime-error
-        :extUrl="extension.url"
+        :extUrl="extension.browser_url"
         :errorMessage="extension.error_message"
         :errorType="extension.error_type"
       />
@@ -137,7 +143,7 @@
 
       <ext-install-error
         v-if="updateError"
-        :extUrl="extension.url"
+        :extUrl="extension.browser_url"
         :errorMessage="updateError.message"
         :errorType="updateError.type"
       />

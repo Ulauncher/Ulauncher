@@ -40,6 +40,9 @@ class TestParseExtensionUrl:
         assert parse_extension_url("https://gitlab.com/u/repo/issues").remote_url == "https://gitlab.com/u/repo.git"
         assert parse_extension_url("https://codeberg.org/u/repo/wiki").remote_url == "https://codeberg.org/u/repo.git"
 
+    def test_browser_url(self) -> None:
+        assert parse_extension_url("git@gitlab.com:user/repo.git").browser_url == "https://gitlab.com/user/repo"
+
     def test_ext_id(self) -> None:
         assert parse_extension_url("https://github.com/user/repo").ext_id == "com.github.user.repo"
         assert parse_extension_url("https://example.co.uk/user/repo").ext_id == "uk.co.example.user.repo"
@@ -73,6 +76,7 @@ class TestParseExtensionUrl:
         result = parse_extension_url("/local/path/to/extension")
         assert result == parse_extension_url("file:///local/path/to/extension")
         assert result.remote_url == "file:///local/path/to/extension"
+        assert result.browser_url == "file:///local/path/to/extension"
 
     def test_empty_path_raises_assertion_error(self) -> None:
         with pytest.raises(AssertionError):
