@@ -71,8 +71,7 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     def handle_registration(self, framer: JSONFramer, event: dict[str, Any]) -> None:
         if isinstance(event, dict) and event.get("type") == "extension:socket_connected":
-            pended = self.pending.pop(id(framer))
-            if pended:
+            if pended := self.pending.pop(id(framer)):
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
             ext_id: str | None = event.get("ext_id")
@@ -90,8 +89,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service = None
 
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
-        data_controller = ExtensionController.get_from_keyword(keyword)
-        if data_controller:
+        if data_controller := ExtensionController.get_from_keyword(keyword):
             return self.controllers.get(data_controller.id)
         return None
 
@@ -113,8 +111,7 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
-        controller = ExtensionSocketServer().controllers.get(ext_id)
-        if controller:
+        if controller := ExtensionSocketServer().controllers.get(ext_id):
             for id, new_value in data.get("preferences", {}).items():
                 pref = controller.data_controller.user_preferences.get(id)
                 if pref and new_value != pref.value:

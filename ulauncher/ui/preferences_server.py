@@ -87,9 +87,8 @@ class PreferencesServer:
         uri: str = scheme_request.get_uri()
         params = urlparse(uri)
         path = params.path.replace("null/", "/")
-        route_handler = routes.get(path)
 
-        if route_handler:
+        if route_handler := routes.get(path):
             # WebKit.URISchemeRequest is very primitive as a server:
             # * It can only read the URL (not the body of a post request)
             # * It can either send data with status 200 or an error message which cannot be retrieved in the client.

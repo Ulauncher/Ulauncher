@@ -29,8 +29,7 @@ def launch_app(desktop_entry_name: str) -> bool:
         logger.error("Could not get Exec for app %s", app_id)
         return False
 
-    desktop_entry_path = app.get_filename()
-    if desktop_entry_path:
+    if desktop_entry_path := app.get_filename():
         app_exec = app_exec.replace("%k", desktop_entry_path)
         app_dir = os.path.dirname(desktop_entry_path)
 
@@ -46,8 +45,7 @@ def launch_app(desktop_entry_name: str) -> bool:
         cmd = ["gapplication", "launch", app_id]
     elif app_exec:
         if app.get_boolean("Terminal"):
-            terminal_exec = settings.terminal_command
-            if terminal_exec:
+            if terminal_exec := settings.terminal_command:
                 logger.info("Will run command in preferred terminal (%s)", terminal_exec)
                 cmd = [*shlex.split(terminal_exec), app_exec]
             else:

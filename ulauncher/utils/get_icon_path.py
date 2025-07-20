@@ -20,8 +20,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
             if isfile(expanded_path):
                 return expanded_path
 
-            themed_icon = icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE)
-            if themed_icon:
+            if themed_icon := icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE):
                 return themed_icon.get_filename()
 
     except Exception as err:  # noqa: BLE001

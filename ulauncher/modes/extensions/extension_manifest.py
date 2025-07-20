@@ -100,8 +100,7 @@ class ExtensionManifest(JsonConf):
         Ensure that the manifest is valid (or raise error)
         """
         required_fields = ["api_version", "authors", "name", "icon", "triggers"]
-        missing_fields = [f for f in required_fields if not self.get(f)]
-        if missing_fields:
+        if missing_fields := [f for f in required_fields if not self.get(f)]:
             err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
             raise ExtensionManifestError(err_msg)
 

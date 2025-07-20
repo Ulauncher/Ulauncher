@@ -59,8 +59,7 @@ def json_save(
     """Save self to file path"""
     # When serializing to JSON, filter out common empty default values like None, empty list or dict
     # These are default values when initializing the objects, but they are not actual data
-    file_path = Path(path).resolve()
-    if file_path:
+    if file_path := Path(path).resolve():
         try:
             # Ensure parent dir first
             file_path.parent.mkdir(parents=True, exist_ok=True)

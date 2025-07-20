@@ -48,8 +48,7 @@ class QueryHandler:
         from ulauncher.modes.mode_handler import get_modes
 
         for mode in get_modes():
-            query = mode.parse_query_str(query_str)
-            if query:
+            if query := mode.parse_query_str(query_str):
                 self.mode = mode
                 self.query = query
 

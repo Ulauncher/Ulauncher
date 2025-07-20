@@ -115,13 +115,10 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        window = self._window and self._window()
-        if window:
+        if window := self._window and self._window():
             window.close(save_query=True)
 
-        preferences = self._preferences and self._preferences()
-
-        if preferences:
+        if preferences := self._preferences and self._preferences():
             preferences.present(page)
         else:
             from ulauncher.ui.windows.preferences_window import PreferencesWindow

@@ -78,9 +78,8 @@ class ExtensionController:
 
     @classmethod
     def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
-        cached_controller = controller_cache.get(ext_id)
-        if cached_controller:
-            return cached_controller
+        if controller := controller_cache.get(ext_id):
+            return controller
         new_controller = cls(ext_id, path)
         controller_cache[ext_id] = new_controller
         return new_controller
@@ -280,8 +279,7 @@ class ExtensionController:
         return False
 
     async def stop(self) -> None:
-        runtime = extension_runtimes.pop(self.id, None)
-        if runtime:
+        if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
             self.is_running = False
 
