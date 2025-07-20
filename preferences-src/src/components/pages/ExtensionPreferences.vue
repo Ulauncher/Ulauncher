@@ -17,16 +17,19 @@
           </div>
         </div>
         <div class="notes">
-          <span v-if="extension.is_manageable">user installed,</span>
-          <span v-if="!extension.is_manageable">externally managed,</span>
+          <span v-if="extension.is_manageable">User installed</span>
+          <span v-if="!extension.is_manageable">Externally managed,</span>
           <a class="text-muted" href @click.prevent
              v-clipboard:copy="extension.path"
-             v-b-tooltip.hover="'click to copy:\n\n' + extension.path">see path</a>
+             :title="extension.path"><i class="fa fa-copy"></i> copy path</a>
         </div>
         <div class="notes" v-if="extension.duplicate_paths.length > 0">
-          duplicates found,
+          Duplicates found,
           <a class="text-muted" href @click.prevent
-             v-b-tooltip.hover="extension.duplicate_paths.map((p) => `- ${p}`).join('\n')">see paths</a>
+             :title="extension.duplicate_paths.map((p) => `- ${p}`).join('\n')">
+             <i class="fa fa-copy"></i>
+             copy paths
+          </a>
         </div>
       </div>
       <div class="saved-notif">
