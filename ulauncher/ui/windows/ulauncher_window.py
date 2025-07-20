@@ -280,9 +280,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def position_window(self, is_composited: bool) -> None:
         base_height = 100  # roughly the height of Ulauncher with no results
         margin_x = margin_y = 0.0 if is_composited else 20.0
-        monitor = get_monitor(self.settings.render_on_screen != "default-monitor")
 
-        if monitor:
+        if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
             monitor_size = monitor.get_geometry()
             window_width = self.settings.base_width
             max_height = monitor_size.height * 0.85 - base_height
