@@ -14,7 +14,7 @@ class CLIArguments(argparse.Namespace):
     no_window_shadow: bool
 
 
-def parse_cli_args(ulauncher_version: str) -> type[CLIArguments]:
+def parse_cli_args(ulauncher_version: str) -> CLIArguments:
     """Command Line options for the initial ulauncher (daemon) call"""
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
@@ -47,7 +47,7 @@ def parse_cli_args(ulauncher_version: str) -> type[CLIArguments]:
     parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
 
-    args = parser.parse_args(namespace=CLIArguments)
+    args = parser.parse_args(namespace=CLIArguments())
     if args.dev:
         args.verbose = True
 
