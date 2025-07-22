@@ -10,7 +10,7 @@ from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
 logger = logging.getLogger()
-_events = EventBus("query")
+_events = EventBus()
 logger = logging.getLogger()
 
 
