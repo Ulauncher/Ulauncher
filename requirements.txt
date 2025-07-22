@@ -1,6 +1,6 @@
 build
 lefthook
-mypy
+mypy < 1.17.0
 pytest
 pytest-mock
 ruff >= 0.12.1
