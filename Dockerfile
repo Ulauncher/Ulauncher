@@ -70,7 +70,6 @@ RUN apt autoremove -y
 RUN apt clean
 
 COPY [ "requirements.txt", "preferences-src/package.json", "preferences-src/yarn.lock", "./" ]
-COPY [ "docs/requirements.txt", "./docs/" ]
 
 # Update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 COPY [ "scripts/dput.cf", "/etc" ]
@@ -78,7 +77,6 @@ COPY [ "scripts/dput.cf", "/etc" ]
 RUN apt install -y python3-pip
 RUN pip3 install -r requirements.txt
 RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install pygobject-stubs --no-cache-dir
-RUN pip3 install -r docs/requirements.txt
 # Cache node_modules to make builds faster
 RUN yarnpkg
 RUN mv node_modules /var
