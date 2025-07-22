@@ -6,7 +6,7 @@ from typing import Any, Sequence
 from gi.repository import Gdk, GLib, Gtk
 
 import ulauncher
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.internals.result import Result
 from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell

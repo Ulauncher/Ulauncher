@@ -5,7 +5,7 @@ import logging
 import re
 from pathlib import Path
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.utils.json_conf import JsonConf
 
 logger = logging.getLogger()

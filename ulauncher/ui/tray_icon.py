@@ -34,7 +34,7 @@ except (AssertionError, ImportError, ValueError):
         except (ImportError, ValueError):
             AyatanaIndicator = None
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger()

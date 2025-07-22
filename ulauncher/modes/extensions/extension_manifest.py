@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ulauncher.config import API_VERSION, paths
+from ulauncher import api_version, paths
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
@@ -153,7 +153,7 @@ class ExtensionManifest(JsonConf):
         """
         Ensure the extension is compatible with the Ulauncher API (or raise error)
         """
-        if not satisfies(API_VERSION, self.api_version):
+        if not satisfies(api_version, self.api_version):
             if satisfies("2.0", self.api_version):
                 # Show a warning for v2 -> v3 instead of aborting. Most v2 extensions run in v3.
                 if verbose:
@@ -161,10 +161,10 @@ class ExtensionManifest(JsonConf):
                         "Extension %s has not yet been updated to support API v%s. "
                         "Running in compatibility mode, which may not be fully functional.",
                         self.name,
-                        API_VERSION,
+                        api_version,
                     )
             else:
-                msg = f"{self.name} does not support Ulauncher API v{API_VERSION}."
+                msg = f"{self.name} does not support Ulauncher API v{api_version}."
                 raise ExtensionIncompatibleRecoverableError(msg)
 
     def _get_raw_preferences(self, ext_id: str) -> JsonConf:

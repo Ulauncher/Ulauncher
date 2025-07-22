@@ -7,8 +7,7 @@ from typing import Any, cast
 from gi.repository import Gio, Gtk
 
 import ulauncher
-from ulauncher import config
-from ulauncher.config import APP_ID, FIRST_RUN
+from ulauncher import app_id, cli_args, first_run
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -31,7 +30,7 @@ class UlauncherApp(Gtk.Application):
         return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        kwargs.update(application_id=APP_ID, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+        kwargs.update(application_id=app_id, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         super().__init__(*args, **kwargs)
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
@@ -59,7 +58,7 @@ class UlauncherApp(Gtk.Application):
 
     def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
         # We need to use the unique CLI invocation here,
-        # Can't use config.get_options(), because that's the daemon's initial cli arguments
+        # Can't use ulauncher.cli_args here, because that's the daemon's initial cli arguments
         args = args[0].get_arguments()
         # --no-window was a temporary name in the v6 beta (never released stable)
         if "--daemon" not in args and "--no-window" not in args:
@@ -69,14 +68,14 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
-        if not settings.daemonless or config.get_options().daemon:
+        if not settings.daemonless or cli_args.daemon:
             # Keep the app running even without a window
             self.hold()
 
             if settings.show_tray_icon:
                 self.toggle_tray_icon(True)
 
-        if FIRST_RUN or settings.hotkey_show_app:
+        if first_run or settings.hotkey_show_app:
             from ulauncher.utils.hotkey_controller import HotkeyController
 
             if HotkeyController.is_supported():

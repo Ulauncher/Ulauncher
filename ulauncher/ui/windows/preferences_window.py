@@ -5,7 +5,7 @@ from typing import Any
 
 from gi.repository import Gtk
 
-from ulauncher.config import get_options, paths
+from ulauncher import cli_args, paths
 from ulauncher.ui.preferences_server import PreferencesServer
 from ulauncher.utils.webkit2 import WebKit2
 
@@ -21,7 +21,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _init_webview(self) -> None:
         settings = WebKit2.Settings(
-            enable_developer_extras=bool(get_options().dev),
+            enable_developer_extras=bool(cli_args.dev),
             enable_hyperlink_auditing=False,
             enable_page_cache=False,
             enable_webgl=False,
@@ -37,7 +37,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self.webview.show()
         self.load_page()
         # Show right click menu if running with --dev flag
-        self.webview.connect("context-menu", lambda *_: not get_options().dev)
+        self.webview.connect("context-menu", lambda *_: not cli_args.dev)
 
     def load_page(self, page: str | None = "") -> None:
         self.webview.load_uri(f"prefs://{paths.ASSETS}/preferences/index.html#/{page}")

@@ -11,7 +11,7 @@ from shutil import copytree, rmtree
 from typing import Any, Iterator
 from weakref import WeakValueDictionary
 
-from ulauncher.config import get_options, paths
+from ulauncher import cli_args, paths
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_dependencies import (
     ExtensionDependencies,
@@ -51,7 +51,6 @@ class ExtensionState(JsonConf):
 
 
 logger = logging.getLogger()
-verbose_logging: bool = get_options().verbose
 controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 
@@ -264,7 +263,7 @@ class ExtensionController:
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}
             env = {
-                "VERBOSE": str(int(verbose_logging)),
+                "VERBOSE": str(int(cli_args.verbose)),
                 "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }

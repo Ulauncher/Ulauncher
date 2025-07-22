@@ -10,7 +10,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
 
-from ulauncher.config import API_VERSION, paths
+from ulauncher import api_version, paths
 from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifest
 from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.untar import untar
@@ -109,7 +109,7 @@ class ExtensionRemote(UrlParseResult):
         """
         remote_refs = self._get_refs()
         compatible = {
-            ref: sha for ref, sha in remote_refs.items() if ref.startswith("apiv") and satisfies(API_VERSION, ref[4:])
+            ref: sha for ref, sha in remote_refs.items() if ref.startswith("apiv") and satisfies(api_version, ref[4:])
         }
 
         if compatible:
@@ -138,9 +138,9 @@ class ExtensionRemote(UrlParseResult):
                         raise ExtensionRemoteError(msg)
                     tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
                     manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
-                    if not satisfies(API_VERSION, manifest.api_version):
+                    if not satisfies(api_version, manifest.api_version):
                         if not satisfies("2.0", manifest.api_version):
-                            msg = f"{manifest.name} does not support Ulauncher API v{API_VERSION}."
+                            msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
                             raise ExtensionIncompatibleRecoverableError(msg)
                         logger.warning("Falling back on using API 2.0 version for %s.", self.url)
 

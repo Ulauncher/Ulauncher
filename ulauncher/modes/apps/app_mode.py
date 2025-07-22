@@ -5,7 +5,7 @@ from typing import Iterator
 
 from gi.repository import Gio
 
-from ulauncher.config import APP_ID
+from ulauncher import app_id
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.apps.app_result import AppResult
@@ -35,7 +35,7 @@ class AppMode(BaseMode):
             if app.get_nodisplay() and executable != "gnome-control-center":
                 continue
             # Don't show Ulauncher app in own list
-            if app.get_id() == f"{APP_ID}.desktop":
+            if app.get_id() == f"{app_id}.desktop":
                 continue
 
             yield AppResult(app)

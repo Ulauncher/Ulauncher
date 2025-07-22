@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui.result_widget import ResultWidget
 from ulauncher.utils.eventbus import EventBus

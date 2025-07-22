@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.utils.json_conf import JsonConf
 
 _settings_file = f"{paths.CONFIG}/settings.json"

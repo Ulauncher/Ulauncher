@@ -12,7 +12,7 @@ from shutil import rmtree
 from types import ModuleType
 from typing import Any, Callable
 
-from ulauncher.config import FIRST_V6_RUN, paths
+from ulauncher import first_v6_run, paths
 from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionState
 from ulauncher.utils.json_utils import json_load
 from ulauncher.utils.systemd_controller import SystemdController
@@ -120,7 +120,7 @@ def v5_to_v6() -> None:
         settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
 
     # Migrate autostart conf from XDG autostart file to systemd
-    if FIRST_V6_RUN:
+    if first_v6_run:
         try:
             systemd_unit = SystemdController("ulauncher")
             autostart_file = Path(f"{paths.CONFIG}/../autostart/ulauncher.desktop").resolve()

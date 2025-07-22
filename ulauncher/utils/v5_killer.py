@@ -2,7 +2,7 @@ import logging
 import os
 import signal
 
-from ulauncher import config
+from ulauncher import first_v6_run
 
 logger = logging.getLogger()
 v5_service_name = "net.launchpad.ulauncher"
@@ -16,7 +16,7 @@ def kill_ulauncher_v5() -> None:
     This check is necessary only on the first run of v6 during the upgrade.
     See https://github.com/Ulauncher/Ulauncher/issues/1093 for more.
     """
-    if not config.FIRST_V6_RUN:
+    if not first_v6_run:
         return
 
     try:

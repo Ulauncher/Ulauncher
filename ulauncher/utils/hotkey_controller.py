@@ -5,14 +5,14 @@ import subprocess
 
 from gi.repository import Gio, GLib
 
-from ulauncher.config import APP_ID
+from ulauncher import app_id
 from ulauncher.ui.windows.hotkey_dialog import HotkeyDialog
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.systemd_controller import SystemdController
 
 logger = logging.getLogger()
-launch_command = f"gapplication launch {APP_ID}"
+launch_command = f"gapplication launch {app_id}"
 
 
 IS_SUPPORTED = DESKTOP_ID in ("GNOME", "XFCE", "PLASMA")
@@ -85,7 +85,7 @@ class HotkeyController:
     def setup_default(default_hotkey: str) -> bool:
         if DESKTOP_ID == "PLASMA":
             hotkey = "Ctrl+Space"
-            config_path = ["--file", "kglobalshortcutsrc", "--group", f"{APP_ID}.desktop", "--key"]
+            config_path = ["--file", "kglobalshortcutsrc", "--group", f"{app_id}.desktop", "--key"]
             config = subprocess.check_output(["kreadconfig5", *config_path, '"_launch"'])
             # only proceed if it's not already set up (don't override user prefs)
             if config.decode().strip():

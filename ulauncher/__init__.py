@@ -1,6 +1,12 @@
 # Eventually switch to define the version/gi_versions in pyproject.toml? see PR 1312
 
+import os
+
+from . import paths
+from .cli import parse_cli_args
+
 version = "6.0.0-beta20"
+api_version = "3.0"
 gi_versions = {
     "Gtk": "3.0",
     "Gdk": "3.0",
@@ -8,6 +14,20 @@ gi_versions = {
     "GdkPixbuf": "2.0",
     "Pango": "1.0",
 }
+app_id = "io.ulauncher.Ulauncher"
+first_run = not os.path.exists(paths.CONFIG)  # If there is no config dir, assume it's the first run
+first_v6_run = not os.path.exists(paths.STATE)
+cli_args = parse_cli_args(version)
+
+
+if not os.path.exists(paths.ASSETS):
+    raise OSError(paths.ASSETS)
+
+os.makedirs(paths.CONFIG, exist_ok=True)
+os.makedirs(paths.STATE, exist_ok=True)
+os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
+os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
+os.makedirs(paths.USER_THEMES, exist_ok=True)
 
 # this namespace module is the only way we can pin gi versions globally,
 # but we also use it when we build, then we don't want to require gi

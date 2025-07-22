@@ -6,7 +6,7 @@ from os.path import basename
 
 from gi.repository import Gio
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.internals.result import Result
 from ulauncher.utils.json_utils import json_load, json_save
 

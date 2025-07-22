@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.config import paths
+from ulauncher import paths
 from ulauncher.internals.result import Result
 
 

@@ -4,7 +4,7 @@ import contextlib
 import os
 from typing import Iterator
 
-from ulauncher.config import paths
+from ulauncher import paths
 
 
 def is_extension(ext_path: str) -> bool:

@@ -6,7 +6,7 @@ from functools import lru_cache
 from cairo import ImageSurface
 from gi.repository import Gdk, GdkPixbuf
 
-from ulauncher.config import paths
+from ulauncher import paths
 
 logger = logging.getLogger()
 
