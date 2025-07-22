@@ -59,10 +59,10 @@ class UlauncherApp(Gtk.Application):
         logger.debug("Activated via gapplication")
         self.show_launcher()
 
-    def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
+    def do_command_line(self, *inpt_args: Gio.ApplicationCommandLine, **_kwargs: Any) -> int:
         # We need to use the unique CLI invocation here,
         # Can't use get_cli_args() here, because that's the daemon's initial cli arguments
-        args = args[0].get_arguments()
+        args = inpt_args[0].get_arguments()
         # --no-window was a temporary name in the v6 beta (never released stable)
         if "--daemon" not in args and "--no-window" not in args:
             self.activate()
