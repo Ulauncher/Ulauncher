@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os
 import signal
 import sys
 from types import TracebackType
@@ -22,6 +23,15 @@ def main() -> None:
     """
     Main function that starts everything
     """
+    if not os.path.exists(paths.ASSETS):
+        raise OSError(paths.ASSETS)
+
+    os.makedirs(paths.CONFIG, exist_ok=True)
+    os.makedirs(paths.STATE, exist_ok=True)
+    os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
+    os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
+    os.makedirs(paths.USER_THEMES, exist_ok=True)
+
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
         sys.exit(2)

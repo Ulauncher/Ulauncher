@@ -19,16 +19,6 @@ first_run = not os.path.exists(paths.CONFIG)  # If there is no config dir, assum
 first_v6_run = not os.path.exists(paths.STATE)
 cli_args = parse_cli_args(version)
 
-
-if not os.path.exists(paths.ASSETS):
-    raise OSError(paths.ASSETS)
-
-os.makedirs(paths.CONFIG, exist_ok=True)
-os.makedirs(paths.STATE, exist_ok=True)
-os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
-os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
-os.makedirs(paths.USER_THEMES, exist_ok=True)
-
 # this namespace module is the only way we can pin gi versions globally,
 # but we also use it when we build, then we don't want to require gi
 try:
