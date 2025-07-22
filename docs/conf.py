@@ -22,8 +22,6 @@ import os
 import sys
 from datetime import datetime
 
-import sphinx_rtd_theme  # type: ignore[import]
-
 sys.path.insert(0, os.path.abspath(".."))
 import ulauncher  # noqa: E402, RUF100 Different Ruff versions disagree here
 
@@ -93,7 +91,6 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
