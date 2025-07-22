@@ -5,9 +5,12 @@ from typing import Any
 
 from gi.repository import Gtk
 
-from ulauncher import cli_args, paths
+from ulauncher import paths
+from ulauncher.cli import get_cli_args
 from ulauncher.ui.preferences_server import PreferencesServer
 from ulauncher.utils.webkit2 import WebKit2
+
+cli_args = get_cli_args()
 
 
 class PreferencesWindow(Gtk.ApplicationWindow):
@@ -21,7 +24,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _init_webview(self) -> None:
         settings = WebKit2.Settings(
-            enable_developer_extras=bool(cli_args.dev),
+            enable_developer_extras=cli_args.dev,
             enable_hyperlink_auditing=False,
             enable_page_cache=False,
             enable_webgl=False,

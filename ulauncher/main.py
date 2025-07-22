@@ -11,7 +11,8 @@ import gi
 from gi.repository import GLib, Gtk
 
 import ulauncher.utils.xinit  # noqa: F401 - must import this before any GUI libraries are initialized
-from ulauncher import api_version, cli_args, paths, version
+from ulauncher import api_version, paths, version
+from ulauncher.cli import get_cli_args
 from ulauncher.ui import layer_shell
 from ulauncher.ui.ulauncher_app import UlauncherApp
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
@@ -19,7 +20,7 @@ from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     """
     Main function that starts everything
     """
@@ -31,6 +32,8 @@ def main() -> None:
     os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
     os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
     os.makedirs(paths.USER_THEMES, exist_ok=True)
+
+    cli_args = get_cli_args()
 
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201

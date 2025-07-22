@@ -7,7 +7,8 @@ from typing import Any, cast
 from gi.repository import Gio, Gtk
 
 import ulauncher
-from ulauncher import app_id, cli_args, first_run
+from ulauncher import app_id, first_run
+from ulauncher.cli import get_cli_args
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -15,6 +16,8 @@ from ulauncher.utils.singleton import get_instance
 
 logger = logging.getLogger()
 events = EventBus("app")
+
+cli_args = get_cli_args()
 
 
 class UlauncherApp(Gtk.Application):
@@ -58,7 +61,7 @@ class UlauncherApp(Gtk.Application):
 
     def do_command_line(self, *args: Any, **_kwargs: Any) -> int:
         # We need to use the unique CLI invocation here,
-        # Can't use ulauncher.cli_args here, because that's the daemon's initial cli arguments
+        # Can't use get_cli_args() here, because that's the daemon's initial cli arguments
         args = args[0].get_arguments()
         # --no-window was a temporary name in the v6 beta (never released stable)
         if "--daemon" not in args and "--no-window" not in args:

@@ -11,7 +11,8 @@ from shutil import copytree, rmtree
 from typing import Any, Iterator
 from weakref import WeakValueDictionary
 
-from ulauncher import cli_args, paths
+from ulauncher import paths
+from ulauncher.cli import get_cli_args
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_dependencies import (
     ExtensionDependencies,
@@ -263,7 +264,7 @@ class ExtensionController:
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}
             env = {
-                "VERBOSE": str(int(cli_args.verbose)),
+                "VERBOSE": str(int(get_cli_args().verbose)),
                 "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }
