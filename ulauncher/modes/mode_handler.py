@@ -32,12 +32,11 @@ def clipboard_store(data: str) -> None:
     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
     clipboard.set_text(data, -1)
     clipboard.store()
-    # hold the app for a bit to make sure it syncs the clipboard before it exists
-    # there is no gtk event or function for this unfortunately, but 0.25s should be more than enough
-    # 0.02s was enough in my local tests
     _events.emit("app:toggle_hold", True)
     _events.emit("window:close")
-    timer(0.25, lambda: _events.emit("app:toggle_hold", False))
+    # Hold the app for 1 second (hopefully enough, 0.25s wasn't) to allow it time to store the clipboard
+    # before exiting. There is no gtk3 event or method that works for this unfortunately
+    timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
 @_events.on
