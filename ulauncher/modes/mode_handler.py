@@ -27,7 +27,6 @@ def get_modes() -> list[BaseMode]:
     return _modes
 
 
-@_events.on
 def clipboard_store(data: str) -> None:
     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
     clipboard.set_text(data, -1)
