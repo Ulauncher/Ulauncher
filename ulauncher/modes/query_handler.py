@@ -65,7 +65,7 @@ class QueryHandler:
         """Called if the query is empty (on startup or when you delete the query)"""
         from ulauncher.modes.apps.app_mode import AppMode
 
-        return AppMode().get_most_frequent(limit)
+        return AppMode.get_most_frequent(limit)
 
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import get_modes, handle_action
