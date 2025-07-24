@@ -41,7 +41,10 @@ class UlauncherCore:
     query: Query = Query(None, "")
 
     def load_triggers(self, force: bool = False) -> None:
-        if self._triggers_loaded and not force:
+        if force:
+            self._triggers_loaded = False
+
+        if self._triggers_loaded:
             return
 
         self._triggers.clear()
