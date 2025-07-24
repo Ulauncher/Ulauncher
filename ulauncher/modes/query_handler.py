@@ -5,7 +5,6 @@ from typing import Sequence
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.apps.app_mode import AppMode
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 
@@ -65,6 +64,8 @@ class QueryHandler:
 
     def get_most_frequent_apps(self, limit: int) -> Sequence[Result]:
         """Called if the query is empty (on startup or when you delete the query)"""
+        from ulauncher.modes.apps.app_mode import AppMode
+
         app_mode = AppMode()
         top_apps = AppMode.get_most_frequent(limit)
         for app in top_apps:
