@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ulauncher.app import UlauncherApp
 from ulauncher.ui.preferences_server import PreferencesServer
-from ulauncher.ui.ulauncher_app import UlauncherApp
 from ulauncher.utils.settings import Settings
 
 app = UlauncherApp()
