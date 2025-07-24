@@ -12,7 +12,7 @@ from ulauncher.ui.result_widget import ResultWidget
 
 class TestItemNavigation:
     @pytest.fixture
-    def query_handler(self) -> MagicMock:
+    def core(self) -> MagicMock:
         return MagicMock()
 
     @pytest.fixture
@@ -20,8 +20,8 @@ class TestItemNavigation:
         return [MagicMock() for _ in range(5)]
 
     @pytest.fixture
-    def nav(self, query_handler: Any, items: list[ResultWidget]) -> ItemNavigation:
-        return ItemNavigation(query_handler, items)
+    def nav(self, core: Any, items: list[ResultWidget]) -> ItemNavigation:
+        return ItemNavigation(core, items)
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker: MockerFixture) -> Any:

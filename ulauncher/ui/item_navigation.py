@@ -6,7 +6,7 @@ from ulauncher import paths
 from ulauncher.utils.json_utils import json_load, json_save
 
 if TYPE_CHECKING:
-    from ulauncher.modes.query_handler import QueryHandler
+    from ulauncher.core import UlauncherCore
     from ulauncher.ui.result_widget import ResultWidget
 
 query_history_path = f"{paths.STATE}/query_history.json"
@@ -18,12 +18,12 @@ class ItemNavigation:
     Performs navigation through found results
     """
 
-    query_handler: QueryHandler
+    core: UlauncherCore
     result_widgets: list[ResultWidget]
     index = 0
 
-    def __init__(self, query_handler: QueryHandler, result_widgets: list[ResultWidget]) -> None:
-        self.query_handler = query_handler
+    def __init__(self, core: UlauncherCore, result_widgets: list[ResultWidget]) -> None:
+        self.core = core
         self.result_widgets = result_widgets
 
     @property
@@ -36,7 +36,7 @@ class ItemNavigation:
         """
         Get the index of the result that should be selected (0 by default)
         """
-        previous_pick = query_history.get(str(self.query_handler.query))
+        previous_pick = query_history.get(str(self.core.query))
 
         for index, widget in enumerate(self.result_widgets):
             if widget.result.searchable and widget.result.name == previous_pick:
@@ -66,9 +66,9 @@ class ItemNavigation:
     def activate(self, alt: bool = False) -> None:
         assert self.selected_item
         result = self.selected_item.result
-        query_str = str(self.query_handler.query)
+        query_str = str(self.core.query)
         if query_str and not alt and result.searchable:
             query_history[query_str] = result.name
             json_save(query_history, query_history_path)
 
-        self.query_handler.activate_result(result, alt)
+        self.core.activate_result(result, alt)

@@ -6,8 +6,8 @@ from typing import Any, Iterable
 from gi.repository import Gdk, GLib, Gtk
 
 from ulauncher import paths
+from ulauncher.core import UlauncherCore
 from ulauncher.internals.result import Result
-from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
 from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
@@ -27,7 +27,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
-    query_handler = QueryHandler()
+    core = UlauncherCore()
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
@@ -198,8 +198,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
             self.show_results([])
         self.apply_styling()
-        self.query_handler.load_triggers(force=True)
-        self.query_handler.update(self.query_str)
+        self.core.load_triggers(force=True)
+        self.core.update(self.query_str)
 
     ######################################
     # GTK Signal Handlers
@@ -223,7 +223,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
-        self.query_handler.update(self.query_str)
+        self.core.update(self.query_str)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -256,7 +256,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not ctrl
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.query_str)
-            and self.query_handler.handle_backspace(self.query_str)
+            and self.core.handle_backspace(self.query_str)
         ):
             return True
 
@@ -398,7 +398,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.prompt_input.get_text() and self.settings.max_recent_apps:
-            results = self.query_handler.get_initial_results(self.settings.max_recent_apps)
+            results = self.core.get_initial_results(self.settings.max_recent_apps)
 
         if results:
             from ulauncher.ui.result_widget import ResultWidget
@@ -407,11 +407,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             for index, result in enumerate(results):
                 if index >= limit:
                     break
-                result_widget = ResultWidget(result, index, self.query_handler.query)
+                result_widget = ResultWidget(result, index, self.core.query)
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
 
-            self.results_nav = ItemNavigation(self.query_handler, result_widgets)
+            self.results_nav = ItemNavigation(self.core, result_widgets)
             self.results_nav.select_default()
 
             self.results.set_margin_bottom(10)

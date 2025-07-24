@@ -31,7 +31,9 @@ def get_modes() -> list[BaseMode]:
     return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), get_app_mode()]
 
 
-class QueryHandler:
+class UlauncherCore:
+    """Core application logic to handle the query events and delegate them to the modes."""
+
     mode: BaseMode | None = None
     query: Query = Query(None, "")
     triggers: list[Result] = []
