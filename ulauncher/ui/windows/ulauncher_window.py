@@ -160,7 +160,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
             self.input.select_region(0, -1)
-        self.query_handler.load_triggers()
+        self.query_handler.load_triggers(force=True)
         self.query_handler.update(self.query_str)
 
     ######################################
