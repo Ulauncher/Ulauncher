@@ -65,12 +65,7 @@ class QueryHandler:
         """Called if the query is empty (on startup or when you delete the query)"""
         from ulauncher.modes.apps.app_mode import AppMode
 
-        app_mode = AppMode()
-        top_apps = AppMode.get_most_frequent(limit)
-        for app in top_apps:
-            self.trigger_mode_map[id(app)] = app_mode
-
-        return top_apps
+        return AppMode().get_most_frequent(limit)
 
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import get_modes, handle_action
@@ -102,6 +97,13 @@ class QueryHandler:
 
     def activate_result(self, result: Result, alt: bool = False) -> None:
         mode = self.trigger_mode_map.get(id(result), self.mode)
+        # TODO: This is a quickfix. The problem is window calls "get_most_frequent" from AppResult directly,
+        # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
+        # for us to be aware of the mode that is being used.
+        if not mode and hasattr(result, "app_id"):
+            from ulauncher.modes.apps.app_mode import AppMode
+
+            mode = AppMode()
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
