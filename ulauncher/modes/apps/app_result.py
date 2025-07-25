@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 import operator
 from os.path import basename
@@ -35,12 +36,10 @@ class AppResult(Result):
 
     @staticmethod
     def from_id(app_id: str) -> AppResult | None:
-        try:
-            app_info = Gio.DesktopAppInfo.new(app_id)
-            assert app_info
-            return AppResult(app_info)
-        except (TypeError, AssertionError):
-            logger.debug("Could not load app '%s' (probably uninstalled)", app_id)
+        # Suppress errors due to app being uninstalled/not found
+        with contextlib.suppress(TypeError):
+            if app_info := Gio.DesktopAppInfo.new(app_id):
+                return AppResult(app_info)
         return None
 
     @staticmethod
