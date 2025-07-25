@@ -98,7 +98,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.current_loading_timer.cancel()
             self.current_loading_timer = None
 
-    @events.on
     def on_query_change(self) -> None:
         self._cancel_loading()
         self.active_event = None
