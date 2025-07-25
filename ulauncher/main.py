@@ -34,6 +34,7 @@ def main() -> None:  # noqa: PLR0915
     os.makedirs(paths.USER_THEMES, exist_ok=True)
 
     cli_args = get_cli_args()
+    in_cli_mode = hasattr(cli_args, "handler")
 
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
@@ -49,19 +50,31 @@ def main() -> None:  # noqa: PLR0915
     # Set up global logging for stdout and file
     file_handler = logging.FileHandler(f"{paths.STATE}/last.log", mode="w+")
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG if cli_args.verbose else logging.WARNING)
-    stream_handler.setFormatter(ColoredFormatter())
+    stream_handler.setLevel(logging.DEBUG if (cli_args.verbose or in_cli_mode) else logging.WARNING)
+    if not in_cli_mode:
+        stream_handler.setFormatter(ColoredFormatter())
 
     logging.getLogger("asyncio").setLevel(logging.WARNING)  # disable asyncio debug messages
     logging.root.handlers = []
+    # If the user is using CLI commands so output only a message
+    log_format = (
+        "%(message)s"
+        if in_cli_mode
+        else "%(asctime)s | %(levelname)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
+    )
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s",
-        handlers=[file_handler, stream_handler],
+        format=log_format,
+        handlers=[stream_handler] if in_cli_mode else [file_handler, stream_handler],
     )
 
     # Logger for actual use in this file
     logger = logging.getLogger()
+
+    # Run CLI handlers
+    if in_cli_mode:
+        success = cli_args.handler(cli_args)
+        sys.exit(0 if success else 1)
 
     logger.info("Ulauncher version %s", version)
     logger.info("Extension API version %s", api_version)
