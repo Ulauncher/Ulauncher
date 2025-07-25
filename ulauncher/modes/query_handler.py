@@ -49,6 +49,7 @@ class QueryHandler:
             if query := mode.parse_query_str(query_str):
                 self.mode = mode
                 self.query = query
+                break
 
         self.handle_change()
 
