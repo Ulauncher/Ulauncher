@@ -15,10 +15,12 @@ events = EventBus("extension_mode")
 
 
 class ExtensionMode(BaseMode):
+    ext_socket_server: ExtensionSocketServer
+    active_ext_id: str | None = None
+
     def __init__(self) -> None:
         self.ext_socket_server = ExtensionSocketServer()
-        ExtensionSocketServer().start()
-        self.active_ext_id: str | None = None
+        self.ext_socket_server.start()
         events.set_self(self)
 
     def parse_query_str(self, query_str: str) -> Query | None:
