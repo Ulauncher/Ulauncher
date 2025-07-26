@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+import logging
+import os
+import sys
+from pathlib import Path
+
+# Add project root directory (enable symlink and trunk execution)
+PYTHONPATH = os.getenv("PYTHONPATH", "")
+PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
+
+# Running in developer environment path
+if (PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path):
+    sys.path.insert(0, str(PROJECT_ROOT))
+    os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
+
+from ulauncher.config import PATHS
+from ulauncher.modes.extensions.extension_finder import find_extensions
+from ulauncher.modes.extensions.ExtensionManifest import ExtensionManifest
+from ulauncher.modes.extensions.ExtensionDownloader import ExtensionDownloader, ExtensionAlreadyInstalledWarning
+from ulauncher.modes.extensions.ExtensionRemote import InvalidExtensionUrlWarning
+from ulauncher.modes.extensions.ExtensionDb import ExtensionDb
+
+import click
+
+
+def get_ext_manifest(ext_id):
+    return ExtensionManifest.load_from_extension_id(ext_id)
+
+def get_ext_manifests():
+    extension_list = find_extensions(PATHS.EXTENSIONS)
+    for ext in extension_list:
+        yield ext[0], ExtensionManifest.load_from_extension_id(ext[0])
+
+@click.group(help="CLI tool that assists in Ulauncher extension management and development")
+def cli():
+    pass
+
+
+@click.command("show", help="Show installed extensions")
+@click.option("--name/--no-name", "-n/ ", default=False, help="Show human readable name of extension")
+@click.option("--id/--no-id", "-i/ ", default=False, help="Show extension id")
+def list_extensions(name, ext_id):
+    for ext_id, ext_manifest in get_ext_manifests():
+        ext_name = ext_manifest.name
+
+        if name and not ext_id:
+            click.echo(ext_name)
+        elif not name and ext_id:
+            click.echo(ext_id)
+        else:
+            click.echo(click.style(f"{ext_manifest.name}: ", bold=True), nl=False)
+            click.echo(ext_id)
+
+
+@click.command("install", help="Install extensions")
+@click.argument("git_url")
+def install_extension(git_url):
+    ext_downloader = ExtensionDownloader.get_instance()
+    try:
+        ext_id = ext_downloader.download(git_url)
+        ext_info = get_ext_manifest(ext_id)
+        click.echo(f"Installed extension: {ext_info.name} ({ext_id})")
+
+    except ExtensionAlreadyInstalledWarning:
+        raise click.ClickException("Extension already exists!")
+    except InvalidExtensionUrlWarning:
+        raise click.ClickException(f"Invalid GIT_URL: {git_url}!")
+
+
+def get_extension_id_opts(ctx, params, incomplete):
+    matches = []
+    for ext_id, ext_manifest in get_ext_manifests():
+        if ext_id.startswith(incomplete):
+            matches.append(ext_id)
+    return matches
+
+
+@click.command("uninstall", help="Uninstall extensions")
+@click.argument("extension_id", shell_complete=get_extension_id_opts)
+def remove_extension(extension_id):
+    ext_downloader = ExtensionDownloader.get_instance()
+    if not ext_downloader.ext_db.get(extension_id):
+        raise click.ClickException(f"Extension with id: {extension_id} is not installed!")
+    else:
+        ext_info = get_ext_manifest(extension_id)
+
+        if click.confirm(f"Are you sure you want to unistall {ext_info.name} ({extension_id})?"):
+            click.echo(f"Uninstalling extension: {ext_info.name} ({extension_id})...")
+            ext_downloader.remove(extension_id)
+
+@click.command("upgrade", help="Upgrade extensions")
+@click.argument("extension_id", shell_complete=get_extension_id_opts, required=False)
+def upgrade(extension_id):
+    ext_downloader = ExtensionDownloader.get_instance()
+    ext_to_update = []
+    if extension_id and not ext_downloader.ext_db.get(extension_id):
+        raise click.ClickException(f"Extension with id: {extension_id} doesn't exist!")
+    elif extension_id:
+        ext_to_update.append(extension_id)
+    else:
+        for ext in find_extensions(PATHS.EXTENSIONS):
+            ext_to_update.append(ext[0])
+
+    count = 0
+    for ext_id in ext_to_update:
+        ext_info = get_ext_manifest(ext_id)
+        if ext_downloader.update(ext_id):
+            click.echo(f"Updated extension: {ext_info.name} ({ext_id})")
+            count += 1
+
+    if not count:
+        click.echo("No updates available")
+
+
+@click.command("restore", help="Restore extensions to extensions.json")
+@click.option("-y", "--yes", "yes_", is_flag=True, default=False, help="Allow restore without verification.")
+def restore(yes_):
+    ext_db = ExtensionDb.load()
+    ext_db_ids = [ext for ext in ext_db]
+    ext_downloader = ExtensionDownloader.get_instance()
+
+    installed_ext_ids = [ext[0] for ext in find_extensions(PATHS.EXTENSIONS)]
+    rm_ext_ids = set(installed_ext_ids) - set(ext_db_ids)
+    add_ext_ids = set(ext_db_ids) - set(installed_ext_ids)
+
+    if not len(add_ext_ids) and not len(rm_ext_ids):
+        click.echo("Nothing to restore")
+        sys.exit(0)
+
+    if len(rm_ext_ids) > 0:
+        click.echo("Removing following extensions: ")
+        for rm_ext_id in rm_ext_ids:
+            rm_ext_manifest = get_ext_manifest(rm_ext_id)
+            click.echo(f"- {rm_ext_manifest.name} ({rm_ext_id})")
+        click.echo("") # add one empty line
+
+    if len(add_ext_ids) > 0:
+        click.echo("Installing following extensions: ")
+        for add_ext_id in add_ext_ids:
+            add_ext_manifest = get_ext_manifest(add_ext_id)
+            click.echo(f"+ {add_ext_manifest.name} ({add_ext_id})")
+        click.echo("") # add one empty line
+
+    if not yes_:
+        click.confirm("Apply changes?", default=True, abort=True)
+
+    logging.disable(logging.WARN) # disable warnings
+    if len(rm_ext_ids):
+        with click.progressbar(rm_ext_ids, label="Uninstalling extensions", length=len(rm_ext_ids)) as bar:
+            for rm_ext_id in bar:
+                ext_downloader.remove(rm_ext_id)
+
+    if len(add_ext_ids):
+        with click.progressbar(add_ext_ids, label="Installing extensions", length=len(add_ext_ids)) as bar:
+            for add_ext_id in bar:
+                ext_downloader.download(ext_db.get(add_ext_id).get("url"))
+
+@click.command("version", help="Show version of ulauncher-extensions")
+def version():
+    click.echo(f"Version: {VERSION}")
+
+
+cli.add_command(list_extensions)
+cli.add_command(version)
+cli.add_command(install_extension)
+cli.add_command(remove_extension)
+cli.add_command(upgrade)
+cli.add_command(restore)
+
+VERSION="v1.0.0"
+
+if __name__ == "__main__":
+    cli()
