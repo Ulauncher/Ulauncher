@@ -86,10 +86,10 @@ def configure_extension_args(parser: argparse.ArgumentParser) -> None:
     list_parser.set_defaults(handler=partial(list_active_extensions, list_parser))
 
     install_parser = subparsers.add_parser("install", aliases=["i"], help="Install an extension from URL")
-    install_parser.add_argument("URL", help="Git URL of the extension to install")
+    install_parser.add_argument("URL_OR_PATH", help="Git URL or path of the extension to install")
     install_parser.set_defaults(handler=partial(install_extension, install_parser))
 
-    uninstall_parser = subparsers.add_parser("uninstall", aliases=["un"], help="Uninstall an extension")
+    uninstall_parser = subparsers.add_parser("uninstall", aliases=["rm"], help="Uninstall an extension")
     uninstall_parser.add_argument("ID_OR_URL", help="Extension ID or URL to uninstall")
     uninstall_parser.set_defaults(handler=partial(uninstall_extension, uninstall_parser))
 
