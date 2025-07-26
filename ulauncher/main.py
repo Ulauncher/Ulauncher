@@ -52,6 +52,7 @@ def main() -> None:  # noqa: PLR0915
     stream_handler.setLevel(logging.DEBUG if cli_args.verbose else logging.WARNING)
     stream_handler.setFormatter(ColoredFormatter())
 
+    logging.getLogger("asyncio").setLevel(logging.WARNING)  # disable asyncio debug messages
     logging.root.handlers = []
     logging.basicConfig(
         level=logging.DEBUG,
