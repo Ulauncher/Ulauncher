@@ -54,6 +54,7 @@ def main() -> None:  # noqa: PLR0915
     if not in_cli_mode:
         stream_handler.setFormatter(ColoredFormatter())
 
+    logging.getLogger("asyncio").setLevel(logging.WARNING)  # disable asyncio debug messages
     logging.root.handlers = []
     # If the user is using CLI commands so output only a message
     log_format = (
