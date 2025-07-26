@@ -50,7 +50,12 @@ def main() -> None:  # noqa: PLR0915
     # Set up global logging for stdout and file
     file_handler = logging.FileHandler(f"{paths.STATE}/last.log", mode="w+")
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG if (cli_args.verbose or in_cli_mode) else logging.WARNING)
+    level = logging.WARNING
+    if cli_args.verbose:
+        level = logging.DEBUG
+    elif in_cli_mode:
+        level = logging.INFO
+    stream_handler.setLevel(level)
     if not in_cli_mode:
         stream_handler.setFormatter(ColoredFormatter())
 
