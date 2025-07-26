@@ -163,7 +163,7 @@ prefs: # Build the preferences web app
 
 sdist: manpage prefs # Build a source tarball
 	@set -euo pipefail
-	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
+	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools directly
 	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
 	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
@@ -185,7 +185,7 @@ deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: 
 	cp -r debian dist/ulauncher_deb/
 	cd dist/ulauncher_deb || exit
 	rm -f debian/changelog
-	dch --create --no-multimaint --package ulauncher --newversion="${DEB_VERSION}" --empty --distribution ${DEB_DISTRO}
+	dch --create --no-multimaint --package ulauncher --newversion="${DEB_VERSION}" --distribution ${DEB_DISTRO} "New upstream release"
 	echo ${DPKG_ARGS} | xargs dpkg-buildpackage
 	cd -
 	rm -rf dist/ulauncher_deb

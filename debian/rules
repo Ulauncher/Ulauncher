@@ -4,11 +4,18 @@ export DEB_BUILD_OPTIONS=nocheck
 #export DH_VERBOSE = 1
 
 %:
-ifneq ($(shell dh -l | grep -xF translations),)
-	dh $@ --with python3,translations --buildsystem=pybuild
-else
 	dh $@ --with python3 --buildsystem=pybuild
-endif
+
+override_dh_auto_build:
+	python3 -m pip wheel --no-build-isolation --no-deps .
+
+override_dh_auto_install:
+	python3 -m pip install --root=$(CURDIR)/debian/ulauncher --prefix=/usr --no-deps *.whl
+
+override_dh_auto_clean:
+	rm -rf build/ dist/ *.egg-info/
+	find . -name "*.pyc" -delete
+	find . -name "__pycache__" -type d -exec rm -rf {} + || true
 
 override_dh_builddeb:
 	dh_builddeb -- -Zgzip

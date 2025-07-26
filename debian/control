@@ -4,7 +4,8 @@ Priority: extra
 Build-Depends: debhelper (>=9~),
  dh-python,
  python3-all,
- python3-setuptools
+ python3-setuptools,
+ python3-pip
 Maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
 Standards-Version: 4.1.4
 X-Python3-Version: >= 3.8
