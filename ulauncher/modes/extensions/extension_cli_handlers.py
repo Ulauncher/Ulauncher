@@ -1,5 +1,6 @@
 import asyncio
 from argparse import ArgumentParser, Namespace
+from pathlib import Path
 
 # Import other modules within functions to avoid circular deps and make sure the logger is initialized
 
@@ -25,15 +26,24 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
     logger = logging.getLogger(__name__)
 
-    if "URL" not in args or not args.URL:
-        logger.error("Error: URL is required for installing an extension")
+    if "URL_OR_PATH" not in args or not args.URL_OR_PATH:
+        logger.error("Error: URL or path is required for installing an extension")
         parser.print_help()
         return False
 
     from ulauncher.modes.extensions.extension_controller import ExtensionController
 
     try:
-        controller = ExtensionController.create_from_url(args.URL)
+        url = args.URL_OR_PATH
+        if not url.startswith(("http", "git@")):
+            # It's a local path. Verify it exists and make absolute path
+            path = Path(url).resolve()
+            if not path.exists():
+                logger.error("Error: The specified path '%s' does not exist", path)
+                return False
+            url = str(path)
+
+        controller = ExtensionController.create_from_url(url)
         asyncio.run(controller.install())
     except Exception:
         logger.exception("Failed to install extension")
@@ -48,7 +58,7 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
     logger = logging.getLogger(__name__)
 
     if "ID_OR_URL" not in args or not args.ID_OR_URL:
-        logger.error("Error: ID or URL is required for installing an extension")
+        logger.error("Error: ID or URL is required for uninstalling an extension")
         parser.print_help()
         return False
 
