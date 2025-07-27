@@ -19,7 +19,11 @@ except (ValueError, ImportError):
 
 def is_supported() -> bool:
     """Check if running under a wayland compositor that supports the layer shell extension"""
-    return GtkLayerShell is not None and GtkLayerShell.is_supported()
+    try:
+        return GtkLayerShell is not None and GtkLayerShell.is_supported()
+    except Exception:  # noqa: BLE001
+        # It may happen that python bindings for GtkLayerShell are not installed but the underlying C library is not.
+        return False
 
 
 def enable(window: Gtk.Window) -> bool:
