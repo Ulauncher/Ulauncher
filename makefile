@@ -78,7 +78,7 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 		exit 1
 	fi
 	if [[ "${DOCKER_BIN}" == $(shell eval "command -v docker") ]]; then
-		SHELL_CMD="sudo -H -u ulauncher bash"
+		SHELL_CMD="usermod -a -G sudo ulauncher; echo 'ulauncher ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; sudo -H -u ulauncher bash"
 		if [[ $$UID != 1000 ]]; then
 			SHELL_CMD="usermod -u $$UID ulauncher; $$SHELL_CMD"
 		fi
