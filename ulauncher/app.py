@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import json
 import logging
 import weakref
 from typing import Any, cast
@@ -64,6 +66,7 @@ class UlauncherApp(Gtk.Application):
                 ("show-preferences", lambda *_: self.show_preferences(), None),
                 ("toggle-tray-icon", lambda *args: self.toggle_tray_icon(args[1].get_boolean()), "b"),
                 ("set-query", lambda *args: self.activate_query(args[1].get_string()), "s"),
+                ("trigger-event", lambda *args: self.delegate_custom_message(args[1].get_string()), "s"),
             ],
         )
 
@@ -146,6 +149,16 @@ class UlauncherApp(Gtk.Application):
     def activate_query(self, query_str: str) -> None:
         self.activate()
         self.set_query(query_str)
+
+    def delegate_custom_message(self, json_message: str) -> None:
+        """Parses and delegates custom JSON messages to the EventBus listener (if any)"""
+        with contextlib.suppress(json.JSONDecodeError):
+            data = json.loads(json_message)
+            if isinstance(data, dict) and "name" in data:
+                events.emit(data["name"], data.get("message"))
+                return
+
+        logger.error("Invalid custom JSON message format: %s", json_message)
 
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
