@@ -21,7 +21,7 @@ def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
 
 
 def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
-    if "URL_OR_PATH" not in args or not args.URL_OR_PATH:
+    if "input" not in args or not args.input:
         logger.error("Error: URL or path is required for installing an extension")
         parser.print_help()
         return False
@@ -29,7 +29,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
     from ulauncher.modes.extensions.extension_controller import ExtensionController
 
     try:
-        url = args.URL_OR_PATH
+        url = args.input
         if not url.startswith(("http", "git@")):
             # It's a local path. Verify it exists and make absolute path
             path = Path(url).resolve()
@@ -48,33 +48,31 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 
 def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
-    if "ID_OR_URL" not in args or not args.ID_OR_URL:
+    if "input" not in args or not args.input:
         logger.error("Error: ID or URL is required for uninstalling an extension")
         parser.print_help()
         return False
-
-    id_or_url = args.ID_OR_URL
 
     from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
 
     # Handle both extension ID and URL
     try:
         controller = (
-            ExtensionController.create_from_url(id_or_url)
-            if id_or_url.startswith(("http", "git@"))
-            else ExtensionController.create(id_or_url)
+            ExtensionController.create_from_url(args.input)
+            if args.input.startswith(("http", "git@"))
+            else ExtensionController.create(args.input)
         )
     except Exception:
-        logger.exception("Failed to find extension controller for '%s'", id_or_url)
+        logger.exception("Failed to find extension controller for '%s'", args.input)
         return False
 
     try:
         asyncio.run(controller.remove())
     except ExtensionNotFoundError:
-        logger.warning("Extension '%s' is not installed", id_or_url)
+        logger.warning("Extension '%s' is not installed", args.input)
         return False
     except Exception:
-        logger.exception("Failed to uninstall extension '%s'", id_or_url)
+        logger.exception("Failed to uninstall extension '%s'", args.input)
         return False
 
     return True
@@ -83,21 +81,20 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
 
-    if "ID_OR_URL" in args and args.ID_OR_URL:
-        id_or_url = args.ID_OR_URL
+    if "input" in args and args.input:
         # Upgrade specific extension
         try:
             controller = (
-                ExtensionController.create_from_url(id_or_url)
-                if id_or_url.startswith(("http", "git@"))
-                else ExtensionController.create(id_or_url)
+                ExtensionController.create_from_url(args.input)
+                if args.input.startswith(("http", "git@"))
+                else ExtensionController.create(args.input)
             )
             asyncio.run(controller.update())
         except ExtensionNotFoundError:
-            logger.warning("Extension '%s' is not installed", id_or_url)
+            logger.warning("Extension '%s' is not installed", args.input)
             return False
         except Exception:
-            logger.exception("Failed to upgrade extension %s", id_or_url)
+            logger.exception("Failed to upgrade extension %s", args.input)
             return False
 
         return True
