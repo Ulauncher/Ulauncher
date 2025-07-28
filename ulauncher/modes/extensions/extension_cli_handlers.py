@@ -1,16 +1,15 @@
 import asyncio
+import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Import other modules within functions to avoid circular deps and make sure the logger is initialized
 
 
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
-    import logging
-
     from ulauncher.modes.extensions.extension_controller import ExtensionController
-
-    logger = logging.getLogger(__name__)
 
     for controller in ExtensionController.iterate():
         disabled_label = " [DISABLED]" if not controller.is_enabled else ""
@@ -22,10 +21,6 @@ def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
 
 
 def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
     if "URL_OR_PATH" not in args or not args.URL_OR_PATH:
         logger.error("Error: URL or path is required for installing an extension")
         parser.print_help()
@@ -53,10 +48,6 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 
 def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
     if "ID_OR_URL" not in args or not args.ID_OR_URL:
         logger.error("Error: ID or URL is required for uninstalling an extension")
         parser.print_help()
@@ -90,9 +81,6 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
-    import logging
-
-    logger = logging.getLogger(__name__)
     from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
 
     if "ID_OR_URL" in args and args.ID_OR_URL:
