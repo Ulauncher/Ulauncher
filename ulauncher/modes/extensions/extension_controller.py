@@ -212,10 +212,11 @@ class ExtensionController:
             msg = f"Extension {self.id} not found at {self._path}"
             raise ExtensionNotFoundError(msg)
 
-        logger.info("Checking for updates to %s", self.id)
+        logger.debug("Checking for updates to %s", self.id)
         has_update, commit_hash = await self.check_update()
         was_running = self.is_running
         if not has_update:
+            logger.info('Extension "%s" is already on the latest version', self.id)
             return False
 
         logger.info(
