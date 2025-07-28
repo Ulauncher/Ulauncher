@@ -6,6 +6,8 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+from ulauncher.utils.dbus_trigger_event import dbus_trigger_event
+
 if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_controller import ExtensionController
 
@@ -82,6 +84,8 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         if controller.is_installed:
             return upgrade_extensions(parser, args)
         asyncio.run(controller.install())
+
+        dbus_trigger_event("extension:reload", [controller.id])
     except Exception:
         logger.exception("Failed to install extension")
         return False
@@ -123,6 +127,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
                 logger.error("Error: Extension '%s' is not installed", args.input)
                 return False
             asyncio.run(controller.update())
+            dbus_trigger_event("extension:reload", [controller.id])
         except ExtensionNotFoundError:
             logger.warning("Extension '%s' is not installed", args.input)
             return False
@@ -132,7 +137,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
 
         return True
 
-    updated_count = 0
+    updated_extensions = []
 
     for controller in ExtensionController.iterate():
         if not controller.is_manageable or not controller.state.url:
@@ -142,13 +147,14 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             ext_name = controller.manifest.name
             updated = asyncio.run(controller.update())
             if updated:
-                updated_count += 1
+                updated_extensions.append(controller.id)
         except Exception:
             logger.exception("Failed to update %s", ext_name)
 
-    if updated_count == 0:
+    if len(updated_extensions) == 0:
         logger.info("All extensions are up to date")
     else:
-        logger.info("Successfully updated %s extensions", updated_count)
+        dbus_trigger_event("extension:reload", updated_extensions)
+        logger.info("Successfully updated %s extensions", len(updated_extensions))
 
     return True

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
+from threading import Thread
 from typing import Any
 
 from gi.repository import Gio, GLib, GObject
@@ -138,3 +140,25 @@ class ExtensionSocketServer(metaclass=Singleton):
         )
         self.active_event = event
         self.active_controller = controller
+
+    @events.on
+    def reload(self, extension_ids: list[str] | None = None) -> None:
+        """(Re)load the extension or all extensions if no id is provided."""
+        if not extension_ids:
+            logger.warning("Reload message received without any extension IDs. No extensions will be restarted.")
+            return
+
+        logger.info("Reloading extensions: %s", ", ".join(extension_ids))
+        controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+
+        # run the reload in a separate thread to avoid blocking the main thread
+        async def reload_extensions_async() -> None:
+            await asyncio.gather(*[c.stop() for c in controllers])
+            await asyncio.gather(*[c.start() for c in controllers])
+
+        def reload_extensions() -> None:
+            asyncio.run(reload_extensions_async())
+
+        Thread(target=reload_extensions).start()
+        logger.info("%i extensions (re)loaded", len(extension_ids))
+
