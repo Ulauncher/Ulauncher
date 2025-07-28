@@ -124,7 +124,7 @@ class ExtensionRemote(UrlParseResult):
         output_dir_exists = isdir(self._dir)
 
         if output_dir_exists and warn_if_overwrite:
-            logger.warning('Extension with URL "%s" is already installed. Overwriting', self.url)
+            logger.info('Extension with URL "%s" is already installed. Updating', self.url)
 
         if self.download_url_template:
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
