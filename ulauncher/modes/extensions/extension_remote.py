@@ -158,6 +158,7 @@ class ExtensionRemote(UrlParseResult):
         subprocess.run(
             ["git", f"--git-dir={self._git_dir}", f"--work-tree={self._dir}", "checkout", commit_hash, "."],
             check=True,
+            stderr=subprocess.DEVNULL,
         )
         commit_timestamp = float(
             subprocess.check_output(["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash])
