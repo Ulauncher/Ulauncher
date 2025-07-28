@@ -1,11 +1,59 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from ulauncher.modes.extensions.extension_controller import ExtensionController
 
 logger = logging.getLogger(__name__)
 
 # Import other modules within functions to avoid circular deps and make sure the logger is initialized
+
+
+def get_argument_type(input_arg: str) -> Literal["id", "url", "path", "invalid"]:
+    """
+    Derives the type of input argument (url, path, id or invalid).
+    """
+    if input_arg.startswith(("http", "git@")):
+        return "url"
+    if input_arg.startswith("file:///") and Path(input_arg[7:]).exists():
+        return "path"
+    if "/" in input_arg and Path(input_arg).exists():
+        return "path"
+    from ulauncher.modes.extensions import extension_finder
+
+    if extension_finder.locate(input_arg):
+        return "id"
+    if Path(input_arg).exists():
+        return "path"
+    return "invalid"
+
+
+def normalize_path(path: str) -> str:
+    if path.startswith("file://"):  # Pathlib does not handle this prefix
+        path = path[7:]
+    return str(Path(path).resolve())
+
+
+def get_controller_for_input(input_arg: str) -> ExtensionController | None:
+    """
+    Returns an ExtensionController instance based on the input argument.
+    Handles both extension ID and URL.
+    """
+    from ulauncher.modes.extensions.extension_controller import ExtensionController
+
+    arg_type = get_argument_type(input_arg)
+    if arg_type == "id":
+        return ExtensionController.create(input_arg)
+    if arg_type == "url":
+        return ExtensionController.create_from_url(input_arg)
+    if arg_type == "path":
+        return ExtensionController.create_from_url(normalize_path(input_arg))
+    return None
 
 
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
@@ -26,19 +74,13 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
-
     try:
-        url = args.input
-        if not url.startswith(("http", "git@")):
-            # It's a local path. Verify it exists and make absolute path
-            path = Path(url).resolve()
-            if not path.exists():
-                logger.error("Error: The specified path '%s' does not exist", path)
-                return False
-            url = str(path)
-
-        controller = ExtensionController.create_from_url(url)
+        controller = get_controller_for_input(args.input)
+        if not controller:
+            logger.error("Error: Invalid URL or path '%s'", args.input)
+            return False
+        if controller.is_installed:
+            return upgrade_extensions(parser, args)
         asyncio.run(controller.install())
     except Exception:
         logger.exception("Failed to install extension")
@@ -53,24 +95,13 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
-
     # Handle both extension ID and URL
     try:
-        controller = (
-            ExtensionController.create_from_url(args.input)
-            if args.input.startswith(("http", "git@"))
-            else ExtensionController.create(args.input)
-        )
-    except Exception:
-        logger.exception("Failed to find extension controller for '%s'", args.input)
-        return False
-
-    try:
+        controller = get_controller_for_input(args.input)
+        if not controller or not controller.is_installed:
+            logger.error("Error: Could not find extension '%s'", args.input)
+            return False
         asyncio.run(controller.remove())
-    except ExtensionNotFoundError:
-        logger.warning("Extension '%s' is not installed", args.input)
-        return False
     except Exception:
         logger.exception("Failed to uninstall extension '%s'", args.input)
         return False
@@ -84,11 +115,13 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     if "input" in args and args.input:
         # Upgrade specific extension
         try:
-            controller = (
-                ExtensionController.create_from_url(args.input)
-                if args.input.startswith(("http", "git@"))
-                else ExtensionController.create(args.input)
-            )
+            controller = get_controller_for_input(args.input)
+            if not controller:
+                logger.error("Error: Invalid URL or path '%s'", args.input)
+                return False
+            if not controller.is_installed:
+                logger.error("Error: Extension '%s' is not installed", args.input)
+                return False
             asyncio.run(controller.update())
         except ExtensionNotFoundError:
             logger.warning("Extension '%s' is not installed", args.input)
