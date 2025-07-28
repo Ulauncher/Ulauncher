@@ -141,6 +141,10 @@ class ExtensionController:
         return extension_finder.is_manageable(self.path)
 
     @property
+    def is_installed(self) -> bool:
+        return extension_finder.locate(self.id) is not None
+
+    @property
     def user_preferences(self) -> dict[str, UserPreference]:
         return self.manifest.get_user_preferences(self.id)
 
