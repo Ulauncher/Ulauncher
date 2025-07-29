@@ -126,6 +126,11 @@ class UlauncherApp(Gtk.Application):
             self.window = UlauncherWindow(application=self)
 
     @events.on
+    def hide_launcher(self) -> None:
+        if self.window:
+            self.window.close()
+
+    @events.on
     def show_preferences(self, page: str | None = None) -> None:
         if self.window:
             self.window.close(save_query=True)

@@ -19,7 +19,7 @@ def clipboard_store(data: str) -> None:
     clipboard.set_text(data, -1)
     clipboard.store()
     _events.emit("app:toggle_hold", True)
-    _events.emit("window:close")
+    _events.emit("app:hide_launcher")
     # Hold the app for 1 second (hopefully enough, 0.25s wasn't) to allow it time to store the clipboard
     # before exiting. There is no gtk3 event or method that works for this unfortunately
     timer(1, lambda: _events.emit("app:toggle_hold", False))
@@ -28,7 +28,7 @@ def clipboard_store(data: str) -> None:
 @_events.on
 def handle_action(action_metadata: ActionMetadata | None) -> None:
     if not _handle_action(action_metadata):
-        _events.emit("window:close")
+        _events.emit("app:hide_launcher")
 
 
 def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912

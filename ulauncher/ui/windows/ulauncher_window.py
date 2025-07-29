@@ -347,7 +347,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 margin_end=margin_x,
             )
 
-    @events.on
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
         if not save_query or self.settings.clear_previous_query:
