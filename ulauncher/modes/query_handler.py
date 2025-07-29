@@ -64,9 +64,9 @@ class QueryHandler:
 
     def get_most_frequent_apps(self, limit: int) -> Sequence[Result]:
         """Called if the query is empty (on startup or when you delete the query)"""
-        from ulauncher.modes.apps.app_mode import AppMode
+        from ulauncher.modes.mode_handler import get_app_mode
 
-        return AppMode.get_most_frequent(limit)
+        return get_app_mode().get_most_frequent(limit)
 
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import get_modes, handle_action
@@ -102,9 +102,9 @@ class QueryHandler:
         # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
         # for us to be aware of the mode that is being used.
         if not mode and hasattr(result, "app_id"):
-            from ulauncher.modes.apps.app_mode import AppMode
+            from ulauncher.modes.mode_handler import get_app_mode
 
-            mode = AppMode()
+            mode = get_app_mode()
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return

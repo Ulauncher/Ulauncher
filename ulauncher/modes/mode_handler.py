@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 
 from gi.repository import Gdk, Gtk
 
@@ -18,13 +19,16 @@ from ulauncher.utils.timer import timer
 
 _logger = logging.getLogger()
 _events = EventBus("mode")
-_modes: list[BaseMode] = []
 
 
+@lru_cache(maxsize=None)
+def get_app_mode() -> AppMode:
+    return AppMode()
+
+
+@lru_cache(maxsize=None)
 def get_modes() -> list[BaseMode]:
-    if not _modes:
-        _modes.extend([FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), AppMode()])
-    return _modes
+    return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), get_app_mode()]
 
 
 def clipboard_store(data: str) -> None:

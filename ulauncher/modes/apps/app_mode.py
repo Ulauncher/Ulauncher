@@ -40,8 +40,7 @@ class AppMode(BaseMode):
 
             yield AppResult(app)
 
-    @staticmethod
-    def get_most_frequent(limit: int) -> list[AppResult]:
+    def get_most_frequent(self, limit: int) -> list[AppResult]:
         # TODO: filter out old apps
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
