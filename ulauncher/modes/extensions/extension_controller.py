@@ -219,7 +219,9 @@ class ExtensionController:
                 await self.toggle_enabled(was_running)
                 raise
 
-        return await self.toggle_enabled(was_running)
+        await self.toggle_enabled(was_running)
+
+        return True
 
     async def check_update(self) -> tuple[bool, str]:
         """
