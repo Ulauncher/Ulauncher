@@ -138,10 +138,3 @@ class ExtensionSocketServer(metaclass=Singleton):
         )
         self.active_event = event
         self.active_controller = controller
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    server = ExtensionSocketServer()
-    server.start()
