@@ -25,7 +25,7 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     query = ""
-    _window: weakref.ReferenceType[UlauncherWindow] | None = None
+    _window_ref: weakref.ReferenceType[UlauncherWindow] | None = None
     _preferences: weakref.ReferenceType[ulauncher.ui.windows.preferences_window.PreferencesWindow] | None = None
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
@@ -37,6 +37,17 @@ class UlauncherApp(Gtk.Application):
         super().__init__(*args, **kwargs)
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
+
+    @property
+    def window(self) -> UlauncherWindow | None:
+        """Get the current window or None if it doesn't exist."""
+        if self._window_ref:
+            return self._window_ref()
+        return None
+
+    @window.setter
+    def window(self, value: UlauncherWindow) -> None:
+        self._window_ref = weakref.ref(value)
 
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
@@ -111,14 +122,13 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
-        window = self._window and self._window()
-        if not window:
-            self._window = weakref.ref(UlauncherWindow(application=self))
+        if not self.window:
+            self.window = UlauncherWindow(application=self)
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        if window := self._window and self._window():
-            window.close(save_query=True)
+        if self.window:
+            self.window.close(save_query=True)
 
         if preferences := self._preferences and self._preferences():
             preferences.present(page)
