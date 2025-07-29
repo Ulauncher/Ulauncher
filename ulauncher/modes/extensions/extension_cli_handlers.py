@@ -85,7 +85,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
             return upgrade_extensions(parser, args)
         asyncio.run(controller.install())
 
-        dbus_trigger_event("extension:reload", [controller.id])
+        dbus_trigger_event("extension:reload_ext", [controller.id])
     except Exception:
         logger.exception("Failed to install extension")
         return False
@@ -106,6 +106,7 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
             logger.error("Error: Could not find extension '%s'", args.input)
             return False
         asyncio.run(controller.remove())
+        dbus_trigger_event("extension:stop_ext", [controller.id])
     except Exception:
         logger.exception("Failed to uninstall extension '%s'", args.input)
         return False
@@ -127,7 +128,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
                 logger.error("Error: Extension '%s' is not installed", args.input)
                 return False
             asyncio.run(controller.update())
-            dbus_trigger_event("extension:reload", [controller.id])
+            dbus_trigger_event("extension:reload_ext", [controller.id])
         except ExtensionNotFoundError:
             logger.warning("Extension '%s' is not installed", args.input)
             return False
@@ -154,7 +155,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     if len(updated_extensions) == 0:
         logger.info("All extensions are up to date")
     else:
-        dbus_trigger_event("extension:reload", updated_extensions)
+        dbus_trigger_event("extension:reload_ext", updated_extensions)
         logger.info("Successfully updated %s extensions", len(updated_extensions))
 
     return True

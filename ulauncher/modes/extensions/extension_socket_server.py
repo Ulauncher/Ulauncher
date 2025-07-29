@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 from threading import Thread
-from typing import Any
+from typing import Any, Literal
 
 from gi.repository import Gio, GLib, GObject
 
@@ -141,24 +141,45 @@ class ExtensionSocketServer(metaclass=Singleton):
         self.active_event = event
         self.active_controller = controller
 
+    def run_ext_batch_job(
+        self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
+    ) -> None:
+        controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+
+        # run the reload in a separate thread to avoid blocking the main thread
+        async def run_batch_async() -> None:
+            for job in jobs:
+                if job == "start":
+                    await asyncio.gather(*[c.start() for c in controllers])
+                elif job == "stop":
+                    await asyncio.gather(*[c.stop() for c in controllers])
+
+        def run_batch() -> None:
+            asyncio.run(run_batch_async())
+
+        Thread(target=run_batch).start()
+
+        logger.info(done_msg)
+
     @events.on
-    def reload(self, extension_ids: list[str] | None = None) -> None:
-        """(Re)load the extension or all extensions if no id is provided."""
+    def reload_ext(
+        self,
+        extension_ids: list[str] | None = None,
+    ) -> None:
         if not extension_ids:
             logger.warning("Reload message received without any extension IDs. No extensions will be restarted.")
             return
 
-        logger.info("Reloading extensions: %s", ", ".join(extension_ids))
-        controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+        logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
 
-        # run the reload in a separate thread to avoid blocking the main thread
-        async def reload_extensions_async() -> None:
-            await asyncio.gather(*[c.stop() for c in controllers])
-            await asyncio.gather(*[c.start() for c in controllers])
+        self.run_ext_batch_job(extension_ids, ["stop", "start"], done_msg=f"{len(extension_ids)} extensions (re)loaded")
 
-        def reload_extensions() -> None:
-            asyncio.run(reload_extensions_async())
+    @events.on
+    def stop_ext(self, extension_ids: list[str] | None = None) -> None:
+        if not extension_ids:
+            logger.warning("Stop message received without any extension IDs. No extensions will be stopped.")
+            return
 
-        Thread(target=reload_extensions).start()
-        logger.info("%i extensions (re)loaded", len(extension_ids))
+        logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
 
+        self.run_ext_batch_job(extension_ids, ["stop"], done_msg=f"{len(extension_ids)} extensions stopped")
