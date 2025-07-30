@@ -278,7 +278,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.set_visual(visual)
 
     def position_window(self, is_composited: bool) -> None:
-        margin_x = margin_y = 0.0 if is_composited else 20.0
+        margin_x = margin_y = 20.0 if is_composited else 0.0
 
         if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
             base_height = 100  # roughly the height of Ulauncher with no results
