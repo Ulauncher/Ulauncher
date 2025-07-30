@@ -29,13 +29,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     settings = Settings.load()
     query_handler = QueryHandler()
 
-    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
+    def __init__(self, **kwargs: Any) -> None:
         logger.info("Opening Ulauncher window")
         super().__init__(
             decorated=False,
             deletable=False,
             has_focus=True,
             icon_name="ulauncher",
+            opacity=0,  # set to 0 so we can show the window and get keyboard input before it's fully loaded
             resizable=False,
             skip_pager_hint=True,
             skip_taskbar_hint=True,
@@ -47,16 +48,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         events.set_self(self)
 
-        if layer_shell.is_supported():
-            self.layer_shell_enabled = layer_shell.enable(self)
-
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
         self.window_frame = Gtk.Box()
         self.add(self.window_frame)
 
-        window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
-        self.window_frame.pack_start(window_container, True, True, 0)
+        self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
+        self.window_frame.pack_start(self.window_container, True, True, 0)
 
         event_box = Gtk.EventBox()
         input_box = Gtk.Box()
@@ -75,7 +73,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             receives_default=True,
         )
 
-        prefs_btn = Gtk.Button(
+        self.prefs_btn = Gtk.Button(
             name="prefs_btn",
             width_request=24,
             height_request=24,
@@ -86,7 +84,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
 
         input_box.pack_start(self.input, True, True, 0)
-        input_box.pack_end(prefs_btn, False, False, 0)
+        input_box.pack_end(self.prefs_btn, False, False, 0)
 
         self.scroll_container = Gtk.ScrolledWindow(
             can_focus=True,
@@ -97,17 +95,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
+        self.window_container.pack_end(self.scroll_container, True, True, 0)
 
-        window_container.pack_start(event_box, True, True, 0)
-        window_container.pack_end(self.scroll_container, True, True, 0)
+        self.window_container.pack_start(event_box, True, True, 0)
 
-        window_container.get_style_context().add_class("app")
-        self.input.get_style_context().add_class("input")
-        prefs_btn.get_style_context().add_class("prefs-btn")
-        self.result_box.get_style_context().add_class("result-box")
-
-        prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
-        prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
         self.window_frame.show_all()
 
         self.connect("focus-in-event", lambda *_: self.on_focus_in())
@@ -117,22 +108,24 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
         self.connect("draw", self.on_initial_draw)
+        self.prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
-        prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
-
-        self.set_keep_above(True)
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        is_composited = screen.is_composited()
-        logger.debug("Screen is composited: %s", is_composited)
         if visual is None:
             logger.info("Screen does not support alpha channels")
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
-        self.apply_theme()
-        self.position_window(is_composited)
+
+        is_composited = screen.is_composited()
+        logger.debug("Screen is composited: %s", is_composited)
+        if not is_composited:
+            # without a compositor deferred would lead to "flash of unstyled content"
+            self.apply_styling()
+
+        self.set_keep_above(True)
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
         # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
@@ -143,15 +136,39 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         if self.query_str:
             self.set_input(self.query_str)
-        else:
-            # this will trigger to show frequent apps if necessary
-            self.show_results([])
+
+    def apply_styling(self) -> None:
+        """
+        Apply styling and position the window.
+
+        Note that this method is slow and should be called after the window is shown if possible.
+        """
+        if self.get_opacity() == 1:  # already applied styling
+            return
+
+        if layer_shell.is_supported():
+            self.layer_shell_enabled = layer_shell.enable(self)
+
+        self.window_container.get_style_context().add_class("app")
+        self.input.get_style_context().add_class("input")
+        self.prefs_btn.get_style_context().add_class("prefs-btn")
+        self.result_box.get_style_context().add_class("result-box")
+        prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
+        self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
+
+        self.apply_theme()
+        self.position_window()
+        self.set_opacity(1)
 
     def deferred_init(self) -> None:
         if self.query_str:
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
             self.input.select_region(0, -1)
+        else:
+            # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
+            self.show_results([])
+        self.apply_styling()
         self.query_handler.load_triggers(force=True)
         self.query_handler.update(self.query_str)
 
@@ -259,7 +276,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return self.get_application().query  # type: ignore[no-any-return, union-attr]
 
     def apply_css(self, widget: Gtk.Widget) -> None:
-        assert self._css_provider
+        if not self._css_provider:
+            self._css_provider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider(
             widget.get_style_context(), self._css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
@@ -276,7 +294,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if visual:
             self.set_visual(visual)
 
-    def position_window(self, is_composited: bool) -> None:
+    def position_window(self) -> None:
+        is_composited = self.is_composited()
         margin_x = margin_y = 20.0 if is_composited else 0.0
 
         if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
