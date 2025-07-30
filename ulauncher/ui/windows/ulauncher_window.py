@@ -125,10 +125,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
         is_composited = screen.is_composited()
-        logger.debug("Screen RGBA visual: %s", visual)
         logger.debug("Screen is composited: %s", is_composited)
         if visual is None:
-            logger.info("Screen does not support alpha channels. Likely not running a compositor.")
+            logger.info("Screen does not support alpha channels")
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
