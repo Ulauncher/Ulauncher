@@ -117,22 +117,23 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
         self.connect("draw", self.on_initial_draw)
-
         prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
-        self.set_keep_above(True)
         # Try setting a transparent background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        is_composited = screen.is_composited()
-        logger.debug("Screen is composited: %s", is_composited)
         if visual is None:
             logger.info("Screen does not support alpha channels")
             visual = screen.get_system_visual()
 
         self.set_visual(visual)
+
+        is_composited = screen.is_composited()
+        logger.debug("Screen is composited: %s", is_composited)
+
         self.apply_theme()
         self.position_window(is_composited)
+        self.set_keep_above(True)
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
         # (Gnome 3 forks like Cinnamon or Budgie, but not Gnome 3 itself any longer)
