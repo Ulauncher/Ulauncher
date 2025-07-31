@@ -158,7 +158,7 @@
         <td>
           <label for="show-tray-icon">Show tray icon</label>
           <small>
-            <p>Requires optional dependency XApp (recommended), AppIndicator3 or AyatanaAppindicator3</p>
+            <p>Requires optional dependency AppIndicator3 or XApp (X11 only)</p>
           </small>
         </td>
         <td>

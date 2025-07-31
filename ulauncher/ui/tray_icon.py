@@ -1,46 +1,51 @@
-# Ignore type errors for the TrayIcon deps
-# mypy: disable-error-code="attr-defined"
+# Status icon support is optional. It'll work if you install XApp or AppIndicator3
+# Only XApp supports activating the launcher on left click and showing the menu on right click
+
+from __future__ import annotations
+
+import contextlib
 import logging
 from pathlib import Path
 from typing import Any, Callable
 
 import gi
 from gi.repository import GObject, Gtk
-
-from ulauncher.utils.eventbus import EventBus
-
-# Status icon support is optional. It'll work if you install XApp or AppIndicator3
-# Only XApp supports activating the launcher on left click and showing the menu on right click
-try:
-    gi.require_version("XApp", "1.0")
-    from gi.repository import XApp
-
-    # Older versions of XApp doesn't have StatusIcon
-    assert hasattr(XApp, "StatusIcon")
-    AyatanaIndicator = None
-except (AssertionError, ImportError, ValueError):
-    XApp = None  # type: ignore[assignment, unused-ignore]
-    try:
-        gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3
-
-        AyatanaIndicator = AppIndicator3
-    except (ImportError, ValueError):
-        try:
-            gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3
-
-            AyatanaIndicator = AyatanaAppIndicator3
-        except (ImportError, ValueError):
-            AyatanaIndicator = None
+from typing_extensions import Literal
 
 from ulauncher import paths
+from ulauncher.utils.environment import IS_X11_COMPATIBLE
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
+tray_icon_lib: Literal["AyatanaIndicator", "XApp"] | None = None
 logger = logging.getLogger()
 events = EventBus()
 icon_asset_path = f"{paths.ASSETS}/icons/system/status"
 default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default
+
+
+if IS_X11_COMPATIBLE:
+    with contextlib.suppress(ImportError, ValueError):
+        gi.require_version("XApp", "1.0")
+        from gi.repository import XApp
+
+        # Older versions of XApp doesn't have StatusIcon
+        if hasattr(XApp, "StatusIcon"):
+            tray_icon_lib = "XApp"
+
+if tray_icon_lib is None:
+    try:
+        gi.require_version("AppIndicator3", "0.1")
+        from gi.repository import AppIndicator3 as AyatanaIndicator
+
+        tray_icon_lib = "AyatanaIndicator"
+
+    except (ImportError, ValueError):
+        with contextlib.suppress(ImportError, ValueError):
+            gi.require_version("AyatanaAppIndicator3", "0.1")
+            from gi.repository import AyatanaAppIndicator3 as AyatanaIndicator  # type: ignore[no-redef]
+
+            tray_icon_lib = "AyatanaIndicator"
 
 
 def _create_menu_item(label: str, handler: Callable[[Any], None]) -> Gtk.MenuItem:
@@ -50,6 +55,8 @@ def _create_menu_item(label: str, handler: Callable[[Any], None]) -> Gtk.MenuIte
 
 
 class TrayIcon(GObject.Object):
+    _indicator: Any | None = None
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if self.supports_appindicator():
@@ -80,37 +87,34 @@ class TrayIcon(GObject.Object):
                 break
             logger.warning("Could not find Ulauncher icon %s", _icon)
 
-        if XApp:
+        if tray_icon_lib == "XApp":
             if icon_dir:
                 # Xapp supports loading from path instead of icon name
                 icon_name = f"{icon_dir}/{icon_name}.svg"
 
-            self._indicator = XApp.StatusIcon()
-            self._indicator.set_icon_name(icon_name)
+            self.xapp_indicator = XApp.StatusIcon()
+            self.xapp_indicator.set_icon_name(icon_name)
             # Show menu on right click and show launcher on left click
-            self._indicator.set_secondary_menu(menu)
-            self._indicator.connect("activate", lambda *_: events.emit("app:show_launcher"))
+            self.xapp_indicator.set_secondary_menu(menu)
+            self.xapp_indicator.connect("activate", lambda *_: events.emit("app:show_launcher"))
 
-        elif AyatanaIndicator:
+        elif tray_icon_lib == "AyatanaIndicator":
+            app_status = AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
+            self.aya_indicator = AyatanaIndicator.Indicator.new("ulauncher", icon_name, app_status)
             if icon_dir:
-                self._indicator = AyatanaIndicator.Indicator.new_with_path(
-                    "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS, icon_dir
-                )
-            else:
-                self._indicator = AyatanaIndicator.Indicator.new(
-                    "ulauncher", icon_name, AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
-                )
+                self.aya_indicator.set_icon_theme_path(icon_dir)
+
             # libappindicator can't / won't distinguish between left and right clicks
             # Show menu on left or right click and show launcher on middle click
-            self._indicator.set_menu(menu)
-            self._indicator.set_secondary_activate_target(show_menu_item)
+            self.aya_indicator.set_menu(menu)
+            self.aya_indicator.set_secondary_activate_target(show_menu_item)
 
     def supports_appindicator(self) -> bool:
-        return bool(XApp or AyatanaIndicator)
+        return bool(tray_icon_lib)
 
     def switch(self, status: bool = False) -> None:
-        if XApp:
-            self._indicator.set_visible(status)
-        elif AyatanaIndicator:
-            status = getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE")
-            self._indicator.set_status(status)
+        if tray_icon_lib == "XApp":
+            self.xapp_indicator.set_visible(status)
+        elif tray_icon_lib == "AyatanaIndicator":
+            aya_status = getattr(AyatanaIndicator.IndicatorStatus, "ACTIVE" if status else "PASSIVE")
+            self.aya_indicator.set_status(aya_status)
