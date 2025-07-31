@@ -21,6 +21,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self._init_webview()
         # Kill the child WebKitNetworkProcess when the window is closed (there's no clean way to do this)
         self.connect("delete-event", self.on_delete)
+        self.connect("map-event", lambda *_: self.present())
 
     def _init_webview(self) -> None:
         settings = WebKit2.Settings(
