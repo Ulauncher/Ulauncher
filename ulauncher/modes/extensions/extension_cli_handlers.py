@@ -95,7 +95,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
     if "input" not in args or not args.input:
-        logger.error("Error: ID or URL is required for installing an extension")
+        logger.error("Error: ID or URL is required for uninstalling an extension")
         parser.print_help()
         return False
 
