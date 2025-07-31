@@ -31,6 +31,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def __init__(self, **kwargs: Any) -> None:
         logger.info("Opening Ulauncher window")
+        window_width = int(self.settings.base_width)
+
+        # Use the full width of the monitor for the window, and center the visible window
+        # needed because Gnome Wayland assumes you want to positions new windows next to
+        # the topmost window if any, instead of centering it.
+        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
+            window_width = monitor_size.width
+
         super().__init__(
             decorated=False,
             deletable=False,
@@ -43,6 +51,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             title="Ulauncher - Application Launcher",
             urgency_hint=True,
             window_position=Gtk.WindowPosition.CENTER,
+            width_request=window_width,
             **kwargs,
         )
 
@@ -294,28 +303,28 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if visual:
             self.set_visual(visual)
 
+    def get_monitor_size(self) -> Gdk.Rectangle | None:
+        if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
+            return monitor.get_geometry()
+        return None
+
     def position_window(self) -> None:
         is_composited = self.is_composited()
         margin_x = margin_y = 20.0 if is_composited else 0.0
 
-        if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
+        if monitor_size := self.get_monitor_size():
             base_height = 100  # roughly the height of Ulauncher with no results
-            monitor_size = monitor.get_geometry()
             window_width = self.settings.base_width
             max_height = monitor_size.height * 0.85 - base_height
             self.scroll_container.set_property("max-content-height", max_height)
 
-            # Use the full width of the monitor for the window, and center the visible window
-            # needed because Gnome Wayland assumes you want to positions new windows next to
-            # the topmost window if any, instead of centering it.
+            # Part II of the Gnome Wayland fix (see above in __init__)
             if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
                 margin_x = (monitor_size.width - window_width) / 2
-                self.set_property("width-request", monitor_size.width)
 
             else:
                 pos_x = int(monitor_size.width * 0.5 - window_width * 0.5 + monitor_size.x)
                 pos_y = int(monitor_size.y + monitor_size.height * 0.12)
-                self.set_property("width-request", window_width)
 
                 if self.layer_shell_enabled:
                     layer_shell.set_vertical_position(self, pos_y)
