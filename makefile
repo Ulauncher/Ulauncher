@@ -163,7 +163,7 @@ prefs: # Build the preferences web app
 
 sdist: manpage prefs # Build a source tarball
 	@set -euo pipefail
-	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools directly
+	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
 	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
 	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
