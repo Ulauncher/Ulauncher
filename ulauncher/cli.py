@@ -62,27 +62,9 @@ def get_cli_args() -> CLIArguments:
         title="arguments",
         metavar="",  # keep this empty to avoid duplication of argument names
     )
-    extension_help = _("Manage extensions: list, install, uninstall, upgrade")
-    configure_extension_args(
-        subparsers.add_parser("extensions", aliases=["e"], description=extension_help, help=extension_help)
-    )
 
-    args = parser.parse_args(namespace=CLIArguments())
-    if args.dev:
-        args.verbose = True
-
-    return args
-
-
-def configure_extension_args(parser: argparse.ArgumentParser) -> None:
-    # list extensions on `ulauncher extensions`
-    parser.set_defaults(handler=partial(list_active_extensions, parser))
-
-    subparsers = parser.add_subparsers(
-        metavar="",  # keep this empty to avoid duplication of argument names
-    )
-
-    list_parser = subparsers.add_parser("list", aliases=["ls"], help="List active extensions")
+    # Extension commands at top level
+    list_parser = subparsers.add_parser("extensions", aliases=["e"], help="List installed extensions")
     list_parser.set_defaults(handler=partial(list_active_extensions, list_parser))
 
     install_parser = subparsers.add_parser("install", aliases=["i"], help="Install an extension from URL")
@@ -100,3 +82,9 @@ def configure_extension_args(parser: argparse.ArgumentParser) -> None:
         help="Optional extension ID or URL to upgrade (upgrades all if not specified)",
     )
     upgrade_parser.set_defaults(handler=partial(upgrade_extensions, upgrade_parser))
+
+    args = parser.parse_args(namespace=CLIArguments())
+    if args.dev:
+        args.verbose = True
+
+    return args
