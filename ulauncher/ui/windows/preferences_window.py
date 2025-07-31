@@ -8,6 +8,7 @@ from gi.repository import Gtk
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
 from ulauncher.ui.preferences_server import PreferencesServer
+from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.webkit2 import WebKit2
 
 cli_args = get_cli_args()
@@ -21,7 +22,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self._init_webview()
         # Kill the child WebKitNetworkProcess when the window is closed (there's no clean way to do this)
         self.connect("delete-event", self.on_delete)
-        self.connect("map-event", lambda *_: self.present())
+        # this only seems to work in X or XWayland, and instead makes it harder to find the window in pure Wayland
+        if IS_X11_COMPATIBLE:
+            self.connect("map-event", lambda *_: self.present())
 
     def _init_webview(self) -> None:
         settings = WebKit2.Settings(
