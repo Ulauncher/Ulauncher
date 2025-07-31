@@ -6,11 +6,10 @@ from __future__ import annotations
 import contextlib
 import logging
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import gi
 from gi.repository import GObject, Gtk
-from typing_extensions import Literal
 
 from ulauncher import paths
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
