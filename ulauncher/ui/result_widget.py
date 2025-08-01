@@ -35,6 +35,14 @@ class ResultWidget(Gtk.EventBox):
         inner_margin_x = int(12.0 * text_scaling_factor)
         outer_margin_x = int(18.0 * text_scaling_factor)
         margin_y = (3 if result.compact else 5) * text_scaling_factor
+        
+        # Calculate available width for text container dynamically
+        # Base width from settings minus margins, icon, and shortcut space
+        settings = Settings.load()
+        window_width = settings.base_width
+        shortcut_width = 44  # Fixed width for shortcut label
+        total_margins = (outer_margin_x * 2) + (inner_margin_x * 2)
+        available_width = window_width - icon_size - shortcut_width - total_margins - 20  # 20px buffer
 
         super().__init__()
         self.get_style_context().add_class("item-frame")
@@ -54,7 +62,7 @@ class ResultWidget(Gtk.EventBox):
         item_container.pack_start(icon, False, True, 0)
 
         self.text_container = Gtk.Box(
-            width_request=int(350.0 * text_scaling_factor),
+            width_request=max(int(available_width * text_scaling_factor), int(300.0 * text_scaling_factor)),
             margin_start=inner_margin_x,
             margin_end=inner_margin_x,
             orientation=Gtk.Orientation.VERTICAL,
