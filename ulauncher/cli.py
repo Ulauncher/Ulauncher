@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import argparse
-from functools import lru_cache
+from functools import lru_cache, partial
 from gettext import gettext as _
 
 from ulauncher import version
+from ulauncher.modes.extensions.extension_cli_handlers import (
+    install_extension,
+    list_active_extensions,
+    uninstall_extension,
+    upgrade_extensions,
+)
 
 
 class CLIArguments(argparse.Namespace):
@@ -24,7 +30,7 @@ def get_cli_args() -> CLIArguments:
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
     parser = argparse.ArgumentParser(
         None,
-        None,
+        "%(prog)s OPTIONS or ARGUMENT",
         "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
     )
@@ -50,6 +56,32 @@ def get_cli_args() -> CLIArguments:
     parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
+
+    subparsers = parser.add_subparsers(
+        prog="ulauncher",
+        title="arguments",
+        metavar="",  # keep this empty to avoid duplication of argument names
+    )
+
+    # Extension commands at top level
+    list_parser = subparsers.add_parser("extensions", aliases=["e"], help="List installed extensions")
+    list_parser.set_defaults(handler=partial(list_active_extensions, list_parser))
+
+    install_parser = subparsers.add_parser("install", aliases=["i"], help="Install an extension from URL")
+    install_parser.add_argument("input", help="Git URL or path of the extension to install")
+    install_parser.set_defaults(handler=partial(install_extension, install_parser))
+
+    uninstall_parser = subparsers.add_parser("uninstall", aliases=["rm"], help="Uninstall an extension")
+    uninstall_parser.add_argument("input", help="Extension ID or URL to uninstall")
+    uninstall_parser.set_defaults(handler=partial(uninstall_extension, uninstall_parser))
+
+    upgrade_parser = subparsers.add_parser("upgrade", aliases=["up"], help="Upgrade extensions")
+    upgrade_parser.add_argument(
+        "input",
+        nargs=argparse.OPTIONAL,
+        help="Optional extension ID or URL to upgrade (upgrades all if not specified)",
+    )
+    upgrade_parser.set_defaults(handler=partial(upgrade_extensions, upgrade_parser))
 
     args = parser.parse_args(namespace=CLIArguments())
     if args.dev:
