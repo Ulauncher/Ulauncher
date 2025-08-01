@@ -10,7 +10,7 @@ override_dh_auto_build:
 	python3 -m pip wheel --no-build-isolation --no-deps .
 
 override_dh_auto_install:
-	python3 -m pip install --root=$(CURDIR)/debian/ulauncher --prefix=/usr --no-deps *.whl
+	python3 -m pip install --ignore-installed --root=$(CURDIR)/debian/ulauncher --prefix=/usr --no-deps *.whl
 
 override_dh_auto_clean:
 	rm -rf build/ dist/ *.egg-info/
