@@ -185,7 +185,7 @@ deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: 
 	cp -r debian dist/ulauncher_deb/
 	cd dist/ulauncher_deb || exit
 	rm -f debian/changelog
-	dch --create --no-multimaint --package ulauncher --newversion="${DEB_VERSION}" --empty --distribution ${DEB_DISTRO}
+	dch --create --no-multimaint --package ulauncher --newversion="${DEB_VERSION}" --distribution ${DEB_DISTRO} "New upstream release"
 	echo ${DPKG_ARGS} | xargs dpkg-buildpackage
 	cd -
 	rm -rf dist/ulauncher_deb
