@@ -35,6 +35,14 @@ class ResultWidget(Gtk.EventBox):
         inner_margin_x = int(12.0 * text_scaling_factor)
         outer_margin_x = int(18.0 * text_scaling_factor)
         margin_y = (3 if result.compact else 5) * text_scaling_factor
+        
+        # Calculate available width for text container dynamically
+        # Base width from settings minus margins, icon, and shortcut space
+        settings = Settings.load()
+        window_width = settings.base_width
+        shortcut_width = 44  # Fixed width for shortcut label
+        total_margins = (outer_margin_x * 2) + (inner_margin_x * 2)
+        available_width = window_width - icon_size - shortcut_width - total_margins - 20  # 20px buffer
 
         super().__init__()
         self.get_style_context().add_class("item-frame")
@@ -51,26 +59,35 @@ class ResultWidget(Gtk.EventBox):
         icon = Gtk.Image()
         icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, self.get_scale_factor()))
         icon.get_style_context().add_class("item-icon")
+        
         item_container.pack_start(icon, False, True, 0)
 
+        # Use proper text width constraints to prevent overflow on all compositors
+        # Keep closer to original behavior but add reasonable max width
+        max_text_width = max(int(available_width * 0.85), 350)  # 85% of available width, minimum 350px
         self.text_container = Gtk.Box(
-            width_request=int(350.0 * text_scaling_factor),
+            width_request=max(int(available_width * text_scaling_factor), int(300.0 * text_scaling_factor)),
             margin_start=inner_margin_x,
             margin_end=inner_margin_x,
             orientation=Gtk.Orientation.VERTICAL,
         )
+        # Set a reasonable maximum to prevent overflow while keeping original behavior
+        current_width = self.text_container.get_size_request()[0]
+        if current_width > max_text_width:
+            self.text_container.set_size_request(max_text_width, -1)
         item_container.pack_start(self.text_container, True, True, 0)
 
         self.shortcut_label = Gtk.Label(justify=Gtk.Justification.RIGHT, width_request=44)
         self.shortcut_label.get_style_context().add_class("item-shortcut")
         self.shortcut_label.get_style_context().add_class("item-text")
+        
         item_container.pack_end(self.shortcut_label, False, True, 0)
 
         self.set_index(index)
 
         item_container.get_style_context().add_class("small-result-item")
 
-        self.title_box = Gtk.Box()
+        self.title_box = Gtk.Box(hexpand=True)
         self.title_box.get_style_context().add_class("item-name")
         self.title_box.get_style_context().add_class("item-text")
 
@@ -134,7 +151,10 @@ class ResultWidget(Gtk.EventBox):
         else:
             labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
-        for label in labels:
+        for i, label in enumerate(labels):
+            # Keep original packing behavior to avoid spacing issues
+            label.set_line_wrap(False)
+            label.set_single_line_mode(True)
             self.title_box.pack_start(label, False, False, 0)
 
     def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:

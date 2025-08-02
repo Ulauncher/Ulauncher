@@ -55,6 +55,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             **kwargs,
         )
 
+        # Initialize layer shell BEFORE any window operations
+        # This must happen before the window is mapped to avoid Niri issues
+        self.layer_shell_enabled = False
+        if layer_shell.is_supported():
+            try:
+                self.layer_shell_enabled = layer_shell.enable(self)
+                if self.layer_shell_enabled:
+                    logger.info("Layer shell enabled successfully")
+                else:
+                    logger.warning("Layer shell initialization failed, falling back to standard window")
+            except Exception as e:
+                logger.warning(f"Layer shell failed with error: {e}, using standard window")
+                self.layer_shell_enabled = False
+
         events.set_self(self)
 
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
@@ -159,8 +173,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.get_opacity() == 1:  # already applied styling
             return
 
-        if layer_shell.is_supported():
-            self.layer_shell_enabled = layer_shell.enable(self)
+        # Layer shell was already initialized in constructor
 
         self.window_container.get_style_context().add_class("app")
         self.input.get_style_context().add_class("input")
@@ -300,8 +313,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def apply_theme(self) -> None:
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        theme_css = Theme.load(self.settings.theme_name).get_css().encode()
-        self._css_provider.load_from_data(theme_css)
+        theme_css = Theme.load(self.settings.theme_name).get_css()
+        
+        
+        self._css_provider.load_from_data(theme_css.encode())
         self.apply_css(self)
         visual = self.get_screen().get_rgba_visual()
         if visual:

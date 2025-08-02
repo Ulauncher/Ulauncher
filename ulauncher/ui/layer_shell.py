@@ -30,12 +30,24 @@ def enable(window: Gtk.Window) -> bool:
     if not is_supported():
         return False
 
-    GtkLayerShell.init_for_window(window)
-    GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
-    GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
-    # Ask to be moved when over some other shell component
-    GtkLayerShell.set_exclusive_zone(window, 0)
-    return True
+    # Ensure window is not mapped before initializing layer shell
+    # This fixes the issue with Niri compositor
+    if window.get_mapped():
+        import logging
+        logging.warning("Window is already mapped, cannot initialize layer shell")
+        return False
+    
+    try:
+        GtkLayerShell.init_for_window(window)
+        GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+        GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
+        # Ask to be moved when over some other shell component
+        GtkLayerShell.set_exclusive_zone(window, 0)
+        return True
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to initialize layer shell: {e}")
+        return False
 
 
 def set_vertical_position(window: Gtk.Window, pos_y: float) -> None:
