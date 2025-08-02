@@ -62,7 +62,7 @@ def try_raise_app(app_id: str) -> bool:
                     ewmh.display.flush()
                     return True
 
-        except ModuleNotFoundError:
-            pass
+        except (ModuleNotFoundError, ImportError):
+            logger.warning("python-xlib is required to use raise windows")
 
     return False
