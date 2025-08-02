@@ -1,6 +1,6 @@
 # Communication
 
-Please read our General communication guidelines [here](CODE_OF_CONDUCT.md#General_communication_guidelines).
+Please read our General [communication guidelines](CODE_OF_CONDUCT.md#General_communication_guidelines).
 
 ## Code contributions
 
@@ -12,11 +12,11 @@ Although there are no releases for it yet as of writing this, all the active dev
 
 ### Set Up Development Environment
 
-For the v6 branch you need the following to set up the local build environment:
+You need the following to set up the local build environment:
 
 * Git
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
-* python3-setuptools (if you have pip, you have it already)
+* python3-pip and python3-setuptools
 * Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-xlib is new for v6**)
 
 #### Distro specific instructions
