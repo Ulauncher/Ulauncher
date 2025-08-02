@@ -311,26 +311,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self._css_provider = Gtk.CssProvider()
         theme_css = Theme.load(self.settings.theme_name).get_css()
         
-        # Add Niri-specific CSS fixes
-        import os
-        if "NIRI" in os.environ.get("XDG_CURRENT_DESKTOP", "").upper():
-            niri_css = """
-/* Niri compositor fix for text overlapping - OBVIOUS STYLING */
-.app {
-    background-color: red;
-    border: 5px solid lime;
-}
-.item-frame {
-    min-height: 60px;
-    background-color: yellow;
-}
-.input {
-    background-color: magenta;
-    color: white;
-}
-"""
-            theme_css += niri_css
-            
+        
         self._css_provider.load_from_data(theme_css.encode())
         self.apply_css(self)
         visual = self.get_screen().get_rgba_visual()

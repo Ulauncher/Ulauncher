@@ -11,7 +11,6 @@ from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.text_highlighter import highlight_text
 from ulauncher.utils.wm import get_text_scaling_factor
-from ulauncher.utils.environment import DESKTOP_NAME
 
 ELLIPSIZE_MIN_LENGTH = 6
 ELLIPSIZE_FORCE_AT_LENGTH = 20
@@ -44,11 +43,6 @@ class ResultWidget(Gtk.EventBox):
         shortcut_width = 44  # Fixed width for shortcut label
         total_margins = (outer_margin_x * 2) + (inner_margin_x * 2)
         available_width = window_width - icon_size - shortcut_width - total_margins - 20  # 20px buffer
-        
-        # Niri compositor needs special handling for text rendering
-        is_niri = "NIRI" in DESKTOP_NAME
-        if is_niri:
-            logger.info(f"NIRI FIX: Creating result widget for '{result.name}' with available_width={available_width}, niri_width will be {min(int(available_width * 0.3), 150)}")
 
         super().__init__()
         self.get_style_context().add_class("item-frame")
@@ -68,24 +62,19 @@ class ResultWidget(Gtk.EventBox):
         
         item_container.pack_start(icon, False, True, 0)
 
-        # Niri needs fixed width containers to prevent overlapping
-        if is_niri:
-            # Force a very specific width for Niri to prevent any overflow
-            niri_width = min(int(available_width * 0.3), 150)  # Even smaller for Niri - 30% of available width, max 150px
-            self.text_container = Gtk.Box(
-                width_request=niri_width,
-                hexpand=False,
-                margin_start=inner_margin_x,
-                margin_end=inner_margin_x,
-                orientation=Gtk.Orientation.VERTICAL,
-            )
-        else:
-            self.text_container = Gtk.Box(
-                hexpand=True,
-                margin_start=inner_margin_x,
-                margin_end=inner_margin_x,
-                orientation=Gtk.Orientation.VERTICAL,
-            )
+        # Use proper text width constraints to prevent overflow on all compositors
+        # Keep closer to original behavior but add reasonable max width
+        max_text_width = max(int(available_width * 0.85), 350)  # 85% of available width, minimum 350px
+        self.text_container = Gtk.Box(
+            width_request=max(int(available_width * text_scaling_factor), int(300.0 * text_scaling_factor)),
+            margin_start=inner_margin_x,
+            margin_end=inner_margin_x,
+            orientation=Gtk.Orientation.VERTICAL,
+        )
+        # Set a reasonable maximum to prevent overflow while keeping original behavior
+        current_width = self.text_container.get_size_request()[0]
+        if current_width > max_text_width:
+            self.text_container.set_size_request(max_text_width, -1)
         item_container.pack_start(self.text_container, True, True, 0)
 
         self.shortcut_label = Gtk.Label(justify=Gtk.Justification.RIGHT, width_request=44)
@@ -148,7 +137,6 @@ class ResultWidget(Gtk.EventBox):
             viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
     def highlight_name(self) -> None:
-        is_niri = "NIRI" in DESKTOP_NAME
         highlightable_input = self.result.get_highlightable_input(self.query)
         if highlightable_input and (self.result.searchable or self.result.highlightable):
             labels = []
@@ -164,23 +152,10 @@ class ResultWidget(Gtk.EventBox):
             labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
         for i, label in enumerate(labels):
-            # Niri needs different text handling
-            if is_niri:
-                label.set_hexpand(False)
-                label.set_line_wrap(False)
-                label.set_single_line_mode(True)
-                label.set_max_width_chars(10)  # Much shorter text for Niri
-                label.set_ellipsize(Pango.EllipsizeMode.END)
-                # Aggressively truncate text if too long
-                text = label.get_text()
-                if len(text) > 12:
-                    label.set_text(text[:10] + "..")
-                self.title_box.pack_start(label, False, False, 0)
-            else:
-                # Allow labels to expand and fill available space
-                label.set_hexpand(True)
-                label.set_max_width_chars(1)  # Allow dynamic width
-                self.title_box.pack_start(label, True, True, 0)
+            # Keep original packing behavior to avoid spacing issues
+            label.set_line_wrap(False)
+            label.set_single_line_mode(True)
+            self.title_box.pack_start(label, False, False, 0)
 
     def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
         window = self.get_toplevel()
