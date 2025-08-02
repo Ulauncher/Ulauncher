@@ -57,6 +57,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         events.set_self(self)
 
+        # avoid checking layer shell support for known cases it does not apply (for performance reasons)
+        if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and layer_shell.is_supported():
+            self.layer_shell_enabled = layer_shell.enable(self)
+
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
         self.window_frame = Gtk.Box()
