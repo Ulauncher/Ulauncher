@@ -29,7 +29,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     settings = Settings.load()
     query_handler = QueryHandler()
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
         window_width = int(self.settings.base_width)
 
@@ -60,6 +60,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
         if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and layer_shell.is_supported():
             self.layer_shell_enabled = layer_shell.enable(self)
+            if self.layer_shell_enabled:
+                logger.info("Layer shell support is enabled")
+            else:
+                logger.warning(
+                    "Layer shell is not supported. If you have issues with window positioning, "
+                    "ensure that your compositor supports it and that you have installed the gtk-layer-shell library"
+                )
 
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
@@ -158,9 +165,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         if self.get_opacity() == 1:  # already applied styling
             return
-
-        if layer_shell.is_supported():
-            self.layer_shell_enabled = layer_shell.enable(self)
 
         self.window_container.get_style_context().add_class("app")
         self.input.get_style_context().add_class("input")
