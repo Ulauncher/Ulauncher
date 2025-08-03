@@ -125,7 +125,7 @@ class ResultWidget(Gtk.EventBox):
             labels = []
 
             for label_text, is_highlight in highlight_text(highlightable_input, self.result.name):
-                ellipsize_min = (not is_highlight and ELLIPSIZE_MIN_LENGTH) or ELLIPSIZE_FORCE_AT_LENGTH
+                ellipsize_min = ELLIPSIZE_MIN_LENGTH if not is_highlight else ELLIPSIZE_FORCE_AT_LENGTH
                 ellipsize = Pango.EllipsizeMode.MIDDLE if len(label_text) > ellipsize_min else Pango.EllipsizeMode.NONE
                 label = Gtk.Label(label=unescape(label_text), ellipsize=ellipsize)
                 if is_highlight:

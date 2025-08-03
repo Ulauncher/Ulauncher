@@ -31,12 +31,12 @@ def detach_child() -> None:
     # called, so this redirection prevents the child process from exiting when
     # ulauncher is interrupted. Unlike "nohup", stdout and stderr are not sent
     # to a file but sent to /dev/null instead.
-    null_fp = open("/dev/null", "w+b")  # noqa: SIM115
-    null_fd = null_fp.fileno()
-    for fp in [sys.stdin, sys.stdout, sys.stderr]:
-        orig_fd = fp.fileno()
-        fp.close()
-        os.dup2(null_fd, orig_fd)
+    with open("/dev/null", "w+b") as null_fp:
+        null_fd = null_fp.fileno()
+        for fp in [sys.stdin, sys.stdout, sys.stderr]:
+            orig_fd = fp.fileno()
+            fp.close()
+            os.dup2(null_fd, orig_fd)
 
 
 def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:

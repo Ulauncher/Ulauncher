@@ -13,7 +13,7 @@ def copy(text: str) -> ActionMetadata:
         msg = "Copy argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    if type(text) is not str:
+    if not isinstance(text, str):
         msg = f'Copy argument "{text}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
@@ -25,7 +25,7 @@ def open(item: str) -> ActionMetadata:  # noqa: A001
         msg = "Open argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    if type(item) is not str:
+    if not isinstance(item, str):
         msg = f'Open argument "{item}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
@@ -37,7 +37,7 @@ def run_script(script: str, args: str = "") -> ActionMetadata:
         msg = "Script argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    if type(script) is not str:
+    if not isinstance(script, str):
         msg = f'Script argument "{script}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
