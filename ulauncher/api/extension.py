@@ -132,7 +132,7 @@ class Extension:
     def on_item_enter(self, data: Any) -> None:
         pass
 
-    def on_preferences_update(self, id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
+    def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
 
     def on_unload(self) -> None:

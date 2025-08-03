@@ -52,7 +52,6 @@ target-version = "py38"
 
 [tool.ruff.lint]
 pylint = { max-args = 10}
-flake8-builtins = { builtins-ignorelist = ["id"] }
 flake8-pytest-style = {fixture-parentheses = false}
 ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope

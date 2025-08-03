@@ -265,8 +265,8 @@ class ExtensionController:
 
             ext_deps = ExtensionDependencies(self.id, self.path)
             cmd = [sys.executable, f"{self.path}/main.py"]
-            prefs = {id: pref.value for id, pref in self.user_preferences.items()}
-            triggers = {id: t.keyword for id, t in self.manifest.triggers.items() if t.keyword}
+            prefs = {p_id: pref.value for p_id, pref in self.user_preferences.items()}
+            triggers = {t_id: t.keyword for t_id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}
             env = {

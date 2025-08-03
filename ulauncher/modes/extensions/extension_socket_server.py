@@ -111,10 +111,10 @@ class ExtensionSocketServer(metaclass=Singleton):
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
         if controller := ExtensionSocketServer().controllers.get(ext_id):
-            for id, new_value in data.get("preferences", {}).items():
-                pref = controller.data_controller.user_preferences.get(id)
+            for p_id, new_value in data.get("preferences", {}).items():
+                pref = controller.data_controller.user_preferences.get(p_id)
                 if pref and new_value != pref.value:
-                    event_data = {"type": "event:update_preferences", "args": [id, new_value, pref.value]}
+                    event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
                     controller.trigger_event(event_data)
 
     @events.on

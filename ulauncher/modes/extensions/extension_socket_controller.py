@@ -41,7 +41,7 @@ class ExtensionSocketController:
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
-        prefs = {id: pref.value for id, pref in self.manifest.get_user_preferences(ext_id).items()}
+        prefs = {p_id: pref.value for p_id, pref in self.manifest.get_user_preferences(ext_id).items()}
         self._send_event({"type": "event:legacy_preferences_load", "args": [prefs]})
         logger.info('Extension "%s" connected', ext_id)
         self.framer.connect("message_parsed", self.handle_response)
@@ -57,7 +57,7 @@ class ExtensionSocketController:
         :returns: action object
         """
         triggers = self.data_controller.user_triggers
-        trigger_id = next((id for id, t in triggers.items() if t.user_keyword == query.keyword), None)
+        trigger_id = next((t_id for t_id, t in triggers.items() if t.user_keyword == query.keyword), None)
 
         return self.trigger_event(
             {

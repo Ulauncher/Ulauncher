@@ -73,20 +73,20 @@ class ExtensionManifest(JsonConf):
                 return
         # Convert triggers dicts to ExtensionManifestTrigger instances
         elif key == "triggers":
-            value = {id: ExtensionManifestTrigger(trigger) for id, trigger in value.items()}
+            value = {t_id: ExtensionManifestTrigger(trigger) for t_id, trigger in value.items()}
         # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
         elif key == "preferences":
             if isinstance(value, dict):
-                value = {id: ExtensionManifestPreference(pref) for id, pref in value.items()}
+                value = {p_id: ExtensionManifestPreference(pref) for p_id, pref in value.items()}
             elif isinstance(value, list):  # APIv2 backwards compatibility
                 prefs = {}
                 for p in value:
-                    id = p.get("id")
+                    p_id = p.get("id")
                     pref = ExtensionManifestPreference(p, id=None)
                     if pref.type != "keyword":
-                        prefs[id] = pref
+                        prefs[p_id] = pref
                     else:
-                        self.triggers[id] = ExtensionManifestTrigger(
+                        self.triggers[p_id] = ExtensionManifestTrigger(
                             name=pref.name,
                             description=pref.description,
                             keyword=pref.default_value,
@@ -105,46 +105,46 @@ class ExtensionManifest(JsonConf):
             raise ExtensionManifestError(err_msg)
 
         try:
-            for id, t in self.triggers.items():
-                assert t.name, f'"{id}" missing non-optional field "name"'
+            for t_id, t in self.triggers.items():
+                assert t.name, f'"{t_id}" missing non-optional field "name"'
         except AssertionError as e:
             msg = f"Invalid triggers in Extension manifest: {e}"
             raise ExtensionManifestError(msg) from None
 
         try:
-            for id, p in self.preferences.items():
+            for p_id, p in self.preferences.items():
                 valid_types = ["input", "checkbox", "number", "select", "text"]
                 default = p.default_value
-                assert p.name, f'"{id}" missing non-optional field "name"'
-                assert p.type, f'"{id}" missing non-optional field "type"'
+                assert p.name, f'"{p_id}" missing non-optional field "name"'
+                assert p.type, f'"{p_id}" missing non-optional field "type"'
                 assert p.type in valid_types, (
-                    f'"{id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
+                    f'"{p_id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
                 )
-                assert p.min is None or p.type == "number", f'"min" specified for "{id}", which is not a number type'
-                assert p.max is None or p.type == "number", f'"max" specified for "{id}", which is not a number type'
+                assert p.min is None or p.type == "number", f'"min" specified for "{p_id}", which is not a number type'
+                assert p.max is None or p.type == "number", f'"max" specified for "{p_id}", which is not a number type'
                 if p.type == "checkbox" and default:
-                    assert isinstance(default, bool), f'"{id}" "default_value" must be a boolean'
+                    assert isinstance(default, bool), f'"{p_id}" "default_value" must be a boolean'
                 if p.type == "number":
-                    assert isinstance(default, int), f'"{id}" default_value must be a non-decimal number'
-                    assert not isinstance(default, bool), f'"{id}" default_value must be a non-decimal number'
+                    assert isinstance(default, int), f'"{p_id}" default_value must be a non-decimal number'
+                    assert not isinstance(default, bool), f'"{p_id}" default_value must be a non-decimal number'
                     assert not p.min or isinstance(p.min, int), (
-                        f'"{id}" "min" value must be non-decimal number if specified'
+                        f'"{p_id}" "min" value must be non-decimal number if specified'
                     )
                     assert not p.max or isinstance(p.min, int), (
-                        f'"{id}" "max" value must be non-decimal number if specified'
+                        f'"{p_id}" "max" value must be non-decimal number if specified'
                     )
                     assert not p.min or not p.max or p.min < p.max, (
-                        f'"{id}" "min" value must be lower than "max" if specified'
+                        f'"{p_id}" "min" value must be lower than "max" if specified'
                     )
                     assert not default or not p.max or default <= p.max, (
-                        f'"{id}" "default_value" must not be higher than "max"'
+                        f'"{p_id}" "default_value" must not be higher than "max"'
                     )
                     assert not default or not p.min or default >= p.min, (
-                        f'"{id}" "min" value must not be higher than "default_value"'
+                        f'"{p_id}" "min" value must not be higher than "default_value"'
                     )
                 if p.type == "select":
-                    assert isinstance(p.options, list), f'"{id}" options field must be a list'
-                    assert p.options, f'"{id}" option cannot be empty for select type'
+                    assert isinstance(p.options, list), f'"{p_id}" options field must be a list'
+                    assert p.options, f'"{p_id}" option cannot be empty for select type'
         except AssertionError as e:
             msg = f"Invalid preferences in Extension manifest: {e}"
             raise ExtensionManifestError(msg) from None
@@ -173,22 +173,22 @@ class ExtensionManifest(JsonConf):
     def get_user_preferences(self, ext_id: str) -> dict[str, UserPreference]:
         user_prefs_json = self._get_raw_preferences(ext_id)
         user_prefs = {}
-        for id, pref in self.preferences.items():
+        for p_id, pref in self.preferences.items():
             # copy to avoid mutating
             user_pref = UserPreference(**pref)
-            user_pref.value = user_prefs_json.get("preferences", {}).get(id, pref.default_value)
-            user_prefs[id] = user_pref
+            user_pref.value = user_prefs_json.get("preferences", {}).get(p_id, pref.default_value)
+            user_prefs[p_id] = user_pref
         return user_prefs
 
     def get_user_triggers(self, ext_id: str) -> dict[str, UserTrigger]:
         user_prefs_json = self._get_raw_preferences(ext_id)
         user_triggers = {}
-        for id, trigger in self.triggers.items():
+        for t_id, trigger in self.triggers.items():
             combined_trigger = UserTrigger(trigger)
             if trigger.keyword:
-                user_keyword = user_prefs_json.get("triggers", {}).get(id, {}).get("keyword", trigger.keyword)
+                user_keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword)
                 combined_trigger.user_keyword = user_keyword
-            user_triggers[id] = combined_trigger
+            user_triggers[t_id] = combined_trigger
 
         return user_triggers
 
