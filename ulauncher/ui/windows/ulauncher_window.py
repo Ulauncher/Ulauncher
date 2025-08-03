@@ -362,18 +362,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.results_nav.select(index)
 
     def toggle_grab_pointer_device(self, grab: bool) -> None:
-        window = self.get_window()
-        seat = window and window.get_display().get_default_seat()
-        if not window or not seat:
-            logger.warning("Could not get the pointer device.")
-            return
+        if window := self.get_window():
+            seat = window.get_display().get_default_seat()
+            if not window or not seat:
+                logger.warning("Could not get the pointer device.")
+                return
 
-        if not grab:
-            seat.ungrab()
-            return
+            if not grab:
+                seat.ungrab()
+                return
 
-        grab_status = seat.grab(window, Gdk.SeatCapabilities.ALL_POINTING, True)
-        logger.debug("Focus in event, grabbing pointer: %s", grab_status)
+            grab_status = seat.grab(window, Gdk.SeatCapabilities.ALL_POINTING, True)
+            logger.debug("Focus in event, grabbing pointer: %s", grab_status)
 
     @events.on
     def set_input(self, query_str: str) -> None:
