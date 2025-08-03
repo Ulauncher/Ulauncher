@@ -58,7 +58,7 @@ class ExtensionManifest(JsonConf):
     triggers: dict[str, ExtensionManifestTrigger] = {}
     preferences: dict[str, ExtensionManifestPreference] = {}
 
-    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]  # noqa: PLR0912
         # Rename "required_api_version" back to "api_version"
         if key == "required_api_version":
             key = "api_version"
@@ -68,11 +68,11 @@ class ExtensionManifest(JsonConf):
         # Flatten manifest v2 API "options"
         elif key == "options":
             key = "input_debounce"
-            value = value and float(value.get("query_debounce", -1))
+            value = isinstance(value, dict) and float(value.get("query_debounce", -1))
             if value <= 0:
                 return
         # Convert triggers dicts to ExtensionManifestTrigger instances
-        elif key == "triggers":
+        elif key == "triggers" and isinstance(value, dict):
             value = {t_id: ExtensionManifestTrigger(trigger) for t_id, trigger in value.items()}
         # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
         elif key == "preferences":
@@ -81,17 +81,19 @@ class ExtensionManifest(JsonConf):
             elif isinstance(value, list):  # APIv2 backwards compatibility
                 prefs = {}
                 for p in value:
-                    p_id = p.get("id")
-                    pref = ExtensionManifestPreference(p, id=None)
-                    if pref.type != "keyword":
-                        prefs[p_id] = pref
-                    else:
-                        self.triggers[p_id] = ExtensionManifestTrigger(
-                            name=pref.name,
-                            description=pref.description,
-                            keyword=pref.default_value,
-                            icon=pref.get("icon", ""),
-                        )
+                    if isinstance(p, dict):
+                        p_id = p.get("id")
+                        if isinstance(p_id, str):
+                            pref = ExtensionManifestPreference(p, id=None)
+                            if pref.type != "keyword":
+                                prefs[p_id] = pref
+                            else:
+                                self.triggers[p_id] = ExtensionManifestTrigger(
+                                    name=pref.name,
+                                    description=pref.description,
+                                    keyword=pref.default_value,
+                                    icon=pref.get("icon", ""),
+                                )
                 value = prefs
         super().__setitem__(key, value)
 
