@@ -18,6 +18,11 @@ logger = logging.getLogger()
 
 
 class Client:
+    socket_path: str
+    extension: ulauncher.api.Extension
+    client: Gio.SocketClient
+    conn: Gio.SocketConnection | None = None
+    framer: JSONFramer | None = None
     """
     Communication layers:
     → Extension subclass
@@ -33,15 +38,13 @@ class Client:
         self.socket_path = get_socket_path()
         self.extension = extension
         self.client = Gio.SocketClient()
-        self.conn = None
-        self.framer = None
 
     def connect(self) -> None:
         """
         Connects to the extension server and blocks thread
         """
         logger.debug("Connecting to socket_path %s", self.socket_path)
-        self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)  # type: ignore[assignment]
+        self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
         if not self.conn:
             msg = f"Failed to connect to socket_path {self.socket_path}"
             raise RuntimeError(msg)

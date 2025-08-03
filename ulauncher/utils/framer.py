@@ -20,6 +20,12 @@ class InvalidStateError(RuntimeError):
 
 
 class JSONFramer(GObject.GObject):
+    _canceller: Gio.Cancellable
+    _conn: Gio.SocketConnection | None = None
+    _inprogress: bytes = b""
+    _inbound: bytes = b""
+    _outbound: deque[bytes]
+    _partial_reads: int = 0
     """
     The JSONFramer frames objects serialized using JSON into and out of a Gio based
     SocketConnection instances.
@@ -41,12 +47,8 @@ class JSONFramer(GObject.GObject):
 
     def __init__(self) -> None:
         GObject.GObject.__init__(self)
-        self._conn: Gio.SocketConnection | None = None
         self._canceller = Gio.Cancellable.new()
-        self._inbound: bytes | None = None
         self._outbound = deque()
-        self._inprogress = None
-        self._partial_reads = 0
 
     def set_connection(self, conn: Gio.SocketConnection) -> None:
         if self._conn:
@@ -105,7 +107,7 @@ class JSONFramer(GObject.GObject):
         # full message yet, as well as reads that have multiple messages. For local unix sockets,
         # this will generally be one message per read, since there are not all of the over-network
         # real world issues that can delay messages over the Internet.
-        self._inbound = self._inbound + data if self._inbound else data
+        self._inbound += data
 
         ptr = 0
         while ptr < len(self._inbound):
@@ -122,7 +124,7 @@ class JSONFramer(GObject.GObject):
             ptr += msgsize
 
         if ptr == len(self._inbound):
-            self._inbound = None
+            self._inbound = b""
         elif ptr:
             self._inbound = self._inbound[ptr:]
 
@@ -151,5 +153,5 @@ class JSONFramer(GObject.GObject):
             log.error("Bytes written %d doesn't match expected bytes %d", written, len(self._inprogress))
         else:
             log.debug("Sent %d bytes", written)
-        self._inprogress = None
+        self._inprogress = b""
         self._write_next()
