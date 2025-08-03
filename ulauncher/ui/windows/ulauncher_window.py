@@ -32,12 +32,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
         window_width = int(self.settings.base_width)
+        window_height = 0
 
-        # Use the full width of the monitor for the window, and center the visible window
-        # needed because Gnome Wayland assumes you want to positions new windows next to
-        # the topmost window if any, instead of centering it.
         if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
+            # Use the full width of the monitor for the window, and center the visible window
+            # needed because Gnome Wayland assumes you want to positions new windows next to
+            # the topmost window if any, instead of centering it.
             window_width = monitor_size.width
+
+            # Request 66% of the screen height, otherwise Wayland positions the window
+            # in the middle of the screen making little space for the results
+            take_screen_height_percent = 0.66
+            window_height = int(monitor_size.height * take_screen_height_percent / self.get_monitor_scale_factor())
 
         super().__init__(
             decorated=False,
@@ -52,6 +58,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             urgency_hint=True,
             window_position=Gtk.WindowPosition.CENTER,
             width_request=window_width,
+            height_request=window_height,
             **kwargs,
         )
 
@@ -316,6 +323,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return monitor.get_geometry()
         return None
 
+    def get_monitor_scale_factor(self) -> int:
+        if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
+            return monitor.get_scale_factor()
+        return 1
+
     def position_window(self) -> None:
         margin_x = margin_y = 20.0
 
@@ -345,6 +357,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 margin_start=margin_x,
                 margin_end=margin_x,
             )
+            # Reset the height request that was set in __init__ to let the window
+            # adjust height based on the content
+            self.set_size_request(int(self.settings.base_width + margin_x * 2), 0)
 
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
