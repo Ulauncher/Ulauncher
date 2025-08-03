@@ -407,8 +407,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.result_box.set_margin_top(3)
             self.apply_css(self.result_box)
             self.scroll_container.show_all()
+            logger.debug("Render %s results", len(result_widgets))
         else:
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
-        logger.debug("render %s results", len(results))
+            logger.debug("Hiding results container, no results found")
