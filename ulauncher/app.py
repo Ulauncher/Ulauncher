@@ -139,8 +139,6 @@ class UlauncherApp(Gtk.Application):
         if preferences := self._preferences and self._preferences():
             preferences.present(page)
         else:
-            from ulauncher.ui.windows.preferences_window import PreferencesWindow
-
             preferences = PreferencesWindow(application=self)
             self._preferences = weakref.ref(preferences)
             preferences.show(page)
