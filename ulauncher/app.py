@@ -9,6 +9,7 @@ from gi.repository import Gio, Gtk
 import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
+from ulauncher.ui.windows.preferences_window import PreferencesWindow
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -26,7 +27,7 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     query = ""
     _window_ref: weakref.ReferenceType[UlauncherWindow] | None = None
-    _preferences: weakref.ReferenceType[ulauncher.ui.windows.preferences_window.PreferencesWindow] | None = None
+    _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:

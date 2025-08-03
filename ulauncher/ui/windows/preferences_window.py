@@ -6,12 +6,7 @@ from typing import Any
 from gi.repository import Gtk
 
 from ulauncher import paths
-from ulauncher.cli import get_cli_args
-from ulauncher.ui.preferences_server import PreferencesServer
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
-from ulauncher.utils.webkit2 import WebKit2
-
-cli_args = get_cli_args()
 
 
 class PreferencesWindow(Gtk.ApplicationWindow):
@@ -27,6 +22,11 @@ class PreferencesWindow(Gtk.ApplicationWindow):
             self.connect("map-event", lambda *_: self.present())
 
     def _init_webview(self) -> None:
+        from ulauncher.cli import get_cli_args
+        from ulauncher.ui.preferences_server import PreferencesServer
+        from ulauncher.utils.webkit2 import WebKit2
+
+        cli_args = get_cli_args()
         settings = WebKit2.Settings(
             enable_developer_extras=cli_args.dev,
             enable_hyperlink_auditing=False,
