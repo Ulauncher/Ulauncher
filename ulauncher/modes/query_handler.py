@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Sequence
+from typing import Iterable
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -62,11 +62,11 @@ class QueryHandler:
         sorted_ = sorted(self.triggers, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
         return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
-    def get_most_frequent_apps(self, limit: int) -> Sequence[Result]:
+    def get_initial_results(self, limit: int) -> Iterable[Result]:
         """Called if the query is empty (on startup or when you delete the query)"""
         from ulauncher.modes.mode_handler import get_app_mode
 
-        return get_app_mode().get_most_frequent(limit)
+        return get_app_mode().get_initial_results(limit)
 
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import get_modes, handle_action
@@ -98,7 +98,7 @@ class QueryHandler:
 
     def activate_result(self, result: Result, alt: bool = False) -> None:
         mode = self.trigger_mode_map.get(id(result), self.mode)
-        # TODO: This is a quickfix. The problem is window calls "get_most_frequent" from AppResult directly,
+        # TODO: This is a quickfix. The problem is window calls "get_initial_results" from AppResult directly,
         # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
         # for us to be aware of the mode that is being used.
         if not mode and hasattr(result, "app_id"):

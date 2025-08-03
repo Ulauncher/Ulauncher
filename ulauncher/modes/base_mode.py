@@ -27,6 +27,13 @@ class BaseMode:
     def get_triggers(self) -> Iterable[Result]:
         return []
 
+    def get_initial_results(self, _limit: int) -> Iterable[Result]:
+        """
+        Called if the query is empty (on startup or when you delete the query)
+        We only actually use this for AppMode, so it should not be implemented for other modes.
+        """
+        return []
+
     def get_fallback_results(self) -> Iterable[Result]:
         """
         Called if nothing matches the user input

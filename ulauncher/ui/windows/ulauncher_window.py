@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Sequence
+from typing import Any, Iterable
 
 from gi.repository import Gdk, GLib, Gtk
 
@@ -382,19 +382,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.input.set_position(-1)
 
     @events.on
-    def show_results(self, results: Sequence[Result]) -> None:
+    def show_results(self, results: Iterable[Result]) -> None:
         self.results_nav = None
         self.result_box.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.input.get_text() and self.settings.max_recent_apps:
-            results = self.query_handler.get_most_frequent_apps(self.settings.max_recent_apps)
+            results = self.query_handler.get_initial_results(self.settings.max_recent_apps)
 
         if results:
             from ulauncher.ui.result_widget import ResultWidget
 
             result_widgets: list[ResultWidget] = []
-            for index, result in enumerate(results[:limit]):
+            for index, result in enumerate(results):
+                if index >= limit:
+                    break
                 result_widget = ResultWidget(result, index, self.query_handler.query)
                 result_widgets.append(result_widget)
                 self.result_box.add(result_widget)
