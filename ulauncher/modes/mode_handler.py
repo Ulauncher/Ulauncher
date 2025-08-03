@@ -46,22 +46,22 @@ def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR
 
     if isinstance(action_metadata, dict):
         event_type = action_metadata.get("type", "")
-        data = action_metadata.get("data")
-        if event_type == "action:open" and data:
-            open_detached(data)
-            return False
-        if event_type == "action:clipboard_store" and data:
-            clipboard_store(data)
-            return False
-        if event_type == "action:legacy_run_script" and isinstance(data, list):
-            run_script(*data)
-            return False
-        if event_type == "action:legacy_run_many" and isinstance(data, list):
-            keep_open = False
-            for action_ in data:
-                if _handle_action(action_):
-                    keep_open = True
-            return keep_open
+        if data := action_metadata.get("data"):
+            if event_type == "action:open":
+                open_detached(data)
+                return False
+            if event_type == "action:clipboard_store":
+                clipboard_store(data)
+                return False
+            if event_type == "action:legacy_run_script" and isinstance(data, list):
+                run_script(*data)
+                return False
+            if event_type == "action:legacy_run_many" and isinstance(data, list):
+                keep_open = False
+                for action_ in data:
+                    if _handle_action(action_):
+                        keep_open = True
+                return keep_open
         if event_type == "action:activate_custom":
             _events.emit(
                 "extension:trigger_event", {"type": "event:activate_custom", "ref": action_metadata.get("ref")}
