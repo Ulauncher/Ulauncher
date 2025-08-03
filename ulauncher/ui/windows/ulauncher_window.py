@@ -12,7 +12,6 @@ from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.gtk_utils import ui_snapshot
 from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.theme import Theme
@@ -414,7 +413,3 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # minimum amount of space even if it is empty.
             self.scroll_container.hide()
             logger.debug("Hiding results container, no results found")
-
-        if logger.level <= logging.DEBUG:
-            # Print UI snapshot after rendering results
-            logger.debug(ui_snapshot(self))
