@@ -1,34 +1,17 @@
 from __future__ import annotations
 
 import logging
-from functools import lru_cache
 
 from gi.repository import Gdk, Gtk
 
 from ulauncher.internals.result import ActionMetadata, Result
-from ulauncher.modes.apps.app_mode import AppMode
-from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.calc.calc_mode import CalcMode
-from ulauncher.modes.extensions.extension_mode import ExtensionMode
-from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
 from ulauncher.modes.shortcuts.run_script import run_script
-from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.timer import timer
 
 _logger = logging.getLogger()
 _events = EventBus("mode")
-
-
-@lru_cache(maxsize=None)
-def get_app_mode() -> AppMode:
-    return AppMode()
-
-
-@lru_cache(maxsize=None)
-def get_modes() -> list[BaseMode]:
-    return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), get_app_mode()]
 
 
 def clipboard_store(data: str) -> None:

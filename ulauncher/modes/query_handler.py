@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from typing import Iterable
 
 from ulauncher.internals.query import Query
@@ -10,6 +11,23 @@ from ulauncher.utils.eventbus import EventBus
 
 _events = EventBus()
 logger = logging.getLogger()
+
+
+@lru_cache(maxsize=None)
+def get_app_mode() -> BaseMode:
+    from ulauncher.modes.apps.app_mode import AppMode
+
+    return AppMode()
+
+
+@lru_cache(maxsize=None)
+def get_modes() -> list[BaseMode]:
+    from ulauncher.modes.calc.calc_mode import CalcMode
+    from ulauncher.modes.extensions.extension_mode import ExtensionMode
+    from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
+    from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
+
+    return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), get_app_mode()]
 
 
 class QueryHandler:
@@ -22,8 +40,6 @@ class QueryHandler:
     def load_triggers(self, force: bool = False) -> None:
         if self.triggers_loaded and not force:
             return
-
-        from ulauncher.modes.mode_handler import get_modes
 
         self.triggers.clear()
         self.trigger_mode_map.clear()
@@ -42,8 +58,6 @@ class QueryHandler:
 
         self.mode = None
         self.query = Query(None, query_str)
-
-        from ulauncher.modes.mode_handler import get_modes
 
         for mode in get_modes():
             if query := mode.parse_query_str(query_str):
@@ -64,12 +78,10 @@ class QueryHandler:
 
     def get_initial_results(self, limit: int) -> Iterable[Result]:
         """Called if the query is empty (on startup or when you delete the query)"""
-        from ulauncher.modes.mode_handler import get_app_mode
-
         return get_app_mode().get_initial_results(limit)
 
     def handle_change(self) -> None:
-        from ulauncher.modes.mode_handler import get_modes, handle_action
+        from ulauncher.modes.mode_handler import handle_action
 
         if self.mode:
             try:
@@ -102,8 +114,6 @@ class QueryHandler:
         # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
         # for us to be aware of the mode that is being used.
         if not mode and hasattr(result, "app_id"):
-            from ulauncher.modes.mode_handler import get_app_mode
-
             mode = get_app_mode()
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
