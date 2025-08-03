@@ -32,6 +32,7 @@ class ExtensionMode(BaseMode):
         return None
 
     def handle_query(self, query: Query) -> Any:
+        controller = None
         if query.keyword:
             self.ext_socket_server.on_query_change()
             controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)

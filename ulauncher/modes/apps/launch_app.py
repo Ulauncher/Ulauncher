@@ -20,6 +20,7 @@ def launch_app(desktop_entry_name: str) -> bool:
     settings = Settings.load()
     app = Gio.DesktopAppInfo.new(desktop_entry_name)
     app_dir: str | None = None
+    cmd: list[str] = []
     if not app:
         logger.error("Could not load app %s", desktop_entry_name)
         return False
