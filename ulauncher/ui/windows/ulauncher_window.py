@@ -73,7 +73,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
-        self.window_frame = Gtk.Box()
+        self.window_frame = Gtk.Box(valign=Gtk.Align.START)
         self.add(self.window_frame)
 
         self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
@@ -118,9 +118,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
-        self.window_container.pack_end(self.scroll_container, True, True, 0)
 
-        self.window_container.pack_start(event_box, True, True, 0)
+        self.window_container.pack_start(event_box, False, True, 0)
+        self.window_container.pack_start(self.scroll_container, False, True, 0)
 
         self.window_frame.show_all()
 
@@ -349,9 +349,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 margin_start=margin_x,
                 margin_end=margin_x,
             )
-            # Reset the height request that was set in __init__ to let the window
-            # adjust height based on the content
-            self.set_property("height-request", -1)
 
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
