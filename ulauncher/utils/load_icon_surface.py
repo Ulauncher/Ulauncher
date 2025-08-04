@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 from functools import lru_cache
-
-from cairo import ImageSurface
-from gi.repository import Gdk, GdkPixbuf
+from typing import TYPE_CHECKING
 
 from ulauncher import paths
+
+if TYPE_CHECKING:
+    from cairo import ImageSurface
+
 
 logger = logging.getLogger()
 
@@ -17,6 +19,8 @@ DEFAULT_EXE_ICON = f"{paths.ASSETS}/icons/executable.png"
 def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSurface:
     real_size = size * scaling_factor
     try:
+        from gi.repository import Gdk, GdkPixbuf
+
         if not icon.startswith("/"):
             from ulauncher.utils.get_icon_path import get_icon_path
 
