@@ -173,6 +173,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.get_opacity() == 1:  # already applied styling
             return
 
+        self.get_style_context().add_class("background")
         self.window_container.get_style_context().add_class("app")
         self.input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
