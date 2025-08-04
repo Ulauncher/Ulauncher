@@ -3,19 +3,11 @@ from __future__ import annotations
 import json
 import logging
 import os
-import pickle
 import sys
-from configparser import ConfigParser
-from functools import partial
 from pathlib import Path
-from shutil import rmtree
-from types import ModuleType
 from typing import Any, Callable
 
 from ulauncher import first_v6_run, paths
-from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionState
-from ulauncher.utils.json_utils import json_load
-from ulauncher.utils.systemd_controller import SystemdController
 
 _logger = logging.getLogger()
 CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache"), "ulauncher_cache")  # See issue#40
@@ -23,6 +15,8 @@ CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache
 
 def _load_legacy(path: Path) -> Any | None:
     try:
+        import pickle
+
         if path.suffix == ".db":
             return pickle.loads(path.read_bytes())
         if path.suffix == ".json":
@@ -62,6 +56,8 @@ def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
 
 
 def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    from ulauncher.modes.extensions.extension_controller import ExtensionController
+
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
@@ -80,6 +76,14 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
 
 def v5_to_v6() -> None:
     # Migrate extension state to individual files
+    from configparser import ConfigParser
+    from functools import partial
+    from types import ModuleType
+
+    from ulauncher.modes.extensions.extension_controller import ExtensionState
+    from ulauncher.utils.json_utils import json_load
+    from ulauncher.utils.systemd_controller import SystemdController
+
     extension_db: dict[str, Any] = json_load(f"{paths.CONFIG}/extensions.json")
     for legacy_state in extension_db.values():
         ext_id = legacy_state["id"]
@@ -140,6 +144,7 @@ def v5_to_v6() -> None:
 
 
 def v5_to_v6_destructive() -> None:
+    from shutil import rmtree
     # Currently optional changes that breaks your conf if you want to revert back to v5 for some reason
     # We probably want to run these later as part of the v7 migration instead.
 
