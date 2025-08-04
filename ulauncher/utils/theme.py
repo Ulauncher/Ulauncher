@@ -43,10 +43,6 @@ CSS_RESET = """
   transition-timing-function: initial;
   transition-delay: initial;
 }
-.background {
-  background-color: blueviolet;
-  border: 1px solid red;
-}
 """
 
 
