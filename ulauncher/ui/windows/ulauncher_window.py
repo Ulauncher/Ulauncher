@@ -317,8 +317,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return None
 
     def position_window(self) -> None:
-        is_composited = self.is_composited()
-        margin_x = margin_y = 20.0 if is_composited else 0.0
+        margin_x = margin_y = 20.0
 
         if monitor_size := self.get_monitor_size():
             base_height = 100  # roughly the height of Ulauncher with no results
@@ -339,7 +338,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 else:
                     self.move(pos_x, pos_y)
 
-        if is_composited:
+        if self.is_composited():
             self.window_frame.set_properties(
                 margin_top=margin_y,
                 margin_bottom=margin_y,
