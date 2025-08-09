@@ -125,7 +125,9 @@ class ExtensionController:
     def path(self) -> str:
         if not self._path:
             self._path = extension_finder.locate(self.id)
-        assert self._path, f"No extension could be found matching {self.id}"
+        if not self._path:
+            msg = f"No extension could be found matching {self.id}"
+            raise ExtensionNotFoundError(msg)
         return self._path
 
     @property
@@ -159,6 +161,8 @@ class ExtensionController:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
     async def install(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
+        logger.info("Installing extension: %s", self.state.url or self._path)
+
         commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
 
         # install python dependencies from requirements.txt
@@ -176,9 +180,16 @@ class ExtensionController:
             error_type="",
             error_message="",
         )
+        logger.info("Extension %s installed successfully", self.id)
 
     async def remove(self) -> None:
         if not self.is_manageable:
+            logger.warning(
+                "Extension %s is not manageable. Cannot remove it automatically. "
+                "Please remove it manually from the extensions directory: %s",
+                self.id,
+                self.path,
+            )
             return
 
         await self.stop()
@@ -191,14 +202,21 @@ class ExtensionController:
             self.state.save(is_enabled=False)
         elif self._state_path.is_file():
             self._state_path.unlink()
+        logger.info("Extension %s uninstalled successfully", self.id)
 
     async def update(self) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
+        if not self.path:
+            msg = f"Extension {self.id} not found at {self._path}"
+            raise ExtensionNotFoundError(msg)
+
+        logger.debug("Checking for updates to %s", self.id)
         has_update, commit_hash = await self.check_update()
         was_running = self.is_running
         if not has_update:
+            logger.info('Extension "%s" is already on the latest version', self.id)
             return False
 
         logger.info(
@@ -224,6 +242,7 @@ class ExtensionController:
                 raise
 
         await self.toggle_enabled(was_running)
+        logger.info("Successfully updated extension: %s", self.id)
 
         return True
 
@@ -296,3 +315,7 @@ class ExtensionController:
     async def stop_all(cls) -> None:
         jobs = [c.stop() for c in controller_cache.values() if c.is_running]
         await asyncio.gather(*jobs)
+
+
+class ExtensionNotFoundError(Exception):
+    """Raised when an extension cannot be found by its ID or path."""

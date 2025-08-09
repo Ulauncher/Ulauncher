@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
-from typing import Any
+from threading import Thread
+from typing import Any, Literal
 
 from gi.repository import Gio, GLib, GObject
 
@@ -138,3 +140,46 @@ class ExtensionSocketServer(metaclass=Singleton):
         )
         self.active_event = event
         self.active_controller = controller
+
+    def run_ext_batch_job(
+        self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
+    ) -> None:
+        controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+
+        # run the reload in a separate thread to avoid blocking the main thread
+        async def run_batch_async() -> None:
+            for job in jobs:
+                if job == "start":
+                    await asyncio.gather(*[c.start() for c in controllers])
+                elif job == "stop":
+                    await asyncio.gather(*[c.stop() for c in controllers])
+
+        def run_batch() -> None:
+            asyncio.run(run_batch_async())
+
+        Thread(target=run_batch).start()
+
+        logger.info(done_msg)
+
+    @events.on
+    def reload_ext(
+        self,
+        extension_ids: list[str] | None = None,
+    ) -> None:
+        if not extension_ids:
+            logger.warning("Reload message received without any extension IDs. No extensions will be restarted.")
+            return
+
+        logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
+
+        self.run_ext_batch_job(extension_ids, ["stop", "start"], done_msg=f"{len(extension_ids)} extensions (re)loaded")
+
+    @events.on
+    def stop_ext(self, extension_ids: list[str] | None = None) -> None:
+        if not extension_ids:
+            logger.warning("Stop message received without any extension IDs. No extensions will be stopped.")
+            return
+
+        logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
+
+        self.run_ext_batch_job(extension_ids, ["stop"], done_msg=f"{len(extension_ids)} extensions stopped")
