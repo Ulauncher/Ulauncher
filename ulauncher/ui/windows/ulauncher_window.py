@@ -320,31 +320,34 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return None
 
     def position_window(self) -> None:
-        margin_x = margin_y = 20.0
+        margin_x = margin_top = margin_bottom = 20.0
 
         if monitor_size := self.get_monitor_size():
             base_height = 100  # roughly the height of Ulauncher with no results
             window_width = self.settings.base_width
             max_height = monitor_size.height * 0.85 - base_height
             self.scroll_container.set_property("max-content-height", max_height)
+            pos_x = (monitor_size.width - window_width) / 2
+            pos_y = monitor_size.height * 0.1
 
             # Part II of the Gnome Wayland fix (see above in __init__)
             if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
-                margin_x = (monitor_size.width - window_width) / 2
+                margin_x = pos_x
+                margin_top = max(margin_top, pos_y)
 
             else:
-                pos_x = int(monitor_size.width * 0.5 - window_width * 0.5 + monitor_size.x)
-                pos_y = int(monitor_size.y + monitor_size.height * 0.12)
+                pos_x_for_monitor = int(pos_x + monitor_size.x)
+                pos_y_for_monitor = int(pos_y + monitor_size.y)
 
                 if self.layer_shell_enabled:
-                    layer_shell.set_vertical_position(self, pos_y)
+                    layer_shell.set_vertical_position(self, pos_y_for_monitor)
                 else:
-                    self.move(pos_x, pos_y)
+                    self.move(pos_x_for_monitor, pos_y_for_monitor)
 
         if self.is_composited():
             self.window_frame.set_properties(
-                margin_top=margin_y,
-                margin_bottom=margin_y,
+                margin_top=margin_top,
+                margin_bottom=margin_bottom,
                 margin_start=margin_x,
                 margin_end=margin_x,
             )
