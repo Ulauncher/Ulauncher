@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copyfileobj
 from typing import Iterator
 
+from Cython.Build import cythonize
 from setuptools import find_packages, setup
 
 
@@ -37,6 +38,7 @@ def data_files_from_path(target_path: str, source_path: str) -> Iterator[tuple[s
 
 
 setup(
+    ext_modules=cythonize("ulauncher/main.py", compiler_directives={"language_level": "3"}),
     packages=find_packages(exclude=["docs", "tests", "conftest.py"]),
     # These will be placed in /usr
     data_files=[
