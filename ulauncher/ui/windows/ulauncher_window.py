@@ -31,13 +31,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
-        window_width = int(self.settings.base_width)
+        width_request = int(self.settings.base_width)
+        height_request = -1
 
-        # Use the full width of the monitor for the window, and center the visible window
-        # needed because Gnome Wayland assumes you want to positions new windows next to
-        # the topmost window if any, instead of centering it.
         if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
-            window_width = monitor_size.width
+            # Use the full width of the monitor for the window, and center the visible window
+            # needed because Gnome Wayland assumes you want to positions new windows next to
+            # the topmost window if any, instead of centering it.
+            width_request = monitor_size.width
+            height_request = monitor_size.height
 
         super().__init__(
             decorated=False,
@@ -51,7 +53,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             title="Ulauncher - Application Launcher",
             urgency_hint=True,
             window_position=Gtk.WindowPosition.CENTER,
-            width_request=window_width,
+            width_request=width_request,
+            height_request=height_request,
             **kwargs,
         )
 
@@ -70,7 +73,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         # This box exists only for setting the margin conditionally, based on ^
         # without the theme being able to override it
-        self.window_frame = Gtk.Box()
+        self.window_frame = Gtk.Box(valign=Gtk.Align.START)
         self.add(self.window_frame)
 
         self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
@@ -115,9 +118,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
         self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.scroll_container.add(self.result_box)
-        self.window_container.pack_end(self.scroll_container, True, True, 0)
 
-        self.window_container.pack_start(event_box, True, True, 0)
+        self.window_container.pack_start(event_box, False, True, 0)
+        self.window_container.pack_start(self.scroll_container, False, True, 0)
 
         self.window_frame.show_all()
 
