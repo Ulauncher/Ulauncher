@@ -36,13 +36,3 @@ class Query:
     def get_argument(self, default: str | None = None) -> str | None:
         # TODO: Add deprecation warning
         return self.argument or default
-
-    @staticmethod
-    def parse_str(query_str: str) -> Query:
-        """Create a Query object from a string (assuming first word is the keyword)"""
-        argument: str | None = None
-        components = query_str.split(" ", 1)
-        if len(components) > 1:
-            # argument will be an empty string if there is only a space after the keyword (see is_active property)
-            argument = components[1]
-        return Query(components[0], argument)

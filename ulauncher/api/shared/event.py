@@ -34,7 +34,12 @@ class KeywordQueryEvent(BaseEvent):
     """
 
     def __init__(self, query_str: str) -> None:
-        self.query = Query.parse_str(query_str)
+        argument: str | None = None
+        components = query_str.split(" ", 1)
+        if len(components) > 1:
+            # argument will be an empty string if there is only a space after the keyword (see is_active property)
+            argument = components[1]
+        self.query = Query(components[0], argument)
         super().__init__([self.query])
 
     def get_keyword(self) -> str:
