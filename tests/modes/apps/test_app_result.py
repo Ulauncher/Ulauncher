@@ -6,6 +6,7 @@ from typing import Any, Iterator
 
 import pytest
 from gi.repository import Gio
+from pytest_mock import MockerFixture
 
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.utils.json_utils import json_load
@@ -23,14 +24,14 @@ class TestAppResult:
         shutil.rmtree("/tmp/ulauncher-test")
 
     @pytest.fixture(autouse=True)
-    def patch_desktop_app_info_new(self, mocker: Any) -> Any:
+    def patch_desktop_app_info_new(self, mocker: MockerFixture) -> Any:
         def mkappinfo(app_id: str) -> Gio.DesktopAppInfo | None:
             return Gio.DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
 
         return mocker.patch("ulauncher.modes.apps.app_result.Gio.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
-    def patch_desktop_app_info_get_all(self, mocker: Any) -> Any:
+    def patch_desktop_app_info_get_all(self, mocker: MockerFixture) -> Any:
         def get_all_appinfo() -> Iterator[Gio.DesktopAppInfo]:
             for path in ["trueapp.desktop", "falseapp.desktop"]:
                 if app_info := Gio.DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}"):
@@ -47,7 +48,7 @@ class TestAppResult:
         return AppResult.from_id("falseapp.desktop")
 
     @pytest.fixture(autouse=True)
-    def app_starts(self, mocker: Any) -> Any:
+    def app_starts(self, mocker: MockerFixture) -> Any:
         app_starts = json_load("/tmp/ulauncher-test/app_starts.json")
         app_starts.update({"falseapp.desktop": 3000, "trueapp.desktop": 765})
         return mocker.patch("ulauncher.modes.apps.app_result.app_starts", new=app_starts)

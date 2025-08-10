@@ -3,6 +3,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.app import UlauncherApp
 from ulauncher.ui.preferences_server import PreferencesServer
@@ -14,11 +15,11 @@ settings = Settings.load()
 
 class TestPreferencesServer:
     @pytest.fixture(autouse=True)
-    def autostart_pref(self, mocker: MagicMock) -> Any:
+    def autostart_pref(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.ui.preferences_server.SystemdController").return_value
 
     @pytest.fixture(autouse=True)
-    def webview(self, mocker: MagicMock) -> Any:
+    def webview(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.ui.preferences_server.WebKit2.WebView").return_value
 
     @pytest.fixture

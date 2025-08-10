@@ -32,7 +32,7 @@ class TestJsonConf:
         jc = JsonConf()
         jc.a = 1
         jc.update({"b": 2}, c=3)
-        jc["d"] = 4
+        jc["d"] = 4  # type: ignore[assignment]
         assert jc == JsonConf(a=1, b=2, c=3, d=4)
         assert JsonConf(b=2, a=1) == JsonConf({"a": 1, "b": 2})
         assert JsonConf(a=1, b=2) != JsonConf({"a": 1})

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -9,7 +10,7 @@ from ulauncher.ui.result_widget import ResultWidget
 
 class TestResultWidget:
     @pytest.fixture(autouse=True)
-    def scroll_to_focus(self, mocker: MagicMock) -> None:
+    def scroll_to_focus(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.ui.result_widget.ResultWidget.scroll_to_focus")
 
     def test_descr(self) -> None:

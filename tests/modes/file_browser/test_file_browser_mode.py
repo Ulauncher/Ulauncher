@@ -1,13 +1,15 @@
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
 from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
 
 
 class MockDirEntry:
-    def __init__(self, name, atime, is_file=True) -> None:
+    def __init__(self, name: str, atime: int, is_file: bool = True) -> None:
         self.name = name
         self._atime = atime
         self._is_file = is_file
@@ -15,16 +17,16 @@ class MockDirEntry:
     def is_dir(self) -> bool:
         return not self._is_file
 
-    def is_file(self):
+    def is_file(self) -> bool:
         return self._is_file
 
-    def stat(self):
+    def stat(self) -> SimpleNamespace:
         return SimpleNamespace(st_atime=self._atime)
 
 
 class TestFileBrowserMode:
     @pytest.fixture(autouse=True)
-    def scandir(self, mocker):
+    def scandir(self, mocker: MockerFixture) -> MagicMock:
         sd = mocker.patch("ulauncher.modes.file_browser.file_browser_mode.os.scandir")
         sd.return_value = [
             MockDirEntry("a", 1655837759),
@@ -35,10 +37,10 @@ class TestFileBrowserMode:
         return sd
 
     @pytest.fixture
-    def mode(self):
+    def mode(self) -> FileBrowserMode:
         return FileBrowserMode()
 
-    def test_is_enabled(self, mode) -> None:
+    def test_is_enabled(self, mode: FileBrowserMode) -> None:
         assert mode.parse_query_str("~/Downloads")
         assert mode.parse_query_str("~")
         assert mode.parse_query_str("$USER/Videos")
@@ -50,11 +52,11 @@ class TestFileBrowserMode:
         assert not mode.parse_query_str("+")
         assert not mode.parse_query_str(" ")
 
-    def test_list_files(self, mode) -> None:
+    def test_list_files(self, mode: FileBrowserMode) -> None:
         assert mode.list_files("path") == ["a", "B", "c", "D"]
         assert mode.list_files("path", sort_by_atime=True) == ["B", "D", "c", "a"]
 
-    def test_filter_dot_files(self, mode) -> None:
+    def test_filter_dot_files(self, mode: FileBrowserMode) -> None:
         assert mode.filter_dot_files(["a", ".b", "c", ".d"]) == ["a", "c"]
 
     def test_handle_query__path_from_q_exists__dir_listing_rendered(self) -> None:
@@ -62,6 +64,6 @@ class TestFileBrowserMode:
         flattened_results = [str(r.path) for r in FileBrowserMode().handle_query(query)]
         assert flattened_results == ["/tmp/B", "/tmp/D", "/tmp/c", "/tmp/a"]
 
-    def test_handle_query__invalid_path__empty_list_rendered(self, mode) -> None:
+    def test_handle_query__invalid_path__empty_list_rendered(self, mode: FileBrowserMode) -> None:
         query = Query(None, "~~")
         assert mode.handle_query(query) == []

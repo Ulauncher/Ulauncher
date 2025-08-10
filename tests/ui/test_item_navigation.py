@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.ui.result_widget import ResultWidget
@@ -19,15 +20,15 @@ class TestItemNavigation:
         return [MagicMock() for _ in range(5)]
 
     @pytest.fixture
-    def nav(self, query_handler, items: list[ResultWidget]) -> ItemNavigation:
+    def nav(self, query_handler: Any, items: list[ResultWidget]) -> ItemNavigation:
         return ItemNavigation(query_handler, items)
 
     @pytest.fixture(autouse=True)
-    def query_history(self, mocker: Any) -> Any:
+    def query_history(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.ui.item_navigation.query_history")
 
     @pytest.fixture(autouse=True)
-    def json_save(self, mocker: Any) -> Any:
+    def json_save(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.ui.item_navigation.json_save")
 
     def test_select_is_called(self, nav: ItemNavigation, items: list[MagicMock]) -> None:

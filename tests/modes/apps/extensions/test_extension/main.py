@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import signal
 import sys
 from time import sleep
+from types import FrameType
 
 
-def exit_gracefully(_signum, _frame) -> None:
+def exit_gracefully(_signum: int, _frame: FrameType | None) -> None:
     print("On SIGTERM")
     sleep(3)
 

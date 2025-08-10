@@ -1,8 +1,8 @@
 from decimal import Decimal
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
@@ -14,7 +14,7 @@ class TestCalcMode:
         return CalcMode()
 
     @pytest.fixture
-    def copy_action(self, mocker: MagicMock) -> Any:
+    def copy_action(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.calc.calc_mode.actions.copy")
 
     def test_is_enabled(self, mode: CalcMode) -> None:

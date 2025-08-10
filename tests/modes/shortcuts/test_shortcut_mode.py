@@ -2,6 +2,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
@@ -16,15 +17,15 @@ class TestShortcutMode:
         return ShortcutMode()
 
     @pytest.fixture(autouse=True)
-    def shortcuts_db(self, mocker: MagicMock) -> Any:
+    def shortcuts_db(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutsDb.load").return_value
 
     @pytest.fixture(autouse=True)
-    def run_shortcut(self, mocker: MagicMock) -> Any:
+    def run_shortcut(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.run_shortcut")
 
     @pytest.fixture(autouse=False)
-    def shortcut_result(self, mocker: MagicMock) -> Any:
+    def shortcut_result(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutResult")
 
     def test_is_enabled__query_starts_with_query_and_space__returns_true(

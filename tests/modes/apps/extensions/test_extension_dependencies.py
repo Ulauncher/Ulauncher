@@ -1,7 +1,9 @@
 import sys
-from unittest.mock import MagicMock, mock_open, patch
+from typing import Any, Callable
+from unittest.mock import MagicMock, mock_open
 
 import pytest
+from pytest_mock import MockerFixture
 
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 
@@ -11,27 +13,42 @@ def extension_dependencies() -> ExtensionDependencies:
     return ExtensionDependencies(ext_id="extension-X", path="/fake/path")
 
 
-@patch("ulauncher.modes.extensions.extension_dependencies.isfile", return_value=True)
-@patch("ulauncher.modes.extensions.extension_dependencies.isdir", return_value=True)
+@pytest.fixture
+def isfile(mocker: MockerFixture) -> Callable[..., bool]:
+    return mocker.patch("ulauncher.modes.extensions.extension_dependencies.isfile")
+
+
+@pytest.fixture
+def isdir(mocker: MockerFixture) -> Callable[..., bool]:
+    return mocker.patch("ulauncher.modes.extensions.extension_dependencies.isdir")
+
+
+@pytest.fixture
+def builtins_open(mocker: MockerFixture) -> Any:
+    return mocker.patch("builtins.open", new_callable=mock_open, read_data="some-package==1.0\n")
+
+
+@pytest.fixture
+def subprocess_run(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("subprocess.run")
+
+
+@pytest.mark.usefixtures("isfile", "isdir")
 def test_get_dependencies_path(
-    mock_isdir: MagicMock,  # noqa: ARG001
-    mock_isfile: MagicMock,  # noqa: ARG001
     extension_dependencies: ExtensionDependencies,
 ) -> None:
     deps_path = extension_dependencies.get_dependencies_path()
     assert deps_path == "/fake/path/.dependencies"
 
 
-@patch("ulauncher.modes.extensions.extension_dependencies.isfile", return_value=True)
-@patch("builtins.open", new_callable=mock_open, read_data="some-package==1.0\n")
-@patch("subprocess.run")
+@pytest.mark.usefixtures("builtins_open")
 def test_install(
-    mock_subprocess: MagicMock,
-    mock_open_fn: MagicMock,  # noqa: ARG001
-    mock_isfile: MagicMock,  # noqa: ARG001
+    subprocess_run: MagicMock,
     extension_dependencies: ExtensionDependencies,
+    isfile: MagicMock,
 ) -> None:
-    mock_subprocess.return_value = MagicMock(stdout="Installation successful", returncode=0)
+    isfile.return_value = True
+    subprocess_run.return_value = MagicMock(stdout="Installation successful", returncode=0)
 
     extension_dependencies.install()
 
@@ -45,4 +62,4 @@ def test_install(
         "--target",
         "/fake/path/.dependencies",
     ]
-    mock_subprocess.assert_called_once_with(expected_command, check=True, capture_output=True, text=True)
+    subprocess_run.assert_called_once_with(expected_command, check=True, capture_output=True, text=True)
