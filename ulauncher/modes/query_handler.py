@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from functools import lru_cache
 from typing import Iterable
+from weakref import WeakKeyDictionary
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -34,7 +35,7 @@ class QueryHandler:
     mode: BaseMode | None = None
     query: Query = Query(None, "")
     triggers: list[Result] = []
-    trigger_mode_map: dict[int, BaseMode] = {}
+    mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
     triggers_loaded: bool = False
 
     def load_triggers(self, force: bool = False) -> None:
@@ -42,11 +43,10 @@ class QueryHandler:
             return
 
         self.triggers.clear()
-        self.trigger_mode_map.clear()
         for mode in get_modes():
             for trigger in mode.get_triggers():
                 self.triggers.append(trigger)
-                self.trigger_mode_map[id(trigger)] = mode
+                self.mode_map[trigger] = mode
         self.triggers_loaded = True
 
     def update(self, query_str: str) -> None:
@@ -78,7 +78,10 @@ class QueryHandler:
 
     def get_initial_results(self, limit: int) -> Iterable[Result]:
         """Called if the query is empty (on startup or when you delete the query)"""
-        return get_app_mode().get_initial_results(limit)
+        app_mode = get_app_mode()
+        for app_result in app_mode.get_initial_results(limit):
+            self.mode_map[app_result] = app_mode
+            yield app_result
 
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import handle_action
@@ -95,8 +98,9 @@ class QueryHandler:
         # If the search result is empty, add the default items for all other modes (only shortcuts currently)
         if not results and str(self.query):
             for mode in get_modes():
-                res = mode.get_fallback_results()
-                results.extend(res)
+                for fallback_result in mode.get_fallback_results():
+                    results.append(fallback_result)
+                    self.mode_map[fallback_result] = mode
         handle_action(results)
 
     def handle_backspace(self, query_str: str) -> bool:
@@ -109,12 +113,7 @@ class QueryHandler:
         return False
 
     def activate_result(self, result: Result, alt: bool = False) -> None:
-        mode = self.trigger_mode_map.get(id(result), self.mode)
-        # TODO: This is a quickfix. The problem is window calls "get_initial_results" from AppResult directly,
-        # this method really belongs on the AppMode, but and should be called from via this class, and the mode handler,
-        # for us to be aware of the mode that is being used.
-        if not mode and hasattr(result, "app_id"):
-            mode = get_app_mode()
+        mode = self.mode_map.get(result, self.mode)
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
