@@ -46,6 +46,12 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
         # set values
         self.update(*args, **kwargs)
 
+    def __hash__(self) -> int:  # type: ignore [override]
+        """
+        Returns the memory address of the instance as a hash, so even if it's mutable this remains consistent.
+        """
+        return id(self)
+
     def __dir__(self) -> list[str]:  # For IDE autocompletion
         return dir(type(self)) + list(self.keys())
 
