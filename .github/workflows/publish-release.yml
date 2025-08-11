@@ -34,7 +34,6 @@ jobs:
           # noble    24.04 LTS EOL 2029-06
           # jammy    22.04 LTS EOL 2027-06
           # plucky   25.04     EOL 2026-01
-          # oracular 24.10     EOL 2025-07
           # focal    20.04 LTS EOL 2025-05
           for DISTRO in $(echo "noble jammy oracular focal plucky"); do
             DEB_VERSION="$(echo "$VERSION" | tr "-" "~")-0ubuntu1ppa1~$DISTRO"
