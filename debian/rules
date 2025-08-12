@@ -5,3 +5,16 @@ export DEB_BUILD_OPTIONS=nocheck
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	python3 -m pip wheel --no-build-isolation --no-deps .
+
+override_dh_auto_install:
+	python3 -m pip install --ignore-installed --root=$(CURDIR)/debian/ulauncher --prefix=/usr --no-deps *.whl
+
+override_dh_usrlocal:
+  # https://stackoverflow.com/a/12055731/633921
+
+override_dh_auto_clean:
+	find . -name "*.pyc" -delete
+	find . -name "__pycache__" -type d -exec rm -rf {} + || true
