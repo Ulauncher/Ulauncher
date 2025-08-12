@@ -340,7 +340,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 pos_y_for_monitor = int(pos_y + monitor_size.y)
 
                 if self.layer_shell_enabled:
-                    layer_shell.set_vertical_position(self, pos_y_for_monitor)
+                    layer_shell.set_vertical_position(self, pos_y)
                 else:
                     self.move(pos_x_for_monitor, pos_y_for_monitor)
 
