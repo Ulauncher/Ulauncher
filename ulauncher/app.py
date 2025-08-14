@@ -3,8 +3,8 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
-import weakref
-from typing import Any, cast
+from typing import Any, Literal, cast
+from weakref import WeakValueDictionary
 
 from gi.repository import Gio, Gtk
 
@@ -28,8 +28,7 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     query = ""
-    _window_ref: weakref.ReferenceType[UlauncherWindow] | None = None
-    _preferences: weakref.ReferenceType[PreferencesWindow] | None = None
+    windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
@@ -40,17 +39,6 @@ class UlauncherApp(Gtk.Application):
         super().__init__(*args, **kwargs)
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
-
-    @property
-    def window(self) -> UlauncherWindow | None:
-        """Get the current window or None if it doesn't exist."""
-        if self._window_ref:
-            return self._window_ref()
-        return None
-
-    @window.setter
-    def window(self, value: UlauncherWindow) -> None:
-        self._window_ref = weakref.ref(value)
 
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
@@ -126,24 +114,24 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
-        if not self.window:
-            self.window = UlauncherWindow(application=self)
+        if "main" not in self.windows:
+            self.windows["main"] = UlauncherWindow(application=self)
 
     @events.on
     def hide_launcher(self) -> None:
-        if self.window:
-            self.window.close()
+        if main_window := self.windows.get("main"):
+            main_window.close()
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        if self.window:
-            self.window.close(save_query=True)
+        if main_window := self.windows.get("main"):
+            cast("UlauncherWindow", main_window).close(save_query=True)
 
-        if preferences := self._preferences and self._preferences():
-            preferences.present(page)
+        if preferences := self.windows.get("preferences"):
+            cast("PreferencesWindow", preferences).present(page)
         else:
             preferences = PreferencesWindow(application=self)
-            self._preferences = weakref.ref(preferences)
+            self.windows["preferences"] = preferences
             preferences.show(page)
 
     def activate_query(self, query_str: str) -> None:
