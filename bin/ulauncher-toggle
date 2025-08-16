@@ -13,4 +13,4 @@ do
   fi
 done
 
-gapplication launch io.ulauncher.Ulauncher
+gapplication action io.ulauncher.Ulauncher toggle-window
