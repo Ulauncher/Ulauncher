@@ -71,7 +71,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     "ensure that your compositor supports it and that you have installed the gtk-layer-shell library"
                 )
 
-        # frame exists to set the margin conditionally without the theme being able to override it
+        # Widget structure
+        #
+        # frame (positioning container, not affected by theme)
+        # └── theme_root(.app)
+        #     ├── drag_listener
+        #     │   └── prompt
+        #     │       ├── prompt_input (.input)
+        #     │       └── prefs_btn (.prefs-btn)
+        #     └── results_scroller
+        #         └── results (.result-box)
+        #             └── ResultWidget (multiple)
+
         self.frame = Gtk.Box(valign=Gtk.Align.START)
         self.add(self.frame)
 
