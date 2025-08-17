@@ -109,7 +109,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         prompt.pack_start(self.input, True, True, 0)
         prompt.pack_end(self.prefs_btn, False, False, 0)
 
-        self.scroll_container = Gtk.ScrolledWindow(
+        self.results_scroller = Gtk.ScrolledWindow(
             can_focus=True,
             max_content_height=500,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
@@ -117,10 +117,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             shadow_type=Gtk.ShadowType.IN,
         )
         self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.scroll_container.add(self.results)
+        self.results_scroller.add(self.results)
 
         self.window_container.pack_start(event_box, False, True, 0)
-        self.window_container.pack_start(self.scroll_container, False, True, 0)
+        self.window_container.pack_start(self.results_scroller, False, True, 0)
 
         self.window_frame.show_all()
 
@@ -326,7 +326,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             base_height = 100  # roughly the height of Ulauncher with no results
             window_width = self.settings.base_width
             max_height = monitor_size.height * 0.85 - base_height
-            self.scroll_container.set_property("max-content-height", max_height)
+            self.results_scroller.set_property("max-content-height", max_height)
             pos_x = (monitor_size.width - window_width) / 2
             pos_y = monitor_size.height * 0.1
 
@@ -411,10 +411,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)
             self.apply_css(self.results)
-            self.scroll_container.show_all()
+            self.results_scroller.show_all()
             logger.debug("Render %s results", len(result_widgets))
         else:
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
-            self.scroll_container.hide()
+            self.results_scroller.hide()
             logger.debug("Hiding results container, no results found")
