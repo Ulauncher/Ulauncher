@@ -75,8 +75,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.frame = Gtk.Box(valign=Gtk.Align.START)
         self.add(self.frame)
 
-        self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
-        self.frame.pack_start(self.window_container, True, True, 0)
+        self.theme_root = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
+        self.frame.pack_start(self.theme_root, True, True, 0)
 
         prompt = Gtk.Box()
         drag_listener = Gtk.EventBox()
@@ -118,8 +118,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.results_scroller.add(self.results)
 
-        self.window_container.pack_start(drag_listener, False, True, 0)
-        self.window_container.pack_start(self.results_scroller, False, True, 0)
+        self.theme_root.pack_start(drag_listener, False, True, 0)
+        self.theme_root.pack_start(self.results_scroller, False, True, 0)
 
         self.frame.show_all()
 
@@ -168,7 +168,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.get_opacity() == 1:  # already applied styling
             return
 
-        self.window_container.get_style_context().add_class("app")
+        self.theme_root.get_style_context().add_class("app")
         self.prompt_input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
         self.results.get_style_context().add_class("result-box")
