@@ -83,7 +83,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         drag_listener = Gtk.EventBox()
         drag_listener.add(prompt)
 
-        self.input = Gtk.Entry(
+        self.prompt_input = Gtk.Entry(
             can_default=True,
             can_focus=True,
             has_focus=True,
@@ -106,7 +106,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             margin_end=15,
         )
 
-        prompt.pack_start(self.input, True, True, 0)
+        prompt.pack_start(self.prompt_input, True, True, 0)
         prompt.pack_end(self.prefs_btn, False, False, 0)
 
         self.results_scroller = Gtk.ScrolledWindow(
@@ -128,8 +128,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.connect("focus-out-event", lambda *_: self.on_focus_out())
         drag_listener.connect("button-press-event", self.on_mouse_down)
         self.connect("button-release-event", lambda *_: self.on_mouse_up())
-        self.input.connect("changed", lambda *_: self.on_input_changed())
-        self.input.connect("key-press-event", self.on_input_key_press)
+        self.prompt_input.connect("changed", lambda *_: self.on_input_changed())
+        self.prompt_input.connect("key-press-event", self.on_input_key_press)
         self.connect("draw", self.on_initial_draw)
         self.prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
 
@@ -170,7 +170,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return
 
         self.window_container.get_style_context().add_class("app")
-        self.input.get_style_context().add_class("input")
+        self.prompt_input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
         self.results.get_style_context().add_class("result-box")
         prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
@@ -184,7 +184,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.query_str:
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
-            self.input.select_region(0, -1)
+            self.prompt_input.select_region(0, -1)
         else:
             # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
             self.show_results([])
@@ -213,7 +213,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        events.emit("app:set_query", self.input.get_text(), update_input=False)
+        events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
         self.query_handler.update(self.query_str)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
@@ -382,8 +382,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @events.on
     def set_input(self, query_str: str) -> None:
-        self.input.set_text(query_str)
-        self.input.set_position(-1)
+        self.prompt_input.set_text(query_str)
+        self.prompt_input.set_position(-1)
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
@@ -391,7 +391,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.results.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
-        if not self.input.get_text() and self.settings.max_recent_apps:
+        if not self.prompt_input.get_text() and self.settings.max_recent_apps:
             results = self.query_handler.get_initial_results(self.settings.max_recent_apps)
 
         if results:
