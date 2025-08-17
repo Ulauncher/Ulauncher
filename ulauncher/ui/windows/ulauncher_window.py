@@ -79,9 +79,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
         self.window_frame.pack_start(self.window_container, True, True, 0)
 
-        event_box = Gtk.EventBox()
         prompt = Gtk.Box()
-        event_box.add(prompt)
+        drag_listener = Gtk.EventBox()
+        drag_listener.add(prompt)
 
         self.input = Gtk.Entry(
             can_default=True,
@@ -119,14 +119,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.results_scroller.add(self.results)
 
-        self.window_container.pack_start(event_box, False, True, 0)
+        self.window_container.pack_start(drag_listener, False, True, 0)
         self.window_container.pack_start(self.results_scroller, False, True, 0)
 
         self.window_frame.show_all()
 
         self.connect("focus-in-event", lambda *_: self.on_focus_in())
         self.connect("focus-out-event", lambda *_: self.on_focus_out())
-        event_box.connect("button-press-event", self.on_mouse_down)
+        drag_listener.connect("button-press-event", self.on_mouse_down)
         self.connect("button-release-event", lambda *_: self.on_mouse_up())
         self.input.connect("changed", lambda *_: self.on_input_changed())
         self.input.connect("key-press-event", self.on_input_key_press)
