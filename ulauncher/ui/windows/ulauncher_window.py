@@ -71,13 +71,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     "ensure that your compositor supports it and that you have installed the gtk-layer-shell library"
                 )
 
-        # This box exists only for setting the margin conditionally, based on ^
-        # without the theme being able to override it
-        self.window_frame = Gtk.Box(valign=Gtk.Align.START)
-        self.add(self.window_frame)
+        # frame exists to set the margin conditionally without the theme being able to override it
+        self.frame = Gtk.Box(valign=Gtk.Align.START)
+        self.add(self.frame)
 
         self.window_container = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
-        self.window_frame.pack_start(self.window_container, True, True, 0)
+        self.frame.pack_start(self.window_container, True, True, 0)
 
         prompt = Gtk.Box()
         drag_listener = Gtk.EventBox()
@@ -122,7 +121,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.window_container.pack_start(drag_listener, False, True, 0)
         self.window_container.pack_start(self.results_scroller, False, True, 0)
 
-        self.window_frame.show_all()
+        self.frame.show_all()
 
         self.connect("focus-in-event", lambda *_: self.on_focus_in())
         self.connect("focus-out-event", lambda *_: self.on_focus_out())
@@ -345,7 +344,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     self.move(pos_x_for_monitor, pos_y_for_monitor)
 
         if self.is_composited():
-            self.window_frame.set_properties(
+            self.frame.set_properties(
                 margin_top=margin_top,
                 margin_bottom=margin_bottom,
                 margin_start=margin_x,
