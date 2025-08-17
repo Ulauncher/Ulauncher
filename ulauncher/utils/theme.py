@@ -12,36 +12,18 @@ logger = logging.getLogger()
 DEFAULT_THEME = "light"
 CSS_RESET = """
 * {
-  color: inherit;
-  font-size: inherit;
-  font-family: inherit;
-  font-style: inherit;
-  font-variant: inherit;
-  font-weight: inherit;
-  text-shadow: inherit;
-  -icon-shadow: inherit;
-  background-color: initial;
+  background: initial;
+  border: initial;
+  border-radius: initial;
   box-shadow: initial;
+  color: inherit;
+  font: inherit;
   margin: initial;
   padding: initial;
-  border-color: initial;
-  border-style: initial;
-  border-width: initial;
-  border-radius: initial;
-  outline-color: initial;
-  outline-style: initial;
-  outline-width: initial;
-  outline-offset: initial;
-  background-clip: initial;
-  background-origin: initial;
-  background-size: initial;
-  background-position: initial;
-  background-repeat: initial;
-  background-image: initial;
-  transition-property: initial;
-  transition-duration: initial;
-  transition-timing-function: initial;
-  transition-delay: initial;
+  text-shadow: inherit;
+  transition: initial;
+  -icon-shadow: inherit;
+  outline: initial;
 }
 """
 
