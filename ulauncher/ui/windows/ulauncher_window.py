@@ -5,11 +5,11 @@ from typing import Any, Iterable
 
 from gi.repository import Gdk, GLib, Gtk
 
-import ulauncher
 from ulauncher import paths
 from ulauncher.internals.result import Result
 from ulauncher.modes.query_handler import QueryHandler
 from ulauncher.ui import layer_shell
+from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
@@ -23,7 +23,7 @@ events = EventBus("window", True)
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
-    results_nav: ulauncher.ui.item_navigation.ItemNavigation | None = None
+    results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
@@ -404,7 +404,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 result_widget = ResultWidget(result, index, self.query_handler.query)
                 result_widgets.append(result_widget)
                 self.result_box.add(result_widget)
-            from ulauncher.ui.item_navigation import ItemNavigation
 
             self.results_nav = ItemNavigation(self.query_handler, result_widgets)
             self.results_nav.select_default()

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from ulauncher import paths
-from ulauncher.modes.query_handler import QueryHandler
-from ulauncher.ui.result_widget import ResultWidget
 from ulauncher.utils.json_utils import json_load, json_save
+
+if TYPE_CHECKING:
+    from ulauncher.modes.query_handler import QueryHandler
+    from ulauncher.ui.result_widget import ResultWidget
 
 query_history_path = f"{paths.STATE}/query_history.json"
 query_history: dict[str, str] = json_load(query_history_path)
