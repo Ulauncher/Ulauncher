@@ -116,8 +116,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             propagate_natural_height=True,
             shadow_type=Gtk.ShadowType.IN,
         )
-        self.result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.scroll_container.add(self.result_box)
+        self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.scroll_container.add(self.results)
 
         self.window_container.pack_start(event_box, False, True, 0)
         self.window_container.pack_start(self.scroll_container, False, True, 0)
@@ -172,7 +172,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.window_container.get_style_context().add_class("app")
         self.input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
-        self.result_box.get_style_context().add_class("result-box")
+        self.results.get_style_context().add_class("result-box")
         prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
 
@@ -388,7 +388,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
         self.results_nav = None
-        self.result_box.foreach(lambda w: w.destroy())
+        self.results.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.input.get_text() and self.settings.max_recent_apps:
@@ -403,14 +403,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     break
                 result_widget = ResultWidget(result, index, self.query_handler.query)
                 result_widgets.append(result_widget)
-                self.result_box.add(result_widget)
+                self.results.add(result_widget)
 
             self.results_nav = ItemNavigation(self.query_handler, result_widgets)
             self.results_nav.select_default()
 
-            self.result_box.set_margin_bottom(10)
-            self.result_box.set_margin_top(3)
-            self.apply_css(self.result_box)
+            self.results.set_margin_bottom(10)
+            self.results.set_margin_top(3)
+            self.apply_css(self.results)
             self.scroll_container.show_all()
             logger.debug("Render %s results", len(result_widgets))
         else:
