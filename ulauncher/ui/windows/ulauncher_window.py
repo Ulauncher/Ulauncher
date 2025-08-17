@@ -80,8 +80,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.window_frame.pack_start(self.window_container, True, True, 0)
 
         event_box = Gtk.EventBox()
-        input_box = Gtk.Box()
-        event_box.add(input_box)
+        prompt = Gtk.Box()
+        event_box.add(prompt)
 
         self.input = Gtk.Entry(
             can_default=True,
@@ -106,8 +106,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             margin_end=15,
         )
 
-        input_box.pack_start(self.input, True, True, 0)
-        input_box.pack_end(self.prefs_btn, False, False, 0)
+        prompt.pack_start(self.input, True, True, 0)
+        prompt.pack_end(self.prefs_btn, False, False, 0)
 
         self.scroll_container = Gtk.ScrolledWindow(
             can_focus=True,
