@@ -143,11 +143,8 @@ class UlauncherApp(Gtk.Application):
 
     def toggle_window(self) -> None:
         """Toggle window visibility - for explicit toggle requests only."""
-        if main_window := self.windows.get("main"):
-            if main_window.is_visible():
-                self.hide_launcher()
-            else:
-                self.show_launcher()
+        if "main" in self.windows:
+            self.hide_launcher()
         else:
             self.show_launcher()
 
