@@ -52,6 +52,9 @@ class UlauncherApp(Gtk.Application):
             self,
             [
                 ("show-preferences", lambda *_: self.show_preferences(), None),
+                ("show-window", lambda *_: self.show_launcher(), None),
+                ("hide-window", lambda *_: self.hide_launcher(), None),
+                ("toggle-window", lambda *_: self.toggle_window(), None),
                 ("toggle-tray-icon", lambda *args: self.toggle_tray_icon(args[1].get_boolean()), "b"),
                 ("set-query", lambda *args: self.activate_query(args[1].get_string()), "s"),
                 ("trigger-event", lambda *args: self.delegate_custom_message(args[1].get_string()), "s"),
@@ -137,6 +140,13 @@ class UlauncherApp(Gtk.Application):
     def activate_query(self, query_str: str) -> None:
         self.activate()
         self.set_query(query_str)
+
+    def toggle_window(self) -> None:
+        """Toggle window visibility - for explicit toggle requests only."""
+        if "main" in self.windows:
+            self.hide_launcher()
+        else:
+            self.show_launcher()
 
     def delegate_custom_message(self, json_message: str) -> None:
         """Parses and delegates custom JSON messages to the EventBus listener (if any)"""
