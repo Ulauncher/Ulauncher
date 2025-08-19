@@ -89,9 +89,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.theme_root = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
         self.frame.pack_start(self.theme_root, True, True, 0)
 
-        prompt = Gtk.Box()
+        self.prompt = Gtk.Box()
         drag_listener = Gtk.EventBox()
-        drag_listener.add(prompt)
+        drag_listener.add(self.prompt)
 
         self.prompt_input = Gtk.Entry(
             can_default=True,
@@ -116,12 +116,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             margin_end=15,
         )
 
-        prompt.pack_start(self.prompt_input, True, True, 0)
-        prompt.pack_end(self.prefs_btn, False, False, 0)
+        self.prompt.pack_start(self.prompt_input, True, True, 0)
+        self.prompt.pack_end(self.prefs_btn, False, False, 0)
 
         self.results_scroller = Gtk.ScrolledWindow(
             can_focus=True,
-            max_content_height=500,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             propagate_natural_height=True,
             shadow_type=Gtk.ShadowType.IN,
@@ -333,12 +332,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         margin_x = margin_top = margin_bottom = 20.0
 
         if monitor_size := self.get_monitor_size():
-            base_height = 100  # roughly the height of Ulauncher with no results
             window_width = self.settings.base_width
-            max_height = monitor_size.height * 0.85 - base_height
-            self.results_scroller.set_property("max-content-height", max_height)
             pos_x = (monitor_size.width - window_width) / 2
             pos_y = monitor_size.height * 0.1
+
+            prompt_height = self.prompt.get_allocated_height()
+            max_height = monitor_size.height - prompt_height - pos_y * 2
+            self.results_scroller.set_property("max-content-height", max_height)
 
             # Part II of the Gnome Wayland fix (see above in __init__)
             if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
