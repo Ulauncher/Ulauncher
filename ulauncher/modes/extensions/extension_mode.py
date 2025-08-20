@@ -58,6 +58,9 @@ class ExtensionMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         for ext in ExtensionController.iterate():
+            if not ext.is_enabled:
+                continue
+
             for trigger_id, trigger in ext.user_triggers.items():
                 action: Any = None
                 if not trigger.keyword:
