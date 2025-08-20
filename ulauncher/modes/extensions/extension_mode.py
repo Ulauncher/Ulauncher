@@ -23,14 +23,6 @@ class ExtensionMode(BaseMode):
         self.ext_socket_server.start()
         events.set_self(self)
 
-    def parse_query_str(self, query_str: str) -> Query | None:
-        query = Query.parse_str(query_str)
-        if query.keyword and query.is_active:
-            controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
-            if controller:
-                return query
-        return None
-
     def handle_query(self, query: Query) -> Any:
         controller = None
         if query.keyword:
@@ -77,6 +69,7 @@ class ExtensionMode(BaseMode):
                     description=html.escape(trigger.description),
                     icon=ext.get_normalized_icon_path(trigger.icon),
                     on_enter=action,
+                    keyword=trigger.keyword,
                     searchable=True,
                 )
 

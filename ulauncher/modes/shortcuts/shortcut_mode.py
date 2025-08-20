@@ -33,10 +33,6 @@ class ShortcutMode(BaseMode):
     def __init__(self) -> None:
         self.shortcuts_db = ShortcutsDb.load()
 
-    def parse_query_str(self, query_str: str) -> Query | None:
-        query = Query.parse_str(query_str)
-        return query if self._get_active_shortcut(query) else None
-
     def _get_active_shortcut(self, query: Query) -> Shortcut | None:
         for s in self.shortcuts_db.values():
             if query.keyword == s.keyword and (query.is_active or s.run_without_argument):

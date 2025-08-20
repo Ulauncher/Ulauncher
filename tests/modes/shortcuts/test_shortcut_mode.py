@@ -28,15 +28,6 @@ class TestShortcutMode:
     def shortcut_result(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutResult")
 
-    def test_is_enabled__query_starts_with_query_and_space__returns_true(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock
-    ) -> None:
-        query = "kw "
-        shortcut = ShortcutRecord(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
-
-        assert mode.parse_query_str(query)
-
     def test_is_enabled__query_starts_with_query__returns_false(
         self, mode: ShortcutMode, shortcuts_db: MagicMock
     ) -> None:
@@ -44,7 +35,7 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
-        assert not mode.parse_query_str(query)
+        assert not mode.matches_query_str(query)
 
     def test_is_enabled__query_doesnt_start_with_query__returns_false(
         self, mode: ShortcutMode, shortcuts_db: MagicMock
@@ -53,16 +44,7 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
-        assert not mode.parse_query_str(query)
-
-    def test_is_enabled__query_run_without_argument__returns_true(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock
-    ) -> None:
-        query = "wk"
-        shortcut = ShortcutRecord(keyword="wk", run_without_argument=True)
-        shortcuts_db.values.return_value = [shortcut]
-
-        assert mode.parse_query_str(query)
+        assert not mode.matches_query_str(query)
 
     def test_handle_query__return_value__is(
         self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult

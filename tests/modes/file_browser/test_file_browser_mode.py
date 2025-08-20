@@ -41,16 +41,16 @@ class TestFileBrowserMode:
         return FileBrowserMode()
 
     def test_is_enabled(self, mode: FileBrowserMode) -> None:
-        assert mode.parse_query_str("~/Downloads")
-        assert mode.parse_query_str("~")
-        assert mode.parse_query_str("$USER/Videos")
-        assert mode.parse_query_str("/usr/bin")
-        assert mode.parse_query_str("/")
-        assert mode.parse_query_str(" /foo/bar")
+        assert mode.matches_query_str("~/Downloads")
+        assert mode.matches_query_str("~")
+        assert mode.matches_query_str("$USER/Videos")
+        assert mode.matches_query_str("/usr/bin")
+        assert mode.matches_query_str("/")
+        assert mode.matches_query_str(" /foo/bar")
 
-        assert not mode.parse_query_str("test")
-        assert not mode.parse_query_str("+")
-        assert not mode.parse_query_str(" ")
+        assert not mode.matches_query_str("test")
+        assert not mode.matches_query_str("+")
+        assert not mode.matches_query_str(" ")
 
     def test_list_files(self, mode: FileBrowserMode) -> None:
         assert mode.list_files("path") == ["a", "B", "c", "D"]

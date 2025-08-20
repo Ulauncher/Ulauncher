@@ -142,8 +142,8 @@ def _eval(node: ast.expr) -> int | float | Decimal:
 
 
 class CalcMode(BaseMode):
-    def parse_query_str(self, query_str: str) -> Query | None:
-        return Query(None, query_str) if _is_enabled(query_str) else None
+    def matches_query_str(self, query_str: str) -> bool:
+        return _is_enabled(query_str)
 
     def handle_query(self, query: Query) -> list[CalcResult]:
         try:

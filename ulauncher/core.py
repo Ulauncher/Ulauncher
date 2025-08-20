@@ -35,6 +35,7 @@ class UlauncherCore:
     """Core application logic to handle the query events and delegate them to the modes."""
 
     _mode: BaseMode | None = None
+    _keywords: dict[str, Result] = {}
     _triggers: list[Result] = []
     _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
     _triggers_loaded: bool = False
@@ -48,10 +49,14 @@ class UlauncherCore:
             return
 
         self._triggers.clear()
+        self._keywords.clear()
         for mode in get_modes():
             for trigger in mode.get_triggers():
                 self._triggers.append(trigger)
                 self._mode_map[trigger] = mode
+                if trigger.keyword:
+                    self._keywords[trigger.keyword] = trigger
+
         self._triggers_loaded = True
 
     def update(self, query_str: str) -> None:
@@ -64,11 +69,20 @@ class UlauncherCore:
         self._mode = None
         self.query = Query(None, query_str)
 
-        for mode in get_modes():
-            if query := mode.parse_query_str(query_str):
-                self._mode = mode
-                self.query = query
-                break
+        # keyword match
+        keyword, argument = query_str.split(" ", 1) if " " in query_str else (query_str, None)
+        trigger = self._keywords.get(keyword)
+        if trigger and (argument is not None or getattr(trigger, "run_without_argument", False)):
+            self._mode = self._mode_map.get(trigger)
+            self.query = Query(keyword, argument)
+
+        # non-keyword match
+        if not self._mode:
+            for mode in get_modes():
+                if mode.matches_query_str(query_str):
+                    self._mode = mode
+                    self.query = Query(None, query_str)
+                    break
 
         self.handle_change()
 

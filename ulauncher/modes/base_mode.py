@@ -9,11 +9,11 @@ DEFAULT_ACTION = True  #  keep window open and do nothing
 
 
 class BaseMode:
-    def parse_query_str(self, _query_str: str) -> Query | None:
+    def matches_query_str(self, _query_str: str) -> bool:
         """
-        Return a Query if the input should be handled by the mode, else None
+        Return if the input should be handled by the mode
         """
-        return None
+        return False
 
     def handle_backspace(self, _query_str: str) -> Query | None:
         """
