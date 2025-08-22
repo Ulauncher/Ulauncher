@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from os.path import basename
 
-from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 
@@ -19,11 +18,8 @@ class FileBrowserResult(Result):
             icon=get_icon_from_path(path),
         )
 
-    def get_highlightable_input(self, query: Query) -> str | None:
-        # only highlight when you put a filter query in after the path (e.g. ~/Downloads/txt)
-        if query.argument:
-            return basename(query.argument)
-        return None
+    def get_highlightable_input(self, query_str: str) -> str:
+        return basename(query_str)
 
 
 class CopyPath(Result):

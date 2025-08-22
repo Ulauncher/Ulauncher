@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Union
 
-from ulauncher.internals.query import Query
 from ulauncher.utils.basedataclass import BaseDataClass
 
 """
@@ -51,10 +50,8 @@ class Result(BaseDataClass):
     def get_icon(self) -> str | None:
         return self.icon
 
-    def get_highlightable_input(self, query: Query) -> str | None:
-        if not self.keyword or self.keyword == query.keyword:
-            return query.argument
-        return str(query)
+    def get_highlightable_input(self, query_str: str) -> str:
+        return query_str
 
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         return [(self.name, 1.0), (self.description, 0.8)]

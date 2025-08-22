@@ -120,7 +120,7 @@ class ResultWidget(Gtk.EventBox):
             viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
     def highlight_name(self) -> None:
-        highlightable_input = self.result.get_highlightable_input(self.query)
+        highlightable_input = self.result.get_highlightable_input(str(self.query))
         if highlightable_input and (self.result.searchable or self.result.highlightable):
             labels = []
 
