@@ -34,7 +34,7 @@ class BaseMode:
         """
         return []
 
-    def get_fallback_results(self) -> Iterable[Result]:
+    def get_fallback_results(self, _query_str: str) -> Iterable[Result]:
         """
         Called if nothing matches the user input
         """

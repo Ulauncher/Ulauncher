@@ -90,7 +90,7 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw", is_default_search=True)
         shortcuts_db.values.return_value = [shortcut]
 
-        assert mode.get_fallback_results() == [shortcut_result.return_value]
+        assert mode.get_fallback_results("") == [shortcut_result.return_value]
 
     def test_get_triggers(self, mode: ShortcutMode, shortcuts_db: MagicMock) -> None:
         shortcut = ShortcutRecord(keyword="kw")

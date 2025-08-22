@@ -55,8 +55,9 @@ class ShortcutMode(BaseMode):
 
         return [convert_to_result(shortcut, query)]
 
-    def get_fallback_results(self) -> list[ShortcutResult]:
-        return [convert_to_result(s) for s in self.shortcuts_db.values() if s["is_default_search"]]
+    def get_fallback_results(self, query_str: str) -> list[ShortcutResult]:
+        query = Query(None, query_str)
+        return [convert_to_result(s, query) for s in self.shortcuts_db.values() if s["is_default_search"]]
 
     def get_triggers(self) -> Iterator[Result]:
         for shortcut in self.shortcuts_db.values():

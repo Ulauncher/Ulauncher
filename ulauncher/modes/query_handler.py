@@ -98,7 +98,7 @@ class QueryHandler:
         # If the search result is empty, add the default items for all other modes (only shortcuts currently)
         if not results and str(self.query):
             for mode in get_modes():
-                for fallback_result in mode.get_fallback_results():
+                for fallback_result in mode.get_fallback_results(str(self.query)):
                     results.append(fallback_result)
                     self.mode_map[fallback_result] = mode
         handle_action(results)
