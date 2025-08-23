@@ -22,22 +22,25 @@ class ExtensionSocketController:
     """
 
     ext_id: str
-    data_controller: ExtensionController
+    ext_controller: ExtensionController
     manifest: ExtensionManifest
+    socket_controllers: dict[str, ExtensionSocketController]
 
-    def __init__(self, controllers: dict[str, ExtensionSocketController], framer: JSONFramer, ext_id: str) -> None:
+    def __init__(
+        self, socket_controllers: dict[str, ExtensionSocketController], framer: JSONFramer, ext_id: str
+    ) -> None:
         if not ext_id:
             msg = "No ext_id provided"
             raise RuntimeError(msg)
-        self.controllers = controllers
+        self.socket_controllers = socket_controllers
         self.framer: JSONFramer = framer
         self.ext_id = ext_id
-        self.data_controller = ExtensionController.create(ext_id)
+        self.ext_controller = ExtensionController.create(ext_id)
         ext_path = extension_finder.locate(ext_id)
         assert ext_path, f"No extension could be found matching {ext_id}"
         self.manifest = ExtensionManifest.load(ext_path)
 
-        self.controllers[ext_id] = self
+        self.socket_controllers[ext_id] = self
         self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
@@ -56,7 +59,7 @@ class ExtensionSocketController:
         Handles user query with a keyword from this extension
         :returns: action object
         """
-        triggers = self.data_controller.user_triggers
+        triggers = self.ext_controller.user_triggers
         trigger_id = next((t_id for t_id, t in triggers.items() if t.user_keyword == query.keyword), None)
 
         return self.trigger_event(
@@ -91,4 +94,4 @@ class ExtensionSocketController:
     def handle_close(self, _framer: JSONFramer) -> None:
         logger.info('Extension "%s" disconnected', self.ext_id)
         with contextlib.suppress(Exception):
-            del self.controllers[self.ext_id]
+            del self.socket_controllers[self.ext_id]

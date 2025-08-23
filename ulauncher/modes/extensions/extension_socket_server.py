@@ -27,16 +27,16 @@ events = EventBus("extension")
 class ExtensionSocketServer(metaclass=Singleton):
     socket_path: str
     service: Gio.SocketService | None
-    controllers: dict[str, ExtensionSocketController]
+    socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
-    active_controller: ExtensionSocketController | None = None
+    active_socket_controller: ExtensionSocketController | None = None
     active_event: dict[str, Any] | None = None
     current_loading_timer: TimerContext | None = None
 
     def __init__(self) -> None:
         self.service = None
         self.socket_path = get_socket_path()
-        self.controllers = {}
+        self.socket_controllers = {}
         self.pending = {}
         events.set_self(self)
 
@@ -52,12 +52,12 @@ class ExtensionSocketServer(metaclass=Singleton):
             Gio.UnixSocketAddress.new(self.socket_path), Gio.SocketType.STREAM, Gio.SocketProtocol.DEFAULT, None
         )
         self.pending = {}
-        self.controllers = {}
+        self.socket_controllers = {}
 
         def starts_extensions() -> None:
-            for controller in ExtensionController.iterate():
-                if controller.is_enabled and not controller.has_error:
-                    controller.start_detached()
+            for ext_controller in ExtensionController.iterate():
+                if ext_controller.is_enabled and not ext_controller.has_error:
+                    ext_controller.start_detached()
 
         GLib.idle_add(starts_extensions)
 
@@ -78,7 +78,7 @@ class ExtensionSocketServer(metaclass=Singleton):
                     GObject.signal_handler_disconnect(framer, msg_id)
             ext_id: str | None = event.get("ext_id")
             assert ext_id
-            ExtensionSocketController(self.controllers, framer, ext_id)
+            ExtensionSocketController(self.socket_controllers, framer, ext_id)
             # TODO: This is ugly, but we have no other way to detect the extension started successfully
             ExtensionController.create(ext_id).is_running = True
         else:
@@ -91,8 +91,8 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service = None
 
     def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
-        if data_controller := ExtensionController.get_from_keyword(keyword):
-            return self.controllers.get(data_controller.id)
+        if ext_controller := ExtensionController.get_from_keyword(keyword):
+            return self.socket_controllers.get(ext_controller.id)
         return None
 
     def _cancel_loading(self) -> None:
@@ -103,28 +103,28 @@ class ExtensionSocketServer(metaclass=Singleton):
     def on_query_change(self) -> None:
         self._cancel_loading()
         self.active_event = None
-        self.active_controller = None
+        self.active_socket_controller = None
 
     @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
-        if self.active_controller:
-            self.active_controller.trigger_event(event)
+        if self.active_socket_controller:
+            self.active_socket_controller.trigger_event(event)
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
-        if controller := ExtensionSocketServer().controllers.get(ext_id):
+        if socket_controller := ExtensionSocketServer().socket_controllers.get(ext_id):
             for p_id, new_value in data.get("preferences", {}).items():
-                pref = controller.data_controller.user_preferences.get(p_id)
+                pref = socket_controller.ext_controller.user_preferences.get(p_id)
                 if pref and new_value != pref.value:
                     event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
-                    controller.trigger_event(event_data)
+                    socket_controller.trigger_event(event_data)
 
     @events.on
-    def handle_response(self, response: dict[str, Any], controller: ExtensionSocketController) -> None:
-        if not self.active_controller and not self.active_event:
+    def handle_response(self, response: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
+        if not self.active_socket_controller and not self.active_event:
             self.active_event = response.get("event")
-            self.active_controller = controller
-        elif self.active_controller != controller or self.active_event != response.get("event"):
+            self.active_socket_controller = socket_controller
+        elif self.active_socket_controller != socket_controller or self.active_event != response.get("event"):
             # This can happen if the extension was killed from a task manager
             logger.warning("Received response from different controller or event")
             return
@@ -133,26 +133,26 @@ class ExtensionSocketServer(metaclass=Singleton):
         events.emit("extension_mode:handle_action", response.get("action"))
 
     @events.on
-    def handle_event(self, event: dict[str, Any], controller: ExtensionSocketController) -> None:
+    def handle_event(self, event: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
         self._cancel_loading()
         self.current_loading_timer = timer(
             LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
         )
         self.active_event = event
-        self.active_controller = controller
+        self.active_socket_controller = socket_controller
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
     ) -> None:
-        controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+        ext_controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    await asyncio.gather(*[c.start() for c in controllers])
+                    await asyncio.gather(*[c.start() for c in ext_controllers])
                 elif job == "stop":
-                    await asyncio.gather(*[c.stop() for c in controllers])
+                    await asyncio.gather(*[c.stop() for c in ext_controllers])
 
         def run_batch() -> None:
             asyncio.run(run_batch_async())
