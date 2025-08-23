@@ -17,18 +17,8 @@ class TestExtensionSocketController:
         return {}
 
     @pytest.fixture(autouse=True)
-    def extension_finder(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_finder")
-
-    @pytest.fixture(autouse=True)
-    def esc_extension_finder(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_socket_controller.extension_finder")
-
-    @pytest.fixture(autouse=True)
-    def manifest(self, mocker: MockerFixture) -> Any:
-        return mocker.patch(
-            "ulauncher.modes.extensions.extension_socket_controller.ExtensionManifest.load"
-        ).return_value
+    def extension_finder_locate(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.extensions.extension_finder.locate")
 
     @pytest.fixture
     def controller(self, controllers: dict[str, ExtensionSocketController]) -> ExtensionSocketController:

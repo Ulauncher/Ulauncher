@@ -7,7 +7,6 @@ from typing import Any
 from ulauncher.internals.query import Query
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
@@ -23,7 +22,6 @@ class ExtensionSocketController:
 
     ext_id: str
     ext_controller: ExtensionController
-    manifest: ExtensionManifest
     socket_controllers: dict[str, ExtensionSocketController]
 
     def __init__(
@@ -38,13 +36,12 @@ class ExtensionSocketController:
         self.ext_controller = ExtensionController.create(ext_id)
         ext_path = extension_finder.locate(ext_id)
         assert ext_path, f"No extension could be found matching {ext_id}"
-        self.manifest = ExtensionManifest.load(ext_path)
 
         self.socket_controllers[ext_id] = self
-        self._debounced_send_event = debounce(self.manifest.input_debounce)(self._send_event)
+        self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self._send_event)
 
         # legacy_preferences_load is useless and deprecated
-        prefs = {p_id: pref.value for p_id, pref in self.manifest.get_user_preferences(ext_id).items()}
+        prefs = {p_id: pref.value for p_id, pref in self.ext_controller.user_preferences.items()}
         self._send_event({"type": "event:legacy_preferences_load", "args": [prefs]})
         logger.info('Extension "%s" connected', ext_id)
         self.framer.connect("message_parsed", self.handle_response)
