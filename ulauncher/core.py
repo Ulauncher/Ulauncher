@@ -55,7 +55,18 @@ class UlauncherCore:
                 self._triggers.append(trigger)
                 self._mode_map[trigger] = mode
                 if trigger.keyword:
-                    self._keywords[trigger.keyword] = trigger
+                    if trigger.keyword in self._keywords:
+                        current_trigger = self._keywords[trigger.keyword]
+                        logger.warning(
+                            'Cannot register keyword "%s" for "%s" (%s). It is already used by "%s" (%s).',
+                            trigger.keyword,
+                            trigger.name,
+                            trigger.__class__.__name__,
+                            current_trigger.name,
+                            current_trigger.__class__.__name__,
+                        )
+                    else:
+                        self._keywords[trigger.keyword] = trigger
 
         self._triggers_loaded = True
 

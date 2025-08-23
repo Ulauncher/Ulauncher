@@ -14,6 +14,10 @@ DEFAULT_ACTION = True  #  keep window open and do nothing
 events = EventBus("extension_mode")
 
 
+class ExtensionTrigger(Result):
+    searchable = True
+
+
 class ExtensionMode(BaseMode):
     ext_socket_server: ExtensionSocketServer
     active_ext_id: str | None = None
@@ -64,13 +68,12 @@ class ExtensionMode(BaseMode):
                     }
                 )
 
-                yield Result(
+                yield ExtensionTrigger(
                     name=html.escape(trigger.name),
                     description=html.escape(trigger.description),
                     icon=ext.get_normalized_icon_path(trigger.icon),
-                    on_enter=action,
                     keyword=trigger.keyword,
-                    searchable=True,
+                    on_enter=action,
                 )
 
     def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
