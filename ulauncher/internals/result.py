@@ -41,15 +41,6 @@ class Result(BaseDataClass):
 
         super().__setitem__(key, value)
 
-    def get_keyword(self) -> str:
-        return self.keyword
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_icon(self) -> str | None:
-        return self.icon
-
     def get_highlightable_input(self, query_str: str) -> str:
         return query_str
 
