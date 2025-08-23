@@ -37,7 +37,7 @@ class ExtensionPreference(ExtensionManifestPreference):
 
 
 class ExtensionTrigger(ExtensionManifestTrigger):
-    user_keyword = ""
+    pass
 
 
 class ExtensionState(JsonConf):
@@ -62,6 +62,10 @@ class ExtensionState(JsonConf):
 logger = logging.getLogger()
 controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
+
+
+def _load_preferences(ext_id: str) -> JsonConf:
+    return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
 
 class ExtensionController:
@@ -116,7 +120,7 @@ class ExtensionController:
     def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
         for controller in controller_cache.values():
             for trigger in controller.triggers.values():
-                if controller.is_running and keyword and keyword == trigger.user_keyword:
+                if controller.is_running and keyword and keyword == trigger.keyword:
                     return controller
 
         return None
@@ -156,33 +160,29 @@ class ExtensionController:
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
-        user_prefs_json = self._get_raw_preferences(self.id)
-        user_prefs = {}
-        for p_id, pref in self.manifest.preferences.items():
+        prefs_json = _load_preferences(self.id)
+        prefs = {}
+        for p_id, manifest_pref in self.manifest.preferences.items():
             # copy to avoid mutating
-            user_pref = ExtensionPreference(**pref)
-            user_pref.value = user_prefs_json.get("preferences", {}).get(p_id, pref.default_value)
-            user_prefs[p_id] = user_pref
-        return user_prefs
+            pref = ExtensionPreference(**manifest_pref)
+            pref.value = prefs_json.get("preferences", {}).get(p_id, manifest_pref.default_value)
+            prefs[p_id] = pref
+        return prefs
 
     @property
     def triggers(self) -> dict[str, ExtensionTrigger]:
-        user_prefs_json = self._get_raw_preferences(self.id)
+        user_prefs_json = _load_preferences(self.id)
         triggers = {}
-        for t_id, trigger in self.manifest.triggers.items():
-            combined_trigger = ExtensionTrigger(trigger)
-            if trigger.keyword:
-                user_keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword)
-                combined_trigger.user_keyword = user_keyword
-            triggers[t_id] = combined_trigger
+        for t_id, manifest_trigger in self.manifest.triggers.items():
+            trigger = ExtensionTrigger(manifest_trigger)
+            if user_keyword := user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword):
+                trigger.keyword = user_keyword
+            triggers[t_id] = trigger
 
         return triggers
 
-    def _get_raw_preferences(self, ext_id: str) -> JsonConf:
-        return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
-
     def save_user_preferences(self, data: Any) -> None:
-        user_prefs_json = self._get_raw_preferences(self.id)
+        user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
 
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:

@@ -57,7 +57,7 @@ class ExtensionSocketController:
         :returns: action object
         """
         triggers = self.ext_controller.triggers
-        trigger_id = next((t_id for t_id, t in triggers.items() if t.user_keyword == query.keyword), None)
+        trigger_id = next((t_id for t_id, t in triggers.items() if t.keyword == query.keyword), None)
 
         return self.trigger_event(
             {

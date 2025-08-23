@@ -62,24 +62,23 @@ class ExtensionMode(BaseMode):
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
-                action: Any = None
-                if not trigger.keyword:
-                    action = {
+                action = (
+                    f"{trigger.keyword} "
+                    if trigger.keyword
+                    else {
                         "type": "event:launch_trigger",
                         "args": [trigger_id],
                         "ext_id": ext.id,
                     }
-                elif trigger.user_keyword:
-                    action = f"{trigger.user_keyword} "
+                )
 
-                if action:
-                    yield Result(
-                        name=html.escape(trigger.name),
-                        description=html.escape(trigger.description),
-                        icon=ext.get_normalized_icon_path(trigger.icon),
-                        on_enter=action,
-                        searchable=True,
-                    )
+                yield Result(
+                    name=html.escape(trigger.name),
+                    description=html.escape(trigger.description),
+                    icon=ext.get_normalized_icon_path(trigger.icon),
+                    on_enter=action,
+                    searchable=True,
+                )
 
     def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
         """
