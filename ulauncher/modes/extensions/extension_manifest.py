@@ -40,14 +40,6 @@ class ExtensionManifestTrigger(JsonConf):
     icon = ""
 
 
-class UserPreference(ExtensionManifestPreference):
-    value: str | int | None = None
-
-
-class UserTrigger(ExtensionManifestTrigger):
-    user_keyword = ""
-
-
 class ExtensionManifest(JsonConf):
     api_version = ""
     authors = ""
@@ -171,32 +163,6 @@ class ExtensionManifest(JsonConf):
 
     def _get_raw_preferences(self, ext_id: str) -> JsonConf:
         return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
-
-    def get_user_preferences(self, ext_id: str) -> dict[str, UserPreference]:
-        user_prefs_json = self._get_raw_preferences(ext_id)
-        user_prefs = {}
-        for p_id, pref in self.preferences.items():
-            # copy to avoid mutating
-            user_pref = UserPreference(**pref)
-            user_pref.value = user_prefs_json.get("preferences", {}).get(p_id, pref.default_value)
-            user_prefs[p_id] = user_pref
-        return user_prefs
-
-    def get_user_triggers(self, ext_id: str) -> dict[str, UserTrigger]:
-        user_prefs_json = self._get_raw_preferences(ext_id)
-        user_triggers = {}
-        for t_id, trigger in self.triggers.items():
-            combined_trigger = UserTrigger(trigger)
-            if trigger.keyword:
-                user_keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword)
-                combined_trigger.user_keyword = user_keyword
-            user_triggers[t_id] = combined_trigger
-
-        return user_triggers
-
-    def save_user_preferences(self, ext_id: str, data: Any) -> None:
-        user_prefs_json = self._get_raw_preferences(ext_id)
-        user_prefs_json.save(data)
 
     @classmethod
     def load(cls, path: str | Path) -> ExtensionManifest:

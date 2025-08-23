@@ -61,7 +61,7 @@ class ExtensionMode(BaseMode):
             if not ext.is_enabled:
                 continue
 
-            for trigger_id, trigger in ext.user_triggers.items():
+            for trigger_id, trigger in ext.triggers.items():
                 action: Any = None
                 if not trigger.keyword:
                     action = {

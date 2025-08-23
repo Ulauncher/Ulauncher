@@ -50,8 +50,8 @@ def get_extension_data(controller: ExtensionController) -> dict[str, Any]:
         "icon": controller.get_normalized_icon_path(),
         "authors": controller.manifest.authors,
         "instructions": controller.manifest.instructions,
-        "preferences": controller.user_preferences,
-        "triggers": controller.user_triggers,
+        "preferences": controller.preferences,
+        "triggers": controller.triggers,
         "is_manageable": controller.is_manageable,
         "is_stopped": not controller.is_running,
     }

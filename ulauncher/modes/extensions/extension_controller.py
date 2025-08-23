@@ -22,14 +22,22 @@ from ulauncher.modes.extensions.extension_manifest import (
     ExtensionIncompatibleRecoverableError,
     ExtensionManifest,
     ExtensionManifestError,
-    UserPreference,
-    UserTrigger,
+    ExtensionManifestPreference,
+    ExtensionManifestTrigger,
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
 from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
+
+
+class ExtensionPreference(ExtensionManifestPreference):
+    value: str | int | None = None
+
+
+class ExtensionTrigger(ExtensionManifestTrigger):
+    user_keyword = ""
 
 
 class ExtensionState(JsonConf):
@@ -107,7 +115,7 @@ class ExtensionController:
     @classmethod
     def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
         for controller in controller_cache.values():
-            for trigger in controller.user_triggers.values():
+            for trigger in controller.triggers.values():
                 if controller.is_running and keyword and keyword == trigger.user_keyword:
                     return controller
 
@@ -147,15 +155,35 @@ class ExtensionController:
         return extension_finder.locate(self.id) is not None
 
     @property
-    def user_preferences(self) -> dict[str, UserPreference]:
-        return self.manifest.get_user_preferences(self.id)
+    def preferences(self) -> dict[str, ExtensionPreference]:
+        user_prefs_json = self._get_raw_preferences(self.id)
+        user_prefs = {}
+        for p_id, pref in self.manifest.preferences.items():
+            # copy to avoid mutating
+            user_pref = ExtensionPreference(**pref)
+            user_pref.value = user_prefs_json.get("preferences", {}).get(p_id, pref.default_value)
+            user_prefs[p_id] = user_pref
+        return user_prefs
 
     @property
-    def user_triggers(self) -> dict[str, UserTrigger]:
-        return self.manifest.get_user_triggers(self.id)
+    def triggers(self) -> dict[str, ExtensionTrigger]:
+        user_prefs_json = self._get_raw_preferences(self.id)
+        triggers = {}
+        for t_id, trigger in self.manifest.triggers.items():
+            combined_trigger = ExtensionTrigger(trigger)
+            if trigger.keyword:
+                user_keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword)
+                combined_trigger.user_keyword = user_keyword
+            triggers[t_id] = combined_trigger
+
+        return triggers
+
+    def _get_raw_preferences(self, ext_id: str) -> JsonConf:
+        return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
     def save_user_preferences(self, data: Any) -> None:
-        self.manifest.save_user_preferences(self.id, data)
+        user_prefs_json = self._get_raw_preferences(self.id)
+        user_prefs_json.save(data)
 
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
@@ -284,7 +312,7 @@ class ExtensionController:
 
             ext_deps = ExtensionDependencies(self.id, self.path)
             cmd = [sys.executable, f"{self.path}/main.py"]
-            prefs = {p_id: pref.value for p_id, pref in self.user_preferences.items()}
+            prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
             triggers = {t_id: t.keyword for t_id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}
