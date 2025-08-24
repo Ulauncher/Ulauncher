@@ -83,7 +83,7 @@ class UlauncherCore:
         # keyword match
         keyword, argument = query_str.split(" ", 1) if " " in query_str else (query_str, None)
         trigger = self._keywords.get(keyword)
-        if trigger and (argument is not None or getattr(trigger, "run_without_argument", False)):
+        if trigger and argument is not None:
             self._mode = self._mode_map.get(trigger)
             self.query = Query(keyword, argument)
 

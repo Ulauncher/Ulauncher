@@ -57,16 +57,19 @@ class ShortcutMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         for shortcut in self.shortcuts_db.values():
-            yield ShortcutTrigger(**shortcut, description=get_description(shortcut))
+            trigger = ShortcutTrigger(**shortcut, description=get_description(shortcut))
+            if shortcut.run_without_argument:
+                trigger.keyword = ""
+            yield trigger
 
     def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata:
         if isinstance(result, ShortcutTrigger):
-            if not result.run_without_argument:
+            if result.keyword:
                 return f"{result.keyword} "
             return run_shortcut(result.cmd)
         if isinstance(result, ShortcutResult):
             argument = query.argument or "" if query.keyword == result.keyword else str(query)
-            if argument or result.run_without_argument:
+            if argument or not result.keyword:
                 return run_shortcut(result.cmd, argument or None)
             return True
         logger.error("Unexpected result type for Shortcut mode '%s'", result)
