@@ -66,7 +66,7 @@ class ExtensionMode(BaseMode):
                     f"{trigger.keyword} "
                     if trigger.keyword
                     else {
-                        "type": "event:launch_trigger",
+                        "type": "action:launch_trigger",
                         "args": [trigger_id],
                         "ext_id": ext.id,
                     }

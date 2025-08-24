@@ -68,6 +68,10 @@ def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR
             )
             return action_metadata.get("keep_app_open") is True
 
+        if event_type == "action:launch_trigger":
+            _events.emit("extension:trigger_event", {**action_metadata, "type": "event:launch_trigger"})
+            return True
+
     else:
         _logger.warning("Invalid action from mode: %s", type(action_metadata).__name__)
 

@@ -107,8 +107,10 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
-        if self.active_socket_controller:
-            self.active_socket_controller.trigger_event(event)
+        ext_id = event.get("ext_id")
+        socket_controller = self.socket_controllers.get(ext_id) if ext_id else self.active_socket_controller
+        if socket_controller:
+            socket_controller.trigger_event(event)
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
