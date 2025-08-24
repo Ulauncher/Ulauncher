@@ -9,10 +9,6 @@ logger = logging.getLogger()
 
 
 def copy(text: str) -> ActionMetadata:
-    if not text:
-        msg = "Copy argument cannot be empty"
-        logger.error(msg)
-        raise ValueError(msg)
     if not isinstance(text, str):
         msg = f'Copy argument "{text}" is invalid. It must be a string'
         logger.error(msg)
