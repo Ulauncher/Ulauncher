@@ -86,7 +86,7 @@ class TestShortcutMode:
 
     def test_activate_trigger_no_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", None)
-        result = ShortcutTrigger(keyword="kw", cmd="/bin/asdf", run_without_argument=True)
+        result = ShortcutTrigger(cmd="/bin/asdf", run_without_argument=True)
         mode.activate_result(result, query, False)
         run_shortcut.assert_called_once_with("/bin/asdf")
 
@@ -102,8 +102,10 @@ class TestShortcutMode:
         mode.activate_result(result, query, False)
         run_shortcut.assert_not_called()
 
-    def test_activate_shortcutresult_cmd_run_without_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+    def test_activate_shortcutresult_run_without_args_no_op(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
+        # "run without args" are used for to define custom launch scripts etc. they should have no keyword
+        # it would be weird if typing without pressing enter would run a command
         query = Query("kw", None)
         result = ShortcutResult(keyword="kw", cmd="/bin/asdf", run_without_argument=True)
         mode.activate_result(result, query, False)
-        run_shortcut.assert_called_once_with("/bin/asdf", None)
+        run_shortcut.assert_not_called()
