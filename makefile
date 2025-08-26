@@ -148,9 +148,16 @@ docker: # Build the docker image (only needed if you make changes to it)
 
 prefs: # Build the preferences web app
 	@set -euo pipefail
-	if [ ! -d "preferences-src" ]; then
-		echo -e "${BOLD}${RED}preferences-src does not exist.${RESET}"
-		exit 1
+	if [ -z "${YARN_BIN}" ] || [ ! -x "${YARN_BIN}" ]; then \
+	  echo -e "${BOLD}${RED}yarn is not installed or not executable.${RESET}"; \
+	  echo -e "${BOLD}${RED}yarn is needed to set up the local build environment.${RESET}"; \
+	  echo -e "${BOLD}${RED}Please visit https://classic.yarnpkg.com/en/docs/install to install yarn.${RESET}"; \
+	  exit 1; \
+  fi
+
+	if [ ! -d "preferences-src" ]; then \
+		echo -e "${BOLD}${RED}preferences-src does not exist.${RESET}"; \
+		exit 1; \
 	fi
 
 	if [ -z "$(FORCE)" ] && [ -d data/preferences ] && [ -z $(shell eval "find preferences-src -newer data/preferences -print -quit") ] ; then
