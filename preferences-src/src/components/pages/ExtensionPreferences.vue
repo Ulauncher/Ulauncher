@@ -79,7 +79,7 @@
           :description="trigger.description"
           :label="`${trigger.name} keyword`"
         >
-          <b-form-input :ref="`trigger_keyword_${id}`" :value="trigger.user_keyword"></b-form-input>
+          <b-form-input :ref="`trigger_keyword_${id}`" :value="trigger.keyword"></b-form-input>
         </b-form-group>
       </template>
 
@@ -206,7 +206,7 @@ export default {
         triggers[id] = {}
         let { $el } = this.$refs[`trigger_keyword_${id}`][0]
         if (trigger.keyword) {
-          triggers[id].keyword = trigger.user_keyword = $el.value.trim()
+          triggers[id].keyword = trigger.keyword = $el.value.trim()
         }
       });
       Object.entries(this.extension.preferences).forEach(([id, pref]) => {
