@@ -32,12 +32,8 @@ def get_cli_args() -> CLIArguments:
         "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
     )
-    parser.add_argument(
-        "-h", "--help", action="help", help=_("Show this help message and exit")
-    )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help=_("Show debug log messages")
-    )
+    parser.add_argument("-h", "--help", action="help", help=_("Show this help message and exit"))
+    parser.add_argument("-v", "--verbose", action="store_true", help=_("Show debug log messages"))
     parser.add_argument(
         "--version",
         action="version",
@@ -47,24 +43,18 @@ def get_cli_args() -> CLIArguments:
     parser.add_argument(
         "--daemon",
         action="store_true",
-        help=_(
-            "Run Ulauncher as a background process, without initially showing the window"
-        ),
+        help=_("Run Ulauncher as a background process, without initially showing the window"),
     )
     parser.add_argument(
         "--dev",
         action="store_true",
-        help=_(
-            "Developer mode (enables verbose logging and Preferences UI context menu)"
-        ),
+        help=_("Developer mode (enables verbose logging and Preferences UI context menu)"),
     )
     # deprecated
     parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--no-window-shadow", action="store_true", help=argparse.SUPPRESS
-    )
+    parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
 
     subparsers = parser.add_subparsers(
         prog="ulauncher",
@@ -89,9 +79,7 @@ def get_cli_args() -> CLIArguments:
         help="Install an extension from URL",
         description="Install an extension from a Git URL or local path",
     )
-    install_parser.add_argument(
-        "input", help="Git URL or path of the extension to install"
-    )
+    install_parser.add_argument("input", help="Git URL or path of the extension to install")
     install_parser.set_defaults(handler=partial(install_extension, install_parser))
 
     uninstall_parser = subparsers.add_parser(
@@ -101,9 +89,7 @@ def get_cli_args() -> CLIArguments:
         description="Remove an installed extension by ID or URL",
     )
     uninstall_parser.add_argument("input", help="Extension ID or URL to uninstall")
-    uninstall_parser.set_defaults(
-        handler=partial(uninstall_extension, uninstall_parser)
-    )
+    uninstall_parser.set_defaults(handler=partial(uninstall_extension, uninstall_parser))
 
     upgrade_parser = subparsers.add_parser(
         "upgrade",
