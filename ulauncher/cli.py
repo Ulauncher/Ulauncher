@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import argparse
 from functools import lru_cache, partial
 from gettext import gettext as _
+
 from ulauncher import version
 from ulauncher.modes.extensions.extension_cli_handlers import (
     install_extension,
