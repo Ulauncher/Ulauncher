@@ -6,7 +6,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from ulauncher.utils.dbus_trigger_event import dbus_trigger_event
+from ulauncher.utils.dbus import dbus_trigger_event
 
 if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_controller import ExtensionController
