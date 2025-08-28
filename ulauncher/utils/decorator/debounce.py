@@ -1,6 +1,6 @@
 import contextlib
-from typing import Any, Callable
 from functools import wraps
+from typing import Any, Callable
 
 from ulauncher.utils.timer import timer
 
@@ -24,4 +24,3 @@ def debounce(wait: float) -> Callable[..., Callable[..., None]]:
         return debounced
 
     return decorator
-
