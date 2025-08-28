@@ -75,7 +75,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.active_socket_controller = socket_controller
             socket_controller.handle_query(query)
             self.current_loading_timer = timer(
-                LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
+                LOADING_DELAY, lambda: events.emit("extensions:handle_action", [{"name": "Loading..."}])
             )
             return socket_controller.ext_id
         return None
@@ -146,7 +146,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             return
 
         self._cancel_loading()
-        events.emit("extension_mode:handle_action", response.get("action"))
+        events.emit("extensions:handle_action", response.get("action"))
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None

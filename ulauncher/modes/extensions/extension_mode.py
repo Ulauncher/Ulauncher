@@ -11,7 +11,7 @@ from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketSe
 from ulauncher.utils.eventbus import EventBus
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
-events = EventBus("extension_mode")
+events = EventBus("extensions")
 
 
 class ExtensionTrigger(Result):
