@@ -132,13 +132,13 @@ class ExtensionSocketServer(metaclass=Singleton):
             return
 
         self._cancel_loading()
-        events.emit("extension_mode:handle_action", response.get("action"))
+        events.emit("extensions:handle_action", response.get("action"))
 
     @events.on
     def handle_event(self, event: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
         self._cancel_loading()
         self.current_loading_timer = timer(
-            LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
+            LOADING_DELAY, lambda: events.emit("extensions:handle_action", [{"name": "Loading..."}])
         )
         self.active_event = event
         self.active_socket_controller = socket_controller
