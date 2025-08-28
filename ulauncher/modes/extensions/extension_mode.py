@@ -4,13 +4,14 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Iterator, Literal
+from typing import Any, Iterator, Literal, cast
+
+from gi.repository import GLib
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
@@ -23,28 +24,64 @@ class ExtensionTrigger(Result):
 
 
 class ExtensionMode(BaseMode):
-    ext_socket_server: ExtensionSocketServer
     active_ext_id: str | None = None
 
     def __init__(self) -> None:
-        self.ext_socket_server = ExtensionSocketServer()
-        self.ext_socket_server.start()
         events.set_self(self)
+        GLib.idle_add(self.starts_extensions)
 
-    def handle_query(self, query: Query) -> Any:
-        controller = None
+    def starts_extensions(self) -> None:
+        for ext in ExtensionController.iterate():
+            if ext.is_enabled and not ext.has_error:
+                ext.start_detached()
+                # legacy_preferences_load is useless and deprecated
+                prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
+                ext.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
+
+    def handle_query(self, query: Query) -> list[Result]:
+        ext: ExtensionController | None = None
         if query.keyword:
-            self.ext_socket_server.on_query_change()
-            controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
+            ext = ExtensionController.get_from_keyword(query.keyword)
 
-        if not controller:
+        if not ext:
             msg = f"Query not valid for extension mode {query}"
             raise RuntimeError(msg)
 
-        self.active_ext_id = controller.ext_id
-        return controller.handle_query(query)
+        self.active_ext_id = ext.id
+        trigger_id = next((t_id for t_id, t in ext.triggers.items() if t.keyword == query.keyword), None)
+        event = {
+            "type": "event:input_trigger",
+            "ext_id": ext.id,
+            "args": [query.argument, trigger_id],
+        }
+
+        self.send_message(ext.id, event)
+        return []
 
     @events.on
+    def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
+        ext = ExtensionController.create(ext_id)
+        for p_id, new_value in data.get("preferences", {}).items():
+            pref = ext.preferences.get(p_id)
+            if pref and new_value != pref.value:
+                event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
+                self.send_message(ext_id, event_data)
+
+    @events.on
+    def trigger_event(self, event: dict[str, Any]) -> None:
+        ext_id = cast("str", event.get("ext_id"))
+        self.send_message(ext_id, event)
+
+    def send_message(self, ext_id: str, message: dict[str, Any]) -> None:
+        if ext := ExtensionController.create(ext_id):
+            ext.send_message(message)
+        else:
+            logger.warning("Cannot send message to unknown extension ID %s", ext_id)
+
+    @events.on
+    def handle_response(self, response: dict[str, Any]) -> None:
+        self.handle_action(response.get("action"))
+
     def handle_action(self, action_metadata: ActionMetadata | None) -> None:
         if self.active_ext_id and isinstance(action_metadata, list):
             controller = ExtensionController(self.active_ext_id)

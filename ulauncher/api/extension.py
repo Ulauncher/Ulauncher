@@ -28,13 +28,16 @@ class Extension:
     """
 
     def __init__(self) -> None:
-        log_handler = logging.StreamHandler()
+        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
+        self._client = Client(self, sys.stdin, sys.stdout)
+        # Redirect stdout to stderr for extension environment, since we need stdout for JSON communication
+        sys.stdout = sys.stderr
+        log_handler = logging.StreamHandler(sys.stderr)
         log_handler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
-        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.ext_id)
+
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
-        self._client = Client(self)
         self.preferences = {}
         signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.graceful_unload(signal))
         with contextlib.suppress(Exception):

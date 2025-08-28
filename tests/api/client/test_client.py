@@ -1,5 +1,5 @@
 from typing import Any
-from unittest.mock import MagicMock, Mock, create_autospec
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -32,11 +32,8 @@ class TestClient:
         return ext
 
     @pytest.fixture
-    def client(self, extension: Any, framer: Any, sock_client: Any) -> Client:
-        client = Client(extension)
-        client.framer = framer
-        client.client = sock_client
-        return client
+    def client(self, extension: Any, stdin: Any, stdout: Any) -> Client:
+        return Client(stdin=stdin, stdout=stdout, extension=extension)
 
     def test_connect__connect_is_called(self, client: Any, mainloop: Any) -> None:
         client.connect()
@@ -45,11 +42,10 @@ class TestClient:
         mainloop.return_value.run.assert_called_once()
 
     def test_on_message__trigger_event__is_called(self, client: Client, extension: MagicMock) -> None:
-        client.on_message(Mock(), {"hello": "world"})
+        client.on_message({"hello": "world"})
         extension.trigger_event.assert_called_with({"hello": "world"})
 
-    def test_on_close__unload_event__is_triggered(self, client: Client, extension: MagicMock) -> None:
-        client.on_close(Mock())
+    def test_on_close__unload_event__is_triggered(self, extension: MagicMock) -> None:
         extension.trigger_event.assert_called_with({"type": "event:unload"})
 
     def test_send__framer_send__is_called(self, client: Client, framer: MagicMock) -> None:
