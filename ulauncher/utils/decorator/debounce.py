@@ -1,15 +1,17 @@
 import contextlib
+from functools import wraps
 from typing import Any, Callable
 
 from ulauncher.utils.timer import timer
 
 
 def debounce(wait: float) -> Callable[..., Callable[..., None]]:
-    """Decorator that will postpone a functions
+    """Decorator that will postpone a function
     execution until after wait seconds
     have elapsed since the last time it was invoked."""
 
     def decorator(fn: Callable[..., None]) -> Callable[..., None]:
+        @wraps(fn)
         def debounced(*args: Any, **kwargs: Any) -> None:
             def call_it() -> None:
                 fn(*args, **kwargs)
