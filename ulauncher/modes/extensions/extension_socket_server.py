@@ -152,7 +152,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    await asyncio.gather(*[c.start() for c in ext_controllers])
+                    await asyncio.gather(*[c.start() for c in ext_controllers if c.is_enabled])
                 elif job == "stop":
                     await asyncio.gather(*[c.stop() for c in ext_controllers])
 
