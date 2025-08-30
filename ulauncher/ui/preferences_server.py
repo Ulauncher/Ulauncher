@@ -244,8 +244,9 @@ class PreferencesServer:
     async def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
-            tasks = [controller.start() for controller in ExtensionController.iterate() if controller.is_enabled]
-            await asyncio.gather(*tasks)
+            for controller in ExtensionController.iterate():
+                if controller.is_enabled:
+                    controller.start()
         return {ex.id: get_extension_data(ex) for ex in ExtensionController.iterate()}
 
     @route("/extension/add")
@@ -253,7 +254,7 @@ class PreferencesServer:
         logger.info("Add extension: %s", url)
         controller = await ExtensionController.install(url)
         await controller.stop()
-        await controller.start()
+        controller.start()
         return get_extension_data(controller)
 
     @route("/extension/set-prefs")

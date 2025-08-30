@@ -252,11 +252,11 @@ class ExtensionController:
     async def toggle_enabled(self, enabled: bool) -> bool:
         self.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
-            return await self.start()
+            return self.start()
         await self.stop()
         return False
 
-    def start_detached(self) -> None:
+    def start(self) -> bool:
         if not self.is_running:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
@@ -269,10 +269,10 @@ class ExtensionController:
                 self.manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
                 exit_handler("Invalid", str(err))
-                return
+                return False
             except ExtensionIncompatibleRecoverableError as err:
                 exit_handler("Incompatible", str(err))
-                return
+                return False
 
             self.state.save(error_type="", error_message="")  # clear any previous error
 
@@ -290,15 +290,7 @@ class ExtensionController:
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
 
-    async def start(self) -> bool:
-        self.start_detached()
-        for _ in range(100):
-            if self.has_error:
-                return False
-            if self.is_running:
-                return True
-            await asyncio.sleep(0.1)
-        return False
+        return self.is_running
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
