@@ -34,7 +34,7 @@ class ExtensionMode(BaseMode):
     def start_extensions(self) -> None:
         for ext in ExtensionController.iterate():
             if ext.is_enabled and not ext.has_error:
-                ext.start_detached()
+                ext.start()
                 # legacy_preferences_load is useless and deprecated
                 prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
                 ext.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
@@ -104,7 +104,9 @@ class ExtensionMode(BaseMode):
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    await asyncio.gather(*[c.start() for c in ext_controllers if c.is_enabled])
+                    for controller in ExtensionController.iterate():
+                        if controller.is_enabled:
+                            controller.start()
                 elif job == "stop":
                     await asyncio.gather(*[c.stop() for c in ext_controllers])
 
