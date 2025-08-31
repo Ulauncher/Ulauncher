@@ -6,7 +6,7 @@ from . import paths
 
 app_id = "io.ulauncher.Ulauncher"
 dbus_path = "/" + app_id.replace(".", "/")
-version = "6.0.0-beta23"
+version = "6.0.0-beta24"
 api_version = "3.0"
 first_run = not os.path.exists(paths.CONFIG)  # If there is no config dir, assume it's the first run
 first_v6_run = not os.path.exists(paths.STATE)
