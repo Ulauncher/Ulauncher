@@ -28,9 +28,9 @@ class ExtensionMode(BaseMode):
 
     def __init__(self) -> None:
         events.set_self(self)
-        GLib.idle_add(self.starts_extensions)
+        GLib.idle_add(self.start_extensions)
 
-    def starts_extensions(self) -> None:
+    def start_extensions(self) -> None:
         for ext in ExtensionController.iterate():
             if ext.is_enabled and not ext.has_error:
                 ext.start()
