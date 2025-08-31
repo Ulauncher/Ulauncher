@@ -81,9 +81,13 @@ class ExtensionRuntime:
         if self.stdin:
             try:
                 json_str = json.dumps(message) + "\n"
-                self.stdin.write(json_str.encode(), None)
-                self.stdin.flush(None)
-                logger.debug("Sent message to %s: %s", self.ext_id, message)
+                self.stdin.write_async(
+                    buffer=json_str.encode(),
+                    io_priority=GLib.PRIORITY_DEFAULT,
+                    callback=lambda *_: self.stdin.flush_async(GLib.PRIORITY_DEFAULT),
+                )
+                logger.debug("Sending message to %s: %s", self.ext_id, message)
+
             except Exception:
                 logger.exception("Failed to send stdin message to %s", self.ext_id)
 
