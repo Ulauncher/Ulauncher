@@ -44,7 +44,7 @@ class ExtensionMode(BaseMode):
             ext = ExtensionController.get_from_keyword(query.keyword)
 
         if not ext:
-            msg = f"Query not valid for extension mode {query}"
+            msg = f"Extension could not handle query {query}"
             raise RuntimeError(msg)
 
         self.active_ext_id = ext.id
