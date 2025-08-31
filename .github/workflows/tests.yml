@@ -15,7 +15,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:5.0
+    container: ulauncher/build-image:6.3
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
