@@ -244,8 +244,9 @@ class PreferencesServer:
     async def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
         logger.info("Handling /extension/get-all")
         if reload:
-            tasks = [controller.start() for controller in ExtensionController.iterate() if controller.is_enabled]
-            await asyncio.gather(*tasks)
+            for controller in ExtensionController.iterate():
+                if controller.is_enabled:
+                    controller.start()
         return {ex.id: get_extension_data(ex) for ex in ExtensionController.iterate()}
 
     @route("/extension/add")
@@ -254,13 +255,13 @@ class PreferencesServer:
         controller = ExtensionController.create_from_url(url)
         await controller.install()
         await controller.stop()
-        await controller.start()
+        controller.start()
         return get_extension_data(controller)
 
     @route("/extension/set-prefs")
     async def extension_update_prefs(self, ext_id: str, data: dict[str, Any]) -> None:
         logger.info("Update extension preferences %s to %s", ext_id, data)
-        events.emit("extension:update_preferences", ext_id, data)
+        events.emit("extensions:update_preferences", ext_id, data)
         # Note: Must save after emitting because the event above need access to
         # both the new and old data
         ExtensionController.create(ext_id).save_user_preferences(data)

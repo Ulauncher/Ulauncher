@@ -64,12 +64,12 @@ def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR
                 return keep_open
         if event_type == "action:activate_custom":
             _events.emit(
-                "extension:trigger_event", {"type": "event:activate_custom", "ref": action_metadata.get("ref")}
+                "extensions:trigger_event", {"type": "event:activate_custom", "ref": action_metadata.get("ref")}
             )
             return action_metadata.get("keep_app_open") is True
 
         if event_type == "action:launch_trigger":
-            _events.emit("extension:trigger_event", {**action_metadata, "type": "event:launch_trigger"})
+            _events.emit("extensions:trigger_event", {**action_metadata, "type": "event:launch_trigger"})
             return True
 
     else:
