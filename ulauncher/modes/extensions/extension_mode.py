@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import html
-from typing import Any, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -9,6 +9,9 @@ from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
+
+if TYPE_CHECKING:
+    from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 events = EventBus("extension_mode")
@@ -28,17 +31,17 @@ class ExtensionMode(BaseMode):
         events.set_self(self)
 
     def handle_query(self, query: Query) -> Any:
-        controller = None
+        socket_controller: ExtensionSocketController | None = None
         if query.keyword:
             self.ext_socket_server.on_query_change()
-            controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
+            socket_controller = self.ext_socket_server.get_controller_by_keyword(query.keyword)
 
-        if not controller:
+        if not socket_controller:
             msg = f"Query not valid for extension mode {query}"
             raise RuntimeError(msg)
 
-        self.active_ext_id = controller.ext_id
-        return controller.handle_query(query)
+        self.active_ext_id = socket_controller.ext_id
+        return socket_controller.handle_query(query)
 
     @events.on
     def handle_action(self, action_metadata: ActionMetadata | None) -> None:
