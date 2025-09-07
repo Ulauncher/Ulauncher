@@ -66,16 +66,18 @@ class ExtensionSocketServer(metaclass=Singleton):
         Derives the extension belonging to a user query, handles the query and returns the extension id
         :returns: ext_id of the extension that will handle this query
         """
-        socket_controller: ExtensionSocketController | None = None
-        if query.keyword:
-            self.on_query_change()
-            if socket_controller := self.get_controller_by_keyword(query.keyword):
-                socket_controller.handle_query(query)
-                self.set_active_controller(socket_controller)
-                self.current_loading_timer = timer(
-                    LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
-                )
-                return socket_controller.ext_id
+        if not query.keyword:
+            logger.warning("Extensions currently only support queries with a keyword: %s", query)
+            return None
+
+        if socket_controller := self.get_controller_by_keyword(query.keyword):
+            self._cancel_loading()
+            self.active_socket_controller = socket_controller
+            socket_controller.handle_query(query)
+            self.current_loading_timer = timer(
+                LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
+            )
+            return socket_controller.ext_id
         return None
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
@@ -117,17 +119,13 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.current_loading_timer.cancel()
             self.current_loading_timer = None
 
-    def on_query_change(self) -> None:
-        self._cancel_loading()
-        self.active_socket_controller = None
-
     @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
         ext_id = event.get("ext_id")
         socket_controller = self.socket_controllers.get(ext_id) if ext_id else self.active_socket_controller
         if socket_controller:
             socket_controller.trigger_event(event)
-            self.set_active_controller(socket_controller)
+            self.active_socket_controller = socket_controller
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
@@ -149,10 +147,6 @@ class ExtensionSocketServer(metaclass=Singleton):
 
         self._cancel_loading()
         events.emit("extension_mode:handle_action", response.get("action"))
-
-    def set_active_controller(self, socket_controller: ExtensionSocketController) -> None:
-        self._cancel_loading()
-        self.active_socket_controller = socket_controller
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
