@@ -131,3 +131,7 @@ class ExtensionMode(BaseMode):
     @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
         self.ext_socket_server.trigger_event(event)
+
+    @events.on
+    def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
+        self.ext_socket_server.handle_response(ext_id, response)

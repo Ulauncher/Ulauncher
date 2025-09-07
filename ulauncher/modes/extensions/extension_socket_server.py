@@ -20,7 +20,7 @@ logger = logging.getLogger()
 
 # This event bus is used to communicate between the ExtensionSocketServer class and the rest of the app
 # Communication further down to the extension level is done through Gio.SocketService and Unix sockets
-events = EventBus("extension")
+events = EventBus()
 
 
 class ExtensionSocketServer(metaclass=Singleton):
@@ -132,8 +132,8 @@ class ExtensionSocketServer(metaclass=Singleton):
                     event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
                     socket_controller.send_message(event_data)
 
-    @events.on
-    def handle_response(self, response: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
+    def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
+        socket_controller = self.socket_controllers.get(ext_id)
         if not self.active_socket_controller:
             self.active_socket_controller = socket_controller
         elif self.active_socket_controller != socket_controller:

@@ -79,7 +79,7 @@ class ExtensionSocketController:
             set(response),
             self.ext_id,
         )
-        events.emit("extension:handle_response", response, self)
+        events.emit("extensions:handle_response", self.ext_id, response)
 
     def handle_close(self, _framer: JSONFramer) -> None:
         logger.info('Extension "%s" disconnected', self.ext_id)
