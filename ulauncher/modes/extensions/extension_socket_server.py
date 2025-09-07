@@ -31,7 +31,6 @@ class ExtensionSocketServer(metaclass=Singleton):
     socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
     active_socket_controller: ExtensionSocketController | None = None
-    active_event: dict[str, Any] | None = None
     current_loading_timer: TimerContext | None = None
 
     def __init__(self) -> None:
@@ -116,7 +115,6 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     def on_query_change(self) -> None:
         self._cancel_loading()
-        self.active_event = None
         self.active_socket_controller = None
 
     @events.on
@@ -137,10 +135,9 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     @events.on
     def handle_response(self, response: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
-        if not self.active_socket_controller and not self.active_event:
-            self.active_event = response.get("event")
+        if not self.active_socket_controller:
             self.active_socket_controller = socket_controller
-        elif self.active_socket_controller != socket_controller or self.active_event != response.get("event"):
+        elif self.active_socket_controller != socket_controller:
             # This can happen if the extension was killed from a task manager
             logger.warning("Received response from different controller or event")
             return
@@ -149,12 +146,11 @@ class ExtensionSocketServer(metaclass=Singleton):
         events.emit("extension_mode:handle_action", response.get("action"))
 
     @events.on
-    def handle_event(self, event: dict[str, Any], socket_controller: ExtensionSocketController) -> None:
+    def handle_event(self, socket_controller: ExtensionSocketController) -> None:
         self._cancel_loading()
         self.current_loading_timer = timer(
             LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])
         )
-        self.active_event = event
         self.active_socket_controller = socket_controller
 
     def run_ext_batch_job(
