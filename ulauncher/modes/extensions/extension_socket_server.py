@@ -133,7 +133,7 @@ class ExtensionSocketServer(metaclass=Singleton):
                 pref = socket_controller.ext_controller.preferences.get(p_id)
                 if pref and new_value != pref.value:
                     event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
-                    socket_controller.trigger_event(event_data)
+                    socket_controller.send_message(event_data)
 
     @events.on
     def handle_response(self, response: dict[str, Any], socket_controller: ExtensionSocketController) -> None:

@@ -38,16 +38,16 @@ class ExtensionSocketController:
         assert ext_path, f"No extension could be found matching {ext_id}"
 
         self.socket_controllers[ext_id] = self
-        self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self._send_event)
+        self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self.send_message)
 
         # legacy_preferences_load is useless and deprecated
         prefs = {p_id: pref.value for p_id, pref in self.ext_controller.preferences.items()}
-        self._send_event({"type": "event:legacy_preferences_load", "args": [prefs]})
+        self.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
         logger.info('Extension "%s" connected', ext_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
 
-    def _send_event(self, event: dict[str, Any]) -> None:
+    def send_message(self, event: dict[str, Any]) -> None:
         logger.debug('Send event %s to "%s"', type(event).__name__, self.ext_id)
         self.framer.send(event)
 
@@ -71,12 +71,7 @@ class ExtensionSocketController:
         """
         Triggers event for an extension
         """
-        # don't debounce events that are triggered by updates in preferences
-        if event.get("type") == "event:update_preferences":
-            self._send_event(event)
-        else:
-            self._debounced_send_event(event)
-
+        self._debounced_send_event(event)
         events.emit("extension:handle_event", event, self)
 
     def handle_response(self, _framer: JSONFramer, response: dict[str, Any]) -> None:

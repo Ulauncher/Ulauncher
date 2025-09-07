@@ -23,7 +23,7 @@ class TestExtensionSocketController:
     @pytest.fixture
     def controller(self, controllers: dict[str, ExtensionSocketController]) -> ExtensionSocketController:
         controller = ExtensionSocketController(controllers, Mock(), TEST_EXT_ID)
-        controller._debounced_send_event = controller._send_event
+        controller._debounced_send_event = controller.send_message
         return controller
 
     def test_configure__typical(
