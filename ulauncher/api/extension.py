@@ -28,6 +28,7 @@ class Extension:
     """
 
     def __init__(self) -> None:
+        self._input: str = ""
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
@@ -98,6 +99,9 @@ class Extension:
         if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
 
+        if event.get("type") == "event:input_trigger":
+            self._input = event.get("args", [])[0]
+
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
             # We can use method_name to determine if listener was added the old way or the new class method way
@@ -109,12 +113,14 @@ class Extension:
     def run_event_listener(
         self, event: dict[str, Any], method: Callable[..., ActionMetadata | None], args: tuple[Any]
     ) -> None:
+        current_input = self._input
         action_metadata = method(*args)
         if action_metadata is not None:
             # convert iterables to list
             if isinstance(action_metadata, Iterator):
                 action_metadata = [*action_metadata]
-            self._client.send({"event": event, "action": action_metadata})
+            if current_input == self._input:  # ignore outdated responses
+                self._client.send({"event": event, "action": action_metadata})
 
     def run(self) -> None:
         """
