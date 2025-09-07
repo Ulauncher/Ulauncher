@@ -127,3 +127,7 @@ class ExtensionMode(BaseMode):
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
         self.ext_socket_server.update_preferences(ext_id, data)
+
+    @events.on
+    def trigger_event(self, event: dict[str, Any]) -> None:
+        self.ext_socket_server.trigger_event(event)

@@ -117,7 +117,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.current_loading_timer.cancel()
             self.current_loading_timer = None
 
-    @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
         ext_id = event.get("ext_id")
         socket_controller = self.socket_controllers.get(ext_id) if ext_id else self.active_socket_controller
