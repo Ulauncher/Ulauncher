@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Iterator, Literal
+from typing import Any, Iterator, Literal
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -123,3 +123,7 @@ class ExtensionMode(BaseMode):
         logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
 
         self.run_ext_batch_job(extension_ids, ["stop"], done_msg=f"{len(extension_ids)} extensions stopped")
+
+    @events.on
+    def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
+        self.ext_socket_server.update_preferences(ext_id, data)
