@@ -25,11 +25,6 @@ class TestExtensionMode:
         assert not mode.matches_query_str("kw"), "Mode is enabled"
 
     def test_handle_query__controller_handle_query__is_called(self, ext_server: MagicMock) -> None:
-        controller = create_autospec(ExtensionSocketController)
-        controller.ext_id = "com.example.asdf.ghjk"
-        ext_server.get_controller_by_keyword.return_value = controller
-        mode = ExtensionMode()
         query = Query("asdf", "ghjk")
-        mode.handle_query(query)
-
-        ext_server.get_controller_by_keyword.return_value.handle_query.assert_called_with(query)
+        ExtensionMode().handle_query(query)
+        ext_server.handle_query.assert_called_with(query)

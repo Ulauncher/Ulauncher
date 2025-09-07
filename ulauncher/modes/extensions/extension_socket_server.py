@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from gi.repository import Gio, GLib, GObject
 
+from ulauncher.internals.query import Query
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
@@ -60,6 +61,19 @@ class ExtensionSocketServer(metaclass=Singleton):
                     ext_controller.start_detached()
 
         GLib.idle_add(start_extensions)
+
+    def handle_query(self, query: Query) -> str | None:
+        """
+        Derives the extension belonging to a user query, handles the query and returns the extension id
+        :returns: ext_id of the extension that will handle this query
+        """
+        socket_controller: ExtensionSocketController | None = None
+        if query.keyword:
+            self.on_query_change()
+            if socket_controller := self.get_controller_by_keyword(query.keyword):
+                socket_controller.handle_query(query)
+                return socket_controller.ext_id
+        return None
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
         framer = JSONFramer()
