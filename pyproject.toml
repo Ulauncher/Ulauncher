@@ -29,6 +29,7 @@ strict = true
 disable_error_code = "import-untyped"
 implicit_reexport = true
 disallow_untyped_calls = false
+incremental = false  # Incremental is broken: https://github.com/python/mypy/issues/18473
 
 [tool.pylint.MASTER]
 ignore-patterns="ulauncher,docs,data,scripts,tests"
