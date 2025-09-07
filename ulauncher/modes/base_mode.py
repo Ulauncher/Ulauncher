@@ -21,7 +21,10 @@ class BaseMode:
         """
         return None
 
-    def handle_query(self, _query: Query) -> Iterable[Result]:
+    def handle_query(self, _query: Query) -> Iterable[Result] | None:
+        """
+        Return the new results for the given query, or None to keep the current results (for asynchronous handling)
+        """
         return []
 
     def get_triggers(self) -> Iterable[Result]:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Iterator
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -30,7 +30,7 @@ class ExtensionMode(BaseMode):
         self.ext_socket_server.start()
         events.set_self(self)
 
-    def handle_query(self, query: Query) -> Any:
+    def handle_query(self, query: Query) -> None:
         socket_controller: ExtensionSocketController | None = None
         if query.keyword:
             self.ext_socket_server.on_query_change()
@@ -41,7 +41,7 @@ class ExtensionMode(BaseMode):
             raise RuntimeError(msg)
 
         self.active_ext_id = socket_controller.ext_id
-        return socket_controller.handle_query(query)
+        socket_controller.handle_query(query)
 
     @events.on
     def handle_action(self, action_metadata: ActionMetadata | None) -> None:

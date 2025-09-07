@@ -33,11 +33,3 @@ class TestExtensionMode:
         mode.handle_query(query)
 
         ext_server.get_controller_by_keyword.return_value.handle_query.assert_called_with(query)
-
-    def test_handle_query__controller_handle_query__is_returned(self, ext_server: MagicMock) -> None:
-        controller = create_autospec(ExtensionSocketController)
-        controller.ext_id = "com.example.asdf.ghjk"
-        ext_server.get_controller_by_keyword.return_value = controller
-        mode = ExtensionMode()
-        query = Query("asdf", "ghjk")
-        assert mode.handle_query(query) is ext_server.get_controller_by_keyword.return_value.handle_query.return_value

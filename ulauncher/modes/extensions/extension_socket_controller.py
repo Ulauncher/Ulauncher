@@ -51,7 +51,7 @@ class ExtensionSocketController:
         logger.debug('Send event %s to "%s"', type(event).__name__, self.ext_id)
         self.framer.send(event)
 
-    def handle_query(self, query: Query) -> bool:
+    def handle_query(self, query: Query) -> None:
         """
         Handles user query with a keyword from this extension
         :returns: action object
@@ -59,7 +59,7 @@ class ExtensionSocketController:
         triggers = self.ext_controller.triggers
         trigger_id = next((t_id for t_id, t in triggers.items() if t.keyword == query.keyword), None)
 
-        return self.trigger_event(
+        self.trigger_event(
             {
                 "type": "event:input_trigger",
                 "ext_id": self.ext_id,
@@ -67,7 +67,7 @@ class ExtensionSocketController:
             }
         )
 
-    def trigger_event(self, event: dict[str, Any]) -> bool:
+    def trigger_event(self, event: dict[str, Any]) -> None:
         """
         Triggers event for an extension
         """
@@ -78,7 +78,6 @@ class ExtensionSocketController:
             self._debounced_send_event(event)
 
         events.emit("extension:handle_event", event, self)
-        return True
 
     def handle_response(self, _framer: JSONFramer, response: dict[str, Any]) -> None:
         logger.debug(
