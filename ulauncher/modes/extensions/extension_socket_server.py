@@ -114,7 +114,7 @@ class ExtensionSocketServer(metaclass=Singleton):
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
-        if socket_controller := ExtensionSocketServer().socket_controllers.get(ext_id):
+        if socket_controller := self.socket_controllers.get(ext_id):
             for p_id, new_value in data.get("preferences", {}).items():
                 pref = socket_controller.ext_controller.preferences.get(p_id)
                 if pref and new_value != pref.value:
