@@ -71,6 +71,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.on_query_change()
             if socket_controller := self.get_controller_by_keyword(query.keyword):
                 socket_controller.handle_query(query)
+                self.set_active_controller(socket_controller)
                 return socket_controller.ext_id
         return None
 
@@ -123,6 +124,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         socket_controller = self.socket_controllers.get(ext_id) if ext_id else self.active_socket_controller
         if socket_controller:
             socket_controller.trigger_event(event)
+            self.set_active_controller(socket_controller)
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
@@ -145,8 +147,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         self._cancel_loading()
         events.emit("extension_mode:handle_action", response.get("action"))
 
-    @events.on
-    def handle_event(self, socket_controller: ExtensionSocketController) -> None:
+    def set_active_controller(self, socket_controller: ExtensionSocketController) -> None:
         self._cancel_loading()
         self.current_loading_timer = timer(
             LOADING_DELAY, lambda: events.emit("extension_mode:handle_action", [{"name": "Loading..."}])

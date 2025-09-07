@@ -72,7 +72,6 @@ class ExtensionSocketController:
         Triggers event for an extension
         """
         self._debounced_send_event(event)
-        events.emit("extension:handle_event", self)
 
     def handle_response(self, _framer: JSONFramer, response: dict[str, Any]) -> None:
         logger.debug(
