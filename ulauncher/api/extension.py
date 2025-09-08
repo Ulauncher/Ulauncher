@@ -16,9 +16,13 @@ from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
+from ulauncher.utils.timer import TimerContext, timer
+
+PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 class Extension:
+    _placeholder_result_timer: TimerContext | None = None
     """
     Manages extension runtime.
     Used only within the extension process to handle events and communicate with Ulauncher.
@@ -114,15 +118,26 @@ class Extension:
         self, event: dict[str, Any], method: Callable[..., ActionMetadata | None], args: tuple[Any]
     ) -> None:
         current_input = self._input
+        self._clear_placeholder_timeout()
+        self._placeholder_result_timer = timer(
+            PLACEHOLDER_DELAY, lambda: self._client.send({"event": event, "action": [{"name": "Loading..."}]})
+        )
         action_metadata = method(*args)
 
         # convert iterables to list
         if isinstance(action_metadata, Iterator):
             action_metadata = [*action_metadata]
 
+        self._clear_placeholder_timeout()
+
         # ignore outdated responses
         if current_input == self._input and action_metadata is not None:
             self._client.send({"event": event, "action": action_metadata})
+
+    def _clear_placeholder_timeout(self) -> None:
+        if self._placeholder_result_timer:
+            self._placeholder_result_timer.cancel()
+            self._placeholder_result_timer = None
 
     def run(self) -> None:
         """

@@ -13,9 +13,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
 from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.socket_path import get_socket_path
-from ulauncher.utils.timer import TimerContext, timer
 
-LOADING_DELAY = 0.3  # delay in sec before Loading... is rendered
 logger = logging.getLogger()
 
 # This event bus is used to communicate between the ExtensionSocketServer class and the rest of the app
@@ -29,7 +27,6 @@ class ExtensionSocketServer(metaclass=Singleton):
     socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
     active_socket_controller: ExtensionSocketController | None = None
-    current_loading_timer: TimerContext | None = None
 
     def __init__(self) -> None:
         self.service = None
@@ -69,12 +66,8 @@ class ExtensionSocketServer(metaclass=Singleton):
             return None
 
         if socket_controller := self.get_controller_by_keyword(query.keyword):
-            self._cancel_loading()
             self.active_socket_controller = socket_controller
             socket_controller.handle_query(query)
-            self.current_loading_timer = timer(
-                LOADING_DELAY, lambda: events.emit("extensions:handle_action", [{"name": "Loading..."}])
-            )
             return socket_controller.ext_id
         return None
 
@@ -112,11 +105,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             return self.socket_controllers.get(ext_controller.id)
         return None
 
-    def _cancel_loading(self) -> None:
-        if self.current_loading_timer:
-            self.current_loading_timer.cancel()
-            self.current_loading_timer = None
-
     def trigger_event(self, event: dict[str, Any]) -> None:
         ext_id = event.get("ext_id")
         socket_controller = self.socket_controllers.get(ext_id) if ext_id else self.active_socket_controller
@@ -141,5 +129,4 @@ class ExtensionSocketServer(metaclass=Singleton):
             logger.warning("Received response from different controller or event")
             return
 
-        self._cancel_loading()
         events.emit("extensions:handle_action", response.get("action"))
