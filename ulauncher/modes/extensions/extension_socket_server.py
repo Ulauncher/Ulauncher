@@ -9,7 +9,7 @@ from typing import Any, Literal
 from gi.repository import Gio, GLib, GObject
 
 from ulauncher.internals.query import Query
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, controller_cache
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
@@ -91,6 +91,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         self.pending.pop(id(framer))
 
     def handle_registration(self, framer: JSONFramer, event: dict[str, Any]) -> None:
+        logger.debug("Received extension registration event: %s", event)
         if isinstance(event, dict) and event.get("type") == "extension:socket_connected":
             if pended := self.pending.pop(id(framer)):
                 for msg_id in pended[1:]:
@@ -190,3 +191,47 @@ class ExtensionSocketServer(metaclass=Singleton):
         logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
 
         self.run_ext_batch_job(extension_ids, ["stop"], done_msg=f"{len(extension_ids)} extensions stopped")
+
+    @events.on
+    def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
+        """Handle a preview extension request coming from the CLI (via D-Bus).
+
+        Stage: run the extension from an arbitrary filesystem path WITHOUT installing it.
+
+        Expected payload example:
+            {
+              "ext_id": "my-extension",
+              "path": "/abs/path/to/extension",
+              "with_debugger": false
+            }
+        """
+        if not payload or not isinstance(payload, dict):  # basic guard
+            logger.error("preview_ext called without valid payload: %s", payload)
+            return
+
+        ext_id = payload.get("ext_id")
+        path = payload.get("path")
+        with_debugger = bool(payload.get("with_debugger"))
+        assert ext_id, "preview_ext called without ext_id"
+        assert path, "preview_ext called without path"
+
+        logger.info(
+            "[preview] Received preview request for ext_id=%s path=%s debugger=%s (stub stage)",
+            ext_id,
+            path,
+            with_debugger,
+        )
+
+        existing_controller = controller_cache.get(ext_id)
+        if existing_controller and existing_controller.is_running:
+            logger.info(
+                "[preview] Extension '%s' is currently running; stopping it before launching preview version",
+                ext_id,
+            )
+            self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
+
+        preview_ext_id = f"{ext_id}.preview"
+        controller = ExtensionController.create(preview_ext_id, path)
+        controller.is_preview = True
+        asyncio.run(controller.install())
+        asyncio.run(controller.start())

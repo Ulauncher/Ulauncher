@@ -72,12 +72,15 @@ class ExtensionController:
     id: str
     state: ExtensionState
     is_running: bool = False
+    is_preview: bool = False
     _path: str | None
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str | None = None) -> None:
         self.id = ext_id
         self._path = path
+        if not self._path and "preview" in self.id:
+            raise ValueError("Preview extensions must be created with a path")
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
@@ -112,6 +115,17 @@ class ExtensionController:
         return instance
 
     @classmethod
+    def get_by_path(cls, path: str) -> ExtensionController:
+        logger.warning("Looking up extension by path: %s", path)
+        for controller in controller_cache.values():
+            logger.warning(" - %s: %s", controller.path, controller.id)
+            if controller.path == path:
+                return controller
+
+        msg = f"No extension found at path: {path}"
+        raise ExtensionNotFoundError(msg)
+
+    @classmethod
     def iterate(cls) -> Iterator[ExtensionController]:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)
@@ -120,6 +134,7 @@ class ExtensionController:
     def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
         for controller in controller_cache.values():
             for trigger in controller.triggers.values():
+                logger.warning("EXT '%s' - %s: %s", trigger.keyword, controller.id, controller.is_running)
                 if controller.is_running and keyword and keyword == trigger.keyword:
                     return controller
 
@@ -191,14 +206,18 @@ class ExtensionController:
     async def install(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
         logger.info("Installing extension: %s", self.state.url or self._path)
 
-        commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
+        commit_hash = "(preview)"
+        commit_timestamp = 0.0
+        if not self.is_preview:
+            commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
 
         # install python dependencies from requirements.txt
         # or remove the downloaded extension files to avoid broken state
         try:
             self.deps.install()
         except ExtensionDependenciesRecoverableError:
-            await self.remove()
+            if not self.is_preview:
+                await self.remove()
             raise
 
         self.state.save(
