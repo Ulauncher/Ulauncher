@@ -115,12 +115,14 @@ class Extension:
     ) -> None:
         current_input = self._input
         action_metadata = method(*args)
-        if action_metadata is not None:
-            # convert iterables to list
-            if isinstance(action_metadata, Iterator):
-                action_metadata = [*action_metadata]
-            if current_input == self._input:  # ignore outdated responses
-                self._client.send({"event": event, "action": action_metadata})
+
+        # convert iterables to list
+        if isinstance(action_metadata, Iterator):
+            action_metadata = [*action_metadata]
+
+        # ignore outdated responses
+        if current_input == self._input and action_metadata is not None:
+            self._client.send({"event": event, "action": action_metadata})
 
     def run(self) -> None:
         """
