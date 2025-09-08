@@ -1,5 +1,5 @@
-from typing import Any
-from unittest.mock import MagicMock, Mock, create_autospec
+from typing import Any, cast
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -9,18 +9,6 @@ from ulauncher.api.extension import Extension
 
 
 class TestClient:
-    @pytest.fixture(autouse=True)
-    def sock_client(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.Gio.SocketClient")
-
-    @pytest.fixture(autouse=True)
-    def mainloop(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.GLib.MainLoop.new")
-
-    @pytest.fixture(autouse=True)
-    def framer(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.JSONFramer")
-
     @pytest.fixture(autouse=True)
     def timer(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.api.client.Client.timer")
@@ -32,26 +20,20 @@ class TestClient:
         return ext
 
     @pytest.fixture
-    def client(self, extension: Any, framer: Any, sock_client: Any) -> Client:
-        client = Client(extension)
-        client.framer = framer
-        client.client = sock_client
-        return client
-
-    def test_connect__connect_is_called(self, client: Any, mainloop: Any) -> None:
-        client.connect()
-        client.client.connect.assert_called_once()
-        client.framer.send.assert_called_once()
-        mainloop.return_value.run.assert_called_once()
+    def client(self, extension: Any) -> Client:
+        return Client(extension, MagicMock(), MagicMock())
 
     def test_on_message__trigger_event__is_called(self, client: Client, extension: MagicMock) -> None:
-        client.on_message(Mock(), {"hello": "world"})
+        client.on_message({"hello": "world"})
         extension.trigger_event.assert_called_with({"hello": "world"})
 
-    def test_on_close__unload_event__is_triggered(self, client: Client, extension: MagicMock) -> None:
-        client.on_close(Mock())
+    def test_graceful_unload(self, client: Client, extension: MagicMock, timer: MagicMock) -> None:
+        client.graceful_unload()
         extension.trigger_event.assert_called_with({"type": "event:unload"})
+        timer.assert_called_once()
 
-    def test_send__framer_send__is_called(self, client: Client, framer: MagicMock) -> None:
+    def test_send__is_handled(self, client: Client) -> None:
         client.send({"hello": "world"})
-        framer.send.assert_called_with({"hello": "world"})
+        stdout_mock = cast("MagicMock", client.output_stream)
+        stdout_mock.write.assert_called_with('{"hello": "world"}\n')
+        stdout_mock.flush.assert_called_once()
