@@ -14,7 +14,7 @@ tan=$'\e[91m'
 cyan=$'\e[96m'
 white=$'\e[97m'
 
-BUILD_IMAGE=ulauncher/build-image:5.0
+BUILD_IMAGE=ulauncher/build-image:6.3
 
 underline() {
     printf "${underline}${bold}%s${reset}\n" "$@"
