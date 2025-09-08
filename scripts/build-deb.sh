@@ -15,7 +15,7 @@ build-deb () {
 
     set -e
 
-    GPGKEY=${GPGKEY:-6BD735B0}
+    GPGKEY=${GPGKEY:-00164538EC9563EC}
     version=$1
     # Debian prerelease separator is "~" instead of "-" (semver prerelease separator)
     deb_version=$(echo "$version" | tr "-" "~")
