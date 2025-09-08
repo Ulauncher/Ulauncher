@@ -15,16 +15,12 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.3
+    container: ulauncher/build-image:5.1
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Tests
         run: |
-          # restore dependencies needed for v5
-          pip install -r requirements.txt
-          apt update && apt install -y gir1.2-notify-0.7 gir1.2-keybinder-3.0 python3-pyinotify python3-levenshtein gir1.2-keybinder-3.0 python3-websocket
-
           flake8 .
           mypy .
           pylint ulauncher
