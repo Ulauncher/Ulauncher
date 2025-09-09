@@ -15,12 +15,19 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:5.1
+    # Use build-image v6.3 for v5 test runs, otherwise Github Actions 'Post Checkout' stage fails wanting GLIBC_2.28,
+    # which cannot be installed on Ubuntu 18.04.
+    # Upgrading the base image for v5 builds is not an efficient spend of time in light of (hopefully) upcoming v6 release.
+    container: ulauncher/build-image:6.3
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Tests
         run: |
+          # restore dependencies needed for v5
+          pip install -r requirements.txt
+          apt update && apt install -y gir1.2-notify-0.7 gir1.2-keybinder-3.0 python3-pyinotify python3-levenshtein gir1.2-keybinder-3.0 python3-websocket
+
           flake8 .
           mypy .
           pylint ulauncher
