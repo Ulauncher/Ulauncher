@@ -110,6 +110,12 @@ check: typos ruff mypy # Run all linters
 test: check pytest # Run all linters and test
 
 mypy: # Lint with mypy (type checker)
+	@set -euo pipefail
+	if [ -z $(shell eval "command -v mypy") ]; then \
+	  echo -e "${BOLD}${RED}mypy is not installed.${RESET}"; \
+	  echo -e "${BOLD}${RED}Please run make python-venv to create a venv and install dependencies.${RESET}"; \
+	  exit 1; \
+  fi
 	mypy ulauncher
 
 ruff: # Lint with ruff
