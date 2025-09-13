@@ -40,7 +40,7 @@ class ExtensionMode(BaseMode):
     @events.on
     def handle_action(self, action_metadata: ActionMetadata | None) -> None:
         if self.active_ext_id and isinstance(action_metadata, list):
-            controller = ExtensionController(self.active_ext_id)
+            controller = ExtensionController.create(self.active_ext_id)
             for result in action_metadata:
                 result["icon"] = controller.get_normalized_icon_path(result.get("icon"))
 
