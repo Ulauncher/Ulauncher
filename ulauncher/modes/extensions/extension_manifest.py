@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ulauncher import api_version, paths
+from ulauncher import api_version
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
@@ -160,9 +160,6 @@ class ExtensionManifest(JsonConf):
             else:
                 msg = f"{self.name} does not support Ulauncher API v{api_version}."
                 raise ExtensionIncompatibleRecoverableError(msg)
-
-    def _get_raw_preferences(self, ext_id: str) -> JsonConf:
-        return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
     @classmethod
     def load(cls, path: str | Path) -> ExtensionManifest:
