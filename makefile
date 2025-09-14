@@ -1,6 +1,5 @@
 .ONESHELL:
 SHELL := bash
-USER_SHELL := $(shell eval 'basename "$$SHELL"')
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.3
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
@@ -58,7 +57,7 @@ python-venv: # Creates a python virtual environment and installs dependencies
 	echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
 	echo -e "\nTo activate it, run:"
 	echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
-	echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish"
+	echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish\n"
 	echo -e "\nDo the activation each time you open the terminal."
 	echo "Now you can run make commands in this environment."
 
@@ -111,17 +110,14 @@ check-dev-deps: # Check if development dependencies are properly installed
 	@set -euo pipefail
 	STDERR_OUTPUT=$$(pip3 freeze -r requirements.txt 2>&1 >/dev/null)
 	if [ -n "$$STDERR_OUTPUT" ]; then
-		echo -e "${BOLD}${RED}Development dependencies not installed:${RESET}" >&2
+		echo -e "${BOLD}${RED}Development dependencies not met:${RESET}" >&2
 		echo -e "${YELLOW}$$STDERR_OUTPUT\n${RESET}" >&2
 		if [ ! -d ".venv" ]; then
 			echo -e "${BOLD}${RED}Please run 'make python-venv' to set up the development environment.${RESET}" >&2
 		else \
 			echo -e "Please activate the virtual environment:"
-			if [ "$(USER_SHELL)" = "fish" ]; then
-				echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET)\n"
-			else
-				echo -e "  $(GREEN)source .venv/bin/activate$(RESET)\n"
-			fi
+			echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
+			echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish\n"
 		fi;
 		exit 1
 	fi
