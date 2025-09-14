@@ -1,5 +1,6 @@
 .ONESHELL:
 SHELL := bash
+USER_SHELL := $(shell eval 'basename "$$SHELL"')
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.3
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
@@ -16,6 +17,7 @@ DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 BOLD := \\e[1m
 GREEN := \\e[32m
 RED := \\e[31m
+YELLOW := \\e[33m
 RESET := \\e[0m
 
 # Bash scripting in Makefile guide:
@@ -103,22 +105,41 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 
 #=Lint/test Commands
 
-.PHONY: check mypy ruff typos pytest test format
+.PHONY: check mypy ruff typos pytest test format check-dev-deps
 
-check: typos ruff mypy # Run all linters
+check-dev-deps: # Check if development dependencies are properly installed
+	@set -euo pipefail
+	STDERR_OUTPUT=$$(pip3 freeze -r requirements.txt 2>&1 >/dev/null)
+	if [ -n "$$STDERR_OUTPUT" ]; then
+		echo -e "${BOLD}${RED}Development dependencies not installed:${RESET}" >&2
+		echo -e "${YELLOW}$$STDERR_OUTPUT\n${RESET}" >&2
+		if [ ! -d ".venv" ]; then
+			echo -e "${BOLD}${RED}Please run 'make python-venv' to set up the development environment.${RESET}" >&2
+		else \
+			echo -e "Please activate the virtual environment:"
+			if [ "$(USER_SHELL)" = "fish" ]; then
+				echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET)\n"
+			else
+				echo -e "  $(GREEN)source .venv/bin/activate$(RESET)\n"
+			fi
+		fi;
+		exit 1
+	fi
+
+check: check-dev-deps typos ruff mypy # Run all linters
 
 test: check pytest # Run all linters and test
 
-mypy: # Lint with mypy (type checker)
+mypy: check-dev-deps # Lint with mypy (type checker)
 	mypy ulauncher
 
-ruff: # Lint with ruff
+ruff: check-dev-deps # Lint with ruff
 	ruff check . && ruff format --check .
 
-typos: # Lint with typos (typo checker)
+typos: check-dev-deps # Lint with typos (typo checker)
 	typos .
 
-pytest: # Run unit tests
+pytest: check-dev-deps # Run unit tests
 	@set -euo pipefail
 	if [ -z $(shell eval "command -v xvfb-run") ]; then
 		pytest -p no:cacheprovider tests
@@ -127,7 +148,7 @@ pytest: # Run unit tests
 		xvfb-run --auto-servernum -- pytest -p no:cacheprovider tests
 	fi
 
-format: # Auto format the code
+format: check-dev-deps # Auto format the code
 	ruff check . --fix
 	ruff format .
 
@@ -135,7 +156,7 @@ format: # Auto format the code
 
 .PHONY: prefs docker docs sdist manpage deb nix-run nix-build-dev nix-build
 
-docs: # Build the API docs
+docs: check-dev-deps # Build the API docs
 	@set -euo pipefail
 	cd docs
 	sphinx-build -M html . ./_build
