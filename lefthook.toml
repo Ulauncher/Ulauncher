@@ -9,6 +9,9 @@ skip_lfs = true
 # and jobs can fail because a previous job created the git lockfile,
 parallel = true
 
+[pre-commit.commands.venv]
+run = "make check-dev-deps"
+
 [pre-commit.commands.typos]
 glob = "*"
 run = "typos --force-exclude {staged_files}"
