@@ -47,7 +47,7 @@ python-venv: # Creates a python virtual environment and installs dependencies
 	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	python3 -m venv --system-site-packages .venv
 	@echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
-	.venv/bin/python -m pip install --ignore-installed --upgrade -r requirements.txt
+	.venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
 	@echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
 
 	# Update to the latest (v2.13.0) after migration to python>=9 in Dockerfile
