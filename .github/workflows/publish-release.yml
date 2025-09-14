@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ulauncher/build-image:6.3
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Publish to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
@@ -49,6 +49,6 @@ jobs:
         with:
           new_release: ${{ github.ref_name }}
           package_name: ulauncher
-          commit_username: 'Ulauncher'
+          commit_username: "Ulauncher"
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_PRIVATE_KEY }}
