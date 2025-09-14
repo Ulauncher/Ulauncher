@@ -71,7 +71,6 @@ def _load_preferences(ext_id: str) -> JsonConf:
 class ExtensionController:
     id: str
     state: ExtensionState
-    is_running: bool = False
     _path: str | None
     _state_path: Path
 
@@ -157,6 +156,10 @@ class ExtensionController:
     @property
     def is_installed(self) -> bool:
         return extension_finder.locate(self.id) is not None
+
+    @property
+    def is_running(self) -> bool:
+        return self.id in extension_runtimes
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -294,7 +297,6 @@ class ExtensionController:
 
             def error_handler(error_type: str, error_msg: str) -> None:
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
-                self.is_running = False
                 extension_runtimes.pop(self.id, None)
                 self.state.save(error_type=error_type, error_message=error_msg)
 
@@ -337,7 +339,10 @@ class ExtensionController:
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
-            self.is_running = False
+
+    def send_message(self, message: dict[str, Any]) -> None:
+        if runtime := extension_runtimes.get(self.id):
+            runtime.send_message(message)
 
     @classmethod
     async def stop_all(cls) -> None:
