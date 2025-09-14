@@ -46,19 +46,19 @@ version: # Print the Ulauncher version
 python-venv: # Creates a python virtual environment and installs dependencies
 	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	python3 -m venv --system-site-packages .venv
-	@echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
+	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
 	.venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
-	@echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
+	echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
 
 	# Update to the latest (v2.13.0) after migration to python>=9 in Dockerfile
 	.venv/bin/python -m pip install pygobject-stubs==2.12.0 --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
 
-	@echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
-	@echo -e "\nTo activate it, run:"
-	@echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
-	@echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish"
-	@echo -e "\nDo the activation each time you open the terminal."
-	@echo "Now you can run make commands in this environment."
+	echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
+	echo -e "\nTo activate it, run:"
+	echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
+	echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish"
+	echo -e "\nDo the activation each time you open the terminal."
+	echo "Now you can run make commands in this environment."
 
 run: prefs # Run ulauncher from source
 	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
