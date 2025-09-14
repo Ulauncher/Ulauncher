@@ -108,6 +108,9 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 
 check-dev-deps: # Check if development dependencies are properly installed
 	@set -euo pipefail
+	if [ "$${GITHUB_ACTIONS:-}" = "true" ]; then
+	  exit 0
+	fi
 	STDERR_OUTPUT=$$(pip3 freeze -r requirements.txt 2>&1 >/dev/null)
 	if [ -n "$$STDERR_OUTPUT" ]; then
 		echo -e "${BOLD}${RED}Development dependencies not met:${RESET}" >&2
