@@ -2,16 +2,14 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
+from typing import Any, Callable
 
-from gi.repository import Gio, GLib, GObject
+from gi.repository import Gio, GObject
 
 from ulauncher.internals.query import Query
-from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
-from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.socket_path import get_socket_path
 
 logger = logging.getLogger()
@@ -21,18 +19,20 @@ logger = logging.getLogger()
 events = EventBus()
 
 
-class ExtensionSocketServer(metaclass=Singleton):
+class ExtensionSocketServer:
     socket_path: str
     service: Gio.SocketService | None
     socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
     active_socket_controller: ExtensionSocketController | None = None
+    on_extension_registered_callback: Callable[[str], None]
 
-    def __init__(self) -> None:
+    def __init__(self, on_extension_registered_callback: Callable[[str], None]) -> None:
         self.service = None
         self.socket_path = get_socket_path()
         self.socket_controllers = {}
         self.pending = {}
+        self.on_extension_registered_callback = on_extension_registered_callback
         events.set_self(self)
 
     def start(self) -> None:
@@ -49,27 +49,21 @@ class ExtensionSocketServer(metaclass=Singleton):
         self.pending = {}
         self.socket_controllers = {}
 
-        def start_extensions() -> None:
-            for ext_controller in ExtensionController.iterate():
-                if ext_controller.is_enabled and not ext_controller.has_error:
-                    ext_controller.start_detached()
-
-        GLib.idle_add(start_extensions)
-
-    def handle_query(self, query: Query) -> str | None:
+    def handle_query(self, ext_id: str, query: Query) -> bool:
         """
-        Derives the extension belonging to a user query, handles the query and returns the extension id
-        :returns: ext_id of the extension that will handle this query
+        Handles the query.
+        :returns: True if it found an active socket controller for the given ext_id
         """
         if not query.keyword:
             logger.warning("Extensions currently only support queries with a keyword: %s", query)
-            return None
+            return False
 
-        if socket_controller := self.get_controller_by_keyword(query.keyword):
+        if socket_controller := self.socket_controllers.get(ext_id):
             self.active_socket_controller = socket_controller
             socket_controller.handle_query(query)
-            return socket_controller.ext_id
-        return None
+            return True
+
+        return False
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:
         framer = JSONFramer()
@@ -89,8 +83,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             ext_id: str | None = event.get("ext_id")
             assert ext_id
             ExtensionSocketController(self.socket_controllers, framer, ext_id)
-            # TODO: This is ugly, but we have no other way to detect the extension started successfully
-            ExtensionController.create(ext_id).is_running = True
+            self.on_extension_registered_callback(ext_id)
         else:
             logger.debug("Unhandled message received: %s", event)
 
@@ -99,11 +92,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service.stop()
             self.service.close()
             self.service = None
-
-    def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
-        if ext_controller := ExtensionController.get_from_keyword(keyword):
-            return self.socket_controllers.get(ext_controller.id)
-        return None
 
     def trigger_event(self, event: dict[str, Any]) -> None:
         ext_id = event.get("ext_id")

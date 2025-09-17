@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Iterator
-from weakref import WeakValueDictionary
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
@@ -60,7 +59,6 @@ class ExtensionState(JsonConf):
 
 
 logger = logging.getLogger()
-controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 
 
@@ -73,14 +71,12 @@ class ExtensionController:
     state: ExtensionState
     is_running: bool = False
     is_preview: bool = False
-    _path: str | None
+    path: str
     _state_path: Path
 
-    def __init__(self, ext_id: str, path: str | None = None) -> None:
+    def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
-        self._path = path
-        if not self._path and "preview" in self.id:
-            raise ValueError("Preview extensions must be created with a path")
+        self.path = path
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
@@ -94,51 +90,36 @@ class ExtensionController:
             self.state.browser_url = self.remote.browser_url or ""
 
     @classmethod
-    def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
-        if controller := controller_cache.get(ext_id):
-            return controller
-        new_controller = cls(ext_id, path)
-        controller_cache[ext_id] = new_controller
-        return new_controller
+    def create_from_id(cls, ext_id: str) -> ExtensionController:
+        """
+        Creates a controller for an installed extension
+        :raises ExtensionNotFoundError: if extension with given ID is not found
+        """
+        path = extension_finder.locate(ext_id)
+        if not path:
+            msg = f"Extension not found with ID {ext_id}"
+            raise ExtensionNotFoundError(msg)
+
+        return cls(ext_id, path)
 
     @classmethod
     def create_from_url(cls, url: str) -> ExtensionController:
         remote = ExtensionRemote(url)
-        if remote.ext_id in controller_cache:
-            instance = controller_cache[remote.ext_id]
-        else:
-            instance = cls(remote.ext_id)
-            controller_cache[remote.ext_id] = instance
-        instance.remote = remote
-        instance.state.url = url
-        instance.state.browser_url = remote.browser_url or ""
-        return instance
+        return cls(remote.ext_id, remote.installation_path)
 
     @classmethod
-    def get_by_path(cls, path: str) -> ExtensionController:
-        logger.warning("Looking up extension by path: %s", path)
-        for controller in controller_cache.values():
-            logger.warning(" - %s: %s", controller.path, controller.id)
-            if controller.path == path:
-                return controller
-
-        msg = f"No extension found at path: {path}"
-        raise ExtensionNotFoundError(msg)
+    def create_from_path(cls, path: str) -> ExtensionController:
+        raise NotImplementedError()
 
     @classmethod
-    def iterate(cls) -> Iterator[ExtensionController]:
+    def create_all_installed(cls) -> Iterator[ExtensionController]:
         for ext_id, ext_path in extension_finder.iterate():
-            yield ExtensionController.create(ext_id, ext_path)
+            yield ExtensionController(ext_id, ext_path)
 
     @classmethod
-    def get_from_keyword(cls, keyword: str) -> ExtensionController | None:
-        for controller in controller_cache.values():
-            for trigger in controller.triggers.values():
-                logger.warning("EXT '%s' - %s: %s", trigger.keyword, controller.id, controller.is_running)
-                if controller.is_running and keyword and keyword == trigger.keyword:
-                    return controller
-
-        return None
+    async def stop_all(cls) -> None:
+        jobs = [c.stop() for c in cls.create_all_installed() if c.is_running]
+        await asyncio.gather(*jobs)
 
     @property
     def manifest(self) -> ExtensionManifest:
@@ -147,15 +128,6 @@ class ExtensionController:
     @property
     def deps(self) -> ExtensionDependencies:
         return ExtensionDependencies(self.id, self.path)
-
-    @property
-    def path(self) -> str:
-        if not self._path:
-            self._path = extension_finder.locate(self.id)
-        if not self._path:
-            msg = f"No extension could be found matching {self.id}"
-            raise ExtensionNotFoundError(msg)
-        return self._path
 
     @property
     def is_enabled(self) -> bool:
@@ -204,7 +176,7 @@ class ExtensionController:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
     async def install(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
-        logger.info("Installing extension: %s", self.state.url or self._path)
+        logger.info("Installing extension: %s", self.state.url or self.path)
 
         commit_hash = "(preview)"
         commit_timestamp = 0.0
@@ -242,10 +214,11 @@ class ExtensionController:
         await self.stop()
         rmtree(self.path)
         # Regenerate cached path in case extension still exists (installed elsewhere)
-        self._path = extension_finder.locate(self.id)
+        # TODO: why do we need this?
+        found_path = extension_finder.locate(self.id)
 
         # If ^, then disable, else delete from db
-        if self._path:
+        if found_path:
             self.state.save(is_enabled=False)
         elif self._state_path.is_file():
             self._state_path.unlink()
@@ -255,10 +228,6 @@ class ExtensionController:
         """
         :returns: False if already up-to-date, True if was updated
         """
-        if not self.path:
-            msg = f"Extension {self.id} not found at {self._path}"
-            raise ExtensionNotFoundError(msg)
-
         logger.debug("Checking for updates to %s", self.id)
         has_update, commit_hash = await self.check_update()
         was_running = self.is_running
@@ -275,7 +244,6 @@ class ExtensionController:
 
         # Backup extension files. If update fails, restore from backup
         with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
-            # use local variable, because self.path property will call locate() on a non-existing path
             ext_path = self.path
             copytree(ext_path, backup_dir, dirs_exist_ok=True)
 
@@ -357,11 +325,6 @@ class ExtensionController:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
             self.is_running = False
-
-    @classmethod
-    async def stop_all(cls) -> None:
-        jobs = [c.stop() for c in controller_cache.values() if c.is_running]
-        await asyncio.gather(*jobs)
 
 
 class ExtensionNotFoundError(Exception):

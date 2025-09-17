@@ -9,10 +9,29 @@
         "**/dist": true,
         "**/build": true
     },
+
+    // Keep Pylance for IDE features but avoid duplicate type checking
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.exclude": [
+        "**/.venv/**",
+        "data/**",
+        "docs/**/_build/**",
+        "preferences-src/**"
+    ],
+
+    // Reduce file watcher load
+    "files.watcherExclude": {
+        "**/.venv/**": true,
+        "**/data/**": true,
+        "**/docs/**/_build/**": true,
+        "**/preferences-src/**": true
+    },
+
+    // Testing
     "python.testing.pytestArgs": [
         "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true
 }
-

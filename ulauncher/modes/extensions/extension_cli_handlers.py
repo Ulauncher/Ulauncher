@@ -51,7 +51,7 @@ def get_controller_for_input(input_arg: str) -> ExtensionController | None:
 
     arg_type = get_argument_type(input_arg)
     if arg_type == "id":
-        return ExtensionController.create(input_arg)
+        return ExtensionController.create_from_id(input_arg)
     if arg_type == "url":
         return ExtensionController.create_from_url(input_arg)
     if arg_type == "path":
@@ -62,10 +62,12 @@ def get_controller_for_input(input_arg: str) -> ExtensionController | None:
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
     from ulauncher.modes.extensions.extension_controller import ExtensionController
 
-    for controller in ExtensionController.iterate():
+    controllers = ExtensionController.create_all_installed()
+    for controller in controllers:
         disabled_label = " [DISABLED]" if not controller.is_enabled else ""
         logger.info("- %s (%s)%s", controller.manifest.name, controller.id, disabled_label)
-    if not ExtensionController.iterate():
+
+    if not controllers:
         logger.info("No extensions installed.")
 
     return True
@@ -141,7 +143,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
 
     updated_extensions = []
 
-    for controller in ExtensionController.iterate():
+    for controller in ExtensionController.create_all_installed():
         if not controller.is_manageable or not controller.state.url:
             continue
 
