@@ -66,8 +66,14 @@ def get_ulauncher_dbus_action_group(bus: Gio.DBusConnection) -> Gio.DBusActionGr
     return Gio.DBusActionGroup.get(bus, app_id, dbus_path)
 
 
-def dbus_trigger_event(name: str, message: Any | None = None) -> None:
-    """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name."""
+def dbus_trigger_event(name: str, message: Any | None = None, wait: bool = False) -> None:
+    """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name.
+
+    Args:
+        name: Event name to trigger
+        message: Optional message data to send with the event
+        wait: If True, wait for the event handler to complete before returning
+    """
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
 
     if not check_app_running(app_id, bus):
@@ -75,4 +81,21 @@ def dbus_trigger_event(name: str, message: Any | None = None) -> None:
         return
 
     json_message = json.dumps({"name": name, "message": message})
-    get_ulauncher_dbus_action_group(bus).activate_action("trigger-event", GLib.Variant.new_string(json_message))
+    action_group = get_ulauncher_dbus_action_group(bus)
+
+    if wait:
+        res = bus.call_sync(
+            bus_name=app_id,
+            object_path=dbus_path,
+            interface_name="org.gtk.Actions",
+            method_name="Activate",
+            parameters=GLib.Variant("(sava{sv})", ("trigger-event", [GLib.Variant.new_string(json_message)], {})),
+            reply_type=None,
+            flags=Gio.DBusCallFlags.NONE,
+            timeout_msec=-1,
+            cancellable=None,
+        )
+        print(">>", res)
+    else:
+        # Use asynchronous call (original behavior)
+        action_group.activate_action("trigger-event", GLib.Variant.new_string(json_message))
