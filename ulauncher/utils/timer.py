@@ -10,12 +10,10 @@ class TimerContext:
     """A utility class to hold the context for the timer() function."""
 
     source: GLib.Source | None
-    repeat: bool
     func: Callable[[], None]
 
-    def __init__(self, source: GLib.Source, func: Callable[[], None], repeat: bool = False) -> None:
+    def __init__(self, source: GLib.Source, func: Callable[[], None]) -> None:
         self.source = source
-        self.repeat = repeat
         self.func = func
         self.source.set_callback(self.trigger)
         self.source.attach(None)
@@ -25,15 +23,14 @@ class TimerContext:
             self.source.destroy()
             self.source = None
 
-    def trigger(self, *_args: Any) -> bool:
+    def trigger(self, *_args: Any) -> None:
         self.func()
-        return self.repeat
 
 
-def timer(delay_sec: float, func: Callable[[], None], repeat: bool = False) -> TimerContext:
+def timer(delay_sec: float, func: Callable[[], None]) -> TimerContext:
     """
-    Executes the given function after a delay given in seconds. Repeats every delay_sec if
-    repeat==True. The function is executed in the context of the GLib MainContext thread.
+    Executes the given function after a delay given in seconds.
+    The function is executed in the context of the GLib MainContext thread.
 
     func is not called with any arguments, so to call with custom arguments use functools.partial,
     such as `timer(0.5, partial(myfunc, myarg1, myarg2))`.
@@ -48,4 +45,4 @@ def timer(delay_sec: float, func: Callable[[], None], repeat: bool = False) -> T
         else GLib.timeout_source_new(int(delay_sec * 1000.0))
     )
 
-    return TimerContext(source, func, repeat)
+    return TimerContext(source, func)
