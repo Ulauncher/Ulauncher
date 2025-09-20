@@ -210,15 +210,15 @@ class ExtensionController:
 
         await self.stop()
         rmtree(self.path)
-        # Regenerate cached path in case extension still exists (installed elsewhere)
-        self._path = extension_finder.locate(self.id)
+        logger.info("Extension %s uninstalled successfully", self.id)
 
-        # If ^, then disable, else delete from db
-        if self._path:
+        # non-manageable extension still exists (installed elsewhere)
+        if fallback_path := extension_finder.locate(self.id):
+            self._path = fallback_path
             self.state.save(is_enabled=False)
+            logger.info("Non-manageable extension with the same id exists in '%s'", fallback_path)
         elif self._state_path.is_file():
             self._state_path.unlink()
-        logger.info("Extension %s uninstalled successfully", self.id)
 
     async def update(self) -> bool:
         """
