@@ -1,36 +1,30 @@
 from __future__ import annotations
 
-import math
-from typing import Any, Callable
-
-from gi.repository import GLib
+import threading
+from typing import Callable
 
 
 class TimerContext:
     """A utility class to hold the context for the timer() function."""
 
-    source: GLib.Source | None
+    _timer: threading.Timer | None
     func: Callable[[], None]
 
-    def __init__(self, source: GLib.Source, func: Callable[[], None]) -> None:
-        self.source = source
+    def __init__(self, delay_sec: float, func: Callable[[], None]) -> None:
         self.func = func
-        self.source.set_callback(self.trigger)
-        self.source.attach(None)
+        self._timer = threading.Timer(delay_sec, self.func)
+        self._timer.start()
 
     def cancel(self) -> None:
-        if self.source:
-            self.source.destroy()
-            self.source = None
-
-    def trigger(self, *_args: Any) -> None:
-        self.func()
+        if self._timer:
+            self._timer.cancel()
+            self._timer = None
 
 
 def timer(delay_sec: float, func: Callable[[], None]) -> TimerContext:
     """
     Executes the given function after a delay given in seconds.
-    The function is executed in the context of the GLib MainContext thread.
+    The function is executed in a separate thread.
 
     func is not called with any arguments, so to call with custom arguments use functools.partial,
     such as `timer(0.5, partial(myfunc, myarg1, myarg2))`.
@@ -38,11 +32,4 @@ def timer(delay_sec: float, func: Callable[[], None]) -> TimerContext:
     To cancel the timer, call `.cancel()` on the returned object.
 
     """
-    frac, _ = math.modf(delay_sec)
-    source = (
-        GLib.timeout_source_new_seconds(int(delay_sec))
-        if frac == 0
-        else GLib.timeout_source_new(int(delay_sec * 1000.0))
-    )
-
-    return TimerContext(source, func)
+    return TimerContext(delay_sec, func)
