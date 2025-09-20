@@ -121,10 +121,6 @@ class ExtensionController:
         return ExtensionManifest.load(self.path)
 
     @property
-    def deps(self) -> ExtensionDependencies:
-        return ExtensionDependencies(self.id, self.path)
-
-    @property
     def path(self) -> str:
         if not self._path:
             self._path = extension_finder.locate(self.id)
@@ -187,7 +183,8 @@ class ExtensionController:
         # install python dependencies from requirements.txt
         # or remove the downloaded extension files to avoid broken state
         try:
-            self.deps.install()
+            deps = ExtensionDependencies(self.id, self.path)
+            deps.install()
         except ExtensionDependenciesRecoverableError:
             await self.remove()
             raise
