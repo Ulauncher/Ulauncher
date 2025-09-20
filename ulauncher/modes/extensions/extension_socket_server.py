@@ -56,7 +56,7 @@ class ExtensionSocketServer(metaclass=Singleton):
 
         GLib.idle_add(start_extensions)
 
-    def handle_query(self, query: Query) -> str | None:
+    def handle_query(self, query: Query) -> ExtensionController | None:
         """
         Derives the extension belonging to a user query, handles the query and returns the extension id
         :returns: ext_id of the extension that will handle this query
@@ -68,7 +68,7 @@ class ExtensionSocketServer(metaclass=Singleton):
         if socket_controller := self.get_controller_by_keyword(query.keyword):
             self.active_socket_controller = socket_controller
             socket_controller.handle_query(query)
-            return socket_controller.ext_id
+            return socket_controller.ext_controller
         return None
 
     def handle_incoming(self, _service: Any, conn: Gio.SocketConnection, _source: Any) -> None:

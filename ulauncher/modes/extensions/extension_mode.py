@@ -24,7 +24,7 @@ class ExtensionTrigger(Result):
 
 class ExtensionMode(BaseMode):
     ext_socket_server: ExtensionSocketServer
-    active_ext_id: str | None = None
+    active_ext: ExtensionController | None = None
 
     def __init__(self) -> None:
         self.ext_socket_server = ExtensionSocketServer()
@@ -32,17 +32,16 @@ class ExtensionMode(BaseMode):
         events.set_self(self)
 
     def handle_query(self, query: Query) -> None:
-        self.active_ext_id = self.ext_socket_server.handle_query(query)
-        if not self.active_ext_id:
+        self.active_ext = self.ext_socket_server.handle_query(query)
+        if not self.active_ext:
             msg = f"Query not valid for extension mode {query}"
             raise RuntimeError(msg)
 
     @events.on
     def handle_action(self, action_metadata: ActionMetadata | None) -> None:
-        if self.active_ext_id and isinstance(action_metadata, list):
-            controller = ExtensionController.create(self.active_ext_id)
+        if self.active_ext and isinstance(action_metadata, list):
             for result in action_metadata:
-                result["icon"] = controller.get_normalized_icon_path(result.get("icon"))
+                result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
             results = [Result(**res) for res in action_metadata]
             events.emit("window:show_results", results)
