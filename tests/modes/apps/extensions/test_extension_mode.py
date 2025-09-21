@@ -18,13 +18,19 @@ class TestExtensionMode:
         return ess
 
     def test_is_enabled__query_only_contains_keyword__returns_false(self, ext_server: MagicMock) -> None:
+        keyword = "kw"
         controller = create_autospec(ExtensionSocketController)
-        ext_server.get_controller_by_keyword.return_value = controller
+        ext_server.socket_controllers.get.return_value = controller
         mode = ExtensionMode()
+        mode._keywords = {keyword: "ext_id"}
 
-        assert not mode.matches_query_str("kw"), "Mode is enabled"
+        assert not mode.matches_query_str(keyword), "Mode is enabled"
 
     def test_handle_query__controller_handle_query__is_called(self, ext_server: MagicMock) -> None:
-        query = Query("asdf", "ghjk")
-        ExtensionMode().handle_query(query)
-        ext_server.handle_query.assert_called_with(query)
+        keyword = "asdf"
+        ext_id = "com.test.ext"
+        mode = ExtensionMode()
+        mode._keywords = {keyword: ext_id}
+        query = Query(keyword, "ghjk")
+        mode.handle_query(query)
+        ext_server.handle_query.assert_called_with(ext_id, query)

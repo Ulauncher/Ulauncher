@@ -56,16 +56,12 @@ class ExtensionSocketServer(metaclass=Singleton):
 
         GLib.idle_add(start_extensions)
 
-    def handle_query(self, query: Query) -> ExtensionController | None:
+    def handle_query(self, ext_id: str, query: Query) -> ExtensionController | None:
         """
         Derives the extension belonging to a user query, handles the query and returns the extension id
         :returns: ext_id of the extension that will handle this query
         """
-        if not query.keyword:
-            logger.warning("Extensions currently only support queries with a keyword: %s", query)
-            return None
-
-        if socket_controller := self.get_controller_by_keyword(query.keyword):
+        if socket_controller := self.socket_controllers.get(ext_id):
             self.active_socket_controller = socket_controller
             socket_controller.handle_query(query)
             return socket_controller.ext_controller
@@ -99,11 +95,6 @@ class ExtensionSocketServer(metaclass=Singleton):
             self.service.stop()
             self.service.close()
             self.service = None
-
-    def get_controller_by_keyword(self, keyword: str) -> ExtensionSocketController | None:
-        if ext_controller := ExtensionController.get_from_keyword(keyword):
-            return self.socket_controllers.get(ext_controller.id)
-        return None
 
     def trigger_event(self, event: dict[str, Any]) -> None:
         ext_id = event.get("ext_id")
