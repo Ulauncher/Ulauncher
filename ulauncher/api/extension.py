@@ -16,13 +16,13 @@ from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
-from ulauncher.utils.timer import TimerContext, timer
+from ulauncher.utils.timer import Timer, timer
 
 PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 class Extension:
-    _placeholder_result_timer: TimerContext | None = None
+    _placeholder_result_timer: Timer | None = None
     """
     Manages extension runtime.
     Used only within the extension process to handle events and communicate with Ulauncher.
