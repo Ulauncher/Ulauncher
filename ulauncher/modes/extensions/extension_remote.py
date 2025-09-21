@@ -40,6 +40,7 @@ class UrlParseResult(BaseDataClass):
 
 class ExtensionRemote(UrlParseResult):
     url: str
+    target_dir: str
 
     def __init__(self, url: str) -> None:
         try:
@@ -50,7 +51,7 @@ class ExtensionRemote(UrlParseResult):
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionRecoverableError(msg) from e
 
-        self._dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
+        self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
 
     def _get_refs(self) -> dict[str, str]:
@@ -123,7 +124,7 @@ class ExtensionRemote(UrlParseResult):
     def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = False) -> tuple[str, float]:
         if not commit_hash:
             commit_hash = self.get_compatible_hash()
-        output_dir_exists = isdir(self._dir)
+        output_dir_exists = isdir(self.target_dir)
 
         if output_dir_exists and warn_if_overwrite:
             logger.info('Extension with URL "%s" is already installed. Updating', self.url)
@@ -147,18 +148,18 @@ class ExtensionRemote(UrlParseResult):
                         logger.warning("Falling back on using API 2.0 version for %s.", self.url)
 
                     if output_dir_exists:
-                        rmtree(self._dir)
-                    move(tmp_dir, self._dir)
-            commit_timestamp = getmtime(self._dir)
+                        rmtree(self.target_dir)
+                    move(tmp_dir, self.target_dir)
+            commit_timestamp = getmtime(self.target_dir)
             return commit_hash, commit_timestamp
 
         if not which("git"):
             msg = "This extension URL can only be supported if you have git installed."
             raise ExtensionRemoteError(msg)
 
-        os.makedirs(self._dir, exist_ok=True)
+        os.makedirs(self.target_dir, exist_ok=True)
         subprocess.run(
-            ["git", f"--git-dir={self._git_dir}", f"--work-tree={self._dir}", "checkout", commit_hash, "."],
+            ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
             check=True,
             stderr=subprocess.DEVNULL,
         )
