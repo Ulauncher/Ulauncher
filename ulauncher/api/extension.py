@@ -16,13 +16,12 @@ from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
-from ulauncher.utils.timer import TimerContext, timer
 
 PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 class Extension:
-    _placeholder_result_timer: TimerContext | None = None
+    _placeholder_result_timer: threading.Timer | None = None
     """
     Manages extension runtime.
     Used only within the extension process to handle events and communicate with Ulauncher.
@@ -120,9 +119,10 @@ class Extension:
     ) -> None:
         current_input = self._input
         self._clear_placeholder_timeout()
-        self._placeholder_result_timer = timer(
+        self._placeholder_result_timer = threading.Timer(
             PLACEHOLDER_DELAY, lambda: self._client.send({"event": event, "action": [{"name": "Loading..."}]})
         )
+        self._placeholder_result_timer.start()
         action_metadata = method(*args)
 
         # convert iterables to list

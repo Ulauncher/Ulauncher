@@ -3,11 +3,11 @@ from __future__ import annotations  # noqa: N999
 import json
 import logging
 import os
+import threading
 from functools import partial
 from typing import Any, Iterator, TextIO
 
 import ulauncher.api
-from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 
@@ -65,7 +65,7 @@ class Client:
     def graceful_unload(self, status_code: int = 0) -> None:
         # extension has 0.5 sec to save it's state, after that it will be terminated
         self.extension.trigger_event({"type": "event:unload"})
-        timer(0.5, partial(os._exit, status_code))
+        threading.Timer(0.5, partial(os._exit, status_code)).start()
 
     def send(self, response: Any) -> None:
         """Send a JSON object as a newline-delimited message."""

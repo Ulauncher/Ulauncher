@@ -11,7 +11,7 @@ from ulauncher.api.extension import Extension
 class TestClient:
     @pytest.fixture(autouse=True)
     def timer(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.timer")
+        return mocker.patch("threading.Timer")
 
     @pytest.fixture
     def extension(self) -> Extension:
