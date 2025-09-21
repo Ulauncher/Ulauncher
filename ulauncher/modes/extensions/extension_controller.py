@@ -264,7 +264,7 @@ class ExtensionController:
                 await self.stop()
                 await self.install(commit_hash, warn_if_overwrite=False)
             except Exception:
-                logger.exception("Failed to update extension. Restoring from backup.")
+                logger.exception("Could not update extension '%s'.", self.id)
                 copytree(backup_dir, ext_path, dirs_exist_ok=True)
                 await self.toggle_enabled(was_running)
                 raise
