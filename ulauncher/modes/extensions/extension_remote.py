@@ -46,7 +46,7 @@ class ExtensionRemote(UrlParseResult):
             self.url = url.strip()
             self.update(parse_extension_url(self.url))
         except Exception as e:
-            logger.warning("Invalid URL: %s (%s: %s)", url, type(e).__name__, e)
+            logger.warning("Invalid URL: %s", url)
             msg = f"Invalid URL: {url}"
             raise InvalidExtensionRecoverableError(msg) from e
 
