@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from ulauncher.utils.dbus import dbus_trigger_event
 
@@ -16,46 +17,30 @@ logger = logging.getLogger(__name__)
 # Import other modules within functions to avoid circular deps and make sure the logger is initialized
 
 
-def get_argument_type(input_arg: str) -> Literal["id", "url", "path", "invalid"]:
+def get_installed_ext_controller(input_arg: str) -> ExtensionController | None:
     """
-    Derives the type of input argument (url, path, id or invalid).
+    Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None
     """
-    if input_arg.startswith(("http", "git@")):
-        return "url"
-    if input_arg.startswith("file:///") and Path(input_arg[7:]).exists():
-        return "path"
-    if "/" in input_arg and Path(input_arg).exists():
-        return "path"
     from ulauncher.modes.extensions import extension_finder
-
-    if extension_finder.locate(input_arg):
-        return "id"
-    if Path(input_arg).exists():
-        return "path"
-    return "invalid"
-
-
-def normalize_path(path: str) -> str:
-    if path.startswith("file://"):  # Pathlib does not handle this prefix
-        path = path[7:]
-    return str(Path(path).resolve())
-
-
-def get_controller_for_input(input_arg: str) -> ExtensionController | None:
-    """
-    Returns an ExtensionController instance based on the input argument.
-    Handles both extension ID and URL.
-    """
     from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
-    arg_type = get_argument_type(input_arg)
-    if arg_type == "id":
-        return ExtensionController.create(input_arg)
-    if arg_type == "url":
-        return ExtensionController.create_from_url(input_arg)
-    if arg_type == "path":
-        return ExtensionController.create_from_url(normalize_path(input_arg))
+    arg = normalize_arg(input_arg)
+    with contextlib.suppress(ValueError):
+        parse_result = parse_extension_url(arg)
+        arg = parse_result.ext_id
+
+    if path := extension_finder.locate(arg):
+        return ExtensionController.create(arg, path)
     return None
+
+
+def normalize_arg(path: str) -> str:
+    if "://" in path:
+        return path
+    with contextlib.suppress(OSError):
+        return str(Path(path).resolve(strict=True))
+    return path
 
 
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
@@ -71,26 +56,30 @@ def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
 
 
 def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
+    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError, InvalidExtensionRecoverableError
+
     if "input" not in args or not args.input:
         logger.error("Error: URL or path is required for installing an extension")
         parser.print_help()
         return False
 
+    if get_installed_ext_controller(args.input):
+        return upgrade_extensions(parser, args)
+
+    url = normalize_arg(args.input)
+
     try:
-        controller = get_controller_for_input(args.input)
-        if not controller:
-            logger.error("Error: Invalid URL or path '%s'", args.input)
-            return False
-        if controller.is_installed:
-            return upgrade_extensions(parser, args)
+        controller = ExtensionController.create_from_url(url)
         asyncio.run(controller.install())
-
         dbus_trigger_event("extensions:reload", [controller.id])
-    except Exception:
-        logger.exception("Failed to install extension")
+    except (ValueError, InvalidExtensionRecoverableError):  # error already logged
         return False
-
-    return True
+    except ExtensionRemoteError:
+        logger.warning("Network error: Could not install %s", args.input)
+        return False
+    else:
+        return True
 
 
 def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
@@ -99,44 +88,30 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    # Handle both extension ID and URL
-    try:
-        controller = get_controller_for_input(args.input)
-        if not controller or not controller.is_installed:
-            logger.error("Error: Could not find extension '%s'", args.input)
-            return False
+    if controller := get_installed_ext_controller(args.input):
         asyncio.run(controller.remove())
         dbus_trigger_event("extensions:stop", [controller.id])
-    except Exception:
-        logger.exception("Failed to uninstall extension '%s'", args.input)
-        return False
+        return True
 
-    return True
+    logger.error("Error: Argument '%s' does not match any installed extension", args.input)
+    return False
 
 
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
+    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError
 
     if "input" in args and args.input:
         # Upgrade specific extension
-        try:
-            controller = get_controller_for_input(args.input)
-            if not controller:
-                logger.error("Error: Invalid URL or path '%s'", args.input)
-                return False
-            if not controller.is_installed:
-                logger.error("Error: Extension '%s' is not installed", args.input)
-                return False
-            asyncio.run(controller.update())
+        if controller := get_installed_ext_controller(args.input):
+            try:
+                asyncio.run(controller.update())
+            except ExtensionRemoteError:
+                logger.warning("Network error: Could not upgrade %s", args.input)
             dbus_trigger_event("extensions:reload", [controller.id])
-        except ExtensionNotFoundError:
-            logger.warning("Extension '%s' is not installed", args.input)
-            return False
-        except Exception:
-            logger.exception("Failed to upgrade extension %s", args.input)
-            return False
-
-        return True
+            return True
+        logger.error("Error: Argument '%s' does not match any installed extension", args.input)
+        return False
 
     updated_extensions = []
 
@@ -145,12 +120,11 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             continue
 
         try:
-            ext_name = controller.manifest.name
             updated = asyncio.run(controller.update())
             if updated:
                 updated_extensions.append(controller.id)
-        except Exception:
-            logger.exception("Failed to update %s", ext_name)
+        except ExtensionRemoteError:
+            logger.warning("Network error: Could not upgrade %s", controller.id)
 
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
