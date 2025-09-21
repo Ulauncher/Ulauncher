@@ -1,27 +1,10 @@
 from __future__ import annotations
 
-import threading
+from threading import Timer
 from typing import Callable
 
 
-class TimerContext:
-    """A utility class to hold the context for the timer() function."""
-
-    _timer: threading.Timer | None
-    func: Callable[[], None]
-
-    def __init__(self, delay_sec: float, func: Callable[[], None]) -> None:
-        self.func = func
-        self._timer = threading.Timer(delay_sec, self.func)
-        self._timer.start()
-
-    def cancel(self) -> None:
-        if self._timer:
-            self._timer.cancel()
-            self._timer = None
-
-
-def timer(delay_sec: float, func: Callable[[], None]) -> TimerContext:
+def timer(delay_sec: float, func: Callable[[], None]) -> Timer:
     """
     Executes the given function after a delay given in seconds.
     The function is executed in a separate thread.
@@ -32,4 +15,6 @@ def timer(delay_sec: float, func: Callable[[], None]) -> TimerContext:
     To cancel the timer, call `.cancel()` on the returned object.
 
     """
-    return TimerContext(delay_sec, func)
+    timer = Timer(delay_sec, func)
+    timer.start()
+    return timer
