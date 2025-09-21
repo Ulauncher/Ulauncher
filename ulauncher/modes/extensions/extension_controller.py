@@ -70,14 +70,18 @@ def _load_preferences(ext_id: str) -> JsonConf:
 
 class ExtensionController:
     id: str
+    path: str
     state: ExtensionState
+    manifest: ExtensionManifest
+    is_manageable: bool
     is_running: bool = False
-    _path: str | None
     _state_path: Path
 
-    def __init__(self, ext_id: str, path: str | None = None) -> None:
+    def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
-        self._path = path
+        self.path = path
+        self.manifest = ExtensionManifest.load(path)
+        self.is_manageable = extension_finder.is_manageable(path)
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
@@ -86,12 +90,13 @@ class ExtensionController:
             defaults = json_load(f"{path}/.default-state.json")
             self.state.update(defaults)
 
-        if self.state.url:
-            self.remote = ExtensionRemote(self.state.url)
-            self.state.browser_url = self.remote.browser_url or ""
-
     @classmethod
     def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
+        if not path:
+            path = extension_finder.locate(ext_id)
+            if not path:
+                msg = f"Extension with ID '{ext_id}' not found"
+                raise ExtensionNotFoundError(msg)
         if controller := controller_cache.get(ext_id):
             return controller
         new_controller = cls(ext_id, path)
@@ -99,35 +104,39 @@ class ExtensionController:
         return new_controller
 
     @classmethod
-    def create_from_url(cls, url: str) -> ExtensionController:
+    async def install(
+        cls, url: str, commit_hash: str | None = None, warn_if_overwrite: bool = True
+    ) -> ExtensionController:
+        logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
-        if remote.ext_id in controller_cache:
-            instance = controller_cache[remote.ext_id]
+        commit_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
+
+        try:
+            # install python dependencies from requirements.txt
+            deps = ExtensionDependencies(remote.ext_id, remote.target_dir)
+            deps.install()
+        except ExtensionDependenciesRecoverableError:
+            # clean up broken install
+            rmtree(remote.target_dir)
+            raise
         else:
-            instance = cls(remote.ext_id)
-            controller_cache[remote.ext_id] = instance
-        instance.remote = remote
-        instance.state.url = url
-        instance.state.browser_url = remote.browser_url or ""
-        return instance
+            controller = cls.create(remote.ext_id, remote.target_dir)
+            controller.state.save(
+                url=url,
+                browser_url=remote.browser_url or "",
+                commit_hash=commit_hash,
+                commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+                updated_at=datetime.now().isoformat(),
+                error_type="",
+                error_message="",
+            )
+            logger.info("Extension %s installed successfully", controller.id)
+            return controller
 
     @classmethod
     def iterate(cls) -> Iterator[ExtensionController]:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)
-
-    @property
-    def manifest(self) -> ExtensionManifest:
-        return ExtensionManifest.load(self.path)
-
-    @property
-    def path(self) -> str:
-        if not self._path:
-            self._path = extension_finder.locate(self.id)
-        if not self._path:
-            msg = f"No extension could be found matching {self.id}"
-            raise ExtensionNotFoundError(msg)
-        return self._path
 
     @property
     def is_enabled(self) -> bool:
@@ -136,14 +145,6 @@ class ExtensionController:
     @property
     def has_error(self) -> bool:
         return bool(self.state.error_type)
-
-    @property
-    def is_manageable(self) -> bool:
-        return extension_finder.is_manageable(self.path)
-
-    @property
-    def is_installed(self) -> bool:
-        return extension_finder.locate(self.id) is not None
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -175,29 +176,6 @@ class ExtensionController:
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
-    async def install(self, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> None:
-        logger.info("Installing extension: %s", self.state.url or self._path)
-
-        commit_hash, commit_timestamp = self.remote.download(commit_hash, warn_if_overwrite)
-
-        # install python dependencies from requirements.txt
-        # or remove the downloaded extension files to avoid broken state
-        try:
-            deps = ExtensionDependencies(self.id, self.path)
-            deps.install()
-        except ExtensionDependenciesRecoverableError:
-            await self.remove()
-            raise
-
-        self.state.save(
-            commit_hash=commit_hash,
-            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-            updated_at=datetime.now().isoformat(),
-            error_type="",
-            error_message="",
-        )
-        logger.info("Extension %s installed successfully", self.id)
-
     async def remove(self) -> None:
         if not self.is_manageable:
             logger.warning(
@@ -214,8 +192,9 @@ class ExtensionController:
 
         # non-manageable extension still exists (installed elsewhere)
         if fallback_path := extension_finder.locate(self.id):
-            self._path = fallback_path
-            self.state.save(is_enabled=False)
+            controller_cache.pop(self.id, None)
+            fallback_ext = ExtensionController.create(self.id, fallback_path)
+            fallback_ext.state.save(is_enabled=False)
             logger.info("Non-manageable extension with the same id exists in '%s'", fallback_path)
         elif self._state_path.is_file():
             self._state_path.unlink()
@@ -224,10 +203,6 @@ class ExtensionController:
         """
         :returns: False if already up-to-date, True if was updated
         """
-        if not self.path:
-            msg = f"Extension {self.id} not found at {self._path}"
-            raise ExtensionNotFoundError(msg)
-
         logger.debug("Checking for updates to %s", self.id)
         has_update, commit_hash = await self.check_update()
         was_running = self.is_running
@@ -250,7 +225,7 @@ class ExtensionController:
 
             try:
                 await self.stop()
-                await self.install(commit_hash, warn_if_overwrite=False)
+                await self.install(self.state.url, commit_hash, warn_if_overwrite=False)
             except Exception:
                 logger.exception("Could not update extension '%s'.", self.id)
                 copytree(backup_dir, ext_path, dirs_exist_ok=True)

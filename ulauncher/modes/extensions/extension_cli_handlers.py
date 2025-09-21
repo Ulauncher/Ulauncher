@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Import other modules within functions to avoid circular deps and make sure the logger is initialized
 
 
-def get_installed_ext_controller(input_arg: str) -> ExtensionController | None:
+def get_ext_controller(input_arg: str) -> ExtensionController | None:
     """
     Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None
     """
@@ -64,14 +64,12 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    if get_installed_ext_controller(args.input):
+    if get_ext_controller(args.input):
         return upgrade_extensions(parser, args)
 
     url = normalize_arg(args.input)
-
     try:
-        controller = ExtensionController.create_from_url(url)
-        asyncio.run(controller.install())
+        controller = asyncio.run(ExtensionController.install(url))
         dbus_trigger_event("extensions:reload", [controller.id])
     except (ValueError, InvalidExtensionRecoverableError):  # error already logged
         return False
@@ -88,7 +86,7 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    if controller := get_installed_ext_controller(args.input):
+    if controller := get_ext_controller(args.input):
         asyncio.run(controller.remove())
         dbus_trigger_event("extensions:stop", [controller.id])
         return True
@@ -103,7 +101,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
 
     if "input" in args and args.input:
         # Upgrade specific extension
-        if controller := get_installed_ext_controller(args.input):
+        if controller := get_ext_controller(args.input):
             try:
                 asyncio.run(controller.update())
             except ExtensionRemoteError:
