@@ -59,7 +59,7 @@ class ExtensionRemote(UrlParseResult):
         try:
             if which("git"):
                 if isdir(self._git_dir):
-                    subprocess.run(
+                    subprocess.check_call(
                         [
                             "git",
                             f"--git-dir={self._git_dir}",
@@ -69,11 +69,14 @@ class ExtensionRemote(UrlParseResult):
                             "--prune",
                             "--prune-tags",
                         ],
-                        check=True,
+                        stderr=subprocess.DEVNULL,
                     )
                 else:
                     os.makedirs(self._git_dir)
-                    subprocess.run(["git", "clone", "--bare", self.remote_url, self._git_dir], check=True)
+                    subprocess.check_call(
+                        ["git", "clone", "--bare", self.remote_url, self._git_dir],
+                        stderr=subprocess.DEVNULL,
+                    )
 
                 response = subprocess.check_output(["git", "ls-remote", self._git_dir]).decode().strip().split("\n")
             else:
@@ -94,7 +97,6 @@ class ExtensionRemote(UrlParseResult):
                 msg = f'Could not access repository resource "{self.url}"'
                 raise ExtensionNetworkError(msg) from e
 
-            logger.warning("Unexpected error fetching extension versions '%s' (%s: %s)", self.url, type(e).__name__, e)
             msg = f'Could not fetch reference "{ref}" for {self.url}.' if ref else f"Could not fetch remote {self.url}."
             raise ExtensionRemoteError(msg) from e
 
