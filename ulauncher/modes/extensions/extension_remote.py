@@ -189,10 +189,14 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     host = url_parts.netloc
     remote_url = f"https://{host}/{path}"
 
-    assert path
+    if not path:
+        msg = f"Invalid URL: {input_url}"
+        raise ValueError(msg)
 
     if url_parts.scheme in ("", "file"):
-        assert isdir(url_parts.path)
+        if not isdir(url_parts.path):
+            msg = f"Invalid path: {input_url}"
+            raise ValueError(msg)
         browser_url = remote_url = f"file:///{path}"
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
@@ -212,8 +216,9 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     elif input_url_is_ssl:
         logger.warning("Can not safely derive HTTPS URL from SSL URL input '%s', Assuming: '%s'", input_url, remote_url)
 
-    if not remote_url.startswith("file://"):
-        assert host
+    if not remote_url.startswith("file://") and not host:
+        msg = f"Invalid URL: {input_url}"
+        raise ValueError(msg)
 
     ext_id = ".".join(([*reversed(host.split("."))] if host else []) + path.split("/"))
 

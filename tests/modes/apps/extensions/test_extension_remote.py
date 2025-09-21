@@ -67,7 +67,7 @@ class TestParseExtensionUrl:
     @patch("ulauncher.modes.extensions.extension_remote.isdir")
     def test_invalid_local_path_raises_assertion_error(self, mock_isdir: MagicMock) -> None:
         mock_isdir.return_value = False
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Invalid path"):
             parse_extension_url("/nonexistent/path")
 
     @patch("ulauncher.modes.extensions.extension_remote.isdir")
@@ -79,11 +79,11 @@ class TestParseExtensionUrl:
         assert result.browser_url == "file:///local/path/to/extension"
 
     def test_empty_path_raises_assertion_error(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Invalid URL"):
             parse_extension_url("https://example.com/")
 
     def test_no_host_no_file_protocol_raises_assertion_error(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Invalid URL"):
             # This creates a URL with no host but protocol is https
             parse_extension_url("https:///user/repo")
 
