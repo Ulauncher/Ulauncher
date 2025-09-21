@@ -95,7 +95,7 @@ class ExtensionRemote(UrlParseResult):
                 raise ExtensionNetworkError(msg) from e
 
             logger.warning("Unexpected error fetching extension versions '%s' (%s: %s)", self.url, type(e).__name__, e)
-            msg = f'Could not fetch reference "{ref}" for {self.url}.'
+            msg = f'Could not fetch reference "{ref}" for {self.url}.' if ref else f"Could not fetch remote {self.url}."
             raise ExtensionRemoteError(msg) from e
 
         return refs
