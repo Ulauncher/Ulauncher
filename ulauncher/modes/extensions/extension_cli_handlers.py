@@ -152,10 +152,8 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         except Exception:
             logger.exception("Failed to update %s", ext_name)
 
-    if len(updated_extensions) == 0:
-        logger.info("All extensions are up to date")
-    else:
+    if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
-        logger.info("Successfully updated %s extensions", len(updated_extensions))
 
+    logger.info("\n%s extensions updated", len(updated_extensions))
     return True
