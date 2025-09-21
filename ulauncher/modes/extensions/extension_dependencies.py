@@ -67,7 +67,8 @@ class ExtensionDependencies:
         except subprocess.CalledProcessError as e:
             logger.exception("Error during installation. Output: %s", e.stderr)
 
-            raise ExtensionDependenciesRecoverableError(f"$ {command_str}\n{e.stderr}") from e  # noqa: TRY003, EM102
+            err_msg = f"$ {command_str}\n{e.stderr}"
+            raise ExtensionDependenciesRecoverableError(err_msg) from e
 
     def _read_requirements(self) -> str | None:
         """
