@@ -57,7 +57,7 @@ class ExtensionMode(BaseMode):
         self._keywords.clear()
 
         for ext in ExtensionController.iterate():
-            if not ext.is_enabled:
+            if not ext.is_enabled or ext.has_error:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
