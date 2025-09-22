@@ -54,7 +54,7 @@ class ExtensionMode(BaseMode):
                 "args": [query.argument, trigger_id],
             }
 
-            ext.send_message(event)
+            ext.debounced_send_message(event)
             return
 
         msg = f"Extension could not handle query {query}"
