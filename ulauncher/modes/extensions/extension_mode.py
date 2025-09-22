@@ -25,7 +25,7 @@ class ExtensionTrigger(Result):
 
 class ExtensionMode(BaseMode):
     active_ext: ExtensionController | None = None
-    _keywords: dict[str, str] = {}
+    _trigger_cache: dict[str, tuple[str, str]] = {}
 
     def __init__(self) -> None:
         events.set_self(self)
@@ -44,10 +44,10 @@ class ExtensionMode(BaseMode):
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
 
-        if ext_id := self._keywords.get(query.keyword, None):
+        if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
+            trigger_id, ext_id = trigger_cache_entry
             ext = ExtensionController.create(ext_id)
             self.active_ext = ext
-            trigger_id = next((t_id for t_id, t in ext.triggers.items() if t.keyword == query.keyword), None)
             event = {
                 "type": "event:input_trigger",
                 "ext_id": ext.id,
@@ -61,13 +61,13 @@ class ExtensionMode(BaseMode):
         raise RuntimeError(msg)
 
     def get_triggers(self) -> Iterator[Result]:
-        self._keywords.clear()
+        self._trigger_cache.clear()
         for ext in ExtensionController.iterate():
             if not ext.is_enabled:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
-                self._keywords[trigger.keyword] = ext.id
+                self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
                 action = (
                     f"{trigger.keyword} "
