@@ -36,7 +36,7 @@ class ExtensionPreference(ExtensionManifestPreference):
     value: str | int | None = None
 
 
-class ExtensionTrigger(ExtensionManifestTrigger):
+class ExtensionControllerTrigger(ExtensionManifestTrigger):
     pass
 
 
@@ -158,11 +158,11 @@ class ExtensionController:
         return prefs
 
     @property
-    def triggers(self) -> dict[str, ExtensionTrigger]:
+    def triggers(self) -> dict[str, ExtensionControllerTrigger]:
         user_prefs_json = _load_preferences(self.id)
         triggers = {}
         for t_id, manifest_trigger in self.manifest.triggers.items():
-            trigger = ExtensionTrigger(manifest_trigger)
+            trigger = ExtensionControllerTrigger(manifest_trigger)
             if user_keyword := user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword):
                 trigger.keyword = user_keyword
             triggers[t_id] = trigger
