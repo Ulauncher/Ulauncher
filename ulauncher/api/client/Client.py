@@ -1,79 +1,66 @@
 from __future__ import annotations  # noqa: N999
 
+import json
 import logging
 import os
-import sys
-import traceback
 from functools import partial
-from typing import Any
-
-from gi.repository import Gio, GLib
+from typing import Any, Iterator, TextIO
 
 import ulauncher.api
-from ulauncher.utils.framer import JSONFramer
-from ulauncher.utils.socket_path import get_socket_path
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 
 
 class Client:
-    socket_path: str
     extension: ulauncher.api.Extension
-    client: Gio.SocketClient
-    conn: Gio.SocketConnection | None = None
-    framer: JSONFramer | None = None
+    input_stream: TextIO
+    output_stream: TextIO
     """
     Communication layers:
     → Extension subclass
     • This class
-    → (OS) Unix socket
-    → (Ulauncher process) ExtensionSocketServer
-    → ExtensionSocketController
+    → (OS) input/output streams
+    → (Ulauncher process) ExtensionRuntime
     → EventBus
     → the rest of Ulauncher
     """
 
-    def __init__(self, extension: ulauncher.api.Extension) -> None:
-        self.socket_path = get_socket_path()
+    def __init__(self, extension: ulauncher.api.Extension, input_stream: TextIO, output_stream: TextIO) -> None:
+        self.input_stream = input_stream
+        self.output_stream = output_stream
         self.extension = extension
-        self.client = Gio.SocketClient()
+
+    def read_messages(self) -> Iterator[dict[str, Any]]:
+        """Generator that yields messages from input stream."""
+        try:
+            for raw_line in self.input_stream:
+                line = raw_line.strip()
+                if line:
+                    try:
+                        obj = json.loads(line)
+                        yield obj
+                    except json.JSONDecodeError:
+                        logger.warning("Invalid JSON from Ulauncher app %s:", line)
+                        continue
+        except (EOFError, KeyboardInterrupt):
+            # Input stream closed or interrupted
+            self.graceful_unload()
+            return
 
     def connect(self) -> None:
         """
         Connects to the extension server and blocks thread
         """
-        logger.debug("Connecting to socket_path %s", self.socket_path)
-        self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
-        if not self.conn:
-            msg = f"Failed to connect to socket_path {self.socket_path}"
-            raise RuntimeError(msg)
-        self.framer = JSONFramer()
-        self.framer.connect("message_parsed", self.on_message)
-        self.framer.connect("closed", self.on_close)
-        self.framer.set_connection(self.conn)
-        self.send({"type": "extension:socket_connected", "ext_id": self.extension.ext_id})
+        for message in self.read_messages():
+            self.on_message(message)
 
-        mainloop = GLib.MainLoop.new(None, False)
-        mainloop.run()
-
-    def on_message(self, _framer: JSONFramer, event: dict[str, Any]) -> None:
+    def on_message(self, event: dict[str, Any]) -> None:
         """
         Parses message from Ulauncher and triggers extension event
         """
         logger.debug("Incoming event: %s", event)
-        try:
-            self.extension.trigger_event(event)
-        except Exception:  # noqa: BLE001
-            traceback.print_exc(file=sys.stderr)
-
-    def on_close(self, _framer: JSONFramer) -> None:
-        """
-        Terminates extension process on client disconnect.
-        Triggers unload event for graceful shutdown
-        """
-        logger.warning("Connection closed. Exiting")
-        self.graceful_unload()
+        self.extension.trigger_event(event)
 
     def graceful_unload(self, status_code: int = 0) -> None:
         # extension has 0.5 sec to save it's state, after that it will be terminated
@@ -81,6 +68,8 @@ class Client:
         timer(0.5, partial(os._exit, status_code))
 
     def send(self, response: Any) -> None:
+        """Send a JSON object as a newline-delimited message."""
         logger.debug('Send message with keys "%s"', set(response))
-        assert self.framer
-        self.framer.send(response)
+        json_str = json.dumps(response)
+        self.output_stream.write(json_str + "\n")
+        self.output_stream.flush()
