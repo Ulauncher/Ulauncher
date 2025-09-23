@@ -143,3 +143,52 @@ class ExtensionMode(BaseMode):
     @events.on
     def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
         self.ext_socket_server.handle_response(ext_id, response)
+
+    @events.on
+    def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
+        """Handle a preview extension request coming from the CLI (via D-Bus).
+
+        Stage: run the extension from an arbitrary filesystem path WITHOUT installing it.
+
+        Expected payload example:
+            {
+              "ext_id": "my-extension",
+              "path": "/abs/path/to/extension",
+              "with_debugger": false
+            }
+        """
+        if not payload or not isinstance(payload, dict):  # basic guard
+            logger.error("preview_ext called without valid payload: %s", payload)
+            return
+
+        ext_id = payload.get("ext_id")
+        path = payload.get("path")
+        with_debugger = bool(payload.get("with_debugger"))
+        assert ext_id, "preview_ext called without ext_id"
+        assert path, "preview_ext called without path"
+
+        logger.info(
+            "[preview] Received preview request for ext_id=%s path=%s debugger=%s (stub stage)",
+            ext_id,
+            path,
+            with_debugger,
+        )
+
+        existing_controller = ExtensionController.create(ext_id)
+        if existing_controller and existing_controller.is_running:
+            logger.info(
+                "[preview] Extension '%s' is currently running; stopping it before launching preview version",
+                ext_id,
+            )
+            self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
+
+        preview_ext_id = f"{ext_id}.preview"
+        controller = ExtensionController.create(preview_ext_id, path)
+        controller.is_preview = True
+        # install python dependencies from requirements.txt
+        from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+
+        deps = ExtensionDependencies(controller.id, controller.path)
+        deps.install()
+
+        asyncio.run(controller.start())
