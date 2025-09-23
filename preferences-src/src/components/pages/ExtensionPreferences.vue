@@ -7,7 +7,7 @@
       <div class="ext-info">
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
-        <div class="repo" v-if="extension.url">
+        <div class="repo" v-if="extension.url && !extension.is_preview">
           <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div>
           <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div>
           <div v-if="extension.browser_url">
@@ -44,7 +44,7 @@
       <div>
         <b-button-group>
           <b-button @click="save" v-if="canSave && !extension.error_type" title="Save preferences"><i class="fa fa-check"></i></b-button>
-          <b-button @click="checkUpdates" v-if="extension.url" title="Check updates"><i class="fa fa-refresh"></i></b-button>
+          <b-button @click="checkUpdates" v-if="extension.url && !extension.is_preview" title="Check updates"><i class="fa fa-refresh"></i></b-button>
           <b-button @click="openRemoveModal" v-if="isManageable" title="Remove"><i class="fa fa-trash"></i></b-button>
           <b-button
             @click="setIsEnabled(!extension.is_enabled || !!extension.error_type)"
