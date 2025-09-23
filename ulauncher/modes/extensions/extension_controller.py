@@ -8,7 +8,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 from weakref import WeakValueDictionary
 
 from ulauncher import paths
@@ -27,6 +27,7 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
@@ -74,7 +75,7 @@ class ExtensionController:
     state: ExtensionState
     manifest: ExtensionManifest
     is_manageable: bool
-    is_running: bool = False
+    debounced_send_message: Callable[[dict[str, Any]], None]
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -82,6 +83,7 @@ class ExtensionController:
         self.path = path
         self.manifest = ExtensionManifest.load(path)
         self.is_manageable = extension_finder.is_manageable(path)
+        self.debounced_send_message = debounce(self.manifest.input_debounce)(self.send_message)
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
@@ -145,6 +147,10 @@ class ExtensionController:
     @property
     def has_error(self) -> bool:
         return bool(self.state.error_type)
+
+    @property
+    def is_running(self) -> bool:
+        return self.id in extension_runtimes
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -248,16 +254,15 @@ class ExtensionController:
     async def toggle_enabled(self, enabled: bool) -> bool:
         self.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
-            return await self.start()
+            return self.start()
         await self.stop()
         return False
 
-    def start_detached(self) -> None:
+    def start(self) -> bool:
         if not self.is_running:
 
             def error_handler(error_type: str, error_msg: str) -> None:
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
-                self.is_running = False
                 extension_runtimes.pop(self.id, None)
                 self.state.save(error_type=error_type, error_message=error_msg)
 
@@ -266,10 +271,10 @@ class ExtensionController:
                 self.manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
                 error_handler("Invalid", str(err))
-                return
+                return False
             except ExtensionIncompatibleRecoverableError as err:
                 error_handler("Incompatible", str(err))
-                return
+                return False
 
             self.state.save(error_type="", error_message="")  # clear any previous error
 
@@ -287,20 +292,21 @@ class ExtensionController:
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, error_handler)
 
-    async def start(self) -> bool:
-        self.start_detached()
-        for _ in range(100):
-            if self.has_error:
-                return False
-            if self.is_running:
-                return True
-            await asyncio.sleep(0.1)
-        return False
+        return self.is_running
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
-            self.is_running = False
+
+    def send_message(self, message: dict[str, Any]) -> bool:
+        """
+        Sends a JSON message to the extension if it is running.
+        Returns True if message was sent, False otherwise.
+        """
+        if runtime := extension_runtimes.get(self.id):
+            runtime.send_message(message)
+            return True
+        return False
 
     @classmethod
     async def stop_all(cls) -> None:

@@ -16,13 +16,12 @@ from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.result import ActionMetadata
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
-from ulauncher.utils.timer import TimerContext, timer
 
 PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 class Extension:
-    _placeholder_result_timer: TimerContext | None = None
+    _placeholder_result_timer: threading.Timer | None = None
     """
     Manages extension runtime.
     Used only within the extension process to handle events and communicate with Ulauncher.
@@ -32,14 +31,15 @@ class Extension:
     """
 
     def __init__(self) -> None:
+        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self._input: str = ""
-        log_handler = logging.StreamHandler()
+        self._client = Client(self, sys.stdin, sys.stderr)
+        log_handler = logging.StreamHandler(sys.stdout)
         log_handler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
-        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
         self.logger = logging.getLogger(self.ext_id)
+
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
-        self._client = Client(self)
         self.preferences = {}
         signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.graceful_unload(signal))
         with contextlib.suppress(Exception):
@@ -119,9 +119,10 @@ class Extension:
     ) -> None:
         current_input = self._input
         self._clear_placeholder_timeout()
-        self._placeholder_result_timer = timer(
+        self._placeholder_result_timer = threading.Timer(
             PLACEHOLDER_DELAY, lambda: self._client.send({"event": event, "action": [{"name": "Loading..."}]})
         )
+        self._placeholder_result_timer.start()
         action_metadata = method(*args)
 
         # convert iterables to list
