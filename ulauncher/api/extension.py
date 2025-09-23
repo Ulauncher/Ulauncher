@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import signal
-import sys
 import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterator
@@ -36,7 +35,8 @@ class Extension:
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
-        self.ext_id = os.path.basename(os.path.dirname(sys.argv[0]))
+        self.ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
+        assert self.ext_id, "ULAUNCHER_EXTENSION_ID env variable not set"
         self.logger = logging.getLogger(self.ext_id)
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self._client = Client(self)

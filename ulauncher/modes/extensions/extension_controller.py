@@ -77,6 +77,7 @@ class ExtensionController:
     manifest: ExtensionManifest
     is_manageable: bool
     is_running: bool = False
+    is_preview: bool = False
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -236,7 +237,7 @@ class ExtensionController:
         await self.stop()
         return False
 
-    def start_detached(self) -> None:
+    def start_detached(self, with_debugger: bool = False) -> None:
         if not self.is_running:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
@@ -258,7 +259,13 @@ class ExtensionController:
             self.state.save(error_type="", error_message="")  # clear any previous error
 
             ext_deps = ExtensionDependencies(self.id, self.path)
-            cmd = [sys.executable, f"{self.path}/main.py"]
+            extension_main = f"{self.path}/main.py"
+            cmd = [sys.executable, extension_main]
+
+            # If debugger mode is enabled, prepend debugger command
+            if with_debugger:
+                cmd = [sys.executable, "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", extension_main]
+
             prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
             triggers = {t_id: t.keyword for t_id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)
@@ -267,6 +274,7 @@ class ExtensionController:
                 "VERBOSE": str(int(get_cli_args().verbose)),
                 "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+                "ULAUNCHER_EXTENSION_ID": self.id,
             }
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)

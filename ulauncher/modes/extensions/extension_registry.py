@@ -26,7 +26,15 @@ def get(ext_id: str) -> ExtensionController:
 
 def iterate() -> Iterator[ExtensionController]:
     """Iterate over registered extension controllers."""
-    yield from _ext_controllers.values()
+
+    def sort_key(controller: ExtensionController) -> int:
+        if controller.is_preview:
+            return 0  # preview first
+        if controller.is_running:
+            return 1  # running second
+        return 2  # stopped and errored last
+
+    yield from sorted(_ext_controllers.values(), key=sort_key)
 
 
 def load(ext_id: str, path: str | None = None) -> ExtensionController:
