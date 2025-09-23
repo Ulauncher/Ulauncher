@@ -77,6 +77,7 @@ class ExtensionController:
     manifest: ExtensionManifest
     is_manageable: bool
     is_running: bool = False
+    is_preview: bool = False
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -267,6 +268,7 @@ class ExtensionController:
                 "VERBOSE": str(int(get_cli_args().verbose)),
                 "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+                "ULAUNCHER_EXTENSION_ID": self.id,
             }
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
