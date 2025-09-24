@@ -25,7 +25,7 @@ class ExtensionTrigger(Result):
 class ExtensionMode(BaseMode):
     ext_socket_server: ExtensionSocketServer
     active_ext: ExtensionController | None = None
-    _keywords: dict[str, str] = {}
+    _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
         self.ext_socket_server = ExtensionSocketServer()
@@ -36,8 +36,9 @@ class ExtensionMode(BaseMode):
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
-        if ext_id := self._keywords.get(query.keyword, None):
-            self.active_ext = self.ext_socket_server.handle_query(ext_id, query)
+        if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
+            trigger_id, ext_id = trigger_cache_entry
+            self.active_ext = self.ext_socket_server.handle_query(ext_id, trigger_id, query)
         if not ext_id or not self.active_ext:
             msg = f"Query not valid for extension mode '{query}'"
             raise RuntimeError(msg)
@@ -54,14 +55,13 @@ class ExtensionMode(BaseMode):
             events.emit("mode:handle_action", action_metadata)
 
     def get_triggers(self) -> Iterator[Result]:
-        self._keywords.clear()
-
+        self._trigger_cache.clear()
         for ext in ExtensionController.iterate():
             if not ext.is_enabled or ext.has_error:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
-                self._keywords[trigger.keyword] = ext.id
+                self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
                 action = (
                     f"{trigger.keyword} "

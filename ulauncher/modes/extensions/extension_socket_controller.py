@@ -48,14 +48,11 @@ class ExtensionSocketController:
         logger.debug('Send event %s to "%s"', type(event).__name__, self.ext_id)
         self.framer.send(event)
 
-    def handle_query(self, query: Query) -> None:
+    def handle_query(self, trigger_id: str, query: Query) -> None:
         """
         Handles user query with a keyword from this extension
         :returns: action object
         """
-        triggers = self.ext_controller.triggers
-        trigger_id = next((t_id for t_id, t in triggers.items() if t.keyword == query.keyword), None)
-
         self.trigger_event(
             {
                 "type": "event:input_trigger",
