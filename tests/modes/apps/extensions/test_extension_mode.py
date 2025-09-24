@@ -22,15 +22,16 @@ class TestExtensionMode:
         controller = create_autospec(ExtensionSocketController)
         ext_server.socket_controllers.get.return_value = controller
         mode = ExtensionMode()
-        mode._keywords = {keyword: "ext_id"}
+        mode._trigger_cache = {keyword: ("ext_id", "trigger_id")}
 
         assert not mode.matches_query_str(keyword), "Mode is enabled"
 
     def test_handle_query__controller_handle_query__is_called(self, ext_server: MagicMock) -> None:
         keyword = "asdf"
         ext_id = "com.test.ext"
+        trigger_id = "trigger_id"
         mode = ExtensionMode()
-        mode._keywords = {keyword: ext_id}
+        mode._trigger_cache = {keyword: (ext_id, trigger_id)}
         query = Query(keyword, "ghjk")
         mode.handle_query(query)
-        ext_server.handle_query.assert_called_with(ext_id, query)
+        ext_server.handle_query.assert_called_with(trigger_id, ext_id, query)
