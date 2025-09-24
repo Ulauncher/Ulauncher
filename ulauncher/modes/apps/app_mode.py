@@ -11,6 +11,7 @@ from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.base_mode import BaseMode
+from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger()
@@ -23,7 +24,7 @@ class AppMode(BaseMode):
         if not settings.enable_application_mode:
             return
 
-        apps: list[Gio.DesktopAppInfo] = Gio.DesktopAppInfo.get_all()  # type: ignore[assignment]
+        apps: list[Gio.DesktopAppInfo] = DesktopAppInfo.get_all()  # type: ignore[assignment]
         for app in apps:
             executable = app.get_executable()
             if not executable or not app.get_display_name():

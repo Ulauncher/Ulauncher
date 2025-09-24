@@ -6,8 +6,7 @@ import re
 import shlex
 from pathlib import Path
 
-from gi.repository import Gio
-
+from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.wm import try_raise_app
@@ -18,7 +17,7 @@ logger = logging.getLogger()
 def launch_app(desktop_entry_name: str) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
-    app = Gio.DesktopAppInfo.new(desktop_entry_name)
+    app = DesktopAppInfo.new(desktop_entry_name)
     app_dir: str | None = None
     cmd: list[str] = []
     if not app:

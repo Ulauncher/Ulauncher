@@ -9,6 +9,7 @@ from gi.repository import Gio
 
 from ulauncher import paths
 from ulauncher.internals.result import Result
+from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
@@ -38,7 +39,7 @@ class AppResult(Result):
     def from_id(app_id: str) -> AppResult | None:
         # Suppress errors due to app being uninstalled/not found
         with contextlib.suppress(TypeError):
-            if app_info := Gio.DesktopAppInfo.new(app_id):
+            if app_info := DesktopAppInfo.new(app_id):
                 return AppResult(app_info)
         return None
 

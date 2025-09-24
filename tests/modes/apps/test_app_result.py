@@ -9,6 +9,7 @@ from gi.repository import Gio
 from pytest_mock import MockerFixture
 
 from ulauncher.modes.apps.app_result import AppResult
+from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.json_utils import json_load
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
@@ -26,18 +27,18 @@ class TestAppResult:
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_new(self, mocker: MockerFixture) -> Any:
         def mkappinfo(app_id: str) -> Gio.DesktopAppInfo | None:
-            return Gio.DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
+            return DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
 
-        return mocker.patch("ulauncher.modes.apps.app_result.Gio.DesktopAppInfo.new", new=mkappinfo)
+        return mocker.patch("ulauncher.modes.apps.app_result.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_get_all(self, mocker: MockerFixture) -> Any:
         def get_all_appinfo() -> Iterator[Gio.DesktopAppInfo]:
             for path in ["trueapp.desktop", "falseapp.desktop"]:
-                if app_info := Gio.DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}"):
+                if app_info := DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}"):
                     yield app_info
 
-        return mocker.patch("ulauncher.modes.apps.app_result.Gio.DesktopAppInfo.get_all", new=get_all_appinfo)
+        return mocker.patch("ulauncher.modes.apps.app_result.DesktopAppInfo.get_all", new=get_all_appinfo)
 
     @pytest.fixture
     def app1(self) -> AppResult | None:
