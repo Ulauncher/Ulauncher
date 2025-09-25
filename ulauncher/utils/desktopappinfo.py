@@ -1,13 +1,11 @@
-from typing import cast
-
-import gi
 from gi.repository import Gio
 
 try:
+    DesktopAppInfo = Gio.DesktopAppInfo
+except AttributeError:
+    import gi
+
     gi.require_version("GioUnix", "2.0")
     from gi.repository import GioUnix  # type: ignore[attr-defined]
-except (ImportError, ValueError):
-    GioUnix = Gio
 
-
-DesktopAppInfo = cast("Gio.DesktopAppInfo", GioUnix.DesktopAppInfo)
+    DesktopAppInfo = GioUnix.DesktopAppInfo  # type: ignore[assignment,misc,unused-ignore]
