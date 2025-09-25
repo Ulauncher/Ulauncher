@@ -4,10 +4,8 @@ from collections import OrderedDict
 from itertools import chain
 from typing import Generator, List
 
-import gi
-gi.require_version('Gio', '2.0')
-# pylint: disable=wrong-import-position
-from gi.repository import Gio
+
+from ulauncher.utils.desktopappinfo import DesktopAppInfo
 
 from ulauncher.utils.file_finder import find_files
 from ulauncher.config import DESKTOP_DIRS, CACHE_DIR
@@ -69,7 +67,7 @@ def read_desktop_file(file):
     :rtype: :class:`Gio.DesktopAppInfo` or :code:`None`
     """
     try:
-        return Gio.DesktopAppInfo.new_from_filename(file)
+        return DesktopAppInfo.new_from_filename(file)
     # pylint: disable=broad-except
     except Exception as e:
         logger.info('Could not read "%s": %s', file, e)
