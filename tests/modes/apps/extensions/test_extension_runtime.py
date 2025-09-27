@@ -1,7 +1,7 @@
 import asyncio
 import signal
 from typing import Any
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, call
 
 import pytest
 from pytest_mock import MockerFixture
@@ -94,15 +94,20 @@ class TestExtensionRuntime:
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
 
-    def test_stop(self) -> None:
-        extid = "mock.test_stop"
+    def test_stop_noop_if_not_running(self) -> None:
+        extid = "mock.test_stop_noop_if_not_running"
         err_cb = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
 
         runtime.subprocess.get_identifier.return_value = None
         asyncio.run(runtime.stop())
-        runtime.subprocess.send_signal.assert_called_with(signal.SIGTERM)
+        runtime.subprocess.send_signal.assert_not_called()
+
+    def test_stop(self) -> None:
+        extid = "mock.test_stop"
+        err_cb = Mock()
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
 
         runtime.subprocess.get_identifier.return_value = "ID"
         asyncio.run(runtime.stop())
-        runtime.subprocess.send_signal.assert_called_with(signal.SIGKILL)
+        runtime.subprocess.send_signal.assert_has_calls([call(signal.SIGTERM), call(signal.SIGKILL)])
