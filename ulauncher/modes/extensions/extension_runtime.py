@@ -54,6 +54,10 @@ class ExtensionRuntime:
         """
         Terminates extension
         """
+        if not self.subprocess.get_identifier():
+            logger.info("Cannot stop '%s'. It has already been terminated, or was never started", self.ext_id)
+            return
+
         logger.info('Terminating extension "%s"', self.ext_id)
         aborted_subprocesses.add(self.subprocess)
         self.subprocess.send_signal(signal.SIGTERM)
