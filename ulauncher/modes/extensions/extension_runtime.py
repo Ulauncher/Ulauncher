@@ -12,7 +12,7 @@ from gi.repository import Gio, GLib
 
 ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"]
 logger = logging.getLogger()
-ErrorHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
+ExitHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
 aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()
 
 
@@ -22,17 +22,17 @@ class ExtensionRuntime:
     start_time: float
     error_stream: Gio.DataInputStream
     recent_errors: deque[str]
-    error_handler: ErrorHandlerCallback | None
+    exit_handler: ExitHandlerCallback | None
 
     def __init__(
         self,
         ext_id: str,
         cmd: list[str],
         env: dict[str, str] | None = None,
-        error_handler: ErrorHandlerCallback | None = None,
+        exit_handler: ExitHandlerCallback | None = None,
     ) -> None:
         self.ext_id = ext_id
-        self.error_handler = error_handler
+        self.exit_handler = exit_handler
         self.recent_errors = deque(maxlen=1)
         self.start_time = time()
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
@@ -85,24 +85,24 @@ class ExtensionRuntime:
             logger.info('Extension "%s" was stopped by the user', self.ext_id)
             return
 
-        if self.error_handler:
+        if self.exit_handler:
             uptime_seconds = time() - self.start_time
             exit_status = self.subprocess.get_exit_status()
             error_msg = "\n".join(self.recent_errors)
             if "ModuleNotFoundError" in error_msg:
                 package_name = error_msg.split("'")[1].split(".")[0]
                 if package_name == "ulauncher":
-                    self.error_handler("MissingInternals", error_msg)
+                    self.exit_handler("MissingInternals", error_msg)
                     return
                 if package_name:
-                    self.error_handler("MissingModule", package_name)
+                    self.exit_handler("MissingModule", package_name)
                     return
             if uptime_seconds < 1:
                 logger.error('Extension "%s" terminated before it could start', self.ext_id)
-                self.error_handler("Terminated", error_msg)
+                self.exit_handler("Terminated", error_msg)
                 return
 
             if not error_msg:
                 error_msg = f'Extension "{self.ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
-            self.error_handler("Exited", error_msg)
+            self.exit_handler("Exited", error_msg)

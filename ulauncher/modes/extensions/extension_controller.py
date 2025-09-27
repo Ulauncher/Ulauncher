@@ -255,7 +255,7 @@ class ExtensionController:
     def start_detached(self) -> None:
         if not self.is_running:
 
-            def error_handler(error_type: str, error_msg: str) -> None:
+            def exit_handler(error_type: str, error_msg: str) -> None:
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
                 self.is_running = False
                 extension_runtimes.pop(self.id, None)
@@ -265,10 +265,10 @@ class ExtensionController:
                 self.manifest.validate()
                 self.manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
-                error_handler("Invalid", str(err))
+                exit_handler("Invalid", str(err))
                 return
             except ExtensionIncompatibleRecoverableError as err:
-                error_handler("Incompatible", str(err))
+                exit_handler("Incompatible", str(err))
                 return
 
             self.state.save(error_type="", error_message="")  # clear any previous error
@@ -285,7 +285,7 @@ class ExtensionController:
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             }
 
-            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, error_handler)
+            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
 
     async def start(self) -> bool:
         self.start_detached()

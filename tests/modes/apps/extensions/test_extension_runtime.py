@@ -55,49 +55,49 @@ class TestExtensionRuntime:
 
     def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"
-        err_cb = Mock()
+        exit_handler = Mock()
 
-        runtime = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
+        runtime = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
         aborted_subprocesses.add(runtime.subprocess)
 
         runtime.handle_exit(runtime.subprocess, Mock())
-        err_cb.assert_not_called()
+        exit_handler.assert_not_called()
 
     def test_handle_exit__rapid_exit(self, time: MagicMock) -> None:
         extid = "mock.test_handle_exit__rapid_exit"
         curtime = 100.0
         starttime = curtime - 0.5
         time.return_value = starttime
-        err_cb = Mock()
+        exit_handler = Mock()
 
-        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
         runtime.subprocess.get_if_signaled.return_value = False
         runtime.subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
 
         runtime.handle_exit(runtime.subprocess, Mock())
-        err_cb.assert_called()
+        exit_handler.assert_called()
 
     def test_handle_exit(self, time: MagicMock) -> None:
         extid = "mock.test_handle_exit"
-        err_cb = Mock()
+        exit_handler = Mock()
         curtime = 100.0
         starttime = curtime - 5
         time.return_value = starttime
 
-        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
         runtime.subprocess.get_if_signaled.return_value = False
         runtime.subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
         runtime.handle_exit(runtime.subprocess, Mock())
-        err_cb.assert_called_once_with(
+        exit_handler.assert_called_once_with(
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
 
     def test_stop_noop_if_not_running(self) -> None:
         extid = "mock.test_stop_noop_if_not_running"
-        err_cb = Mock()
-        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
+        exit_handler = Mock()
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
         runtime.subprocess.get_identifier.return_value = None
         asyncio.run(runtime.stop())
@@ -105,8 +105,8 @@ class TestExtensionRuntime:
 
     def test_stop(self) -> None:
         extid = "mock.test_stop"
-        err_cb = Mock()
-        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, err_cb)
+        exit_handler = Mock()
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
         runtime.subprocess.get_identifier.return_value = "ID"
         asyncio.run(runtime.stop())
