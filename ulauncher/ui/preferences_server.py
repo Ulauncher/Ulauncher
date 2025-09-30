@@ -86,7 +86,8 @@ class PreferencesServer:
         """
         uri: str = scheme_request.get_uri()
         params = urlparse(uri)
-        path = params.path.replace("null/", "/")
+        # Strip fragment (hash) from path - e.g., "/path/file.html#/" becomes "/path/file.html"
+        path = params.path.replace("null/", "/").split("#")[0]
 
         if route_handler := routes.get(path):
             # WebKit.URISchemeRequest is very primitive as a server:

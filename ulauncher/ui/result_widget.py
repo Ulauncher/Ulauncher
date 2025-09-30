@@ -49,7 +49,8 @@ class ResultWidget(Gtk.EventBox):
         self.item_box.add(item_container)
 
         icon = Gtk.Image()
-        icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, self.get_scale_factor()))
+        scale_factor = self.get_scale_factor()
+        icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, scale_factor))
         icon.get_style_context().add_class("item-icon")
         item_container.pack_start(icon, False, True, 0)
 
