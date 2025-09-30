@@ -24,23 +24,23 @@ class ExtensionSocketController:
     socket_controllers: dict[str, ExtensionSocketController]
 
     def __init__(
-        self, socket_controllers: dict[str, ExtensionSocketController], framer: JSONFramer, ext_id: str
+        self,
+        socket_controllers: dict[str, ExtensionSocketController],
+        framer: JSONFramer,
+        ext_controller: ExtensionController,
     ) -> None:
-        if not ext_id:
-            msg = "No ext_id provided"
-            raise RuntimeError(msg)
         self.socket_controllers = socket_controllers
         self.framer: JSONFramer = framer
-        self.ext_id = ext_id
-        self.ext_controller = ExtensionController.create(ext_id)
+        self.ext_controller = ext_controller
+        self.ext_id = ext_controller.id
 
-        self.socket_controllers[ext_id] = self
+        self.socket_controllers[self.ext_id] = self
         self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self.send_message)
 
         # legacy_preferences_load is useless and deprecated
         prefs = {p_id: pref.value for p_id, pref in self.ext_controller.preferences.items()}
         self.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
-        logger.info('Extension "%s" connected', ext_id)
+        logger.info('Extension "%s" connected', self.ext_id)
         self.framer.connect("message_parsed", self.handle_response)
         self.framer.connect("closed", self.handle_close)
 

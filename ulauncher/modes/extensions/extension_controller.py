@@ -135,6 +135,27 @@ class ExtensionController:
             return controller
 
     @classmethod
+    async def install_preview(cls, ext_id: str, path: str) -> ExtensionController:
+        logger.info("Installing extension in preview: %s", path)
+
+        # install python dependencies from requirements.txt
+        deps = ExtensionDependencies(ext_id, path)
+        deps.install()
+
+        controller = cls.create(ext_id, path)
+        controller.state.save(
+            url=path,
+            browser_url=path,
+            commit_hash="(preview)",
+            commit_time="N/A",
+            updated_at="N/A",
+            error_type="",
+            error_message="",
+        )
+        logger.info("Extension %s installed successfully", controller.id)
+        return controller
+
+    @classmethod
     def iterate(cls) -> Iterator[ExtensionController]:
         for ext_id, ext_path in extension_finder.iterate():
             yield ExtensionController.create(ext_id, ext_path)

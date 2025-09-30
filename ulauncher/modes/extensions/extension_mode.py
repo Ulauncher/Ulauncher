@@ -36,6 +36,8 @@ class ExtensionMode(BaseMode):
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
+        # TODO: figure out why when I'm running extension in preview mode, the existing non-preview extension is returned here instead of the preview one
+        # I'm stopping the existing extension in the preview handler below.
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
             self.active_ext = self.ext_socket_server.handle_query(ext_id, trigger_id, query)
@@ -57,10 +59,12 @@ class ExtensionMode(BaseMode):
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
         for ext in ExtensionController.iterate():
+            logger.debug("|||||||||| Controller for ext %s", ext.id)
             if not ext.is_enabled or ext.has_error:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
+                logger.debug(">>>>>>>> trigger '%s' for extension '%s'", trigger.keyword, ext.id)
                 self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
                 action = (
@@ -183,12 +187,6 @@ class ExtensionMode(BaseMode):
             self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
 
         preview_ext_id = f"{ext_id}.preview"
-        controller = ExtensionController.create(preview_ext_id, path)
-        controller.is_preview = True
-        # install python dependencies from requirements.txt
-        from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
-
-        deps = ExtensionDependencies(controller.id, controller.path)
-        deps.install()
-
+        controller = asyncio.run(ExtensionController.install_preview(preview_ext_id, path))
         asyncio.run(controller.start())
+        self.get_triggers()  # to rebuild the trigger cache

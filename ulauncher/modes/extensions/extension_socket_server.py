@@ -83,10 +83,13 @@ class ExtensionSocketServer(metaclass=Singleton):
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
             ext_id: str | None = event.get("ext_id")
+            ext_path: str | None = event.get("path")
             assert ext_id
-            ExtensionSocketController(self.socket_controllers, framer, ext_id)
+            assert ext_path
+            ext_controller = ExtensionController.create(ext_id, ext_path)
+            ExtensionSocketController(self.socket_controllers, framer, ext_controller)
             # TODO: This is ugly, but we have no other way to detect the extension started successfully
-            ExtensionController.create(ext_id).is_running = True
+            ext_controller.is_running = True
         else:
             logger.debug("Unhandled message received: %s", event)
 
