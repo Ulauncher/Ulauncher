@@ -5,8 +5,6 @@ import logging
 import operator
 from os.path import basename
 
-from gi.repository import Gio
-
 from ulauncher import paths
 from ulauncher.internals.result import Result
 from ulauncher.utils.desktopappinfo import DesktopAppInfo
@@ -22,7 +20,7 @@ class AppResult(Result):
     app_id = ""
     _executable = ""
 
-    def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
+    def __init__(self, app_info: DesktopAppInfo) -> None:
         super().__init__(
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
