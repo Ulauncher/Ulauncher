@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Iterator
 
-from gi.repository import Gio
-
 from ulauncher import app_id
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -24,7 +22,7 @@ class AppMode(BaseMode):
         if not settings.enable_application_mode:
             return
 
-        apps: list[Gio.DesktopAppInfo] = DesktopAppInfo.get_all()  # type: ignore[assignment]
+        apps: list[DesktopAppInfo] = DesktopAppInfo.get_all()
         for app in apps:
             executable = app.get_executable()
             if not executable or not app.get_display_name():
