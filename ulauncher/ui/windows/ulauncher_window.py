@@ -34,6 +34,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         width_request = int(self.settings.base_width)
         height_request = -1
 
+        # Check for potential fractional scaling
+        if not IS_X11_COMPATIBLE:
+            if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
+                monitor_geometry = monitor.get_geometry()
+                monitor_scale = monitor.get_scale_factor()
+                logger.info(
+                    "Wayland mode detected. Monitor: %sx%s, Scale factor: %s",
+                    monitor_geometry.width,
+                    monitor_geometry.height,
+                    monitor_scale,
+                )
+
         if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
             # Use the full width of the monitor for the window, and center the visible window
             # needed because Gnome Wayland assumes you want to positions new windows next to
@@ -182,7 +194,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
         self.results.get_style_context().add_class("result-box")
-        prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
+
+        # Get scale factor - window should be realized at this point
+        scale_factor = self.get_scale_factor()
+        prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, scale_factor)
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
 
         self.apply_theme()

@@ -27,6 +27,11 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         from ulauncher.utils.webkit2 import WebKit2
 
         cli_args = get_cli_args()
+
+        # Workaround for WebKit2 blank screen on Wayland with fractional scaling
+        # Force software rendering mode
+        if not IS_X11_COMPATIBLE:
+            os.environ["WEBKIT_DISABLE_COMPOSITING_MODE"] = "1"
         settings = WebKit2.Settings(
             enable_developer_extras=cli_args.dev,
             enable_hyperlink_auditing=False,
