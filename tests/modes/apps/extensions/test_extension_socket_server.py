@@ -43,7 +43,7 @@ class TestExtensionSocketServer:
 
     @pytest.fixture
     def server(self) -> ExtensionSocketServer:
-        return ExtensionSocketServer()
+        return ExtensionSocketServer(lambda _ext_id, _path: None)
 
     def test_start(self, server: MagicMock) -> None:
         server.start()
@@ -72,7 +72,7 @@ class TestExtensionSocketServer:
         server.start()
         server.handle_incoming(server.service, conn, source)
         extid = "id"
-        event = {"type": "extension:socket_connected", "ext_id": extid}
+        event = {"type": "extension:socket_connected", "ext_id": extid, "path": "/test/path"}
         assert id(jsonframer.return_value) in server.pending
         server.handle_registration(jsonframer.return_value, event)
         assert id(jsonframer.return_value) not in server.pending
