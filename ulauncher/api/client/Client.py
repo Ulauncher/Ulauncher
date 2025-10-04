@@ -52,7 +52,13 @@ class Client:
         self.framer.connect("message_parsed", self.on_message)
         self.framer.connect("closed", self.on_close)
         self.framer.set_connection(self.conn)
-        self.send({"type": "extension:socket_connected", "ext_id": self.extension.ext_id})
+        self.send(
+            {
+                "type": "extension:socket_connected",
+                "ext_id": self.extension.ext_id,
+                "path": os.path.dirname(os.path.abspath(sys.argv[0])),
+            }
+        )
 
         mainloop = GLib.MainLoop.new(None, False)
         mainloop.run()

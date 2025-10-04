@@ -43,7 +43,7 @@ class TestExtensionSocketServer:
 
     @pytest.fixture
     def server(self) -> ExtensionSocketServer:
-        return ExtensionSocketServer()
+        return ExtensionSocketServer(lambda _ext_id: None)
 
     def test_start(self, server: MagicMock) -> None:
         server.start()
