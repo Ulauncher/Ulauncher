@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html
 import logging
+from pathlib import Path
 from threading import Thread
 from typing import Any, Iterator, Literal
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
+from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.singleton import Singleton
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 logger = logging.getLogger()
@@ -22,15 +26,26 @@ class ExtensionTrigger(Result):
     searchable = True
 
 
-class ExtensionMode(BaseMode):
+class ExtensionMode(BaseMode, metaclass=Singleton):
+    """
+    Mode that handles extension triggers and communication with extensions.
+    Is singleton because it owns the ExtensionSocketServer instance.
+    """
+
     ext_socket_server: ExtensionSocketServer
+    registry: ExtensionRegistry
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
-        self.ext_socket_server = ExtensionSocketServer()
+        self.registry = ExtensionRegistry()
+        self.ext_socket_server = ExtensionSocketServer(self._on_extension_registered)
         self.ext_socket_server.start()
         events.set_self(self)
+
+    def _on_extension_registered(self, ext_id: str, _: Path) -> None:
+        """Callback when an extension successfully registers with the socket server."""
+        self.registry.get_or_raise(ext_id).is_running = True
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:
@@ -56,7 +71,7 @@ class ExtensionMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
-        for ext in ExtensionController.iterate():
+        for ext in self.registry.iterate():
             if not ext.is_enabled or ext.has_error:
                 continue
 
@@ -92,7 +107,11 @@ class ExtensionMode(BaseMode):
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
     ) -> None:
-        ext_controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+        ext_controllers: list[ExtensionController] = []
+        for ext_id in extension_ids:
+            with contextlib.suppress(ExtensionNotFoundError):
+                # suppress so if an extension is removed, it doesn't try to load it
+                ext_controllers.append(self.registry.load(ext_id))
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
