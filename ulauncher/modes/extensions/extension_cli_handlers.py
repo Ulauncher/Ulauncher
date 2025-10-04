@@ -22,8 +22,7 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
     """
     Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None
     """
-    from ulauncher.modes.extensions import extension_finder
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
     from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
     arg = normalize_arg(input_arg)
@@ -31,9 +30,8 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
         parse_result = parse_extension_url(arg)
         arg = parse_result.ext_id
 
-    if path := extension_finder.locate(arg):
-        return ExtensionController.create(arg, path)
-    return None
+    registry = ExtensionRegistry()
+    return registry.get(arg)
 
 
 def normalize_arg(path: str) -> str:
@@ -45,19 +43,21 @@ def normalize_arg(path: str) -> str:
 
 
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 
-    for controller in ExtensionController.iterate():
+    registry = ExtensionRegistry()
+    extensions = list(registry.iterate())
+    for controller in extensions:
         disabled_label = " [DISABLED]" if not controller.is_enabled else ""
         logger.info("- %s (%s)%s", controller.manifest.name, controller.id, disabled_label)
-    if not ExtensionController.iterate():
+    if not extensions:
         logger.info("No extensions installed.")
 
     return True
 
 
 def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
     from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError, InvalidExtensionRecoverableError
 
     if "input" not in args or not args.input:
@@ -69,8 +69,9 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         return upgrade_extensions(parser, args)
 
     url = normalize_arg(args.input)
+    registry = ExtensionRegistry()
     try:
-        controller = asyncio.run(ExtensionController.install(url))
+        controller = asyncio.run(registry.install(url))
         dbus_trigger_event("extensions:reload", [controller.id])
     except (ValueError, InvalidExtensionRecoverableError):  # error already logged
         return False
@@ -88,7 +89,10 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
         return False
 
     if controller := get_ext_controller(args.input):
-        asyncio.run(controller.remove())
+        from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
+
+        registry = ExtensionRegistry()
+        asyncio.run(registry.remove(controller))
         dbus_trigger_event("extensions:stop", [controller.id])
         return True
 
@@ -97,14 +101,15 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
     from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError
 
     if "input" in args and args.input:
         # Upgrade specific extension
         if controller := get_ext_controller(args.input):
             try:
-                asyncio.run(controller.update())
+                registry = ExtensionRegistry()
+                asyncio.run(registry.update(controller))
             except ExtensionRemoteError:
                 logger.warning("Network error: Could not upgrade %s", args.input)
             dbus_trigger_event("extensions:reload", [controller.id])
@@ -113,13 +118,14 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         return False
 
     updated_extensions = []
+    registry = ExtensionRegistry()
 
-    for controller in ExtensionController.iterate():
+    for controller in registry.iterate():
         if not controller.is_manageable or not controller.state.url:
             continue
 
         try:
-            updated = asyncio.run(controller.update())
+            updated = asyncio.run(registry.update(controller))
             if updated:
                 updated_extensions.append(controller.id)
         except ExtensionRemoteError:

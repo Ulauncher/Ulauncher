@@ -36,8 +36,6 @@ def json_load(path: str | Path) -> Any:
             logger.warning('Moving invalid JSON file to "%s"', backup_path)
             shutil.move(str(file_path), backup_path)
 
-    # raise FileNotFoundError(f'JSON file "{file_path}" not found or is empty.')
-    # Why not throw an error?
     return {}
 
 

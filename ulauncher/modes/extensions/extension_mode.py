@@ -10,8 +10,10 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.singleton import Singleton
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 logger = logging.getLogger()
@@ -22,22 +24,26 @@ class ExtensionTrigger(Result):
     searchable = True
 
 
-class ExtensionMode(BaseMode):
+class ExtensionMode(BaseMode, metaclass=Singleton):
     ext_socket_server: ExtensionSocketServer
+    registry: ExtensionRegistry
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
-        self.ext_socket_server = ExtensionSocketServer()
+        self.registry = ExtensionRegistry()
+        self.ext_socket_server = ExtensionSocketServer(self._on_extension_registered)
         self.ext_socket_server.start()
         events.set_self(self)
+
+    def _on_extension_registered(self, ext_id: str) -> None:
+        """Callback when an extension successfully registers with the socket server."""
+        self.registry.get_or_raise(ext_id).is_running = True
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
-        # TODO: figure out why when I'm running extension in preview mode, the existing non-preview extension is returned here instead of the preview one
-        # I'm stopping the existing extension in the preview handler below.
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
             self.active_ext = self.ext_socket_server.handle_query(ext_id, trigger_id, query)
@@ -58,13 +64,11 @@ class ExtensionMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
-        for ext in ExtensionController.iterate():
-            logger.debug("|||||||||| Controller for ext %s", ext.id)
+        for ext in self.registry.iterate():
             if not ext.is_enabled or ext.has_error:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
-                logger.debug(">>>>>>>> trigger '%s' for extension '%s'", trigger.keyword, ext.id)
                 self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
                 action = (
@@ -96,7 +100,7 @@ class ExtensionMode(BaseMode):
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
     ) -> None:
-        ext_controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+        ext_controllers = [self.registry.get_or_raise(ext_id) for ext_id in extension_ids]
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
@@ -178,7 +182,7 @@ class ExtensionMode(BaseMode):
             with_debugger,
         )
 
-        existing_controller = ExtensionController.create(ext_id)
+        existing_controller = self.registry.get(ext_id)
         if existing_controller and existing_controller.is_running:
             logger.info(
                 "[preview] Extension '%s' is currently running; stopping it before launching preview version",
@@ -187,6 +191,6 @@ class ExtensionMode(BaseMode):
             self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
 
         preview_ext_id = f"{ext_id}.preview"
-        controller = asyncio.run(ExtensionController.install_preview(preview_ext_id, path))
+        controller = asyncio.run(self.registry.install_preview(preview_ext_id, path))
         asyncio.run(controller.start())
         self.get_triggers()  # to rebuild the trigger cache

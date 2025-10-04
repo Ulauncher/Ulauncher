@@ -23,6 +23,11 @@ class TestExtensionSocketServer:
     def ext_controller(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_socket_server.ExtensionController")
 
+    @pytest.fixture
+    def ext_registry(self, mocker: MockerFixture) -> MagicMock:
+        mock_registry = mocker.patch("ulauncher.modes.extensions.extension_socket_server.ExtensionRegistry")
+        return mock_registry.return_value
+
     @pytest.fixture(autouse=True)
     def path_exists(self, mocker: MockerFixture) -> MagicMock:
         exists = mocker.patch("ulauncher.modes.extensions.extension_socket_server.os.path.exists")
@@ -43,7 +48,7 @@ class TestExtensionSocketServer:
 
     @pytest.fixture
     def server(self) -> ExtensionSocketServer:
-        return ExtensionSocketServer()
+        return ExtensionSocketServer(lambda _: None)
 
     def test_start(self, server: MagicMock) -> None:
         server.start()
@@ -63,21 +68,31 @@ class TestExtensionSocketServer:
         assert id(jsonframer.return_value) in server.pending
         jsonframer.return_value.set_connection.assert_called_with(conn)
 
-    @pytest.mark.usefixtures("ext_controller")
     def test_handle_registration(
-        self, server: MagicMock, jsonframer: MagicMock, gobject: MagicMock, extension_socket_controller: MagicMock
+        self,
+        server: MagicMock,
+        jsonframer: MagicMock,
+        gobject: MagicMock,
+        extension_socket_controller: MagicMock,
+        ext_registry: MagicMock,
     ) -> None:
+        callback = Mock()
+        server.on_extension_registered = callback
         conn = Mock()
         source = Mock()
         server.start()
         server.handle_incoming(server.service, conn, source)
         extid = "id"
-        event = {"type": "extension:socket_connected", "ext_id": extid}
+        event = {"type": "extension:socket_connected", "ext_id": extid, "path": "/test/path"}
+
+        mock_ext_controller = Mock()
+        ext_registry.get_or_raise.return_value = mock_ext_controller
         assert id(jsonframer.return_value) in server.pending
         server.handle_registration(jsonframer.return_value, event)
         assert id(jsonframer.return_value) not in server.pending
         assert gobject.signal_handler_disconnect.call_count == 2
         extension_socket_controller.assert_called_once()
+        callback.assert_called_once_with(extid)
 
     def test_stop(self, server: MagicMock) -> None:
         server.start()
