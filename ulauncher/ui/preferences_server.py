@@ -14,6 +14,7 @@ from gi.repository import Gio, GLib, Gtk
 from ulauncher import api_version, paths, version
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.shortcuts.shortcuts_db import ShortcutsDb
 from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.environment import IS_X11
@@ -243,15 +244,17 @@ class PreferencesServer:
     @route("/extension/get-all")
     async def extension_get_all(self, reload: bool) -> dict[str, dict[str, Any]]:
         logger.info("Handling /extension/get-all")
+        registry = ExtensionRegistry()
         if reload:
-            tasks = [controller.start() for controller in ExtensionController.iterate() if controller.is_enabled]
+            tasks = [controller.start() for controller in registry.iterate() if controller.is_enabled]
             await asyncio.gather(*tasks)
-        return {ex.id: get_extension_data(ex) for ex in ExtensionController.iterate()}
+        return {ex.id: get_extension_data(ex) for ex in registry.iterate()}
 
     @route("/extension/add")
     async def extension_add(self, url: str) -> dict[str, Any]:
         logger.info("Add extension: %s", url)
-        controller = await ExtensionController.install(url)
+        registry = ExtensionRegistry()
+        controller = await registry.install(url)
         await controller.stop()
         await controller.start()
         return get_extension_data(controller)
@@ -262,29 +265,34 @@ class PreferencesServer:
         events.emit("extensions:update_preferences", ext_id, data)
         # Note: Must save after emitting because the event above need access to
         # both the new and old data
-        ExtensionController.create(ext_id).save_user_preferences(data)
+        registry = ExtensionRegistry()
+        registry.get_or_raise(ext_id).save_user_preferences(data)
 
     @route("/extension/check-update")
     async def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
         logger.info("Checking if extension has an update")
-        controller = ExtensionController.create(ext_id)
+        registry = ExtensionRegistry()
+        controller = registry.get_or_raise(ext_id)
         return await controller.check_update()
 
     @route("/extension/update-ext")
     async def extension_update_ext(self, ext_id: str) -> dict[str, Any]:
         logger.info("Update extension: %s", ext_id)
-        controller = ExtensionController.create(ext_id)
-        await controller.update()
+        registry = ExtensionRegistry()
+        controller = registry.get_or_raise(ext_id)
+        await registry.update(controller)
         return get_extension_data(controller)
 
     @route("/extension/remove")
     async def extension_remove(self, ext_id: str) -> None:
         logger.info("Remove extension: %s", ext_id)
-        controller = ExtensionController.create(ext_id)
-        await controller.remove()
+        registry = ExtensionRegistry()
+        controller = registry.get_or_raise(ext_id)
+        await registry.remove(controller)
 
     @route("/extension/toggle-enabled")
     async def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
         logger.info("Toggle extension: %s on: %s", ext_id, is_enabled)
-        controller = ExtensionController.create(ext_id)
+        registry = ExtensionRegistry()
+        controller = registry.get_or_raise(ext_id)
         await controller.toggle_enabled(is_enabled)

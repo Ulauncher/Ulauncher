@@ -4,20 +4,13 @@ import asyncio
 import json
 import logging
 import sys
-import tempfile
-from datetime import datetime
 from pathlib import Path
-from shutil import copytree, rmtree
-from typing import Any, Iterator
-from weakref import WeakValueDictionary
+from typing import Any
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.extension_dependencies import (
-    ExtensionDependencies,
-    ExtensionDependenciesRecoverableError,
-)
+from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionIncompatibleRecoverableError,
     ExtensionManifest,
@@ -60,7 +53,6 @@ class ExtensionState(JsonConf):
 
 
 logger = logging.getLogger()
-controller_cache: WeakValueDictionary[str, ExtensionController] = WeakValueDictionary()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 
 
@@ -89,54 +81,6 @@ class ExtensionController:
             self.state.id = self.id
             defaults = json_load(f"{path}/.default-state.json")
             self.state.update(defaults)
-
-    @classmethod
-    def create(cls, ext_id: str, path: str | None = None) -> ExtensionController:
-        if not path:
-            path = extension_finder.locate(ext_id)
-            if not path:
-                msg = f"Extension with ID '{ext_id}' not found"
-                raise ExtensionNotFoundError(msg)
-        if controller := controller_cache.get(ext_id):
-            return controller
-        new_controller = cls(ext_id, path)
-        controller_cache[ext_id] = new_controller
-        return new_controller
-
-    @classmethod
-    async def install(
-        cls, url: str, commit_hash: str | None = None, warn_if_overwrite: bool = True
-    ) -> ExtensionController:
-        logger.info("Installing extension: %s", url)
-        remote = ExtensionRemote(url)
-        commit_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
-
-        try:
-            # install python dependencies from requirements.txt
-            deps = ExtensionDependencies(remote.ext_id, remote.target_dir)
-            deps.install()
-        except ExtensionDependenciesRecoverableError:
-            # clean up broken install
-            rmtree(remote.target_dir)
-            raise
-        else:
-            controller = cls.create(remote.ext_id, remote.target_dir)
-            controller.state.save(
-                url=url,
-                browser_url=remote.browser_url or "",
-                commit_hash=commit_hash,
-                commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-                updated_at=datetime.now().isoformat(),
-                error_type="",
-                error_message="",
-            )
-            logger.info("Extension %s installed successfully", controller.id)
-            return controller
-
-    @classmethod
-    def iterate(cls) -> Iterator[ExtensionController]:
-        for ext_id, ext_path in extension_finder.iterate():
-            yield ExtensionController.create(ext_id, ext_path)
 
     @property
     def is_enabled(self) -> bool:
@@ -175,67 +119,6 @@ class ExtensionController:
 
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
-
-    async def remove(self) -> None:
-        if not self.is_manageable:
-            logger.warning(
-                "Extension %s is not manageable. Cannot remove it automatically. "
-                "Please remove it manually from the extensions directory: %s",
-                self.id,
-                self.path,
-            )
-            return
-
-        await self.stop()
-        rmtree(self.path)
-        logger.info("Extension %s uninstalled successfully", self.id)
-
-        # non-manageable extension still exists (installed elsewhere)
-        if fallback_path := extension_finder.locate(self.id):
-            controller_cache.pop(self.id, None)
-            fallback_ext = ExtensionController.create(self.id, fallback_path)
-            fallback_ext.state.save(is_enabled=False)
-            logger.info("Non-manageable extension with the same id exists in '%s'", fallback_path)
-        elif self._state_path.is_file():
-            self._state_path.unlink()
-
-    async def update(self) -> bool:
-        """
-        :returns: False if already up-to-date, True if was updated
-        """
-        logger.debug("Checking for updates to %s", self.id)
-        has_update, commit_hash = await self.check_update()
-        was_running = self.is_running
-        if not has_update:
-            logger.info('Extension "%s" is already on the latest version', self.id)
-            return False
-
-        logger.info(
-            'Updating extension "%s" from commit %s to %s',
-            self.id,
-            self.state.commit_hash[:8],
-            commit_hash[:8],
-        )
-
-        # Backup extension files. If update fails, restore from backup
-        with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
-            # use local variable, because self.path property will call locate() on a non-existing path
-            ext_path = self.path
-            copytree(ext_path, backup_dir, dirs_exist_ok=True)
-
-            try:
-                await self.stop()
-                await self.install(self.state.url, commit_hash, warn_if_overwrite=False)
-            except Exception:
-                logger.exception("Could not update extension '%s'.", self.id)
-                copytree(backup_dir, ext_path, dirs_exist_ok=True)
-                await self.toggle_enabled(was_running)
-                raise
-
-        await self.toggle_enabled(was_running)
-        logger.info("Successfully updated extension: %s", self.id)
-
-        return True
 
     async def check_update(self) -> tuple[bool, str]:
         """
@@ -301,11 +184,6 @@ class ExtensionController:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
             self.is_running = False
-
-    @classmethod
-    async def stop_all(cls) -> None:
-        jobs = [c.stop() for c in controller_cache.values() if c.is_running]
-        await asyncio.gather(*jobs)
 
 
 class ExtensionNotFoundError(Exception):

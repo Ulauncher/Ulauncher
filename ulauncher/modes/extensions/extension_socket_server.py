@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
+from typing import Any, Callable
 
 from gi.repository import Gio, GLib, GObject
 
 from ulauncher.internals.query import Query
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
-from ulauncher.utils.singleton import Singleton
 from ulauncher.utils.socket_path import get_socket_path
 
 logger = logging.getLogger()
@@ -21,18 +21,20 @@ logger = logging.getLogger()
 events = EventBus()
 
 
-class ExtensionSocketServer(metaclass=Singleton):
+class ExtensionSocketServer:
     socket_path: str
     service: Gio.SocketService | None
     socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
     active_socket_controller: ExtensionSocketController | None = None
+    on_extension_registered: Callable[[str], None]
 
-    def __init__(self) -> None:
+    def __init__(self, on_extension_registered: Callable[[str], None]) -> None:
         self.service = None
         self.socket_path = get_socket_path()
         self.socket_controllers = {}
         self.pending = {}
+        self.on_extension_registered = on_extension_registered
         events.set_self(self)
 
     def start(self) -> None:
@@ -50,7 +52,8 @@ class ExtensionSocketServer(metaclass=Singleton):
         self.socket_controllers = {}
 
         def start_extensions() -> None:
-            for ext_controller in ExtensionController.iterate():
+            registry = ExtensionRegistry()
+            for ext_controller in registry.load_all():
                 if ext_controller.is_enabled and not ext_controller.has_error:
                     ext_controller.start_detached()
 
@@ -85,8 +88,7 @@ class ExtensionSocketServer(metaclass=Singleton):
             ext_id: str | None = event.get("ext_id")
             assert ext_id
             ExtensionSocketController(self.socket_controllers, framer, ext_id)
-            # TODO: This is ugly, but we have no other way to detect the extension started successfully
-            ExtensionController.create(ext_id).is_running = True
+            self.on_extension_registered(ext_id)
         else:
             logger.debug("Unhandled message received: %s", event)
 
