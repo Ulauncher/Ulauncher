@@ -14,11 +14,6 @@ logger = logging.getLogger()
 _ext_controllers: dict[str, ExtensionController] = {}
 
 
-def get(ext_id: str) -> ExtensionController | None:
-    """Get an extension controller from the registry."""
-    return _ext_controllers.get(ext_id)
-
-
 def get_or_raise(ext_id: str) -> ExtensionController:
     """Get an extension from the registry or raise if not found."""
     controller = _ext_controllers.get(ext_id)
