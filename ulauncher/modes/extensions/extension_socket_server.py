@@ -8,8 +8,8 @@ from typing import Any, Callable
 from gi.repository import Gio, GLib, GObject
 
 from ulauncher.internals.query import Query
+from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_socket_controller import ExtensionSocketController
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.framer import JSONFramer
@@ -53,8 +53,7 @@ class ExtensionSocketServer:
         self.socket_controllers = {}
 
         def start_extensions() -> None:
-            registry = ExtensionRegistry()
-            for ext_controller in registry.load_all():
+            for ext_controller in extension_registry.load_all():
                 if ext_controller.is_enabled and not ext_controller.has_error:
                     ext_controller.start_detached()
 

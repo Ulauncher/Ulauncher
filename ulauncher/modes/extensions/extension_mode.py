@@ -11,8 +11,8 @@ from typing import Any, Iterator, Literal
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
-from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
@@ -33,19 +33,17 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     """
 
     ext_socket_server: ExtensionSocketServer
-    registry: ExtensionRegistry
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
-        self.registry = ExtensionRegistry()
         self.ext_socket_server = ExtensionSocketServer(self._on_extension_registered)
         self.ext_socket_server.start()
         events.set_self(self)
 
     def _on_extension_registered(self, ext_id: str, _: Path) -> None:
         """Callback when an extension successfully registers with the socket server."""
-        self.registry.get_or_raise(ext_id).is_running = True
+        extension_registry.get_or_raise(ext_id).is_running = True
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:
@@ -71,7 +69,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
-        for ext in self.registry.iterate():
+        for ext in extension_registry.iterate():
             if not ext.is_enabled or ext.has_error:
                 continue
 
@@ -111,7 +109,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         for ext_id in extension_ids:
             with contextlib.suppress(ExtensionNotFoundError):
                 # suppress so if an extension is removed, it doesn't try to load it
-                ext_controllers.append(self.registry.load(ext_id))
+                ext_controllers.append(extension_registry.load(ext_id))
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:

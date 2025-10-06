@@ -9,72 +9,66 @@ from ulauncher.modes.extensions.extension_controller import (
     ExtensionNotFoundError,
     lifecycle_events,
 )
-from ulauncher.utils.singleton import Singleton
 
 logger = logging.getLogger()
+_ext_controllers: dict[str, ExtensionController] = {}
 
 
-class ExtensionRegistry(metaclass=Singleton):
-    """Central in-memory registry for extension controllers."""
+def get(ext_id: str) -> ExtensionController | None:
+    """Get an extension controller from the registry."""
+    return _ext_controllers.get(ext_id)
 
-    _registry: dict[str, ExtensionController]
 
-    def __init__(self) -> None:
-        self._registry = {}
-        lifecycle_events.set_self(self)
+def get_or_raise(ext_id: str) -> ExtensionController:
+    """Get an extension from the registry or raise if not found."""
+    controller = _ext_controllers.get(ext_id)
+    if not controller:
+        msg = f"Extension with ID '{ext_id}' not found in registry"
+        raise ExtensionNotFoundError(msg)
 
-    def get(self, ext_id: str) -> ExtensionController | None:
-        """Get an extension from the registry."""
-        return self._registry.get(ext_id)
+    return controller
 
-    def get_or_raise(self, ext_id: str) -> ExtensionController:
-        """Get an extension from the registry or raise if not found."""
-        controller = self._registry.get(ext_id)
-        if not controller:
-            msg = f"Extension with ID '{ext_id}' not found in registry"
+
+def iterate() -> Iterator[ExtensionController]:
+    """Iterate over registered extension controllers."""
+    yield from _ext_controllers.values()
+
+
+def load(ext_id: str, path: str | None = None) -> ExtensionController:
+    """Load an extension controller into the registry without starting it."""
+    if not path:
+        path = extension_finder.locate(ext_id)
+        if not path:
+            _ext_controllers.pop(ext_id, None)
+            msg = f"Extension with ID '{ext_id}' not found"
             raise ExtensionNotFoundError(msg)
 
-        return controller
-
-    def iterate(self) -> Iterator[ExtensionController]:
-        """Iterate over registered extension controllers."""
-        yield from self._registry.values()
-
-    def load(self, ext_id: str, path: str | None = None) -> ExtensionController:
-        """Load an extension controller into the registry without starting it."""
-        if not path:
-            path = extension_finder.locate(ext_id)
-            if not path:
-                self._registry.pop(ext_id, None)
-                msg = f"Extension with ID '{ext_id}' not found"
-                raise ExtensionNotFoundError(msg)
-
-        controller = ExtensionController(ext_id, path)
-        self._registry[ext_id] = controller
-        return controller
-
-    def load_all(self) -> Iterator[ExtensionController]:
-        """Load all extensions found by the extension finder into the registry."""
-        for ext_id, ext_path in extension_finder.iterate():
-            self.load(ext_id, ext_path)
-
-        yield from self._registry.values()
-
-    @lifecycle_events.on
-    def installed(self, controller: ExtensionController) -> None:
-        """Handle install events dispatched by controllers."""
-        self._registry[controller.id] = controller
-
-    @lifecycle_events.on
-    def updated(self, controller: ExtensionController) -> None:
-        """Handle update events dispatched by controllers."""
-        self._registry[controller.id] = controller
-
-    @lifecycle_events.on
-    def removed(self, ext_id: str) -> None:
-        """Handle removal events dispatched by controllers."""
-        self._registry.pop(ext_id, None)
+    controller = ExtensionController(ext_id, path)
+    _ext_controllers[ext_id] = controller
+    return controller
 
 
-# Instantiate singleton early so event handlers are bound when first emitted
-ExtensionRegistry()
+def load_all() -> Iterator[ExtensionController]:
+    """Load all extensions found by the extension finder into the registry."""
+    for ext_id, ext_path in extension_finder.iterate():
+        load(ext_id, ext_path)
+
+    yield from _ext_controllers.values()
+
+
+@lifecycle_events.on
+def installed(controller: ExtensionController) -> None:
+    """Handle install events dispatched by controllers."""
+    _ext_controllers[controller.id] = controller
+
+
+@lifecycle_events.on
+def updated(controller: ExtensionController) -> None:
+    """Handle update events dispatched by controllers."""
+    _ext_controllers[controller.id] = controller
+
+
+@lifecycle_events.on
+def removed(ext_id: str) -> None:
+    """Handle removal events dispatched by controllers."""
+    _ext_controllers.pop(ext_id, None)
