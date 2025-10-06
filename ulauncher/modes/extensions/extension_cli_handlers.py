@@ -30,10 +30,9 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
         parse_result = parse_extension_url(arg)
         arg = parse_result.ext_id
 
-    try:
+    with contextlib.suppress(ExtensionNotFoundError):
         return extension_registry.load(arg)
-    except ExtensionNotFoundError:
-        return None
+    return None
 
 
 def normalize_arg(path: str) -> str:
