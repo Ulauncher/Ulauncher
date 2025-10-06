@@ -19,7 +19,7 @@ class TestExtensionMode:
 
     @pytest.fixture(autouse=True)
     def ext_registry(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_mode.ExtensionRegistry")
+        return mocker.patch("ulauncher.modes.extensions.extension_mode.extension_registry")
 
     @pytest.fixture(autouse=True)
     def ext_server(self, mocker: MockerFixture) -> Any:

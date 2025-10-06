@@ -56,14 +56,13 @@ def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
 
 
 def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
+    from ulauncher.modes.extensions import extension_registry
 
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
     new_prefs: dict[str, dict[str, Any]] = {"preferences": {}, "triggers": {}}
-    registry = ExtensionRegistry()
-    controller = registry.load(ext_id)
+    controller = extension_registry.load(ext_id)
     for p_id, pref in user_prefs.items():
         try:
             if controller.manifest.triggers.get(p_id):

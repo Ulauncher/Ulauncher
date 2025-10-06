@@ -21,8 +21,8 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
     """
     Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None
     """
+    from ulauncher.modes.extensions import extension_registry
     from ulauncher.modes.extensions.extension_controller import ExtensionNotFoundError
-    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
     from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
     arg = normalize_arg(input_arg)
@@ -30,9 +30,8 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
         parse_result = parse_extension_url(arg)
         arg = parse_result.ext_id
 
-    registry = ExtensionRegistry()
     try:
-        return registry.load(arg)
+        return extension_registry.load(arg)
     except ExtensionNotFoundError:
         return None
 
@@ -46,10 +45,9 @@ def normalize_arg(path: str) -> str:
 
 
 def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
+    from ulauncher.modes.extensions import extension_registry
 
-    registry = ExtensionRegistry()
-    extensions = list(registry.load_all())
+    extensions = list(extension_registry.load_all())
     for controller in extensions:
         disabled_label = " [DISABLED]" if not controller.is_enabled else ""
         logger.info("- %s (%s)%s", controller.manifest.name, controller.id, disabled_label)
@@ -100,7 +98,7 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
-    from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
+    from ulauncher.modes.extensions import extension_registry
     from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError
 
     if "input" in args and args.input:
@@ -116,9 +114,8 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         return False
 
     updated_extensions = []
-    registry = ExtensionRegistry()
 
-    for controller in registry.load_all():
+    for controller in extension_registry.load_all():
         if not controller.is_manageable or not controller.state.url:
             continue
 
