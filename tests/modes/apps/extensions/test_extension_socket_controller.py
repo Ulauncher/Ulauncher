@@ -20,6 +20,10 @@ class TestExtensionSocketController:
     def extension_finder_locate(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_finder.locate")
 
+    @pytest.fixture(autouse=True)
+    def extension_registry(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.extensions.extension_socket_controller.extension_registry")
+
     @pytest.fixture
     def controller(self, controllers: dict[str, ExtensionSocketController]) -> ExtensionSocketController:
         controller = ExtensionSocketController(controllers, Mock(), TEST_EXT_ID)
