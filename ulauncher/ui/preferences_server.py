@@ -262,29 +262,29 @@ class PreferencesServer:
         events.emit("extensions:update_preferences", ext_id, data)
         # Note: Must save after emitting because the event above need access to
         # both the new and old data
-        extension_registry.get_or_raise(ext_id).save_user_preferences(data)
+        extension_registry.get(ext_id).save_user_preferences(data)
 
     @route("/extension/check-update")
     async def extension_check_update(self, ext_id: str) -> tuple[bool, str]:
         logger.info("Checking if extension has an update")
-        controller = extension_registry.get_or_raise(ext_id)
+        controller = extension_registry.get(ext_id)
         return await controller.check_update()
 
     @route("/extension/update-ext")
     async def extension_update_ext(self, ext_id: str) -> dict[str, Any]:
         logger.info("Update extension: %s", ext_id)
-        controller = extension_registry.get_or_raise(ext_id)
+        controller = extension_registry.get(ext_id)
         await controller.update()
         return get_extension_data(controller)
 
     @route("/extension/remove")
     async def extension_remove(self, ext_id: str) -> None:
         logger.info("Remove extension: %s", ext_id)
-        controller = extension_registry.get_or_raise(ext_id)
+        controller = extension_registry.get(ext_id)
         await controller.remove()
 
     @route("/extension/toggle-enabled")
     async def extension_toggle_enabled(self, ext_id: str, is_enabled: bool) -> None:
         logger.info("Toggle extension: %s on: %s", ext_id, is_enabled)
-        controller = extension_registry.get_or_raise(ext_id)
+        controller = extension_registry.get(ext_id)
         await controller.toggle_enabled(is_enabled)

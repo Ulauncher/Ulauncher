@@ -43,7 +43,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     def _on_extension_registered(self, ext_id: str, _: Path) -> None:
         """Callback when an extension successfully registers with the socket server."""
-        extension_registry.get_or_raise(ext_id).is_running = True
+        extension_registry.get(ext_id).is_running = True
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:

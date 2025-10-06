@@ -26,7 +26,7 @@ class TestExtensionSocketController:
         ext_controller = Mock()
         ext_controller.preferences = {}
         ext_controller.manifest.input_debounce = 0.05
-        extension_registry.return_value.get_or_raise.return_value = ext_controller
+        extension_registry.return_value.get.return_value = ext_controller
         return extension_registry
 
     @pytest.fixture
