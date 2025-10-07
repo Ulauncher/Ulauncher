@@ -223,7 +223,6 @@ class ExtensionController:
                 raise
 
         await self.toggle_enabled(was_running)
-        lifecycle_events.emit("extensions:updated", self)
         logger.info("Successfully updated extension: %s", self.id)
 
         return True

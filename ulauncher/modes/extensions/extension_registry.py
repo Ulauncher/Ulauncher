@@ -58,12 +58,6 @@ def installed(controller: ExtensionController) -> None:
 
 
 @lifecycle_events.on
-def updated(controller: ExtensionController) -> None:
-    """Handle update events dispatched by controllers."""
-    _ext_controllers[controller.id] = controller
-
-
-@lifecycle_events.on
 def removed(ext_id: str) -> None:
     """Handle removal events dispatched by controllers."""
     _ext_controllers.pop(ext_id, None)
