@@ -41,7 +41,7 @@ class DesktopAppInfo:
     def get_all():
         return [DesktopAppInfo(app_info) for app_info in SystemDesktopAppInfo.get_all()]  # type: ignore[arg-type]
 
-    ## Methods copied from Gio.DesktopAppInfo (these work fine)
+    # Methods copied from Gio.DesktopAppInfo (these work fine)
 
     def get_id(self):
         return self._app_info.get_id()
