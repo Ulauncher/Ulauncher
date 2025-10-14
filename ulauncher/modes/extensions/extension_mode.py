@@ -4,7 +4,6 @@ import asyncio
 import contextlib
 import html
 import logging
-from pathlib import Path
 from threading import Thread
 from typing import Any, Iterator, Literal
 
@@ -37,13 +36,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
-        self.ext_socket_server = ExtensionSocketServer(self._on_extension_registered)
+        self.ext_socket_server = ExtensionSocketServer()
         self.ext_socket_server.start()
         events.set_self(self)
-
-    def _on_extension_registered(self, ext_id: str, _: Path) -> None:
-        """Callback when an extension successfully registers with the socket server."""
-        extension_registry.get(ext_id).is_running = True
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:

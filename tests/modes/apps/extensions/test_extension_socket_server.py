@@ -20,8 +20,11 @@ class TestExtensionSocketServer:
         return mocker.patch("ulauncher.modes.extensions.extension_socket_server.ExtensionSocketController")
 
     @pytest.fixture
-    def ext_controller(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_socket_server.ExtensionController")
+    def ext_registry(self, mocker: MockerFixture) -> MagicMock:
+        registry = mocker.patch("ulauncher.modes.extensions.extension_socket_server.extension_registry")
+        mock_controller = Mock()
+        registry.get.return_value = mock_controller
+        return registry
 
     @pytest.fixture(autouse=True)
     def path_exists(self, mocker: MockerFixture) -> MagicMock:
@@ -43,7 +46,7 @@ class TestExtensionSocketServer:
 
     @pytest.fixture
     def server(self) -> ExtensionSocketServer:
-        return ExtensionSocketServer(lambda _ext_id, _path: None)
+        return ExtensionSocketServer()
 
     def test_start(self, server: MagicMock) -> None:
         server.start()
@@ -63,7 +66,7 @@ class TestExtensionSocketServer:
         assert id(jsonframer.return_value) in server.pending
         jsonframer.return_value.set_connection.assert_called_with(conn)
 
-    @pytest.mark.usefixtures("ext_controller")
+    @pytest.mark.usefixtures("ext_registry")
     def test_handle_registration(
         self, server: MagicMock, jsonframer: MagicMock, gobject: MagicMock, extension_socket_controller: MagicMock
     ) -> None:
@@ -72,7 +75,7 @@ class TestExtensionSocketServer:
         server.start()
         server.handle_incoming(server.service, conn, source)
         extid = "id"
-        event = {"type": "extension:socket_connected", "ext_id": extid, "path": "/test/path"}
+        event = {"type": "extension:socket_connected", "ext_id": extid}
         assert id(jsonframer.return_value) in server.pending
         server.handle_registration(jsonframer.return_value, event)
         assert id(jsonframer.return_value) not in server.pending

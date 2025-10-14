@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from gi.repository import Gio, GLib, GObject
 
@@ -28,14 +27,12 @@ class ExtensionSocketServer:
     socket_controllers: dict[str, ExtensionSocketController]
     pending: dict[int, tuple[JSONFramer, int, int]]
     active_socket_controller: ExtensionSocketController | None = None
-    on_extension_registered: Callable[[str, Path], None]
 
-    def __init__(self, on_extension_registered: Callable[[str, Path], None]) -> None:
+    def __init__(self) -> None:
         self.service = None
         self.socket_path = get_socket_path()
         self.socket_controllers = {}
         self.pending = {}
-        self.on_extension_registered = on_extension_registered
         events.set_self(self)
 
     def start(self) -> None:
@@ -86,11 +83,10 @@ class ExtensionSocketServer:
                 for msg_id in pended[1:]:
                     GObject.signal_handler_disconnect(framer, msg_id)
             ext_id: str | None = event.get("ext_id")
-            path: str | None = event.get("path")
             assert ext_id
-            assert path
             ExtensionSocketController(self.socket_controllers, framer, ext_id)
-            self.on_extension_registered(ext_id, Path(path))
+            # TODO: This is ugly, but we have no other way to detect the extension started successfully
+            extension_registry.get(ext_id).is_running = True
         else:
             logger.debug("Unhandled message received: %s", event)
 
