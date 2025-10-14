@@ -18,6 +18,10 @@ class TestExtensionRuntime:
     def data_input_stream(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.DataInputStream")
 
+    @pytest.fixture(autouse=True)
+    def data_output_stream(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.DataOutputStream")
+
     @pytest.fixture
     def time(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.time")
@@ -29,7 +33,7 @@ class TestExtensionRuntime:
 
         subprocess_launcher.new.assert_called_once()
         runtime.subprocess.wait_async.assert_called_once()
-        runtime.error_stream.read_line_async.assert_called_once()
+        runtime.stderr.read_line_async.assert_called_once()
 
     def test_read_stderr_line(self) -> None:
         test_output1 = "Test Output 1"
@@ -38,20 +42,20 @@ class TestExtensionRuntime:
         mock_read_line_finish_utf8 = Mock()
 
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
-        runtime.error_stream.read_line_finish_utf8 = mock_read_line_finish_utf8
+        runtime.stderr.read_line_finish_utf8 = mock_read_line_finish_utf8
 
         mock_read_line_finish_utf8.return_value = (test_output1, len(test_output1))
-        runtime.handle_stderr(runtime.error_stream, Mock())
+        runtime.handle_stderr(runtime.stderr, Mock())
         # Confirm the output is stored in recent_errors and read_line_async is called for the next
         # line.
         assert runtime.recent_errors[0] == test_output1
-        assert runtime.error_stream.read_line_async.call_count == 2
+        assert runtime.stderr.read_line_async.call_count == 2
 
         mock_read_line_finish_utf8.return_value = (test_output2, len(test_output2))
-        runtime.handle_stderr(runtime.error_stream, Mock())
+        runtime.handle_stderr(runtime.stderr, Mock())
         # The latest line should replace the previous line
         assert runtime.recent_errors[0] == test_output2
-        assert runtime.error_stream.read_line_async.call_count == 3
+        assert runtime.stderr.read_line_async.call_count == 3
 
     def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"

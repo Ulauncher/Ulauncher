@@ -74,7 +74,6 @@ class ExtensionController:
     state: ExtensionState
     manifest: ExtensionManifest
     is_manageable: bool
-    is_running: bool = False
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -145,6 +144,10 @@ class ExtensionController:
     @property
     def has_error(self) -> bool:
         return bool(self.state.error_type)
+
+    @property
+    def is_running(self) -> bool:
+        return self.id in extension_runtimes
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -258,7 +261,6 @@ class ExtensionController:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
-                self.is_running = False
                 extension_runtimes.pop(self.id, None)
                 self.state.save(error_type=error_type, error_message=error_msg)
 
@@ -301,7 +303,16 @@ class ExtensionController:
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
-            self.is_running = False
+
+    def send_message(self, message: dict[str, Any]) -> bool:
+        """
+        Sends a JSON message to the extension if it is running.
+        Returns True if message was sent, False otherwise.
+        """
+        if runtime := extension_runtimes.get(self.id):
+            runtime.send_message(message)
+            return True
+        return False
 
     @classmethod
     async def stop_all(cls) -> None:

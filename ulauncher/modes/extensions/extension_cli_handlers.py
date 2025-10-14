@@ -68,6 +68,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         return upgrade_extensions(parser, args)
 
     url = normalize_arg(args.input)
+
     try:
         controller = asyncio.run(ExtensionController.install(url))
         dbus_trigger_event("extensions:reload", [controller.id])

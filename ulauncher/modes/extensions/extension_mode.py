@@ -6,11 +6,12 @@ import logging
 from threading import Thread
 from typing import Any, Iterator, Literal
 
+from gi.repository import GLib
+
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
@@ -23,36 +24,41 @@ class ExtensionTrigger(Result):
 
 
 class ExtensionMode(BaseMode):
-    ext_socket_server: ExtensionSocketServer
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
 
     def __init__(self) -> None:
-        self.ext_socket_server = ExtensionSocketServer()
-        self.ext_socket_server.start()
         events.set_self(self)
+        GLib.idle_add(self.start_extensions)
+
+    def start_extensions(self) -> None:
+        for ext in ExtensionController.iterate():
+            if ext.is_enabled and not ext.has_error:
+                ext.start_detached()
+                # legacy_preferences_load is useless and deprecated
+                prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
+                ext.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
 
     def handle_query(self, query: Query) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
+
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
-            self.active_ext = self.ext_socket_server.handle_query(ext_id, trigger_id, query)
-        if not trigger_cache_entry or not self.active_ext:
-            msg = f"Query not valid for extension mode '{query}'"
-            raise RuntimeError(msg)
+            ext = ExtensionController.create(ext_id)
+            self.active_ext = ext
+            event = {
+                "type": "event:input_trigger",
+                "ext_id": ext.id,
+                "args": [query.argument, trigger_id],
+            }
 
-    @events.on
-    def handle_action(self, action_metadata: ActionMetadata | None) -> None:
-        if self.active_ext and isinstance(action_metadata, list):
-            for result in action_metadata:
-                result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
+            ext.send_message(event)
+            return
 
-            results = [Result(**res) for res in action_metadata]
-            events.emit("window:show_results", results)
-        else:
-            events.emit("mode:handle_action", action_metadata)
+        msg = f"Extension could not handle query {query}"
+        raise RuntimeError(msg)
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
@@ -134,12 +140,35 @@ class ExtensionMode(BaseMode):
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
-        self.ext_socket_server.update_preferences(ext_id, data)
+        ext = ExtensionController.create(ext_id)
+        for p_id, new_value in data.get("preferences", {}).items():
+            pref = ext.preferences.get(p_id)
+            if pref and new_value != pref.value:
+                event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
+                ext.send_message(event_data)
 
     @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
-        self.ext_socket_server.trigger_event(event)
+        if not self.active_ext:
+            logger.error("No active extension to send event to")
+            return
+        self.active_ext.send_message(event)
 
     @events.on
     def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
-        self.ext_socket_server.handle_response(ext_id, response)
+        if not self.active_ext:
+            logger.error("No active extension to handle response")
+            return
+        if self.active_ext.id != ext_id:
+            logger.debug("Ignoring response from inactive extension %s", ext_id)
+            return
+
+        action_metadata = response.get("action")
+        if isinstance(action_metadata, list):
+            for result in action_metadata:
+                result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
+
+            results = [Result(**res) for res in action_metadata]
+            events.emit("window:show_results", results)
+            return
+        events.emit("mode:handle_action", action_metadata)
