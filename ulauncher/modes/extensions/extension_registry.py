@@ -34,6 +34,9 @@ def load(ext_id: str, path: str | None = None) -> ExtensionController:
     if not path:
         path = extension_finder.locate(ext_id)
         if not path:
+            # Remove extension from registry if it can no longer be found
+            # This can happen when an extension is deleted via the CLI or manually,
+            # in which case the in-memory registry should reflect that
             _ext_controllers.pop(ext_id, None)
             msg = f"Extension with ID '{ext_id}' not found"
             raise ExtensionNotFoundError(msg)
