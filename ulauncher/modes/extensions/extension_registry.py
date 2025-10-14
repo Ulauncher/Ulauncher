@@ -61,3 +61,15 @@ def installed(controller: ExtensionController) -> None:
 def removed(ext_id: str) -> None:
     """Handle removal events dispatched by controllers."""
     _ext_controllers.pop(ext_id, None)
+
+    # If extension still exists after being removed, it means it's a non-manageable extension
+    # Set its state to disabled instead of completely removing it
+    fallback_path = extension_finder.locate(ext_id)
+    if fallback_path:
+        fallback_controller = ExtensionController(ext_id, fallback_path)
+        fallback_controller.state.save(is_enabled=False)
+        _ext_controllers[ext_id] = fallback_controller
+        logger.info(
+            "Non-manageable extension with the same id exists in '%s'. It was kept disabled.",
+            fallback_path,
+        )

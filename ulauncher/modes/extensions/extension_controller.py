@@ -180,12 +180,6 @@ class ExtensionController:
         if self._state_path.is_file():
             self._state_path.unlink()
 
-        # non-manageable extension still exists (installed elsewhere)
-        if fallback_path := extension_finder.locate(self.id):
-            fallback_ext = ExtensionController(self.id, fallback_path)
-            fallback_ext.state.save(is_enabled=False)
-            logger.info("Non-manageable extension with the same id exists in '%s'", fallback_path)
-
         lifecycle_events.emit("extensions:removed", self.id)
 
     async def update(self) -> bool:
