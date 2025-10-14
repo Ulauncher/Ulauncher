@@ -190,14 +190,15 @@ class ExtensionController:
         rmtree(self.path)
         logger.info("Extension %s uninstalled successfully", self.id)
 
+        if self._state_path.is_file():
+            self._state_path.unlink()
+
         # non-manageable extension still exists (installed elsewhere)
         if fallback_path := extension_finder.locate(self.id):
             controller_cache.pop(self.id, None)
             fallback_ext = ExtensionController.create(self.id, fallback_path)
             fallback_ext.state.save(is_enabled=False)
             logger.info("Non-manageable extension with the same id exists in '%s'", fallback_path)
-        elif self._state_path.is_file():
-            self._state_path.unlink()
 
     async def update(self) -> bool:
         """
