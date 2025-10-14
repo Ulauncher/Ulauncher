@@ -70,6 +70,7 @@ def removed(ext_id: str) -> None:
     fallback_path = extension_finder.locate(ext_id)
     if fallback_path:
         fallback_controller = ExtensionController(ext_id, fallback_path)
+        # TODO: Try to avoid accessing state attribute (we could call toggle_enabled() instead, but that's async)
         fallback_controller.state.save(is_enabled=False)
         _ext_controllers[ext_id] = fallback_controller
         logger.info(
