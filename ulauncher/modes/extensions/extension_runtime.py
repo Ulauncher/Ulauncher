@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import signal
 from collections import deque
 from time import time
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 from weakref import WeakSet
 
 from gi.repository import Gio, GLib
 
+from ulauncher.utils.eventbus import EventBus
+
 ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"]
 logger = logging.getLogger()
+events = EventBus()
 ExitHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
 aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()
 
@@ -20,7 +24,8 @@ class ExtensionRuntime:
     ext_id: str
     subprocess: Gio.Subprocess
     start_time: float
-    error_stream: Gio.DataInputStream
+    stdin: Gio.DataOutputStream
+    stderr: Gio.DataInputStream
     recent_errors: deque[str]
     exit_handler: ExitHandlerCallback | None
 
@@ -35,16 +40,19 @@ class ExtensionRuntime:
         self.exit_handler = exit_handler
         self.recent_errors = deque(maxlen=1)
         self.start_time = time()
-        launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
+
+        launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDERR_PIPE)
+
         for env_name, env_value in (env or {}).items():
             launcher.setenv(env_name, env_value, True)
 
         self.subprocess = launcher.spawnv(cmd)
-        error_input_stream = self.subprocess.get_stderr_pipe()
-        if not error_input_stream:
-            err_msg = "Subprocess must be created with Gio.SubprocessFlags.STDERR_PIPE"
-            raise AssertionError(err_msg)
-        self.error_stream = Gio.DataInputStream.new(error_input_stream)
+
+        if stdin_base_stream := self.subprocess.get_stdin_pipe():
+            self.stdin = Gio.DataOutputStream.new(stdin_base_stream)
+
+        if stderr_base_stream := self.subprocess.get_stderr_pipe():
+            self.stderr = Gio.DataInputStream.new(stderr_base_stream)
 
         logger.debug("Launched %s using Gio.Subprocess", self.ext_id)
         self.subprocess.wait_async(None, self.handle_exit)
@@ -70,14 +78,31 @@ class ExtensionRuntime:
             self.subprocess.send_signal(signal.SIGKILL)
 
     def read_stderr_line(self) -> None:
-        self.error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr)
+        self.stderr.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr)
 
-    def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
+    def send_message(self, message: dict[str, Any]) -> None:
+        """Send a JSON message to extension stdin."""
+        if self.stdin:
+            try:
+                json_str = json.dumps(message) + "\n"
+                self.stdin.write(json_str.encode())
+                self.stdin.flush()
+                logger.debug("Sent message to %s: %s", self.ext_id, message)
+            except Exception:
+                logger.exception("Failed to send stdin message to %s", self.ext_id)
+
+    def handle_stderr(self, stderr: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
         # append output to recent_errors
-        output, _ = error_stream.read_line_finish_utf8(result)
+        output, _ = stderr.read_line_finish_utf8(result)
         if output:
-            print(output)  # noqa: T201
-            self.recent_errors.append(output)
+            try:
+                message = json.loads(output)
+                logger.debug('Incoming response with keys "%s" from "%s"', set(message), self.ext_id)
+                events.emit("extensions:handle_response", self.ext_id, message)
+            except json.JSONDecodeError:
+                print(output)  # noqa: T201
+                self.recent_errors.append(output)
+
             self.read_stderr_line()
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
