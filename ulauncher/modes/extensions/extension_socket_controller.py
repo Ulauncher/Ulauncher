@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from ulauncher.internals.query import Query
+from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.utils.eventbus import EventBus
@@ -32,7 +33,7 @@ class ExtensionSocketController:
         self.socket_controllers = socket_controllers
         self.framer: JSONFramer = framer
         self.ext_id = ext_id
-        self.ext_controller = ExtensionController.create(ext_id)
+        self.ext_controller = extension_registry.get(ext_id)
 
         self.socket_controllers[ext_id] = self
         self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self.send_message)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html
 import logging
 from threading import Thread
@@ -9,9 +10,11 @@ from typing import Any, Iterator, Literal
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions import extension_registry
+from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.singleton import Singleton
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 logger = logging.getLogger()
@@ -22,7 +25,12 @@ class ExtensionTrigger(Result):
     searchable = True
 
 
-class ExtensionMode(BaseMode):
+class ExtensionMode(BaseMode, metaclass=Singleton):
+    """
+    Mode that handles extension triggers and communication with extensions.
+    Is singleton because it owns the ExtensionSocketServer instance.
+    """
+
     ext_socket_server: ExtensionSocketServer
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
@@ -56,7 +64,7 @@ class ExtensionMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
-        for ext in ExtensionController.iterate():
+        for ext in extension_registry.iterate():
             if not ext.is_enabled or ext.has_error:
                 continue
 
@@ -92,7 +100,11 @@ class ExtensionMode(BaseMode):
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
     ) -> None:
-        ext_controllers = [ExtensionController.create(ext_id) for ext_id in extension_ids]
+        ext_controllers: list[ExtensionController] = []
+        for ext_id in extension_ids:
+            with contextlib.suppress(ExtensionNotFoundError):
+                # suppress so if an extension is removed, it doesn't try to load it
+                ext_controllers.append(extension_registry.load(ext_id))
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
