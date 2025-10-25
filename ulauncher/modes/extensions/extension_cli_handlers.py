@@ -138,13 +138,6 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     Run an extension in preview mode (without installing it).
     Returns True on success, False otherwise.
 
-    Implement preview extension command.
-    See extension_cli_handlers.py.
-    Start with the first undone point (marked as 👉).
-    Work on it and then mark ✅ when you're done.
-    Rest will be done in a separate session.
-
-    TODO:
     ✅ Check if ulauncher is running. If not, print error and exit:
     ✅ Validate provided "path" (extension manifest, etc.)
     ✅ Get extension id (if it's a git-enabled path, generate it from URL)
@@ -152,16 +145,12 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
         At this stage only create the necessary methods and function calls.
     --- the next steps happen in the main process in that `preview_ext()` dbus method ---
     ✅ If extension with the same ID is running, stop it.
-    ✅ Run extension from the given path in "preview" mode (no install):
-        Find out how extensions are run.
-        Make the necessary changes to run from an arbitrary given path.
-        Extensions can have dependencies listed in requirements.txt. We still need to install those.
-        Create a temporary venv under `/tmp/ulauncher/{ext_id}.venv` and install dependencies there.
-        Don't delete the folder because the user might want to run extension in preview mode multiple times.
-        But make a note in code comments that this is intentionally left undeleted.
-    ⬜ If --with-debugger, run in debugger mode. Show how to connect with a debugger
+    ✅ Run extension from the given path in "preview" mode
+    ✅ If --with-debugger, run in debugger mode.
+       And in the preview command process output helpful info describing how to connect with a debugger.
     --- back in the CLI process ---
-    ⬜ On `ctrl+c`, stop extension and re-enable previous version (if any)
+    ⬜ On `ctrl+c` event in the preview command process, stop extension and re-enable previous version (if any)
+       Implement this by sending another dbus event to stop the preview extension and start the previous one.
     ⬜ Show a special label on Preferences UI for extension running in preview mode
     """
     # Check if Ulauncher is running
@@ -173,6 +162,20 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     if not hasattr(args, "path") or not args.path:
         logger.error("Error: Extension path is required")
         return False
+
+    # Check if debugpy is available when --with-debugger is requested
+    if getattr(args, "with_debugger", False):
+        try:
+            import debugpy  # noqa: F401
+        except ImportError:
+            logger.error(
+                "Error: debugpy is required for --with-debugger option but is not installed.\n"
+                "Install it using:\n"
+                "  Debian/Ubuntu: sudo apt-get install python3-debugpy\n"
+                "  Arch Linux: sudo pacman -S python-debugpy\n"
+                "  Fedora: sudo dnf install python3-debugpy"
+            )
+            return False
 
     path = Path(args.path).resolve()
 
@@ -247,6 +250,13 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     preview_message = {"ext_id": ext_id, "path": str(path), "with_debugger": with_debugger}
     logger.debug("Sending preview request over D-Bus: %s", preview_message)
     dbus_trigger_event("extensions:preview_ext", preview_message, wait=True)
+
+    # Output helpful info if debugger mode is enabled
+    if with_debugger:
+        logger.info(
+            "Extension '%s' started with debugger enabled. Connect your debugger to: localhost:5678",
+            ext_id,
+        )
 
     # TODO: Remaining implementation steps happen in the main process handler (see extension_socket_server.preview_ext)
     return True

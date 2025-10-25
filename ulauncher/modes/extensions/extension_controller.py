@@ -237,7 +237,7 @@ class ExtensionController:
         await self.stop()
         return False
 
-    def start_detached(self) -> None:
+    def start_detached(self, with_debugger: bool = False) -> None:
         if not self.is_running:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
@@ -259,7 +259,13 @@ class ExtensionController:
             self.state.save(error_type="", error_message="")  # clear any previous error
 
             ext_deps = ExtensionDependencies(self.id, self.path)
-            cmd = [sys.executable, f"{self.path}/main.py"]
+            extension_main = f"{self.path}/main.py"
+            cmd = [sys.executable, extension_main]
+
+            # If debugger mode is enabled, prepend debugger command
+            if with_debugger:
+                cmd = [sys.executable, "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", extension_main]
+
             prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
             triggers = {t_id: t.keyword for t_id, t in self.manifest.triggers.items() if t.keyword}
             # backwards compatible v2 preferences format (with keywords added back)

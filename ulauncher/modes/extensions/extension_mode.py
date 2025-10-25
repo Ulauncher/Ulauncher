@@ -180,7 +180,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         assert path, "preview_ext called without path"
 
         logger.info(
-            "[preview] Received preview request for ext_id=%s path=%s debugger=%s (stub stage)",
+            "[preview] Received preview request for ext_id=%s path=%s debugger=%s",
             ext_id,
             path,
             with_debugger,
@@ -204,4 +204,4 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         deps.install()
 
         # Run start_detached instead of start to avoid blocking the main thread
-        controller.start_detached()
+        controller.start_detached(with_debugger=with_debugger)
