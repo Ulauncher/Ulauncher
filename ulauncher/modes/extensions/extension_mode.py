@@ -205,3 +205,44 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         # Run start_detached instead of start to avoid blocking the main thread
         controller.start_detached(with_debugger=with_debugger)
+
+    @events.on
+    def stop_preview(self, payload: dict[str, Any] | None = None) -> None:
+        """Handle stopping a preview extension and restoring the previous version if any.
+
+        Expected payload example:
+            {
+              "preview_ext_id": "my-extension.preview",
+              "original_ext_id": "my-extension"
+            }
+        """
+        if not payload or not isinstance(payload, dict):
+            logger.error("stop_preview called without valid payload: %s", payload)
+            return
+
+        preview_ext_id = payload.get("preview_ext_id")
+        original_ext_id = payload.get("original_ext_id")
+
+        if not preview_ext_id or not original_ext_id:
+            logger.error("stop_preview called without required fields: %s", payload)
+            return
+
+        logger.info(
+            "[preview] Received stop preview request for preview_ext_id=%s, original_ext_id=%s",
+            preview_ext_id,
+            original_ext_id,
+        )
+
+        # Stop the preview extension
+        stop_msg = f"[preview] Preview extension '{preview_ext_id}' stopped"
+        self.run_ext_batch_job([preview_ext_id], ["stop"], done_msg=stop_msg)
+
+        # Try to restart the original extension
+        original_controller = extension_registry.get(original_ext_id)
+        if original_controller:
+            logger.info(
+                "[preview] Re-enabling original extension '%s'",
+                original_ext_id,
+            )
+            restart_msg = f"[preview] Original extension '{original_ext_id}' re-enabled"
+            self.run_ext_batch_job([original_ext_id], ["start"], done_msg=restart_msg)
