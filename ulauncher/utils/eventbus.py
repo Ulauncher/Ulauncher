@@ -25,17 +25,21 @@ class EventBus:
 
     def on(self, listener: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(listener)
-        def wrapper(*args: Any, **kwargs: Any) -> None:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             if self.skip_if_not_bound and not self.self_arg:
-                return
+                return None
             if self.self_arg:
                 args = (self.self_arg, *args)
-            listener(*args, **kwargs)
+            return listener(*args, **kwargs)
 
         _listeners[self._full_event_name(listener.__name__)].add(wrapper)
         # return the original listener so the class method works as normal
         return listener
 
-    def emit(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+    def emit(self, event_name: str, *args: Any, **kwargs: Any) -> Any:
+        result: Any = None
         for listener in _listeners[event_name]:
-            listener(*args, **kwargs)
+            callback_result = listener(*args, **kwargs)
+            if callback_result is not None:
+                result = callback_result
+        return result

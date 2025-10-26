@@ -12,6 +12,7 @@ from ulauncher import app_id, dbus_path
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+CLI_INTERFACE_NAME = "io.ulauncher.CLI"
 
 
 def dbus_query_freedesktop(
@@ -86,22 +87,25 @@ def dbus_trigger_event(name: str, message: Any | None = None, wait: bool = False
         return None
 
     json_message = json.dumps({"name": name, "message": message})
-    action_group = get_ulauncher_dbus_action_group(bus)
-
     if wait:
-        result = bus.call_sync(
-            bus_name=app_id,
-            object_path=dbus_path,
-            interface_name="org.gtk.Actions",
-            method_name="Activate",
-            parameters=GLib.Variant("(sava{sv})", ("trigger-event", [GLib.Variant.new_string(json_message)], {})),
-            reply_type=None,
-            flags=Gio.DBusCallFlags.NONE,
-            timeout_msec=-1,
-            cancellable=None,
-        )
-        return cast("T", result)
+        try:
+            result = bus.call_sync(
+                bus_name=app_id,
+                object_path=dbus_path,
+                interface_name=CLI_INTERFACE_NAME,
+                method_name="TriggerEvent",
+                parameters=GLib.Variant("(s)", (json_message,)),
+                reply_type=GLib.VariantType("(bs)"),
+                flags=Gio.DBusCallFlags.NONE,
+                timeout_msec=-1,
+                cancellable=None,
+            )
+        except GLib.Error as err:
+            logger.error("Failed to trigger event %s via D-Bus: %s", name, err)
+            return None
+        return cast("T", result.unpack())
 
     # Use asynchronous call (original behavior)
+    action_group = get_ulauncher_dbus_action_group(bus)
     action_group.activate_action("trigger-event", GLib.Variant.new_string(json_message))
     return None

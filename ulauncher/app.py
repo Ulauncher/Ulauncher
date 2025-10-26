@@ -6,7 +6,7 @@ import logging
 from typing import Any, Literal, cast
 from weakref import WeakValueDictionary
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, Gtk, GLib
 
 import ulauncher
 from ulauncher import app_id, first_run
@@ -22,6 +22,19 @@ events = EventBus("app")
 
 cli_args = get_cli_args()
 
+CLI_INTROSPECTION_XML = """
+<node>
+  <interface name="io.ulauncher.CLI">
+    <method name="TriggerEvent">
+      <arg type="s" name="json_message" direction="in"/>
+      <arg type="(bs)" name="response" direction="out"/>
+    </method>
+  </interface>
+</node>
+"""
+
+CLI_NODE_INFO = Gio.DBusNodeInfo.new_for_xml(CLI_INTROSPECTION_XML)
+
 
 class UlauncherApp(Gtk.Application):
     # Gtk.Applications check if the app is already registered and if so,
@@ -29,6 +42,7 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     query = ""
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
+    _cli_dbus_reg_id: int = 0
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
@@ -60,6 +74,26 @@ class UlauncherApp(Gtk.Application):
                 ("trigger-event", lambda *args: self.delegate_custom_message(args[1].get_string()), "s"),
             ],
         )
+
+    def do_dbus_register(self, connection: Gio.DBusConnection, object_path: str) -> bool:
+        registered = super().do_dbus_register(connection, object_path)
+
+        if CLI_NODE_INFO and CLI_NODE_INFO.interfaces:
+            interface_info = CLI_NODE_INFO.interfaces[0]
+            self._cli_dbus_reg_id = connection.register_object(
+                object_path,
+                interface_info,
+                self._on_cli_dbus_method_call,
+                None,
+                None,
+            )
+        return registered
+
+    def do_dbus_unregister(self, connection: Gio.DBusConnection, object_path: str) -> None:
+        if self._cli_dbus_reg_id:
+            connection.unregister_object(self._cli_dbus_reg_id)
+            self._cli_dbus_reg_id = 0
+        super().do_dbus_unregister(connection, object_path)
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
         logger.debug("Activated via gapplication")
@@ -148,15 +182,15 @@ class UlauncherApp(Gtk.Application):
         else:
             self.show_launcher()
 
-    def delegate_custom_message(self, json_message: str) -> None:
+    def delegate_custom_message(self, json_message: str) -> Any:
         """Parses and delegates custom JSON messages to the EventBus listener (if any)"""
         with contextlib.suppress(json.JSONDecodeError):
             data = json.loads(json_message)
             if isinstance(data, dict) and "name" in data:
-                events.emit(data["name"], data.get("message"))
-                return
+                return events.emit(data["name"], data.get("message"))
 
         logger.error("Invalid custom JSON message format: %s", json_message)
+        return None
 
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
@@ -173,3 +207,37 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def quit(self) -> None:
         super().quit()
+
+    def _on_cli_dbus_method_call(
+        self,
+        connection: Gio.DBusConnection,
+        sender: str,
+        object_path: str,
+        interface_name: str,
+        method_name: str,
+        parameters: GLib.Variant,
+        invocation: Gio.DBusMethodInvocation,
+    ) -> None:
+        if method_name != "TriggerEvent":
+            invocation.return_error_literal(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD, "Unknown method")
+            return
+
+        json_message = parameters.get_child_value(0).get_string()
+
+        try:
+            response = self.delegate_custom_message(json_message)
+        except Exception as exc:  # noqa: BLE001 - propagate to caller
+            logger.exception("Error while handling CLI TriggerEvent request")
+            invocation.return_dbus_error(
+                "io.ulauncher.CLI.Error",
+                str(exc),
+            )
+            return
+
+        reply: tuple[bool, str]
+        if isinstance(response, tuple) and len(response) == 2:
+            reply = (bool(response[0]), str(response[1]))
+        else:
+            reply = (False, "")
+
+        invocation.return_value(GLib.Variant("(bs)", reply))
