@@ -28,6 +28,7 @@ class TestClient:
     @pytest.fixture
     def extension(self) -> Extension:
         ext: Extension = create_autospec(Extension)
+        ext.exec_path = "com.example.test-extension"
         ext.ext_id = "com.example.test-extension"
         return ext
 

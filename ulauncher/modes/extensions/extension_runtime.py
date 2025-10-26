@@ -38,6 +38,7 @@ class ExtensionRuntime:
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
         for env_name, env_value in (env or {}).items():
             launcher.setenv(env_name, env_value, True)
+        launcher.setenv("ULAUNCHER_EXTENSION_ID", ext_id, True)
 
         self.subprocess = launcher.spawnv(cmd)
         error_input_stream = self.subprocess.get_stderr_pipe()
@@ -76,7 +77,7 @@ class ExtensionRuntime:
         # append output to recent_errors
         output, _ = error_stream.read_line_finish_utf8(result)
         if output:
-            print(output)  # noqa: T201
+            print(output, f" 🔌 from {self.ext_id}")  # noqa: T201
             self.recent_errors.append(output)
             self.read_stderr_line()
 

@@ -14,6 +14,7 @@
             Error
           </b-badge>
           <b-badge v-else-if="ext.is_stopped">Stopped</b-badge>
+          <b-badge v-else-if="ext.is_preview" variant="success">Preview</b-badge>
           <span>{{ ext.name }}</span>
         </li>
         <li class="link" style="margin-top:25px" @click="addExtDialog">
