@@ -35,8 +35,9 @@ def eval_expr(expr):
 
 
 def _eval(node):
-    if isinstance(node, ast.Num):  # <number>
-        return Decimal(str(node.n))
+    if isinstance(node, ast.Constant):  # <constant> (number)
+        value = node.value if hasattr(node, "value") else node.n  # older versions of python has .n instead of .value
+        return Decimal(str(value))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
