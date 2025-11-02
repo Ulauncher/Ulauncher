@@ -74,7 +74,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     return new_prefs
 
 
-def v5_to_v6() -> None:
+def v5_to_v6() -> None:  # noqa: PLR0912
     # Migrate extension state to individual files
     from configparser import ConfigParser
     from functools import partial
@@ -95,7 +95,10 @@ def v5_to_v6() -> None:
     ext_prefs = Path(paths.EXTENSIONS_CONFIG)
     # Migrate JSON to JSON first, assuming these are newer
     for file in ext_prefs.rglob("*.json"):
-        _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
+        try:
+            _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
+        except Exception as e:  # noqa: BLE001 -
+            _logger.warning("Skipping migration for extension preference %s (extension not installed): %s", file, e)
     # Migrate db to JSON without overwrite. So if a JSON file exists it should never be overwritten
     # with data from a db file
     for file in ext_prefs.rglob("*.db"):
