@@ -37,10 +37,10 @@
              copy paths
           </a>
         </div>
-        <div class="notes alert-warning paddding-small" v-if="extension.shadowed_by_preview">
+        <div class="notes alert-warning padding-small" v-if="extension.shadowed_by_preview">
           <i class="fa fa-exclamation-triangle"></i> This extension cannot be used while another extension with the same ID is running in preview mode.
         </div>
-        <div class="notes alert-info paddding-small" v-if="extension.is_preview && extension.with_debugger && extension.is_stopped">
+        <div class="notes alert-info padding-small" v-if="extension.is_preview && extension.with_debugger && extension.is_stopped">
           <i class="fa fa-info-circle"></i> Extension is waiting for debugger connection (see console for details).
         </div>
       </div>
@@ -391,7 +391,7 @@ export default {
   font-style: italic;
 }
 
-.paddding-small {
+.padding-small {
   padding: 8px;
 }
 </style>
