@@ -65,7 +65,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
         for ext in extension_registry.iterate():
-            if not ext.is_enabled or ext.has_error:
+            if not ext.is_running:
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
