@@ -102,6 +102,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     ) -> None:
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
+            # preview extensions cannot be loaded, so adding them from the registry
+            with contextlib.suppress(ExtensionNotFoundError):
+                preview_ext = extension_registry.get(ext_id)
+                if preview_ext.is_preview:
+                    ext_controllers.append(preview_ext)
+
             with contextlib.suppress(ExtensionNotFoundError):
                 # suppress so if an extension is removed, it doesn't try to load it
                 ext_controllers.append(extension_registry.load(ext_id))
@@ -197,6 +203,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 ext_id,
             )
             self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
+            existing_controller = extension_registry.get(ext_id)  # reload to update is_running state
+            existing_controller.shadowed_by_preview = True
 
         preview_ext_id = f"{ext_id}.preview"
         controller = extension_registry.load(preview_ext_id, path)
@@ -254,5 +262,6 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 "[preview] Re-enabling original extension '%s'",
                 original_ext_id,
             )
+            original_controller.shadowed_by_preview = False
             restart_msg = f"[preview] Original extension '{original_ext_id}' re-enabled"
             self.run_ext_batch_job([original_ext_id], ["start"], done_msg=restart_msg)

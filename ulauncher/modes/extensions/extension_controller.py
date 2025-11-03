@@ -78,6 +78,8 @@ class ExtensionController:
     is_manageable: bool
     is_running: bool = False
     is_preview: bool = False
+    with_debugger: bool = False
+    shadowed_by_preview: bool = False
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -238,6 +240,7 @@ class ExtensionController:
         return False
 
     def start_detached(self, with_debugger: bool = False) -> None:
+        self.with_debugger = with_debugger
         if not self.is_running:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
@@ -280,6 +283,10 @@ class ExtensionController:
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
 
     async def start(self) -> bool:
+        # Disable starting extensions that are shadowed by preview extensions
+        # to avoid conflicts and confusion
+        if self.shadowed_by_preview:
+            return False
         self.start_detached()
         for _ in range(100):
             if self.has_error:

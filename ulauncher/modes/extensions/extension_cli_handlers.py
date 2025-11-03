@@ -142,7 +142,7 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     """
     # Check if Ulauncher is running
     if not check_app_running(app_id):
-        logger.error("Error: Ulauncher is not running. Please start it first.")
+        logger.error("Error: Ulauncher needs to be running in order to preview extensions.")
         return False
 
     # Validate provided path
@@ -158,7 +158,7 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
             logger.error(  # noqa: TRY400
                 "Error: debugpy is required for --with-debugger option but is not installed.\n"
                 "Install it using:\n"
-                "  Debian/Ubuntu: sudo apt-get install python3-debugpy\n"
+                "  Debian/Ubuntu: sudo apt install python3-debugpy\n"
                 "  Arch Linux: sudo pacman -S python-debugpy\n"
                 "  Fedora: sudo dnf install python3-debugpy"
             )
@@ -200,6 +200,15 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     except Exception:
         logger.exception("Error: Extension validation failed with unexpected error")
         return False
+
+    requirements_file = path / "requirements.txt"
+    if requirements_file.is_file():
+        logger.warning(
+            (
+                "The extension has a requirements.txt file. "
+                "Its dependencies will be installed in the '.dependencies' folder inside the extension path."
+            ),
+        )
 
     # Get extension ID from git URL or path
     url_to_parse = str(path)

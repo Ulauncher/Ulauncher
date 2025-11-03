@@ -55,6 +55,8 @@ def get_extension_data(controller: ExtensionController) -> dict[str, Any]:
         "is_manageable": controller.is_manageable,
         "is_stopped": not controller.is_running,
         "is_preview": controller.is_preview,
+        "with_debugger": controller.with_debugger,
+        "shadowed_by_preview": controller.shadowed_by_preview,
     }
 
 
