@@ -48,7 +48,7 @@ def main() -> None:  # noqa: PLR0915
         sys.exit(2)
 
     # Set up global logging for stdout and file
-    file_handler = logging.FileHandler(f"{paths.STATE}/last.log", mode="w+")
+    file_handler = logging.FileHandler(paths.LOG_FILE, mode="w+")
     stream_handler = logging.StreamHandler()
     level = logging.WARNING
     if cli_args.verbose:
