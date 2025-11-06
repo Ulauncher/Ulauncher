@@ -13,6 +13,7 @@ from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
 from ulauncher.ui.windows.preferences_window import PreferencesWindow
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
+from ulauncher.utils import perf
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.singleton import get_instance
@@ -117,8 +118,20 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
-        if "main" not in self.windows:
-            self.windows["main"] = UlauncherWindow(application=self)
+        if "main" in self.windows:
+            return
+
+        recorder = perf.start_trace("show_launcher")
+        try:
+            window = UlauncherWindow(application=self)
+        except Exception:
+            recorder.finish("error")
+            raise
+
+        self.windows["main"] = window
+        if window.perf_recorder is None:
+            window.perf_recorder = recorder
+        recorder.checkpoint("window_created")
 
     @events.on
     def hide_launcher(self) -> None:

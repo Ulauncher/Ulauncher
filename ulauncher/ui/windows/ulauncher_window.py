@@ -10,6 +10,7 @@ from ulauncher.core import UlauncherCore
 from ulauncher.internals.result import Result
 from ulauncher.ui import layer_shell
 from ulauncher.ui.item_navigation import ItemNavigation
+from ulauncher.utils import perf
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.load_icon_surface import load_icon_surface
@@ -28,11 +29,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     layer_shell_enabled = False
     settings = Settings.load()
     core = UlauncherCore()
+    perf_recorder: perf.PerfRecorder | None = None
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
         width_request = int(self.settings.base_width)
         height_request = -1
+
+        recorder = perf.get_current()
+        if recorder:
+            self.perf_recorder = recorder
 
         if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
             # Use the full width of the monitor for the window, and center the visible window
@@ -58,6 +64,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             **kwargs,
         )
 
+        if recorder:
+            recorder.checkpoint("window:gtk_init")
+
         events.set_self(self)
 
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
@@ -70,6 +79,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                     "Layer shell is not supported. If you have issues with window positioning, "
                     "ensure that your compositor supports it and that you have installed the gtk-layer-shell library"
                 )
+
+        if recorder:
+            recorder.checkpoint("window:layer_shell")
 
         # Widget structure
         #
@@ -133,6 +145,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.frame.show_all()
 
+        if recorder:
+            recorder.checkpoint("window:widgets_ready")
+
         self.connect("focus-in-event", lambda *_: self.on_focus_in())
         self.connect("focus-out-event", lambda *_: self.on_focus_out())
         drag_listener.connect("button-press-event", self.on_mouse_down)
@@ -157,6 +172,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # without a compositor deferred would lead to "flash of unstyled content"
             self.apply_styling()
 
+            if recorder:
+                recorder.checkpoint("window:initial_styling")
+
         self.set_keep_above(True)
         self.present()
         # note: present_with_time is needed on some DEs to defeat focus stealing protection
@@ -166,8 +184,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.present_with_time(Gdk.CURRENT_TIME)
         super().show()
 
+        if recorder:
+            recorder.checkpoint("window:presented")
+
         if self.query_str:
             self.set_input(self.query_str)
+
+        if recorder:
+            recorder.checkpoint("window:init_complete")
 
     def apply_styling(self) -> None:
         """
@@ -190,16 +214,38 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.set_opacity(1)
 
     def deferred_init(self) -> None:
-        if self.query_str:
-            # select all text in the input field.
-            # used when user turns off "start with blank query" setting
-            self.prompt_input.select_region(0, -1)
+        recorder = self.perf_recorder
+        if recorder:
+            recorder.checkpoint("window:deferred_init")
+
+        try:
+            if self.query_str:
+                # select all text in the input field.
+                # used when user turns off "start with blank query" setting
+                self.prompt_input.select_region(0, -1)
+            else:
+                # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
+                self.show_results([])
+
+            if recorder:
+                recorder.checkpoint("window:prefill_results")
+
+            self.apply_styling()
+            if recorder:
+                recorder.checkpoint("window:apply_styling")
+
+            self.core.load_triggers(force=True)
+            if recorder:
+                recorder.checkpoint("core:load_triggers")
+
+            self.core.update(self.query_str)
+        except Exception:
+            if recorder:
+                recorder.finish("error")
+            raise
         else:
-            # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
-            self.show_results([])
-        self.apply_styling()
-        self.core.load_triggers(force=True)
-        self.core.update(self.query_str)
+            if recorder:
+                recorder.finish("core:update")
 
     ######################################
     # GTK Signal Handlers
@@ -207,6 +253,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def on_initial_draw(self, *_: tuple[Any]) -> None:
         logger.info("Window shown")
+        if self.perf_recorder:
+            self.perf_recorder.checkpoint("window:initial_draw")
         self.disconnect_by_func(self.on_initial_draw)
         GLib.idle_add(self.deferred_init)
 
