@@ -441,8 +441,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
+        recorder = self.perf_recorder or perf.get_current()
+        if recorder:
+            recorder.checkpoint("results:show_enter")
+
         self.results_nav = None
         self.results.foreach(lambda w: w.destroy())
+        if recorder:
+            recorder.checkpoint("results:cleared")
 
         limit = len(self.settings.get_jump_keys()) or 25
         if not self.prompt_input.get_text() and self.settings.max_recent_apps:
@@ -467,8 +473,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.apply_css(self.results)
             self.results_scroller.show_all()
             logger.debug("Render %s results", len(result_widgets))
+            if recorder:
+                recorder.checkpoint(f"results:render[{len(result_widgets)}]")
         else:
             # Hide the scroll container when there are no results since it normally takes up a
             # minimum amount of space even if it is empty.
             self.results_scroller.hide()
             logger.debug("Hiding results container, no results found")
+            if recorder:
+                recorder.checkpoint("results:empty")
+
+        if recorder:
+            recorder.checkpoint("results:show_exit")

@@ -9,6 +9,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils import perf
 
 _events = EventBus()
 logger = logging.getLogger()
@@ -42,16 +43,29 @@ class UlauncherCore:
     query: Query = Query(None, "")
 
     def load_triggers(self, force: bool = False) -> None:
+        recorder = perf.get_current()
+        if recorder:
+            recorder.checkpoint("core:load_triggers:start")
+
         if force:
             self._triggers_loaded = False
 
         if self._triggers_loaded:
+            if recorder:
+                recorder.checkpoint("core:load_triggers:cached")
             return
 
         self._triggers.clear()
         self._keywords.clear()
         for mode in get_modes():
-            for trigger in mode.get_triggers():
+            mode_name = mode.__class__.__name__
+            if recorder:
+                recorder.checkpoint(f"core:load_triggers:{mode_name}:start")
+            mode_triggers = list(mode.get_triggers())
+            if recorder:
+                recorder.checkpoint(f"core:load_triggers:{mode_name}:fetched[{len(mode_triggers)}]")
+
+            for trigger in mode_triggers:
                 self._triggers.append(trigger)
                 self._mode_map[trigger] = mode
                 if trigger.keyword:
@@ -67,8 +81,12 @@ class UlauncherCore:
                         )
                     else:
                         self._keywords[trigger.keyword] = trigger
+            if recorder:
+                recorder.checkpoint(f"core:load_triggers:{mode_name}:done[{len(mode_triggers)}]")
 
         self._triggers_loaded = True
+        if recorder:
+            recorder.checkpoint("core:load_triggers:complete")
 
     def update(self, query_str: str) -> None:
         """Parse the query string and update the mode and query."""
