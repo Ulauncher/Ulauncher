@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 import shlex
 from pathlib import Path
@@ -18,7 +17,6 @@ def launch_app(desktop_entry_name: str) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
     app = DesktopAppInfo.new(desktop_entry_name)
-    app_dir: str | None = None
     cmd: list[str] = []
     if not app:
         logger.error("Could not load app %s", desktop_entry_name)
@@ -31,7 +29,6 @@ def launch_app(desktop_entry_name: str) -> bool:
 
     if desktop_entry_path := app.get_filename():
         app_exec = app_exec.replace("%k", desktop_entry_path)
-        app_dir = os.path.dirname(desktop_entry_path)
 
     # strip field codes %f, %F, %u, %U, etc
     app_exec = re.sub(r"\%[uUfFdDnNickvm]", "", app_exec).strip()
@@ -57,6 +54,5 @@ def launch_app(desktop_entry_name: str) -> bool:
         logger.error("No command to run %s", app_id)
     else:
         logger.info("Run application %s (%s) Exec %s", app.get_name(), app_id, cmd)
-        working_dir = app.get_string("Path") or app_dir
-        launch_detached(cmd, working_dir)
+        launch_detached(cmd, app.get_string("Path"))
     return True
