@@ -30,4 +30,5 @@ data/preferences
 .venv
 /nix/result
 /nix/dev
+/result
 ulauncher.1.gz
