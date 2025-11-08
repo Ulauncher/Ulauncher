@@ -28,7 +28,7 @@
 , systemd
 , typos
 , webkitgtk_4_1
-, wrapGAppsHook
+, wrapGAppsHook3
 , xdg-utils
 , xvfb-run
 , yarn
@@ -84,7 +84,7 @@ let
       gdk-pixbuf
       gobject-introspection
       intltool
-      wrapGAppsHook
+      wrapGAppsHook3
     ];
 
     buildInputs = [
