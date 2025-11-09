@@ -80,8 +80,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
     except ExtensionRemoteError:
         logger.warning("Network error: Could not install %s", args.input)
         return False
-    else:
-        return True
+    return True
 
 
 def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:

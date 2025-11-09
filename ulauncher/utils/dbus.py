@@ -7,7 +7,7 @@ from typing import Any
 
 from gi.repository import Gio, GLib
 
-from ulauncher import app_id, dbus_path
+import ulauncher
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +63,14 @@ def get_app_pid(app_id: str) -> int | None:
 
 @lru_cache(maxsize=1)
 def get_ulauncher_dbus_action_group(bus: Gio.DBusConnection) -> Gio.DBusActionGroup:
-    return Gio.DBusActionGroup.get(bus, app_id, dbus_path)
+    return Gio.DBusActionGroup.get(bus, ulauncher.app_id, ulauncher.dbus_path)
 
 
 def dbus_trigger_event(name: str, message: Any | None = None) -> None:
     """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name."""
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
 
-    if not check_app_running(app_id, bus):
+    if not check_app_running(ulauncher.app_id, bus):
         logger.debug("Ulauncher app is not running, skipping D-Bus trigger event: %s", name)
         return
 

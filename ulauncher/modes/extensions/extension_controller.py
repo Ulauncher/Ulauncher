@@ -112,21 +112,21 @@ class ExtensionController:
             # clean up broken install
             rmtree(remote.target_dir)
             raise
-        else:
-            controller = cls(remote.ext_id, remote.target_dir)
-            controller.state.save(
-                url=url,
-                browser_url=remote.browser_url or "",
-                commit_hash=commit_hash,
-                commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-                updated_at=datetime.now().isoformat(),
-                error_type="",
-                error_message="",
-            )
-            logger.info("Extension %s installed successfully", controller.id)
-            if is_new_install:
-                lifecycle_events.emit("extensions:installed", controller)
-            return controller
+
+        controller = cls(remote.ext_id, remote.target_dir)
+        controller.state.save(
+            url=url,
+            browser_url=remote.browser_url or "",
+            commit_hash=commit_hash,
+            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+            updated_at=datetime.now().isoformat(),
+            error_type="",
+            error_message="",
+        )
+        logger.info("Extension %s installed successfully", controller.id)
+        if is_new_install:
+            lifecycle_events.emit("extensions:installed", controller)
+        return controller
 
     @property
     def is_enabled(self) -> bool:

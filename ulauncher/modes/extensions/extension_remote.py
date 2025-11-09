@@ -43,6 +43,7 @@ class ExtensionRemote(UrlParseResult):
     target_dir: str
 
     def __init__(self, url: str) -> None:
+        super().__init__()
         try:
             self.url = url.strip()
             self.update(parse_extension_url(self.url))
