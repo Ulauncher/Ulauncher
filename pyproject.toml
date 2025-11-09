@@ -67,8 +67,9 @@ ignore = [
   "TC001", "TC002", "TC003", # Performance best practice that does nothing for our use
   "TD002", "TD003" # Allow TODOs and FIXMEs without author and link
 ]
-# Updated to support all standard rules as of ruff 0.12.0
-# See https://docs.astral.sh/ruff/rules/
+# List is excluding rule-sets for libraries we don't use (like Airflow, FastAPI, NumPy, Pandas etc).
+# All other rules should be either included or commented out with a reason for the exclusion.
+# See https://docs.astral.sh/ruff/rules/ (synced with ruff 0.14.0)
 select = [
   "A",        # flake8-builtins
   "ANN204",   # flake8-annotations (204 covers __init__, __new__, and __call__. All the other rules are covered by mypy)
@@ -133,4 +134,3 @@ per-file-ignores = {"tests/**/*.py" = [ # Relax some linting rules for tests
 
 [tool.pytest.ini_options]
 log_cli = true
-

@@ -3,7 +3,7 @@ lefthook
 mypy < 1.17.0
 pytest
 pytest-mock
-ruff >= 0.12.1
+ruff >= 0.14.4
 Sphinx
 sphinx_rtd_theme
 typos
