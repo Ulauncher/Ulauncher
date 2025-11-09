@@ -8,6 +8,7 @@ from ulauncher import version
 from ulauncher.modes.extensions.extension_cli_handlers import (
     install_extension,
     list_active_extensions,
+    preview_extension,
     uninstall_extension,
     upgrade_extensions,
 )
@@ -105,6 +106,21 @@ def get_cli_args() -> CLIArguments:
         help="Optional extension ID or URL to upgrade (upgrades all if not specified)",
     )
     upgrade_parser.set_defaults(handler=partial(upgrade_extensions, upgrade_parser))
+
+    preview_parser = subparsers.add_parser(
+        "preview",
+        aliases=["pr"],
+        help="Preview extension",
+        description="Starts extension from a local path for development and debugging purposes",
+    )
+    preview_parser.add_argument(
+        "--with-debugger",
+        action="store_true",
+        default=False,
+        help="Start the extension with remote Python debugger enabled",
+    )
+    preview_parser.add_argument("path", help="Path to the extension source directory")
+    preview_parser.set_defaults(handler=partial(preview_extension, preview_parser))
 
     args = parser.parse_args(namespace=CLIArguments())
     if args.dev:

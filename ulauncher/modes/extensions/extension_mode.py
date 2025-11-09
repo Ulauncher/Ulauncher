@@ -102,6 +102,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     ) -> None:
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
+            # preview extensions cannot be loaded, so adding them from the registry
+            with contextlib.suppress(ExtensionNotFoundError):
+                preview_ext = extension_registry.get(ext_id)
+                if preview_ext.is_preview:
+                    ext_controllers.append(preview_ext)
+
             with contextlib.suppress(ExtensionNotFoundError):
                 # suppress so if an extension is removed, it doesn't try to load it
                 ext_controllers.append(extension_registry.load(ext_id))
@@ -155,3 +161,107 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     @events.on
     def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
         self.ext_socket_server.handle_response(ext_id, response)
+
+    @events.on
+    def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
+        """Handle a preview extension request coming from the CLI (via D-Bus).
+
+        Stage: run the extension from an arbitrary filesystem path WITHOUT installing it.
+
+        Expected payload example:
+            {
+              "ext_id": "my-extension",
+              "path": "/abs/path/to/extension",
+              "with_debugger": false
+            }
+        """
+
+        if not payload or not isinstance(payload, dict):  # basic guard
+            logger.error("preview_ext called without valid payload: %s", payload)
+            return
+
+        ext_id = payload.get("ext_id")
+        path = payload.get("path")
+        with_debugger = bool(payload.get("with_debugger"))
+        assert ext_id, "preview_ext called without ext_id"
+        assert path, "preview_ext called without path"
+
+        logger.info(
+            "[preview] Received preview request for ext_id=%s path=%s debugger=%s",
+            ext_id,
+            path,
+            with_debugger,
+        )
+
+        try:
+            existing_controller = extension_registry.get(ext_id)
+        except ExtensionNotFoundError:
+            existing_controller = None
+        if existing_controller and existing_controller.is_running:
+            logger.info(
+                "[preview] Extension '%s' is currently running; stopping it before launching preview version",
+                ext_id,
+            )
+            self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
+            existing_controller = extension_registry.get(ext_id)  # reload to update is_running state
+            existing_controller.shadowed_by_preview = True
+
+        preview_ext_id = f"{ext_id}.preview"
+        controller = extension_registry.load(preview_ext_id, path)
+        controller.is_preview = True
+
+        # install python dependencies from requirements.txt
+        from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+
+        deps = ExtensionDependencies(controller.id, controller.path)
+        deps.install()
+
+        # Run start_detached instead of start to avoid blocking the main thread
+        controller.start_detached(with_debugger=with_debugger)
+
+        logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+
+    @events.on
+    def stop_preview(self, payload: dict[str, Any] | None = None) -> None:
+        """Handle stopping a preview extension and restoring the previous version if any.
+
+        Expected payload example:
+            {
+              "preview_ext_id": "my-extension.preview",
+              "original_ext_id": "my-extension"
+            }
+        """
+        if not payload or not isinstance(payload, dict):
+            logger.error("stop_preview called without valid payload: %s", payload)
+            return
+
+        preview_ext_id = payload.get("preview_ext_id")
+        original_ext_id = payload.get("original_ext_id")
+
+        if not preview_ext_id or not original_ext_id:
+            logger.error("stop_preview called without required fields: %s", payload)
+            return
+
+        logger.info(
+            "[preview] Received stop preview request for preview_ext_id=%s, original_ext_id=%s",
+            preview_ext_id,
+            original_ext_id,
+        )
+
+        # Stop the preview extension
+        stop_msg = f"[preview] Preview extension '{preview_ext_id}' stopped"
+        self.run_ext_batch_job([preview_ext_id], ["stop"], done_msg=stop_msg)
+
+        # Try to restart the original extension
+        try:
+            original_controller = extension_registry.get(original_ext_id)
+        except ExtensionNotFoundError:
+            original_controller = None
+        if original_controller:
+            logger.info(
+                "[preview] Re-enabling original extension '%s'",
+                original_ext_id,
+            )
+            original_controller.shadowed_by_preview = False
+            restart_msg = f"[preview] Original extension '{original_ext_id}' re-enabled"
+            self.run_ext_batch_job([original_ext_id], ["start"], done_msg=restart_msg)

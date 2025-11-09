@@ -45,3 +45,18 @@ class TestExtensionMode:
         query = Query(keyword, "ghjk")
         mode.handle_query(query)
         ext_server.handle_query.assert_called_with(ext_id, trigger_id, query)
+
+    def test_get_triggers__skips_extensions_not_running(self, ext_registry: MagicMock) -> None:
+        trigger = MagicMock(keyword="kw", name="Trigger", description="Desc", icon="icon.png")
+        ext = MagicMock()
+        ext.is_enabled = True
+        ext.has_error = False
+        ext.is_running = False
+        ext.id = "com.test.ext"
+        ext.triggers = {"trigger-id": trigger}
+        ext_registry.iterate.return_value = [ext]
+
+        mode = ExtensionMode()
+
+        assert list(mode.get_triggers()) == []
+        assert mode._trigger_cache == {}

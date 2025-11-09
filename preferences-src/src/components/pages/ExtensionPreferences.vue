@@ -7,7 +7,7 @@
       <div class="ext-info">
         <div class="ext-name">{{ extension.name }}</div>
         <div class="authors">by {{ extension.authors }}</div>
-        <div class="repo" v-if="extension.url">
+        <div class="repo" v-if="extension.url && !extension.is_preview">
           <div v-if="extension.commit_hash"><i class="fa fa-code-fork fa-fw"></i><span class="text-monospace">{{ extension.commit_hash.slice(0, 7) }}</span></div>
           <div v-if="extension.commit_hash"><i class="fa fa-calendar fa-fw"></i>{{ extension.updated_at.slice(0, 10) }}</div>
           <div v-if="extension.browser_url">
@@ -37,6 +37,12 @@
              copy paths
           </a>
         </div>
+        <div class="notes alert-warning padding-small" v-if="extension.shadowed_by_preview">
+          <i class="fa fa-exclamation-triangle"></i> This extension cannot be used while another extension with the same ID is running in preview mode.
+        </div>
+        <div class="notes alert-info padding-small" v-if="extension.is_preview && extension.with_debugger && extension.is_stopped">
+          <i class="fa fa-info-circle"></i> Extension is waiting for debugger connection (see console for details).
+        </div>
       </div>
       <div class="saved-notif">
         <i v-if="showSavedMsg" class="fa fa-check-circle"/>
@@ -44,12 +50,12 @@
       <div>
         <b-button-group>
           <b-button @click="save" v-if="canSave && !extension.error_type" title="Save preferences"><i class="fa fa-check"></i></b-button>
-          <b-button @click="checkUpdates" v-if="extension.url" title="Check updates"><i class="fa fa-refresh"></i></b-button>
+          <b-button @click="checkUpdates" v-if="extension.url && !extension.is_preview" :disabled="extension.shadowed_by_preview" title="Check updates"><i class="fa fa-refresh"></i></b-button>
           <b-button @click="openRemoveModal" v-if="isManageable" title="Remove"><i class="fa fa-trash"></i></b-button>
           <b-button
             @click="setIsEnabled(!extension.is_enabled || !!extension.error_type)"
             :variant="(extension.is_enabled && !extension.error_type) ? 'success' : 'outline-secondary'"
-            :disabled="!['', 'Terminated'].includes(extension.error_type)"
+            :disabled="!['', 'Terminated'].includes(extension.error_type) || extension.shadowed_by_preview"
             :title="(extension.is_enabled && !extension.error_type) ? 'Disable extension' : 'Enable extension'"
           >
             {{ (extension.is_enabled && !extension.error_type) ? 'ON' : 'OFF' }}
@@ -383,5 +389,9 @@ export default {
 }
 .ext-config small {
   font-style: italic;
+}
+
+.padding-small {
+  padding: 8px;
 }
 </style>
