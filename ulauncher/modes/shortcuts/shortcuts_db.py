@@ -15,7 +15,7 @@ class Shortcut(JsonConf):
     keyword = ""
     cmd = ""
     icon = ""
-    is_default_search = True
+    is_default_search = False
     run_without_argument = False  # Only used in ShortcutTrigger (not Result)
     added = 0
     id = ""
@@ -54,6 +54,7 @@ class ShortcutsDb(JsonConf):
                     name="Google Search",
                     cmd="https://google.com/search?q=%s",
                     icon=f"{paths.ASSETS}/icons/google-search.png",
+                    is_default_search=True,
                 ),
                 Shortcut(
                     id="stackoverflow",
@@ -62,6 +63,7 @@ class ShortcutsDb(JsonConf):
                     name="Stack Overflow",
                     cmd="https://stackoverflow.com/search?q=%s",
                     icon=f"{paths.ASSETS}/icons/stackoverflow.svg",
+                    is_default_search=True,
                 ),
                 Shortcut(
                     id="wikipedia",
@@ -70,6 +72,7 @@ class ShortcutsDb(JsonConf):
                     name="Wikipedia",
                     cmd="https://en.wikipedia.org/wiki/%s",
                     icon=f"{paths.ASSETS}/icons/wikipedia.png",
+                    is_default_search=True,
                 ),
             ]
             instance.save({keyword.id: keyword for keyword in keywords})
