@@ -1,0 +1,125 @@
+/**
+ * CSS for Ulauncher Preferences Window
+ *
+ * Make sure that changes to this file are tested with both light and dark themes
+ *
+ * One way to do this is to use shades of grey with opacity.
+ *
+ * You can use gtk 3 standard classes for this. They are really poorly documented,
+ * but here is a full list (extracted from gtk 3 type stubs):
+ * accelerator, arrow, background, bottom, button, calendar, cell, check, combobox-entry,
+ * context-menu, csd, cursor-handle, default, destructive-action, dim-label, dnd, dock,
+ * entry, error, expander, flat, frame, grip, header, highlight, horizontal, image, info,
+ * inline-toolbar, insertion-cursor, label, left, level-bar, linked, list, list-row, mark,
+ * menu, menubar, menuitem, message-dialog, monospace, needs-attention, notebook, osd,
+ * overshoot, pane-separator, paper, popover, popup, primary-toolbar, progressbar, pulse,
+ * question, radio, raised, read-only, right, rubberband, scale, scale-has-marks-above,
+ * scale-has-marks-below, scrollbar, scrollbars-junction, separator, sidebar, slider,
+ * spinbutton, spinner, statusbar, subtitle, suggested-action, title, titlebar, toolbar,
+ * tooltip, top, touch-selection, trough, undershoot, vertical, view, warning, wide
+ *
+ * General Gtk3 css documentation:
+ * https://docs.gtk.org/gtk3/css-overview.html
+ * https://docs.gtk.org/gtk3/css-properties.html
+ **/
+
+/* ensure form element consistency, otherwise themes might use a mix of background colors and weights */
+entry, button, comboboxtext, spinbutton, textview {
+  background-color: rgba(128, 128, 128, 0.1);
+  font-weight: normal;
+}
+
+textview *, spinbutton * {
+  background-color: transparent;
+}
+
+/* general ui */
+
+notebook tab {
+  padding: 8px 20px;
+}
+
+.view-container {
+  background-color: rgba(128, 128, 128, 0.1);
+  border-top: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+.sidebar {
+  border-right: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+/* extensions */
+
+.progress-dialog {
+  padding: 20px;
+}
+
+.progress-content {
+  padding: 10px 0;
+}
+
+.status-badge {
+  padding: 2px 6px;
+  font-weight: 600;
+  border-radius: 5px;
+  font-size: 11px;
+  color: black;
+  letter-spacing: 0.3px;
+}
+
+.status-badge.on {
+  background-color: rgba(90, 210, 100, 0.75);
+  border-color: rgba(25, 135, 84, 0.2);
+}
+
+.status-badge.off {
+  background-color: rgba(160, 160, 160, 0.75);
+  border-color: rgba(108, 117, 125, 0.2);
+}
+
+.status-badge.error {
+  background-color: rgba(210, 160, 45, 0.75);
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.status-badge.stopped {
+  background-color: rgba(210, 160, 45, 0.75);
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.status-badge.preview {
+  background-color: #0dcaf0;
+  border-color: rgba(13, 202, 240, 0.2);
+}
+
+.ext-installation-instructions {
+  margin-bottom: 5px;
+}
+
+.ext-installation-instructions expander {
+  font-weight: 500;
+}
+
+.ext-installation-instructions expander > label {
+  font-size: 14px;
+}
+
+.ext-error-frame {
+  background-color: rgba(240, 173, 78, 0.3);
+  border: 1px solid rgba(240, 173, 78, 0.4);
+  padding: 10px;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* Spinner animation for button images */
+@keyframes spin {
+  to { -gtk-icon-transform: rotate(1turn); }
+}
+
+.spinner-button image {
+  animation-name: spin;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
