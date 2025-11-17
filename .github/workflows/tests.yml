@@ -14,10 +14,12 @@ jobs:
       - uses: actions/checkout@v5
       - name: ruff
         run: make ruff
+      - name: pyrefly
+        run: make pyrefly
       - name: typo
         run: make typos
       - name: mypy
-        run: make mypy
+        run: mypy ulauncher
       - name: pytest
         run: make pytest
       - name: build docs

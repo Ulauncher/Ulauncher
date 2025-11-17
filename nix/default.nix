@@ -16,10 +16,10 @@
 , libX11
 , libappindicator
 , librsvg
-, mypy
 , nix-update-script
 , procps
 , python3Packages
+, pyrefly
 , setuptools ? python3Packages.setuptools
 , setuptools-scm ? python3Packages.setuptools-scm
 , ruff
@@ -44,7 +44,7 @@ let
     pytest-mock
   ]);
   packages.tests.system = [
-    mypy
+    pyrefly
     ruff
     typos
     xvfb-run # xvfb-run tests fail

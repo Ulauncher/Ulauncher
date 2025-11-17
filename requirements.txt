@@ -1,6 +1,7 @@
 build
 lefthook
 mypy < 1.17.0
+pyrefly >= 0.42.0
 pytest
 pytest-mock
 ruff >= 0.14.4

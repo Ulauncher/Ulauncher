@@ -24,7 +24,7 @@ run = """
   """
 stage_fixed = true
 
-[pre-commit.commands.mypy]
+[pre-commit.commands.pyrefly]
 root = "ulauncher"
 glob = "*.py"
-run = "mypy {staged_files}"
+run = "pyrefly check {staged_files}"

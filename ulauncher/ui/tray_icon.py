@@ -100,7 +100,11 @@ class TrayIcon(GObject.Object):
 
         elif tray_icon_lib == "AyatanaIndicator":
             app_status = AyatanaIndicator.IndicatorCategory.APPLICATION_STATUS
-            self.aya_indicator = AyatanaIndicator.Indicator.new("ulauncher", icon_name, app_status)
+            self.aya_indicator = AyatanaIndicator.Indicator.new(
+                "ulauncher",
+                icon_name,
+                app_status,  # pyrefly: ignore[ bad-argument-type]
+            )
             if icon_dir:
                 self.aya_indicator.set_icon_theme_path(icon_dir)
 

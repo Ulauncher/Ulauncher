@@ -5,7 +5,7 @@ import contextlib
 import html
 import logging
 from threading import Thread
-from typing import Any, Iterator, Literal
+from typing import Any, Callable, Iterator, Literal, cast
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -98,7 +98,10 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
-        handler = getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION)
+        handler = cast(
+            "ActionMetadata | Callable[[Query], ActionMetadata]",
+            getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION),
+        )
         return handler(query) if callable(handler) else handler
 
     def run_ext_batch_job(

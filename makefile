@@ -103,7 +103,7 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 
 #=Lint/test Commands
 
-.PHONY: check mypy ruff typos pytest test format check-dev-deps
+.PHONY: check pyrefly ruff typos pytest test format check-dev-deps
 
 check-dev-deps: # Check if development dependencies are properly installed
 	@set -euo pipefail
@@ -124,12 +124,12 @@ check-dev-deps: # Check if development dependencies are properly installed
 		exit 1
 	fi
 
-check: check-dev-deps typos ruff mypy # Run all linters
+check: check-dev-deps typos ruff pyrefly # Run all linters
 
 test: check pytest # Run all linters and test
 
-mypy: check-dev-deps # Lint with mypy (type checker)
-	mypy ulauncher
+pyrefly: check-dev-deps # Lint with pyrefly (type checker)
+	pyrefly check
 
 ruff: check-dev-deps # Lint with ruff
 	ruff check . && ruff format --check .
