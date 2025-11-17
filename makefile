@@ -3,7 +3,6 @@ SHELL := bash
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.3
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
-YARN_BIN = $(shell eval 'command -v yarn || command -v yarnpkg')
 ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION = $(shell eval 'python3 -c "import ulauncher; print(ulauncher.version)"')
 DPKG_ARGS := "--post-clean --build=all --no-sign"
@@ -167,32 +166,13 @@ docker: # Build the docker image (only needed if you make changes to it)
 	docker build -t "${DOCKER_IMAGE}" .
 
 prefs: # Build the preferences web app
-	@set -euo pipefail
-	if [ -z "${YARN_BIN}" ] || [ ! -x "${YARN_BIN}" ]; then \
-	  echo -e "${BOLD}${RED}yarn is not installed or not executable.${RESET}"; \
-	  echo -e "${BOLD}${RED}yarn is needed to set up the local build environment.${RESET}"; \
-	  echo -e "${BOLD}${RED}Please visit https://classic.yarnpkg.com/en/docs/install to install yarn.${RESET}"; \
-	  exit 1; \
-  fi
-
-	if [ ! -d "preferences-src" ]; then \
-		echo -e "${BOLD}${RED}preferences-src does not exist.${RESET}"; \
-		exit 1; \
-	fi
-
-	if [ -z "$(FORCE)" ] && [ -d data/preferences ] && [ -z $(shell eval "find preferences-src -newer data/preferences -print -quit") ] ; then
-		echo -e "${BOLD}Preferences build SKIPPED${RESET} - No changes since last build"
-		exit 0
-	fi
-	cd preferences-src
-	${YARN_BIN}
-	${YARN_BIN} build
+	@echo "make prefs is no longer needed"
 
 sdist: manpage prefs # Build a source tarball
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
 	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
-	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "preferences-src\nscripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
+	cat .gitignore | grep -v data/preferences | grep -v ulauncher.1.gz | cat <(echo -en "scripts\ntests\ndebian\ndocs\n.github\nconftest.py\nDockerfile\nCO*.md\n.*ignore\nmakefile\nnix\n.editorconfig\nrequirements.txt\n*.nix\nflake.lock\n") - > .tarignore
 	mkdir -p dist
 	# create archive with .tarignore
 	tar --transform 's|^\.|ulauncher|' --exclude-vcs --exclude-ignore-recursive=.tarignore -zcf dist/ulauncher-${VERSION}.tar.gz .

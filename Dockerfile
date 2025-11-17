@@ -41,7 +41,6 @@ RUN apt install -y python3-gi
 RUN apt install -y python3-gi-cairo
 RUN apt install -y gir1.2-glib-2.0
 RUN apt install -y gir1.2-gtk-3.0
-RUN apt install -y gir1.2-webkit2-4.0
 
 # Workaround only needed for 20.04 and older: https://github.com/pypa/setuptools/issues/2956
 # Replace with python3-setuptools after upgrading to 22.04
@@ -59,17 +58,12 @@ RUN tar zcvf ../python-setuptools_60.0.4.orig.tar.gz --exclude=.git .
 RUN debuild -uc -us
 WORKDIR /root
 
-# Nodejs/yarn (ubuntu 20.04 has too old nodejs version, but in 22.04 you just need to install yarnpkg)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash
-RUN apt install -y nodejs
-RUN npm install -g yarn
-
 # Clean up
 RUN apt update
 RUN apt autoremove -y
 RUN apt clean
 
-COPY [ "requirements.txt", "preferences-src/package.json", "preferences-src/yarn.lock", "./" ]
+COPY [ "requirements.txt", "./" ]
 
 # Update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 COPY [ "scripts/dput.cf", "/etc" ]
@@ -77,9 +71,6 @@ COPY [ "scripts/dput.cf", "/etc" ]
 RUN apt install -y python3-pip
 RUN pip3 install -r requirements.txt
 RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install pygobject-stubs --no-cache-dir
-# Cache node_modules to make builds faster
-RUN yarnpkg
-RUN mv node_modules /var
 
 # Create container dir for the repo root dir to mount to
 # This is needed because dpkg-buildpackage is stupid and outputs are hard coded to be the parent dir

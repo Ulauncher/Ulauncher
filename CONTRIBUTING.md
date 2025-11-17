@@ -15,7 +15,6 @@ Although there are no releases for it yet as of writing this, all the active dev
 You need the following to set up the local build environment:
 
 * Git
-* [Yarn](https://classic.yarnpkg.com/en/docs/install)
 * python3-pip and python3-setuptools
 * Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-xlib is new for v6**)
 
@@ -27,7 +26,7 @@ You need the following to set up the local build environment:
   Install the development dependencies:
 
   ```sh
-  sudo apt update && sudo apt install git bash make sed yarnpkg python3-setuptools debhelper dh-python
+  sudo apt update && sudo apt install git bash make sed python3-setuptools debhelper dh-python
   make python-venv
   ```
 
@@ -36,7 +35,7 @@ You need the following to set up the local build environment:
   ```sh
   sudo add-apt-repository universe
   sudo apt install python3-{all,gi,gi-cairo,xlib} gobject-introspection \
-    gir1.2-{glib-2.0,gtk-3.0,webkit2-4.0,gtklayershell-0.1}
+    gir1.2-{glib-2.0,gtk-3.0,gtklayershell-0.1}
   ```
 
 </details>
@@ -53,14 +52,14 @@ You need the following to set up the local build environment:
   Install the development and testing dependencies:
 
   ```sh
-  sudo pacman -Syu --needed git bash make sed yarn python-{build,setuptools,lefthook}
+  sudo pacman -Syu --needed git bash make sed python-{build,setuptools,lefthook}
   make python-venv
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
 
   ```sh
-  sudo pacman -Syu --needed gtk3 webkit2gtk-4.1 gtk-layer-shell python-{cairo,gobject,xlib}
+  sudo pacman -Syu --needed gtk3 gtk-layer-shell python-{cairo,gobject,xlib}
   ```
 
 </details>
