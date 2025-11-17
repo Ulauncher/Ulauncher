@@ -11,7 +11,7 @@ from gi.repository import Gio, Gtk
 import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
-from ulauncher.ui.windows.preferences_window import PreferencesWindow
+from ulauncher.ui.windows.preferences.preferences_window import PreferencesWindow
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
