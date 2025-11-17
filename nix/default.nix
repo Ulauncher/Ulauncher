@@ -16,7 +16,6 @@
 , libX11
 , libappindicator
 , librsvg
-, mkYarnPackage
 , mypy
 , nix-update-script
 , procps
@@ -27,11 +26,9 @@
 , stdenv
 , systemd
 , typos
-, webkitgtk_4_1
 , wrapGAppsHook3
 , xdg-utils
 , xvfb-run
-, yarn
 , withXorg ? true
 }:
 let
@@ -39,24 +36,7 @@ let
   version = "v6";
 
   src.python = ../.;
-  # putting it directly here instead of "${src.python}/preferences-src" prevents unnecessary rebuilds
-  src.preferences = ../preferences-src;
 
-  preferencesPackage = mkYarnPackage {
-    name = "${pname}-${version}-ulauncher-prefs";
-    src = src.preferences;
-
-    postPatch = ''
-      substituteInPlace webpack.build.conf.js \
-        --replace-fail "__dirname, '../data/preferences" "__dirname, 'dist"
-    '';
-    buildPhase = ''yarn --offline run build'';
-    installPhase = ''mv -T deps/ulauncher-prefs/dist $out'';
-    distPhase = "true";
-  };
-
-
-  packages.preferences.dev = [ yarn ];
   packages.tests.python = pp: (with pp; [
     mock
     (pygobject-stubs.overridePythonAttrs (old: { PYGOBJECT_STUB_CONFIG = "Gtk3,Gdk3,Soup2"; }))
@@ -94,7 +74,6 @@ let
       gtk3
       libappindicator
       librsvg
-      webkitgtk_4_1
     ];
 
     # runtime dependencies / binaries prepended to PATH
@@ -130,8 +109,6 @@ let
           ulauncher.service \
           io.ulauncher.Ulauncher.service \
         --replace-fail "/usr" "$out"
-
-      ln -s "${preferencesPackage}" data/preferences
 
       substituteInPlace \
           tests/modes/shortcuts/test_run_script.py \
@@ -212,7 +189,6 @@ let
             )
           ))
         ]
-        ++ packages.preferences.dev
         ++ packages.tests.system;
       };
     };

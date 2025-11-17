@@ -20,8 +20,6 @@ jobs:
         run: make mypy
       - name: pytest
         run: make pytest
-      - name: build preferences
-        run: make prefs FORCE=1
       - name: build docs
         run: make docs
   nix-build:
