@@ -182,14 +182,14 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
         logger.error("Error: %s", validation_error)
         return False
 
+    from ulauncher.modes.extensions.extension_manifest import (
+        ExtensionIncompatibleRecoverableError,
+        ExtensionManifest,
+        ExtensionManifestError,
+    )
+
     # Validate the extension manifest
     try:
-        from ulauncher.modes.extensions.extension_manifest import (
-            ExtensionIncompatibleRecoverableError,
-            ExtensionManifest,
-            ExtensionManifestError,
-        )
-
         manifest = ExtensionManifest.load(str(path))
         manifest.validate()
         manifest.check_compatibility(verbose=True)
@@ -213,9 +213,9 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
     url_to_parse = str(path)
 
     # Try to get git remote URL if the path is a git repository
-    try:
-        import subprocess
+    import subprocess
 
+    try:
         git_url = (
             subprocess.check_output(["git", "remote", "get-url", "origin"], cwd=str(path), stderr=subprocess.DEVNULL)
             .decode()
