@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 from gi.repository import Gdk, Gtk
 
+from ulauncher import paths
 from ulauncher.ui.windows.preferences.views import BaseView, styled
 from ulauncher.ui.windows.preferences.views.about import AboutView
 from ulauncher.ui.windows.preferences.views.extensions import ExtensionsView
@@ -108,8 +108,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def _setup_custom_styling(self) -> None:
         """Setup custom CSS styling for softer appearance"""
         css_provider = Gtk.CssProvider()
-        css_path = Path(__file__).parent / "preferences.css"
-        css_provider.load_from_path(str(css_path))
+        css_provider.load_from_path(f"{paths.ASSETS}/preferences.css")
 
         screen = Gdk.Screen.get_default()
         if screen:
