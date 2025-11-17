@@ -130,7 +130,7 @@ class ExtensionController:
 
     @property
     def is_enabled(self) -> bool:
-        return self.state.is_enabled
+        return self.state.is_enabled and not self.has_error
 
     @property
     def has_error(self) -> bool:
