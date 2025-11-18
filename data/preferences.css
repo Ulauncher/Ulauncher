@@ -58,6 +58,31 @@ notebook tab {
   border-right: 1px solid rgba(128, 128, 128, 0.15);
 }
 
+.preferences-section-title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding-bottom: 0;
+}
+
+.preferences-section-card {
+  border-radius: 10px;
+  margin-bottom: 32px;
+}
+
+.preferences-setting-row {
+  padding: 16px 0;
+}
+
+.preferences-setting-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.preferences-setting-description {
+  color: alpha(@theme_fg_color, 0.65);
+  font-size: 12px;
+}
+
 /* extensions */
 
 .progress-dialog {
