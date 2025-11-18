@@ -58,6 +58,37 @@ notebook tab {
   border-right: 1px solid rgba(128, 128, 128, 0.15);
 }
 
+.preferences-section-title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.preferences-section-card {
+  background-color: @theme_base_color;
+  border-radius: 18px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 18px 40px alpha(#000000, 0.12);
+}
+
+.preferences-setting-row {
+  padding: 16px 0;
+}
+
+.preferences-section-card > .preferences-setting-row:not(:first-child) {
+  border-top: 1px solid alpha(#000000, 0.08);
+}
+
+.preferences-setting-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.preferences-setting-description {
+  color: alpha(@theme_fg_color, 0.65);
+  font-size: 12px;
+}
+
 /* extensions */
 
 .progress-dialog {
