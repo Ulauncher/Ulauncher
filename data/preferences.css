@@ -39,6 +39,16 @@ notebook tab {
   padding: 8px 20px;
 }
 
+.preferences-header {
+  min-height: 35px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.preferences-header .preferences-nav button {
+  padding: 6px 18px;
+}
+
 .view-container {
   background-color: rgba(128, 128, 128, 0.1);
   border-top: 1px solid rgba(128, 128, 128, 0.15);

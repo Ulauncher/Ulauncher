@@ -12,12 +12,12 @@ from ulauncher.ui.windows.preferences.views.help import HelpView
 from ulauncher.ui.windows.preferences.views.preferences import PreferencesView
 from ulauncher.ui.windows.preferences.views.shortcuts import ShortcutsView
 
-VIEW_CONFIG: list[tuple[str, str, type[BaseView]]] = [
-    ("Preferences", "preferences-system-symbolic", PreferencesView),
-    ("Shortcuts", "go-next-symbolic", ShortcutsView),
-    ("Extensions", "application-x-addon-symbolic", ExtensionsView),
-    ("Help", "help-browser-symbolic", HelpView),
-    ("About", "help-about-symbolic", AboutView),
+VIEW_CONFIG: list[tuple[str, type[BaseView]]] = [
+    ("Preferences", PreferencesView),
+    ("Shortcuts", ShortcutsView),
+    ("Extensions", ExtensionsView),
+    ("Help", HelpView),
+    ("About", AboutView),
 ]
 WINDOW_DEFAULT_WIDTH = 1000
 WINDOW_DEFAULT_HEIGHT = 600
@@ -33,8 +33,8 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         self.set_default_size(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT)
 
-        # Store views for keybinding access
-        self.views: list[BaseView] = []
+        # Store views keyed by stack page name for keybinding access
+        self.views: dict[str, BaseView] = {}
 
         # Create the main UI
         self._create_ui()
@@ -48,37 +48,46 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(main_box)
 
-        # Create notebook for tabs
-        self.notebook: Gtk.Notebook = Gtk.Notebook(tab_pos=Gtk.PositionType.TOP)
-        main_box.pack_start(self.notebook, True, True, 0)
+        # Create stack for view navigation
+        self.stack: Gtk.Stack = Gtk.Stack(
+            transition_type=Gtk.StackTransitionType.SLIDE_LEFT_RIGHT, transition_duration=200
+        )
+        main_box.pack_start(self.stack, True, True, 0)
 
-        # Store views in dictionary for easy access
-        for name, icon_name, view_class in VIEW_CONFIG:
+        # Place navigation in the header bar
+        self._create_headerbar()
+
+        for name, view_class in VIEW_CONFIG:
             view = view_class(self)
-            self.views.append(view)
-            self._add_view(view, icon_name, name)
+            self._add_view(view, name)
 
         # Setup custom styling
         self._setup_custom_styling()
 
         main_box.show_all()
 
-    def _add_view(self, view: Gtk.Widget, icon_name: str, label_text: str) -> None:
-        tab_box = self._create_tab_header(icon_name, label_text)
+    def _create_headerbar(self) -> None:
+        header_bar = Gtk.HeaderBar()
+        header_bar.set_show_close_button(True)
+        header_bar.get_style_context().add_class("preferences-header")
+
+        stack_switcher = Gtk.StackSwitcher()
+        stack_switcher.set_stack(self.stack)
+        stack_switcher.set_halign(Gtk.Align.CENTER)
+        stack_switcher.set_hexpand(False)
+        stack_switcher.get_style_context().add_class("preferences-nav")
+
+        header_bar.set_custom_title(stack_switcher)
+        self.set_titlebar(header_bar)
+        header_bar.show_all()
+
+    def _add_view(self, view: BaseView, label_text: str) -> None:
         # Wrap page in background container
         view_bg = styled(Gtk.Box(), "view-container")
         view_bg.pack_start(view, True, True, 0)
-        self.notebook.append_page(view_bg, tab_box)
-
-    def _create_tab_header(self, icon_name: str, label_text: str) -> Gtk.Box:
-        """Create a tab header with icon and label"""
-        tab_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.SMALL_TOOLBAR)
-        label = Gtk.Label.new(label_text)
-        tab_box.pack_start(icon, False, False, 0)
-        tab_box.pack_start(label, False, False, 0)
-        tab_box.show_all()
-        return tab_box
+        page_name = label_text.lower()
+        self.stack.add_titled(view_bg, page_name, label_text)
+        self.views[page_name] = view
 
     def present(self, view: str | None = None) -> None:
         self.show(view)
@@ -86,10 +95,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def show(self, view: str | None = None) -> None:
         if view:
-            for index, (name, *_) in enumerate(VIEW_CONFIG):
-                if view == name.lower():
-                    self.notebook.set_current_page(index)
-                    break
+            page_name = view.lower()
+            if self.stack.get_child_by_name(page_name):
+                self.stack.set_visible_child_name(page_name)
         super().show()
 
     def _setup_keybindings(self) -> None:
@@ -99,10 +107,11 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _on_key_press(self, _widget: Gtk.Widget, event: Gdk.EventKey) -> bool:
         """Handle key press events for keyboard shortcuts"""
-        current_page = self.notebook.get_current_page()
         # Ctrl+S
         if (event.state & Gdk.ModifierType.CONTROL_MASK) and event.keyval == Gdk.KEY_s:
-            return self.views[current_page].save_changes()
+            page_name = self.stack.get_visible_child_name()
+            if page_name:
+                return self.views[page_name].save_changes()
         return False
 
     def _setup_custom_styling(self) -> None:
