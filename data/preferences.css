@@ -61,22 +61,16 @@ notebook tab {
 .preferences-section-title {
   font-weight: 700;
   letter-spacing: 0.2px;
+  padding-bottom: 0;
 }
 
 .preferences-section-card {
-  background-color: @theme_base_color;
-  border-radius: 18px;
-  padding: 24px 32px;
+  border-radius: 10px;
   margin-bottom: 32px;
-  box-shadow: 0 18px 40px alpha(#000000, 0.12);
 }
 
 .preferences-setting-row {
   padding: 16px 0;
-}
-
-.preferences-section-card > .preferences-setting-row:not(:first-child) {
-  border-top: 1px solid alpha(#000000, 0.08);
 }
 
 .preferences-setting-title {
