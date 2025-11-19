@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gio, GLib, Gtk
 
 from ulauncher import paths
 from ulauncher.ui.windows.preferences.views import BaseView, styled
@@ -22,6 +23,8 @@ VIEW_CONFIG: list[tuple[str, type[BaseView]]] = [
 WINDOW_DEFAULT_WIDTH = 1000
 WINDOW_DEFAULT_HEIGHT = 600
 
+logger = logging.getLogger(__name__)
+
 
 class PreferencesWindow(Gtk.ApplicationWindow):
     """Main preferences window with tabbed interface"""
@@ -35,12 +38,17 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         # Store views keyed by stack page name for keybinding access
         self.views: dict[str, BaseView] = {}
+        self._css_provider: Gtk.CssProvider | None = None
+        self._css_monitor: Gio.FileMonitor | None = None
 
         # Create the main UI
         self._create_ui()
 
         # Setup keyboard shortcuts
         self._setup_keybindings()
+
+        # Setup CSS file monitoring
+        self._setup_css_monitoring()
 
     def _create_ui(self) -> None:
         """Create the main UI with notebook tabs"""
@@ -116,9 +124,47 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _setup_custom_styling(self) -> None:
         """Setup custom CSS styling for softer appearance"""
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_path(f"{paths.ASSETS}/preferences.css")
-
+        self._css_provider = Gtk.CssProvider()
+        self._load_preferences_css()
         screen = Gdk.Screen.get_default()
         if screen:
-            Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            Gtk.StyleContext.add_provider_for_screen(
+                screen, self._css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            )
+
+    def reload_styles(self) -> None:
+        """Reload the CSS provider contents from disk."""
+        self._load_preferences_css()
+
+    def _load_preferences_css(self) -> None:
+        if not self._css_provider:
+            return
+        css_path = f"{paths.ASSETS}/preferences.css"
+        try:
+            self._css_provider.load_from_path(css_path)
+        except GLib.Error:
+            logger.exception("Failed to load preferences CSS from %s", css_path)
+
+    def _setup_css_monitoring(self) -> None:
+        """Setup file monitoring for CSS changes and auto-reload."""
+        css_path = f"{paths.ASSETS}/preferences.css"
+        css_file = Gio.File.new_for_path(css_path)
+
+        try:
+            self._css_monitor = css_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
+            self._css_monitor.connect("changed", self._on_css_file_changed)
+            logger.info("Watching for CSS changes at %s", css_path)
+        except GLib.Error:
+            logger.exception("Failed to setup CSS file monitor for %s", css_path)
+
+    def _on_css_file_changed(
+        self,
+        _monitor: Gio.FileMonitor,
+        _file: Gio.File,
+        _other_file: Gio.File | None,
+        event_type: Gio.FileMonitorEvent,
+    ) -> None:
+        """Handle CSS file changes by reloading styles."""
+        if event_type in (Gio.FileMonitorEvent.CHANGED, Gio.FileMonitorEvent.CREATED):
+            logger.info("CSS file changed, reloading styles")
+            self.reload_styles()

@@ -63,7 +63,8 @@ class UlauncherApp(Gtk.Application):
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
         logger.debug("Activated via gapplication")
-        self.show_launcher()
+        # TEMPORARY: Open preferences instead of main launcher window
+        self.show_preferences()
 
     def do_command_line(self, command_line: Gio.ApplicationCommandLine, *_args: Any, **_kwargs: Any) -> int:
         # command_line is the cli arguments from the process that activated the app
