@@ -44,9 +44,13 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
-        if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
+
+        trigger_cache_entry = self._trigger_cache.get(query.keyword, None)
+
+        if trigger_cache_entry:
             trigger_id, ext_id = trigger_cache_entry
             self.active_ext = self.ext_socket_server.handle_query(ext_id, trigger_id, query)
+
         if not trigger_cache_entry or not self.active_ext:
             msg = f"Query not valid for extension mode '{query}'"
             raise RuntimeError(msg)
