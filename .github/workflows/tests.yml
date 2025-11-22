@@ -9,7 +9,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.3
+    container: ulauncher/build-image:6.4
     steps:
       - uses: actions/checkout@v5
       - name: ruff
