@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from types import SimpleNamespace
+from typing import Any
 
 from gi.repository import Gdk, Gtk
 
@@ -75,6 +76,6 @@ class HotkeyDialog(Gtk.MessageDialog):
         if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
             self.set_hotkey(key_name)
 
-    def run(self) -> str:
-        super().run()
+    def run(self, *args: Any, **kwargs: Any) -> str:
+        super().run(*args, **kwargs)
         return self._hotkey
