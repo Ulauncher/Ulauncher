@@ -52,7 +52,7 @@ def try_raise_app(app_id: str) -> bool:
                     return False
                 class_id, class_name = wm_class
                 win_app_id = (class_id or "").lower()
-                if win_app_id == "thunar" and win.get_wm_name().startswith("Bulk Rename"):
+                if win_app_id == "thunar" and (win.get_wm_name() or "").startswith("Bulk Rename"):
                     # "Bulk Rename" identify as "Thunar": https://gitlab.xfce.org/xfce/thunar/-/issues/731
                     # Also, note that get_wm_name is unreliable, but it works for Thunar https://github.com/parkouss/pyewmh/issues/15
                     win_app_id = "thunar --bulk-rename"
