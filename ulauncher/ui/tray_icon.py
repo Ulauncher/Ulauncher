@@ -58,9 +58,10 @@ class TrayIcon(GObject.Object):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        menu = Gtk.Menu()
+        show_menu_item: Gtk.MenuItem | None = None
         if self.supports_appindicator():
             show_menu_item = _create_menu_item("Show Ulauncher", lambda *_: events.emit("app:show_launcher"))
-            menu = Gtk.Menu()
             menu.append(show_menu_item)
             menu.append(_create_menu_item("Preferences", lambda *_: events.emit("app:show_preferences")))
             menu.append(_create_menu_item("About", lambda *_: events.emit("app:show_preferences", "about")))
