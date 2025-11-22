@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from ulauncher import paths
 
 if TYPE_CHECKING:
-    from cairo import ImageSurface
+    from cairo import ImageSurface  # pyrefly: ignore - this fails in our docker image for some reason
 
 
 logger = logging.getLogger()

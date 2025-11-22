@@ -29,7 +29,7 @@ class UlauncherApp(Gtk.Application):
     # So all methods except __init__ runs on the main app
     query = ""
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
-    _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None
+    _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
         return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
@@ -171,5 +171,5 @@ class UlauncherApp(Gtk.Application):
         self.hold() if value else self.release()
 
     @events.on
-    def quit(self) -> None:
+    def quit(self) -> None:  # pyrefly: ignore[bad-override]
         super().quit()

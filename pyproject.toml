@@ -23,6 +23,14 @@ dynamic = ["version", "license"]
 [tool.setuptools.dynamic]
 version = {attr = "ulauncher.version"}
 
+[tool.pyrefly]
+python-platform = "linux"
+python-version = "3.8"
+project-includes = ["ulauncher"]
+
+[tool.pyrefly.errors]
+bad-param-name-override = false
+
 [tool.mypy]
 python_version = "3.8"
 strict = true

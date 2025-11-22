@@ -1,3 +1,4 @@
+# pyrefly: ignore-errors
 """
 Allows for a window to opt in to the wayland layer shell protocol.
 

@@ -1,3 +1,4 @@
+# pyrefly: ignore-errors
 # mypy: ignore-errors
 # ruff: noqa: PGH004
 # ruff: noqa
@@ -15,7 +16,7 @@ See the freedesktop.org `specification
 information.
 """
 
-from Xlib import display, X, protocol
+from Xlib import display, X, xobject, protocol
 import time
 
 
@@ -272,7 +273,7 @@ class EWMH:
         """
         return [self._createWindow(w) for w in self._getProperty("_NET_CLIENT_LIST")]
 
-    def getClientListStacking(self):
+    def getClientListStacking(self) -> list[xobject.drawable.Window]:
         """
         Get the list of windows maintained by the window manager for the
         property _NET_CLIENT_LIST_STACKING.
