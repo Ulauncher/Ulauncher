@@ -13,29 +13,6 @@ locale.textdomain('ulauncher')
 if sys.version_info.major < 3:
     raise Exception("Ulauncher should be run with Python 3")
 
-# Workaround for Mutter bug causing keyboard input to get stuck
-# when launching via GNOME keyboard shortcut (issue #1571)
-# This must be set before gi.repository is loaded
-def _apply_mutter_workaround():
-    """Apply GDK_BACKEND=wayland workaround on GNOME Wayland"""
-    # Only apply on Wayland sessions
-    if os.environ.get('XDG_SESSION_TYPE', '').lower() != 'wayland':
-        return
-
-    # Only apply on GNOME (where Mutter is used)
-    desktop = os.environ.get('XDG_CURRENT_DESKTOP', '').lower()
-    if 'gnome' not in desktop:
-        return
-
-    # Check if GDK_BACKEND is already set
-    if os.environ.get('GDK_BACKEND'):
-        return
-
-    # Apply the workaround
-    os.environ['GDK_BACKEND'] = 'wayland'
-
-_apply_mutter_workaround()
-
 # Add project root directory (enable symlink and trunk execution)
 PROJECT_ROOT_DIRECTORY = os.path.abspath(
     os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
