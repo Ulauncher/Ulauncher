@@ -22,7 +22,7 @@ MODIFIERS = (
 )
 
 
-class HotkeyDialog(Gtk.MessageDialog):
+class HotkeyDialog(Gtk.Dialog):
     _hotkey = ""
 
     def __init__(self) -> None:
@@ -30,10 +30,14 @@ class HotkeyDialog(Gtk.MessageDialog):
         self.add_buttons("Close", Gtk.ResponseType.CLOSE, "Save", Gtk.ResponseType.OK)
         self.set_response_sensitive(RESPONSES.OK, False)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin_start=10, margin_end=10)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=20, spacing=10)
         self._hotkey_input = Gtk.Entry(editable=False)
-        vbox.pack_start(self._hotkey_input, True, True, 5)
-        vbox.pack_start(Gtk.Label(use_markup=True, label=f"<i><small>{footer_notice}</small></i>"), True, True, 5)
+        vbox.pack_start(self._hotkey_input, False, True, 0)
+
+        notice_label = Gtk.Label(use_markup=True, label=f"<i><small>{footer_notice}</small></i>", wrap=True)
+        notice_label.set_line_wrap(True)
+        vbox.pack_start(notice_label, False, True, 0)
+
         self.get_content_area().add(vbox)
 
         self.show_all()
