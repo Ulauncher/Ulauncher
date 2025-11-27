@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gio, GLib, Gtk
 
 from ulauncher import paths
 from ulauncher.ui.windows.preferences.views import BaseView, styled
@@ -23,6 +23,25 @@ WINDOW_DEFAULT_WIDTH = 1000
 WINDOW_DEFAULT_HEIGHT = 600
 
 
+def system_prefers_dark() -> bool:
+    """Return True when the desktop prefers a dark theme."""
+    try:
+        interface_settings = Gio.Settings.new("org.gnome.desktop.interface")
+    except GLib.Error:
+        return False
+
+    # GNOME 42+ stores an explicit preference, otherwise fall back.
+    if interface_settings.is_writable("color-scheme"):
+        value = interface_settings.get_string("color-scheme")
+        if value == "prefer-dark":
+            return True
+        if value == "prefer-light":
+            return False
+
+    theme_name = interface_settings.get_string("gtk-theme")
+    return theme_name.lower().endswith("-dark")
+
+
 class PreferencesWindow(Gtk.ApplicationWindow):
     """Main preferences window with tabbed interface"""
 
@@ -35,6 +54,10 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         # Store views keyed by stack page name for keybinding access
         self.views: dict[str, BaseView] = {}
+        self.interface_settings: Gio.Settings | None = None
+
+        # Watch system theme changes
+        self._watch_system_theme()
 
         # Create the main UI
         self._create_ui()
@@ -122,3 +145,26 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         screen = Gdk.Screen.get_default()
         if screen:
             Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def _watch_system_theme(self) -> None:
+        """Watch for system theme changes and apply them to the preferences window"""
+        try:
+            self.interface_settings = Gio.Settings.new("org.gnome.desktop.interface")
+        except GLib.Error:
+            self.interface_settings = None
+            return
+
+        self.interface_settings.connect("changed::color-scheme", self._on_theme_changed)
+        self.interface_settings.connect("changed::gtk-theme", self._on_theme_changed)
+        self._apply_system_theme()
+
+    def _on_theme_changed(self, *_args: Any) -> None:
+        """Callback when system theme changes"""
+        self._apply_system_theme()
+
+    def _apply_system_theme(self) -> None:
+        """Apply the system theme preference to the preferences window"""
+        prefer_dark = system_prefers_dark()
+        gtk_settings = self.get_settings()
+        if gtk_settings:
+            gtk_settings.props.gtk_application_prefer_dark_theme = prefer_dark
