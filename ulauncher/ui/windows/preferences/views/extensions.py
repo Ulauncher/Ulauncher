@@ -13,6 +13,7 @@ from ulauncher.modes.extensions.extension_controller import (
     ExtensionPreference,
 )
 from ulauncher.ui.windows.preferences import views
+from ulauncher.ui.windows.preferences.components import create_warning_box
 from ulauncher.ui.windows.preferences.utils import ext_utils
 from ulauncher.ui.windows.preferences.utils.ext_handlers import ExtensionHandlers
 from ulauncher.ui.windows.preferences.views import (
@@ -507,19 +508,14 @@ class ExtensionsView(BaseView):
             message_text = ext_utils.get_error_message(ext.state.error_type, ext.state.error_message, ext)
 
             # Create warning-style container
-            warning_frame = styled(Gtk.Box(), "ext-error-frame")
+            warning_frame = create_warning_box(message_text, use_markup=True, selectable=True)
 
-            error_label = Gtk.Label(
-                label=message_text,
-                use_markup=True,
-                halign=Gtk.Align.START,
-                wrap=True,
-                selectable=True,
-                max_width_chars=80,
-            )
+            # Get the label from the warning frame and connect link activation
+            for child in warning_frame.get_children():
+                if isinstance(child, Gtk.Label):
+                    child.connect("activate-link", lambda _, uri: open_detached(uri))
+                    break
 
-            error_label.connect("activate-link", lambda _, uri: open_detached(uri))
-            warning_frame.pack_start(error_label, False, False, 0)
             error_box.pack_start(warning_frame, False, False, 0)
             container.pack_start(error_box, False, False, 0)
 

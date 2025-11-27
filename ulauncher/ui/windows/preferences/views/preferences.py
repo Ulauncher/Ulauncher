@@ -5,6 +5,7 @@ from typing import Any
 
 from gi.repository import Gtk
 
+from ulauncher.ui.windows.preferences.components import create_warning_box
 from ulauncher.ui.windows.preferences.views import BaseView, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
@@ -26,20 +27,18 @@ class PreferencesView(BaseView):
         self.autostart_pref: SystemdController = SystemdController("ulauncher")
 
         scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-        scrolled.set_min_content_width(420)
-        scrolled.set_max_content_width(800)
         scrolled.set_propagate_natural_width(True)
         scrolled.set_propagate_natural_height(True)
         self.pack_start(scrolled, True, True, 0)
 
-        # Create main container
+        # Create main container - centers on wide screens, fills on narrow screens
         prefs_view = styled(
             Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=30, spacing=24),
-            "preferences-centered-content",
+            "preferences-content",
         )
         prefs_view.set_halign(Gtk.Align.CENTER)
         prefs_view.set_valign(Gtk.Align.START)
-        prefs_view.set_hexpand(False)
+        prefs_view.set_size_request(600, -1)  # min-width of 600px
         scrolled.add(prefs_view)
 
         # Add sections
@@ -69,13 +68,27 @@ class PreferencesView(BaseView):
         parent.pack_start(section_box, False, False, 0)
         return section_box
 
-    def _add_setting_row(self, parent: Gtk.Box, label_text: str, widget: Gtk.Widget, description: str) -> None:
-        """Add a settings row with label and widget"""
+    def _add_setting_row(
+        self, parent: Gtk.Box, label_text: str, widget: Gtk.Widget, description: str, full_width: bool = False
+    ) -> None:
+        """Add a settings row with label and widget
+
+        Args:
+            parent: The parent container
+            label_text: The setting label
+            widget: The control widget
+            description: Description text
+            full_width: If True, widget takes full width below label (for long inputs like Entry)
+        """
         row_box = styled(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=24), "preferences-setting-row")
         row_box.set_hexpand(True)
 
         # Left side - label and description
-        label_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, width_request=360)
+        label_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        if not full_width:
+            label_container.set_hexpand(True)
+        else:
+            label_container.set_size_request(360, -1)
 
         label = styled(Gtk.Label(label=label_text, halign=Gtk.Align.START), "preferences-setting-title")
         label.set_xalign(0.0)
@@ -94,12 +107,20 @@ class PreferencesView(BaseView):
         desc_label.set_xalign(0.0)
         label_container.pack_start(desc_label, False, False, 0)
 
-        row_box.pack_start(label_container, False, False, 0)
-
-        # Right side - widget
-        widget.set_halign(Gtk.Align.START)
-        widget.set_valign(Gtk.Align.START)
-        row_box.pack_start(widget, False, False, 0)
+        if full_width:
+            # For long inputs: stack vertically
+            container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            container.pack_start(label_container, False, False, 0)
+            widget.set_halign(Gtk.Align.FILL)
+            widget.set_hexpand(True)
+            container.pack_start(widget, False, False, 0)
+            row_box.pack_start(container, True, True, 0)
+        else:
+            # For buttons/switches/combos: place on right side
+            row_box.pack_start(label_container, True, True, 0)
+            widget.set_halign(Gtk.Align.END)
+            widget.set_valign(Gtk.Align.START)
+            row_box.pack_start(widget, False, False, 0)
 
         parent.pack_start(row_box, False, False, 0)
 
@@ -108,15 +129,21 @@ class PreferencesView(BaseView):
         general_box = self._create_section_container(parent, "General")
 
         # Launch at login
-        autostart_switch = Gtk.Switch(
-            active=self.autostart_pref.is_enabled(), sensitive=self.autostart_pref.can_start()
-        )
-        autostart_switch.connect("notify::active", self._on_autostart_toggled)
+        if self.autostart_pref.can_start():
+            autostart_switch = Gtk.Switch(active=self.autostart_pref.is_enabled())
+            autostart_switch.connect("notify::active", self._on_autostart_toggled)
 
-        desc = "Start Ulauncher automatically whenever your desktop session begins."
-        if self.settings.daemonless:
-            desc += " Enabling this will turn off Daemonless mode."
-        self._add_setting_row(general_box, "Launch at login", autostart_switch, desc)
+            desc = "Start Ulauncher automatically whenever your desktop session begins."
+            if self.settings.daemonless:
+                desc += " Enabling this will turn off Daemonless mode."
+            self._add_setting_row(general_box, "Launch at login", autostart_switch, desc)
+        else:
+            warning_text = (
+                "Automatic startup via systemd is not available on your system.\n"
+                "To start Ulauncher at login, add it to your desktop environment's autostart settings."
+            )
+            warning_box = create_warning_box(warning_text)
+            self._add_setting_row(general_box, "Launch at login", warning_box, "")
 
         # Hotkey
         if HotkeyController.is_supported():
@@ -125,20 +152,12 @@ class PreferencesView(BaseView):
             hotkey_desc = "Choose the global keyboard shortcut that opens Ulauncher."
             self._add_setting_row(general_box, "Hotkey", hotkey_button, hotkey_desc)
         else:
-            warning_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
             warning_text = (
                 "Ulauncher doesn't support setting global shortcuts for your desktop environment.\n"
                 "Bind this command in your DE settings: gapplication launch io.ulauncher.Ulauncher"
             )
-            warning_label = styled(
-                Gtk.Label(label=warning_text, wrap=True, halign=Gtk.Align.START),
-                "preferences-setting-description",
-            )
-            warning_box.pack_start(warning_label, False, False, 0)
-            warning_desc = (
-                "Set the keyboard shortcut in your desktop preferences. Some environments only support manual binding."
-            )
-            self._add_setting_row(general_box, "Hotkey", warning_box, warning_desc)
+            warning_box = create_warning_box(warning_text)
+            self._add_setting_row(general_box, "Hotkey", warning_box, "")
 
         # Color theme
         theme_combo = Gtk.ComboBoxText()
@@ -237,7 +256,7 @@ class PreferencesView(BaseView):
         jump_entry = Gtk.Entry(text=self.settings.jump_keys, width_chars=50)
         jump_entry.connect("changed", self._on_jump_keys_changed)
         desc = "Configure the characters used for jumping directly to a result with modifier shortcuts."
-        self._add_setting_row(advanced_box, "Jump keys", jump_entry, desc)
+        self._add_setting_row(advanced_box, "Jump keys", jump_entry, desc, full_width=True)
 
         # Terminal command
         terminal_entry = Gtk.Entry(text=self.settings.terminal_command, width_chars=50)
@@ -245,7 +264,7 @@ class PreferencesView(BaseView):
         desc = (
             "Override the terminal binary for desktop entries that request a terminal. Leave blank to use the default."
         )
-        self._add_setting_row(advanced_box, "Terminal command", terminal_entry, desc)
+        self._add_setting_row(advanced_box, "Terminal command", terminal_entry, desc, full_width=True)
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
