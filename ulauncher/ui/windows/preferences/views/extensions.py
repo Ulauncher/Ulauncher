@@ -507,7 +507,7 @@ class ExtensionsView(BaseView):
             message_text = ext_utils.get_error_message(ext.state.error_type, ext.state.error_message, ext)
 
             # Create warning-style container
-            warning_frame = styled(Gtk.Box(), "ext-error-frame")
+            warning_frame = styled(Gtk.Box(), "ext-error-box")
 
             error_label = Gtk.Label(
                 label=message_text,

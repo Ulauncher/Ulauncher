@@ -23,16 +23,6 @@
  * https://docs.gtk.org/gtk3/css-properties.html
  **/
 
-/* ensure form element consistency, otherwise themes might use a mix of background colors and weights */
-entry, button, comboboxtext, spinbutton, textview {
-  background-color: rgba(128, 128, 128, 0.1);
-  font-weight: normal;
-}
-
-textview *, spinbutton * {
-  background-color: transparent;
-}
-
 /* general ui */
 
 notebook tab {
@@ -49,13 +39,34 @@ notebook tab {
   padding: 6px 18px;
 }
 
-.view-container {
-  background-color: rgba(128, 128, 128, 0.1);
-  border-top: 1px solid rgba(128, 128, 128, 0.15);
+.preferences-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding-bottom: 0;
+  margin-bottom: 4px;
 }
 
-.sidebar {
-  border-right: 1px solid rgba(128, 128, 128, 0.15);
+.preferences-section-card {
+  border-radius: 10px;
+  margin-bottom: 32px;
+}
+
+.preferences-setting-row {
+  padding: 16px 0;
+}
+
+.preferences-setting-row:first-child {
+  padding-top: 8px;
+}
+
+.preferences-setting-title {
+  font-size: 13px;
+}
+
+.preferences-setting-description {
+  color: alpha(@theme_fg_color, 0.65);
+  font-size: 12px;
 }
 
 /* extensions */
@@ -114,14 +125,6 @@ notebook tab {
   font-size: 14px;
 }
 
-.ext-error-frame {
-  background-color: rgba(240, 173, 78, 0.3);
-  border: 1px solid rgba(240, 173, 78, 0.4);
-  padding: 10px;
-  border-radius: 4px;
-  color: rgba(0, 0, 0, 0.9);
-}
-
 /* Spinner animation for button images */
 @keyframes spin {
   to { -gtk-icon-transform: rotate(1turn); }
@@ -132,4 +135,26 @@ notebook tab {
   animation-duration: 1s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+}
+
+/* override styles above: */
+
+.warning-label {
+  color: @warning_color; /* use standard warning color from theme */
+  font-style: italic;
+}
+
+.ext-error-box {
+  border-radius: 6px;
+  border: 1px solid alpha(@warning_color, 0.3);
+  background-color: alpha(@warning_color, 0.12);
+  padding: 12px;
+}
+
+.ext-error-box image {
+  color: @warning_color;
+}
+
+.ext-error-box label {
+  color: @theme_fg_color;
 }
