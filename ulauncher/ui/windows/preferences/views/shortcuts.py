@@ -41,6 +41,10 @@ class ShortcutsView(views.BaseView):
 
         self.pack_start(left_sidebar, False, False, 0)
 
+        # Vertical separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        self.pack_start(separator, False, False, 0)
+
         # Right side - details view
         self.details_view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, hexpand=True, halign=Gtk.Align.FILL)
         self.pack_start(self.details_view, True, True, 0)
@@ -242,31 +246,31 @@ class ShortcutsView(views.BaseView):
         """Create a shortcut row for the list"""
         row = DataListBoxRow(shortcut_id)
 
-        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, margin=8)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, margin=6)
 
         # Icon
         icon_image: Gtk.Image | None = None
         icon_path = shortcut.icon
-        icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_S, self.get_scale_factor())
+        icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_M, self.get_scale_factor())
         icon_image = Gtk.Image.new_from_surface(icon_surface)
 
         main_box.pack_start(icon_image, False, False, 0)
 
         # Info box
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, hexpand=True)
+        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1, hexpand=True)
 
         # Name
         name_label = styled(
             Gtk.Label(label=shortcut.name or "Unnamed", ellipsize=Pango.EllipsizeMode.END, halign=Gtk.Align.START),
-            "body",
+            "sidebar-item-name",
         )
         info_box.pack_start(name_label, False, False, 0)
 
         # Keyword
         keyword_label = styled(
             Gtk.Label(label=shortcut.keyword, ellipsize=Pango.EllipsizeMode.END, halign=Gtk.Align.START),
-            "caption",
             "dim-label",
+            "sidebar-item-description",
         )
         info_box.pack_start(keyword_label, False, False, 0)
 

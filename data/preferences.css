@@ -69,6 +69,16 @@ notebook tab {
   font-size: 12px;
 }
 
+/* Sidebar */
+
+.sidebar .sidebar-item-name {
+  font-size: 14px;
+}
+
+.sidebar .sidebar-item-description {
+  font-size: 11px;
+}
+
 /* extensions */
 
 .progress-dialog {
