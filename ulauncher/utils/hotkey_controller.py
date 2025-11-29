@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
+from shutil import which
 
 from gi.repository import Gio, GLib
 
@@ -77,7 +78,13 @@ class HotkeyController:
     @staticmethod
     def show_dialog() -> None:
         if DESKTOP_ID == "PLASMA":
-            launch_detached(["systemsettings5", "kcm_keys"])
+            # I haven't found the specifics in why the systemsettings command was renamed
+            # and if we have to support more than these, but at least systemsettings5 is the old one
+            for syssettings_alias in ("systemsettings", "systemsettings5"):
+                if which(syssettings_alias):
+                    launch_detached([syssettings_alias, "kcm_keys"])
+                    return
+
         elif IS_SUPPORTED:
             _set_hotkey(HotkeyDialog().run())
 
