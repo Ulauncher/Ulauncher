@@ -41,7 +41,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def start_extensions(self) -> None:
         for ext in extension_registry.load_all():
             if ext.is_enabled and not ext.has_error:
-                ext.start_detached()
+                ext.start()
                 # legacy_preferences_load is useless and deprecated
                 prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
                 ext.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
@@ -124,7 +124,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    await asyncio.gather(*[c.start() for c in ext_controllers if c.is_enabled])
+                    for controller in ext_controllers:
+                        if controller.is_enabled:
+                            controller.start()
                 elif job == "stop":
                     await asyncio.gather(*[c.stop() for c in ext_controllers])
 
@@ -249,8 +251,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 deps = ExtensionDependencies(controller.id, controller.path)
                 deps.install()
 
-                # Run start_detached instead of start to avoid blocking the main thread
-                controller.start_detached(with_debugger=with_debugger)
+                controller.start(with_debugger=with_debugger)
 
                 logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
 
