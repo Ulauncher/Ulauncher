@@ -41,7 +41,7 @@ class Extension:
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self._client = Client(self)
         self.preferences = {}
-        signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.graceful_unload(signal))
+        signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.unload(signal))
         with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
 
