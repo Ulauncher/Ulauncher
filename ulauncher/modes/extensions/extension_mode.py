@@ -198,6 +198,11 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 "[preview] Extension '%s' is currently running; stopping it before launching preview version",
                 ext_id,
             )
+            # TODO: run_ext_batch_job is used on a single extension (missing the point of a batch runner),
+            # as a way to avoid not having to await. But we really should await, to ensure the old extension runtime
+            # is exited before starting the new one. Otherwise there can be errors with the keyword still being mapped
+            # to the old extension on the first run.
+            # But it might require deeper refactoring to fix this.
             self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
             if existing_controller := extension_registry.get(ext_id):  # reload to update is_running state
                 existing_controller.shadowed_by_preview = True
