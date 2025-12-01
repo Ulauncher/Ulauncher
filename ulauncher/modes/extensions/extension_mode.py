@@ -108,14 +108,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     ) -> None:
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
-            # preview extensions cannot be loaded, so adding them from the registry
-            ext = extension_registry.get(ext_id)
-            if ext and ext.is_preview:
-                ext_controllers.append(ext)
-
-            # TODO: This looks like an error (should be elif?)
-            if ext := extension_registry.load(ext_id):
-                ext_controllers.append(ext)
+            if ext := extension_registry.get(ext_id) or extension_registry.load(ext_id):
+                ext_controllers.append(ext)  # noqa: PERF401
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
