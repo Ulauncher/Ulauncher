@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 import signal
 from collections import deque
@@ -9,6 +8,8 @@ from typing import Callable, Literal
 from weakref import WeakSet
 
 from gi.repository import Gio, GLib
+
+from ulauncher.utils.timer import timer
 
 ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
@@ -53,7 +54,7 @@ class ExtensionRuntime:
         self.subprocess.wait_async(None, self.handle_exit)
         self.read_stderr_line()
 
-    async def stop(self) -> None:
+    def stop(self) -> None:
         """
         Terminates extension
         """
@@ -64,7 +65,10 @@ class ExtensionRuntime:
         logger.info('Terminating extension "%s"', self.ext_id)
         aborted_subprocesses.add(self.subprocess)
         self.subprocess.send_signal(signal.SIGTERM)
-        await asyncio.sleep(0.6)  # wait for graceful shutdown (0.5s)
+        # wait for graceful shutdown before forcibly killing (client needs 0.5s so padding 25ms extra)
+        timer(0.525, self._kill)
+
+    def _kill(self) -> None:
         if self.subprocess.get_identifier():
             logger.info("Extension %s still running, sending SIGKILL", self.ext_id)
             # It is possible that the process exited between the check above and this signal,

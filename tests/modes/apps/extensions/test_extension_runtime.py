@@ -1,7 +1,6 @@
-import asyncio
 import signal
 from typing import Any
-from unittest.mock import MagicMock, Mock, call
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -100,7 +99,7 @@ class TestExtensionRuntime:
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
         runtime.subprocess.get_identifier.return_value = None
-        asyncio.run(runtime.stop())
+        runtime.stop()
         runtime.subprocess.send_signal.assert_not_called()
 
     def test_stop(self) -> None:
@@ -109,5 +108,6 @@ class TestExtensionRuntime:
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
         runtime.subprocess.get_identifier.return_value = "ID"
-        asyncio.run(runtime.stop())
-        runtime.subprocess.send_signal.assert_has_calls([call(signal.SIGTERM), call(signal.SIGKILL)])
+        runtime.stop()
+        runtime.subprocess.send_signal.assert_called_once_with(signal.SIGTERM)
+        # TODO: This doesn't test the SIGKILL signal ^

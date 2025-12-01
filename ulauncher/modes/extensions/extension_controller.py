@@ -5,10 +5,11 @@ import json
 import logging
 import sys
 import tempfile
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
-from typing import Any
+from typing import Any, Callable
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
@@ -61,6 +62,8 @@ class ExtensionState(JsonConf):
 
 logger = logging.getLogger()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
+stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
+
 lifecycle_events = EventBus("extensions")
 
 
@@ -243,6 +246,12 @@ class ExtensionController:
 
             def exit_handler(cause: str, error_msg: str) -> None:
                 self.is_running = False
+                listeners = stopped_listeners.get(self.id, [])
+                for stop_listener in listeners:
+                    stop_listener()
+
+                listeners.clear()
+
                 if cause != "Stopped":
                     logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
                     extension_runtimes.pop(self.id, None)
@@ -297,5 +306,11 @@ class ExtensionController:
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
-            await runtime.stop()
-            self.is_running = False
+            if not runtime or not self.is_running:
+                return
+
+            stopped_future: asyncio.Future[None] = asyncio.Future()
+            stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
+            runtime.stop()
+
+            await asyncio.wait_for(stopped_future, timeout=5.0)
