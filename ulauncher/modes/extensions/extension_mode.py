@@ -111,9 +111,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         for ext_id in extension_ids:
             # preview extensions cannot be loaded, so adding them from the registry
             with contextlib.suppress(ExtensionNotFoundError):
-                preview_ext = extension_registry.get(ext_id)
-                if preview_ext.is_preview:
-                    ext_controllers.append(preview_ext)
+                ext = extension_registry.get(ext_id)
+                if ext.is_preview:
+                    ext_controllers.append(ext)
 
             with contextlib.suppress(ExtensionNotFoundError):
                 # suppress so if an extension is removed, it doesn't try to load it
