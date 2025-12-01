@@ -78,7 +78,6 @@ class ExtensionController:
     is_manageable: bool
     is_running: bool = False
     is_preview: bool = False
-    with_debugger: bool = False
     shadowed_by_preview: bool = False
     _state_path: Path
 
@@ -240,7 +239,6 @@ class ExtensionController:
         return False
 
     def start_detached(self, with_debugger: bool = False) -> None:
-        self.with_debugger = with_debugger
         if not self.is_running:
 
             def exit_handler(error_type: str, error_msg: str) -> None:
