@@ -27,6 +27,7 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
@@ -81,6 +82,7 @@ class ExtensionController:
     is_manageable: bool
     is_preview: bool = False
     shadowed_by_preview: bool = False
+    debounced_send_message: Callable[[dict[str, Any]], None]
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -88,6 +90,7 @@ class ExtensionController:
         self.path = path
         self.manifest = ExtensionManifest.load(path)
         self.is_manageable = extension_finder.is_manageable(path)
+        self.debounced_send_message = debounce(self.manifest.input_debounce)(self.send_message)
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
