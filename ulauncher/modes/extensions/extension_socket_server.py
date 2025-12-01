@@ -86,7 +86,8 @@ class ExtensionSocketServer:
             assert ext_id
             ExtensionSocketController(self.socket_controllers, framer, ext_id)
             # TODO: This is ugly, but we have no other way to detect the extension started successfully
-            extension_registry.get(ext_id).is_running = True
+            if ext := extension_registry.get(ext_id):
+                ext.is_running = True
         else:
             logger.debug("Unhandled message received: %s", event)
 

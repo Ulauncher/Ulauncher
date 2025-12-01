@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import logging
 from typing import Any, Literal
 
@@ -9,7 +8,6 @@ from gi.repository import GLib, Gtk
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
-    ExtensionNotFoundError,
     ExtensionPreference,
 )
 from ulauncher.ui.windows.preferences import views
@@ -190,10 +188,9 @@ class ExtensionsView(BaseView):
         if not row:
             return
 
-        with contextlib.suppress(ExtensionNotFoundError):
-            if ext := extension_registry.get(row.id):
-                self.active_ext = ext
-                self._show_extension_details(ext)
+        if ext := extension_registry.get(row.id):
+            self.active_ext = ext
+            self._show_extension_details(ext)
 
     def _clear_extension_view(self) -> None:
         """Clear the extension details view"""

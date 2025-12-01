@@ -298,7 +298,3 @@ class ExtensionController:
         if runtime := extension_runtimes.pop(self.id, None):
             await runtime.stop()
             self.is_running = False
-
-
-class ExtensionNotFoundError(Exception):
-    """Raised when an extension cannot be found by its ID or path."""

@@ -33,7 +33,9 @@ class ExtensionSocketController:
         self.socket_controllers = socket_controllers
         self.framer: JSONFramer = framer
         self.ext_id = ext_id
-        self.ext_controller = extension_registry.get(ext_id)
+        ext_controller = extension_registry.get(ext_id)
+        assert ext_controller, f"Extension {ext_id} not found"
+        self.ext_controller = ext_controller
 
         self.socket_controllers[ext_id] = self
         self._debounced_send_event = debounce(self.ext_controller.manifest.input_debounce)(self.send_message)

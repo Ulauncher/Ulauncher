@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import html
 import logging
 from threading import Thread
@@ -11,7 +10,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
-from ulauncher.modes.extensions.extension_controller import ExtensionController, ExtensionNotFoundError
+from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_socket_server import ExtensionSocketServer
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
@@ -110,14 +109,13 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
             # preview extensions cannot be loaded, so adding them from the registry
-            with contextlib.suppress(ExtensionNotFoundError):
-                ext = extension_registry.get(ext_id)
-                if ext.is_preview:
-                    ext_controllers.append(ext)
+            ext = extension_registry.get(ext_id)
+            if ext and ext.is_preview:
+                ext_controllers.append(ext)
 
-            with contextlib.suppress(ExtensionNotFoundError):
-                # suppress so if an extension is removed, it doesn't try to load it
-                ext_controllers.append(extension_registry.load(ext_id))
+            # TODO: This looks like an error (should be elif?)
+            if ext := extension_registry.load(ext_id):
+                ext_controllers.append(ext)
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
@@ -200,33 +198,30 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             with_debugger,
         )
 
-        try:
-            existing_controller = extension_registry.get(ext_id)
-        except ExtensionNotFoundError:
-            existing_controller = None
+        existing_controller = extension_registry.get(ext_id)
         if existing_controller and existing_controller.is_running:
             logger.info(
                 "[preview] Extension '%s' is currently running; stopping it before launching preview version",
                 ext_id,
             )
             self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
-            existing_controller = extension_registry.get(ext_id)  # reload to update is_running state
-            existing_controller.shadowed_by_preview = True
+            if existing_controller := extension_registry.get(ext_id):  # reload to update is_running state
+                existing_controller.shadowed_by_preview = True
 
         preview_ext_id = f"{ext_id}.preview"
-        controller = extension_registry.load(preview_ext_id, path)
-        controller.is_preview = True
+        if controller := extension_registry.load(preview_ext_id, path):
+            controller.is_preview = True
 
-        # install python dependencies from requirements.txt
-        from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+            # install python dependencies from requirements.txt
+            from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 
-        deps = ExtensionDependencies(controller.id, controller.path)
-        deps.install()
+            deps = ExtensionDependencies(controller.id, controller.path)
+            deps.install()
 
-        # Run start_detached instead of start to avoid blocking the main thread
-        controller.start_detached(with_debugger=with_debugger)
+            # Run start_detached instead of start to avoid blocking the main thread
+            controller.start_detached(with_debugger=with_debugger)
 
-        logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+            logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
 
     @events.on
     def stop_preview(self, payload: dict[str, Any] | None = None) -> None:
@@ -260,10 +255,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         self.run_ext_batch_job([preview_ext_id], ["stop"], done_msg=stop_msg)
 
         # Try to restart the original extension
-        try:
-            original_controller = extension_registry.get(original_ext_id)
-        except ExtensionNotFoundError:
-            original_controller = None
+        original_controller = extension_registry.get(original_ext_id)
         if original_controller:
             logger.info(
                 "[preview] Re-enabling original extension '%s'",

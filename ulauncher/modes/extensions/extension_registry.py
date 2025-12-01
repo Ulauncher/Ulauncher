@@ -6,7 +6,6 @@ from typing import Iterator
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
-    ExtensionNotFoundError,
     lifecycle_events,
 )
 
@@ -14,14 +13,8 @@ logger = logging.getLogger()
 _ext_controllers: dict[str, ExtensionController] = {}
 
 
-def get(ext_id: str) -> ExtensionController:
-    """Get an extension from the registry or raise if not found."""
-    controller = _ext_controllers.get(ext_id)
-    if not controller:
-        msg = f"Extension with ID '{ext_id}' not found in registry"
-        raise ExtensionNotFoundError(msg)
-
-    return controller
+def get(ext_id: str) -> ExtensionController | None:
+    return _ext_controllers.get(ext_id)
 
 
 def iterate() -> Iterator[ExtensionController]:
@@ -41,7 +34,7 @@ def iterate() -> Iterator[ExtensionController]:
     yield from sorted(_ext_controllers.values(), key=sort_key)
 
 
-def load(ext_id: str, path: str | None = None) -> ExtensionController:
+def load(ext_id: str, path: str | None = None) -> ExtensionController | None:
     """Load an extension controller into the registry without starting it."""
     if not path:
         path = extension_finder.locate(ext_id)
@@ -50,8 +43,7 @@ def load(ext_id: str, path: str | None = None) -> ExtensionController:
             # This can happen when an extension is deleted via the CLI or manually,
             # in which case the in-memory registry should reflect that
             _ext_controllers.pop(ext_id, None)
-            msg = f"Extension with ID '{ext_id}' not found"
-            raise ExtensionNotFoundError(msg)
+            return None
 
     controller = ExtensionController(ext_id, path)
     _ext_controllers[ext_id] = controller

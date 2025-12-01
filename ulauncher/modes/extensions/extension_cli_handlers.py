@@ -25,7 +25,6 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
     Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None
     """
     from ulauncher.modes.extensions import extension_registry
-    from ulauncher.modes.extensions.extension_controller import ExtensionNotFoundError
     from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
     arg = normalize_arg(input_arg)
@@ -33,9 +32,7 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
         parse_result = parse_extension_url(arg)
         arg = parse_result.ext_id
 
-    with contextlib.suppress(ExtensionNotFoundError):
-        return extension_registry.load(arg)
-    return None
+    return extension_registry.load(arg)
 
 
 def normalize_arg(path: str) -> str:

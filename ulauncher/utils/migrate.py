@@ -65,7 +65,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     controller = extension_registry.load(ext_id)
     for p_id, pref in user_prefs.items():
         try:
-            if controller.manifest.triggers.get(p_id):
+            if controller and controller.manifest.triggers.get(p_id):
                 new_prefs["triggers"][p_id] = {"keyword": pref}
             else:
                 new_prefs["preferences"][p_id] = pref
