@@ -61,7 +61,7 @@ class TestExtensionRuntime:
         aborted_subprocesses.add(runtime.subprocess)
 
         runtime.handle_exit(runtime.subprocess, Mock())
-        exit_handler.assert_not_called()
+        exit_handler.assert_called_once_with("Stopped", "Extension was stopped by the user")
 
     def test_handle_exit__rapid_exit(self, time: MagicMock) -> None:
         extid = "mock.test_handle_exit__rapid_exit"

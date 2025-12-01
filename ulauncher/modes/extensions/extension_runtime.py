@@ -10,9 +10,11 @@ from weakref import WeakSet
 
 from gi.repository import Gio, GLib
 
-ExtensionRuntimeError = Literal["Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"]
+ExtensionExitCause = Literal[
+    "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
+]
 logger = logging.getLogger()
-ExitHandlerCallback = Callable[[ExtensionRuntimeError, str], None]
+ExitHandlerCallback = Callable[[ExtensionExitCause, str], None]
 aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()
 
 
@@ -83,6 +85,8 @@ class ExtensionRuntime:
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
         if self.subprocess in aborted_subprocesses:
+            if self.exit_handler:
+                self.exit_handler("Stopped", "Extension was stopped by the user")
             logger.info('Extension "%s" was stopped by the user', self.ext_id)
             return
 

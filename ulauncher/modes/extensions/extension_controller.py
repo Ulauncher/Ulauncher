@@ -241,11 +241,12 @@ class ExtensionController:
     def start_detached(self, with_debugger: bool = False) -> None:
         if not self.is_running:
 
-            def exit_handler(error_type: str, error_msg: str) -> None:
-                logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, error_type)
+            def exit_handler(cause: str, error_msg: str) -> None:
                 self.is_running = False
-                extension_runtimes.pop(self.id, None)
-                self.state.save(error_type=error_type, error_message=error_msg)
+                if cause != "Stopped":
+                    logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
+                    extension_runtimes.pop(self.id, None)
+                    self.state.save(error_type=cause, error_message=error_msg)
 
             try:
                 self.manifest.validate()
