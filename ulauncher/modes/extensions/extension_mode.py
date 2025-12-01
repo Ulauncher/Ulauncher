@@ -104,7 +104,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         return handler(query) if callable(handler) else handler
 
     def run_ext_batch_job(
-        self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], done_msg: str | None = None
+        self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
     ) -> None:
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
@@ -124,7 +124,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         Thread(target=run_batch).start()
 
-        logger.info(done_msg)
+        if callback:
+            callback()
 
     @events.on
     def reload(
@@ -137,7 +138,11 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
 
-        self.run_ext_batch_job(extension_ids, ["stop", "start"], done_msg=f"{len(extension_ids)} extensions (re)loaded")
+        self.run_ext_batch_job(
+            extension_ids,
+            ["stop", "start"],
+            callback=lambda: logger.info("%s extensions (re)loaded", len(extension_ids)),
+        )
 
     @events.on
     def stop(self, extension_ids: list[str] | None = None) -> None:
@@ -147,7 +152,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
 
-        self.run_ext_batch_job(extension_ids, ["stop"], done_msg=f"{len(extension_ids)} extensions stopped")
+        self.run_ext_batch_job(
+            extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
+        )
 
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
@@ -192,35 +199,37 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             with_debugger,
         )
 
+        def load_preview_extension(ext_id: str):
+            preview_ext_id = f"{ext_id}.preview"
+            if controller := extension_registry.load(preview_ext_id, path):
+                controller.is_preview = True
+
+                # install python dependencies from requirements.txt
+                from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+
+                deps = ExtensionDependencies(controller.id, controller.path)
+                deps.install()
+
+                # Run start_detached instead of start to avoid blocking the main thread
+                controller.start_detached(with_debugger=with_debugger)
+
+                logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+
+        def on_stopped(ext_id: str):
+            logger.info("[preview] Extension '%s' stopped", ext_id)
+            if existing_controller := extension_registry.get(ext_id):  # reload to update is_running state
+                existing_controller.shadowed_by_preview = True
+            load_preview_extension(ext_id)
+
         existing_controller = extension_registry.get(ext_id)
         if existing_controller and existing_controller.is_running:
             logger.info(
                 "[preview] Extension '%s' is currently running; stopping it before launching preview version",
                 ext_id,
             )
-            # TODO: run_ext_batch_job is used on a single extension (missing the point of a batch runner),
-            # as a way to avoid not having to await. But we really should await, to ensure the old extension runtime
-            # is exited before starting the new one. Otherwise there can be errors with the keyword still being mapped
-            # to the old extension on the first run.
-            # But it might require deeper refactoring to fix this.
-            self.run_ext_batch_job([ext_id], ["stop"], done_msg=f"[preview] Extension '{ext_id}' stopped")
-            if existing_controller := extension_registry.get(ext_id):  # reload to update is_running state
-                existing_controller.shadowed_by_preview = True
-
-        preview_ext_id = f"{ext_id}.preview"
-        if controller := extension_registry.load(preview_ext_id, path):
-            controller.is_preview = True
-
-            # install python dependencies from requirements.txt
-            from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
-
-            deps = ExtensionDependencies(controller.id, controller.path)
-            deps.install()
-
-            # Run start_detached instead of start to avoid blocking the main thread
-            controller.start_detached(with_debugger=with_debugger)
-
-            logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+            self.run_ext_batch_job([ext_id], ["stop"], callback=lambda: on_stopped(ext_id))
+        else:
+            load_preview_extension(ext_id)
 
     @events.on
     def stop_preview(self, payload: dict[str, Any] | None = None) -> None:
@@ -249,17 +258,21 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             original_ext_id,
         )
 
-        # Stop the preview extension
-        stop_msg = f"[preview] Preview extension '{preview_ext_id}' stopped"
-        self.run_ext_batch_job([preview_ext_id], ["stop"], done_msg=stop_msg)
-
         # Try to restart the original extension
-        original_controller = extension_registry.get(original_ext_id)
-        if original_controller:
-            logger.info(
-                "[preview] Re-enabling original extension '%s'",
-                original_ext_id,
-            )
-            original_controller.shadowed_by_preview = False
-            restart_msg = f"[preview] Original extension '{original_ext_id}' re-enabled"
-            self.run_ext_batch_job([original_ext_id], ["start"], done_msg=restart_msg)
+        def restart_original_extension(ext_id):
+            ext = extension_registry.get(ext_id)
+            if ext:
+                logger.info(
+                    "[preview] Re-enabling original extension '%s'",
+                    ext_id,
+                )
+                ext.shadowed_by_preview = False
+                restart_msg = f"[preview] Original extension '{ext_id}' re-enabled"
+                self.run_ext_batch_job([ext_id], ["start"], callback=lambda: logger.info(restart_msg))
+
+        def stopped_handler():
+            logger.info("[preview] Preview extension '%s' stopped", preview_ext_id)
+            restart_original_extension(original_ext_id)
+
+        # Stop the preview extension
+        self.run_ext_batch_job([preview_ext_id], ["stop"], stopped_handler)
