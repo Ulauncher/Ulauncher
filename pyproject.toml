@@ -35,7 +35,8 @@ implicit-any = "error"
 [tool.mypy]
 python_version = "3.8"
 strict = true
-disable_error_code = "import-untyped"
+# no-untyped-def is a good rule, but disabled to align with pyrefly's behavior https://github.com/facebook/pyrefly/issues/1082
+disable_error_code = "import-untyped,no-untyped-def"
 implicit_reexport = true
 disallow_untyped_calls = false
 incremental = false  # Incremental is broken: https://github.com/python/mypy/issues/18473
