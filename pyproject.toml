@@ -30,6 +30,7 @@ project-includes = ["ulauncher"]
 
 [tool.pyrefly.errors]
 bad-param-name-override = false
+implicit-any = "error"
 
 [tool.mypy]
 python_version = "3.8"
