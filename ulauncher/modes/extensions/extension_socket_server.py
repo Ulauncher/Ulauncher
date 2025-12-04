@@ -76,6 +76,7 @@ class ExtensionSocketServer:
 
     def handle_pending_close(self, framer: JSONFramer) -> None:
         self.pending.pop(id(framer))
+        events.emit("extensions:invalidate_cache")
 
     def handle_registration(self, framer: JSONFramer, event: dict[str, Any]) -> None:
         if isinstance(event, dict) and event.get("type") == "extension:socket_connected":
@@ -88,6 +89,7 @@ class ExtensionSocketServer:
             # TODO: This is ugly, but we have no other way to detect the extension started successfully
             if ext := extension_registry.get(ext_id):
                 ext.is_running = True
+                events.emit("extensions:invalidate_cache")
         else:
             logger.debug("Unhandled message received: %s", event)
 

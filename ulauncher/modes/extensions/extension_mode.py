@@ -39,6 +39,13 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         self.ext_socket_server.start()
         events.set_self(self)
 
+    def has_trigger_changes(self) -> bool:
+        return not self._trigger_cache
+
+    @events.on
+    def invalidate_cache(self) -> None:
+        self._trigger_cache.clear()
+
     def handle_query(self, query: Query) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"

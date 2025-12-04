@@ -30,6 +30,14 @@ class BaseMode:
     def get_triggers(self) -> Iterable[Result]:
         return []
 
+    def has_trigger_changes(self) -> bool:
+        """
+        Return True if this mode's triggers may need to be reloaded.
+        Note that all triggers are reloaded when the Ulauncher window is shown,
+        so this is mainly for modes that load trigger asynchronously and won't be ready initially.
+        """
+        return False
+
     def get_initial_results(self, _limit: int) -> Iterable[Result]:
         """
         Called if the query is empty (on startup or when you delete the query)

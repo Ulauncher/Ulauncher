@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import itertools
 import logging
+from collections import defaultdict
 from functools import lru_cache
 from typing import Iterable
 from weakref import WeakKeyDictionary
@@ -35,28 +37,38 @@ class UlauncherCore:
     """Core application logic to handle the query events and delegate them to the modes."""
 
     _mode: BaseMode | None = None
-    _keywords: dict[str, Result] = {}
-    _triggers: list[Result] = []
+    _keyword_cache: defaultdict[BaseMode, dict[str, Result]] = defaultdict(dict)
+    _trigger_cache: defaultdict[BaseMode, list[Result]] = defaultdict(list)
     _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
-    _triggers_loaded: bool = False
     query: Query = Query(None, "")
 
     def load_triggers(self, force: bool = False) -> None:
-        if force:
-            self._triggers_loaded = False
+        """Load or refresh triggers from modes that have changes."""
+        claimed_keywords: dict[str, Result] = {}
+        outdated_modes: set[BaseMode] = set()
 
-        if self._triggers_loaded:
-            return
-
-        self._triggers.clear()
-        self._keywords.clear()
+        # load claimed keywords and modes that need to be refreshed
         for mode in get_modes():
+            if force or mode.has_trigger_changes():
+                outdated_modes.add(mode)
+            else:
+                claimed_keywords.update(self._keyword_cache[mode])
+
+        for mode in outdated_modes:
+            triggers = self._trigger_cache[mode]
+            keywords = self._keyword_cache[mode]
+            triggers.clear()
+            keywords.clear()
+
             for trigger in mode.get_triggers():
-                self._triggers.append(trigger)
+                triggers.append(trigger)
                 self._mode_map[trigger] = mode
                 if trigger.keyword:
-                    if trigger.keyword in self._keywords:
-                        current_trigger = self._keywords[trigger.keyword]
+                    if trigger.keyword not in claimed_keywords:
+                        keywords[trigger.keyword] = trigger
+                        claimed_keywords[trigger.keyword] = trigger
+                    else:
+                        current_trigger = claimed_keywords[trigger.keyword]
                         logger.warning(
                             'Cannot register keyword "%s" for "%s" (%s). It is already used by "%s" (%s).',
                             trigger.keyword,
@@ -65,10 +77,6 @@ class UlauncherCore:
                             current_trigger.name,
                             current_trigger.__class__.__name__,
                         )
-                    else:
-                        self._keywords[trigger.keyword] = trigger
-
-        self._triggers_loaded = True
 
     def update(self, query_str: str) -> None:
         """Parse the query string and update the mode and query."""
@@ -82,10 +90,12 @@ class UlauncherCore:
 
         # keyword match
         keyword, argument = query_str.split(" ", 1) if " " in query_str else (query_str, None)
-        trigger = self._keywords.get(keyword)
-        if trigger and argument is not None:
-            self._mode = self._mode_map.get(trigger)
-            self.query = Query(keyword, argument)
+
+        for mode, keywords in self._keyword_cache.items():
+            if keyword in keywords and argument is not None:
+                self._mode = mode
+                self.query = Query(keyword, argument)
+                break
 
         # non-keyword match
         if not self._mode:
@@ -103,7 +113,9 @@ class UlauncherCore:
         query_str = self.query.argument
         if not query_str:
             return []
-        sorted_ = sorted(self._triggers, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
+
+        flattened_ = itertools.chain.from_iterable(self._trigger_cache.values())
+        sorted_ = sorted(flattened_, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
         return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
     def get_initial_results(self, limit: int) -> Iterable[Result]:
