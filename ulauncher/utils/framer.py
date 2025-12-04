@@ -1,4 +1,3 @@
-# mypy: disable-error-code="arg-type,no-untyped-def,var-annotated"
 from __future__ import annotations
 
 import json
@@ -75,8 +74,11 @@ class JSONFramer(GObject.GObject):
         self._outbound.append(msg)
         self._write_next()
 
-    def _close_ready(self, _source, result, _user) -> None:
+    def _close_ready(
+        self, _source: GObject.Object | None, result: Gio.AsyncResult | None, _data: object | None
+    ) -> None:
         assert self._conn
+        assert result
         if self._conn.close_finish(result):
             log.debug("Connection (%s) closed", self)
         else:
@@ -89,8 +91,9 @@ class JSONFramer(GObject.GObject):
             self.READ_SIZE, GLib.PRIORITY_DEFAULT, self._canceller, self._read_ready, None
         )
 
-    def _read_ready(self, _source, result, _user) -> None:
+    def _read_ready(self, _source: GObject.Object | None, result: Gio.AsyncResult | None, _data: object | None) -> None:
         assert self._conn
+        assert result
         bytesbuf = self._conn.get_input_stream().read_bytes_finish(result)
         if not bytesbuf or bytesbuf.get_size() == 0:
             self.close()
@@ -141,8 +144,9 @@ class JSONFramer(GObject.GObject):
             self._inprogress, GLib.PRIORITY_DEFAULT, self._canceller, self._write_done, None
         )
 
-    def _write_done(self, _source, result, _user) -> None:
+    def _write_done(self, _source: GObject.Object | None, result: Gio.AsyncResult | None, _data: object | None) -> None:
         assert self._conn
+        assert result
         done, written = self._conn.get_output_stream().write_all_finish(result)
         if not done and self._canceller.is_cancelled():
             log.debug("Write canceled, closing connection.")
