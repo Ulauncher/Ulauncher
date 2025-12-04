@@ -35,8 +35,7 @@ implicit-any = "error"
 [tool.mypy]
 python_version = "3.8"
 strict = true
-# no-untyped-def is a good rule, but disabled to align with pyrefly's behavior https://github.com/facebook/pyrefly/issues/1082
-disable_error_code = "import-untyped,no-untyped-def"
+disable_error_code = "import-untyped"
 implicit_reexport = true
 disallow_untyped_calls = false
 incremental = false  # Incremental is broken: https://github.com/python/mypy/issues/18473
@@ -70,6 +69,7 @@ pylint = { max-args = 10}
 flake8-pytest-style = {fixture-parentheses = false}
 ignore = [
   "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
+  "ANN401",   # Using Any as an argument type annotation
   "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors.
   "PLC0415",  # Allow imports outside of top-level for performance reasons
   "PYI019",   # Don't want to require typing_extensions and/or py 3.11
@@ -82,7 +82,7 @@ ignore = [
 # See https://docs.astral.sh/ruff/rules/ (synced with ruff 0.14.0)
 select = [
   "A",        # flake8-builtins
-  "ANN204",   # flake8-annotations (204 covers __init__, __new__, and __call__. All the other rules are covered by mypy)
+  "ANN",      # flake8-annotations (ANN2** are not covered by pyrefly, and ANN204 is not covered by mypy)
   "ARG",      # flake8-unused-arguments
   "ASYNC",    # flake8-async
   "B",        # flake8-bugbear
