@@ -302,7 +302,7 @@ class ExtensionsView(BaseView):
         # Save button
         save_icon = Gtk.Image.new_from_icon_name("checkmark-symbolic", Gtk.IconSize.BUTTON)
         self.save_button = styled(Gtk.Button(image=save_icon, tooltip_text="Save", sensitive=False), "suggested-action")
-        self.save_button.connect("clicked", lambda: self.save_changes())
+        self.save_button.connect("clicked", lambda _: self.save_changes())
         button_box.pack_start(self.save_button, False, False, 0)
 
         # Update button
