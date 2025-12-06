@@ -12,7 +12,7 @@ from weakref import WeakSet
 from gi.repository import Gio, GLib
 
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.message_socket import MessageSocket
+from ulauncher.utils.socket_msg_controller import SocketMsgController
 from ulauncher.utils.timer import timer
 
 ExtensionExitCause = Literal[
@@ -30,7 +30,7 @@ class ExtensionRuntime:
     ext_id: str
     subprocess: Gio.Subprocess
     start_time: float
-    msg_socket: MessageSocket
+    msg_socket: SocketMsgController
     parent_socket: socket.socket
     error_stream: Gio.DataInputStream
     recent_errors: deque[str]
@@ -69,7 +69,7 @@ class ExtensionRuntime:
         child_socket.close()
 
         # Socket handler for parent process
-        self.msg_socket = MessageSocket(self.parent_socket.fileno())
+        self.msg_socket = SocketMsgController(self.parent_socket.fileno())
 
         error_input_stream = self.subprocess.get_stderr_pipe()
         if not error_input_stream:

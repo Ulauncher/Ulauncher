@@ -34,7 +34,7 @@ class TestExtensionRuntime:
 
     @pytest.fixture(autouse=True)
     def message_socket_class(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_runtime.MessageSocket")
+        return mocker.patch("ulauncher.modes.extensions.extension_runtime.SocketMsgController")
 
     @pytest.fixture
     def time(self, mocker: MockerFixture) -> MagicMock:

@@ -3,7 +3,7 @@ from __future__ import annotations
 from ulauncher.utils.gio_compat import Gio
 
 
-class MessageSocket:
+class SocketMsgController:
     """
     Takes a file descriptor from a socket pair to provides read and write methods
     """

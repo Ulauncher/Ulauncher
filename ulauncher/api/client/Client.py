@@ -9,7 +9,7 @@ from typing import Any
 from gi.repository import GLib
 
 import ulauncher.api
-from ulauncher.utils.message_socket import MessageSocket
+from ulauncher.utils.socket_msg_controller import SocketMsgController
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -17,7 +17,7 @@ logger = logging.getLogger()
 
 class Client:
     extension: ulauncher.api.Extension
-    msg_socket: MessageSocket
+    msg_controller: SocketMsgController
     mainloop: GLib.MainLoop
     """
     Manages the extension's communication with Ulauncher.
@@ -29,8 +29,8 @@ class Client:
     Communication layers:
     → Extension subclass
     • This class
-    → MessageSocket (wraps a socket file descriptor)
-    → (OS) Unix socket connection
+    → SocketMsgController
+    → (OS) Unix socket (pair) connection
     → Ulauncher ExtensionRuntime (parent runtime)
     """
 
@@ -39,7 +39,7 @@ class Client:
 
         self.extension = extension
         self.mainloop = GLib.MainLoop()
-        self.msg_socket = MessageSocket(file_descriptor)
+        self.msg_controller = SocketMsgController(file_descriptor)
 
     def on_io_event(self, _channel: GLib.IOChannel, condition: GLib.IOCondition) -> bool:
         """
@@ -53,7 +53,7 @@ class Client:
             return False
 
         if condition & GLib.IOCondition.IN:
-            line = self.msg_socket.read_msg()
+            line = self.msg_controller.read_msg()
 
             if line is None:
                 logger.info("Received None data before HUP, unloading.")
@@ -75,7 +75,7 @@ class Client:
         """
         # Create IOChannel for event monitoring
         # Must be set to not buffer, or it would steal data from msg_socket
-        io_channel = GLib.IOChannel.unix_new(self.msg_socket.file_descriptor)
+        io_channel = GLib.IOChannel.unix_new(self.msg_controller.file_descriptor)
         io_channel.set_encoding(None)
         io_channel.set_buffered(False)
 
@@ -106,4 +106,4 @@ class Client:
         """Send a JSON object as a message."""
         logger.debug('Send message with keys "%s"', set(response))
         json_str = json.dumps(response)
-        self.msg_socket.write_msg(json_str)
+        self.msg_controller.write_msg(json_str)
