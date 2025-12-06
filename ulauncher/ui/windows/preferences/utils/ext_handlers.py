@@ -129,20 +129,9 @@ class ExtensionHandlers:
                 asyncio.run(ext.toggle_enabled(state))
 
             except Exception:  # noqa: BLE001
-
-                def show_error() -> None:
-                    error_dialog = Gtk.MessageDialog(
-                        transient_for=self.window,
-                        modal=True,
-                        message_type=Gtk.MessageType.ERROR,
-                        buttons=Gtk.ButtonsType.OK,
-                        text=f"Failed to {'enable' if state else 'disable'} extension",
-                        secondary_text="Toggle operation failed",
-                    )
-                    error_dialog.run()
-                    error_dialog.destroy()
-
-                GLib.idle_add(show_error)
+                failed_action = "enable" if state else "disable"
+                error_msg = f"Failed to {failed_action} extension"
+                GLib.idle_add(self.show_error_dialog, error_msg, "Toggle operation failed")
 
         thread = threading.Thread(target=toggle_async)
         thread.daemon = True
@@ -179,25 +168,24 @@ class ExtensionHandlers:
                     GLib.idle_add(update_ui)
 
                 except Exception:  # noqa: BLE001
-
-                    def show_error() -> None:
-                        progress_dialog.destroy()
-                        error_dialog = Gtk.MessageDialog(
-                            transient_for=self.window,
-                            modal=True,
-                            message_type=Gtk.MessageType.ERROR,
-                            buttons=Gtk.ButtonsType.OK,
-                            text="Failed to remove extension",
-                            secondary_text="Remove operation failed",
-                        )
-                        error_dialog.run()
-                        error_dialog.destroy()
-
-                    GLib.idle_add(show_error)
+                    progress_dialog.destroy()
+                    GLib.idle_add(self.show_error_dialog, "Failed to remove extension", "Remove operation failed")
 
             thread = threading.Thread(target=remove_async)
             thread.daemon = True
             thread.start()
+
+    def show_error_dialog(self, text: str, secondary_text: str) -> None:
+        error_dialog = Gtk.MessageDialog(
+            transient_for=self.window,
+            modal=True,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text=text,
+            secondary_text=secondary_text,
+        )
+        error_dialog.run()
+        error_dialog.destroy()
 
     def check_updates(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
         """Handle checking for extension updates"""
@@ -216,22 +204,8 @@ class ExtensionHandlers:
                 GLib.idle_add(update_ui)
 
             except Exception as e:  # noqa: BLE001
-                error_message = str(e)
-
-                def show_error() -> None:
-                    callback()
-                    error_dialog = Gtk.MessageDialog(
-                        transient_for=self.window,
-                        modal=True,
-                        message_type=Gtk.MessageType.ERROR,
-                        buttons=Gtk.ButtonsType.OK,
-                        text="Failed to check for updates",
-                        secondary_text=f"Error: {error_message}",
-                    )
-                    error_dialog.run()
-                    error_dialog.destroy()
-
-                GLib.idle_add(show_error)
+                callback()
+                GLib.idle_add(self.show_error_dialog, "Failed to check for updates", f"Error: {e!s}")
 
         thread = threading.Thread(target=check_async)
         thread.daemon = True
@@ -383,13 +357,4 @@ class ExtensionHandlers:
                 )
 
         # Create and show error dialog
-        error_dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.ERROR,
-            buttons=Gtk.ButtonsType.OK,
-            text=primary_text,
-            secondary_text=secondary_text,
-        )
-        error_dialog.run()
-        error_dialog.destroy()
+        self.show_error_dialog(primary_text, secondary_text)
