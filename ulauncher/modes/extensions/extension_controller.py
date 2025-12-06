@@ -64,7 +64,7 @@ logger = logging.getLogger()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 
-lifecycle_events = EventBus("extensions")
+lifecycle_events = EventBus()
 
 
 def _load_preferences(ext_id: str) -> JsonConf:
