@@ -53,7 +53,7 @@ class Client:
             return False
 
         if condition & GLib.IOCondition.IN:
-            line = self.msg_controller.read_msg()
+            line = self.msg_controller.read()
 
             if line is None:
                 logger.info("Received None data before HUP, unloading.")
@@ -106,4 +106,4 @@ class Client:
         """Send a JSON object as a message."""
         logger.debug('Send message with keys "%s"', set(response))
         json_str = json.dumps(response)
-        self.msg_controller.write_msg(json_str)
+        self.msg_controller.write(json_str)

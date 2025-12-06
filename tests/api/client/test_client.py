@@ -41,4 +41,4 @@ class TestClient:
 
     def test_send__is_handled(self, client: Client) -> None:
         client.send({"hello": "world"})
-        client.msg_controller.write_msg.assert_called_with('{"hello": "world"}')
+        client.msg_controller.write.assert_called_with('{"hello": "world"}')

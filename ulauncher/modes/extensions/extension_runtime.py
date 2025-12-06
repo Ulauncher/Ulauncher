@@ -118,7 +118,7 @@ class ExtensionRuntime:
         """Send a JSON message to extension."""
         try:
             json_str = json.dumps(message)
-            self.msg_socket.write_msg(json_str)
+            self.msg_socket.write(json_str)
             logger.debug("Sent message to %s: %s", self.ext_id, message)
         except Exception:
             logger.exception("Failed to send message to %s", self.ext_id)

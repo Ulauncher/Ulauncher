@@ -17,14 +17,14 @@ class SocketMsgController:
         self.input_stream = Gio.DataInputStream.new(unix_in_stream)
         self.output_stream = Gio.DataOutputStream.new(unix_out_stream)
 
-    def read_msg(self) -> str | None:
+    def read(self) -> str | None:
         """
         Read line-delimited message from the socket.
         """
         result = self.input_stream.read_line_utf8()
         return result[0] if result else None
 
-    def write_msg(self, msg: str) -> None:
+    def write(self, msg: str) -> None:
         """
         Write a line-delimited message to the socket (newline will be added automatically).
         """
