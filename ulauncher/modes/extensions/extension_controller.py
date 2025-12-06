@@ -301,9 +301,6 @@ class ExtensionController:
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
-            if not runtime or not self.is_running:
-                return
-
             stopped_future: asyncio.Future[None] = asyncio.Future()
             stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
