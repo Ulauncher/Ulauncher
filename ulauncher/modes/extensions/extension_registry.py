@@ -4,10 +4,10 @@ import logging
 from typing import Iterator
 
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.extension_controller import (
-    ExtensionController,
-    lifecycle_events,
-)
+from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.utils.eventbus import EventBus
+
+events = EventBus("extension_lifecycle")
 
 logger = logging.getLogger()
 _ext_controllers: dict[str, ExtensionController] = {}
@@ -58,13 +58,13 @@ def load_all() -> Iterator[ExtensionController]:
     yield from _ext_controllers.values()
 
 
-@lifecycle_events.on
+@events.on
 def installed(controller: ExtensionController) -> None:
     """Handle install events dispatched by controllers."""
     _ext_controllers[controller.id] = controller
 
 
-@lifecycle_events.on
+@events.on
 def removed(ext_id: str) -> None:
     """Handle removal events dispatched by controllers."""
     _ext_controllers.pop(ext_id, None)

@@ -64,7 +64,7 @@ logger = logging.getLogger()
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 
-lifecycle_events = EventBus()
+events = EventBus()
 
 
 def _load_preferences(ext_id: str) -> JsonConf:
@@ -127,7 +127,7 @@ class ExtensionController:
         )
         logger.info("Extension %s installed successfully", controller.id)
         if is_new_install:
-            lifecycle_events.emit("extensions:installed", controller)
+            events.emit("extension_lifecycle:installed", controller)
         return controller
 
     @property
@@ -185,7 +185,7 @@ class ExtensionController:
         if self._state_path.is_file():
             self._state_path.unlink()
 
-        lifecycle_events.emit("extensions:removed", self.id)
+        events.emit("extension_lifecycle:removed", self.id)
 
     async def update(self) -> bool:
         """
