@@ -99,7 +99,7 @@ class ExtensionHandlers:
             try:
                 ext = asyncio.run(ExtensionController.install(url))
                 asyncio.run(ext.stop())
-                asyncio.run(ext.start())
+                ext.start()
 
                 # Update UI in main thread
                 def update_ui() -> None:

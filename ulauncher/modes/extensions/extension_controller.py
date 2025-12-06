@@ -27,6 +27,7 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.utils.decorator.debounce import debounce
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
@@ -79,9 +80,9 @@ class ExtensionController:
     state: ExtensionState
     manifest: ExtensionManifest
     is_manageable: bool
-    is_running: bool = False
     is_preview: bool = False
     shadowed_by_preview: bool = False
+    debounced_send_message: Callable[[dict[str, Any]], None]
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
@@ -89,6 +90,7 @@ class ExtensionController:
         self.path = path
         self.manifest = ExtensionManifest.load(path)
         self.is_manageable = extension_finder.is_manageable(path)
+        self.debounced_send_message = debounce(self.manifest.input_debounce)(self.send_message)
         self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
         self.state = ExtensionState.load(self._state_path)
 
@@ -137,6 +139,10 @@ class ExtensionController:
     @property
     def has_error(self) -> bool:
         return bool(self.state.error_type)
+
+    @property
+    def is_running(self) -> bool:
+        return self.id in extension_runtimes
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -237,15 +243,17 @@ class ExtensionController:
     async def toggle_enabled(self, enabled: bool) -> bool:
         self.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
-            return await self.start()
+            return self.start()
         await self.stop()
         return False
 
-    def start_detached(self, with_debugger: bool = False) -> None:
+    def start(self, with_debugger: bool = False) -> bool:
+        if self.shadowed_by_preview:
+            return False
+
         if not self.is_running:
 
             def exit_handler(cause: str, error_msg: str) -> None:
-                self.is_running = False
                 listeners = stopped_listeners.get(self.id, [])
                 for stop_listener in listeners:
                     stop_listener()
@@ -262,10 +270,10 @@ class ExtensionController:
                 self.manifest.check_compatibility(verbose=True)
             except ExtensionManifestError as err:
                 exit_handler("Invalid", str(err))
-                return
+                return False
             except ExtensionIncompatibleRecoverableError as err:
                 exit_handler("Incompatible", str(err))
-                return
+                return False
 
             self.state.save(error_type="", error_message="")  # clear any previous error
 
@@ -289,28 +297,22 @@ class ExtensionController:
             }
 
             extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
-
-    async def start(self) -> bool:
-        # Disable starting extensions that are shadowed by preview extensions
-        # to avoid conflicts and confusion
-        if self.shadowed_by_preview:
-            return False
-        self.start_detached()
-        for _ in range(100):
-            if self.has_error:
-                return False
-            if self.is_running:
-                return True
-            await asyncio.sleep(0.1)
-        return False
+        return self.is_running
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
-            if not runtime or not self.is_running:
-                return
-
             stopped_future: asyncio.Future[None] = asyncio.Future()
             stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
+
+    def send_message(self, message: dict[str, Any]) -> bool:
+        """
+        Sends a JSON message to the extension if it is running.
+        Returns True if message was sent, False otherwise.
+        """
+        if runtime := extension_runtimes.get(self.id):
+            runtime.send_message(message)
+            return True
+        return False

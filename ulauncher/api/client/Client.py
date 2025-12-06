@@ -1,86 +1,109 @@
 from __future__ import annotations  # noqa: N999
 
+import json
 import logging
 import os
-import sys
-import traceback
 from functools import partial
 from typing import Any
 
-from gi.repository import Gio, GLib
+from gi.repository import GLib
 
 import ulauncher.api
-from ulauncher.utils.framer import JSONFramer
-from ulauncher.utils.socket_path import get_socket_path
+from ulauncher.utils.socket_msg_controller import SocketMsgController
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 
 
 class Client:
-    socket_path: str
     extension: ulauncher.api.Extension
-    client: Gio.SocketClient
-    conn: Gio.SocketConnection | None = None
-    framer: JSONFramer | None = None
+    msg_controller: SocketMsgController
+    mainloop: GLib.MainLoop
     """
+    Manages the extension's communication with Ulauncher.
+
+    The socket connection is established before this process starts:
+    - Ulauncher (parent process) creates a socket pair (two connected endpoints)
+    - Parent keeps one endpoint, passes the other's FD to child process (this)
+
     Communication layers:
     → Extension subclass
     • This class
-    → (OS) Unix socket
-    → (Ulauncher process) ExtensionSocketServer
-    → ExtensionSocketController
-    → EventBus
-    → the rest of Ulauncher
+    → SocketMsgController
+    → (OS) Unix socket (pair) connection
+    → Ulauncher ExtensionRuntime (parent runtime)
     """
 
     def __init__(self, extension: ulauncher.api.Extension) -> None:
-        self.socket_path = get_socket_path()
+        file_descriptor = int(os.environ.get("SOCKETPAIR_FD", "0"))
+
         self.extension = extension
-        self.client = Gio.SocketClient()
+        self.mainloop = GLib.MainLoop()
+        self.msg_controller = SocketMsgController(file_descriptor)
+
+    def on_io_event(self, _channel: GLib.IOChannel, condition: GLib.IOCondition) -> bool:
+        """
+        Socket I/O event listener.
+        Returns True to keep watching, False to remove the watch.
+        """
+        # condition can have multiple flags set simultaneously (hence the bitwise operators)
+        if condition & (GLib.IOCondition.HUP | GLib.IOCondition.ERR):
+            logger.debug("Socket closed or error occurred")
+            self.unload()
+            return False
+
+        if condition & GLib.IOCondition.IN:
+            line = self.msg_controller.read()
+
+            if line is None:
+                logger.info("Received None data before HUP, unloading.")
+                self.unload()
+                return False
+
+            if line:
+                try:
+                    obj = json.loads(line)
+                    self.on_message(obj)
+                except json.JSONDecodeError:
+                    logger.warning("Invalid JSON from Ulauncher app %s:", line)
+
+        return True
 
     def connect(self) -> None:
         """
-        Connects to the extension server and blocks thread
+        Sets up I/O event monitoring and starts the GLib mainloop (blocks thread).
         """
-        logger.debug("Connecting to socket_path %s", self.socket_path)
-        self.conn = self.client.connect(Gio.UnixSocketAddress.new(self.socket_path), None)
-        if not self.conn:
-            msg = f"Failed to connect to socket_path {self.socket_path}"
-            raise RuntimeError(msg)
-        self.framer = JSONFramer()
-        self.framer.connect("message_parsed", self.on_message)
-        self.framer.connect("closed", self.on_close)
-        self.framer.set_connection(self.conn)
-        self.send({"type": "extension:socket_connected", "ext_id": self.extension.ext_id})
+        # Create IOChannel for event monitoring
+        # Must be set to not buffer, or it would steal data from msg_socket
+        io_channel = GLib.IOChannel.unix_new(self.msg_controller.file_descriptor)
+        io_channel.set_encoding(None)
+        io_channel.set_buffered(False)
 
-        mainloop = GLib.MainLoop.new(None, False)
-        mainloop.run()
+        GLib.io_add_watch(
+            io_channel, GLib.IOCondition.IN | GLib.IOCondition.HUP | GLib.IOCondition.ERR, self.on_io_event
+        )
 
-    def on_message(self, _framer: JSONFramer, event: dict[str, Any]) -> None:
+        logger.debug("Starting GLib mainloop")
+        self.mainloop.run()
+        logger.debug("GLib mainloop stopped")
+
+    def on_message(self, event: dict[str, Any]) -> None:
         """
         Parses message from Ulauncher and triggers extension event
         """
         logger.debug("Incoming event: %s", event)
-        try:
-            self.extension.trigger_event(event)
-        except Exception:  # noqa: BLE001
-            traceback.print_exc(file=sys.stderr)
-
-    def on_close(self, _framer: JSONFramer) -> None:
-        """
-        Terminates extension process on client disconnect.
-        Triggers unload event for graceful shutdown
-        """
-        logger.warning("Connection closed. Exiting")
-        self.unload()
+        self.extension.trigger_event(event)
 
     def unload(self, status_code: int = 0) -> None:
         # extension has 0.5 sec to save it's state, after that it will be terminated
         self.extension.trigger_event({"type": "event:unload"})
         timer(0.5, partial(os._exit, status_code))
+        # Quit mainloop to exit after current event, needed to unblock and for the shutdown to proceed
+        if self.mainloop.is_running():
+            self.mainloop.quit()
 
     def send(self, response: Any) -> None:
+        """Send a JSON object as a message."""
         logger.debug('Send message with keys "%s"', set(response))
-        assert self.framer
-        self.framer.send(response)
+        json_str = json.dumps(response)
+        self.msg_controller.write(json_str)
