@@ -5,7 +5,7 @@ from ulauncher.utils.gio_compat import Gio
 
 class MessageSocket:
     """
-    Wraps a file descriptor from a socket pair to provide conventent read/write methods
+    Takes a file descriptor from a socket pair to provides read and write methods
     """
 
     file_descriptor: int
