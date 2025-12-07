@@ -14,13 +14,12 @@ def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
     assert display
 
     if use_mouse_position:
-        try:
-            x11_display = GdkX11.X11Display.get_default()
+        if x11_display := GdkX11.X11Display.get_default():
             seat = x11_display.get_default_seat()
-            (_, x, y) = seat.get_pointer().get_position()
-            return display.get_monitor_at_point(x, y)
-        except Exception:
-            logger.exception("Could not get monitor with X11. Defaulting to first or primary monitor")
+            if pointer := seat.get_pointer():
+                (_, x, y) = pointer.get_position()
+                return display.get_monitor_at_point(x, y)
+        logger.info("Could not get monitor with X11. Defaulting to first or primary monitor")
 
     return display.get_primary_monitor() or display.get_monitor(0)
 
