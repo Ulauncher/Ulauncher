@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from time import time
-from typing import Any, Callable, Literal, TypeVar, overload
+from typing import Any, Callable, TypeVar, cast
 
 from gi.repository import GLib, Gtk
 
@@ -84,24 +84,6 @@ class DialogLauncher:
     def __init__(self, window: Gtk.Window) -> None:
         self.window = window
 
-    @overload
-    def show(
-        self,
-        text: str,
-        secondary_text: str,
-        message_type: Literal[Gtk.MessageType.QUESTION],
-        buttons: Gtk.ButtonsType | None = None,
-    ) -> Gtk.ResponseType: ...
-
-    @overload
-    def show(
-        self,
-        text: str,
-        secondary_text: str,
-        message_type: Gtk.MessageType | None = None,
-        buttons: Gtk.ButtonsType | None = None,
-    ) -> None: ...
-
     def show(
         self,
         text: str,
@@ -117,12 +99,14 @@ class DialogLauncher:
             text=text,
             secondary_text=secondary_text,
         )
-        response = dialog.run()
+        response = cast("Gtk.ResponseType | None", dialog.run())
         dialog.destroy()
         return response
 
     def show_question(self, text: str, secondary_text: str) -> Gtk.ResponseType:
-        return self.show(text, secondary_text, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO)
+        response = self.show(text, secondary_text, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO)
+        return cast("Gtk.ResponseType", response)
 
     def show_error(self, text: str, secondary_text: str) -> None:
-        return self.show(text, secondary_text, Gtk.MessageType.ERROR)
+        response = self.show(text, secondary_text, Gtk.MessageType.ERROR)
+        return cast("None", response)
