@@ -12,7 +12,7 @@ from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependenciesRecoverableError
 from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifestError
 from ulauncher.modes.extensions.extension_remote import ExtensionNetworkError, InvalidExtensionRecoverableError
-from ulauncher.ui.windows.preferences.views import styled
+from ulauncher.ui.windows.preferences.views import DialogLauncher, styled
 
 logger = logging.getLogger()
 
@@ -22,6 +22,7 @@ class ExtensionHandlers:
 
     def __init__(self, window: Gtk.Window) -> None:
         self.window = window
+        self.dialog_launcher = DialogLauncher(self.window)
 
     def _show_progress_dialog(self, title: str, message: str) -> Gtk.Dialog:
         """Create a progress dialog with a spinning icon"""
@@ -131,7 +132,7 @@ class ExtensionHandlers:
             except Exception:  # noqa: BLE001
                 failed_action = "enable" if state else "disable"
                 error_msg = f"Failed to {failed_action} extension"
-                GLib.idle_add(self.show_error_dialog, error_msg, "Toggle operation failed")
+                GLib.idle_add(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
 
         thread = threading.Thread(target=toggle_async)
         thread.daemon = True
@@ -139,17 +140,9 @@ class ExtensionHandlers:
 
     def remove_extension(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
         """Handle extension removal"""
-        dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.QUESTION,
-            buttons=Gtk.ButtonsType.YES_NO,
-            text=f'Remove extension "{ext.manifest.name}"?',
-            secondary_text="This action cannot be undone.",
-        )
-
-        response = dialog.run()
-        dialog.destroy()
+        text = f'Remove extension "{ext.manifest.name}"?'
+        secondary_text = "This action cannot be undone."
+        response = self.dialog_launcher.show_question(text, secondary_text)
 
         if response == Gtk.ResponseType.YES:
             progress_dialog = self._show_progress_dialog(
@@ -169,23 +162,13 @@ class ExtensionHandlers:
 
                 except Exception:  # noqa: BLE001
                     progress_dialog.destroy()
-                    GLib.idle_add(self.show_error_dialog, "Failed to remove extension", "Remove operation failed")
+                    GLib.idle_add(
+                        self.dialog_launcher.show_error, "Failed to remove extension", "Remove operation failed"
+                    )
 
             thread = threading.Thread(target=remove_async)
             thread.daemon = True
             thread.start()
-
-    def show_error_dialog(self, text: str, secondary_text: str) -> None:
-        error_dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.ERROR,
-            buttons=Gtk.ButtonsType.OK,
-            text=text,
-            secondary_text=secondary_text,
-        )
-        error_dialog.run()
-        error_dialog.destroy()
 
     def check_updates(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
         """Handle checking for extension updates"""
@@ -199,13 +182,15 @@ class ExtensionHandlers:
                         self._show_update_dialog(ext, commit_hash, callback)
                     else:
                         callback()
-                        self._show_no_updates_dialog(ext)
+                        self.dialog_launcher.show(
+                            f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                        )
 
                 GLib.idle_add(update_ui)
 
             except Exception as e:  # noqa: BLE001
                 callback()
-                GLib.idle_add(self.show_error_dialog, "Failed to check for updates", f"Error: {e!s}")
+                GLib.idle_add(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
 
         thread = threading.Thread(target=check_async)
         thread.daemon = True
@@ -227,16 +212,9 @@ class ExtensionHandlers:
                     callback()
                     progress_dialog.destroy()
                     # Show success message
-                    success_dialog = Gtk.MessageDialog(
-                        transient_for=self.window,
-                        modal=True,
-                        message_type=Gtk.MessageType.INFO,
-                        buttons=Gtk.ButtonsType.OK,
-                        text="Extension updated successfully",
-                        secondary_text=f"{ext.manifest.name} has been updated.",
+                    self.dialog_launcher.show(
+                        "Extension updated successfully", f"{ext.manifest.name} has been updated."
                     )
-                    success_dialog.run()
-                    success_dialog.destroy()
 
                 GLib.idle_add(update_ui)
 
@@ -256,32 +234,11 @@ class ExtensionHandlers:
 
     def _show_update_dialog(self, ext: ExtensionController, commit_hash: str, callback: Callable[[], None]) -> None:
         """Show dialog when update is available"""
-        dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.QUESTION,
-            buttons=Gtk.ButtonsType.YES_NO,
-            text=f"Update available for '{ext.manifest.name}'",
-            secondary_text=f"New version: {commit_hash[:7]}\n\nDo you want to update now?",
-        )
-        response = dialog.run()
-        dialog.destroy()
-
+        text = f"Update available for '{ext.manifest.name}'"
+        secondary_text = f"New version: {commit_hash[:7]}\n\nDo you want to update now?"
+        response = self.dialog_launcher.show_question(text, secondary_text)
         if response == Gtk.ResponseType.YES:
             self.update_extension(ext, callback)
-
-    def _show_no_updates_dialog(self, ext: ExtensionController) -> None:
-        """Show dialog when no updates are available"""
-        dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.INFO,
-            buttons=Gtk.ButtonsType.OK,
-            text=f"No updates available for {ext.manifest.name}",
-            secondary_text="The extension is up to date.",
-        )
-        dialog.run()
-        dialog.destroy()
 
     def _show_extension_operation_error(self, error: Exception, url: str, operation: str = "install") -> None:
         """Show detailed error dialog for extension operation failures"""
@@ -357,4 +314,4 @@ class ExtensionHandlers:
                 )
 
         # Create and show error dialog
-        self.show_error_dialog(primary_text, secondary_text)
+        self.dialog_launcher.show_error(primary_text, secondary_text)

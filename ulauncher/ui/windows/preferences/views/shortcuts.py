@@ -8,7 +8,7 @@ from gi.repository import Gtk, Pango
 
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 from ulauncher.ui.windows.preferences import views
-from ulauncher.ui.windows.preferences.views import DataListBoxRow, TextArea, styled
+from ulauncher.ui.windows.preferences.views import DataListBoxRow, DialogLauncher, TextArea, styled
 from ulauncher.utils.load_icon_surface import load_icon_surface
 
 
@@ -376,18 +376,9 @@ class ShortcutsView(views.BaseView):
         if not shortcut:
             return
 
-        dialog = Gtk.MessageDialog(
-            transient_for=self.window,
-            modal=True,
-            message_type=Gtk.MessageType.QUESTION,
-            buttons=Gtk.ButtonsType.YES_NO,
-            text=f'Delete shortcut "{shortcut.name}"?',
-            secondary_text="This action cannot be undone.",
+        response = DialogLauncher(self.window).show_question(
+            f'Delete shortcut "{shortcut.name}"?', "This action cannot be undone."
         )
-
-        response = dialog.run()
-        dialog.destroy()
-
         if response == Gtk.ResponseType.YES:
             # Remove from database
             shortcuts_db = ShortcutsDb.load()

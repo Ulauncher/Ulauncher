@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from time import time
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Literal, TypeVar, overload
 
 from gi.repository import GLib, Gtk
 
@@ -78,3 +78,51 @@ class TextArea(Gtk.TextView):
     def get_text(self) -> str:
         buffer = self.get_buffer()
         return buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+
+
+class DialogLauncher:
+    def __init__(self, window: Gtk.Window) -> None:
+        self.window = window
+
+    @overload
+    def show(
+        self,
+        text: str,
+        secondary_text: str,
+        message_type: Literal[Gtk.MessageType.QUESTION],
+        buttons: Gtk.ButtonsType | None = None,
+    ) -> Gtk.ResponseType: ...
+
+    @overload
+    def show(
+        self,
+        text: str,
+        secondary_text: str,
+        message_type: Gtk.MessageType | None = None,
+        buttons: Gtk.ButtonsType | None = None,
+    ) -> None: ...
+
+    def show(
+        self,
+        text: str,
+        secondary_text: str,
+        message_type: Gtk.MessageType | None = None,
+        buttons: Gtk.ButtonsType | None = None,
+    ) -> Gtk.ResponseType | None:
+        dialog = Gtk.MessageDialog(
+            transient_for=self.window,
+            modal=True,
+            message_type=message_type or Gtk.MessageType.INFO,
+            buttons=buttons or Gtk.ButtonsType.OK,
+            text=text,
+            secondary_text=secondary_text,
+        )
+        response = dialog.run()
+        dialog.destroy()
+        return response
+
+    def show_question(self, text: str, secondary_text: str) -> Gtk.ResponseType:
+        return self.show(text, secondary_text, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO)
+
+    def show_error(self, text: str, secondary_text: str) -> None:
+        return self.show(text, secondary_text, Gtk.MessageType.ERROR)
