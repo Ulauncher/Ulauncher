@@ -27,6 +27,15 @@ class SocketMsgController:
         self._input_stream = Gio.DataInputStream.new(unix_in_stream)
         self._output_stream = Gio.DataOutputStream.new(unix_out_stream)
 
+    def _trigger_close(self) -> None:
+        """
+        Trigger the on_close callback if set, ensuring it's only called once.
+        """
+        callback = self._on_close
+        self._on_close = None
+        if callback:
+            callback()
+
     def send(self, data: dict[str, Any]) -> None:
         """
         Serialize a dictionary to JSON and send it to the socket.
@@ -42,8 +51,7 @@ class SocketMsgController:
             self._output_stream.flush()
         except GLib.Error as e:
             logger.warning("Failed to send message, connection likely closed: %s", e)
-            if self._on_close:
-                self._on_close()
+            self._trigger_close()
 
     def listen(self, on_message: Callable[[dict[str, Any]], None]) -> None:
         """
@@ -61,14 +69,12 @@ class SocketMsgController:
                 message_str, _ = input_stream.read_line_finish_utf8(result)
             except GLib.Error:
                 # I/O error - connection is broken
-                if self._on_close:
-                    self._on_close()
+                self._trigger_close()
                 return
 
             if message_str is None:
                 # Connection closed normally
-                if self._on_close:
-                    self._on_close()
+                self._trigger_close()
                 return
 
             try:
