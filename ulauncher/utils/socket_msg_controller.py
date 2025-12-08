@@ -29,11 +29,21 @@ class SocketMsgController:
 
     def send(self, data: dict[str, Any]) -> None:
         """
-        Serialize a dictionary to JSON and write it to the socket.
+        Serialize a dictionary to JSON and send it to the socket.
         """
-        json_str = json.dumps(data)
-        self._output_stream.put_string(json_str + "\n")
-        self._output_stream.flush()
+        try:
+            json_str = json.dumps(data)
+        except (TypeError, ValueError, RecursionError) as e:
+            logger.warning("Data not JSON serializable %s", e)
+            return
+
+        try:
+            self._output_stream.put_string(json_str + "\n")
+            self._output_stream.flush()
+        except GLib.Error as e:
+            logger.warning("Failed to send message, connection likely closed: %s", e)
+            if self._on_close:
+                self._on_close()
 
     def listen(self, on_message: Callable[[dict[str, Any]], None]) -> None:
         """
