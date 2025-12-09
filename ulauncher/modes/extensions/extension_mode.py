@@ -278,7 +278,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 self.run_ext_batch_job([ext_id], ["start"], callback=lambda: logger.info(restart_msg))
 
         def stopped_handler(original_ext_id: str) -> None:
-            logger.info("[preview] Preview extension '%s' stopped")
+            logger.info("[preview] Preview extension stopped. Restarting %s", original_ext_id)
             restart_original_extension(original_ext_id)
 
         # Stop the preview extension
