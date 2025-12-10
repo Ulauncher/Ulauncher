@@ -27,8 +27,8 @@ class TestExtensionRuntime:
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
 
         subprocess_launcher.new.assert_called_once()
-        runtime.subprocess.wait_async.assert_called_once()
-        runtime.error_stream.read_line_async.assert_called_once()
+        runtime._subprocess.wait_async.assert_called_once()
+        runtime._error_stream.read_line_async.assert_called_once()
 
     def test_read_stderr_line(self) -> None:
         test_output1 = "Test Output 1"
@@ -37,29 +37,29 @@ class TestExtensionRuntime:
         mock_read_line_finish_utf8 = Mock()
 
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
-        runtime.error_stream.read_line_finish_utf8 = mock_read_line_finish_utf8
+        runtime._error_stream.read_line_finish_utf8 = mock_read_line_finish_utf8
 
         mock_read_line_finish_utf8.return_value = (test_output1, len(test_output1))
-        runtime.handle_stderr(runtime.error_stream, Mock())
+        runtime.handle_stderr(runtime._error_stream, Mock())
         # Confirm the output is stored in recent_errors and read_line_async is called for the next
         # line.
-        assert runtime.recent_errors[0] == test_output1
-        assert runtime.error_stream.read_line_async.call_count == 2
+        assert runtime._recent_errors[0] == test_output1
+        assert runtime._error_stream.read_line_async.call_count == 2
 
         mock_read_line_finish_utf8.return_value = (test_output2, len(test_output2))
-        runtime.handle_stderr(runtime.error_stream, Mock())
+        runtime.handle_stderr(runtime._error_stream, Mock())
         # The latest line should replace the previous line
-        assert runtime.recent_errors[0] == test_output2
-        assert runtime.error_stream.read_line_async.call_count == 3
+        assert runtime._recent_errors[0] == test_output2
+        assert runtime._error_stream.read_line_async.call_count == 3
 
     def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"
         exit_handler = Mock()
 
         runtime = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
-        aborted_subprocesses.add(runtime.subprocess)
+        aborted_subprocesses.add(runtime._subprocess)
 
-        runtime.handle_exit(runtime.subprocess, Mock())
+        runtime.handle_exit(runtime._subprocess, Mock())
         exit_handler.assert_called_once_with("Stopped", "Extension was stopped by the user")
 
     def test_handle_exit__rapid_exit(self, time: MagicMock) -> None:
@@ -70,11 +70,11 @@ class TestExtensionRuntime:
         exit_handler = Mock()
 
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
-        runtime.subprocess.get_if_signaled.return_value = False
-        runtime.subprocess.get_exit_status.return_value = 9
+        runtime._subprocess.get_if_signaled.return_value = False
+        runtime._subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
 
-        runtime.handle_exit(runtime.subprocess, Mock())
+        runtime.handle_exit(runtime._subprocess, Mock())
         exit_handler.assert_called()
 
     def test_handle_exit(self, time: MagicMock) -> None:
@@ -85,10 +85,10 @@ class TestExtensionRuntime:
         time.return_value = starttime
 
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
-        runtime.subprocess.get_if_signaled.return_value = False
-        runtime.subprocess.get_exit_status.return_value = 9
+        runtime._subprocess.get_if_signaled.return_value = False
+        runtime._subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
-        runtime.handle_exit(runtime.subprocess, Mock())
+        runtime.handle_exit(runtime._subprocess, Mock())
         exit_handler.assert_called_once_with(
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
@@ -98,16 +98,16 @@ class TestExtensionRuntime:
         exit_handler = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
-        runtime.subprocess.get_identifier.return_value = None
+        runtime._subprocess.get_identifier.return_value = None
         runtime.stop()
-        runtime.subprocess.send_signal.assert_not_called()
+        runtime._subprocess.send_signal.assert_not_called()
 
     def test_stop(self) -> None:
         extid = "mock.test_stop"
         exit_handler = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
-        runtime.subprocess.get_identifier.return_value = "ID"
+        runtime._subprocess.get_identifier.return_value = "ID"
         runtime.stop()
-        runtime.subprocess.send_signal.assert_called_once_with(signal.SIGTERM)
+        runtime._subprocess.send_signal.assert_called_once_with(signal.SIGTERM)
         # TODO: This doesn't test the SIGKILL signal ^
