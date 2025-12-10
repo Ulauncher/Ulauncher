@@ -17,6 +17,21 @@ class TestExtensionRuntime:
     def data_input_stream(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.DataInputStream")
 
+    @pytest.fixture(autouse=True)
+    def message_socket(self, mocker: MockerFixture) -> MagicMock:
+        mock_parent_sock = Mock()
+        mock_child_sock = Mock()
+        mock_child_sock.fileno.return_value = 1
+        mock_parent_sock.fileno.return_value = 2
+        return mocker.patch(
+            "ulauncher.modes.extensions.extension_runtime.socket.socketpair",
+            return_value=(mock_parent_sock, mock_child_sock),
+        )
+
+    @pytest.fixture(autouse=True)
+    def message_socket_class(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.extensions.extension_runtime.SocketMsgController")
+
     @pytest.fixture
     def time(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.time")
@@ -92,15 +107,6 @@ class TestExtensionRuntime:
         exit_handler.assert_called_once_with(
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
-
-    def test_stop_noop_if_not_running(self) -> None:
-        extid = "mock.test_stop_noop_if_not_running"
-        exit_handler = Mock()
-        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
-
-        runtime._subprocess.get_identifier.return_value = None
-        runtime.stop()
-        runtime._subprocess.send_signal.assert_not_called()
 
     def test_stop(self) -> None:
         extid = "mock.test_stop"

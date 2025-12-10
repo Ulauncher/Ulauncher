@@ -79,7 +79,6 @@ class ExtensionController:
     state: ExtensionState
     manifest: ExtensionManifest
     is_manageable: bool
-    is_running: bool = False
     is_preview: bool = False
     shadowed_by_preview: bool = False
     _state_path: Path
@@ -137,6 +136,10 @@ class ExtensionController:
     @property
     def has_error(self) -> bool:
         return bool(self.state.error_type)
+
+    @property
+    def is_running(self) -> bool:
+        return self.id in extension_runtimes
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -245,7 +248,6 @@ class ExtensionController:
         if not self.is_running:
 
             def exit_handler(cause: str, error_msg: str) -> None:
-                self.is_running = False
                 listeners = stopped_listeners.get(self.id, [])
                 for stop_listener in listeners:
                     stop_listener()
@@ -306,11 +308,18 @@ class ExtensionController:
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
-            if not runtime or not self.is_running:
-                return
-
             stopped_future: asyncio.Future[None] = asyncio.Future()
             stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
+
+    def send_message(self, message: dict[str, Any]) -> bool:
+        """
+        Sends a JSON message to the extension if it is running.
+        Returns True if message was sent, False otherwise.
+        """
+        if runtime := extension_runtimes.get(self.id):
+            runtime.send_message(message)
+            return True
+        return False

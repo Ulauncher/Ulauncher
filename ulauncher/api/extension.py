@@ -31,17 +31,18 @@ class Extension:
     """
 
     def __init__(self) -> None:
+        self.ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
+        assert self.ext_id, "ULAUNCHER_EXTENSION_ID env variable not set"
         self._input: str = ""
+        self._client = Client(self)
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
         logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
-        self.ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
-        assert self.ext_id, "ULAUNCHER_EXTENSION_ID env variable not set"
         self.logger = logging.getLogger(self.ext_id)
+
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
-        self._client = Client(self)
         self.preferences = {}
-        signal.signal(signal.SIGTERM, lambda signal, _frame: self._client.unload(signal))
+        signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
 
