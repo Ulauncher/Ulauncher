@@ -97,10 +97,8 @@ class ExtensionRuntime:
         aborted_subprocesses.add(self._subprocess)
 
         self._msg_controller.close()
-
-        self._subprocess.send_signal(signal.SIGTERM)
-        # wait for graceful shutdown before forcibly killing (client needs 0.5s so padding 25ms extra)
-        timer(0.525, self._kill)
+        # wait for graceful shutdown before forcibly killing
+        timer(0.5, self._kill)
 
     def _kill(self) -> None:
         if self._subprocess.get_identifier():

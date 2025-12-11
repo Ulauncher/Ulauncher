@@ -8,7 +8,6 @@ from gi.repository import GLib
 
 import ulauncher.api
 from ulauncher.utils.socket_msg_controller import SocketMsgController
-from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 
@@ -65,11 +64,8 @@ class Client:
         self.extension.trigger_event(event)
 
     def unload(self) -> None:
-        # extension has 0.5 sec to save it's state, after that it will be terminated
+        # trigger unload event and release mainloop so that the process will exit after the event is handled
         self.extension.trigger_event({"type": "event:unload"})
-        timer(0.5, self.quit)
-
-    def quit(self) -> None:
         if self.mainloop.is_running():
             self.mainloop.quit()
 
