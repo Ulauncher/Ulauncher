@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 from typing import Any, Callable
@@ -35,6 +36,17 @@ class SocketMsgController:
         self._on_close = None
         if callback:
             callback()
+
+    def close(self) -> None:
+        """
+        Close the socket and cleanup resources.
+        """
+        # separate suppress statements so that both will try to close even if one errors
+        with contextlib.suppress(GLib.Error):
+            self._input_stream.close(None)
+        with contextlib.suppress(GLib.Error):
+            self._output_stream.close(None)
+        self._trigger_close()
 
     def send(self, data: dict[str, Any]) -> None:
         """

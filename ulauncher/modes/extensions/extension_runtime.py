@@ -96,11 +96,7 @@ class ExtensionRuntime:
         logger.info('Terminating extension "%s"', self._ext_id)
         aborted_subprocesses.add(self._subprocess)
 
-        try:
-            if self._parent_socket:
-                self._parent_socket.close()
-        except Exception:
-            logger.exception("Error closing socket for %s", self._ext_id)
+        self._msg_controller.close()
 
         self._subprocess.send_signal(signal.SIGTERM)
         # wait for graceful shutdown before forcibly killing (client needs 0.5s so padding 25ms extra)
