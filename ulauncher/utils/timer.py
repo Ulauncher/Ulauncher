@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from typing import Any, Callable
 
 from gi.repository import GLib
@@ -41,11 +40,6 @@ def timer(delay_sec: float, func: Callable[[], None], repeat: bool = False) -> T
     To cancel the timer, call `.cancel()` on the returned object.
 
     """
-    frac, _ = math.modf(delay_sec)
-    source = (
-        GLib.timeout_source_new_seconds(int(delay_sec))
-        if frac == 0
-        else GLib.timeout_source_new(int(delay_sec * 1000.0))
-    )
+    source = GLib.timeout_source_new(int(delay_sec * 1000.0))
 
     return TimerContext(source, func, repeat)
