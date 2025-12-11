@@ -1,4 +1,3 @@
-import signal
 from typing import Any
 from unittest.mock import MagicMock, Mock
 
@@ -114,6 +113,7 @@ class TestExtensionRuntime:
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
         runtime._subprocess.get_identifier.return_value = "ID"
+        runtime._msg_controller = Mock()
         runtime.stop()
-        runtime._subprocess.send_signal.assert_called_once_with(signal.SIGTERM)
+        runtime._msg_controller.close.assert_called_once()
         # TODO: This doesn't test the SIGKILL signal ^

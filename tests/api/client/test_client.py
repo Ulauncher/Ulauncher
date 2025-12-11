@@ -11,10 +11,6 @@ from ulauncher.api.extension import Extension
 
 class TestClient:
     @pytest.fixture(autouse=True)
-    def timer(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.timer")
-
-    @pytest.fixture(autouse=True)
     def message_socket(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.api.client.Client.SocketMsgController")
 
@@ -34,7 +30,9 @@ class TestClient:
         client.on_message({"hello": "world"})
         extension.trigger_event.assert_called_with({"hello": "world"})
 
-    def test_unload(self, client: Client, extension: MagicMock, timer: MagicMock) -> None:
+    def test_unload(self, client: Client, extension: MagicMock) -> None:
+        client.mainloop = MagicMock()
+        client.mainloop.is_running.return_value = True
         client.unload()
         extension.trigger_event.assert_called_with({"type": "event:unload"})
-        timer.assert_called_once()
+        client.mainloop.quit.assert_called_once()
