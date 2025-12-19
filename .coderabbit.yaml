@@ -1,0 +1,23 @@
+language: en-US
+reviews:
+  profile: assertive
+
+  # Suppress redundant posts and collapse the "walkthrough" post
+  review_status: false          # removes the "Actions performed" status comment
+  in_progress_fortune: false    # removes the in-progress "Currently processing…" comment
+  collapse_walkthrough: true
+
+  # Remove mostly redendant/noisy sections
+  sequence_diagrams: false
+  suggested_labels: false
+  changed_files_summary: false
+  poem: false
+
+  # Focus reviews on changed code only
+  path_instructions:
+    - path: "**"
+      instructions: |
+        Only review what changed in this PR (added/modified lines and their immediate context).
+        Do not flag pre-existing issues unless they are correctness, crash, or security risks.
+        If you notice repo-wide improvement opportunities, summarize them under a single
+        collapsed "Non‑blocking: repo‑wide observations" section in the walkthrough; avoid inline comments for these.
