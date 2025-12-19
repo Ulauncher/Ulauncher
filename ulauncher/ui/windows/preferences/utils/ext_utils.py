@@ -8,7 +8,7 @@ ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
 
 
 def fmt_pango_code_block(text: str) -> str:
-    return f'<span face="monospace" bgcolor="#00000030">{text}</span>'
+    return f'<span face="monospace" bgcolor="#90600050">{text}</span>'
 
 
 def get_status_str(ext: ExtensionController) -> ExtStatus:
