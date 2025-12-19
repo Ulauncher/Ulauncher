@@ -73,7 +73,6 @@ class ShortcutsView(views.BaseView):
 
         self.selected_icon_path = shortcut.icon or ""
         self._update_icon_button()
-        self._on_form_field_changed(self.name_entry)
 
         return form_box
 
