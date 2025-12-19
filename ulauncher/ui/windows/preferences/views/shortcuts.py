@@ -101,7 +101,7 @@ class ShortcutsView(views.BaseView):
 
     def _create_icon_section(self) -> Gtk.Box:
         """Create the icon selection section"""
-        icon_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        icon_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, valign=Gtk.Align.END)
         icon_section.set_margin_top(6)
 
         self.icon_button = Gtk.Button(width_request=views.ICON_SIZE_L, height_request=views.ICON_SIZE_L)
@@ -472,7 +472,7 @@ class ShortcutsView(views.BaseView):
 
     def _update_icon_button(self) -> None:
         """Update the icon button image"""
-        icon_surface = load_icon_surface(self.selected_icon_path, views.ICON_SIZE_M, self.get_scale_factor())
+        icon_surface = load_icon_surface(self.selected_icon_path, views.ICON_SIZE_L, self.get_scale_factor())
         icon = Gtk.Image.new_from_surface(icon_surface)
         self.icon_button.set_image(icon)
 
