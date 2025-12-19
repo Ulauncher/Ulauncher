@@ -7,6 +7,10 @@ from ulauncher.modes.extensions.extension_controller import ExtensionController
 ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
 
 
+def fmt_pango_code_block(text: str) -> str:
+    return f'<span face="monospace" bgcolor="#00000030">{text}</span>'
+
+
 def get_status_str(ext: ExtensionController) -> ExtStatus:
     if ext.has_error:
         return "error"
@@ -54,7 +58,7 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionControl
         message = (
             f"The extension crashed because it could not import module <b>{module_name}</b>.\n\n"
             f"Try installing this module manually:\n"
-            f'<span face="monospace" bgcolor="#00000030">pip3 install {module_name} --user</span>\n\n'
+            f"{fmt_pango_code_block(f'pip3 install {module_name} --user')}\n\n"
             f"Then restart Ulauncher."
         )
         if ext_url:
