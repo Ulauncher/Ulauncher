@@ -472,7 +472,6 @@ class ShortcutsView(views.BaseView):
 
     def _update_icon_button(self) -> None:
         """Update the icon button image"""
-        icon: Gtk.Image | None = None
         icon_surface = load_icon_surface(self.selected_icon_path, views.ICON_SIZE_M, self.get_scale_factor())
         icon = Gtk.Image.new_from_surface(icon_surface)
         self.icon_button.set_image(icon)
