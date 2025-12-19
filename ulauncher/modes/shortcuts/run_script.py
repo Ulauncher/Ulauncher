@@ -16,7 +16,7 @@ def run_script(script: str, arg: str) -> None:
     with open(file_path, "w") as file:
         file.write(script)
     try:
-        os.chmod(file_path, 0o777)
+        os.chmod(file_path, 0o700)
         logger.debug("Running a script from %s", file_path)
         output = subprocess.check_output([file_path + " " + shlex.quote(arg)], shell=True).decode("utf-8")
         logger.debug("Script action output:\n%s", output)
