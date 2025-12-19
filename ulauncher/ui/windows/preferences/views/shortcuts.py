@@ -24,7 +24,6 @@ class ShortcutsView(views.BaseView):
         left_sidebar = styled(
             Gtk.Box(
                 orientation=Gtk.Orientation.VERTICAL,
-                spacing=0,
                 hexpand=False,
                 halign=Gtk.Align.START,
                 width_request=views.SIDEBAR_WIDTH,
