@@ -479,11 +479,9 @@ class ShortcutsView(views.BaseView):
 
     def _on_select_icon(self, _button: Gtk.Button) -> None:
         """Handle icon selection"""
-        toplevel = self.get_toplevel()
-        if not isinstance(toplevel, Gtk.Window):
-            return
-
-        dialog = Gtk.FileChooserDialog(title="Select Icon", parent=toplevel, action=Gtk.FileChooserAction.OPEN)
+        dialog = Gtk.FileChooserDialog(
+            title="Select Icon", transient_for=self.window, action=Gtk.FileChooserAction.OPEN
+        )
         dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 
         # Add image filter
