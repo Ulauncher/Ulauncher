@@ -489,7 +489,7 @@ class ShortcutsView(views.BaseView):
         # Add image filter
         filter_images = Gtk.FileFilter()
         filter_images.set_name("Image files")
-        filter_images.add_mime_type("image/*")
+        filter_images.add_pixbuf_formats()
         dialog.add_filter(filter_images)
 
         response = dialog.run()
