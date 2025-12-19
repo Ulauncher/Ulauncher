@@ -217,16 +217,16 @@ class ShortcutsView(views.BaseView):
         spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         button_row.pack_start(spacer, True, True, 0)
 
-        delete_button = styled(Gtk.Button(label="Delete"), "shortcuts-button", "destructive-action")
-        delete_button.set_sensitive(bool(shortcut.id))
-        delete_button.connect("clicked", self._on_delete_current)
+        remove_button = styled(Gtk.Button(label="Remove"), "shortcuts-button", "destructive-action")
+        remove_button.set_sensitive(bool(shortcut.id))
+        remove_button.connect("clicked", self._on_remove_current)
 
         save_button = styled(Gtk.Button(label="Save"), "shortcuts-button", "suggested-action")
         save_button.set_sensitive(False)
         save_button.connect("clicked", self._on_save_shortcut)
         self.save_button = save_button
 
-        for button in [delete_button, save_button]:
+        for button in [remove_button, save_button]:
             button_row.pack_start(button, False, False, 0)
 
         return button_row
@@ -367,8 +367,8 @@ class ShortcutsView(views.BaseView):
             self.active_shortcut_id = None
             self._show_placeholder()
 
-    def _on_delete_current(self, _button: Gtk.Button) -> None:
-        """Handle delete current shortcut button click"""
+    def _on_remove_current(self, _button: Gtk.Button) -> None:
+        """Handle remove current shortcut button click"""
         if not self.active_shortcut_id:
             return
 
@@ -377,7 +377,7 @@ class ShortcutsView(views.BaseView):
             return
 
         response = DialogLauncher(self.window).show_question(
-            f'Delete shortcut "{shortcut.name}"?', "This action cannot be undone."
+            f'Remove shortcut "{shortcut.name}"?', "This action cannot be undone."
         )
         if response == Gtk.ResponseType.YES:
             # Remove from database
