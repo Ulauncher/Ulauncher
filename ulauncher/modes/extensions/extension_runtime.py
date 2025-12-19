@@ -101,7 +101,7 @@ class ExtensionRuntime:
         timer(0.5, self._kill)
 
     def _kill(self) -> None:
-        if self._subprocess.get_identifier():
+        if self._subprocess.get_exit_status() is None:
             logger.info("Extension %s still running, sending SIGKILL", self._ext_id)
             # It is possible that the process exited between the check above and this signal,
             # luckily the subprocess library handles the signal delivery in race-free way, so this
