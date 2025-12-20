@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Literal
+from typing import Any
 
 from gi.repository import GLib, Gtk
 
@@ -91,7 +91,10 @@ class ExtensionsView(BaseView):
 
         self.pack_start(self.ext_details_view, True, True, 0)
 
-        def reload_extension_list() -> Literal[True]:
+        def reload_extension_list() -> bool:
+            if not self.window or not self.window.get_window():
+                return False  # Stops the timeout
+
             self._load_extension_list()
             return True
 
