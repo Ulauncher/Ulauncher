@@ -131,6 +131,11 @@ class UlauncherApp(Gtk.Application):
             cast("UlauncherWindow", main_window).close(save_query=True)
 
         if preferences := self.windows.get("preferences"):
+            if preferences.get_window() is None:
+                logger.warning("Ignoring stale Preferences window reference (suspecting a memory leak)")
+                del self.windows["preferences"]
+                self.show_preferences(page)
+                return
             cast("PreferencesWindow", preferences).present(page)
         else:
             preferences = PreferencesWindow(application=self)
