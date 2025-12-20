@@ -109,5 +109,4 @@ class DialogLauncher:
         return cast("Gtk.ResponseType", response)
 
     def show_error(self, text: str, secondary_text: str) -> None:
-        response = self.show(text, secondary_text, Gtk.MessageType.ERROR)
-        return cast("None", response)
+        self.show(text, secondary_text, Gtk.MessageType.ERROR)
