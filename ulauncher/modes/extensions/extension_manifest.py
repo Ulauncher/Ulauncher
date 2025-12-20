@@ -5,18 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from ulauncher import api_version
+from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
-
-
-class ExtensionManifestError(Exception):
-    pass
-
-
-class ExtensionIncompatibleRecoverableError(Exception):
-    pass
 
 
 class ExtensionManifestPreference(JsonConf):
@@ -96,14 +89,14 @@ class ExtensionManifest(JsonConf):
         required_fields = ["api_version", "authors", "name", "icon", "triggers"]
         if missing_fields := [f for f in required_fields if not self.get(f)]:
             err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
-            raise ExtensionManifestError(err_msg)
+            raise ext_exceptions.ManifestError(err_msg)
 
         try:
             for t_id, t in self.triggers.items():
                 assert t.name, f'"{t_id}" missing non-optional field "name"'
         except AssertionError as e:
             msg = f"Invalid triggers in Extension manifest: {e}"
-            raise ExtensionManifestError(msg) from None
+            raise ext_exceptions.ManifestError(msg) from None
 
         try:
             for p_id, p in self.preferences.items():
@@ -141,7 +134,7 @@ class ExtensionManifest(JsonConf):
                     assert p.options, f'"{p_id}" option cannot be empty for select type'
         except AssertionError as e:
             msg = f"Invalid preferences in Extension manifest: {e}"
-            raise ExtensionManifestError(msg) from None
+            raise ext_exceptions.ManifestError(msg) from None
 
     def check_compatibility(self, verbose: bool = False) -> None:
         """
@@ -159,7 +152,7 @@ class ExtensionManifest(JsonConf):
                     )
             else:
                 msg = f"{self.name} does not support Ulauncher API v{api_version}."
-                raise ExtensionIncompatibleRecoverableError(msg)
+                raise ext_exceptions.CompatibilityError(msg)
 
     @classmethod
     def load(cls, path: str | Path) -> ExtensionManifest:

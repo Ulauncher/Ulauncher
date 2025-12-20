@@ -13,15 +13,10 @@ from typing import Any, Callable
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
-from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.extension_dependencies import (
-    ExtensionDependencies,
-    ExtensionDependenciesRecoverableError,
-)
+from ulauncher.modes.extensions import ext_exceptions, extension_finder
+from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
-    ExtensionIncompatibleRecoverableError,
     ExtensionManifest,
-    ExtensionManifestError,
     ExtensionManifestPreference,
     ExtensionManifestTrigger,
 )
@@ -112,7 +107,7 @@ class ExtensionController:
             # install python dependencies from requirements.txt
             deps = ExtensionDependencies(remote.ext_id, remote.target_dir)
             deps.install()
-        except ExtensionDependenciesRecoverableError:
+        except ext_exceptions.DependencyError:
             # clean up broken install
             rmtree(remote.target_dir)
             raise
@@ -221,7 +216,7 @@ class ExtensionController:
             try:
                 await self.stop()
                 await self.install(self.state.url, commit_hash, warn_if_overwrite=False)
-            except Exception:
+            except (ext_exceptions.ExtensionError, ValueError):
                 logger.exception("Could not update extension '%s'.", self.id)
                 copytree(backup_dir, ext_path, dirs_exist_ok=True)
                 await self.toggle_enabled(was_running)
@@ -268,10 +263,10 @@ class ExtensionController:
             try:
                 self.manifest.validate()
                 self.manifest.check_compatibility(verbose=True)
-            except ExtensionManifestError as err:
+            except ext_exceptions.ManifestError as err:
                 exit_handler("Invalid", str(err))
                 return False
-            except ExtensionIncompatibleRecoverableError as err:
+            except ext_exceptions.CompatibilityError as err:
                 exit_handler("Incompatible", str(err))
                 return False
 

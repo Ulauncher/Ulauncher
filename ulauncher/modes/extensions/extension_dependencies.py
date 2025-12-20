@@ -5,11 +5,9 @@ import subprocess
 import sys
 from os.path import isdir, isfile
 
+from ulauncher.modes.extensions import ext_exceptions
+
 logger = logging.getLogger()
-
-
-class ExtensionDependenciesRecoverableError(Exception):
-    pass
 
 
 class ExtensionDependencies:
@@ -68,7 +66,7 @@ class ExtensionDependencies:
             logger.exception("Error during installation. Output: %s", e.stderr)
 
             err_msg = f"$ {command_str}\n{e.stderr}"
-            raise ExtensionDependenciesRecoverableError(err_msg) from e
+            raise ext_exceptions.DependencyError(err_msg) from e
 
     def _read_requirements(self) -> str | None:
         """
