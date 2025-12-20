@@ -134,6 +134,7 @@ class UlauncherCore:
                 if results is not None:
                     _events.emit("window:show_results", results)
             except Exception:
+                # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)
             return
 
