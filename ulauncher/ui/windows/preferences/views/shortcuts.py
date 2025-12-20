@@ -8,6 +8,7 @@ from gi.repository import Gtk, Pango
 
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 from ulauncher.ui.windows.preferences import views
+from ulauncher.ui.windows.preferences.utils.ext_utils import fmt_pango_code_block
 from ulauncher.ui.windows.preferences.views import DataListBoxRow, DialogLauncher, TextArea, styled
 from ulauncher.utils.load_icon_surface import load_icon_surface
 
@@ -144,6 +145,28 @@ class ShortcutsView(views.BaseView):
         cmd_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         cmd_label = Gtk.Label(label="Query or script", halign=Gtk.Align.START)
         cmd_section.pack_start(cmd_label, False, False, 0)
+
+        cmd_help_expander = styled(Gtk.Expander(label="Show help and examples"), "shortcuts-cmd-help")
+        cmd_script_codeblock = '#!/bin/bash\nnotify-send "Notification" "$*"'
+        cmd_examples_label = Gtk.Label(
+            label=(
+                f"Use {fmt_pango_code_block('%s')} as the argument placeholder. "
+                f"For scripts you can also use: {fmt_pango_code_block('$*')} or {fmt_pango_code_block('$@')}.\n\n"
+                "<b>URL shortcut example</b> (google search)\n"
+                f"{fmt_pango_code_block('https://www.google.com/search?q=%s')}\n\n"
+                "<b>Script shortcut example</b> (send notification)\n"
+                f"{fmt_pango_code_block(cmd_script_codeblock)}\n\n"
+                f"*1 Note that scripts must start with a shebang ({fmt_pango_code_block('#!')})\n"
+                f"*2 Run {fmt_pango_code_block('ulauncher --verbose')} to see any output from scripts"
+            ),
+            use_markup=True,
+            halign=Gtk.Align.START,
+            wrap=True,
+            selectable=True,
+        )
+
+        cmd_help_expander.add(cmd_examples_label)
+        cmd_section.pack_start(cmd_help_expander, False, False, 5)
 
         scrolled_cmd = styled(
             Gtk.ScrolledWindow(min_content_height=100),

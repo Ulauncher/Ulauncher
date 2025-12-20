@@ -205,3 +205,8 @@ notebook tab {
 .shortcuts-button + .shortcuts-button {
   margin-left: 8px;
 }
+
+.shortcuts-cmd-help > * {
+  color: alpha(@theme_fg_color, 0.55);
+  font-size: 13px;
+}
