@@ -8,7 +8,7 @@ logger = logging.getLogger()
 def systemctl_run(*args: str) -> str:
     try:
         return subprocess.check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired, OSError):
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
         return ""
 
 

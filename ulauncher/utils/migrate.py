@@ -14,14 +14,14 @@ CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache
 
 
 def _load_legacy(path: Path) -> Any | None:
-    try:
-        import pickle
+    import pickle
 
+    try:
         if path.suffix == ".db":
             return pickle.loads(path.read_bytes())
         if path.suffix == ".json":
             return json.loads(path.read_text())
-    except Exception as e:  # noqa: BLE001
+    except (OSError, pickle.PickleError, EOFError, AttributeError, ImportError, ValueError) as e:
         _logger.warning('Could not migrate file "%s": %s', str(path), e)
     return None
 
@@ -29,7 +29,7 @@ def _load_legacy(path: Path) -> Any | None:
 def _store_json(path: str, data: Any) -> bool:
     try:
         Path(path).write_text(json.dumps(data, indent=4))
-    except Exception as e:  # noqa: BLE001
+    except (OSError, TypeError, ValueError) as e:
         _logger.warning('Could not store JSON file "%s": %s', path, e)
         return False
     return True
@@ -97,7 +97,7 @@ def v5_to_v6() -> None:  # noqa: PLR0912
     for file in ext_prefs.rglob("*.json"):
         try:
             _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
-        except Exception as e:  # noqa: BLE001 -
+        except (OSError, KeyError, ValueError) as e:
             _logger.warning("Skipping migration for extension preference %s (extension not installed): %s", file, e)
     # Migrate db to JSON without overwrite. So if a JSON file exists it should never be overwritten
     # with data from a db file
@@ -142,7 +142,7 @@ def v5_to_v6() -> None:  # noqa: PLR0912
                     else:
                         _logger.warning("Can't enable systemd unit. Systemd does not have systemd")
             _logger.info("Applied autostart settings to systemd")
-        except Exception as e:  # noqa: BLE001
+        except (OSError, KeyError) as e:
             _logger.warning("Couldn't migrate autostart: %s", e)
 
 

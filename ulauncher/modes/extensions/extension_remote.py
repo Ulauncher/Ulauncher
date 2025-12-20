@@ -94,11 +94,10 @@ class ExtensionRemote(UrlParseResult):
                     commit, ref = row.split()
                     refs[basename(ref)] = commit
 
-        except Exception as e:
-            if isinstance(e, (HTTPError, URLError)):
-                msg = f'Could not access repository resource "{self.url}"'
-                raise ExtensionNetworkError(msg) from e
-
+        except (HTTPError, URLError) as e:
+            msg = f'Could not access repository resource "{self.url}"'
+            raise ExtensionNetworkError(msg) from e
+        except (subprocess.CalledProcessError, OSError) as e:
             msg = f'Could not fetch reference "{ref}" for {self.url}.' if ref else f"Could not fetch remote {self.url}."
             raise ExtensionNetworkError(msg) from e
 

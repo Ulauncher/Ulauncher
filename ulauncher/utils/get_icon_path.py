@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from os.path import expanduser, isfile, join
 
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger()
@@ -23,7 +23,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
             if themed_icon := icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE):
                 return themed_icon.get_filename()
 
-    except Exception as err:  # noqa: BLE001
+    except (OSError, TypeError, AttributeError, GLib.Error) as err:
         logger.warning("Error '%s' occurred when trying to load icon path '%s'.", err, icon)
         logger.info("If this happens often, please see https://github.com/Ulauncher/Ulauncher/discussions/1346")
 

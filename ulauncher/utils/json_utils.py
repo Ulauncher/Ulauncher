@@ -30,7 +30,7 @@ def json_load(path: str | Path) -> Any:
             data = file_path.read_text()
             if data.strip():
                 return json.loads(data, object_hook=sanitize_json)
-        except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
+        except ValueError:
             backup_path = f"{file_path}.{datetime.now().isoformat()}.backup"
             logger.exception('Error opening JSON file "%s"', file_path)
             logger.warning('Moving invalid JSON file to "%s"', backup_path)
@@ -66,7 +66,7 @@ def json_save(
             file_path.write_text(
                 json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
             )
-        except (OSError, PermissionError):
+        except OSError:
             logger.exception('Could not write to JSON file "%s"', file_path)
         else:
             return True

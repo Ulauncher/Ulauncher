@@ -107,7 +107,7 @@ def _is_enabled(query_str: str) -> bool:
             return node.func.id in functions
     except SyntaxError:
         pass
-    except Exception as e:  # noqa: BLE001
+    except (ValueError, TypeError, AttributeError, RecursionError, MemoryError) as e:
         logger.warning("Calc mode parse error for query: '%s', (%s)", query_str, e)
     return False
 

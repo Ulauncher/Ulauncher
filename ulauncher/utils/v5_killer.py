@@ -34,5 +34,5 @@ def kill_ulauncher_v5() -> None:
         logger.info("PID: %s killed.", pid)
     except ProcessLookupError:
         logger.info("Process with PID %s not found (already dead?).", pid)
-    except Exception as ex:  # noqa: BLE001
+    except (OSError, ValueError) as ex:
         logger.info("Failed to kill process: %s", ex)

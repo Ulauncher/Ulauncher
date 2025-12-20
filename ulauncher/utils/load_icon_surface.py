@@ -28,7 +28,7 @@ def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSur
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, real_size, real_size)
         assert pixbuf
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
-    except Exception as e:
+    except (OSError, AssertionError, AttributeError) as e:
         if icon == DEFAULT_EXE_ICON:
             msg = f"Could not load fallback icon: {icon}"
             raise RuntimeError(msg) from e
