@@ -20,8 +20,8 @@ events = EventBus()
 class PreferencesView(BaseView):
     """General preferences page"""
 
-    def __init__(self, window: Gtk.Window) -> None:
-        super().__init__(window, orientation=Gtk.Orientation.VERTICAL)
+    def __init__(self) -> None:
+        super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.settings: Settings = Settings.load()
         self.autostart_pref: SystemdController = SystemdController("ulauncher")
 

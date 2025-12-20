@@ -9,7 +9,13 @@ from gi.repository import Gtk, Pango
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 from ulauncher.ui.windows.preferences import views
 from ulauncher.ui.windows.preferences.utils.ext_utils import fmt_pango_code_block
-from ulauncher.ui.windows.preferences.views import DataListBoxRow, DialogLauncher, TextArea, styled
+from ulauncher.ui.windows.preferences.views import (
+    DataListBoxRow,
+    DialogLauncher,
+    TextArea,
+    get_window_for_widget,
+    styled,
+)
 from ulauncher.utils.load_icon_surface import load_icon_surface
 
 
@@ -19,8 +25,8 @@ class ShortcutsView(views.BaseView):
     save_button: Gtk.Button | None = None
     """Shortcuts management page"""
 
-    def __init__(self, window: Gtk.Window) -> None:
-        super().__init__(window, orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
+    def __init__(self) -> None:
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
 
         left_sidebar = styled(
             Gtk.Box(
@@ -394,7 +400,7 @@ class ShortcutsView(views.BaseView):
         if not shortcut:
             return
 
-        response = DialogLauncher(self.window).show_question(
+        response = DialogLauncher(self).show_question(
             f'Remove shortcut "{shortcut.name}"?', "This action cannot be undone."
         )
         if response == Gtk.ResponseType.YES:
@@ -497,7 +503,7 @@ class ShortcutsView(views.BaseView):
     def _on_select_icon(self, _button: Gtk.Button) -> None:
         """Handle icon selection"""
         dialog = Gtk.FileChooserDialog(
-            title="Select Icon", transient_for=self.window, action=Gtk.FileChooserAction.OPEN
+            title="Select Icon", transient_for=get_window_for_widget(self), action=Gtk.FileChooserAction.OPEN
         )
         dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 

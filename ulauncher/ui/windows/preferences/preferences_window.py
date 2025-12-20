@@ -81,7 +81,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         self._create_headerbar()
 
         for name, view_class in VIEW_CONFIG:
-            view = view_class(self)
+            view = view_class()
             self._add_view(view, name)
 
         # Setup custom styling

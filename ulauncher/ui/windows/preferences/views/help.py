@@ -9,8 +9,8 @@ from ulauncher.utils.launch_detached import open_detached
 class HelpView(BaseView):
     """Help page with useful information and links"""
 
-    def __init__(self, window: Gtk.Window) -> None:
-        super().__init__(window, orientation=Gtk.Orientation.VERTICAL)
+    def __init__(self) -> None:
+        super().__init__(orientation=Gtk.Orientation.VERTICAL)
 
         scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
         self.pack_start(scrolled, True, True, 0)

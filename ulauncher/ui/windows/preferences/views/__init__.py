@@ -16,6 +16,12 @@ SIDEBAR_WIDTH = 280
 SPINNER_MIN_ANIMATION_MS = 250
 
 
+def get_window_for_widget(widget: Gtk.Widget) -> Gtk.Window | None:
+    if (toplevel := widget.get_toplevel()) and isinstance(toplevel, Gtk.Window):
+        return toplevel
+    return None
+
+
 def styled(widget: T, *class_names: str) -> T:
     style = widget.get_style_context()
     for class_name in class_names:
@@ -46,12 +52,7 @@ def start_spinner_button_animation(button: Gtk.Button) -> Callable[[], None]:
 
 
 class BaseView(Gtk.Box):
-    window: Gtk.Window
     """Base class for preference views (for public methods)"""
-
-    def __init__(self, window: Gtk.Window, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.window = window
 
     def save_changes(self) -> bool:
         """Save changes and return True if successful, False otherwise.
@@ -81,8 +82,8 @@ class TextArea(Gtk.TextView):
 
 
 class DialogLauncher:
-    def __init__(self, window: Gtk.Window) -> None:
-        self.window = window
+    def __init__(self, widget: Gtk.Widget) -> None:
+        self.widget = widget
 
     def show(
         self,
@@ -92,7 +93,7 @@ class DialogLauncher:
         buttons: Gtk.ButtonsType | None = None,
     ) -> Gtk.ResponseType | None:
         dialog = Gtk.MessageDialog(
-            transient_for=self.window,
+            transient_for=get_window_for_widget(self.widget),
             modal=True,
             message_type=message_type or Gtk.MessageType.INFO,
             buttons=buttons or Gtk.ButtonsType.OK,

@@ -13,8 +13,8 @@ ABOUT_VIEW_LOGO_SIZE = 200
 class AboutView(BaseView):
     """About page with application information"""
 
-    def __init__(self, window: Gtk.Window) -> None:
-        super().__init__(window, orientation=Gtk.Orientation.HORIZONTAL, margin=40, spacing=30)
+    def __init__(self) -> None:
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, margin=40, spacing=30)
 
         # Left column - Logo and version info
         left_column = Gtk.Box(

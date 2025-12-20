@@ -12,7 +12,7 @@ from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependenciesRecoverableError
 from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifestError
 from ulauncher.modes.extensions.extension_remote import ExtensionNetworkError, InvalidExtensionRecoverableError
-from ulauncher.ui.windows.preferences.views import DialogLauncher, styled
+from ulauncher.ui.windows.preferences.views import DialogLauncher, get_window_for_widget, styled
 
 logger = logging.getLogger()
 
@@ -20,14 +20,15 @@ logger = logging.getLogger()
 class ExtensionHandlers:
     """Handles extension operations like install, remove, toggle, update, etc."""
 
-    def __init__(self, window: Gtk.Window) -> None:
-        self.window = window
-        self.dialog_launcher = DialogLauncher(self.window)
+    def __init__(self, widget: Gtk.Widget) -> None:
+        self.widget = widget
+        self.dialog_launcher = DialogLauncher(self.widget)
 
     def _show_progress_dialog(self, title: str, message: str) -> Gtk.Dialog:
         """Create a progress dialog with a spinning icon"""
         dialog = styled(
-            Gtk.Dialog(title=title, transient_for=self.window, modal=True, resizable=False), "progress-dialog"
+            Gtk.Dialog(title=title, transient_for=get_window_for_widget(self.widget), modal=True, resizable=False),
+            "progress-dialog",
         )
         dialog.set_default_size(400, 150)
 
@@ -58,7 +59,7 @@ class ExtensionHandlers:
 
     def add_extension(self, callback: Callable[[ExtensionController], None]) -> None:
         """Handle add extension button click"""
-        dialog = Gtk.Dialog(title="Add Extension", transient_for=self.window, modal=True)
+        dialog = Gtk.Dialog(title="Add Extension", transient_for=get_window_for_widget(self.widget), modal=True)
         dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("Add", Gtk.ResponseType.OK)
         dialog.set_default_size(500, 150)

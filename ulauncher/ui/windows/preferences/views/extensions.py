@@ -18,6 +18,7 @@ from ulauncher.ui.windows.preferences.views import (
     BaseView,
     DataListBoxRow,
     TextArea,
+    get_window_for_widget,
     start_spinner_button_animation,
     styled,
 )
@@ -36,11 +37,11 @@ class ExtensionsView(BaseView):
     ext_details_view: Gtk.Box
     save_button: Gtk.Button | None = None
 
-    def __init__(self, window: Gtk.Window) -> None:
-        super().__init__(window, orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
+    def __init__(self) -> None:
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
 
-        # Initialize extension handlers
-        self.handlers = ExtensionHandlers(window)
+        # Initialize extension handlers (pass self so it can call get_toplevel() when needed)
+        self.handlers = ExtensionHandlers(self)
 
         left_sidebar = styled(
             Gtk.Box(
@@ -92,7 +93,9 @@ class ExtensionsView(BaseView):
         self.pack_start(self.ext_details_view, True, True, 0)
 
         def reload_extension_list() -> bool:
-            if not self.window or not self.window.get_window():
+            # Stop the timeout if the view or its toplevel window is destroyed
+            toplevel = get_window_for_widget(self)
+            if not toplevel or not toplevel.get_window():
                 return False  # Stops the timeout
 
             self._load_extension_list()
