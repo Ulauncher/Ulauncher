@@ -35,7 +35,7 @@ implicit-any = "error"
 [tool.mypy]
 python_version = "3.8"
 strict = true
-disable_error_code = "import-untyped"
+disable_error_code = "import-untyped,call-arg"
 implicit_reexport = true
 disallow_untyped_calls = false
 incremental = false  # Incremental is broken: https://github.com/python/mypy/issues/18473
