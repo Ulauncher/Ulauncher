@@ -102,7 +102,6 @@ class ShortcutsView(views.BaseView):
     def _create_icon_section(self) -> Gtk.Box:
         """Create the icon selection section"""
         icon_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, valign=Gtk.Align.END)
-        icon_section.set_margin_top(6)
 
         self.icon_button = Gtk.Button(width_request=views.ICON_SIZE_L, height_request=views.ICON_SIZE_L)
         self.icon_button.connect("clicked", self._on_select_icon)
@@ -312,15 +311,14 @@ class ShortcutsView(views.BaseView):
             margin_end=8,
         )
 
-        icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.MENU)
-        icon.set_pixel_size(18)
-        action_box.pack_start(icon, False, False, 0)
+        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.MENU)
+        action_box.pack_start(add_icon, False, False, 0)
 
-        label = styled(
+        add_label = styled(
             Gtk.Label(label="Add Shortcut", halign=Gtk.Align.START),
             "sidebar-item-name",
         )
-        action_box.pack_start(label, True, True, 0)
+        action_box.pack_start(add_label, True, True, 0)
 
         row.add(action_box)
         return row
@@ -436,7 +434,6 @@ class ShortcutsView(views.BaseView):
             "body",
             "dim-label",
         )
-        hint_label.set_line_wrap(True)
 
         placeholder_box.pack_start(heading_label, False, False, 0)
         placeholder_box.pack_start(hint_label, False, False, 0)
