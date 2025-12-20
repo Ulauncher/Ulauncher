@@ -227,6 +227,10 @@ class ExtensionsView(BaseView):
 
         scrolled.add(details_box)
         self.ext_details_view.pack_start(scrolled, True, True, 0)
+
+        footer_button_row = self._create_button_row(ext)
+        self.ext_details_view.pack_start(footer_button_row, False, False, 0)
+
         self.ext_details_view.show_all()
 
     def _create_extension_header(self, ext: ExtensionController) -> Gtk.Box:
@@ -299,25 +303,12 @@ class ExtensionsView(BaseView):
         folder_button.connect("clicked", lambda _: open_detached(ext.path))
         button_box.pack_start(folder_button, False, False, 0)
 
-        # Save button
-        save_icon = Gtk.Image.new_from_icon_name("checkmark-symbolic", Gtk.IconSize.BUTTON)
-        self.save_button = styled(Gtk.Button(image=save_icon, tooltip_text="Save", sensitive=False), "suggested-action")
-        self.save_button.connect("clicked", lambda _: self.save_changes())
-        button_box.pack_start(self.save_button, False, False, 0)
-
         # Update button
         if ext.is_manageable and ext.state.url:
             update_icon = Gtk.Image.new_from_icon_name("software-update-symbolic", Gtk.IconSize.BUTTON)
             update_button = styled(Gtk.Button(image=update_icon, tooltip_text="Check updates"), "update-button")
             update_button.connect("clicked", self._on_check_updates, ext)
             button_box.pack_start(update_button, False, False, 0)
-
-        # Remove button
-        if ext.is_manageable:
-            remove_icon = Gtk.Image.new_from_icon_name("user-trash-symbolic", Gtk.IconSize.BUTTON)
-            remove_button = styled(Gtk.Button(image=remove_icon, tooltip_text="Remove"), "destructive-action")
-            remove_button.connect("clicked", self.on_remove_extension, ext)
-            button_box.pack_start(remove_button, False, False, 0)
 
         # Enable/Disable toggle
         toggle_switch = Gtk.Switch(
@@ -330,6 +321,28 @@ class ExtensionsView(BaseView):
         button_box.pack_start(toggle_switch, False, False, 0)
 
         return button_box
+
+    def _create_button_row(self, ext: ExtensionController) -> Gtk.Box:
+        """Create the footer button row with Save and Remove buttons"""
+        button_row = styled(
+            Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, hexpand=True, margin=10),
+            "shortcuts-button-row",
+        )
+        spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        button_row.pack_start(spacer, True, True, 0)
+
+        # Remove button (only if extension is manageable)
+        if ext.is_manageable:
+            remove_button = styled(Gtk.Button(label="Remove"), "shortcuts-button", "destructive-action")
+            remove_button.connect("clicked", self.on_remove_extension, ext)
+            button_row.pack_start(remove_button, False, False, 0)
+
+        # Save button
+        self.save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
+        self.save_button.connect("clicked", lambda _: self.save_changes())
+        button_row.pack_start(self.save_button, False, False, 0)
+
+        return button_row
 
     def _create_installation_instructions_section(self, ext: ExtensionController) -> Gtk.Box:
         """Create the installation instructions section"""
@@ -377,7 +390,7 @@ class ExtensionsView(BaseView):
 
                 # Keyword input field
                 keyword_entry = Gtk.Entry(text=trigger.keyword, placeholder_text="Enter keyword...", width_chars=20)
-                keyword_entry.connect("changed", self._on_setting_change, self.save_button)
+                keyword_entry.connect("changed", self._on_setting_change)
                 trigger_box.pack_start(keyword_entry, False, False, 0)
 
                 if trigger.description:
@@ -409,7 +422,7 @@ class ExtensionsView(BaseView):
 
             if pref_type == "checkbox":
                 checkbox = Gtk.CheckButton(label=pref_name, active=pref.get("value", False))
-                checkbox.connect("toggled", self._on_setting_change, self.save_button)
+                checkbox.connect("toggled", self._on_setting_change)
                 self.pref_widgets[pref_id] = checkbox
                 pref_box.pack_start(checkbox, False, False, 0)
             else:
@@ -438,7 +451,7 @@ class ExtensionsView(BaseView):
                 step_increment=1,
             )
             spin = Gtk.SpinButton(adjustment=adjustment)
-            spin.connect("value-changed", self._on_setting_change, self.save_button)
+            spin.connect("value-changed", self._on_setting_change)
             self.pref_widgets[pref_id] = spin
             return spin
         if pref_type == "select":
@@ -447,7 +460,7 @@ class ExtensionsView(BaseView):
             return self._create_text_widget(pref_id, pref)
         if pref_type == "input":
             entry = Gtk.Entry(text=str(pref.get("value", "")))
-            entry.connect("changed", self._on_setting_change, self.save_button)
+            entry.connect("changed", self._on_setting_change)
             self.pref_widgets[pref_id] = entry
             return entry
 
@@ -478,7 +491,7 @@ class ExtensionsView(BaseView):
 
         if active_index >= 0:
             combo.set_active(active_index)
-        combo.connect("changed", self._on_setting_change, self.save_button)
+        combo.connect("changed", self._on_setting_change)
         self.pref_widgets[pref_id] = combo
         return combo
 
@@ -490,7 +503,7 @@ class ExtensionsView(BaseView):
         )
         textview.set_text(str(pref.get("value", "")))
         scroll_container.add(textview)
-        textview.get_buffer().connect("changed", self._on_setting_change, self.save_button)
+        textview.get_buffer().connect("changed", self._on_setting_change)
         self.pref_widgets[pref_id] = textview
         return scroll_container
 
@@ -522,8 +535,9 @@ class ExtensionsView(BaseView):
 
         return container
 
-    def _on_setting_change(self, _widget: Gtk.Widget, save_button: Gtk.Button) -> None:
-        save_button.set_sensitive(True)
+    def _on_setting_change(self, _widget: Gtk.Widget) -> None:
+        if self.save_button:
+            self.save_button.set_sensitive(True)
 
     def _on_add_extension(self, _widget: Gtk.Widget) -> None:
         def after_add_extension(ext: ExtensionController) -> None:
