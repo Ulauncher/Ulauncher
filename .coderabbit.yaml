@@ -7,11 +7,26 @@ reviews:
   in_progress_fortune: false    # removes the in-progress "Currently processing…" comment
   collapse_walkthrough: true
 
+  # Don't edit the PR top post
+  high_level_summary_in_walkthrough: true
+
   # Remove mostly redendant/noisy sections
   sequence_diagrams: false
   suggested_labels: false
   changed_files_summary: false
   poem: false
+
+  # disable suggesting tasks for coderabbit
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+  # disable docstring coverage checks
+  pre_merge_checks:
+    docstrings:
+      mode: off
 
   # Focus reviews on changed code only
   path_instructions:
