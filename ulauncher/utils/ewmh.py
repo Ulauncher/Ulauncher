@@ -16,7 +16,7 @@ See the freedesktop.org `specification
 information.
 """
 
-from Xlib import display, X, xobject, protocol
+from Xlib import display, X, xobject, protocol, error
 import time
 
 
@@ -452,7 +452,7 @@ class EWMH:
     def _getAtomName(self, atom):
         try:
             return self.display.get_atom_name(atom)
-        except:
+        except error.BadAtom:
             return "UNKNOWN"
 
     def _createWindow(self, wId):
