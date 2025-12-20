@@ -119,7 +119,7 @@ class TestExtensionRuntime:
         exit_handler = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
-        runtime._subprocess.get_identifier.return_value = "ID"
+        runtime._subprocess.get_exit_status.return_value = None
         runtime._msg_controller = Mock()
         runtime.stop()
 
@@ -133,7 +133,7 @@ class TestExtensionRuntime:
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
 
         # Simulate process still running
-        runtime._subprocess.get_identifier.return_value = "ID"
+        runtime._subprocess.get_exit_status.return_value = None
         runtime._kill()
 
         # Verify SIGKILL is sent
