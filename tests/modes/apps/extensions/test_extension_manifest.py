@@ -4,11 +4,8 @@ import os
 
 import pytest
 
-from ulauncher.modes.extensions.extension_manifest import (
-    ExtensionIncompatibleRecoverableError,
-    ExtensionManifest,
-    ExtensionManifestError,
-)
+from ulauncher.modes.extensions import ext_exceptions
+from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.json_utils import json_stringify
 
 valid_manifest: dict[str, str | dict[str, dict[str, str]]] = {
@@ -28,7 +25,7 @@ class TestExtensionManifest:
 
     def test_validate__name_empty__exception_raised(self) -> None:
         manifest = ExtensionManifest({"api_version": "1"})
-        with pytest.raises(ExtensionManifestError):
+        with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__valid_manifest__no_exceptions_raised(self) -> None:
@@ -38,19 +35,19 @@ class TestExtensionManifest:
     def test_validate__prefs_incorrect_type__exception_raised(self) -> None:
         valid_manifest["preferences"] = {"id": {"type": "incorrect"}}
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError):
+        with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__type_kw_empty_name__exception_raised(self) -> None:
         valid_manifest["preferences"] = {"id": {"type": "incorrect", "keyword": "kw"}}
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError):
+        with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__raises_error_if_empty_default_value_for_keyword(self) -> None:
         valid_manifest["preferences"] = {"id": {"type": "keyword", "name": "My Keyword"}}
         manifest = ExtensionManifest(valid_manifest)
-        with pytest.raises(ExtensionManifestError):
+        with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self) -> None:
@@ -62,7 +59,7 @@ class TestExtensionManifest:
 
     def test_check_compatibility__manifest_version_0__exception_raised(self) -> None:
         manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
-        with pytest.raises(ExtensionIncompatibleRecoverableError):
+        with pytest.raises(ext_exceptions.CompatibilityError):
             manifest.check_compatibility()
 
     def test_check_compatibility__api_version__no_exceptions(self) -> None:

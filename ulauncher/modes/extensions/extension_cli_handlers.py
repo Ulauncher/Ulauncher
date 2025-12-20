@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ulauncher import app_id, paths
+from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
 
 if TYPE_CHECKING:
@@ -58,7 +59,6 @@ def list_active_extensions(_: ArgumentParser, __: Namespace) -> bool:
 
 def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
     from ulauncher.modes.extensions.extension_controller import ExtensionController
-    from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError, InvalidExtensionRecoverableError
 
     if "input" not in args or not args.input:
         logger.error("Error: URL or path is required for installing an extension")
@@ -72,9 +72,9 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
     try:
         controller = asyncio.run(ExtensionController.install(url))
         dbus_trigger_event("extensions:reload", [controller.id])
-    except (ValueError, InvalidExtensionRecoverableError):  # error already logged
+    except (ValueError, ext_exceptions.UrlError):  # error already logged
         return False
-    except ExtensionRemoteError:
+    except ext_exceptions.RemoteError:
         logger.warning("Network error: Could not install %s", args.input)
         return False
     return True
@@ -97,14 +97,13 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
 
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     from ulauncher.modes.extensions import extension_registry
-    from ulauncher.modes.extensions.extension_remote import ExtensionRemoteError
 
     if "input" in args and args.input:
         # Upgrade specific extension
         if controller := get_ext_controller(args.input):
             try:
                 asyncio.run(controller.update())
-            except ExtensionRemoteError:
+            except ext_exceptions.RemoteError:
                 logger.warning("Network error: Could not upgrade %s", args.input)
             dbus_trigger_event("extensions:reload", [controller.id])
             return True
@@ -121,7 +120,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             updated = asyncio.run(controller.update())
             if updated:
                 updated_extensions.append(controller.id)
-        except ExtensionRemoteError:
+        except ext_exceptions.RemoteError:
             logger.warning("Network error: Could not upgrade %s", controller.id)
 
     if updated_extensions:
@@ -179,21 +178,17 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
         logger.error("Error: %s", validation_error)
         return False
 
-    from ulauncher.modes.extensions.extension_manifest import (
-        ExtensionIncompatibleRecoverableError,
-        ExtensionManifest,
-        ExtensionManifestError,
-    )
+    from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 
     # Validate the extension manifest
     try:
         manifest = ExtensionManifest.load(str(path))
         manifest.validate()
         manifest.check_compatibility(verbose=True)
-    except (ExtensionManifestError, ExtensionIncompatibleRecoverableError):
+    except (ext_exceptions.ManifestError, ext_exceptions.CompatibilityError):
         logger.exception("Error: Extension validation failed")
         return False
-    except Exception:
+    except ext_exceptions.ExtensionError:
         logger.exception("Error: Extension validation failed with unexpected error")
         return False
 
@@ -233,7 +228,7 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
         parsed_url = parse_extension_url(url_to_parse)
         ext_id = parsed_url.ext_id
         logger.info("Extension ID: %s", ext_id)
-    except Exception:
+    except (ValueError, ext_exceptions.ExtensionError):
         logger.exception("Error: Failed to parse extension URL/path")
         return False
 
