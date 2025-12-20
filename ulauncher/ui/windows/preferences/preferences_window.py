@@ -131,10 +131,12 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def _on_key_press(self, _widget: Gtk.Widget, event: Gdk.EventKey) -> bool:
         """Handle key press events for keyboard shortcuts"""
         # Ctrl+S
-        if (event.state & Gdk.ModifierType.CONTROL_MASK) and event.keyval == Gdk.KEY_s:
-            page_name = self.stack.get_visible_child_name()
-            if page_name:
-                return self.views[page_name].save_changes()
+        if (
+            (page_name := self.stack.get_visible_child_name())
+            and (event.state & Gdk.ModifierType.CONTROL_MASK)
+            and event.keyval == Gdk.KEY_s
+        ):
+            return self.views[page_name].save_changes()
         return False
 
     def _setup_custom_styling(self) -> None:
@@ -164,7 +166,5 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _apply_system_theme(self) -> None:
         """Apply the system theme preference to the preferences window"""
-        prefer_dark = system_prefers_dark()
-        gtk_settings = self.get_settings()
-        if gtk_settings:
-            gtk_settings.props.gtk_application_prefer_dark_theme = prefer_dark
+        if gtk_settings := self.get_settings():
+            gtk_settings.props.gtk_application_prefer_dark_theme = system_prefers_dark()
