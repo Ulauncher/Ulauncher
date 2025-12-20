@@ -9,7 +9,7 @@ Uses the wlr-layer-shell protocol [1]
 """
 
 import gi
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 try:
     gi.require_version("GtkLayerShell", "0.1")
@@ -22,7 +22,7 @@ def is_supported() -> bool:
     """Check if running under a wayland compositor that supports the layer shell extension"""
     try:
         return GtkLayerShell is not None and GtkLayerShell.is_supported()
-    except Exception:  # noqa: BLE001
+    except (GLib.Error, AttributeError, TypeError):
         # It may happen that python bindings for GtkLayerShell are not installed but the underlying C library is not.
         return False
 

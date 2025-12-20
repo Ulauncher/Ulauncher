@@ -60,7 +60,7 @@ def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
             # the python gi wrapper has a bug, not actually allowing to pass working_directory as None
             **({"working_directory": working_dir} if working_dir else {}),
         )
-    except Exception:
+    except (TypeError, GLib.Error):
         logger.exception('Could not launch "%s"', cmd)
 
 

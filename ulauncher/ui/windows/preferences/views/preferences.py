@@ -280,7 +280,7 @@ class PreferencesView(BaseView):
             self.autostart_pref.toggle(is_enabled)
             if is_enabled and self.settings.daemonless:
                 self.settings.save({"daemonless": False})
-        except Exception:
+        except (OSError, PermissionError, FileNotFoundError):
             logger.exception("Failed to toggle autostart")
             switch.set_active(not is_enabled)
 

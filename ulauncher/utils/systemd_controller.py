@@ -1,14 +1,14 @@
 import logging
+import subprocess
 from shutil import which
-from subprocess import check_output
 
 logger = logging.getLogger()
 
 
 def systemctl_run(*args: str) -> str:
     try:
-        return check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
-    except Exception:  # noqa: BLE001
+        return subprocess.check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired, OSError):
         return ""
 
 

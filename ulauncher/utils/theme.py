@@ -55,7 +55,7 @@ def get_themes() -> dict[str, Theme]:
                 logger.warning("Duplicate theme name '%s'", theme.name)
             else:
                 themes[theme.name] = theme
-        except Exception as e:  # noqa: BLE001
+        except (json.JSONDecodeError, FileNotFoundError, OSError, UnicodeDecodeError) as e:
             logger.warning(
                 "Ignoring invalid or broken theme '%s' in '%s' (%s): %s",
                 theme.name,

@@ -594,7 +594,7 @@ class ExtensionsView(BaseView):
                 elif isinstance(widget, (Gtk.Entry, TextArea)):
                     pref_data[pref_id] = widget.get_text()
 
-        except Exception:
+        except (AttributeError, TypeError, ValueError):
             logger.exception("Failed to save extension changes")
             return None
 
