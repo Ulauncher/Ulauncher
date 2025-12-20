@@ -169,10 +169,9 @@ class ShortcutsView(views.BaseView):
         cmd_section.pack_start(cmd_help_expander, False, False, 5)
 
         scrolled_cmd = styled(
-            Gtk.ScrolledWindow(min_content_height=100),
+            Gtk.ScrolledWindow(min_content_height=100, shadow_type=Gtk.ShadowType.IN),
             "shortcuts-command-editor",
         )
-        scrolled_cmd.set_shadow_type(Gtk.ShadowType.IN)
 
         self.cmd_textview = TextArea(monospace=True, top_margin=10, bottom_margin=10, left_margin=10, right_margin=10)
         self.cmd_textview.set_text(shortcut.cmd)
@@ -204,8 +203,7 @@ class ShortcutsView(views.BaseView):
         return options_box
 
     def _add_option_row(self, container: Gtk.Box, title: str, description: str, active: bool) -> Gtk.Switch:
-        row = styled(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12), "shortcuts-option-row")
-        row.set_hexpand(True)
+        row = styled(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, spacing=12), "shortcuts-option-row")
 
         text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, hexpand=True)
 
@@ -214,15 +212,12 @@ class ShortcutsView(views.BaseView):
             Gtk.Label(label=description, halign=Gtk.Align.START, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR),
             "preferences-setting-description",
         )
-        description_label.set_line_wrap(True)
 
         text_box.pack_start(title_label, False, False, 0)
         text_box.pack_start(description_label, False, False, 0)
         row.pack_start(text_box, True, True, 0)
 
-        option_switch = Gtk.Switch(active=active)
-        option_switch.set_halign(Gtk.Align.END)
-        option_switch.set_valign(Gtk.Align.CENTER)
+        option_switch = Gtk.Switch(active=active, halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         row.pack_end(option_switch, False, False, 0)
 
         option_switch.connect("notify::active", lambda switch, _pspec: self._on_form_field_changed(switch))
@@ -238,12 +233,12 @@ class ShortcutsView(views.BaseView):
         spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         button_row.pack_start(spacer, True, True, 0)
 
-        remove_button = styled(Gtk.Button(label="Remove"), "shortcuts-button", "destructive-action")
-        remove_button.set_sensitive(bool(shortcut.id))
+        remove_button = styled(
+            Gtk.Button(label="Remove", sensitive=bool(shortcut.id)), "shortcuts-button", "destructive-action"
+        )
         remove_button.connect("clicked", self._on_remove_current)
 
-        save_button = styled(Gtk.Button(label="Save"), "shortcuts-button", "suggested-action")
-        save_button.set_sensitive(False)
+        save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
         save_button.connect("clicked", self._on_save_shortcut)
         self.save_button = save_button
 
@@ -299,17 +294,23 @@ class ShortcutsView(views.BaseView):
 
     def _create_add_shortcut_row(self) -> Gtk.ListBoxRow:
         """Create the persistent Add Shortcut action row"""
-        row = DataListBoxRow("add-shortcut")
-        row.set_selectable(False)
-        row.set_can_focus(True)
-        row.set_activatable(True)
-        row.set_tooltip_text("Create a new shortcut")
-
-        action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        action_box.set_margin_top(4)
-        action_box.set_margin_bottom(4)
-        action_box.set_margin_start(8)
-        action_box.set_margin_end(8)
+        row = DataListBoxRow(
+            "add-shortcut",
+            tooltip_text="Create a new shortcut",
+            activatable=True,
+            can_focus=True,
+            selectable=False,
+            margin_top=8,
+            margin_bottom=8,
+        )
+        action_box = Gtk.Box(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            spacing=6,
+            margin_top=4,
+            margin_bottom=4,
+            margin_start=8,
+            margin_end=8,
+        )
 
         icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.MENU)
         icon.set_pixel_size(18)
@@ -322,8 +323,6 @@ class ShortcutsView(views.BaseView):
         action_box.pack_start(label, True, True, 0)
 
         row.add(action_box)
-        row.set_margin_bottom(8)
-        row.set_margin_top(8)
         return row
 
     def _create_shortcut_row(self, shortcut_id: str, shortcut: Shortcut) -> DataListBoxRow:
