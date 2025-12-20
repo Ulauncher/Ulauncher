@@ -10,25 +10,17 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import urlopen, urlretrieve
 
-from ulauncher import api_version, paths
-from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifest
+from ulauncher import (
+    api_version,
+    paths,
+)
+from ulauncher.modes.extensions import ext_exceptions
+from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
-
-
-class ExtensionRemoteError(Exception):
-    pass
-
-
-class InvalidExtensionRecoverableError(Exception):
-    pass
-
-
-class ExtensionNetworkError(Exception):
-    pass
 
 
 class UrlParseResult(BaseDataClass):
@@ -47,10 +39,10 @@ class ExtensionRemote(UrlParseResult):
         try:
             self.url = url.strip()
             self.update(parse_extension_url(self.url))
-        except Exception as e:
+        except (ValueError, OSError) as e:
             logger.warning("Invalid URL: %s", url)
             msg = f"Invalid URL: {url}"
-            raise InvalidExtensionRecoverableError(msg) from e
+            raise ext_exceptions.UrlError(msg) from e
 
         self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
@@ -96,10 +88,10 @@ class ExtensionRemote(UrlParseResult):
 
         except (HTTPError, URLError) as e:
             msg = f'Could not access repository resource "{self.url}"'
-            raise ExtensionNetworkError(msg) from e
+            raise ext_exceptions.NetworkError(msg) from e
         except (subprocess.CalledProcessError, OSError) as e:
             msg = f'Could not fetch reference "{ref}" for {self.url}.' if ref else f"Could not fetch remote {self.url}."
-            raise ExtensionNetworkError(msg) from e
+            raise ext_exceptions.NetworkError(msg) from e
 
         return refs
 
@@ -138,13 +130,13 @@ class ExtensionRemote(UrlParseResult):
                     subdirs = os.listdir(tmp_root_dir)
                     if len(subdirs) != 1:
                         msg = f"Invalid archive for {self.url}."
-                        raise ExtensionRemoteError(msg)
+                        raise ext_exceptions.RemoteError(msg)
                     tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
                     manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
                     if not satisfies(api_version, manifest.api_version):
                         if not satisfies("2.0", manifest.api_version):
                             msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
-                            raise ExtensionIncompatibleRecoverableError(msg)
+                            raise ext_exceptions.CompatibilityError(msg)
                         logger.warning("Falling back on using API 2.0 version for %s.", self.url)
 
                     if output_dir_exists:
@@ -155,7 +147,7 @@ class ExtensionRemote(UrlParseResult):
 
         if not which("git"):
             msg = "This extension URL can only be supported if you have git installed."
-            raise ExtensionRemoteError(msg)
+            raise ext_exceptions.RemoteError(msg)
 
         os.makedirs(self.target_dir, exist_ok=True)
         subprocess.run(

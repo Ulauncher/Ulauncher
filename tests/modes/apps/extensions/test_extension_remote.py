@@ -2,9 +2,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_remote import (
     ExtensionRemote,
-    InvalidExtensionRecoverableError,
     parse_extension_url,
 )
 
@@ -17,7 +17,7 @@ class TestExtensionRemote:
         return ExtensionRemote("https://github.com/Ulauncher/ulauncher-timer")
 
     def test_invalid_url(self) -> None:
-        with pytest.raises(InvalidExtensionRecoverableError):
+        with pytest.raises(ext_exceptions.UrlError):
             ExtensionRemote("INVALID URL")
 
 

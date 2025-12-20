@@ -8,10 +8,8 @@ from typing import Callable
 from gi.repository import GLib, Gtk
 
 from ulauncher import paths
+from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_dependencies import ExtensionDependenciesRecoverableError
-from ulauncher.modes.extensions.extension_manifest import ExtensionIncompatibleRecoverableError, ExtensionManifestError
-from ulauncher.modes.extensions.extension_remote import ExtensionNetworkError, InvalidExtensionRecoverableError
 from ulauncher.ui.windows.preferences.views import DialogLauncher, get_window_for_widget, styled
 
 logger = logging.getLogger()
@@ -110,7 +108,7 @@ class ExtensionHandlers:
 
                 GLib.idle_add(update_ui)
 
-            except Exception as error:  # noqa: BLE001
+            except (ext_exceptions.ExtensionError, ValueError, asyncio.CancelledError) as error:
 
                 def show_error(error: Exception) -> None:
                     progress_dialog.destroy()
@@ -130,7 +128,7 @@ class ExtensionHandlers:
             try:
                 asyncio.run(ext.toggle_enabled(state))
 
-            except Exception:  # noqa: BLE001
+            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
                 failed_action = "enable" if state else "disable"
                 error_msg = f"Failed to {failed_action} extension"
                 GLib.idle_add(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
@@ -161,7 +159,7 @@ class ExtensionHandlers:
 
                     GLib.idle_add(update_ui)
 
-                except Exception:  # noqa: BLE001
+                except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
                     progress_dialog.destroy()
                     GLib.idle_add(
                         self.dialog_launcher.show_error, "Failed to remove extension", "Remove operation failed"
@@ -189,7 +187,7 @@ class ExtensionHandlers:
 
                 GLib.idle_add(update_ui)
 
-            except Exception as e:  # noqa: BLE001
+            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
                 callback()
                 GLib.idle_add(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
 
@@ -219,7 +217,7 @@ class ExtensionHandlers:
 
                 GLib.idle_add(update_ui)
 
-            except Exception as e:  # noqa: BLE001
+            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
                 callback()
 
                 def show_error(error: Exception) -> None:
@@ -250,7 +248,7 @@ class ExtensionHandlers:
         repo_url = url.rstrip(".git") if url.startswith("http") else None
 
         # Determine primary and secondary text based on error type
-        if isinstance(error, InvalidExtensionRecoverableError):
+        if isinstance(error, ext_exceptions.UrlError):
             primary_text = "Invalid Extension URL"
             secondary_text = (
                 "The URL should be a HTTPS git repository link or a path to a local git repository.\n\n"
@@ -258,17 +256,17 @@ class ExtensionHandlers:
                 "• https://github.com/user/repo.git\n"
                 "• https://codeberg.org/user/repo.git"
             )
-        elif isinstance(error, ExtensionManifestError):
+        elif isinstance(error, ext_exceptions.ManifestError):
             primary_text = "Extension Manifest Error"
             secondary_text = f"There's an error in the extension manifest:\n\n{error_message}"
-        elif isinstance(error, ExtensionIncompatibleRecoverableError):
+        elif isinstance(error, ext_exceptions.CompatibilityError):
             primary_text = "Version Incompatibility"
             secondary_text = (
                 f"Version incompatibility error:\n{error_message}\n\n"
                 "Please make sure that the URL you have entered is for a Ulauncher extension, "
                 "and that you are running the latest version of Ulauncher."
             )
-        elif isinstance(error, ExtensionNetworkError):
+        elif isinstance(error, ext_exceptions.NetworkError):
             primary_text = "Network Error"
             if operation == "update":
                 secondary_text = (
@@ -284,7 +282,7 @@ class ExtensionHandlers:
                     "and that the extension has all the required files.\n\n"
                     f"You can also install extensions manually by adding them to {paths.USER_EXTENSIONS}."
                 )
-        elif isinstance(error, ExtensionDependenciesRecoverableError):
+        elif isinstance(error, ext_exceptions.DependencyError):
             if operation == "update":
                 primary_text = "Dependency Update Failed"
                 secondary_text = (
