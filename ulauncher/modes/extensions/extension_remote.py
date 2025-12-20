@@ -5,6 +5,7 @@ import os
 import subprocess
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
+from tarfile import TarError
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -124,9 +125,17 @@ class ExtensionRemote(UrlParseResult):
         if self.download_url_template:
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
                 download_url = self.download_url_template.replace("[commit]", commit_hash)
-                urlretrieve(download_url, tmp_file.name)
+                try:
+                    urlretrieve(download_url, tmp_file.name)
+                except URLError as e:
+                    err_msg = f"Failed to download extension from {download_url}: {e}"
+                    raise ext_exceptions.RemoteError(err_msg) from e
                 with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
-                    untar(tmp_file.name, tmp_root_dir)
+                    try:
+                        untar(tmp_file.name, tmp_root_dir)
+                    except (TarError, OSError) as e:
+                        err_msg = f"Failed to extract extension from {tmp_file.name}: {e}"
+                        raise ext_exceptions.RemoteError(err_msg) from e
                     subdirs = os.listdir(tmp_root_dir)
                     if len(subdirs) != 1:
                         msg = f"Invalid archive for {self.url}."
@@ -150,17 +159,25 @@ class ExtensionRemote(UrlParseResult):
             raise ext_exceptions.RemoteError(msg)
 
         os.makedirs(self.target_dir, exist_ok=True)
-        subprocess.run(
-            ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
-            check=True,
-            stderr=subprocess.DEVNULL,
-        )
-        commit_timestamp = float(
-            subprocess.check_output(["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash])
-            .decode()
-            .strip()
-        )
-        return commit_hash, commit_timestamp
+
+        try:
+            subprocess.run(
+                ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
+                check=True,
+                stderr=subprocess.DEVNULL,
+            )
+            commit_timestamp = float(
+                subprocess.check_output(
+                    ["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash]
+                )
+                .decode()
+                .strip()
+            )
+        except subprocess.CalledProcessError as e:
+            err_msg = f"Failed to checkout commit {commit_hash}: {e}"
+            raise ext_exceptions.RemoteError(err_msg) from e
+        else:
+            return commit_hash, commit_timestamp
 
 
 def parse_extension_url(input_url: str) -> UrlParseResult:
