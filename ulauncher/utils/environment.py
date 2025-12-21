@@ -31,9 +31,11 @@ elif "GNOME" in DESKTOP_NAME or "PANTHEON" in DESKTOP_NAME:
 elif "KDE" in DESKTOP_NAME:
     DESKTOP_ID = "PLASMA"
 
-try:
-    with open(pathlib.Path("/etc/os-release")) as stream:
-        reader = csv.reader(stream, delimiter="=")
-        DISTRO = dict(reader).get("PRETTY_NAME", DISTRO)
-except (FileNotFoundError, ValueError):
-    logger.info("Distro does not provide any version info")
+os_release_path = pathlib.Path("/etc/os-release")
+if os_release_path.exists():
+    try:
+        with open(os_release_path) as stream:
+            reader = csv.reader(stream, delimiter="=")
+            DISTRO = dict(reader).get("PRETTY_NAME", DISTRO)
+    except (OSError, ValueError):
+        logger.info("Distro does not provide any version info")
