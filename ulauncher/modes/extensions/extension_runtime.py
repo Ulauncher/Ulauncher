@@ -136,6 +136,8 @@ class ExtensionRuntime:
             return
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
+        self._msg_controller.close()
+
         if self._subprocess in aborted_subprocesses:
             if self._exit_handler:
                 self._exit_handler("Stopped", "Extension was stopped by the user")
