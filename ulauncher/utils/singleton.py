@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 from typing import Any
 
-_instances: Any = {}
+# Store singleton instances with proper type tracking to prevent type confusion
+_instances: dict[type, Any] = {}
 
 
 def get_instance(supercls: Any, cls: Any, *args: Any, **kwargs: Any) -> Any:
+    # Only create instance if it doesn't exist to ensure true singleton behavior
     if cls not in _instances:
         _instances[cls] = supercls.__call__(*args, **kwargs)
     return _instances[cls]
