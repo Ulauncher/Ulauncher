@@ -25,7 +25,8 @@ class TimerContext:
             self.source = None
 
     def trigger(self, *_args: Any) -> bool:
-        self.func()
+        if self.source:
+            self.func()
         return self.repeat
 
 
