@@ -87,7 +87,9 @@ class TestCalcMode:
         mode.activate_result(result, query, False)
         copy_action.assert_called_once_with("5")
 
-    def test_handle_query__invalid_expr(self, mode: CalcMode, copy_action: MagicMock) -> None:
+    def test_handle_query__invalid_expr(
+        self, mode: CalcMode, copy_action: MagicMock, caplog: pytest.LogCaptureFixture
+    ) -> None:
         bad_queries = [
             "3++",
             "6 2",
@@ -97,10 +99,12 @@ class TestCalcMode:
             "2pi",
         ]
 
-        for query_str in bad_queries:
-            query = Query(None, query_str)
-            result = mode.handle_query(query)[0]
-            assert result.name == "Error!"
-            assert result.description == "Invalid expression"
-            assert mode.activate_result(result, query, False) is True
-            assert not copy_action.called
+        # Suppress expected warning and error logs for this test
+        with caplog.at_level("CRITICAL"):
+            for query_str in bad_queries:
+                query = Query(None, query_str)
+                result = mode.handle_query(query)[0]
+                assert result.name == "Error!"
+                assert result.description == "Invalid expression"
+                assert mode.activate_result(result, query, False) is True
+                assert not copy_action.called
