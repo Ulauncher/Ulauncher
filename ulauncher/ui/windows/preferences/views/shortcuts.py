@@ -9,8 +9,8 @@ from gi.repository import Gtk, Pango
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 from ulauncher.ui.windows.preferences import views
 from ulauncher.ui.windows.preferences.utils.ext_utils import fmt_pango_code_block
+from ulauncher.ui.windows.preferences.utils.sidebar_layout import SidebarItem, SidebarLayout
 from ulauncher.ui.windows.preferences.views import (
-    DataListBoxRow,
     DialogLauncher,
     TextArea,
     get_window_for_widget,
@@ -26,44 +26,12 @@ class ShortcutsView(views.BaseView):
     """Shortcuts management page"""
 
     def __init__(self) -> None:
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, hexpand=True, halign=Gtk.Align.FILL)
 
-        left_sidebar = styled(
-            Gtk.Box(
-                orientation=Gtk.Orientation.VERTICAL,
-                hexpand=False,
-                halign=Gtk.Align.START,
-                width_request=views.SIDEBAR_WIDTH,
-            ),
-            "sidebar",
+        self.layout = SidebarLayout(
+            footer_actions=[("Add Shortcut", "list-add-symbolic", self._on_add_shortcut)],
         )
-
-        # Scrolled window for shortcuts list
-        scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-        self.listbox_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        scrolled.add(self.listbox_container)
-
-        left_sidebar.pack_start(scrolled, True, True, 0)
-
-        divider = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        left_sidebar.pack_start(divider, False, False, 0)
-
-        actions_listbox = Gtk.ListBox(selection_mode=Gtk.SelectionMode.NONE)
-        actions_listbox.set_activate_on_single_click(True)
-        actions_listbox.connect("row-activated", self._on_actions_row_activated)
-        actions_listbox.add(self._create_add_shortcut_row())
-        actions_listbox.show_all()
-        left_sidebar.pack_start(actions_listbox, False, False, 0)
-
-        self.pack_start(left_sidebar, False, False, 0)
-
-        # Vertical separator
-        separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-        self.pack_start(separator, False, False, 0)
-
-        # Right side - details view
-        self.details_view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, hexpand=True, halign=Gtk.Align.FILL)
-        self.pack_start(self.details_view, True, True, 0)
+        self.pack_start(self.layout, True, True, 0)
 
         self._load_shortcut_list()
         self._show_placeholder()
@@ -72,11 +40,11 @@ class ShortcutsView(views.BaseView):
         """Create the edit form with shortcut data"""
         form_box = self._create_form_container()
         content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20, hexpand=True)
-        content_box.pack_start(self._create_icon_name_keyword_row(shortcut), False, False, 0)
+        content_box.pack_start(self._create_icon_button_row(shortcut), False, False, 0)
+        content_box.pack_start(self._create_name_keyword_row(shortcut), False, False, 0)
         content_box.pack_start(self._create_command_section(shortcut), True, True, 0)
         content_box.pack_start(self._create_options_section(shortcut), False, False, 0)
         form_box.pack_start(content_box, True, True, 0)
-        form_box.pack_start(self._create_button_row(shortcut), False, True, 0)
 
         self.selected_icon_path = shortcut.icon or ""
         self._update_icon_button()
@@ -87,27 +55,50 @@ class ShortcutsView(views.BaseView):
         """Create the main form container"""
         return styled(Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20), "edit-form")
 
-    def _create_icon_name_keyword_row(self, shortcut: Shortcut) -> Gtk.Box:
-        """Create the top row with icon, name, and keyword fields"""
-        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+    def _create_icon_button_row(self, shortcut: Shortcut) -> Gtk.Box:
+        """Create the top row with icon on left and action buttons on right"""
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
 
-        # Icon section
+        # Icon section on the left
         icon_section = self._create_icon_section()
-        top_row.pack_start(icon_section, False, False, 0)
+        row.pack_start(icon_section, False, False, 0)
+
+        # Buttons on the right
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, valign=Gtk.Align.CENTER)
+
+        remove_button = styled(
+            Gtk.Button(label="Remove", sensitive=bool(shortcut.id)), "shortcuts-button", "destructive-action"
+        )
+        remove_button.connect("clicked", self._on_remove_current)
+
+        save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
+        save_button.connect("clicked", self._on_save_shortcut)
+        self.save_button = save_button
+
+        button_box.pack_start(save_button, False, False, 0)
+        button_box.pack_start(remove_button, False, False, 0)
+
+        row.pack_end(button_box, False, False, 0)
+
+        return row
+
+    def _create_name_keyword_row(self, shortcut: Shortcut) -> Gtk.Box:
+        """Create the row with name and keyword fields"""
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
 
         # Name section
         name_section = self._create_name_section(shortcut)
-        top_row.pack_start(name_section, True, True, 0)
+        row.pack_start(name_section, True, True, 0)
 
         # Keyword section
         keyword_section = self._create_keyword_section(shortcut)
-        top_row.pack_start(keyword_section, True, True, 0)
+        row.pack_start(keyword_section, True, True, 0)
 
-        return top_row
+        return row
 
     def _create_icon_section(self) -> Gtk.Box:
         """Create the icon selection section"""
-        icon_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, valign=Gtk.Align.END)
+        icon_section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, valign=Gtk.Align.CENTER)
 
         self.icon_button = Gtk.Button(width_request=views.ICON_SIZE_L, height_request=views.ICON_SIZE_L)
         self.icon_button.connect("clicked", self._on_select_icon)
@@ -121,10 +112,7 @@ class ShortcutsView(views.BaseView):
         name_label = Gtk.Label(label="Name", halign=Gtk.Align.START)
         name_section.pack_start(name_label, False, False, 0)
 
-        self.name_entry = styled(
-            Gtk.Entry(text=shortcut.name, placeholder_text="Enter shortcut name"),
-            "shortcuts-entry",
-        )
+        self.name_entry = Gtk.Entry(text=shortcut.name, placeholder_text="Enter shortcut name")
         self.name_entry.connect("changed", self._on_form_field_changed)
         name_section.pack_start(self.name_entry, False, False, 0)
 
@@ -136,10 +124,7 @@ class ShortcutsView(views.BaseView):
         keyword_label = Gtk.Label(label="Keyword", halign=Gtk.Align.START)
         keyword_section.pack_start(keyword_label, False, False, 0)
 
-        self.keyword_entry = styled(
-            Gtk.Entry(text=shortcut.keyword, placeholder_text="Enter keyword"),
-            "shortcuts-entry",
-        )
+        self.keyword_entry = Gtk.Entry(text=shortcut.keyword, placeholder_text="Enter keyword")
         self.keyword_entry.connect("changed", self._on_form_field_changed)
         keyword_section.pack_start(self.keyword_entry, False, False, 0)
 
@@ -230,28 +215,6 @@ class ShortcutsView(views.BaseView):
         container.pack_start(row, False, False, 0)
         return option_switch
 
-    def _create_button_row(self, shortcut: Shortcut) -> Gtk.Box:
-        button_row = styled(
-            Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, hexpand=True),
-            "shortcuts-button-row",
-        )
-        spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        button_row.pack_start(spacer, True, True, 0)
-
-        remove_button = styled(
-            Gtk.Button(label="Remove", sensitive=bool(shortcut.id)), "shortcuts-button", "destructive-action"
-        )
-        remove_button.connect("clicked", self._on_remove_current)
-
-        save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
-        save_button.connect("clicked", self._on_save_shortcut)
-        self.save_button = save_button
-
-        for button in [remove_button, save_button]:
-            button_row.pack_start(button, False, False, 0)
-
-        return button_row
-
     def _on_form_field_changed(self, _widget: Gtk.Widget) -> None:
         """Handle form field changes and validate form"""
         if not self.save_button:
@@ -269,127 +232,43 @@ class ShortcutsView(views.BaseView):
         self.save_button.set_tooltip_text(tooltip)
 
     def _load_shortcut_list(self) -> None:
-        """Load shortcuts from database and recreate listbox"""
-        # Create new listbox
-        shortcuts_listbox = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
-
+        """Load shortcuts from database and populate sidebar"""
         # Load shortcuts data
         self.shortcuts = cast("dict[str, Shortcut]", ShortcutsDb.load())
 
-        # Add shortcut rows
+        # Convert shortcuts to SidebarItems
+        items: list[SidebarItem] = []
         for shortcut_id, shortcut in self.shortcuts.items():
             if shortcut:  # Skip None values (deleted shortcuts)
-                row = self._create_shortcut_row(shortcut_id, shortcut)
-                shortcuts_listbox.add(row)
+                icon_surface = load_icon_surface(shortcut.icon, views.ICON_SIZE_M, self.get_scale_factor())
+                icon_image = Gtk.Image.new_from_surface(icon_surface)
 
-                # Track row for selection if it matches active_shortcut_id
-                if shortcut_id == self.active_shortcut_id:
-                    shortcuts_listbox.select_row(row)
+                item = SidebarItem(
+                    id=shortcut_id,
+                    icon=icon_image,
+                    name=shortcut.name or "Unnamed",
+                    description=shortcut.keyword,
+                    on_activate=self._on_shortcut_item_activated,
+                )
+                items.append(item)
 
-        # Clear existing listbox
-        for child in self.listbox_container.get_children():
-            self.listbox_container.remove(child)
+        self.layout.set_items(items, self.active_shortcut_id)
 
-        # Add listbox to container
-        self.listbox_container.pack_start(shortcuts_listbox, True, True, 0)
-        shortcuts_listbox.show_all()
-
-        # Connect signal (must happen after setting the initial selection)
-        shortcuts_listbox.connect("row-selected", self._on_shortcut_selected)
-
-    def _create_add_shortcut_row(self) -> Gtk.ListBoxRow:
-        """Create the persistent Add Shortcut action row"""
-        row = DataListBoxRow(
-            "add-shortcut",
-            tooltip_text="Create a new shortcut",
-            activatable=True,
-            can_focus=True,
-            selectable=False,
-            margin_top=8,
-            margin_bottom=8,
-        )
-        action_box = Gtk.Box(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=6,
-            margin_top=4,
-            margin_bottom=4,
-            margin_start=8,
-            margin_end=8,
-        )
-
-        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.MENU)
-        action_box.pack_start(add_icon, False, False, 0)
-
-        add_label = styled(
-            Gtk.Label(label="Add Shortcut", halign=Gtk.Align.START),
-            "sidebar-item-name",
-        )
-        action_box.pack_start(add_label, True, True, 0)
-
-        row.add(action_box)
-        return row
-
-    def _create_shortcut_row(self, shortcut_id: str, shortcut: Shortcut) -> DataListBoxRow:
-        """Create a shortcut row for the list"""
-        row = DataListBoxRow(shortcut_id)
-
-        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, margin=6)
-
-        # Icon
-        icon_image: Gtk.Image | None = None
-        icon_path = shortcut.icon
-        icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_M, self.get_scale_factor())
-        icon_image = Gtk.Image.new_from_surface(icon_surface)
-
-        main_box.pack_start(icon_image, False, False, 0)
-
-        # Info box
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1, hexpand=True)
-
-        # Name
-        name_label = styled(
-            Gtk.Label(label=shortcut.name or "Unnamed", ellipsize=Pango.EllipsizeMode.END, halign=Gtk.Align.START),
-            "sidebar-item-name",
-        )
-        info_box.pack_start(name_label, False, False, 0)
-
-        # Keyword
-        keyword_label = styled(
-            Gtk.Label(label=shortcut.keyword, ellipsize=Pango.EllipsizeMode.END, halign=Gtk.Align.START),
-            "dim-label",
-            "sidebar-item-description",
-        )
-        info_box.pack_start(keyword_label, False, False, 0)
-
-        main_box.pack_start(info_box, True, True, 0)
-
-        row.add(main_box)
-        return row
-
-    def _on_actions_row_activated(self, _listbox: Gtk.ListBox, row: Gtk.ListBoxRow | None) -> None:
-        """Handle action rows activated in the sidebar"""
-        if isinstance(row, DataListBoxRow) and row.id == "add-shortcut":
-            self._on_add_shortcut()
-
-    def _on_add_shortcut(self, _widget: Gtk.Widget | None = None) -> None:
-        """Handle add shortcut button click"""
-        self.active_shortcut_id = None
-        self._show_edit_form(Shortcut())
-
-    def _on_shortcut_selected(self, _listbox: Gtk.ListBox, row: DataListBoxRow | None) -> None:
+    def _on_shortcut_item_activated(self, item: SidebarItem) -> None:
         """Handle shortcut selection in sidebar"""
-        if not row:
-            self.active_shortcut_id = None
-            self._show_placeholder()
-            return
-
-        shortcut = self.shortcuts.get(row.id)
+        shortcut = self.shortcuts.get(item.id)
         if shortcut:
-            self.active_shortcut_id = row.id
+            self.active_shortcut_id = item.id
             self._show_edit_form(shortcut)
         else:
             self.active_shortcut_id = None
             self._show_placeholder()
+
+    def _on_add_shortcut(self, _widget: Gtk.Widget) -> None:
+        """Handle add shortcut button click"""
+        self.active_shortcut_id = None
+        self.layout.select_item(None)
+        self._show_edit_form(Shortcut())
 
     def _on_remove_current(self, _button: Gtk.Button) -> None:
         """Handle remove current shortcut button click"""
@@ -414,10 +293,6 @@ class ShortcutsView(views.BaseView):
 
     def _show_placeholder(self) -> None:
         """Show placeholder when no shortcut is selected"""
-        # Clear existing content
-        for child in self.details_view.get_children():
-            self.details_view.remove(child)
-
         has_shortcuts = any(self.shortcuts.values())
         heading = "Select a shortcut to edit" if has_shortcuts else "Create your first shortcut"
         hint = (
@@ -444,19 +319,12 @@ class ShortcutsView(views.BaseView):
         placeholder_box.pack_start(heading_label, False, False, 0)
         placeholder_box.pack_start(hint_label, False, False, 0)
 
-        self.details_view.pack_start(placeholder_box, True, True, 0)
-        self.details_view.show_all()
+        self.layout.set_content(placeholder_box)
 
     def _show_edit_form(self, shortcut: Shortcut) -> None:
         """Show shortcut editing form"""
-        # Clear existing content
-        for child in self.details_view.get_children():
-            self.details_view.remove(child)
-
-        # Create edit form
         form_container = self._create_edit_form(shortcut)
-        self.details_view.pack_start(form_container, True, True, 0)
-        self.details_view.show_all()
+        self.layout.set_content(form_container)
 
     def _on_save_shortcut(self, save_button: Gtk.Button) -> None:
         if not save_button.get_sensitive():

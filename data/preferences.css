@@ -81,6 +81,14 @@ notebook tab {
 
 /* extensions */
 
+.title {
+  font-size: 14px;
+}
+
+.ext-pref-box {
+  margin-bottom: 12px;
+}
+
 .progress-dialog {
   padding: 20px;
 }
@@ -171,11 +179,6 @@ notebook tab {
 
 /* shortcuts editor */
 
-.shortcuts-entry {
-  padding: 8px 12px;
-  border-radius: 4px;
-}
-
 .shortcuts-command-editor {
   padding: 4px;
   border-radius: 4px;
@@ -209,4 +212,29 @@ notebook tab {
 .shortcuts-cmd-help > * {
   color: alpha(@theme_fg_color, 0.55);
   font-size: 13px;
+}
+
+.small-switch slider {
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* Link buttons in extension details */
+linkbutton,
+linkbutton button,
+button.link {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  min-height: 0;
+  min-width: 0;
+}
+
+linkbutton label,
+linkbutton button label,
+button.link label {
+  font-size: 12px;
+  padding: 0;
 }

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib, Gtk, Pango
 
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
@@ -13,10 +13,9 @@ from ulauncher.modes.extensions.extension_controller import (
 from ulauncher.ui.windows.preferences import views
 from ulauncher.ui.windows.preferences.utils import ext_utils
 from ulauncher.ui.windows.preferences.utils.ext_handlers import ExtensionHandlers
+from ulauncher.ui.windows.preferences.utils.sidebar_layout import SidebarItem, SidebarLayout
 from ulauncher.ui.windows.preferences.views import (
-    SIDEBAR_WIDTH,
     BaseView,
-    DataListBoxRow,
     TextArea,
     get_window_for_widget,
     start_spinner_button_animation,
@@ -34,63 +33,25 @@ class ExtensionsView(BaseView):
     active_ext: ExtensionController | None = None
     keyword_inputs: dict[str, Gtk.Entry] = {}
     pref_widgets: dict[str, Gtk.CheckButton | Gtk.SpinButton | Gtk.Entry | Gtk.ComboBoxText | TextArea] = {}
-    ext_details_view: Gtk.Box
     save_button: Gtk.Button | None = None
 
     def __init__(self) -> None:
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, hexpand=True, halign=Gtk.Align.FILL)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, hexpand=True, halign=Gtk.Align.FILL)
 
         # Initialize extension handlers (pass self so it can call get_toplevel() when needed)
         self.handlers = ExtensionHandlers(self)
 
-        left_sidebar = styled(
-            Gtk.Box(
-                orientation=Gtk.Orientation.VERTICAL, hexpand=False, halign=Gtk.Align.START, width_request=SIDEBAR_WIDTH
-            ),
-            "sidebar",
+        self.layout = SidebarLayout(
+            footer_actions=[
+                ("Add Extension", "list-add-symbolic", self._on_add_extension),
+                ("Discover Extensions", "system-search-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
+                ("Extension API Docs", "text-x-generic-symbolic", lambda _: open_detached("https://docs.ulauncher.io")),
+            ],
         )
+        self.pack_start(self.layout, True, True, 0)
 
-        # Action buttons at top (horizontal layout)
-        header_button_box = styled(
-            Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, homogeneous=True), "toolbar"
-        )
-
-        buttons = [
-            ("Add extension", "list-add-symbolic", self._on_add_extension),
-            ("Discover extensions", "web-browser-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
-            (
-                "Extension API documentation",
-                "help-contents-symbolic",
-                lambda _: open_detached("https://docs.ulauncher.io"),
-            ),
-        ]
-
-        for label, icon_name, callback in buttons:
-            icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.SMALL_TOOLBAR)
-            button = Gtk.Button(margin=8, image=icon, tooltip_text=label)
-
-            button.connect("clicked", callback)
-            header_button_box.pack_start(button, True, True, 0)
-
-        left_sidebar.pack_start(header_button_box, False, False, 0)
-
-        # Scrolled window for extensions list
-        scrolled_left = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-
-        self.listbox_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        scrolled_left.add(self.listbox_container)
-
-        left_sidebar.pack_start(scrolled_left, True, True, 0)
-
-        self.pack_start(left_sidebar, False, False, 0)
-
-        # Right side - extension details
-        self.ext_details_view = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL, margin=10, hexpand=True, halign=Gtk.Align.FILL
-        )
-        self._reset_extension_view()
-
-        self.pack_start(self.ext_details_view, True, True, 0)
+        self._load_extension_list()
+        self._show_placeholder()
 
         def reload_extension_list() -> bool:
             # Stop the timeout if the view or its toplevel window is destroyed
@@ -130,99 +91,82 @@ class ExtensionsView(BaseView):
         if not self._list_has_changes():
             return
 
-        # (re)create extensions_listbox
-        extensions_listbox = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
-
+        # Convert extensions to SidebarItems
+        items: list[SidebarItem] = []
         for ext_id, (name, status, icon_path) in self.extension_cache.items():
-            row = self._create_extension_row(ext_id, name, status, icon_path)
-            extensions_listbox.add(row)
-            if self.active_ext and self.active_ext.id == ext_id:
-                extensions_listbox.select_row(row)
+            icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_M, self.get_scale_factor())
+            icon_image = Gtk.Image.new_from_surface(icon_surface)
 
-        if not self.extension_cache:
-            # Show empty state
-            empty_label = styled(
+            # Only show status badge if not "on" (enabled extensions don't need a badge)
+            display_status = None if status == "on" else status
+            status_classes = (status,) if display_status else ()
+
+            item = SidebarItem(
+                id=ext_id,
+                icon=icon_image,
+                name=name,
+                label=display_status,
+                label_style_classes=status_classes,
+                on_activate=self._on_extension_item_activated,
+            )
+            items.append(item)
+
+        # Set empty placeholder builder for when there are no extensions
+        self.layout.set_empty_placeholder_builder(
+            lambda: styled(
                 Gtk.Label(label="No extensions installed", margin_top=30, margin_bottom=30), "caption", "dim-label"
             )
-            placeholder_row = Gtk.ListBoxRow(selectable=False, activatable=False)
-            placeholder_row.add(empty_label)
-            extensions_listbox.add(placeholder_row)
-
-        # Clear old listbox and replace with new one
-        for child in self.listbox_container.get_children():
-            self.listbox_container.remove(child)
-        self.listbox_container.pack_start(extensions_listbox, True, True, 0)
-        extensions_listbox.show_all()
-
-        # Connect signal (must happen after setting the initial selection)
-        extensions_listbox.connect("row-selected", self._on_extension_selected)
-
-    def _create_extension_row(
-        self, ext_id: str, name: str, status: ext_utils.ExtStatus, icon_path: str | None
-    ) -> DataListBoxRow:
-        """Add an extension row to the list"""
-        row = DataListBoxRow(ext_id)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, margin=8)
-
-        # Icon
-        icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_S, self.get_scale_factor())
-        icon_image = Gtk.Image.new_from_surface(icon_surface)
-        box.pack_start(icon_image, False, False, 0)
-
-        name_label = styled(Gtk.Label(label=name, halign=Gtk.Align.START), "body")
-        box.pack_start(name_label, True, True, 0)
-
-        status_box = Gtk.Box(spacing=5)
-        status_label = styled(
-            Gtk.Label(
-                halign=Gtk.Align.CENTER,
-                valign=Gtk.Align.CENTER,
-                label=status,
-            ),
-            "status-badge",
-            status,
         )
-        status_box.pack_start(status_label, False, False, 0)
-        box.pack_start(status_box, False, False, 0)
 
-        row.add(box)
-        return row
+        active_ext_id = self.active_ext.id if self.active_ext else None
+        self.layout.set_items(items, active_ext_id)
 
-    def _on_extension_selected(self, _listbox: Gtk.ListBox, row: DataListBoxRow | None) -> None:
-        """Handle extension selection"""
-        if not row:
-            return
-
-        if ext := extension_registry.get(row.id):
+    def _on_extension_item_activated(self, item: SidebarItem) -> None:
+        """Handle extension selection in sidebar"""
+        if ext := extension_registry.get(item.id):
             self.active_ext = ext
             self._show_extension_details(ext)
+        else:
+            self.active_ext = None
+            self._show_placeholder()
 
-    def _clear_extension_view(self) -> None:
-        """Clear the extension details view"""
-        for child in self.ext_details_view.get_children():
-            self.ext_details_view.remove(child)
+    def _show_placeholder(self) -> None:
+        """Show placeholder when no extension is selected"""
         self.save_button = None
+        has_extensions = bool(self.extension_cache)
+        heading = "Select an extension to view details" if has_extensions else "Install your first extension"
+        hint = (
+            "Choose an extension from the list to configure it."
+            if has_extensions
+            else "Click the Add Extension button in the sidebar to install an extension."
+        )
 
-    def _reset_extension_view(self) -> None:
-        """Clear the extension details view and show placeholder"""
-        self._clear_extension_view()
+        placeholder_box = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            valign=Gtk.Align.CENTER,
+            halign=Gtk.Align.CENTER,
+            spacing=10,
+            margin=30,
+        )
 
-        # Add placeholder text
-        placeholder_label = styled(
-            Gtk.Label(label="Select an extension to view details", valign=Gtk.Align.CENTER, halign=Gtk.Align.CENTER),
+        heading_label = styled(Gtk.Label(label=heading, halign=Gtk.Align.CENTER), "title-3")
+        hint_label = styled(
+            Gtk.Label(label=hint, halign=Gtk.Align.CENTER, wrap=True),
+            "body",
             "dim-label",
         )
 
-        self.ext_details_view.pack_start(placeholder_label, True, True, 0)
-        self.ext_details_view.show_all()
+        placeholder_box.pack_start(heading_label, False, False, 0)
+        placeholder_box.pack_start(hint_label, False, False, 0)
+
+        self.layout.set_content(placeholder_box)
 
     def _show_extension_details(self, ext: ExtensionController) -> None:
         """Show details for selected extension"""
-        self._clear_extension_view()
+        self.save_button = None
 
         scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-        details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=10)
+        details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20)
 
         details_box.pack_start(self._create_extension_header(ext), False, False, 0)
         details_box.pack_start(Gtk.Separator(), False, False, 0)
@@ -232,123 +176,133 @@ class ExtensionsView(BaseView):
         details_box.pack_start(self._create_error_section(ext), False, False, 0)
 
         scrolled.add(details_box)
-        self.ext_details_view.pack_start(scrolled, True, True, 0)
 
-        footer_button_row = self._create_button_row(ext)
-        self.ext_details_view.pack_start(footer_button_row, False, False, 0)
+        self.layout.set_content(scrolled)
 
-        self.ext_details_view.show_all()
+    def _create_extension_header(self, ext: ExtensionController) -> Gtk.Grid:
+        """Create the extension header with icon, name, toggle, info, and action buttons"""
+        header_grid = Gtk.Grid(column_spacing=20, row_spacing=5)
 
-    def _create_extension_header(self, ext: ExtensionController) -> Gtk.Box:
-        """Create the extension header with icon, name, and action buttons"""
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
-
-        # Large icon
+        # Column 0: Large icon
         icon_path = ext.get_normalized_icon_path()
         icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_XL, self.get_scale_factor())
         icon_image = Gtk.Image.new_from_surface(icon_surface)
-        header_box.pack_start(icon_image, False, False, 0)
+        header_grid.attach(icon_image, 0, 0, 1, 2)
 
-        # Extension info
-        info_box = self._create_extension_info_box(ext)
-        header_box.pack_start(info_box, True, True, 0)
+        # Column 1: Name (row 0), Authors + Updated date (row 1)
+        name_toggle_box, secondary_info_box = self._create_name_toggle_column(ext)
+        header_grid.attach(name_toggle_box, 1, 0, 1, 1)
+        if secondary_info_box:
+            header_grid.attach(secondary_info_box, 1, 1, 1, 1)
 
-        # Action buttons
-        button_box = self._create_action_buttons(ext)
-        header_box.pack_end(button_box, False, False, 0)
+        # Column 2: Status (row 0), Links (row 1)
+        info_box = self._create_info_links_column(ext)
+        header_grid.attach(info_box, 2, 0, 1, 2)
 
-        return header_box
+        # Column 3: Action buttons (On/off, Save, Check Updates, Remove) - right aligned
+        button_box = self._create_header_buttons(ext)
+        header_grid.attach(button_box, 3, 0, 1, 2)
 
-    def _create_extension_info_box(self, ext: ExtensionController) -> Gtk.Box:
-        """Create the extension information section"""
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, hexpand=True)
+        return header_grid
 
-        name_label = styled(Gtk.Label(label=ext.manifest.name, halign=Gtk.Align.START), "title-1")
-        info_box.pack_start(name_label, False, False, 0)
+    def _create_name_toggle_column(self, ext: ExtensionController) -> tuple[Gtk.Box, Gtk.Box | None]:
+        """Create the name column content"""
+        name_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        name_label = styled(Gtk.Label(label=ext.manifest.name, halign=Gtk.Align.START), "title")
+        name_box.pack_start(name_label, False, False, 0)
+
+        # Create a vertical box for authors and updated date
+        secondary_info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0, valign=Gtk.Align.END)
 
         if ext.manifest.authors:
             authors_label = styled(
                 Gtk.Label(label=f"by {ext.manifest.authors}", halign=Gtk.Align.START), "caption", "dim-label"
             )
-            info_box.pack_start(authors_label, False, False, 0)
+            secondary_info_box.pack_start(authors_label, False, False, 0)
 
-        # Repository information
-        details_row = styled(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5), "caption", "dim-label")
-        info_box.pack_start(details_row, False, False, 0)
-
+        # Add updated date
         if ext.state.updated_at:
             try:
                 updated_date = ext.state.updated_at[:10]
-                calendar_icon = Gtk.Image.new_from_icon_name("x-office-calendar-symbolic", Gtk.IconSize.MENU)
-                updated_label = Gtk.Label(label=updated_date, halign=Gtk.Align.START)
-                details_row.pack_start(calendar_icon, False, False, 0)
-                details_row.pack_start(updated_label, False, False, 0)
+                updated_row = styled(
+                    Gtk.Label(label=f"updated on {updated_date}", halign=Gtk.Align.START), "caption", "dim-label"
+                )
+                secondary_info_box.pack_start(updated_row, False, False, 0)
             except (ValueError, AttributeError):
                 pass
 
+        return name_box, secondary_info_box if secondary_info_box.get_children() else None
+
+    def _create_info_links_column(self, ext: ExtensionController) -> Gtk.Box:
+        """Create the info and links column content"""
+        info_box = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=3,
+            hexpand=True,
+            valign=Gtk.Align.END,
+        )
+
+        # Row 1: Installation status
         status_text = "User installed" if ext.is_manageable else "Externally managed"
-        status_label = Gtk.Label(label=status_text, halign=Gtk.Align.START)
-        details_row.pack_start(status_label, False, False, 0)
+        status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        status_label = styled(Gtk.Label(label=status_text, halign=Gtk.Align.START), "caption", "dim-label")
+        status_box.pack_start(status_label, False, False, 0)
+
+        # Add a link for installation directory
+        folder_link = Gtk.LinkButton.new_with_label(f"file://{ext.path}", "(locate)")
+        folder_link.set_halign(Gtk.Align.START)
+        status_box.pack_start(folder_link, False, False, 0)
+
+        info_box.pack_start(status_box, False, False, 0)
+
+        # Row 2: Git repository link with URL as text
+        if ext.state.browser_url and ext.state.browser_url.startswith("http"):
+            display_url = ext.state.browser_url.replace("https://", "").replace("http://", "")
+            repo_link = Gtk.LinkButton.new_with_label(ext.state.browser_url, display_url)
+            repo_link.set_halign(Gtk.Align.START)
+            # Enable ellipsis on the internal label to handle long URLs
+            label = repo_link.get_child()
+            if isinstance(label, Gtk.Label):
+                label.set_ellipsize(Pango.EllipsizeMode.END)
+            info_box.pack_start(repo_link, False, False, 0)
 
         return info_box
 
-    def _create_action_buttons(self, ext: ExtensionController) -> Gtk.Box:
-        """Create the action buttons section"""
-        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, valign=Gtk.Align.END)
+    def _create_header_buttons(self, ext: ExtensionController) -> Gtk.Box:
+        """Create the header action buttons (Toggle, Save, Check Updates, Remove)"""
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, valign=Gtk.Align.CENTER)
 
-        # Repository link button
-        if ext.state.browser_url and ext.state.browser_url.startswith("http"):
-            repo_icon = Gtk.Image.new_from_icon_name("web-browser-symbolic", Gtk.IconSize.BUTTON)
-            repo_link = Gtk.Button(image=repo_icon, tooltip_text="Open repository")
-            repo_link.connect("clicked", lambda _: open_detached(ext.state.browser_url))
-            button_box.pack_start(repo_link, False, False, 0)
-
-        # Folder button
-        browse_icon = Gtk.Image.new_from_icon_name("folder-symbolic", Gtk.IconSize.BUTTON)
-        folder_button = Gtk.Button(image=browse_icon, tooltip_text="Open extensions directory")
-        folder_button.connect("clicked", lambda _: open_detached(ext.path))
-        button_box.pack_start(folder_button, False, False, 0)
-
-        # Update button
-        if ext.is_manageable and ext.state.url:
-            update_icon = Gtk.Image.new_from_icon_name("software-update-symbolic", Gtk.IconSize.BUTTON)
-            update_button = styled(Gtk.Button(image=update_icon, tooltip_text="Check updates"), "update-button")
-            update_button.connect("clicked", self._on_check_updates, ext)
-            button_box.pack_start(update_button, False, False, 0)
-
-        # Enable/Disable toggle
-        toggle_switch = Gtk.Switch(
-            vexpand=False,
-            valign=Gtk.Align.CENTER,
-            tooltip_text="Disable" if ext.is_enabled else "Enable",
-            active=ext.is_enabled,
+        # Toggle switch
+        toggle_switch = styled(
+            Gtk.Switch(
+                vexpand=False,
+                valign=Gtk.Align.CENTER,
+                tooltip_text="Disable" if ext.is_enabled else "Enable",
+                active=ext.is_enabled,
+            ),
+            "small-switch",
         )
         toggle_switch.connect("state-set", self._on_toggle_extension, ext)
         button_box.pack_start(toggle_switch, False, False, 0)
 
-        return button_box
+        # Save button
+        self.save_button = styled(Gtk.Button(label="Save", sensitive=False), "suggested-action")
+        self.save_button.connect("clicked", lambda _: self.save_changes())
+        button_box.pack_start(self.save_button, False, False, 0)
 
-    def _create_button_row(self, ext: ExtensionController) -> Gtk.Box:
-        """Create the footer button row with Save and Remove buttons"""
-        button_row = styled(
-            Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, hexpand=True, margin=10),
-            "shortcuts-button-row",
-        )
-        spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        button_row.pack_start(spacer, True, True, 0)
+        # Check Updates button
+        if ext.is_manageable and ext.state.url:
+            update_button = styled(Gtk.Button(label="Check Updates"), "update-button")
+            update_button.connect("clicked", self._on_check_updates, ext)
+            button_box.pack_start(update_button, False, False, 0)
 
         # Remove button (only if extension is manageable)
         if ext.is_manageable:
-            remove_button = styled(Gtk.Button(label="Remove"), "shortcuts-button", "destructive-action")
+            remove_button = styled(Gtk.Button(label="Remove"), "destructive-action")
             remove_button.connect("clicked", self.on_remove_extension, ext)
-            button_row.pack_start(remove_button, False, False, 0)
+            button_box.pack_start(remove_button, False, False, 0)
 
-        # Save button
-        self.save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
-        self.save_button.connect("clicked", lambda _: self.save_changes())
-        button_row.pack_start(self.save_button, False, False, 0)
-
-        return button_row
+        return button_box
 
     def _create_installation_instructions_section(self, ext: ExtensionController) -> Gtk.Box:
         """Create the installation instructions section"""
@@ -421,7 +375,7 @@ class ExtensionsView(BaseView):
         self.pref_widgets = {}
 
         for pref_id, pref in ext.preferences.items():
-            pref_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+            pref_box = styled(Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5), "ext-pref-box")
 
             pref_name = pref.get("name", pref_id)
             pref_type = pref.get("type", "input")
@@ -548,8 +502,10 @@ class ExtensionsView(BaseView):
     def _on_add_extension(self, _widget: Gtk.Widget) -> None:
         def after_add_extension(ext: ExtensionController) -> None:
             self.active_ext = ext
+            self._load_extension_list()
             self._show_extension_details(ext)
 
+        self.layout.select_item(None)
         self.handlers.add_extension(after_add_extension)
 
     def _on_toggle_extension(self, _switch: Gtk.Switch, state: bool, ext: ExtensionController) -> None:
@@ -563,7 +519,8 @@ class ExtensionsView(BaseView):
     def on_remove_extension(self, _button: Gtk.Button, ext: ExtensionController) -> None:
         def after_remove_extension() -> None:
             self.active_ext = None
-            self._reset_extension_view()
+            self._load_extension_list()
+            self._show_placeholder()
 
         self.handlers.remove_extension(ext, after_remove_extension)
 
