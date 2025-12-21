@@ -124,12 +124,16 @@ class ExtensionRuntime:
         events.emit("extensions:handle_response", self._ext_id, message)
 
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
-        # append output to recent_errors
-        output, _ = error_stream.read_line_finish_utf8(result)
-        if output:
-            print(output, f" 🔌 from {self._ext_id}")  # noqa: T201
-            self._recent_errors.append(output)
-            self.read_stderr_line()
+        try:
+            # append output to recent_errors
+            output, _ = error_stream.read_line_finish_utf8(result)
+            if output:
+                print(output, f" 🔌 from {self._ext_id}")  # noqa: T201
+                self._recent_errors.append(output)
+                self.read_stderr_line()
+        except GLib.Error:
+            logger.exception("Failed to read stderr line for %s", self._ext_id)
+            return
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
         if self._subprocess in aborted_subprocesses:
