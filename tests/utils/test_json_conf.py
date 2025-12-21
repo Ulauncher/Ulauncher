@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -9,16 +8,8 @@ import pytest
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load, json_save, json_stringify
 
-json_file = "/tmp/ulauncher-test/jsonconf.json"
-
 
 class TestJsonConf:
-    def setup_class(self) -> None:
-        Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
-
-    def teardown_class(self) -> None:
-        shutil.rmtree("/tmp/ulauncher-test")
-
     def test_attr_methods(self) -> None:
         jc = JsonConf()
         assert not hasattr(jc, "a")
@@ -37,8 +28,10 @@ class TestJsonConf:
         assert JsonConf(b=2, a=1) == JsonConf({"a": 1, "b": 2})
         assert JsonConf(a=1, b=2) != JsonConf({"a": 1})
 
-    def test_new_file_file_cache(self) -> None:
-        file_path = "/tmp/ulauncher-test/jsonconf_test_cache.json"
+    def test_new_file_file_cache(self, tmp_path: Path) -> None:
+        """Test that JsonConf.load uses file cache for the same path"""
+        file_path = tmp_path / "jsonconf_test_cache.json"
+
         jc1 = JsonConf.load(file_path)
         assert not hasattr(jc1, "a")
         jc1.a = 1
@@ -54,26 +47,34 @@ class TestJsonConf:
         assert json_stringify(conf) == '{"d": 1}'
         assert json_stringify(conf, value_blacklist=[]) == '{"a": null, "b": [], "c": {}, "d": 1}'
 
-    def test_save(self) -> None:
+    def test_save(self, tmp_path: Path) -> None:
+        """Test that save() writes the correct data using json_save"""
+        json_file = tmp_path / "jsonconf.json"
+
         jc = JsonConf.load(json_file)
         jc.asdf = "xyz"
         jc.save()
         assert json_load(json_file).get("asdf") == "xyz"
+
         jc.update(asdf="zyx")
         jc.save()
         assert json_load(json_file).get("asdf") == "zyx"
+
         jc.save(asdf="yxz")
         assert json_load(json_file).get("asdf") == "yxz"
+
         jc.save({"asdf": "xzy"})
         assert json_load(json_file).get("asdf") == "xzy"
 
-    def test_save_external(self) -> None:
-        # Check that JsonConf initiated w or w/o path saves to the path specified,
-        # not the instance path
-        file_path = "/tmp/ulauncher-test/jsonconf_save_as.json"
+    def test_save_external(self, tmp_path: Path) -> None:
+        """Test saving to external paths"""
+        json_file = tmp_path / "jsonconf.json"
+        file_path = tmp_path / "jsonconf_save_as.json"
+
         jc_static = JsonConf(abc=123)
         json_save(jc_static, file_path)
         assert json_load(file_path).get("abc") == 123
+
         jc = JsonConf.load(json_file)
         jc.save()
         jc.bcd = 234
@@ -88,7 +89,7 @@ class TestJsonConf:
             jc.get = 1  # type: ignore[assignment, method-assign]
         assert callable(jc.get)
 
-    def test_inheritance(self) -> None:
+    def test_inheritance(self, tmp_path: Path) -> None:
         class ClassWDefault(JsonConf):
             b = 1
             a = 2
@@ -106,7 +107,8 @@ class TestJsonConf:
         assert inst.sum() == 3
         assert json_stringify(SubclassWDefault()) == '{"a": 2, "b": 1, "c": 3}'
 
-        json_ko_file = "/tmp/ulauncher-test/jsonconf-key-order.json"
+        # Test file operations with real files
+        json_ko_file = tmp_path / "jsonconf-key-order.json"
         inst = ClassWDefault.load(json_ko_file)
         inst.save()
         assert list(json_load(json_ko_file).keys()) == ["a", "b"]
@@ -131,7 +133,10 @@ class TestJsonConf:
         data["four"] = 4
         assert json_stringify(data, sort_keys=False) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'
 
-    def test_file_cache(self) -> None:
+    def test_file_cache(self, tmp_path: Path) -> None:
+        """Test that different JsonConf subclasses maintain separate file caches"""
+        json_file = tmp_path / "jsonconf.json"
+
         class C1(JsonConf):
             pass
 
@@ -146,18 +151,26 @@ class TestJsonConf:
         assert hasattr(c2a, "unique_cache_key")
         assert hasattr(c2b, "unique_cache_key")
 
-    def test_load_always_reads_file(self) -> None:
+    def test_load_always_reads_file(self, tmp_path: Path) -> None:
+        """Test that load() always reads from file and updates cached instance"""
+        json_file = tmp_path / "jsonconf.json"
+
         class C1(JsonConf):
             pass
 
-        c1 = C1.load(json_file)
-        c1.a = 1
-        c1.save()
+        # Create initial file with data
+        json_save({"a": 1}, json_file)
 
-        # write a different value directly to the file
-        with open(json_file, "w") as f:
-            f.write('{"a": 2}')
-
-        # load again
+        # Load and verify
         c1 = C1.load(json_file)
-        assert c1.a == 2  # should read the value from the file, not the cached instance
+        assert c1.a == 1
+
+        # Write a different value directly to the file
+        json_save({"a": 2}, json_file)
+
+        # Load again - should read the new value and update the cached instance
+        c1_again = C1.load(json_file)
+        assert c1_again.a == 2
+        # Since it's the same cached instance, the original reference should also be updated
+        assert c1.a == 2
+        assert id(c1) == id(c1_again)
