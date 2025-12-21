@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -10,7 +9,6 @@ from pytest_mock import MockerFixture
 
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.utils.desktopappinfo import DesktopAppInfo
-from ulauncher.utils.json_utils import json_load
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None
@@ -18,12 +16,6 @@ ENTRIES_DIR = Path(__file__).parent.joinpath("mock_desktop_entries").resolve()
 
 
 class TestAppResult:
-    def setup_class(self) -> None:
-        Path("/tmp/ulauncher-test").mkdir(parents=True, exist_ok=True)
-
-    def teardown_class(self) -> None:
-        shutil.rmtree("/tmp/ulauncher-test")
-
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_new(self, mocker: MockerFixture) -> Any:
         def mkappinfo(app_id: str) -> Gio.DesktopAppInfo | None:
@@ -49,10 +41,14 @@ class TestAppResult:
         return AppResult.from_id("falseapp.desktop")
 
     @pytest.fixture(autouse=True)
-    def app_starts(self, mocker: MockerFixture) -> Any:
-        app_starts = json_load("/tmp/ulauncher-test/app_starts.json")
-        app_starts.update({"falseapp.desktop": 3000, "trueapp.desktop": 765})
-        return mocker.patch("ulauncher.modes.apps.app_result.app_starts", new=app_starts)
+    def mock_app_starts(self, mocker: MockerFixture) -> dict[str, int]:
+        app_starts_data = {"falseapp.desktop": 3000, "trueapp.desktop": 765}
+        mocker.patch("ulauncher.modes.apps.app_result.app_starts", app_starts_data)
+        return app_starts_data
+
+    @pytest.fixture(autouse=True)
+    def mock_json_save(self, mocker: MockerFixture) -> Any:
+        return mocker.patch("ulauncher.modes.apps.app_result.json_save")
 
     def test_get_name(self, app1: AppResult) -> None:
         assert app1.name == "TrueApp - Full Name"
@@ -66,6 +62,6 @@ class TestAppResult:
     def test_search_score(self, app1: AppResult) -> None:
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_bump(self, app1: AppResult, app_starts: dict[str, int]) -> None:
+    def test_bump(self, app1: AppResult, mock_app_starts: dict[str, int]) -> None:
         app1.bump_starts()
-        assert app_starts.get("trueapp.desktop") == 766
+        assert mock_app_starts.get("trueapp.desktop") == 766
