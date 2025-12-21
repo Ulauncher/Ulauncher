@@ -1,13 +1,14 @@
-import os
 import textwrap
-from random import randint
+from pathlib import Path
 
 from ulauncher.modes.shortcuts.run_script import run_script
 
 
 class TestRunScriptAction:
-    def test_run_with_arg(self) -> None:
-        test_file = f"/tmp/ulauncher_test_{randint(1, 111111)}"
+    # tmp_path is a pytest fixture that cleans up after itself.
+    # https://docs.pytest.org/en/stable/reference/reference.html#tmp-path
+    def test_run_with_arg(self, tmp_path: Path) -> None:
+        test_file = tmp_path / "test_output.txt"
         arg = "hello world"
         # RunScriptAction only supports bash argument placeholders ("$@" or "$1")
         # Shortcuts also support "%s", but that should be handled before they get here.
@@ -19,6 +20,4 @@ class TestRunScriptAction:
         )
         thread = run_script(script, arg)
         thread.join()
-        with open(test_file) as f:
-            assert f.read() == f"{arg}\n"
-        os.remove(test_file)
+        assert test_file.read_text() == f"{arg}\n"
