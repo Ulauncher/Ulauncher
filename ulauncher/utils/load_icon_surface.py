@@ -17,10 +17,10 @@ DEFAULT_EXE_ICON = f"{paths.ASSETS}/icons/executable.png"
 
 @lru_cache(maxsize=50)
 def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSurface:
+    from gi.repository import Gdk, GdkPixbuf, GLib
+
     real_size = size * scaling_factor
     try:
-        from gi.repository import Gdk, GdkPixbuf
-
         if not icon.startswith("/"):
             from ulauncher.utils.get_icon_path import get_icon_path
 
@@ -28,7 +28,7 @@ def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSur
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, real_size, real_size)
         assert pixbuf
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
-    except (OSError, AssertionError, AttributeError) as e:
+    except GLib.Error as e:
         if icon == DEFAULT_EXE_ICON:
             msg = f"Could not load fallback icon: {icon}"
             raise RuntimeError(msg) from e

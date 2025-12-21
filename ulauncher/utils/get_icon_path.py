@@ -23,7 +23,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
             if themed_icon := icon_theme.lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE):
                 return themed_icon.get_filename()
 
-    except (OSError, TypeError, AttributeError, GLib.Error) as err:
+    except (OSError, GLib.Error) as err:
         logger.warning("Error '%s' occurred when trying to load icon path '%s'.", err, icon)
         logger.info("If this happens often, please see https://github.com/Ulauncher/Ulauncher/discussions/1346")
 
