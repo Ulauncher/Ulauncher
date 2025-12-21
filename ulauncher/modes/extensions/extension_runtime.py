@@ -54,24 +54,28 @@ class ExtensionRuntime:
             launcher.setenv(env_name, env_value, True)
         launcher.setenv("ULAUNCHER_EXTENSION_ID", ext_id, True)
 
-        # Create both parent and child sockets. The child fd is detached and handed over to the launcher.
-        # The parent needs to be stored as a property to avoid getting garbage collected prematurely.
-        self._parent_socket, child_socket = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
-        child_fd = child_socket.detach()
-
-        launcher.setenv("SOCKETPAIR_FD", str(child_fd), True)
-        launcher.take_fd(child_fd, child_fd)
-
-        self._subprocess = launcher.spawnv(cmd)
-
-        def on_close() -> None:
+        def socket_cleanup() -> None:
             if self._parent_socket:
                 self._parent_socket.close()
                 self._parent_socket = None
                 logger.info("Extension %s connection closed", self._ext_id)
 
-        # Socket handler for parent process
-        self._msg_controller = SocketMsgController(self._parent_socket.fileno(), on_close)
+        try:
+            # Create both parent and child sockets. The child fd is detached and handed over to the launcher.
+            # The parent needs to be stored as a property to avoid getting garbage collected prematurely.
+            self._parent_socket, child_socket = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
+            child_fd = child_socket.detach()
+
+            launcher.setenv("SOCKETPAIR_FD", str(child_fd), True)
+            launcher.take_fd(child_fd, child_fd)
+
+            self._subprocess = launcher.spawnv(cmd)
+
+            # Socket handler for parent process
+            self._msg_controller = SocketMsgController(self._parent_socket.fileno(), socket_cleanup)
+        except (OSError, GLib.Error, TypeError):
+            socket_cleanup()
+            raise
 
         error_input_stream = self._subprocess.get_stderr_pipe()
         if not error_input_stream:
