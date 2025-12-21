@@ -117,7 +117,7 @@ class ExtensionManifest(JsonConf):
                     assert not p.min or isinstance(p.min, int), (
                         f'"{p_id}" "min" value must be non-decimal number if specified'
                     )
-                    assert not p.max or isinstance(p.min, int), (
+                    assert not p.max or isinstance(p.max, int), (
                         f'"{p_id}" "max" value must be non-decimal number if specified'
                     )
                     assert not p.min or not p.max or p.min < p.max, (
