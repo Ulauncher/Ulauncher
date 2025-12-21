@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import json
 import logging
 from typing import Any, Literal, cast
@@ -155,13 +154,14 @@ class UlauncherApp(Gtk.Application):
 
     def delegate_custom_message(self, json_message: str) -> None:
         """Parses and delegates custom JSON messages to the EventBus listener (if any)"""
-        with contextlib.suppress(json.JSONDecodeError):
+        try:
             data = json.loads(json_message)
             if isinstance(data, dict) and "name" in data:
                 events.emit(data["name"], data.get("message"))
                 return
-
-        logger.error("Invalid custom JSON message format: %s", json_message)
+            logger.error("Custom message missing required 'name' field: %s", json_message)
+        except json.JSONDecodeError:
+            logger.exception("Failed to parse custom message as JSON: %s", json_message)
 
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
