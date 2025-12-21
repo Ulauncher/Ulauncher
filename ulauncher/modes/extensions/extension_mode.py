@@ -132,11 +132,10 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         def run_batch() -> None:
             asyncio.run(run_batch_async())
+            if callback:
+                callback()
 
         Thread(target=run_batch).start()
-
-        if callback:
-            callback()
 
     @events.on
     def reload(
