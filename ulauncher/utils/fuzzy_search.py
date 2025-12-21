@@ -29,6 +29,7 @@ except ImportError:
 
 
 # convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
+@lru_cache(maxsize=2000)
 def _normalize(string: str) -> str:
     return unicodedata.normalize("NFD", string.casefold()).encode("ascii", "ignore").decode("utf-8")
 
