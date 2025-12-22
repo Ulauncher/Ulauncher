@@ -106,11 +106,6 @@ notebook tab {
   letter-spacing: 0.3px;
 }
 
-.status-badge.on {
-  background-color: rgba(90, 210, 100, 0.75);
-  border-color: rgba(25, 135, 84, 0.2);
-}
-
 .status-badge.off {
   background-color: rgba(160, 160, 160, 0.75);
   border-color: rgba(108, 117, 125, 0.2);
@@ -190,23 +185,6 @@ notebook tab {
 
 .shortcuts-option-row {
   padding: 10px 0;
-}
-
-.shortcuts-button-row {
-  border-top: 1px solid alpha(@theme_fg_color, 0.08);
-  margin-top: 3px;
-  padding-top: 14px;
-}
-
-.shortcuts-button {
-  padding: 6px 18px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background-color 120ms ease-in-out;
-}
-
-.shortcuts-button + .shortcuts-button {
-  margin-left: 8px;
 }
 
 .shortcuts-cmd-help > * {

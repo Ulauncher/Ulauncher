@@ -66,12 +66,10 @@ class ShortcutsView(views.BaseView):
         # Buttons on the right
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, valign=Gtk.Align.CENTER)
 
-        remove_button = styled(
-            Gtk.Button(label="Remove", sensitive=bool(shortcut.id)), "shortcuts-button", "destructive-action"
-        )
+        remove_button = styled(Gtk.Button(label="Remove", sensitive=bool(shortcut.id)), "destructive-action")
         remove_button.connect("clicked", self._on_remove_current)
 
-        save_button = styled(Gtk.Button(label="Save", sensitive=False), "shortcuts-button", "suggested-action")
+        save_button = styled(Gtk.Button(label="Save", sensitive=False), "suggested-action")
         save_button.connect("clicked", self._on_save_shortcut)
         self.save_button = save_button
 
