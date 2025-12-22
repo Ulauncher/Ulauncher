@@ -4,6 +4,7 @@ import logging
 import os
 from os.path import basename, dirname, expandvars, isdir, join
 from pathlib import Path
+from typing import Callable, Iterable
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
@@ -45,11 +46,12 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: Query) -> list[FileBrowserResult]:
+    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
         try:
             path_str = query.argument
             if not path_str:
-                return []
+                callback([])
+                return
             path = Path(expandvars(path_str.strip())).expanduser()
             results = []
 
@@ -81,7 +83,7 @@ class FileBrowserMode(BaseMode):
         except (RuntimeError, OSError):
             results = []
 
-        return results
+        callback(results)
 
     def handle_backspace(self, query_str: str) -> Query | None:
         if "/" in query_str and len(query_str.strip().rstrip("/")) > 1:

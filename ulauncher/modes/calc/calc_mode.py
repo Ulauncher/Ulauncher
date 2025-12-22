@@ -7,7 +7,7 @@ import operator as op
 import re
 from decimal import Decimal
 from functools import lru_cache
-from typing import Callable
+from typing import Callable, Iterable
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
@@ -146,7 +146,7 @@ class CalcMode(BaseMode):
     def matches_query_str(self, query_str: str) -> bool:
         return _is_enabled(query_str)
 
-    def handle_query(self, query: Query) -> list[CalcResult]:
+    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
         try:
             calc_result = str(eval_expr(query.argument))
             result = CalcResult(
@@ -161,7 +161,7 @@ class CalcMode(BaseMode):
                 description="Invalid expression",
             )
 
-        return [result]
+        callback([result])
 
     def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata:
         if isinstance(result, CalcResult) and result.result is not None:

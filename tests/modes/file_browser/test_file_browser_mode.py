@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -5,7 +7,15 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
+
+
+def get_results(mode: FileBrowserMode, query: Query) -> list[Result]:
+    """Helper to collect results from callback-based handle_query."""
+    results = []
+    mode.handle_query(query, lambda r: results.extend(r))
+    return results
 
 
 class MockDirEntry:
@@ -61,9 +71,9 @@ class TestFileBrowserMode:
 
     def test_handle_query__path_from_q_exists__dir_listing_rendered(self) -> None:
         query = Query(None, "/tmp/")
-        flattened_results = [str(r.path) for r in FileBrowserMode().handle_query(query)]
+        flattened_results = [str(r.path) for r in get_results(FileBrowserMode(), query)]
         assert flattened_results == ["/tmp/B", "/tmp/D", "/tmp/c", "/tmp/a"]
 
     def test_handle_query__invalid_path__empty_list_rendered(self, mode: FileBrowserMode) -> None:
         query = Query(None, "~~")
-        assert mode.handle_query(query) == []
+        assert get_results(mode, query) == []
