@@ -165,11 +165,19 @@ class ExtensionsView(BaseView):
         """Show details for selected extension"""
         self.save_button = None
 
-        scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
-        details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20)
+        # Container for fixed header and scrollable content
+        container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
-        details_box.pack_start(self._create_extension_header(ext), False, False, 0)
-        details_box.pack_start(Gtk.Separator(), False, False, 0)
+        # Fixed header section
+        header_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20, margin_bottom=0)
+        header_box.pack_start(self._create_extension_header(ext), False, False, 0)
+        header_box.pack_start(Gtk.Separator(), False, False, 0)
+        container.pack_start(header_box, False, False, 0)
+
+        # Scrollable content section
+        scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+        details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20, margin_top=15)
+
         details_box.pack_start(self._create_extension_status_info(ext), False, False, 0)
         details_box.pack_start(self._create_installation_instructions_section(ext), False, False, 0)
         details_box.pack_start(self._create_triggers_section(ext), False, False, 0)
@@ -177,8 +185,9 @@ class ExtensionsView(BaseView):
         details_box.pack_start(self._create_error_section(ext), False, False, 0)
 
         scrolled.add(details_box)
+        container.pack_start(scrolled, True, True, 0)
 
-        self.layout.set_content(scrolled)
+        self.layout.set_content(container)
 
     def _create_extension_header(self, ext: ExtensionController) -> Gtk.Box:
         """Create the extension header with icon, name, and action buttons"""
@@ -261,9 +270,14 @@ class ExtensionsView(BaseView):
         parts.append(status_label)
 
         # Open source location link
-        folder_link = Gtk.LinkButton.new_with_label(f"file://{ext.path}", "📁 installation location")
+        folder_link = Gtk.LinkButton.new_with_label(f"file://{ext.path}", "installation location")
         folder_link.set_halign(Gtk.Align.CENTER)
-        parts.append(folder_link)
+        folder_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
+        folder_icon = styled(Gtk.Label(label="📁"), "caption")
+        folder_box.pack_start(folder_icon, False, False, 0)
+        folder_box.pack_start(folder_link, False, False, 0)
+        folder_box.set_halign(Gtk.Align.CENTER)
+        parts.append(folder_box)
 
         # Add parts with bullet separators
         for i, part in enumerate(parts):
