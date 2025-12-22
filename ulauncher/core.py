@@ -128,11 +128,16 @@ class UlauncherCore:
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import handle_action
 
+        mode = self._mode
+
+        def callback(results: Iterable[Result]) -> None:
+            # Ensure the mode hasn't changed
+            if self._mode == mode:
+                _events.emit("window:show_results", results)
+
         if self._mode:
             try:
-                results = self._mode.handle_query(self.query)
-                if results is not None:
-                    _events.emit("window:show_results", results)
+                self._mode.handle_query(self.query, callback)
             except Exception:
                 # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)

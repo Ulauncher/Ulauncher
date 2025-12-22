@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from decimal import Decimal
 from unittest.mock import MagicMock
 
@@ -5,7 +7,15 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
+
+
+def get_results(mode: CalcMode, query: Query) -> list[Result]:
+    """Helper to collect results from callback-based handle_query."""
+    results = []
+    mode.handle_query(query, lambda r: results.extend(r))
+    return results
 
 
 class TestCalcMode:
@@ -75,14 +85,14 @@ class TestCalcMode:
         assert eval_expr("asinh(6) + atanh(0.9) + ln(0.7)") == "3.6073243982894"
 
     def test_handle_query(self, mode: CalcMode) -> None:
-        assert mode.handle_query(Query(None, "3+2"))[0].result == "5"
-        assert mode.handle_query(Query(None, "3+2*"))[0].result == "5"
-        assert mode.handle_query(Query(None, "2-2"))[0].result == "0"
-        assert mode.handle_query(Query(None, "5%2"))[0].result == "1"
+        assert get_results(mode, Query(None, "3+2"))[0].result == "5"
+        assert get_results(mode, Query(None, "3+2*"))[0].result == "5"
+        assert get_results(mode, Query(None, "2-2"))[0].result == "0"
+        assert get_results(mode, Query(None, "5%2"))[0].result == "1"
 
     def test_handle_query__copy_action_called(self, mode: CalcMode, copy_action: MagicMock) -> None:
         query = Query(None, "3+2")
-        result = mode.handle_query(query)[0]
+        result = get_results(mode, query)[0]
         assert result.result == "5"
         mode.activate_result(result, query, False)
         copy_action.assert_called_once_with("5")
@@ -103,7 +113,7 @@ class TestCalcMode:
         with caplog.at_level("CRITICAL"):
             for query_str in bad_queries:
                 query = Query(None, query_str)
-                result = mode.handle_query(query)[0]
+                result = get_results(mode, query)[0]
                 assert result.name == "Error!"
                 assert result.description == "Invalid expression"
                 assert mode.activate_result(result, query, False) is True

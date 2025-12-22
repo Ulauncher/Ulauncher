@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Callable, Iterable
 
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
@@ -21,11 +21,11 @@ class BaseMode:
         """
         return None
 
-    def handle_query(self, _query: Query) -> Iterable[Result] | None:
+    def handle_query(self, _query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
         """
-        Return the new results for the given query, or None to keep the current results (for asynchronous handling)
+        Handle a query and provide the result list via callback.
         """
-        return []
+        callback([])
 
     def get_triggers(self) -> Iterable[Result]:
         return []

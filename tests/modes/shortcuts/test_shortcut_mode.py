@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -5,10 +7,18 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
 from ulauncher.modes.shortcuts.shortcut_trigger import ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
+
+
+def get_results(mode: ShortcutMode, query: Query) -> list[Result]:
+    """Helper to collect results from callback-based handle_query."""
+    results = []
+    mode.handle_query(query, lambda r: results.extend(r))
+    return results
 
 
 class TestShortcutMode:
@@ -53,7 +63,7 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
-        assert mode.handle_query(query)[0] == shortcut_result.return_value
+        assert get_results(mode, query)[0] == shortcut_result.return_value
 
     def test_handle_query__shortcut_result__is_called(
         self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
@@ -62,7 +72,7 @@ class TestShortcutMode:
         shortcut = ShortcutRecord(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
-        mode.handle_query(query)
+        get_results(mode, query)
 
         shortcut_result.assert_called_once_with(**shortcut, description="")
 

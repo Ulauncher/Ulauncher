@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal, cast
+from typing import Any, Callable, Iterable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
@@ -33,6 +33,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
+    _current_callback: Callable[[Iterable[Result]], None] | None = None
+    _current_query_change_id: int = 0
 
     def __init__(self) -> None:
         events.set_self(self)
@@ -53,10 +55,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
-    def handle_query(self, query: Query) -> None:
+    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
+
+        self._current_query_change_id += 1
+
+        self._current_callback = callback
 
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
@@ -66,6 +72,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     "type": "event:input_trigger",
                     "ext_id": self.active_ext.id,
                     "args": [query.argument, trigger_id],
+                    "query_change_id": self._current_query_change_id,
                 }
 
                 self.active_ext.debounced_send_message(event)
@@ -197,6 +204,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
+        if (
+            not self._current_callback
+            or response.get("event", {}).get("query_change_id") != self._current_query_change_id
+        ):
+            logger.debug("Ignoring outdated extension response")
+            return
 
         action_metadata = response.get("action")
         if isinstance(action_metadata, list):
@@ -204,7 +217,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
             results = [Result(**res) for res in action_metadata]
-            events.emit("window:show_results", results)
+            self._current_callback(results)
+            self._current_callback = None
             return
         events.emit("mode:handle_action", action_metadata)
 
