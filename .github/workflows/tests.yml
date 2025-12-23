@@ -18,8 +18,6 @@ jobs:
         run: make pyrefly
       - name: typo
         run: make typos
-      - name: mypy
-        run: mypy ulauncher
       - name: pytest
         run: make pytest
       - name: build docs
