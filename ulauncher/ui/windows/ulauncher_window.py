@@ -23,7 +23,7 @@ events = EventBus("window", True)
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
-    results_nav: ItemNavigation | None = None
+    _results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
     settings = Settings.load()
@@ -229,8 +229,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Activate the selected result
         """
-        if self.results_nav:
-            self.results_nav.activate(alt)
+        if self._results_nav:
+            self._results_nav.activate(alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -267,13 +267,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ):
             return True
 
-        if self.results_nav:
+        if self._results_nav:
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == up_alias):
-                self.results_nav.go_up()
+                self._results_nav.go_up()
                 return True
 
             if keyname in ("Down", "Tab") or (ctrl and keyname == down_alias):
-                self.results_nav.go_down()
+                self._results_nav.go_down()
                 return True
 
             if ctrl and keyname == left_alias:
@@ -285,7 +285,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 return True
 
             if keyname in ("Return", "KP_Enter"):
-                self.results_nav.activate(alt)
+                self._results_nav.activate(alt)
                 return True
             if alt and event.string in jump_keys:
                 self.select_result(jump_keys.index(event.string))
@@ -376,8 +376,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.destroy()
 
     def select_result(self, index: int) -> None:
-        if self.results_nav:
-            self.results_nav.select(index)
+        if self._results_nav:
+            self._results_nav.select(index)
 
     def toggle_grab_pointer_device(self, grab: bool) -> None:
         if window := self.get_window():
@@ -400,7 +400,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
-        self.results_nav = None
+        self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
@@ -418,8 +418,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
 
-            self.results_nav = ItemNavigation(self.core, result_widgets)
-            self.results_nav.select_default()
+            self._results_nav = ItemNavigation(self.core, result_widgets)
+            self._results_nav.select_default()
 
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)
