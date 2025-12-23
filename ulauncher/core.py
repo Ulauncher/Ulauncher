@@ -11,9 +11,12 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.timer import TimerContext, timer
 
 _events = EventBus()
 logger = logging.getLogger()
+
+PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 @lru_cache(maxsize=None)
@@ -41,6 +44,7 @@ class UlauncherCore:
     _trigger_cache: defaultdict[BaseMode, list[Result]] = defaultdict(list)
     _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
     query: Query = Query(None, "")
+    _placeholder_timer: TimerContext | None = None
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
@@ -125,22 +129,39 @@ class UlauncherCore:
             self._mode_map[app_result] = app_mode
             yield app_result
 
+    def _show_results(self, results: Iterable[Result]) -> None:
+        self._clear_placeholder_timer()
+        _events.emit("window:show_results", results)
+
+    def _show_placeholder(self) -> None:
+        self._show_results([Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)])
+
+    def _clear_placeholder_timer(self) -> None:
+        if self._placeholder_timer:
+            self._placeholder_timer.cancel()
+            self._placeholder_timer = None
+
     def handle_change(self) -> None:
         from ulauncher.modes.mode_handler import handle_action
+
+        self._clear_placeholder_timer()
 
         mode = self._mode
 
         def callback(results: Iterable[Result]) -> None:
             # Ensure the mode hasn't changed
             if self._mode == mode:
-                _events.emit("window:show_results", results)
+                self._show_results(results)
 
         if self._mode:
             try:
+                self._placeholder_timer = timer(PLACEHOLDER_DELAY, self._show_placeholder)
+
                 self._mode.handle_query(self.query, callback)
             except Exception:
                 # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)
+                self._clear_placeholder_timer()
             return
 
         # No mode selected, which means search

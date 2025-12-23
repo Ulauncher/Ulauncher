@@ -27,6 +27,12 @@ class BaseMode:
         """
         callback([])
 
+    def get_placeholder_icon(self) -> str | None:
+        """
+        Returns icon for the placeholder result to show while waiting for async results.
+        """
+        return None
+
     def get_triggers(self) -> Iterable[Result]:
         return []
 
