@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Union
 
 from ulauncher.utils.basedataclass import BaseDataClass
 
 # ActionMetadata describes the action to be performed by the Ulauncher app.
 # It can be a dict with any value that can be serialized to JSON.
-ActionMetadata = Union[List["Result"], Dict[str, Any], bool, str]
+ActionMetadata = Union[Dict[str, Any], bool, str]
 
 
 class Result(BaseDataClass):

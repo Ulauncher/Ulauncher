@@ -25,12 +25,12 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_action(action_metadata: ActionMetadata | None) -> None:
+def handle_action(action_metadata: ActionMetadata | list[Result] | None) -> None:
     if not _handle_action(action_metadata):
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
+def _handle_action(action_metadata: ActionMetadata | list[Result] | None) -> bool:  # noqa: PLR0911, PLR0912
     if action_metadata is True:
         return True
     if action_metadata in (False, None):

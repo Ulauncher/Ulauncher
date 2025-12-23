@@ -59,7 +59,7 @@ class ShortcutMode(BaseMode):
                 trigger.keyword = ""
             yield trigger
 
-    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata:
+    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata | list[Result]:
         if isinstance(result, ShortcutTrigger):
             if result.keyword:
                 return f"{result.keyword} "
