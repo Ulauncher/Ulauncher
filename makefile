@@ -30,7 +30,7 @@ RESET := \\e[0m
 
 #=General Commands
 
-.PHONY: help version run docker python-venv
+.PHONY: help version run docker venv
 
 help: # Shows this list of available actions (targets)
 	@# Only includes targets with comments, but not if they have Commands with two ## chars
@@ -43,7 +43,7 @@ help: # Shows this list of available actions (targets)
 version: # Print the Ulauncher version
 	@echo ${VERSION}
 
-python-venv: # Creates a python virtual environment and installs dependencies
+venv: # Creates a python virtual environment and installs dependencies
 	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	python3 -m venv --system-site-packages .venv
 	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
@@ -115,7 +115,7 @@ check-dev-deps: # Check if development dependencies are properly installed
 		echo -e "${BOLD}${RED}Development dependencies not met:${RESET}" >&2
 		echo -e "${YELLOW}$$STDERR_OUTPUT\n${RESET}" >&2
 		if [ ! -d ".venv" ]; then
-			echo -e "${BOLD}${RED}Please run 'make python-venv' to set up the development environment.${RESET}" >&2
+			echo -e "${BOLD}${RED}Please run 'make venv' to set up the development environment.${RESET}" >&2
 		else \
 			echo -e "Please activate the virtual environment:"
 			echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"

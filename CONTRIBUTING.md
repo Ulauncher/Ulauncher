@@ -27,7 +27,7 @@ You need the following to set up the local build environment:
 
   ```sh
   sudo apt update && sudo apt install git bash make sed python3-setuptools debhelper dh-python
-  make python-venv
+  make venv
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well (requires universe repo):
@@ -53,7 +53,7 @@ You need the following to set up the local build environment:
 
   ```sh
   sudo pacman -Syu --needed git bash make sed python-{build,setuptools,lefthook}
-  make python-venv
+  make venv
   ```
 
   If you don't have Ulauncher installed already, install the runtime dependencies as well:
