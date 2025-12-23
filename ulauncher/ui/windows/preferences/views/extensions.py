@@ -43,9 +43,9 @@ class ExtensionsView(BaseView):
 
         self.layout = SidebarLayout(
             footer_actions=[
-                ("Add Extension", "list-add-symbolic", self._on_add_extension),
-                ("Discover Extensions", "system-search-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
-                ("Extension API Docs", "text-x-generic-symbolic", lambda _: open_detached("https://docs.ulauncher.io")),
+                ("Add extension", "list-add-symbolic", self._on_add_extension),
+                ("Discover extensions", "system-search-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
+                ("Develop your own", "text-x-generic-symbolic", lambda _: open_detached("https://docs.ulauncher.io")),
             ],
         )
         self.pack_start(self.layout, True, True, 0)
@@ -233,10 +233,10 @@ class ExtensionsView(BaseView):
             )
             secondary_info_box.pack_start(authors_label, False, False, 0)
 
-        # Add updated date
-        if ext.state.updated_at:
+        # Add updated date (commit time)
+        if ext.state.commit_time:
             try:
-                updated_date = ext.state.updated_at[:10]
+                updated_date = ext.state.commit_time[:10]
                 updated_row = styled(
                     Gtk.Label(label=f"updated on {updated_date}", halign=Gtk.Align.START), "caption", "dim-label"
                 )
@@ -410,13 +410,15 @@ class ExtensionsView(BaseView):
                 label = styled(Gtk.Label(label=pref_name, halign=Gtk.Align.START), "body")
                 pref_box.pack_start(label, False, False, 0)
 
+                if descr := pref.description:
+                    desc_label = styled(
+                        Gtk.Label(label=descr, halign=Gtk.Align.START, wrap=True), "caption", "dim-label"
+                    )
+                    pref_box.pack_start(desc_label, False, False, 0)
+
                 widget = self._create_preference_widget(pref_id, pref, pref_type)
                 if widget:
                     pref_box.pack_start(widget, False, False, 0)
-
-            if descr := pref.description:
-                desc_label = styled(Gtk.Label(label=descr, halign=Gtk.Align.START, wrap=True), "caption", "dim-label")
-                pref_box.pack_start(desc_label, False, False, 0)
 
             container.pack_start(pref_box, False, False, 0)
 
