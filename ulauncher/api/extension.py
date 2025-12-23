@@ -123,6 +123,7 @@ class Extension:
 
         # ignore outdated responses
         if current_input == self._input and action_metadata is not None:
+            # TODO: This needs to be typed better
             self._client.send({"event": event, "action": action_metadata})
 
     def run(self) -> None:

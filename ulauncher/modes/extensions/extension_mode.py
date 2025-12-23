@@ -119,6 +119,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
+        # TODO: Try to improve the type and avoid casting
         handler = cast(
             "ActionMetadata | Callable[[Query], ActionMetadata]",
             getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION),
