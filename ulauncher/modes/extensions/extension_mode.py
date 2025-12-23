@@ -108,6 +108,11 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     on_enter=action,
                 )
 
+    def get_placeholder_icon(self) -> str | None:
+        if self.active_ext:
+            return self.active_ext.get_normalized_icon_path()
+        return None
+
     def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
         """
         Called when a result is activated.
