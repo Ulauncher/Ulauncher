@@ -4,7 +4,7 @@ import logging
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMetadata
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
@@ -25,20 +25,16 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_action(action_metadata: ActionMetadata | list[Result] | None) -> None:
+def handle_action(action_metadata: ActionMetadata | None) -> None:
     if not _handle_action(action_metadata):
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_metadata: ActionMetadata | list[Result] | None) -> bool:  # noqa: PLR0911, PLR0912
+def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
     if action_metadata is True:
         return True
     if action_metadata in (False, None):
         return False
-    if isinstance(action_metadata, list):
-        results = [res if isinstance(res, Result) else Result(**res) for res in action_metadata]
-        _events.emit("window:show_results", results)
-        return True
     if isinstance(action_metadata, str):
         _events.emit("app:set_query", action_metadata)
         return True

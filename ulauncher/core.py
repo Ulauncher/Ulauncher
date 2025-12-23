@@ -142,8 +142,6 @@ class UlauncherCore:
             self._placeholder_timer = None
 
     def handle_change(self) -> None:
-        from ulauncher.modes.mode_handler import handle_action
-
         self._clear_placeholder_timer()
 
         mode = self._mode
@@ -172,7 +170,9 @@ class UlauncherCore:
                 for fallback_result in mode.get_fallback_results(str(self.query)):
                     results.append(fallback_result)
                     self._mode_map[fallback_result] = mode
-        handle_action(results)
+
+        result_objects = [res if isinstance(res, Result) else Result(**res) for res in results]
+        _events.emit("window:show_results", result_objects)
 
     def handle_backspace(self, query_str: str) -> bool:
         if self._mode:
@@ -191,4 +191,9 @@ class UlauncherCore:
 
         from ulauncher.modes.mode_handler import handle_action
 
-        handle_action(mode.activate_result(result, self.query, alt))
+        action_metadata = mode.activate_result(result, self.query, alt)
+        if not isinstance(action_metadata, list):
+            handle_action(action_metadata)
+            return
+
+        _events.emit("window:show_results", action_metadata)
