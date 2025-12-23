@@ -4,10 +4,8 @@ from typing import Any, Dict, List, Union
 
 from ulauncher.utils.basedataclass import BaseDataClass
 
-"""
-ActionMetadata describes the action to be performed by the Ulauncher app.
-It can be a dict with any value that can be serialized to JSON.
-"""
+# ActionMetadata describes the action to be performed by the Ulauncher app.
+# It can be a dict with any value that can be serialized to JSON.
 ActionMetadata = Union[List["Result"], Dict[str, Any], bool, str]
 
 
