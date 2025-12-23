@@ -4,7 +4,7 @@ import itertools
 import logging
 from collections import defaultdict
 from functools import lru_cache
-from typing import Iterable
+from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
 from ulauncher.internals.query import Query
@@ -82,7 +82,7 @@ class UlauncherCore:
                             current_trigger.__class__.__name__,
                         )
 
-    def update(self, query_str: str) -> None:
+    def update(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
         """Parse the query string and update the mode and query."""
         if not query_str and not str(self.query):
             # prevent loading modes until the app has rendered initially when the query is empty
@@ -109,7 +109,7 @@ class UlauncherCore:
                     self.query = Query(None, query_str)
                     break
 
-        self.handle_change()
+        self.handle_change(callback)
 
     def search_triggers(self, min_score: int = 50, limit: int = 50) -> list[Result]:
         self.load_triggers()
@@ -129,33 +129,34 @@ class UlauncherCore:
             self._mode_map[app_result] = app_mode
             yield app_result
 
-    def _show_results(self, results: Iterable[Result]) -> None:
+    def _show_results(self, results: Iterable[Result], callback: Callable[[Iterable[Result]], None]) -> None:
         self._clear_placeholder_timer()
-        _events.emit("window:show_results", results)
+        callback(results)
 
-    def _show_placeholder(self) -> None:
-        self._show_results([Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)])
+    def _show_placeholder(self, callback: Callable[[Iterable[Result]], None]) -> None:
+        placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
+        self._show_results([placeholder], callback)
 
     def _clear_placeholder_timer(self) -> None:
         if self._placeholder_timer:
             self._placeholder_timer.cancel()
             self._placeholder_timer = None
 
-    def handle_change(self) -> None:
+    def handle_change(self, callback: Callable[[Iterable[Result]], None]) -> None:
         self._clear_placeholder_timer()
 
         mode = self._mode
 
-        def callback(results: Iterable[Result]) -> None:
+        def results_callback(results: Iterable[Result]) -> None:
             # Ensure the mode hasn't changed
             if self._mode == mode:
-                self._show_results(results)
+                self._show_results(results, callback)
 
         if self._mode:
             try:
-                self._placeholder_timer = timer(PLACEHOLDER_DELAY, self._show_placeholder)
+                self._placeholder_timer = timer(PLACEHOLDER_DELAY, lambda: self._show_placeholder(callback))
 
-                self._mode.handle_query(self.query, callback)
+                self._mode.handle_query(self.query, results_callback)
             except Exception:
                 # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)
@@ -172,7 +173,7 @@ class UlauncherCore:
                     self._mode_map[fallback_result] = mode
 
         result_objects = [res if isinstance(res, Result) else Result(**res) for res in results]
-        _events.emit("window:show_results", result_objects)
+        callback(result_objects)
 
     def handle_backspace(self, query_str: str) -> bool:
         if self._mode:
@@ -183,7 +184,7 @@ class UlauncherCore:
                 return True
         return False
 
-    def activate_result(self, result: Result, alt: bool = False) -> None:
+    def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
         mode = self._mode_map.get(result, self._mode)
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
@@ -196,4 +197,4 @@ class UlauncherCore:
             handle_action(action_metadata)
             return
 
-        _events.emit("window:show_results", action_metadata)
+        self._show_results(action_metadata, callback)

@@ -199,7 +199,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.show_results([])
         self.apply_styling()
         self.core.load_triggers(force=True)
-        self.core.update(self.query_str)
+        self.core.update(self.query_str, self.show_results)
 
     ######################################
     # GTK Signal Handlers
@@ -223,14 +223,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
-        self.core.update(self.query_str)
+        self.core.update(self.query_str, self.show_results)
 
     def activate_result(self, alt: bool) -> None:
         """
         Activate the selected result
         """
         if self._results_nav and (result := self._results_nav.get_active_result()):
-            self.core.activate_result(result, alt)
+            self.core.activate_result(result, self.show_results, alt)
             if not alt:
                 self._results_nav.remember_result_for_query(str(self.core.query), result)
 
@@ -400,7 +400,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.set_text(query_str)
         self.prompt_input.set_position(-1)
 
-    @events.on
     def show_results(self, results: Iterable[Result]) -> None:
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
