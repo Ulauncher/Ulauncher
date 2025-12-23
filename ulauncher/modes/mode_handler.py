@@ -11,7 +11,7 @@ from ulauncher.utils.launch_detached import open_detached
 from ulauncher.utils.timer import timer
 
 _logger = logging.getLogger()
-_events = EventBus("mode")
+_events = EventBus()
 
 
 def clipboard_store(data: str) -> None:
@@ -25,7 +25,6 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-@_events.on
 def handle_action(action_metadata: ActionMetadata | None) -> None:
     if not _handle_action(action_metadata):
         _events.emit("app:hide_launcher")

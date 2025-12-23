@@ -13,6 +13,7 @@ from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.mode_handler import handle_action
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 
@@ -225,7 +226,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             self._current_callback(results)
             self._current_callback = None
             return
-        events.emit("mode:handle_action", action_metadata)
+        handle_action(action_metadata)
 
     @events.on
     def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
