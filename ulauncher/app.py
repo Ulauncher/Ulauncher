@@ -138,6 +138,8 @@ class UlauncherApp(Gtk.Application):
             cast("PreferencesWindow", preferences).present(page)
         else:
             preferences = PreferencesWindow(application=self)
+            # Drop the weakref entry on destroy so we don't keep a stale window around.
+            preferences.connect("destroy", lambda *_: self.windows.pop("preferences", None))
             self.windows["preferences"] = preferences
             preferences.show(page)
 

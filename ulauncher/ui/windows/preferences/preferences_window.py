@@ -11,6 +11,7 @@ from ulauncher.ui.windows.preferences.views.extensions import ExtensionsView
 from ulauncher.ui.windows.preferences.views.help import HelpView
 from ulauncher.ui.windows.preferences.views.preferences import PreferencesView
 from ulauncher.ui.windows.preferences.views.shortcuts import ShortcutsView
+from ulauncher.utils.system_theme import SystemThemeWatcher
 
 VIEW_CONFIG: list[tuple[str, type[BaseView]]] = [
     ("Preferences", PreferencesView),
@@ -35,12 +36,17 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
         # Store views keyed by stack page name for keybinding access
         self.views: dict[str, BaseView] = {}
+        self._theme_watcher: SystemThemeWatcher | None = None
+
+        self._watch_system_theme()
 
         # Create the main UI
         self._create_ui()
 
         # Setup keyboard shortcuts
         self._setup_keybindings()
+
+        self.connect("destroy", self._on_destroy)
 
     def _create_ui(self) -> None:
         """Create the main UI with notebook tabs"""
@@ -124,3 +130,15 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         screen = Gdk.Screen.get_default()
         if screen:
             Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def _watch_system_theme(self) -> None:
+        self._theme_watcher = SystemThemeWatcher(self._apply_system_theme)
+        self._theme_watcher.start()
+
+    def _apply_system_theme(self, prefers_dark: bool) -> None:
+        if gtk_settings := self.get_settings():
+            gtk_settings.props.gtk_application_prefer_dark_theme = prefers_dark
+
+    def _on_destroy(self, *_args: Any) -> None:
+        if self._theme_watcher:
+            self._theme_watcher.disconnect()
