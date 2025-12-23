@@ -225,6 +225,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
         self.core.update(self.query_str)
 
+    def activate_result(self, alt: bool) -> None:
+        """
+        Activate the selected result
+        """
+        if self.results_nav:
+            self.results_nav.activate(alt)
+
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
         Triggered by user key press
