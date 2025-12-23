@@ -109,7 +109,9 @@ class ResultWidget(Gtk.EventBox):
         self.item_box.get_style_context().remove_class("selected")
 
     def scroll_to_focus(self) -> None:
-        viewport: Gtk.Viewport = self.get_ancestor(Gtk.Viewport)  # type: ignore[assignment]
+        viewport = self.get_ancestor(Gtk.Viewport)
+        if not viewport or not isinstance(viewport, Gtk.Viewport):
+            return
         viewport_height = viewport.get_allocation().height
         scroll_y = viewport.get_vadjustment().get_value()
         allocation = self.get_allocation()
