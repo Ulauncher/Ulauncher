@@ -7,13 +7,13 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterable, Iterator
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.result import ActionMetadata
+from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -112,7 +112,7 @@ class Extension:
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
     def run_event_listener(
-        self, event: dict[str, Any], method: Callable[..., ActionMetadata | None], args: tuple[Any]
+        self, event: dict[str, Any], method: Callable[..., ActionMetadata | Iterable[Result] | None], args: tuple[Any]
     ) -> None:
         current_input = self._input
         action_metadata = method(*args)

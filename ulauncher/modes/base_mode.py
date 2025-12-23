@@ -57,7 +57,7 @@ class BaseMode:
         """
         return []
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
+    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.

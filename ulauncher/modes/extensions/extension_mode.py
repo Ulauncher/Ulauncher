@@ -114,14 +114,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata:
+    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
         # TODO: Try to improve the type and avoid casting
         handler = cast(
-            "ActionMetadata | Callable[[Query], ActionMetadata]",
+            "ActionMetadata | list[Result] | Callable[[Query], ActionMetadata | list[Result]]",
             getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION),
         )
         return handler(query) if callable(handler) else handler

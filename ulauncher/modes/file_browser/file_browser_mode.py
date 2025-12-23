@@ -90,7 +90,7 @@ class FileBrowserMode(BaseMode):
             return Query(None, join(Path(query_str).parent, ""))
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMetadata:
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMetadata | list[Result]:
         if isinstance(result, CopyPath):
             return actions.copy(result.path)
         if isinstance(result, OpenFolder):

@@ -44,7 +44,7 @@ class AppMode(BaseMode):
         # TODO: filter out old apps
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
-    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata:
+    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata | list[Result]:
         if isinstance(result, AppResult):
             result.bump_starts()
             if not launch_app(result.app_id):
