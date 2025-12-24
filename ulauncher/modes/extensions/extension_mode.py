@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
+from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
@@ -93,7 +94,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
                 action = (
-                    f"{trigger.keyword} "
+                    actions.set_query(f"{trigger.keyword} ")
                     if trigger.keyword
                     else {
                         "type": "action:launch_trigger",
