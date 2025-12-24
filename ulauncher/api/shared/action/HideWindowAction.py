@@ -1,3 +1,1 @@
-# @todo: Add deprecation warning  # noqa: N999
-def HideWindowAction() -> bool:  # noqa: N802
-    return False
+from ulauncher.internals.actions import close_window as HideWindowAction  # noqa: F401, N812, N999

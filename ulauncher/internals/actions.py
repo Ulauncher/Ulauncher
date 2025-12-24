@@ -8,6 +8,22 @@ from ulauncher.internals.result import ActionMetadata
 logger = logging.getLogger()
 
 
+def do_nothing() -> ActionMetadata:
+    return True
+
+
+def close_window() -> ActionMetadata:
+    return False
+
+
+def set_query(query: str) -> ActionMetadata:
+    if not isinstance(query, str):
+        msg = f'Query argument "{query}" is invalid. It must be a string'
+        logger.error(msg)
+        raise TypeError(msg)
+    return query
+
+
 def copy(text: str) -> ActionMetadata:
     if not isinstance(text, str):
         msg = f'Copy argument "{text}" is invalid. It must be a string'
