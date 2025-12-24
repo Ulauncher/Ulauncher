@@ -98,7 +98,7 @@ class FileBrowserMode(BaseMode):
         if isinstance(result, FileBrowserResult):
             if not alt:
                 if isdir(result.path):
-                    return join(fold_user_path(result.path), "")
+                    return actions.set_query(join(fold_user_path(result.path), ""))
 
                 return actions.open(result.path)
             if isdir(result.path):
@@ -107,4 +107,4 @@ class FileBrowserMode(BaseMode):
                 open_folder = OpenFolder(name="Open Containing Folder", path=dirname(result.path))
             return [open_folder, CopyPath(path=result.path)]
         logger.error("Unexpected File Browser Mode result type '%s'", result)
-        return True
+        return actions.do_nothing()

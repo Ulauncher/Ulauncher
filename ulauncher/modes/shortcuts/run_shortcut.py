@@ -14,4 +14,4 @@ def run_shortcut(command: str, arg: str | None = None) -> ActionMetadata:
     if re.match(r"^http(s)?://", command):
         return actions.open(command)
     run_script(command, arg or "")
-    return False
+    return actions.close_window()

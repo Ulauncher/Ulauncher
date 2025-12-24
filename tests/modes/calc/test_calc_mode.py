@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
@@ -116,5 +117,6 @@ class TestCalcMode:
                 result = get_results(mode, query)[0]
                 assert result.name == "Error!"
                 assert result.description == "Invalid expression"
-                assert mode.activate_result(result, query, False) is True
+                result_action = mode.activate_result(result, query, False)
+                assert result_action == actions.do_nothing()
                 assert not copy_action.called
