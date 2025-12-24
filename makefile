@@ -152,15 +152,7 @@ format: check-dev-deps # Auto format the code
 
 #=Build Commands
 
-.PHONY: prefs docker docs sdist manpage deb nix-run nix-build-dev nix-build
-
-docs: check-dev-deps # Build the API docs
-	@set -euo pipefail
-	cd docs
-	sphinx-build -M html . ./_build
-	if [ -n "${INTERACTIVE}" ]; then
-		python3 -m http.server -d _build/html
-	fi
+.PHONY: prefs docker sdist manpage deb nix-run nix-build-dev nix-build
 
 docker: # Build the docker image (only needed if you make changes to it)
 	docker build -t "${DOCKER_IMAGE}" .

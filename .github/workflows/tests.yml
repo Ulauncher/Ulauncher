@@ -20,8 +20,6 @@ jobs:
         run: make typos
       - name: pytest
         run: make pytest
-      - name: build docs
-        run: make docs
   nix-build:
     runs-on: ubuntu-latest
     steps:
