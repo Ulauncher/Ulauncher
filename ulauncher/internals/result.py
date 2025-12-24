@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from ulauncher.utils.basedataclass import BaseDataClass
-
-# ActionMessage describes the action to be performed by the Ulauncher app.
-# It can be a dict with any value that can be serialized to JSON.
-ActionMessage = Dict[str, Any]
 
 
 class Result(BaseDataClass):

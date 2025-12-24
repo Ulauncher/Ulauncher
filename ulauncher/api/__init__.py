@@ -1,6 +1,6 @@
 # ruff: noqa: F401
 from ulauncher.api.extension import Extension
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 
 
 class ExtensionResult(Result):

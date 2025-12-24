@@ -5,8 +5,9 @@ from typing import Iterator
 
 from ulauncher import app_id
 from ulauncher.internals import actions
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.base_mode import BaseMode

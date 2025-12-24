@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from ulauncher.internals import actions
-from ulauncher.internals.result import ActionMessage
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.modes.shortcuts.run_script import run_script
 
 

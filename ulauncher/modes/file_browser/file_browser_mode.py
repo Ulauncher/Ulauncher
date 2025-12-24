@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from ulauncher.internals import actions
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.file_browser.results import CopyPath, FileBrowserResult, OpenFolder
 from ulauncher.utils.fold_user_path import fold_user_path

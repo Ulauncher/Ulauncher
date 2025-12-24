@@ -8,8 +8,9 @@ from typing import Any, Callable, Iterable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
