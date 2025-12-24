@@ -5,6 +5,4 @@ pyrefly >= 0.42.0
 pytest
 pytest-mock
 ruff >= 0.14.4
-Sphinx
-sphinx_rtd_theme
 typos

@@ -38,7 +38,7 @@ def data_files_from_path(target_path: str, source_path: str) -> Iterator[tuple[s
 
 setuptools.setup(
     license="GPL-3.0",
-    packages=setuptools.find_packages(exclude=["docs", "tests", "conftest.py"]),
+    packages=setuptools.find_packages(exclude=["tests", "conftest.py"]),
     # These will be placed in /usr
     data_files=[
         ("share/applications", ["io.ulauncher.Ulauncher.desktop"]),
