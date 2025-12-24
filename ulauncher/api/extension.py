@@ -13,7 +13,7 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -114,27 +114,27 @@ class Extension:
     def run_event_listener(
         self,
         event: dict[str, Any],
-        method: Callable[..., ActionMetadata | Iterable[Result] | bool | str | None],
+        method: Callable[..., ActionMessage | Iterable[Result] | bool | str | None],
         args: tuple[Any],
     ) -> None:
         current_input = self._input
-        action_metadata = method(*args)
+        action_message = method(*args)
 
         # convert iterables to list
-        if isinstance(action_metadata, Iterator):
-            action_metadata = [*action_metadata]
+        if isinstance(action_message, Iterator):
+            action_message = [*action_message]
 
         # Normalize legacy boolean and string actions to dict format
-        if action_metadata is True:
-            action_metadata = {"type": "action:do_nothing"}
-        elif action_metadata is False:
-            action_metadata = {"type": "action:close_window"}
-        elif isinstance(action_metadata, str):
-            action_metadata = {"type": "action:set_query", "data": action_metadata}
+        if action_message is True:
+            action_message = {"type": "action:do_nothing"}
+        elif action_message is False:
+            action_message = {"type": "action:close_window"}
+        elif isinstance(action_message, str):
+            action_message = {"type": "action:set_query", "data": action_message}
 
         # ignore outdated responses
-        if current_input == self._input and action_metadata is not None:
-            self._client.send({"event": event, "action": action_metadata})
+        if current_input == self._input and action_message is not None:
+            self._client.send({"event": event, "action": action_message})
 
     def run(self) -> None:
         """

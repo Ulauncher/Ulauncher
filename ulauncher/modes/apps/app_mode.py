@@ -6,7 +6,7 @@ from typing import Iterator
 from ulauncher import app_id
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.base_mode import BaseMode
@@ -45,7 +45,7 @@ class AppMode(BaseMode):
         # TODO: filter out old apps
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
-    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMessage | list[Result]:
         if isinstance(result, AppResult):
             result.bump_starts()
             if not launch_app(result.app_id):
