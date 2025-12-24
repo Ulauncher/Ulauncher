@@ -34,10 +34,6 @@ def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR09
     if action_message is None:
         return False
 
-    if not isinstance(action_message, dict):
-        _logger.warning("Invalid action from mode: %s", type(action_message).__name__)
-        return False
-
     event_type = action_message.get("type", "")
 
     if event_type == "action:do_nothing":
