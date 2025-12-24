@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 from ulauncher.utils.basedataclass import BaseDataClass
 
 # ActionMetadata describes the action to be performed by the Ulauncher app.
 # It can be a dict with any value that can be serialized to JSON.
-ActionMetadata = Union[Dict[str, Any], bool, str]
+ActionMetadata = Dict[str, Any]
 
 
 class Result(BaseDataClass):
@@ -33,8 +33,8 @@ class Result(BaseDataClass):
         super().__init__(**kwargs)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (bool, dict, str)):
-            msg = f"Invalid {key} argument. Expected bool, dict or string"
+        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, dict):
+            msg = f"Invalid {key} argument. Expected dict"
             raise KeyError(msg)
 
         super().__setitem__(key, value)
