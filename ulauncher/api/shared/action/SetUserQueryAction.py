@@ -1,5 +1,1 @@
-# @todo: Add deprecation warning  # noqa: N999
-
-
-def SetUserQueryAction(new_query: str) -> str:  # noqa: N802
-    return new_query
+from ulauncher.internals.actions import set_query as SetUserQueryAction  # noqa: F401, N812, N999
