@@ -9,11 +9,11 @@ logger = logging.getLogger()
 
 
 def do_nothing() -> ActionMetadata:
-    return True
+    return {"type": "action:do_nothing"}
 
 
 def close_window() -> ActionMetadata:
-    return False
+    return {"type": "action:close_window"}
 
 
 def set_query(query: str) -> ActionMetadata:
@@ -21,7 +21,7 @@ def set_query(query: str) -> ActionMetadata:
         msg = f'Query argument "{query}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
-    return query
+    return {"type": "action:set_query", "data": query}
 
 
 def copy(text: str) -> ActionMetadata:

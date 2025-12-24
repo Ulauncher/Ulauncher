@@ -112,7 +112,10 @@ class Extension:
             threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
 
     def run_event_listener(
-        self, event: dict[str, Any], method: Callable[..., ActionMetadata | Iterable[Result] | None], args: tuple[Any]
+        self,
+        event: dict[str, Any],
+        method: Callable[..., ActionMetadata | Iterable[Result] | bool | str | None],
+        args: tuple[Any],
     ) -> None:
         current_input = self._input
         action_metadata = method(*args)
@@ -121,9 +124,16 @@ class Extension:
         if isinstance(action_metadata, Iterator):
             action_metadata = [*action_metadata]
 
+        # Normalize legacy boolean and string actions to dict format
+        if action_metadata is True:
+            action_metadata = {"type": "action:do_nothing"}
+        elif action_metadata is False:
+            action_metadata = {"type": "action:close_window"}
+        elif isinstance(action_metadata, str):
+            action_metadata = {"type": "action:set_query", "data": action_metadata}
+
         # ignore outdated responses
         if current_input == self._input and action_metadata is not None:
-            # TODO: This needs to be typed better
             self._client.send({"event": event, "action": action_metadata})
 
     def run(self) -> None:
