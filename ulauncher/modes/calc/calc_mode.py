@@ -167,4 +167,4 @@ class CalcMode(BaseMode):
         if isinstance(result, CalcResult) and result.result is not None:
             return actions.copy(result.result)
         logger.error("Unexpected result type for Calc mode '%s'", result)
-        return True
+        return actions.do_nothing()

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
@@ -92,7 +93,7 @@ class TestShortcutMode:
     def test_activate_trigger(self, mode: ShortcutMode) -> None:
         query = Query("kw", None)
         result = ShortcutTrigger(keyword="kw")
-        assert mode.activate_result(result, query, False) == "kw "
+        assert mode.activate_result(result, query, False) == actions.set_query("kw ")
 
     def test_activate_trigger_no_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", None)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Iterable, Iterator
 
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.base_mode import BaseMode
@@ -62,12 +63,12 @@ class ShortcutMode(BaseMode):
     def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata | list[Result]:
         if isinstance(result, ShortcutTrigger):
             if result.keyword:
-                return f"{result.keyword} "
+                return actions.set_query(f"{result.keyword} ")
             return run_shortcut(result.cmd)
         if isinstance(result, ShortcutResult):
             argument = query.argument or "" if query.keyword == result.keyword else str(query)
             if argument or not result.keyword:
                 return run_shortcut(result.cmd, argument or None)
-            return True
+            return actions.do_nothing()
         logger.error("Unexpected result type for Shortcut mode '%s'", result)
-        return True
+        return actions.do_nothing()

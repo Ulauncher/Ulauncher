@@ -4,6 +4,7 @@ import logging
 from typing import Iterator
 
 from ulauncher import app_id
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionMetadata, Result
 from ulauncher.modes.apps.app_result import AppResult
@@ -49,5 +50,5 @@ class AppMode(BaseMode):
             result.bump_starts()
             if not launch_app(result.app_id):
                 logger.error("Could not launch app %s", result.app_id)
-            return False
-        return True
+            return actions.close_window()
+        return actions.do_nothing()
