@@ -4,8 +4,9 @@ import logging
 from typing import Callable, Iterable, Iterator
 
 from ulauncher.internals import actions
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult

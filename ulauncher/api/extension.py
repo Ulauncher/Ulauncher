@@ -13,7 +13,8 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 

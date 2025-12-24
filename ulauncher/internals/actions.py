@@ -1,22 +1,76 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Literal, TypedDict, Union
 
-from ulauncher.internals.result import ActionMessage
+
+class DoNothing(TypedDict):
+    type: Literal["action:do_nothing"]
+
+
+class CloseWindow(TypedDict):
+    type: Literal["action:close_window"]
+
+
+class SetQuery(TypedDict):
+    type: Literal["action:set_query"]
+    data: str
+
+
+class Open(TypedDict):
+    type: Literal["action:open"]
+    data: str
+
+
+class Copy(TypedDict):
+    type: Literal["action:clipboard_store"]
+    data: str
+
+
+class LegacyRunScript(TypedDict):
+    type: Literal["action:legacy_run_script"]
+    data: list[str]
+
+
+class LegacyRunMany(TypedDict):
+    type: Literal["action:legacy_run_many"]
+    data: list[Any]  # list of other ActionMessages (can't be expressed with TypedDict)
+
+
+class ActivateCustom(TypedDict):
+    type: Literal["action:activate_custom"]
+    ref: int
+    keep_app_open: bool
+
+
+class LaunchTriggerAction(TypedDict):
+    type: Literal["action:launch_trigger"]
+
+
+ActionMessage = Union[
+    DoNothing,
+    CloseWindow,
+    SetQuery,
+    Open,
+    Copy,
+    LegacyRunScript,
+    LegacyRunMany,
+    ActivateCustom,
+    LaunchTriggerAction,
+]
 
 logger = logging.getLogger()
 
 
-def do_nothing() -> ActionMessage:
+def do_nothing() -> DoNothing:
     return {"type": "action:do_nothing"}
 
 
-def close_window() -> ActionMessage:
+def close_window() -> CloseWindow:
     return {"type": "action:close_window"}
 
 
-def set_query(query: str) -> ActionMessage:
+def set_query(query: str) -> SetQuery:
     if not isinstance(query, str):
         msg = f'Query argument "{query}" is invalid. It must be a string'
         logger.error(msg)
@@ -24,7 +78,7 @@ def set_query(query: str) -> ActionMessage:
     return {"type": "action:set_query", "data": query}
 
 
-def copy(text: str) -> ActionMessage:
+def copy(text: str) -> Copy:
     if not isinstance(text, str):
         msg = f'Copy argument "{text}" is invalid. It must be a string'
         logger.error(msg)
@@ -32,7 +86,7 @@ def copy(text: str) -> ActionMessage:
     return {"type": "action:clipboard_store", "data": text}
 
 
-def open(item: str) -> ActionMessage:  # noqa: A001
+def open(item: str) -> Open:  # noqa: A001
     if not item:
         msg = "Open argument cannot be empty"
         logger.error(msg)
@@ -44,7 +98,7 @@ def open(item: str) -> ActionMessage:  # noqa: A001
     return {"type": "action:open", "data": item}
 
 
-def run_script(script: str, args: str = "") -> ActionMessage:
+def run_script(script: str, args: str = "") -> LegacyRunScript:
     if not script:
         msg = "Script argument cannot be empty"
         logger.error(msg)
@@ -56,5 +110,5 @@ def run_script(script: str, args: str = "") -> ActionMessage:
     return {"type": "action:legacy_run_script", "data": [script, args]}
 
 
-def action_list(actions: list[Any]) -> ActionMessage:
+def action_list(actions: list[Any]) -> LegacyRunMany:
     return {"type": "action:legacy_run_many", "data": actions}

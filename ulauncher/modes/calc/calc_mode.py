@@ -10,8 +10,9 @@ from functools import lru_cache
 from typing import Callable, Iterable
 
 from ulauncher.internals import actions
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcResult
 

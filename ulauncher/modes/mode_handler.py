@@ -4,7 +4,7 @@ import logging
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.result import ActionMessage
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
@@ -46,9 +46,11 @@ def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR09
 
     if data := action_message.get("data"):
         if event_type == "action:open":
+            assert isinstance(data, str)
             open_detached(data)
             return False
         if event_type == "action:clipboard_store":
+            assert isinstance(data, str)
             clipboard_store(data)
             return False
         if event_type == "action:legacy_run_script" and isinstance(data, list):
@@ -57,6 +59,7 @@ def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR09
         if event_type == "action:legacy_run_many" and isinstance(data, list):
             keep_open = False
             for action_ in data:
+                assert isinstance(action_, dict)
                 if _handle_action(action_):
                     keep_open = True
             return keep_open

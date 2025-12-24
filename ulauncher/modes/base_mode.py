@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import Callable, Iterable
 
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMessage, Result
+from ulauncher.internals.result import Result
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 
