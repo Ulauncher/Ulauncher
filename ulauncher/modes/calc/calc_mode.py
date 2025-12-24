@@ -11,7 +11,7 @@ from typing import Callable, Iterable
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcResult
 
@@ -163,7 +163,7 @@ class CalcMode(BaseMode):
 
         callback([result])
 
-    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMessage | list[Result]:
         if isinstance(result, CalcResult) and result.result is not None:
             return actions.copy(result.result)
         logger.error("Unexpected result type for Calc mode '%s'", result)

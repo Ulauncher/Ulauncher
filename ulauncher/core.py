@@ -192,9 +192,9 @@ class UlauncherCore:
 
         from ulauncher.modes.mode_handler import handle_action
 
-        action_metadata = mode.activate_result(result, self.query, alt)
-        if not isinstance(action_metadata, list):
-            handle_action(action_metadata)
+        action_message = mode.activate_result(result, self.query, alt)
+        if not isinstance(action_message, list):
+            handle_action(action_message)
             return
 
-        self._show_results(action_metadata, callback)
+        self._show_results(action_message, callback)

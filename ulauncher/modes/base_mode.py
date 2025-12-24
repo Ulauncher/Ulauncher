@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Callable, Iterable
 
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 
 DEFAULT_ACTION = True  #  keep window open and do nothing
 
@@ -57,7 +57,7 @@ class BaseMode:
         """
         return []
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMessage | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.

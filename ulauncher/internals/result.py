@@ -4,9 +4,9 @@ from typing import Any, Dict
 
 from ulauncher.utils.basedataclass import BaseDataClass
 
-# ActionMetadata describes the action to be performed by the Ulauncher app.
+# ActionMessage describes the action to be performed by the Ulauncher app.
 # It can be a dict with any value that can be serialized to JSON.
-ActionMetadata = Dict[str, Any]
+ActionMessage = Dict[str, Any]
 
 
 class Result(BaseDataClass):

@@ -4,7 +4,7 @@ import logging
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.result import ActionMetadata
+from ulauncher.internals.result import ActionMessage
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
@@ -25,30 +25,30 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_action(action_metadata: ActionMetadata | None) -> None:
-    if not _handle_action(action_metadata):
+def handle_action(action_message: ActionMessage | None) -> None:
+    if not _handle_action(action_message):
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR0911, PLR0912
-    if action_metadata is None:
+def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR0911, PLR0912
+    if action_message is None:
         return False
 
-    if not isinstance(action_metadata, dict):
-        _logger.warning("Invalid action from mode: %s", type(action_metadata).__name__)
+    if not isinstance(action_message, dict):
+        _logger.warning("Invalid action from mode: %s", type(action_message).__name__)
         return False
 
-    event_type = action_metadata.get("type", "")
+    event_type = action_message.get("type", "")
 
     if event_type == "action:do_nothing":
         return True
     if event_type == "action:close_window":
         return False
     if event_type == "action:set_query":
-        _events.emit("app:set_query", action_metadata.get("data", ""))
+        _events.emit("app:set_query", action_message.get("data", ""))
         return True
 
-    if data := action_metadata.get("data"):
+    if data := action_message.get("data"):
         if event_type == "action:open":
             open_detached(data)
             return False
@@ -66,11 +66,11 @@ def _handle_action(action_metadata: ActionMetadata | None) -> bool:  # noqa: PLR
             return keep_open
 
     if event_type == "action:activate_custom":
-        _events.emit("extensions:trigger_event", {"type": "event:activate_custom", "ref": action_metadata.get("ref")})
-        return action_metadata.get("keep_app_open") is True
+        _events.emit("extensions:trigger_event", {"type": "event:activate_custom", "ref": action_message.get("ref")})
+        return action_message.get("keep_app_open") is True
 
     if event_type == "action:launch_trigger":
-        _events.emit("extensions:trigger_event", {**action_metadata, "type": "event:launch_trigger"})
+        _events.emit("extensions:trigger_event", {**action_message, "type": "event:launch_trigger"})
         return True
 
     _logger.warning("Unknown action type: %s", event_type)

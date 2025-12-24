@@ -9,7 +9,7 @@ from typing import Any, Callable, Iterable, Iterator, Literal, cast
 from gi.repository import GLib
 
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
@@ -114,14 +114,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMessage | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
         # TODO: Try to improve the type and avoid casting
         handler = cast(
-            "ActionMetadata | list[Result] | Callable[[Query], ActionMetadata | list[Result]]",
+            "ActionMessage | list[Result] | Callable[[Query], ActionMessage | list[Result]]",
             getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION),
         )
         return handler(query) if callable(handler) else handler
@@ -218,16 +218,16 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        action_metadata = response.get("action")
-        if isinstance(action_metadata, list):
-            for result in action_metadata:
+        action_message = response.get("action")
+        if isinstance(action_message, list):
+            for result in action_message:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
-            results = [Result(**res) for res in action_metadata]
+            results = [Result(**res) for res in action_message]
             self._current_callback(results)
             self._current_callback = None
             return
-        handle_action(action_metadata)
+        handle_action(action_message)
 
     @events.on
     def preview_ext(self, payload: dict[str, Any] | None = None) -> None:

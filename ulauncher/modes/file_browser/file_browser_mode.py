@@ -8,7 +8,7 @@ from typing import Callable, Iterable
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.file_browser.results import CopyPath, FileBrowserResult, OpenFolder
 from ulauncher.utils.fold_user_path import fold_user_path
@@ -90,7 +90,7 @@ class FileBrowserMode(BaseMode):
             return Query(None, join(Path(query_str).parent, ""))
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
         if isinstance(result, CopyPath):
             return actions.copy(result.path)
         if isinstance(result, OpenFolder):

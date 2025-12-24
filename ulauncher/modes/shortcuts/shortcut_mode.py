@@ -5,7 +5,7 @@ from typing import Callable, Iterable, Iterator
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import ActionMetadata, Result
+from ulauncher.internals.result import ActionMessage, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
@@ -60,7 +60,7 @@ class ShortcutMode(BaseMode):
                 trigger.keyword = ""
             yield trigger
 
-    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMetadata | list[Result]:
+    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMessage | list[Result]:
         if isinstance(result, ShortcutTrigger):
             if result.keyword:
                 return actions.set_query(f"{result.keyword} ")
