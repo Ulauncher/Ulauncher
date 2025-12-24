@@ -29,7 +29,7 @@ class Result(BaseDataClass):
         super().__init__(**kwargs)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, dict):
+        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (dict, bool, str)):
             msg = f"Invalid {key} argument. Expected dict"
             raise KeyError(msg)
 
