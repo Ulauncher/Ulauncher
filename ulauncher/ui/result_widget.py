@@ -35,6 +35,7 @@ class ResultWidget(Gtk.EventBox):
         inner_margin_x = int(12.0 * text_scaling_factor)
         outer_margin_x = int(18.0 * text_scaling_factor)
         margin_y = (3 if result.compact else 5) * text_scaling_factor
+        extra_top_margin = (2 if result.compact else 3) * text_scaling_factor
 
         super().__init__()
         self.get_style_context().add_class("item-frame")
@@ -81,7 +82,7 @@ class ResultWidget(Gtk.EventBox):
 
         item_container.set_property("margin-start", outer_margin_x)
         item_container.set_property("margin-end", outer_margin_x)
-        item_container.set_property("margin-top", margin_y)
+        item_container.set_property("margin-top", margin_y + extra_top_margin)
         item_container.set_property("margin-bottom", margin_y)
 
         if result.description and not result.compact:
