@@ -58,6 +58,7 @@ class ResultWidget(Gtk.EventBox):
             margin_start=inner_margin_x,
             margin_end=inner_margin_x,
             orientation=Gtk.Orientation.VERTICAL,
+            valign=Gtk.Align.CENTER,
         )
         item_container.pack_start(self.text_container, True, True, 0)
 
