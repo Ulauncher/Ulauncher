@@ -19,7 +19,6 @@ from ulauncher.modes.mode_handler import handle_action
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 
-DEFAULT_ACTION = True  #  keep window open and do nothing
 logger = logging.getLogger()
 events = EventBus("extensions")
 
@@ -124,7 +123,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         # TODO: Try to improve the type and avoid casting
         handler = cast(
             "ActionMessage | list[Result] | Callable[[Query], ActionMessage | list[Result]]",
-            getattr(result, "on_alt_enter" if alt else "on_enter", DEFAULT_ACTION),
+            getattr(result, "on_alt_enter" if alt else "on_enter", actions.do_nothing()),
         )
         return handler(query) if callable(handler) else handler
 
