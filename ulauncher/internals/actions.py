@@ -45,6 +45,8 @@ class ActivateCustom(TypedDict):
 
 class LaunchTriggerAction(TypedDict):
     type: Literal["action:launch_trigger"]
+    args: list[str]
+    ext_id: str
 
 
 ActionMessage = Union[
