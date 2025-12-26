@@ -7,14 +7,13 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, Iterator
+from typing import Any, Callable
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.actions import ActionMessage
-from ulauncher.internals.result import Result
+from ulauncher.internals.action_input import ActionMessageInput, convert_to_action_message
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
@@ -115,26 +114,13 @@ class Extension:
     def run_event_listener(
         self,
         event: dict[str, Any],
-        method: Callable[..., ActionMessage | Iterable[Result] | bool | str | None],
+        method: Callable[..., ActionMessageInput | None],
         args: tuple[Any],
     ) -> None:
         current_input = self._input
-        action_message = method(*args)
-
-        # convert iterables to list
-        if isinstance(action_message, Iterator):
-            action_message = [*action_message]
-
-        # Normalize legacy boolean and string actions to dict format
-        if action_message is True:
-            action_message = {"type": "action:do_nothing"}
-        elif action_message is False:
-            action_message = {"type": "action:close_window"}
-        elif isinstance(action_message, str):
-            action_message = {"type": "action:set_query", "data": action_message}
-
         # ignore outdated responses
-        if current_input == self._input and action_message is not None:
+        if current_input == self._input and (input_action_message := method(*args)) is not None:
+            action_message = convert_to_action_message(input_action_message)
             self._client.send({"event": event, "action": action_message})
 
     def run(self) -> None:
@@ -144,13 +130,13 @@ class Extension:
         self.subscribe(events["event:update_preferences"], PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_input(self, query_str: str, trigger_id: str) -> None:
+    def on_input(self, query_str: str, trigger_id: str) -> ActionMessageInput | None:
         pass
 
     def on_launch(self, trigger_id: str) -> None:
         pass
 
-    def on_item_enter(self, data: Any) -> None:
+    def on_item_enter(self, data: Any) -> ActionMessageInput | None:
         pass
 
     def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:

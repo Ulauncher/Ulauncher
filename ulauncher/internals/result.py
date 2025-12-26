@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from ulauncher.internals import actions
+from ulauncher.internals.action_input import convert_to_action_message
 from ulauncher.utils.basedataclass import BaseDataClass
+
+if TYPE_CHECKING:
+    from ulauncher.internals.action_input import ActionMessageInput
 
 
 class Result(BaseDataClass):
@@ -24,14 +29,51 @@ class Result(BaseDataClass):
     icon = (
         ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
     )
+    on_enter: actions.ActionMessage | list[Result] | None = None
+    on_alt_enter: actions.ActionMessage | list[Result] | None = None
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        *,
+        compact: bool | None = None,
+        highlightable: bool | None = None,
+        searchable: bool | None = None,
+        name: str | None = None,
+        description: str | None = None,
+        keyword: str | None = None,
+        icon: str | None = None,
+        on_enter: ActionMessageInput | None = None,
+        on_alt_enter: ActionMessageInput | None = None,
+        **kwargs: Any,
+    ) -> None:
+        # Build kwargs dict with all provided arguments
+        # We have to do this until we can use typing.Unpack (py3.11)
+        init_kwargs: dict[str, Any] = {}
+        if compact is not None:
+            init_kwargs["compact"] = compact
+        if highlightable is not None:
+            init_kwargs["highlightable"] = highlightable
+        if searchable is not None:
+            init_kwargs["searchable"] = searchable
+        if name is not None:
+            init_kwargs["name"] = name
+        if description is not None:
+            init_kwargs["description"] = description
+        if keyword is not None:
+            init_kwargs["keyword"] = keyword
+        if icon is not None:
+            init_kwargs["icon"] = icon
+        if on_enter is not None:
+            init_kwargs["on_enter"] = on_enter
+        if on_alt_enter is not None:
+            init_kwargs["on_alt_enter"] = on_alt_enter
+        # Add any additional kwargs
+        init_kwargs.update(kwargs)
+        super().__init__(**init_kwargs)
 
     def __setitem__(self, key: str, value: Any) -> None:
-        if key in ["on_enter", "on_alt_enter"] and not isinstance(value, (dict, bool, str)):
-            msg = f"Invalid {key} argument. Expected dict"
-            raise KeyError(msg)
+        if key in ["on_enter", "on_alt_enter"] and value is not None:
+            value = convert_to_action_message(value)
 
         super().__setitem__(key, value)
 

@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterable, Iterator, Literal
+from typing import Any, Callable, Iterable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
@@ -92,14 +92,17 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             for trigger_id, trigger in ext.triggers.items():
                 self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
 
-                action = (
+                action: actions.ActionMessage = (
                     actions.set_query(f"{trigger.keyword} ")
                     if trigger.keyword
-                    else {
-                        "type": "action:launch_trigger",
-                        "args": [trigger_id],
-                        "ext_id": ext.id,
-                    }
+                    else cast(
+                        "actions.LaunchTriggerAction",
+                        {
+                            "type": "action:launch_trigger",
+                            "args": [trigger_id],
+                            "ext_id": ext.id,
+                        },
+                    )
                 )
 
                 yield ExtensionTrigger(
@@ -115,12 +118,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | Iterable[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
-        return getattr(result, "on_alt_enter" if alt else "on_enter", actions.do_nothing())
+        if alt:
+            return result.on_alt_enter or actions.do_nothing()
+        return result.on_enter or actions.do_nothing()
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
