@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterable, Iterator, Literal, cast
+from typing import Any, Callable, Iterable, Iterator, Literal
 
 from gi.repository import GLib
 
@@ -115,17 +115,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
-        # TODO: Try to improve the type and avoid casting
-        handler = cast(
-            "ActionMessage | list[Result] | Callable[[Query], ActionMessage | list[Result]]",
-            getattr(result, "on_alt_enter" if alt else "on_enter", actions.do_nothing()),
-        )
-        return handler(query) if callable(handler) else handler
+        return getattr(result, "on_alt_enter" if alt else "on_enter", actions.do_nothing())
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
