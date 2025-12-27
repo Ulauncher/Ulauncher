@@ -124,6 +124,17 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Override this method to handle the activation of a result.
         """
         action_msg = result.on_alt_enter if alt else result.on_enter
+        if isinstance(action_msg, dict):
+            event_type = action_msg.get("type", "")
+
+            if event_type == "action:activate_custom":
+                self.trigger_event({"type": "event:activate_custom", "ref": action_msg.get("ref")})
+                return actions.do_nothing() if action_msg.get("keep_app_open") else actions.close_window()
+
+            if event_type == "action:launch_trigger":
+                self.trigger_event({**action_msg, "type": "event:launch_trigger"})
+                return actions.do_nothing()
+
         return actions.do_nothing() if action_msg is None else action_msg
 
     def run_ext_batch_job(
@@ -189,7 +200,6 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
                     ext.send_message(event_data)
 
-    @events.on
     def trigger_event(self, event: dict[str, Any]) -> None:
         # If active_ext is not set (e.g., for launch triggers, without keywords),
         # try to get it from the event's ext_id

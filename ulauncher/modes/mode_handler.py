@@ -31,7 +31,7 @@ def handle_action(action_msg: ActionMessage | None) -> None:
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911, PLR0912
+def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911
     if action_msg is None:
         return False
 
@@ -62,14 +62,6 @@ def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911, 
                 if _handle_action(action_):
                     keep_open = True
             return keep_open
-
-    if event_type == "action:activate_custom":
-        _events.emit("extensions:trigger_event", {"type": "event:activate_custom", "ref": action_msg.get("ref")})
-        return action_msg.get("keep_app_open") is True
-
-    if event_type == "action:launch_trigger":
-        _events.emit("extensions:trigger_event", {**action_msg, "type": "event:launch_trigger"})
-        return True
 
     _logger.warning("Unknown action type: %s", event_type)
     return False
