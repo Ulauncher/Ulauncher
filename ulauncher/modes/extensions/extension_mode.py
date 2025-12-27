@@ -68,22 +68,17 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
 
-        self._interaction_id += 1
-
-        self._pending_callback = callback
-
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
-            self.active_ext = extension_registry.get(ext_id)
-            if self.active_ext:
+            if ext := extension_registry.get(ext_id):
+                self.active_ext = ext
                 event = {
                     "type": EventType.INPUT_TRIGGER,
-                    "ext_id": self.active_ext.id,
+                    "ext_id": ext.id,
                     "args": [query.argument, trigger_id],
-                    "interaction_id": self._interaction_id,
                 }
 
-                self.active_ext.send_message(event)
+                self.trigger_event(event, callback)
                 return
 
         msg = f"Query not valid for extension mode '{query}'"
@@ -139,14 +134,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             and (evt_type := ASYNC_ACTION_TYPES.get(action_type))
         ):
             # for async flow, set up the callback, trigger an extension event and wait for the response
-            self._interaction_id += 1
-            self._pending_callback = callback
-            return_msg = {
-                **action_msg,
-                "type": evt_type,
-                "interaction_id": self._interaction_id,
-            }
-            self.trigger_event(return_msg)
+            self.trigger_event({**action_msg, "type": evt_type}, callback)
             return
 
         callback(actions.do_nothing() if action_msg is None else action_msg)
@@ -214,7 +202,11 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, pref.value]}
                     ext.send_message(event_data)
 
-    def trigger_event(self, event: dict[str, Any]) -> None:
+    def trigger_event(self, event: dict[str, Any], callback: Callable[[ActionMessage | list[Result]], None]) -> None:
+        self._interaction_id += 1
+        self._pending_callback = callback
+        event["interaction_id"] = self._interaction_id
+
         # If active_ext is not set (e.g., for launch triggers, without keywords),
         # try to get it from the event's ext_id
         if not self.active_ext:
