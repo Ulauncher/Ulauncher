@@ -243,11 +243,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
             action_msg = [Result(**res) for res in action_msg]
-            self._pending_callback(action_msg)
-            self._pending_callback = None
-            return
 
-        if not response.get("event", {}).get("keep_app_open", True):
+        elif not response.get("event", {}).get("keep_app_open", True):
             action_msg = actions.action_list([action_msg, actions.close_window()])
 
         self._pending_callback(action_msg)
