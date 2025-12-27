@@ -218,7 +218,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        action_msg = response.get("action")
+        action_msg: ActionMessage | list[Result] | None = response.get("action")
         if isinstance(action_msg, list):
             for result in action_msg:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
