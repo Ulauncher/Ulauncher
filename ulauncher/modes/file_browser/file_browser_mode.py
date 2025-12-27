@@ -91,21 +91,29 @@ class FileBrowserMode(BaseMode):
             return Query(None, join(Path(query_str).parent, ""))
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self, result: Result, _query: Query, alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+    ) -> None:
         if isinstance(result, CopyPath):
-            return actions.copy(result.path)
+            callback(actions.copy(result.path))
+            return
         if isinstance(result, OpenFolder):
-            return actions.open(result.path)
+            callback(actions.open(result.path))
+            return
         if isinstance(result, FileBrowserResult):
             if not alt:
                 if isdir(result.path):
-                    return actions.set_query(join(fold_user_path(result.path), ""))
+                    callback(actions.set_query(join(fold_user_path(result.path), "")))
+                    return
 
-                return actions.open(result.path)
+                callback(actions.open(result.path))
+                return
             if isdir(result.path):
                 open_folder = OpenFolder(name=f'Open Folder "{basename(result.path)}"', path=result.path)
             else:
                 open_folder = OpenFolder(name="Open Containing Folder", path=dirname(result.path))
-            return [open_folder, CopyPath(path=result.path)]
+            callback([open_folder, CopyPath(path=result.path)])
+            return
         logger.error("Unexpected File Browser Mode result type '%s'", result)
-        return actions.do_nothing()
+        callback(actions.do_nothing())
+        return

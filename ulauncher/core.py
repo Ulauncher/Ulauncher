@@ -7,6 +7,7 @@ from functools import lru_cache
 from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
@@ -192,9 +193,11 @@ class UlauncherCore:
 
         from ulauncher.modes.mode_handler import handle_action
 
-        action_msg = mode.activate_result(result, self.query, alt)
-        if not isinstance(action_msg, list):
-            handle_action(action_msg)
-            return
+        def mode_callback(action_msg: ActionMessage | list[Result]) -> None:
+            if isinstance(action_msg, list):
+                self._show_results(action_msg, callback)
+                return
 
-        self._show_results(action_msg, callback)
+            handle_action(action_msg)
+
+        mode.activate_result(result, self.query, alt, mode_callback)

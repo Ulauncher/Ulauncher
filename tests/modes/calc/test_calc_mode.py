@@ -95,7 +95,7 @@ class TestCalcMode:
         query = Query(None, "3+2")
         result = get_results(mode, query)[0]
         assert result.result == "5"
-        mode.activate_result(result, query, False)
+        mode.activate_result(result, query, False, lambda _: None)
         copy_action.assert_called_once_with("5")
 
     def test_handle_query__invalid_expr(
@@ -117,6 +117,9 @@ class TestCalcMode:
                 result = get_results(mode, query)[0]
                 assert result.name == "Error!"
                 assert result.description == "Invalid expression"
-                result_action = mode.activate_result(result, query, False)
-                assert result_action == actions.do_nothing()
+
+                def check_action(action: actions.ActionMessage) -> None:
+                    assert action == actions.do_nothing()
+
+                mode.activate_result(result, query, False, check_action)
                 assert not copy_action.called
