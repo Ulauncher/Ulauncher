@@ -147,7 +147,7 @@ class UlauncherCore:
 
         mode = self._mode
 
-        def results_callback(results: Iterable[Result]) -> None:
+        def results_callback(results: list[Result]) -> None:
             # Ensure the mode hasn't changed
             if self._mode == mode:
                 self._show_results(results, callback)

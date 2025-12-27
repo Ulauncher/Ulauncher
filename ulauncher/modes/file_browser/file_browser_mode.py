@@ -4,7 +4,7 @@ import logging
 import os
 from os.path import basename, dirname, expandvars, isdir, join
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable
 
 from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage
@@ -47,7 +47,7 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
         results: list[Result] = []
         try:
             path_str = query.argument

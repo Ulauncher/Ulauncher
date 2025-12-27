@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Iterable, Iterator
+from typing import Callable, Iterator
 
 from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage
@@ -42,7 +42,7 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
             msg = "Query doesn't match any shortcut"

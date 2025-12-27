@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterable, Iterator, Literal, cast
+from typing import Any, Callable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
@@ -35,7 +35,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
-    _current_callback: Callable[[Iterable[Result]], None] | None = None
+    _current_callback: Callable[[list[Result]], None] | None = None
     _current_query_change_id: int = 0
 
     def __init__(self) -> None:
@@ -57,7 +57,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
-    def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
