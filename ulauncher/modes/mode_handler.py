@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import cast
 
 from gi.repository import Gdk, Gtk
 
@@ -46,12 +47,10 @@ def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR09
 
     if data := action_message.get("data"):
         if event_type == "action:open":
-            assert isinstance(data, str)
-            open_detached(data)
+            open_detached(cast("str", data))
             return False
         if event_type == "action:clipboard_store":
-            assert isinstance(data, str)
-            clipboard_store(data)
+            clipboard_store(cast("str", data))
             return False
         if event_type == "action:legacy_run_script" and isinstance(data, list):
             run_script(*data)

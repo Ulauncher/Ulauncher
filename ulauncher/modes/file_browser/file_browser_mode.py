@@ -48,13 +48,13 @@ class FileBrowserMode(BaseMode):
         return [f for f in file_list if not f.startswith(".")]
 
     def handle_query(self, query: Query, callback: Callable[[Iterable[Result]], None]) -> None:
+        results: list[Result] = []
         try:
             path_str = query.argument
             if not path_str:
                 callback([])
                 return
             path = Path(expandvars(path_str.strip())).expanduser()
-            results = []
 
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
             remainder = "/".join(path.parts[closest_parent.count("/") + 1 :])

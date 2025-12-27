@@ -118,7 +118,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | Iterable[Result]:
+    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
