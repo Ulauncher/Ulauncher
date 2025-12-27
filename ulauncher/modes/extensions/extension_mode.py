@@ -123,8 +123,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
-        action = result.on_alt_enter if alt else result.on_enter
-        return action or actions.do_nothing()
+        action_msg = result.on_alt_enter if alt else result.on_enter
+        return actions.do_nothing() if action_msg is None else action_msg
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
