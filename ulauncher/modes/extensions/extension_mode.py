@@ -226,14 +226,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        action_msg: ActionMessage | list[Result] | None = response.get("action")
+        action_msg: ActionMessage | list[Result] = response.get("action", actions.do_nothing())
         if isinstance(action_msg, list):
             for result in action_msg:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
             action_msg = [Result(**res) for res in action_msg]
 
-        self._pending_callback(actions.do_nothing() if action_msg is None else action_msg)
+        self._pending_callback(action_msg)
         self._pending_callback = None
 
     @events.on
