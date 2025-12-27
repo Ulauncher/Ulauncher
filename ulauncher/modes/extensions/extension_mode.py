@@ -21,6 +21,12 @@ from ulauncher.utils.singleton import Singleton
 logger = logging.getLogger()
 events = EventBus("extensions")
 
+# Maps action types that require async extension communication to their event types
+ASYNC_ACTION_TYPES = {
+    "action:activate_custom": "event:activate_custom",
+    "action:launch_trigger": "event:launch_trigger",
+}
+
 
 class ExtensionTrigger(Result):
     searchable = True
@@ -124,16 +130,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
-        async_action_types = {
-            "action:activate_custom": "event:activate_custom",
-            "action:launch_trigger": "event:launch_trigger",
-        }
 
         action_msg = result.on_alt_enter if alt else result.on_enter
         if (
             isinstance(action_msg, dict)
             and (action_type := action_msg.get("type", ""))
-            and (evt_type := async_action_types.get(action_type))
+            and (evt_type := ASYNC_ACTION_TYPES.get(action_type))
         ):
             # for async flow, set up the callback, trigger an extension event and wait for the response
             self._interaction_id += 1
