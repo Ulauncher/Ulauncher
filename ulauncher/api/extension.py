@@ -118,9 +118,10 @@ class Extension:
         args: tuple[Any],
     ) -> None:
         current_input = self._input
+        input_action_msg = method(*args)
         # ignore outdated responses
-        if current_input == self._input and (input_action_message := method(*args)) is not None:
-            action_msg = convert_to_action_message(input_action_message)
+        if current_input == self._input:
+            action_msg = convert_to_action_message(input_action_msg if input_action_msg is not None else False)
             self._client.send({"event": event, "action": action_msg})
 
     def run(self) -> None:
