@@ -124,17 +124,27 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Called when a result is activated.
         Override this method to handle the activation of a result.
         """
+        async_action_types = {
+            "action:activate_custom": "event:activate_custom",
+            "action:launch_trigger": "event:launch_trigger",
+        }
+
         action_msg = result.on_alt_enter if alt else result.on_enter
-        if isinstance(action_msg, dict):
-            event_type = action_msg.get("type", "")
-
-            if event_type == "action:activate_custom":
-                self.trigger_event({"type": "event:activate_custom", "ref": action_msg.get("ref")})
-                action_msg = actions.do_nothing() if action_msg.get("keep_app_open") else actions.close_window()
-
-            if event_type == "action:launch_trigger":
-                self.trigger_event({**action_msg, "type": "event:launch_trigger"})
-                action_msg = actions.do_nothing()
+        if (
+            isinstance(action_msg, dict)
+            and (action_type := action_msg.get("type", ""))
+            and (evt_type := async_action_types.get(action_type))
+        ):
+            # for async flow, set up the callback, trigger an extension event and wait for the response
+            self._interaction_id += 1
+            self._pending_callback = callback
+            return_msg = {
+                **action_msg,
+                "type": evt_type,
+                "interaction_id": self._interaction_id,
+            }
+            self.trigger_event(return_msg)
+            return
 
         callback(actions.do_nothing() if action_msg is None else action_msg)
 
@@ -227,11 +237,18 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return
 
         action_msg: ActionMessage | list[Result] = response.get("action", actions.do_nothing())
+
         if isinstance(action_msg, list):
             for result in action_msg:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
             action_msg = [Result(**res) for res in action_msg]
+            self._pending_callback(action_msg)
+            self._pending_callback = None
+            return
+
+        if not response.get("event", {}).get("keep_app_open", True):
+            action_msg = actions.action_list([action_msg, actions.close_window()])
 
         self._pending_callback(action_msg)
         self._pending_callback = None
