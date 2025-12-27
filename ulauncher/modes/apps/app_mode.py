@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterator
+from typing import Callable, Iterator
 
 from ulauncher import app_id
 from ulauncher.internals import actions
@@ -46,10 +46,13 @@ class AppMode(BaseMode):
         # TODO: filter out old apps
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
-    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self, result: Result, _query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+    ) -> None:
         if isinstance(result, AppResult):
             result.bump_starts()
             if not launch_app(result.app_id):
                 logger.error("Could not launch app %s", result.app_id)
-            return actions.close_window()
-        return actions.do_nothing()
+            callback(actions.close_window())
+            return
+        callback(actions.do_nothing())

@@ -118,7 +118,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return self.active_ext.get_normalized_icon_path()
         return None
 
-    def activate_result(self, result: Result, _query: Query, alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self, result: Result, _query: Query, alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+    ) -> None:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.
@@ -129,13 +131,13 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
             if event_type == "action:activate_custom":
                 self.trigger_event({"type": "event:activate_custom", "ref": action_msg.get("ref")})
-                return actions.do_nothing() if action_msg.get("keep_app_open") else actions.close_window()
+                action_msg = actions.do_nothing() if action_msg.get("keep_app_open") else actions.close_window()
 
             if event_type == "action:launch_trigger":
                 self.trigger_event({**action_msg, "type": "event:launch_trigger"})
-                return actions.do_nothing()
+                action_msg = actions.do_nothing()
 
-        return actions.do_nothing() if action_msg is None else action_msg
+        callback(actions.do_nothing() if action_msg is None else action_msg)
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None

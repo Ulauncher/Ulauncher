@@ -58,7 +58,13 @@ class BaseMode:
         """
         return []
 
-    def activate_result(self, result: Result, query: Query, alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self,
+        result: Result,
+        query: Query,
+        alt: bool,
+        callback: Callable[[ActionMessage | list[Result]], None],
+    ) -> None:
         """
         Called when a result is activated.
         Override this method to handle the activation of a result.

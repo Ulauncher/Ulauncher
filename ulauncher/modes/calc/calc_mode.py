@@ -164,8 +164,11 @@ class CalcMode(BaseMode):
 
         callback([result])
 
-    def activate_result(self, result: Result, _query: Query, _alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self, result: Result, _query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+    ) -> None:
         if isinstance(result, CalcResult) and result.result is not None:
-            return actions.copy(result.result)
+            callback(actions.copy(result.result))
+            return
         logger.error("Unexpected result type for Calc mode '%s'", result)
-        return actions.do_nothing()
+        callback(actions.do_nothing())

@@ -61,15 +61,21 @@ class ShortcutMode(BaseMode):
                 trigger.keyword = ""
             yield trigger
 
-    def activate_result(self, result: Result, query: Query, _alt: bool) -> ActionMessage | list[Result]:
+    def activate_result(
+        self, result: Result, query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+    ) -> None:
         if isinstance(result, ShortcutTrigger):
             if result.keyword:
-                return actions.set_query(f"{result.keyword} ")
-            return run_shortcut(result.cmd)
+                callback(actions.set_query(f"{result.keyword} "))
+                return
+            callback(run_shortcut(result.cmd))
+            return
         if isinstance(result, ShortcutResult):
             argument = query.argument or "" if query.keyword == result.keyword else str(query)
             if argument or not result.keyword:
-                return run_shortcut(result.cmd, argument or None)
-            return actions.do_nothing()
+                callback(run_shortcut(result.cmd, argument or None))
+                return
+            callback(actions.do_nothing())
+            return
         logger.error("Unexpected result type for Shortcut mode '%s'", result)
-        return actions.do_nothing()
+        callback(actions.do_nothing())
