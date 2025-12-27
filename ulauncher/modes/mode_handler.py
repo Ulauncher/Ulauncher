@@ -26,26 +26,26 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_action(action_message: ActionMessage | None) -> None:
-    if not _handle_action(action_message):
+def handle_action(action_msg: ActionMessage | None) -> None:
+    if not _handle_action(action_msg):
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR0911, PLR0912
-    if action_message is None:
+def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911, PLR0912
+    if action_msg is None:
         return False
 
-    event_type = action_message.get("type", "")
+    event_type = action_msg.get("type", "")
 
     if event_type == "action:do_nothing":
         return True
     if event_type == "action:close_window":
         return False
     if event_type == "action:set_query":
-        _events.emit("app:set_query", action_message.get("data", ""))
+        _events.emit("app:set_query", action_msg.get("data", ""))
         return True
 
-    if data := action_message.get("data"):
+    if data := action_msg.get("data"):
         if event_type == "action:open":
             open_detached(cast("str", data))
             return False
@@ -64,11 +64,11 @@ def _handle_action(action_message: ActionMessage | None) -> bool:  # noqa: PLR09
             return keep_open
 
     if event_type == "action:activate_custom":
-        _events.emit("extensions:trigger_event", {"type": "event:activate_custom", "ref": action_message.get("ref")})
-        return action_message.get("keep_app_open") is True
+        _events.emit("extensions:trigger_event", {"type": "event:activate_custom", "ref": action_msg.get("ref")})
+        return action_msg.get("keep_app_open") is True
 
     if event_type == "action:launch_trigger":
-        _events.emit("extensions:trigger_event", {**action_message, "type": "event:launch_trigger"})
+        _events.emit("extensions:trigger_event", {**action_msg, "type": "event:launch_trigger"})
         return True
 
     _logger.warning("Unknown action type: %s", event_type)

@@ -218,16 +218,16 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        action_message = response.get("action")
-        if isinstance(action_message, list):
-            for result in action_message:
+        action_msg = response.get("action")
+        if isinstance(action_msg, list):
+            for result in action_msg:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
-            results = [Result(**res) for res in action_message]
+            results = [Result(**res) for res in action_msg]
             self._current_callback(results)
             self._current_callback = None
             return
-        handle_action(action_message)
+        handle_action(action_msg)
 
     @events.on
     def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
