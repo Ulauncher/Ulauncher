@@ -34,7 +34,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
-    _current_callback: Callable[[ActionMessage | list[Result]], None] | None = None
+    _pending_callback: Callable[[ActionMessage | list[Result]], None] | None = None
     _current_query_change_id: int = 0
 
     def __init__(self) -> None:
@@ -63,7 +63,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
         self._current_query_change_id += 1
 
-        self._current_callback = callback
+        self._pending_callback = callback
 
         if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
             trigger_id, ext_id = trigger_cache_entry
@@ -223,7 +223,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
         if (
-            not self._current_callback
+            not self._pending_callback
             or response.get("event", {}).get("query_change_id") != self._current_query_change_id
         ):
             logger.debug("Ignoring outdated extension response")
@@ -236,8 +236,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
             action_msg = [Result(**res) for res in action_msg]
 
-        self._current_callback(actions.do_nothing() if action_msg is None else action_msg)
-        self._current_callback = None
+        self._pending_callback(actions.do_nothing() if action_msg is None else action_msg)
+        self._pending_callback = None
 
     @events.on
     def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
