@@ -42,7 +42,7 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
             msg = "Query doesn't match any shortcut"

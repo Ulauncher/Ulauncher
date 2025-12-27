@@ -15,7 +15,6 @@ from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.mode_handler import handle_action
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 
@@ -35,7 +34,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
-    _current_callback: Callable[[list[Result]], None] | None = None
+    _current_callback: Callable[[ActionMessage | list[Result]], None] | None = None
     _current_query_change_id: int = 0
 
     def __init__(self) -> None:
@@ -57,7 +56,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
-    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
@@ -235,11 +234,10 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             for result in action_msg:
                 result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
 
-            results = [Result(**res) for res in action_msg]
-            self._current_callback(results)
-            self._current_callback = None
-            return
-        handle_action(action_msg)
+            action_msg = [Result(**res) for res in action_msg]
+
+        self._current_callback(actions.do_nothing() if action_msg is None else action_msg)
+        self._current_callback = None
 
     @events.on
     def preview_ext(self, payload: dict[str, Any] | None = None) -> None:

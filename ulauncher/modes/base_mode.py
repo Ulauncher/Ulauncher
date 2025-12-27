@@ -22,7 +22,7 @@ class BaseMode:
         """
         return None
 
-    def handle_query(self, _query: Query, callback: Callable[[list[Result]], None]) -> None:
+    def handle_query(self, _query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
         """
         Handle a query and provide the result list via callback.
         """

@@ -148,16 +148,23 @@ class UlauncherCore:
 
         mode = self._mode
 
-        def results_callback(results: list[Result]) -> None:
+        def mode_callback(action_msg: ActionMessage | list[Result]) -> None:
             # Ensure the mode hasn't changed
-            if self._mode == mode:
-                self._show_results(results, callback)
+            if self._mode != mode:
+                return
+
+            if isinstance(action_msg, dict):
+                from ulauncher.modes.mode_handler import handle_action
+
+                handle_action(action_msg)
+            elif isinstance(action_msg, list):
+                self._show_results(action_msg, callback)
 
         if self._mode:
             try:
                 self._placeholder_timer = timer(PLACEHOLDER_DELAY, lambda: self._show_placeholder(callback))
 
-                self._mode.handle_query(self.query, results_callback)
+                self._mode.handle_query(self.query, mode_callback)
             except Exception:
                 # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)

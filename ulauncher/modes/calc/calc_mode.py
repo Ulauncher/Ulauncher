@@ -147,7 +147,7 @@ class CalcMode(BaseMode):
     def matches_query_str(self, query_str: str) -> bool:
         return _is_enabled(query_str)
 
-    def handle_query(self, query: Query, callback: Callable[[list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
         try:
             calc_result = str(eval_expr(query.argument))
             result = CalcResult(
