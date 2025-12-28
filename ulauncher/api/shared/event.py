@@ -112,7 +112,6 @@ class EventType:
     INPUT_TRIGGER: Final = "event:input_trigger"
     ACTIVATE_CUSTOM: Final = "event:activate_custom"
     LAUNCH_TRIGGER: Final = "event:launch_trigger"
-    RESULT_ACTIVATION: Final = "event:result_activation"
     UPDATE_PREFERENCES: Final = "event:update_preferences"
     LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
     UNLOAD: Final = "event:unload"
