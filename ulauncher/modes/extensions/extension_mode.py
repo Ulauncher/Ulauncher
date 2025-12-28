@@ -83,7 +83,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     "interaction_id": self._interaction_id,
                 }
 
-                self.active_ext.debounced_send_message(event)
+                self.active_ext.send_message(event)
                 return
 
         msg = f"Query not valid for extension mode '{query}'"
