@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.extension import Extension
+from ulauncher.api.shared.event import EventType
 
 
 class TestClient:
@@ -34,5 +35,5 @@ class TestClient:
         client.mainloop = MagicMock()
         client.mainloop.is_running.return_value = True
         client.unload()
-        extension.trigger_event.assert_called_with({"type": "event:unload"})
+        extension.trigger_event.assert_called_with({"type": EventType.UNLOAD})
         client.mainloop.quit.assert_called_once()
