@@ -10,7 +10,7 @@ from gi.repository import GLib
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import actions
-from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals.actions import ActionMessage, ActionType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
@@ -24,8 +24,8 @@ events = EventBus("extensions")
 
 # Maps action types that require async extension communication to their event types
 ASYNC_ACTION_TYPES = {
-    "action:activate_custom": EventType.ACTIVATE_CUSTOM,
-    "action:launch_trigger": EventType.LAUNCH_TRIGGER,
+    ActionType.ACTIVATE_CUSTOM: EventType.ACTIVATE_CUSTOM,
+    ActionType.LAUNCH_TRIGGER: EventType.LAUNCH_TRIGGER,
 }
 
 
@@ -104,7 +104,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     else cast(
                         "actions.LaunchTriggerAction",
                         {
-                            "type": "action:launch_trigger",
+                            "type": ActionType.LAUNCH_TRIGGER,
                             "args": [trigger_id],
                             "ext_id": ext.id,
                         },

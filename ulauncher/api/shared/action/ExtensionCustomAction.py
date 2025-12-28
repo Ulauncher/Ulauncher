@@ -2,6 +2,8 @@ from __future__ import annotations  # noqa: N999
 
 from typing import Any
 
+from ulauncher.internals.actions import ActionType
+
 # This holds references to custom data for use with ExtensionCustomAction
 # This way the data never travels to the Ulauncher app and back. Only a reference to it.
 # So the data can be anything, even if the serialization doesn't handle it
@@ -14,4 +16,4 @@ def ExtensionCustomAction(data: Any, keep_app_open: bool = False) -> dict[str, A
     """
     ref = id(data)
     custom_data_store[ref] = data
-    return {"type": "action:activate_custom", "ref": ref, "keep_app_open": keep_app_open}
+    return {"type": ActionType.ACTIVATE_CUSTOM, "ref": ref, "keep_app_open": keep_app_open}

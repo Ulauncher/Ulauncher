@@ -5,7 +5,7 @@ from typing import cast
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals.actions import ActionMessage, ActionType
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
@@ -37,25 +37,25 @@ def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911
 
     event_type = action_msg.get("type", "")
 
-    if event_type == "action:do_nothing":
+    if event_type == ActionType.DO_NOTHING:
         return True
-    if event_type == "action:close_window":
+    if event_type == ActionType.CLOSE_WINDOW:
         return False
-    if event_type == "action:set_query":
+    if event_type == ActionType.SET_QUERY:
         _events.emit("app:set_query", action_msg.get("data", ""))
         return True
 
     if data := action_msg.get("data"):
-        if event_type == "action:open":
+        if event_type == ActionType.OPEN:
             open_detached(cast("str", data))
             return False
-        if event_type == "action:clipboard_store":
+        if event_type == ActionType.COPY:
             clipboard_store(cast("str", data))
             return False
-        if event_type == "action:legacy_run_script" and isinstance(data, list):
+        if event_type == ActionType.LEGACY_RUN_SCRIPT and isinstance(data, list):
             run_script(*data)
             return False
-        if event_type == "action:legacy_run_many" and isinstance(data, list):
+        if event_type == ActionType.LEGACY_RUN_MANY and isinstance(data, list):
             keep_open = False
             for action_ in data:
                 assert isinstance(action_, dict)

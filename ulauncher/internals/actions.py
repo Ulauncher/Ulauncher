@@ -1,7 +1,19 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Final, Literal, TypedDict, Union
+
+
+class ActionType:
+    DO_NOTHING: Final = "action:do_nothing"
+    CLOSE_WINDOW: Final = "action:close_window"
+    SET_QUERY: Final = "action:set_query"
+    OPEN: Final = "action:open"
+    COPY: Final = "action:clipboard_store"
+    LEGACY_RUN_SCRIPT: Final = "action:legacy_run_script"
+    LEGACY_RUN_MANY: Final = "action:legacy_run_many"
+    ACTIVATE_CUSTOM: Final = "action:activate_custom"
+    LAUNCH_TRIGGER: Final = "action:launch_trigger"
 
 
 class DoNothing(TypedDict):
@@ -65,11 +77,11 @@ logger = logging.getLogger()
 
 
 def do_nothing() -> DoNothing:
-    return {"type": "action:do_nothing"}
+    return {"type": ActionType.DO_NOTHING}
 
 
 def close_window() -> CloseWindow:
-    return {"type": "action:close_window"}
+    return {"type": ActionType.CLOSE_WINDOW}
 
 
 def set_query(query: str) -> SetQuery:
@@ -77,7 +89,7 @@ def set_query(query: str) -> SetQuery:
         msg = f'Query argument "{query}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
-    return {"type": "action:set_query", "data": query}
+    return {"type": ActionType.SET_QUERY, "data": query}
 
 
 def copy(text: str) -> Copy:
@@ -85,7 +97,7 @@ def copy(text: str) -> Copy:
         msg = f'Copy argument "{text}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
-    return {"type": "action:clipboard_store", "data": text}
+    return {"type": ActionType.COPY, "data": text}
 
 
 def open(item: str) -> Open:  # noqa: A001
@@ -97,7 +109,7 @@ def open(item: str) -> Open:  # noqa: A001
         msg = "Open argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    return {"type": "action:open", "data": item}
+    return {"type": ActionType.OPEN, "data": item}
 
 
 def run_script(script: str, args: str = "") -> LegacyRunScript:
@@ -109,8 +121,8 @@ def run_script(script: str, args: str = "") -> LegacyRunScript:
         msg = "Script argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    return {"type": "action:legacy_run_script", "data": [script, args]}
+    return {"type": ActionType.LEGACY_RUN_SCRIPT, "data": [script, args]}
 
 
 def action_list(actions: list[Any]) -> LegacyRunMany:
-    return {"type": "action:legacy_run_many", "data": actions}
+    return {"type": ActionType.LEGACY_RUN_MANY, "data": actions}
