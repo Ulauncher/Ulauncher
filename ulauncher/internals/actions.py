@@ -76,6 +76,12 @@ ActionMessage = Union[
 logger = logging.getLogger()
 
 
+def is_valid(action_msg: Any) -> bool:
+    return isinstance(action_msg, dict) and action_msg.get("type") in [
+        getattr(ActionType, key) for key in ActionType.__annotations__
+    ]
+
+
 def do_nothing() -> DoNothing:
     return {"type": ActionType.DO_NOTHING}
 
