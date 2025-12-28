@@ -18,7 +18,7 @@ from ulauncher.utils.theme import Theme
 from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
-events = EventBus("window", True)
+events = EventBus()
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -57,8 +57,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             height_request=height_request,
             **kwargs,
         )
-
-        events.set_self(self)
 
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
         if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and layer_shell.is_supported():
@@ -374,7 +372,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self.settings.grab_mouse_pointer:
             self.toggle_grab_pointer_device(False)
         super().close()
-        events.set_self(None)
         self.destroy()
 
     def select_result(self, index: int) -> None:
@@ -395,7 +392,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             grab_status = seat.grab(window, Gdk.SeatCapabilities.ALL_POINTING, True)
             logger.debug("Focus in event, grabbing pointer: %s", grab_status)
 
-    @events.on
     def set_input(self, query_str: str) -> None:
         self.prompt_input.set_text(query_str)
         self.prompt_input.set_position(-1)
