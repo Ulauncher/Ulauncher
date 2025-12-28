@@ -42,8 +42,8 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def set_query(self, value: str, update_input: bool = True) -> None:
         self.query = value.lstrip()
-        if update_input:
-            events.emit("window:set_input", self.query)
+        if update_input and (main_window := self.windows.get("main")) and isinstance(main_window, UlauncherWindow):
+            main_window.set_input(self.query)
 
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
