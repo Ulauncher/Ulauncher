@@ -154,7 +154,7 @@ class UlauncherCore:
                 return
 
             if isinstance(action_msg, dict):
-                from ulauncher.modes.mode_handler import handle_action
+                from ulauncher.internals.action_handler import handle_action
 
                 handle_action(action_msg)
             elif isinstance(action_msg, list):
@@ -198,7 +198,7 @@ class UlauncherCore:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
 
-        from ulauncher.modes.mode_handler import handle_action
+        from ulauncher.internals.action_handler import handle_action
 
         def mode_callback(action_msg: ActionMessage | list[Result]) -> None:
             if isinstance(action_msg, list):
