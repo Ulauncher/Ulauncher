@@ -74,12 +74,11 @@ ActionMessage = Union[
 ]
 
 logger = logging.getLogger()
+_VALID_ACTION_TYPES: Final = frozenset(getattr(ActionType, key) for key in ActionType.__annotations__)
 
 
 def is_valid(action_msg: Any) -> bool:
-    return isinstance(action_msg, dict) and action_msg.get("type") in [
-        getattr(ActionType, key) for key in ActionType.__annotations__
-    ]
+    return isinstance(action_msg, dict) and action_msg.get("type") in _VALID_ACTION_TYPES
 
 
 def do_nothing() -> DoNothing:
