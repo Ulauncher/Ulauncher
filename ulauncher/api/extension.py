@@ -15,6 +15,7 @@ from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.action_input import ActionMessageInput, convert_to_action_message
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
+from ulauncher.utils.timer import TimerContext, timer
 
 
 class Extension:
@@ -38,6 +39,8 @@ class Extension:
 
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self.preferences = {}
+        self._input_debounce_timer: TimerContext | None = None
+        self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
@@ -88,6 +91,21 @@ class Extension:
         return None
 
     def trigger_event(self, event: dict[str, Any]) -> None:
+        """Trigger an event. If it's an input trigger it will be debounced"""
+        if event.get("type") != EventType.INPUT_TRIGGER:
+            self._do_trigger_event(event)
+            return
+
+        def trigger_debounced() -> None:
+            self._input_debounce_timer = None
+            self._do_trigger_event(event)
+
+        if self._input_debounce_timer:
+            self._input_debounce_timer.cancel()
+
+        self._input_debounce_timer = timer(self._input_debounce_delay, trigger_debounced)
+
+    def _do_trigger_event(self, event: dict[str, Any]) -> None:
         base_event = self.convert_to_baseevent(event)
         if not base_event:
             self.logger.warning("Dropping unknown event: %s", event)
