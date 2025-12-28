@@ -18,9 +18,8 @@ def convert_to_action_message(input_data: ActionMessageInput) -> actions.ActionM
     if isinstance(input_data, str):
         return actions.set_query(input_data)
     if isinstance(input_data, dict):
-        type_field = input_data.get("type")  # type: ignore[call-overload]
-        if not isinstance(type_field, str) or not type_field.startswith("action:"):
-            err_msg = f"Invalid action message dict: missing or invalid 'type' field: {input_data}"
-            raise ValueError(err_msg)
-        return cast("actions.ActionMessage", input_data)  # TypedDict unions can't be narrowed by runtime checks
+        if actions.is_valid(input_data):
+            return cast("actions.ActionMessage", input_data)  # TypedDict unions can't be narrowed by runtime checks
+        err_msg = f"Invalid action message dict: {input_data}"
+        raise ValueError(err_msg)
     return list(cast("Iterable[Result]", input_data))  # collect/flatten iterators to lists
