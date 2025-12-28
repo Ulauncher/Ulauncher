@@ -7,6 +7,7 @@ from typing import Any
 from gi.repository import GLib
 
 import ulauncher.api
+from ulauncher.api.shared.event import EventType
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 logger = logging.getLogger()
@@ -65,7 +66,7 @@ class Client:
 
     def unload(self) -> None:
         # trigger unload event and release mainloop so that the process will exit after the event is handled
-        self.extension.trigger_event({"type": "event:unload"})
+        self.extension.trigger_event({"type": EventType.UNLOAD})
         if self.mainloop.is_running():
             self.mainloop.quit()
 

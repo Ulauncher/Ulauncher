@@ -12,7 +12,7 @@ from typing import Any, Callable
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
-from ulauncher.api.shared.event import BaseEvent, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.action_input import ActionMessageInput, convert_to_action_message
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
@@ -44,15 +44,15 @@ class Extension:
 
         # subscribe with methods if user has added their own
         if self.__class__.on_input is not Extension.on_input:
-            self.subscribe(events["event:input_trigger"], "on_input")
+            self.subscribe(events[EventType.INPUT_TRIGGER], "on_input")
         if self.__class__.on_launch is not Extension.on_launch:
-            self.subscribe(events["event:launch_trigger"], "on_launch")
+            self.subscribe(events[EventType.LAUNCH_TRIGGER], "on_launch")
         if self.__class__.on_item_enter is not Extension.on_item_enter:
-            self.subscribe(events["event:activate_custom"], "on_item_enter")
+            self.subscribe(events[EventType.ACTIVATE_CUSTOM], "on_item_enter")
         if self.__class__.on_unload is not Extension.on_unload:
-            self.subscribe(events["event:unload"], "on_unload")
+            self.subscribe(events[EventType.UNLOAD], "on_unload")
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
-            self.subscribe(events["event:update_preferences"], "on_preferences_update")
+            self.subscribe(events[EventType.UPDATE_PREFERENCES], "on_preferences_update")
 
     def subscribe(self, event_type: type[BaseEvent], listener: str | object) -> None:
         """
@@ -70,11 +70,11 @@ class Extension:
         args = event.get("args", [])
         event_constructor = events.get(event_type)
         # If pre v3 extension has KeywordQueryEvent, convert input_trigger to KeywordQueryEvent instead
-        if event_type == "event:input_trigger" and self._listeners[KeywordQueryEvent]:
+        if event_type == EventType.INPUT_TRIGGER and self._listeners[KeywordQueryEvent]:
             argument, trigger_id = args
             return KeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
 
-        if event_type == "event:activate_custom":
+        if event_type == EventType.ACTIVATE_CUSTOM:
             ref = event.get("ref", "")
             data = custom_data_store.get(ref)
             # Remove all entries except the one the user choose, because get_data can be called more than once
@@ -100,7 +100,7 @@ class Extension:
         if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
 
-        if event.get("type") == "event:input_trigger":
+        if event.get("type") == EventType.INPUT_TRIGGER:
             self._input = event.get("args", [])[0]
 
         for listener, method_name in listeners:
@@ -128,7 +128,7 @@ class Extension:
         """
         Subscribes to events and connects to Ulauncher socket server
         """
-        self.subscribe(events["event:update_preferences"], PreferencesUpdateEventListener())
+        self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
         self._client.connect()
 
     def on_input(self, query_str: str, trigger_id: str) -> ActionMessageInput | None:

@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterator, Literal, cast
 
 from gi.repository import GLib
 
+from ulauncher.api.shared.event import EventType
 from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
@@ -23,8 +24,8 @@ events = EventBus("extensions")
 
 # Maps action types that require async extension communication to their event types
 ASYNC_ACTION_TYPES = {
-    "action:activate_custom": "event:activate_custom",
-    "action:launch_trigger": "event:launch_trigger",
+    "action:activate_custom": EventType.ACTIVATE_CUSTOM,
+    "action:launch_trigger": EventType.LAUNCH_TRIGGER,
 }
 
 
@@ -53,7 +54,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 ext.start()
                 # legacy_preferences_load is useless and deprecated
                 prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
-                ext.send_message({"type": "event:legacy_preferences_load", "args": [prefs]})
+                ext.send_message({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": [prefs]})
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
@@ -76,7 +77,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             self.active_ext = extension_registry.get(ext_id)
             if self.active_ext:
                 event = {
-                    "type": "event:input_trigger",
+                    "type": EventType.INPUT_TRIGGER,
                     "ext_id": self.active_ext.id,
                     "args": [query.argument, trigger_id],
                     "interaction_id": self._interaction_id,
@@ -210,7 +211,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             for p_id, new_value in data.get("preferences", {}).items():
                 pref = ext.preferences.get(p_id)
                 if pref and new_value != pref.value:
-                    event_data = {"type": "event:update_preferences", "args": [p_id, new_value, pref.value]}
+                    event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, pref.value]}
                     ext.send_message(event_data)
 
     def trigger_event(self, event: dict[str, Any]) -> None:

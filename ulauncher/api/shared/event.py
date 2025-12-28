@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Final, Union
 
 from ulauncher.internals.query import Query
 
@@ -107,11 +107,22 @@ class PreferencesEvent(BaseEvent):
 # Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
 SystemExitEvent = UnloadEvent
 
+
+class EventType:
+    INPUT_TRIGGER: Final = "event:input_trigger"
+    ACTIVATE_CUSTOM: Final = "event:activate_custom"
+    LAUNCH_TRIGGER: Final = "event:launch_trigger"
+    RESULT_ACTIVATION: Final = "event:result_activation"
+    UPDATE_PREFERENCES: Final = "event:update_preferences"
+    LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
+    UNLOAD: Final = "event:unload"
+
+
 events = {
-    "event:launch_trigger": LaunchTriggerEvent,
-    "event:update_preferences": PreferencesUpdateEvent,
-    "event:legacy_preferences_load": PreferencesEvent,
-    "event:unload": UnloadEvent,
-    "event:input_trigger": InputTriggerEvent,
-    "event:activate_custom": ItemEnterEvent,
+    EventType.LAUNCH_TRIGGER: LaunchTriggerEvent,
+    EventType.UPDATE_PREFERENCES: PreferencesUpdateEvent,
+    EventType.LEGACY_PREFERENCES_LOAD: PreferencesEvent,
+    EventType.UNLOAD: UnloadEvent,
+    EventType.INPUT_TRIGGER: InputTriggerEvent,
+    EventType.ACTIVATE_CUSTOM: ItemEnterEvent,
 }
