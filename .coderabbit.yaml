@@ -13,13 +13,13 @@ reviews:
   # Don't edit the PR top post
   high_level_summary_in_walkthrough: true
 
-  # Remove mostly redendant/noisy sections
+  # Remove mostly redundant/noisy sections
   sequence_diagrams: false
   suggested_labels: false
   changed_files_summary: false
   poem: false
 
-  # disable suggesting tasks for coderabbit
+  # disable coderabbit suggesting tasks
   finishing_touches:
     docstrings:
       enabled: false
