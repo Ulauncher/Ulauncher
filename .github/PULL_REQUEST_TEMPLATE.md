@@ -8,6 +8,6 @@ https://github.com/Ulauncher/Ulauncher#code-contribution
 * When applicable, please update the documentation according to your changes.
 * Ensure that the PR doesn't break existing tests, and please add your own if applicable.
 
-A git action will verify your PR, but you can also test locally with `make test`
+A git action will verify your PR, but you can also test locally with `make check`
 
 -->

@@ -11,8 +11,8 @@ jobs:
     container: ulauncher/build-image:6.4
     steps:
       - uses: actions/checkout@v5
-      - name: Test
-        run: make test
+      - name: Check
+        run: make check
       - name: Build release
         run: |
           VERSION=$(make version)
