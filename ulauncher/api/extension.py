@@ -56,6 +56,8 @@ class Extension:
             self.subscribe(events[EventType.UNLOAD], "on_unload")
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
             self.subscribe(events[EventType.UPDATE_PREFERENCES], "on_preferences_update")
+        if self.__class__.on_result_activation is not Extension.on_result_activation:
+            self.subscribe(events[EventType.RESULT_ACTIVATION], "on_result_activation")
 
     def subscribe(self, event_type: type[BaseEvent], listener: str | object) -> None:
         """
@@ -160,6 +162,15 @@ class Extension:
 
     def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
+
+    def on_result_activation(self, action_id: str, result: dict[str, Any]) -> ActionMessageInput | None:
+        """
+        Called when user activates a result action.
+
+        :param action_id: The ID of the action that was activated (key from Result.actions dict)
+        :param result: The result data as a dict
+        :return: The action to execute
+        """
 
     def on_unload(self) -> None:
         pass

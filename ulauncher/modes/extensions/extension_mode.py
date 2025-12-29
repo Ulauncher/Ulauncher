@@ -143,8 +143,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         elif action_id == "__legacy_on_alt_enter__" and "on_alt_enter" in result:
             action_msg = result.on_alt_enter
         else:
-            logger.error("Unexpected action '%s' for Extension mode result '%s'", action_id, result)
-            callback(actions.do_nothing())
+            event_type = EventType.RESULT_ACTIVATION
+            event_args = [action_id, result]
+            self.trigger_event({"type": event_type, "args": event_args}, callback)
             return
 
         if (
