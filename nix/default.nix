@@ -136,7 +136,7 @@ let
 
         makeWrapper "$(command -v make)" "$test_dir/bin/make" "''${makeWrapperArgs[@]}"
         export PATH="$test_dir/bin:$PATH"
-        #make test
+        #make check
         rm -r "$test_dir"
       )
 
