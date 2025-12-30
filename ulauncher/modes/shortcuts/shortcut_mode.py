@@ -8,9 +8,8 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutTrigger
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
-from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
-from ulauncher.modes.shortcuts.shortcut_trigger import ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 
 logger = logging.getLogger()

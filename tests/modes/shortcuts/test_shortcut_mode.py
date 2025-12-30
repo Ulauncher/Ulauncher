@@ -9,9 +9,8 @@ from pytest_mock import MockerFixture
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
+from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
-from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
-from ulauncher.modes.shortcuts.shortcut_trigger import ShortcutTrigger
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
 
 

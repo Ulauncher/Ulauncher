@@ -7,3 +7,9 @@ class ShortcutResult(Result):
     is_default_search = False
     run_without_argument = False
     cmd = ""
+
+
+class ShortcutTrigger(Result):
+    searchable = True
+    run_without_argument = False
+    cmd = ""

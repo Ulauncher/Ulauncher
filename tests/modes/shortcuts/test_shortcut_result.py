@@ -1,6 +1,6 @@
 import pytest
 
-from ulauncher.modes.shortcuts.shortcut_result import ShortcutResult
+from ulauncher.modes.shortcuts.results import ShortcutResult
 
 
 class TestShortcutResult:
