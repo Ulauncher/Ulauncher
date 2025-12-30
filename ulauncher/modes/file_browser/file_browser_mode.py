@@ -59,27 +59,27 @@ class FileBrowserMode(BaseMode):
             closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
             remainder = "/".join(path.parts[closest_parent.count("/") + 1 :])
 
-            if closest_parent == ".":  # invalid path
-                pass
+            if closest_parent != ".":  # valid path
+                if not remainder:
+                    file_names = self.list_files(str(path), sort_by_atime=True)
+                    for name in self.filter_dot_files(file_names)[: self.LIMIT]:
+                        file = join(closest_parent, name)
+                        results.append(FileResult(file))
 
-            elif not remainder:
-                file_names = self.list_files(str(path), sort_by_atime=True)
-                for name in self.filter_dot_files(file_names)[: self.LIMIT]:
-                    file = join(closest_parent, name)
-                    results.append(FileResult(file))
+                else:
+                    file_names = self.list_files(closest_parent)
+                    path_str = remainder
 
-            else:
-                file_names = self.list_files(closest_parent)
-                path_str = remainder
+                    if not path_str.startswith("."):
+                        file_names = self.filter_dot_files(file_names)
 
-                if not path_str.startswith("."):
-                    file_names = self.filter_dot_files(file_names)
+                    from ulauncher.utils.fuzzy_search import get_score
 
-                from ulauncher.utils.fuzzy_search import get_score
-
-                sorted_files = sorted(file_names, key=lambda fn: get_score(path_str, fn), reverse=True)
-                filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
-                results = [FileResult(join(closest_parent, name)) for name in filtered]
+                    sorted_files = sorted(file_names, key=lambda fn: get_score(path_str, fn), reverse=True)
+                    filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[
+                        : self.LIMIT
+                    ]
+                    results = [FileResult(join(closest_parent, name)) for name in filtered]
 
         except (RuntimeError, OSError):
             results = []
