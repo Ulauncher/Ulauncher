@@ -11,7 +11,7 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.file_browser.results import CopyPath, FileBrowserResult, OpenFolder
+from ulauncher.modes.file_browser.results import CopyPath, FileResult, OpenFolder
 from ulauncher.utils.fold_user_path import fold_user_path
 
 logger = logging.getLogger()
@@ -66,7 +66,7 @@ class FileBrowserMode(BaseMode):
                 file_names = self.list_files(str(path), sort_by_atime=True)
                 for name in self.filter_dot_files(file_names)[: self.LIMIT]:
                     file = join(closest_parent, name)
-                    results.append(FileBrowserResult(file))
+                    results.append(FileResult(file))
 
             else:
                 file_names = self.list_files(closest_parent)
@@ -79,7 +79,7 @@ class FileBrowserMode(BaseMode):
 
                 sorted_files = sorted(file_names, key=lambda fn: get_score(path_str, fn), reverse=True)
                 filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[: self.LIMIT]
-                results = [FileBrowserResult(join(closest_parent, name)) for name in filtered]
+                results = [FileResult(join(closest_parent, name)) for name in filtered]
 
         except (RuntimeError, OSError):
             results = []
@@ -100,7 +100,7 @@ class FileBrowserMode(BaseMode):
         if isinstance(result, OpenFolder):
             callback(actions.open(result.path))
             return
-        if isinstance(result, FileBrowserResult):
+        if isinstance(result, FileResult):
             if not alt:
                 if isdir(result.path):
                     callback(actions.set_query(join(fold_user_path(result.path), "")))

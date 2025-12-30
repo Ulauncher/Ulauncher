@@ -6,7 +6,7 @@ from ulauncher.internals.result import Result
 from ulauncher.modes.file_browser.get_icon_from_path import get_icon_from_path
 
 
-class FileBrowserResult(Result):
+class FileResult(Result):
     compact = True
     highlightable = True
     path = ""
