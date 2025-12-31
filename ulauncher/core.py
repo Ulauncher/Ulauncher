@@ -146,25 +146,10 @@ class UlauncherCore:
     def handle_change(self, callback: Callable[[Iterable[Result]], None]) -> None:
         self._clear_placeholder_timer()
 
-        mode = self._mode
-
-        def mode_callback(action_msg: actions.ActionMessage | list[Result]) -> None:
-            # Ensure the mode hasn't changed
-            if self._mode != mode:
-                return
-
-            if isinstance(action_msg, dict):
-                from ulauncher.internals.action_handler import handle_action
-
-                handle_action(action_msg)
-            elif isinstance(action_msg, list):
-                self._show_results(action_msg, callback)
-
         if self._mode:
             try:
                 self._placeholder_timer = timer(PLACEHOLDER_DELAY, lambda: self._show_placeholder(callback))
-
-                self._mode.handle_query(self.query, mode_callback)
+                self._mode.handle_query(self.query, self._mode_callback(self._mode, callback))
             except Exception:
                 # Mode handlers can raise any exception - catch broadly to prevent crashes
                 logger.exception("Mode '%s' triggered an error while handling query '%s'", self._mode, self.query)
@@ -204,13 +189,23 @@ class UlauncherCore:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
 
-        from ulauncher.internals.action_handler import handle_action
+        mode.activate_result(result, self.query, alt, self._mode_callback(mode, callback))
 
-        def mode_callback(action_msg: actions.ActionMessage | list[Result]) -> None:
-            if isinstance(action_msg, list):
-                self._show_results(action_msg, callback)
+    def _mode_callback(
+        self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
+    ) -> Callable[[actions.ActionMessage | list[Result]], None]:
+        """Callback to handle results and actions from modes."""
+
+        def _callback(action_msg: actions.ActionMessage | list[Result]) -> None:
+            # Ensure the mode hasn't changed
+            if self._mode != mode:
                 return
 
-            handle_action(action_msg)
+            if isinstance(action_msg, dict):
+                from ulauncher.internals.action_handler import handle_action
 
-        mode.activate_result(result, self.query, alt, mode_callback)
+                handle_action(action_msg)
+            elif isinstance(action_msg, list):
+                self._show_results(action_msg, callback)
+
+        return _callback
