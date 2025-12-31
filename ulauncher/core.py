@@ -83,8 +83,8 @@ class UlauncherCore:
                             current_trigger.__class__.__name__,
                         )
 
-    def update(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
-        """Parse the query string and update the mode and query."""
+    def set_query(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
+        """Set the query string and propagate the update to the modes."""
         if not query_str and not str(self.query):
             # prevent loading modes until the app has rendered initially when the query is empty
             # otherwise it will load all the slow stuff before the app is shown

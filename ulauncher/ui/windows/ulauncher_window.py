@@ -197,7 +197,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.show_results([])
         self.apply_styling()
         self.core.load_triggers(force=True)
-        self.core.update(self.query_str, self.show_results)
+        self.core.set_query(self.query_str, self.show_results)
 
     ######################################
     # GTK Signal Handlers
@@ -221,7 +221,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
-        self.core.update(self.query_str, self.show_results)
+        self.core.set_query(self.query_str, self.show_results)
 
     def activate_result(self, alt: bool) -> None:
         """
