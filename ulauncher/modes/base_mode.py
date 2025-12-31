@@ -12,13 +12,13 @@ DEFAULT_ACTION = True  #  keep window open and do nothing
 class BaseMode:
     def matches_query_str(self, _query_str: str) -> bool:
         """
-        Return if the input should be handled by the mode
+        Returns if the input should be handled by the mode.
         """
         return False
 
     def handle_backspace(self, _query_str: str) -> Query | None:
         """
-        Return string to override default backspace and set the query to that string
+        Returns a query if it should override default backspace behavior.
         """
         return None
 
@@ -39,7 +39,7 @@ class BaseMode:
 
     def has_trigger_changes(self) -> bool:
         """
-        Return True if this mode's triggers may need to be reloaded.
+        Returns True if this mode's triggers may need to be reloaded.
         Note that all triggers are reloaded when the Ulauncher window is shown,
         so this is mainly for modes that load trigger asynchronously and won't be ready initially.
         """
@@ -47,15 +47,12 @@ class BaseMode:
 
     def get_initial_results(self, _limit: int) -> Iterable[Result]:
         """
-        Called if the query is empty (on startup or when you delete the query)
-        We only actually use this for AppMode, so it should not be implemented for other modes.
+        Get results to show when there is no query input (on startup or when you delete the query)
+        Only implemented for AppMode.
         """
         return []
 
     def get_fallback_results(self, _query_str: str) -> Iterable[Result]:
-        """
-        Called if nothing matches the user input
-        """
         return []
 
     def activate_result(
@@ -65,10 +62,6 @@ class BaseMode:
         alt: bool,
         callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        """
-        Called when a result is activated.
-        Override this method to handle the activation of a result.
-        """
         error_msg = (
             f"{self.__class__.__name__}.activate_result() is not implemented. "
             "You should override this method to handle result activation."

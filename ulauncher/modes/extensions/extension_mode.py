@@ -122,11 +122,6 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def activate_result(
         self, result: Result, _query: Query, alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
     ) -> None:
-        """
-        Called when a result is activated.
-        Override this method to handle the activation of a result.
-        """
-
         action_msg = result.on_alt_enter if alt else result.on_enter
         if (
             isinstance(action_msg, dict)
