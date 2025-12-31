@@ -95,10 +95,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 name = html.escape(trigger.name)
                 description = html.escape(trigger.description)
                 icon = ext.get_normalized_icon_path(trigger.icon)
-                keyword = trigger.keyword
 
-                if keyword:
-                    yield KeywordTrigger(name=name, description=description, icon=icon, keyword=keyword)
+                if trigger.keyword:
+                    yield KeywordTrigger(name=name, description=description, icon=icon, keyword=trigger.keyword)
                 else:
                     action = cast(
                         "actions.LaunchTriggerAction",
@@ -108,9 +107,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                             "ext_id": ext.id,
                         },
                     )
-                    yield ExtensionStaticTrigger(
-                        name=name, description=description, icon=icon, keyword=keyword, on_enter=action
-                    )
+                    yield ExtensionStaticTrigger(name=name, description=description, icon=icon, on_enter=action)
 
     def get_placeholder_icon(self) -> str | None:
         if self.active_ext:
