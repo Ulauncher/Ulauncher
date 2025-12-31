@@ -47,12 +47,17 @@ class AppMode(BaseMode):
         return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
 
     def activate_result(
-        self, result: Result, _query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+        self,
+        action_id: str,
+        result: Result,
+        _query: Query,
+        callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        if isinstance(result, AppResult):
+        if action_id == "launch":
             result.bump_starts()
             if not launch_app(result.app_id):
                 logger.error("Could not launch app %s", result.app_id)
             callback(actions.close_window())
             return
+        logger.error("Unexpected action '%s' for App mode result '%s'", action_id, result)
         callback(actions.do_nothing())

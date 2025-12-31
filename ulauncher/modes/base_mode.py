@@ -57,11 +57,19 @@ class BaseMode:
 
     def activate_result(
         self,
+        action_id: str,
         result: Result,
         query: Query,
-        alt: bool,
         callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
+        """
+        Called when a result is activated.
+
+        :param action_id: The ID of the action to perform, or empty string for the default action
+        :param result: The result that was activated
+        :param query: The current query
+        :param callback: Callback to return the action or new results
+        """
         error_msg = (
             f"{self.__class__.__name__}.activate_result() is not implemented. "
             "You should override this method to handle result activation."

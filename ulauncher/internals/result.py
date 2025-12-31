@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
-from ulauncher.internals import actions
 from ulauncher.internals.action_input import convert_to_action_message
+from ulauncher.internals.actions import ActionMessage
 from ulauncher.utils.basedataclass import BaseDataClass
 
 if TYPE_CHECKING:
@@ -15,9 +15,12 @@ class Result(BaseDataClass):
     Use this class to define a result item to be displayed in response to a query or other event.
     Return `list[Result]` from the `on_input` or `on_item_enter` methods of the `Extension` subclass.
 
-    :param on_enter: The action to be performed when the result is activated.
+    :param actions: Optional dict of actions for this result. When provided, on_enter/on_alt_enter are ignored.
+                    Format: {"action_id": {"name": "Display Name", "icon": "optional-icon-name"}}
+    :param on_enter: The action to be performed when the result is activated (legacy: please use `actions` instead).
                      Should be a return value of the `ExtensionCustomAction` function.
-    :param on_alt_enter: The action to be performed when the result is activated with the Alt key pressed.
+    :param on_alt_enter: The action to be performed when the result is activated with the Alt key pressed
+                         (legacy: please use `actions` instead).
     """
 
     compact = False  #: If True, the result will be displayed in a single line without a title
@@ -29,8 +32,9 @@ class Result(BaseDataClass):
     icon = (
         ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
     )
-    on_enter: actions.ActionMessage | list[Result] | None = None
-    on_alt_enter: actions.ActionMessage | list[Result] | None = None
+    actions: dict[str, dict[Literal["name", "icon"], str]] = {}  #: dict of actions with display names and icons
+    on_enter: ActionMessage | list[Result] | None = None
+    on_alt_enter: ActionMessage | list[Result] | None = None
 
     def __init__(
         self,
@@ -42,6 +46,7 @@ class Result(BaseDataClass):
         description: str | None = None,
         keyword: str | None = None,
         icon: str | None = None,
+        actions: dict[str, dict[Literal["name", "icon"], str]] | None = None,
         on_enter: ActionMessageInput | None = None,
         on_alt_enter: ActionMessageInput | None = None,
         **kwargs: Any,
@@ -63,6 +68,8 @@ class Result(BaseDataClass):
             init_kwargs["keyword"] = keyword
         if icon is not None:
             init_kwargs["icon"] = icon
+        if actions is not None:
+            init_kwargs["actions"] = actions
         if on_enter is not None:
             init_kwargs["on_enter"] = on_enter
         if on_alt_enter is not None:
@@ -89,6 +96,16 @@ class Result(BaseDataClass):
         from ulauncher.utils.fuzzy_search import get_score
 
         return max(get_score(query_str, field) * weight for field, weight in self.get_searchable_fields() if field)
+
+
+class ActionResult(Result):
+    """
+    Represents an action that can be performed on a parent result.
+    Used internally when a Result has multiple actions defined.
+    """
+
+    action_id = ""  # The action ID from the parent result's actions dict
+    parent_result: Result | None = None  # Reference to the parent result
 
 
 class KeywordTrigger(Result):
