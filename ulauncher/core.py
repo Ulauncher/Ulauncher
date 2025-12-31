@@ -7,9 +7,9 @@ from functools import lru_cache
 from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
-from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.timer import TimerContext, timer
@@ -148,7 +148,7 @@ class UlauncherCore:
 
         mode = self._mode
 
-        def mode_callback(action_msg: ActionMessage | list[Result]) -> None:
+        def mode_callback(action_msg: actions.ActionMessage | list[Result]) -> None:
             # Ensure the mode hasn't changed
             if self._mode != mode:
                 return
@@ -193,6 +193,12 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
+        if isinstance(result, KeywordTrigger):
+            from ulauncher.internals.action_handler import handle_action
+
+            handle_action(actions.set_query(f"{result.keyword} "))
+            return
+
         mode = self._mode_map.get(result, self._mode)
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
@@ -200,7 +206,7 @@ class UlauncherCore:
 
         from ulauncher.internals.action_handler import handle_action
 
-        def mode_callback(action_msg: ActionMessage | list[Result]) -> None:
+        def mode_callback(action_msg: actions.ActionMessage | list[Result]) -> None:
             if isinstance(action_msg, list):
                 self._show_results(action_msg, callback)
                 return

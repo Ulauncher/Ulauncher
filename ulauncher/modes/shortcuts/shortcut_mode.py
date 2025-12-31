@@ -6,9 +6,9 @@ from typing import Callable, Iterator
 from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutTrigger
+from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 
@@ -55,18 +55,16 @@ class ShortcutMode(BaseMode):
 
     def get_triggers(self) -> Iterator[Result]:
         for shortcut in self.shortcuts_db.values():
-            trigger = ShortcutTrigger(**shortcut, description=get_description(shortcut))
-            if shortcut.run_without_argument:
-                trigger.keyword = ""
-            yield trigger
+            yield (
+                ShortcutStaticTrigger(**shortcut, description=get_description(shortcut))
+                if shortcut.run_without_argument
+                else KeywordTrigger(**shortcut, description=get_description(shortcut))
+            )
 
     def activate_result(
         self, result: Result, query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
     ) -> None:
-        if isinstance(result, ShortcutTrigger):
-            if result.keyword:
-                callback(actions.set_query(f"{result.keyword} "))
-                return
+        if isinstance(result, ShortcutStaticTrigger):
             callback(run_shortcut(result.cmd))
             return
         if isinstance(result, ShortcutResult):

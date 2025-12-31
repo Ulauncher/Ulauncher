@@ -12,7 +12,7 @@ from ulauncher.api.shared.event import EventType
 from ulauncher.internals import actions
 from ulauncher.internals.actions import ActionMessage, ActionType
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import Result
+from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
@@ -29,7 +29,7 @@ ASYNC_ACTION_TYPES = {
 }
 
 
-class ExtensionTrigger(Result):
+class ExtensionStaticTrigger(Result):
     searchable = True
 
 
@@ -92,11 +92,15 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
             for trigger_id, trigger in ext.triggers.items():
                 self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
+                name = html.escape(trigger.name)
+                description = html.escape(trigger.description)
+                icon = ext.get_normalized_icon_path(trigger.icon)
+                keyword = trigger.keyword
 
-                action: actions.ActionMessage = (
-                    actions.set_query(f"{trigger.keyword} ")
-                    if trigger.keyword
-                    else cast(
+                if keyword:
+                    yield KeywordTrigger(name=name, description=description, icon=icon, keyword=keyword)
+                else:
+                    action = cast(
                         "actions.LaunchTriggerAction",
                         {
                             "type": ActionType.LAUNCH_TRIGGER,
@@ -104,15 +108,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                             "ext_id": ext.id,
                         },
                     )
-                )
-
-                yield ExtensionTrigger(
-                    name=html.escape(trigger.name),
-                    description=html.escape(trigger.description),
-                    icon=ext.get_normalized_icon_path(trigger.icon),
-                    keyword=trigger.keyword,
-                    on_enter=action,
-                )
+                    yield ExtensionStaticTrigger(
+                        name=name, description=description, icon=icon, keyword=keyword, on_enter=action
+                    )
 
     def get_placeholder_icon(self) -> str | None:
         if self.active_ext:
