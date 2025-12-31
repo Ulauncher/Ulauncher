@@ -70,10 +70,10 @@ class ItemEnterEvent(BaseEvent):
 class ResultActivationEvent(BaseEvent):
     """
     Is triggered when user activates a result action.
-    Args: [action_id: str, result_data: dict]
+    Args: [action_id: str, result: Result]
 
     :param str action_id: The ID of the action that was activated
-    :param dict result_data: The result data as a dict
+    :param Result result: The Result object that was activated
     """
 
 
