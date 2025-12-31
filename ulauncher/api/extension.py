@@ -7,13 +7,14 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals.action_input import ActionMessageInput, convert_to_action_message
+from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.timer import TimerContext, timer
 
@@ -41,6 +42,7 @@ class Extension:
         self.preferences = {}
         self._input_debounce_timer: TimerContext | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
+        self._result_cache: dict[int, Result] = {}
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
@@ -86,6 +88,15 @@ class Extension:
             custom_data_store.clear()
             custom_data_store[ref] = data
             args = [data]
+        elif event_type == EventType.RESULT_ACTIVATION:
+            # Restore actual Result instance from cache using the result_id
+            action_id, result_dict = cast("tuple[str, dict[str, Any]]", args)
+            result_id: int | None = result_dict.get("__result_id__")
+            if result_id and (result := self._result_cache.get(result_id)):
+                args = [action_id, result]
+            else:
+                err_msg = f"Result with id {result_id} not found"
+                raise ValueError(err_msg)
 
         if callable(event_constructor):
             return event_constructor(args)
@@ -142,6 +153,16 @@ class Extension:
         # ignore outdated responses
         if current_input == self._input:
             action_msg = convert_to_action_message(input_action_msg if input_action_msg is not None else False)
+
+            # Cache Result objects before sending them, keyed by their Python object ID
+            if isinstance(action_msg, list):
+                self._result_cache.clear()
+                for result in action_msg:
+                    result_id = id(result)
+                    self._result_cache[result_id] = result
+                    # Add the result_id to the dict representation so Ulauncher can send it back
+                    result["__result_id__"] = result_id
+
             self._client.send({"event": event, "action": action_msg})
 
     def run(self) -> None:
@@ -163,12 +184,12 @@ class Extension:
     def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
 
-    def on_result_activation(self, action_id: str, result: dict[str, Any]) -> ActionMessageInput | None:
+    def on_result_activation(self, action_id: str, result: Result) -> ActionMessageInput | None:
         """
         Called when user activates a result action.
 
         :param action_id: The ID of the action that was activated (key from Result.actions dict)
-        :param result: The result data as a dict
+        :param result: The Result object that was activated
         :return: The action to execute
         """
 
