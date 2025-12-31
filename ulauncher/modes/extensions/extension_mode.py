@@ -91,12 +91,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 continue
 
             for trigger_id, trigger in ext.triggers.items():
-                self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
                 name = html.escape(trigger.name)
                 description = html.escape(trigger.description)
                 icon = ext.get_normalized_icon_path(trigger.icon)
 
                 if trigger.keyword:
+                    self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
                     yield KeywordTrigger(name=name, description=description, icon=icon, keyword=trigger.keyword)
                 else:
                     action = cast(
