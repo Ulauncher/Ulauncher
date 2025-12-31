@@ -8,7 +8,7 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
+from ulauncher.modes.shortcuts import results
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 
@@ -24,8 +24,13 @@ def get_description(shortcut: Shortcut, query: Query | None = None) -> str:
     return description.replace("%s", str(query) if query else "...")
 
 
-def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> ShortcutResult:
-    return ShortcutResult(**shortcut, description=get_description(shortcut, query))
+def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> results.ShortcutResult:
+    description = get_description(shortcut, query)
+    return (
+        results.StaticShortcutResult(**shortcut, description=description)
+        if shortcut.run_without_argument
+        else results.ShortcutResult(**shortcut, description=description)
+    )
 
 
 class ShortcutMode(BaseMode):
@@ -49,30 +54,34 @@ class ShortcutMode(BaseMode):
 
         callback([convert_to_result(shortcut, query)])
 
-    def get_fallback_results(self, query_str: str) -> list[ShortcutResult]:
+    def get_fallback_results(self, query_str: str) -> list[results.ShortcutResult]:
         query = Query(None, query_str)
         return [convert_to_result(s, query) for s in self.shortcuts_db.values() if s["is_default_search"]]
 
     def get_triggers(self) -> Iterator[Result]:
         for shortcut in self.shortcuts_db.values():
             yield (
-                ShortcutStaticTrigger(**shortcut, description=get_description(shortcut))
+                results.ShortcutStaticTrigger(**shortcut, description=get_description(shortcut))
                 if shortcut.run_without_argument
                 else KeywordTrigger(**shortcut, description=get_description(shortcut))
             )
 
     def activate_result(
-        self, result: Result, query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+        self,
+        action_id: str,
+        result: Result,
+        query: Query,
+        callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        if isinstance(result, ShortcutStaticTrigger):
+        if action_id == "run_static":
             callback(run_shortcut(result.cmd))
-            return
-        if isinstance(result, ShortcutResult):
+        elif action_id == "run":
+            # for fallback results (no keyword match) then the full query is the argument
             argument = query.argument or "" if query.keyword == result.keyword else str(query)
-            if argument or not result.keyword:
-                callback(run_shortcut(result.cmd, argument or None))
-                return
+            if argument:
+                callback(run_shortcut(result.cmd, argument))
+            else:
+                callback(actions.do_nothing())
+        else:
+            logger.error("Unexpected action '%s' for Shortcut mode result '%s'", action_id, result)
             callback(actions.do_nothing())
-            return
-        logger.error("Unexpected result type for Shortcut mode '%s'", result)
-        callback(actions.do_nothing())

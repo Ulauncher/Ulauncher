@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from os.path import basename, dirname, expandvars, isdir, join
+from os.path import dirname, expandvars, isdir, join
 from pathlib import Path
 from typing import Callable
 
@@ -11,7 +11,7 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.file_browser.results import CopyPath, FileResult, OpenFolder
+from ulauncher.modes.file_browser.results import FileResult, FolderResult
 from ulauncher.utils.fold_user_path import fold_user_path
 
 logger = logging.getLogger()
@@ -63,8 +63,8 @@ class FileBrowserMode(BaseMode):
                 if not remainder:
                     file_names = self.list_files(str(path), sort_by_atime=True)
                     for name in self.filter_dot_files(file_names)[: self.LIMIT]:
-                        file = join(closest_parent, name)
-                        results.append(FileResult(file))
+                        file_path = join(closest_parent, name)
+                        results.append(FolderResult(file_path) if isdir(file_path) else FileResult(file_path))
 
                 else:
                     file_names = self.list_files(closest_parent)
@@ -79,7 +79,9 @@ class FileBrowserMode(BaseMode):
                     filtered = list(filter(lambda fn: get_score(path_str, fn) > self.THRESHOLD, sorted_files))[
                         : self.LIMIT
                     ]
-                    results = [FileResult(join(closest_parent, name)) for name in filtered]
+                    for name in filtered:
+                        file_path = join(closest_parent, name)
+                        results.append(FolderResult(file_path) if isdir(file_path) else FileResult(file_path))
 
         except (RuntimeError, OSError):
             results = []
@@ -92,28 +94,20 @@ class FileBrowserMode(BaseMode):
         return None
 
     def activate_result(
-        self, result: Result, _query: Query, alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+        self,
+        action_id: str,
+        result: Result,
+        _query: Query,
+        callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        if isinstance(result, CopyPath):
-            callback(actions.copy(result.path))
-            return
-        if isinstance(result, OpenFolder):
+        if action_id == "go_to":
+            callback(actions.set_query(join(fold_user_path(result.path), "")))
+        elif action_id == "open":
             callback(actions.open(result.path))
-            return
-        if isinstance(result, FileResult):
-            if not alt:
-                if isdir(result.path):
-                    callback(actions.set_query(join(fold_user_path(result.path), "")))
-                    return
-
-                callback(actions.open(result.path))
-                return
-            if isdir(result.path):
-                open_folder = OpenFolder(name=f'Open Folder "{basename(result.path)}"', path=result.path)
-            else:
-                open_folder = OpenFolder(name="Open Containing Folder", path=dirname(result.path))
-            callback([open_folder, CopyPath(path=result.path)])
-            return
-        logger.error("Unexpected File Browser Mode result type '%s'", result)
-        callback(actions.do_nothing())
-        return
+        elif action_id == "open_parent":
+            callback(actions.open(dirname(result.path)))
+        elif action_id == "copy_path":
+            callback(actions.copy(result.path))
+        else:
+            logger.error("Unexpected action '%s' for File Browser mode result '%s'", action_id, result)
+            callback(actions.do_nothing())

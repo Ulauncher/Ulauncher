@@ -9,7 +9,7 @@ from weakref import WeakKeyDictionary
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import KeywordTrigger, Result
+from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -166,7 +166,7 @@ class UlauncherCore:
                     self._mode_map[fallback_result] = mode
 
         result_objects = [res if isinstance(res, Result) else Result(**res) for res in results]
-        callback(result_objects)
+        self._show_results(result_objects, callback)
 
     def handle_backspace(self, query_str: str) -> bool:
         if self._mode:
@@ -178,18 +178,37 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
-        if isinstance(result, KeywordTrigger):
-            from ulauncher.internals.action_handler import handle_action
+        from ulauncher.internals.action_handler import handle_action
 
+        if isinstance(result, KeywordTrigger):
             handle_action(actions.set_query(f"{result.keyword} "))
             return
 
+        # Handle ActionResult activation (activate parent result with given action_id)
+        if isinstance(result, ActionResult) and result.parent_result and result.action_id:
+            mode = self._mode_map.get(result.parent_result, self._mode)
+            if mode:
+                mode.activate_result(
+                    result.action_id, result.parent_result, self.query, self._mode_callback(mode, callback)
+                )
+                return
+
+        # Get the mode for this result
         mode = self._mode_map.get(result, self._mode)
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
 
-        mode.activate_result(result, self.query, alt, self._mode_callback(mode, callback))
+        if result.actions:
+            if alt:
+                self._show_results(self._get_action_results(result), callback)
+                return
+            first_action_id = next(iter(result.actions))
+            mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
+            return
+
+        # Result with no actions can be used as headers, spacers or status messages - do nothing
+        handle_action(actions.do_nothing())
 
     def _mode_callback(
         self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
@@ -209,3 +228,13 @@ class UlauncherCore:
                 self._show_results(action_msg, callback)
 
         return _callback
+
+    def _get_action_results(self, result: Result) -> Iterable[Result]:
+        for action_id, action_data in result.actions.items():
+            yield ActionResult(
+                name=action_data["name"],
+                icon=action_data.get("icon", result.icon or ""),
+                action_id=action_id,
+                compact=True,
+                parent_result=result,
+            )

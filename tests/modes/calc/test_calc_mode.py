@@ -6,10 +6,10 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
+from ulauncher.modes.calc.calc_result import CalcErrorResult
 
 
 def get_results(mode: CalcMode, query: Query) -> list[Result]:
@@ -95,12 +95,10 @@ class TestCalcMode:
         query = Query(None, "3+2")
         result = get_results(mode, query)[0]
         assert result.result == "5"
-        mode.activate_result(result, query, False, lambda _: None)
+        mode.activate_result("copy", result, query, lambda _: None)
         copy_action.assert_called_once_with("5")
 
-    def test_handle_query__invalid_expr(
-        self, mode: CalcMode, copy_action: MagicMock, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_handle_query__invalid_expr(self, mode: CalcMode, caplog: pytest.LogCaptureFixture) -> None:
         bad_queries = [
             "3++",
             "6 2",
@@ -115,11 +113,5 @@ class TestCalcMode:
             for query_str in bad_queries:
                 query = Query(None, query_str)
                 result = get_results(mode, query)[0]
-                assert result.name == "Error!"
-                assert result.description == "Invalid expression"
-
-                def check_action(action: actions.ActionMessage) -> None:
-                    assert action == actions.do_nothing()
-
-                mode.activate_result(result, query, False, check_action)
-                assert not copy_action.called
+                # CalcErrorResult have no actions, so they never reach activate_result
+                assert isinstance(result, CalcErrorResult)

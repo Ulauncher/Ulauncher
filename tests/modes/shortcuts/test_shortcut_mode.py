@@ -35,7 +35,7 @@ class TestShortcutMode:
 
     @pytest.fixture(autouse=False)
     def shortcut_result(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutResult")
+        return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.results.ShortcutResult")
 
     def test_is_enabled__query_starts_with_query__returns_false(
         self, mode: ShortcutMode, shortcuts_db: MagicMock
@@ -91,19 +91,19 @@ class TestShortcutMode:
     def test_activate_static_trigger(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", None)
         result = ShortcutStaticTrigger(cmd="/bin/asdf", run_without_argument=True)
-        mode.activate_result(result, query, False, lambda _: None)
+        mode.activate_result("run_static", result, query, lambda _: None)
         run_shortcut.assert_called_once_with("/bin/asdf")
 
     def test_activate_shortcutresult_cmd(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", "arg")
         result = ShortcutResult(keyword="kw", cmd="/bin/asdf")
-        mode.activate_result(result, query, False, lambda _: None)
+        mode.activate_result("run", result, query, lambda _: None)
         run_shortcut.assert_called_once_with("/bin/asdf", "arg")
 
     def test_activate_shortcutresult_cmd_missing_arg(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", None)
         result = ShortcutResult(keyword="kw", cmd="/bin/asdf")
-        mode.activate_result(result, query, False, lambda _: None)
+        mode.activate_result("run", result, query, lambda _: None)
         run_shortcut.assert_not_called()
 
     def test_activate_shortcutresult_run_without_args_no_op(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
@@ -111,5 +111,5 @@ class TestShortcutMode:
         # it would be weird if typing without pressing enter would run a command
         query = Query("kw", None)
         result = ShortcutResult(keyword="kw", cmd="/bin/asdf", run_without_argument=True)
-        mode.activate_result(result, query, False, lambda _: None)
+        mode.activate_result("run", result, query, lambda _: None)
         run_shortcut.assert_not_called()
