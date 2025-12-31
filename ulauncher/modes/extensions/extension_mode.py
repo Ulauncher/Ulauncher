@@ -40,8 +40,11 @@ ASYNC_ACTION_TYPES = {
 }
 
 
-class ExtensionStaticTrigger(Result):
+class ExtensionLaunchTrigger(Result):
     searchable = True
+    ext_id = ""
+    trigger_id = ""
+    actions = {"__launch__": {"name": "Launch"}}
 
 
 class ExtensionMode(BaseMode, metaclass=Singleton):
@@ -110,15 +113,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
                     yield KeywordTrigger(name=name, description=description, icon=icon, keyword=trigger.keyword)
                 else:
-                    action = cast(
-                        "actions.LaunchTriggerAction",
-                        {
-                            "type": ActionType.LAUNCH_TRIGGER,
-                            "args": [trigger_id],
-                            "ext_id": ext.id,
-                        },
+                    yield ExtensionLaunchTrigger(
+                        name=name, description=description, icon=icon, ext_id=ext.id, trigger_id=trigger_id
                     )
-                    yield ExtensionStaticTrigger(name=name, description=description, icon=icon, on_enter=action)
 
     def get_placeholder_icon(self) -> str | None:
         if self.active_ext:
@@ -126,9 +123,30 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         return None
 
     def activate_result(
-        self, result: Result, _query: Query, alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+        self,
+        action_id: str,
+        result: Result,
+        _query: Query,
+        callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        action_msg = result.on_alt_enter if alt else result.on_enter
+        if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
+            action_msg = cast(
+                "actions.LaunchTriggerAction",
+                {
+                    "type": ActionType.LAUNCH_TRIGGER,
+                    "args": [result.trigger_id],
+                    "ext_id": result.ext_id,
+                },
+            )
+        elif action_id == "__legacy_on_enter__" and "on_enter" in result:
+            action_msg = result.on_enter
+        elif action_id == "__legacy_on_alt_enter__" and "on_alt_enter" in result:
+            action_msg = result.on_alt_enter
+        else:
+            logger.error("Unexpected action '%s' for Extension mode result '%s'", action_id, result)
+            callback(actions.do_nothing())
+            return
+
         if (
             isinstance(action_msg, dict)
             and (action_type := action_msg.get("type", ""))
@@ -240,6 +258,14 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             for result_dict in raw_action_msg:
                 result = Result(**result_dict)
                 result.icon = self.active_ext.get_normalized_icon_path(result_dict.get("icon")) or ""
+
+                # Convert legacy actions to the new actions dictionary format
+                if not result.actions:
+                    if "on_enter" in result:
+                        result.actions["__legacy_on_enter__"] = {"name": "Main action"}
+                    if "on_alt_enter" in result:
+                        result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
+
                 action_msg.append(result)
 
         elif not response.get("event", {}).get("keep_app_open", True):

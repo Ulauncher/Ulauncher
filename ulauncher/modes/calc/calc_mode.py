@@ -14,7 +14,7 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
-from ulauncher.modes.calc.calc_result import CalcResult
+from ulauncher.modes.calc.calc_result import CalcErrorResult, CalcResult
 
 # supported operators
 operators: dict[type, Callable[..., int | float]] = {
@@ -157,18 +157,20 @@ class CalcMode(BaseMode):
             )
         except (SyntaxError, TypeError, IndexError):
             logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
-            result = CalcResult(
-                name="Error!",
-                description="Invalid expression",
-            )
+            result = CalcErrorResult()
 
         callback([result])
 
     def activate_result(
-        self, result: Result, _query: Query, _alt: bool, callback: Callable[[ActionMessage | list[Result]], None]
+        self,
+        action_id: str,
+        result: Result,
+        _query: Query,
+        callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        if isinstance(result, CalcResult) and result.result is not None:
+        if action_id == "copy":
+            assert isinstance(result, CalcResult)
             callback(actions.copy(result.result))
-            return
-        logger.error("Unexpected result type for Calc mode '%s'", result)
-        callback(actions.do_nothing())
+        else:
+            logger.error("Unexpected action '%s' for Calc mode result '%s'", action_id, result)
+            callback(actions.do_nothing())

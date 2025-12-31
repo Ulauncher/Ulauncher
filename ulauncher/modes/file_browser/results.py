@@ -10,6 +10,11 @@ class FileResult(Result):
     compact = True
     highlightable = True
     path = ""
+    actions = {
+        "open": {"name": "Open file", "icon": "document-open"},
+        "open_parent": {"name": "Open containing folder", "icon": "folder-open"},
+        "copy_path": {"name": "Copy path", "icon": "edit-copy"},
+    }
 
     def __init__(self, path: str) -> None:
         super().__init__(
@@ -22,14 +27,9 @@ class FileResult(Result):
         return basename(query_str)
 
 
-class CopyPath(Result):
-    compact = True
-    name = "Copy Path to Clipboard"
-    icon = "edit-copy"
-    path = ""
-
-
-class OpenFolder(Result):
-    compact = True
-    icon = "system-file-manager"
-    path = ""
+class FolderResult(FileResult):
+    actions = {
+        "go_to": {"name": "Open", "icon": "folder-open"},
+        "open": {"name": "Open in file manager", "icon": "system-file-manager"},
+        "copy_path": {"name": "Copy path", "icon": "edit-copy"},
+    }
