@@ -9,7 +9,7 @@ class ShortcutResult(Result):
     cmd = ""
 
 
-class ShortcutTrigger(Result):
+class ShortcutStaticTrigger(Result):
     searchable = True
     run_without_argument = False
     cmd = ""

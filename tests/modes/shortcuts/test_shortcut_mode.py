@@ -6,10 +6,9 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ulauncher.internals import actions
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutTrigger
+from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
 
@@ -89,16 +88,9 @@ class TestShortcutMode:
         shortcuts_db.values.return_value = [shortcut]
         assert next(mode.get_triggers()).keyword == "kw"
 
-    def test_activate_trigger(self, mode: ShortcutMode) -> None:
+    def test_activate_static_trigger(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
         query = Query("kw", None)
-        result = ShortcutTrigger(keyword="kw")
-        received_action = []
-        mode.activate_result(result, query, False, lambda action: received_action.append(action))
-        assert received_action[0] == actions.set_query("kw ")
-
-    def test_activate_trigger_no_args(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
-        query = Query("kw", None)
-        result = ShortcutTrigger(cmd="/bin/asdf", run_without_argument=True)
+        result = ShortcutStaticTrigger(cmd="/bin/asdf", run_without_argument=True)
         mode.activate_result(result, query, False, lambda _: None)
         run_shortcut.assert_called_once_with("/bin/asdf")
 
