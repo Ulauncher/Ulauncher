@@ -192,9 +192,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
             self.prompt_input.select_region(0, -1)
-        else:
-            # NOTE: this will show frequent apps if enabled (we should probably refactor this to avoid confusion)
-            self.show_results([])
         self.apply_styling()
         self.core.load_triggers(force=True)
         self.core.set_query(self.query_str, self.show_results)
@@ -401,8 +398,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.results.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
-        if not self.prompt_input.get_text() and self.settings.max_recent_apps:
-            results = self.core.get_initial_results(self.settings.max_recent_apps)
 
         if results:
             from ulauncher.ui.result_widget import ResultWidget

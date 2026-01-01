@@ -12,6 +12,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import TimerContext, timer
 
 _events = EventBus()
@@ -85,9 +86,8 @@ class UlauncherCore:
 
     def set_query(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
         """Set the query string and propagate the update to the modes."""
-        if not query_str and not str(self.query):
-            # prevent loading modes until the app has rendered initially when the query is empty
-            # otherwise it will load all the slow stuff before the app is shown
+        if not query_str:
+            callback(self.get_result_for_empty_query())
             return
 
         self._mode = None
@@ -123,12 +123,12 @@ class UlauncherCore:
         sorted_ = sorted(flattened_, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
         return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
-    def get_initial_results(self, limit: int) -> Iterable[Result]:
-        """Called if the query is empty (on startup or when you delete the query)"""
-        app_mode = get_app_mode()
-        for app_result in app_mode.get_initial_results(limit):
-            self._mode_map[app_result] = app_mode
-            yield app_result
+    def get_result_for_empty_query(self) -> Iterable[Result]:
+        if limit := Settings.load().max_recent_apps:
+            app_mode = get_app_mode()
+            for app_result in app_mode.get_initial_results(limit):
+                self._mode_map[app_result] = app_mode
+                yield app_result
 
     def _show_results(self, results: Iterable[Result], callback: Callable[[Iterable[Result]], None]) -> None:
         self._clear_placeholder_timer()
