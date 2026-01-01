@@ -47,6 +47,11 @@ class UlauncherCore:
     _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
     query: Query = Query(None, "")
     _placeholder_timer: TimerContext | None = None
+    _base_results: list[Result]  # Store original results before expansion
+    _expanded_result: Result | None = None  # Track which result has expanded actions
+
+    def __init__(self) -> None:
+        self._base_results = []
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
@@ -90,6 +95,10 @@ class UlauncherCore:
             callback(self.get_result_for_empty_query())
             return
 
+        # Reset expansion when query changes
+        self._expanded_result = None
+        self._base_results = []
+
         self._mode = None
         self.query = Query(None, query_str)
 
@@ -131,8 +140,21 @@ class UlauncherCore:
                 yield app_result
 
     def _show_results(self, results: Iterable[Result], callback: Callable[[Iterable[Result]], None]) -> None:
+        """Show results, expanding actions inline if a result is marked for expansion."""
         self._clear_placeholder_timer()
-        callback(results)
+        self._base_results = list(results)
+
+        # If a result is expanded, insert its actions inline
+        if self._expanded_result and self._expanded_result in self._base_results:
+            active_result_index = self._base_results.index(self._expanded_result) + 1
+            # Create new list with action results after the selected result
+            callback(
+                self._base_results[:active_result_index]
+                + list(self._get_action_results(self._expanded_result))
+                + self._base_results[active_result_index:]
+            )
+        else:
+            callback(self._base_results)
 
     def _show_placeholder(self, callback: Callable[[Iterable[Result]], None]) -> None:
         placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
@@ -188,6 +210,8 @@ class UlauncherCore:
         if isinstance(result, ActionResult) and result.parent_result and result.action_id:
             mode = self._mode_map.get(result.parent_result, self._mode)
             if mode:
+                # Collapse the action list after activating
+                self._expanded_result = None
                 mode.activate_result(
                     result.action_id, result.parent_result, self.query, self._mode_callback(mode, callback)
                 )
@@ -200,9 +224,19 @@ class UlauncherCore:
             return
 
         if result.actions:
-            if alt:
-                self._show_results(self._get_action_results(result), callback)
+            # Hide result actions if they are showing
+            if self._expanded_result is result:
+                self._expanded_result = None
+                self._show_results(self._base_results, callback)
                 return
+
+            # Show result actions if alt is pressed
+            if alt:
+                self._expanded_result = result
+                self._show_results(self._base_results, callback)
+                return
+
+            # Normal activation: execute first action
             first_action_id = next(iter(result.actions))
             mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
             return

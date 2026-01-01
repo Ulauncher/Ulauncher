@@ -394,6 +394,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.set_position(-1)
 
     def show_results(self, results: Iterable[Result]) -> None:
+        """Render the result list. Core handles expansion logic."""
+        from ulauncher.internals.result import ActionResult
+        from ulauncher.ui.result_widget import ResultWidget
+
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
 
@@ -401,11 +405,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         result_list = list(results)[:limit]
 
         if result_list:
-            from ulauncher.ui.result_widget import ResultWidget
-
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(result_list):
                 result_widget = ResultWidget(result, index, self.core.query)
+
+                # Add left margin for ActionResults to show they're nested
+                if isinstance(result, ActionResult):
+                    result_widget.set_property("margin-start", 10)
+
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
 
