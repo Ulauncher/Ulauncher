@@ -398,14 +398,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.results.foreach(lambda w: w.destroy())
 
         limit = len(self.settings.get_jump_keys()) or 25
+        result_list = list(results)[:limit]
 
-        if results:
+        if result_list:
             from ulauncher.ui.result_widget import ResultWidget
 
             result_widgets: list[ResultWidget] = []
-            for index, result in enumerate(results):
-                if index >= limit:
-                    break
+            for index, result in enumerate(result_list):
                 result_widget = ResultWidget(result, index, self.core.query)
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
