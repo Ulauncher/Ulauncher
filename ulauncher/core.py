@@ -147,6 +147,8 @@ class UlauncherCore:
         # If a result is expanded, insert its actions inline
         if self._expanded_result and self._expanded_result in self._base_results:
             active_result_index = self._base_results.index(self._expanded_result) + 1
+            # Mark the expanded result as selected so Window knows to restore selection
+            self._expanded_result["selected"] = True
             # Create new list with action results after the selected result
             callback(
                 self._base_results[:active_result_index]
@@ -206,15 +208,15 @@ class UlauncherCore:
             handle_action(actions.set_query(f"{result.keyword} "))
             return
 
-        # Handle ActionResult activation (activate parent result with given action_id)
+        # Handle ActionResult activation (activate parent result with given action_id, then collapse)
         if isinstance(result, ActionResult) and result.parent_result and result.action_id:
             mode = self._mode_map.get(result.parent_result, self._mode)
             if mode:
-                # Collapse the action list after activating
+                # Collapse the action list after activating, keeping parent selected
+                parent = result.parent_result
                 self._expanded_result = None
-                mode.activate_result(
-                    result.action_id, result.parent_result, self.query, self._mode_callback(mode, callback)
-                )
+                parent["selected"] = True
+                mode.activate_result(result.action_id, parent, self.query, self._mode_callback(mode, callback))
                 return
 
         # Get the mode for this result
@@ -224,13 +226,15 @@ class UlauncherCore:
             return
 
         if result.actions:
-            # Hide result actions if they are showing
+            # Untoggle/collapse result actions if they are showing
             if self._expanded_result is result:
                 self._expanded_result = None
+                # Keep the parent result selected when collapsing
+                result["selected"] = True
                 self._show_results(self._base_results, callback)
                 return
 
-            # Show result actions if alt is pressed
+            # Show/expand result actions if alt is pressed
             if alt:
                 self._expanded_result = result
                 self._show_results(self._base_results, callback)

@@ -417,7 +417,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.results.add(result_widget)
 
             self._results_nav = ItemNavigation(result_widgets)
-            self._results_nav.select_default(str(self.core.query))
+
+            # Check if Core marked a result as selected (after toggle/expansion)
+            selected_index = None
+            for index, widget in enumerate(result_widgets):
+                if widget.result.get("selected"):
+                    selected_index = index
+                    # Clear the selected property after using it
+                    del widget.result["selected"]
+                    break
+
+            if selected_index is not None:
+                self._results_nav.select(selected_index)
+            else:
+                self._results_nav.select_default(str(self.core.query))
 
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)
