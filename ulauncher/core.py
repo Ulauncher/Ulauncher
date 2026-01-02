@@ -9,7 +9,7 @@ from weakref import WeakKeyDictionary
 
 from ulauncher.internals import actions
 from ulauncher.internals.query import Query
-from ulauncher.internals.result import KeywordTrigger, Result
+from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -47,6 +47,11 @@ class UlauncherCore:
     _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
     query: Query = Query(None, "")
     _placeholder_timer: TimerContext | None = None
+    _base_results: list[Result]  # Store original results before expansion
+    _expanded_result: Result | None = None  # Track which result has expanded actions
+
+    def __init__(self) -> None:
+        self._base_results = []
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
@@ -90,6 +95,10 @@ class UlauncherCore:
             callback(self.get_result_for_empty_query())
             return
 
+        # Reset expansion when query changes
+        self._expanded_result = None
+        self._base_results = []
+
         self._mode = None
         self.query = Query(None, query_str)
 
@@ -131,8 +140,23 @@ class UlauncherCore:
                 yield app_result
 
     def _show_results(self, results: Iterable[Result], callback: Callable[[Iterable[Result]], None]) -> None:
+        """Show results, expanding actions inline if a result is marked for expansion."""
         self._clear_placeholder_timer()
-        callback(results)
+        self._base_results = list(results)
+
+        # If a result is expanded, insert its actions inline
+        if self._expanded_result and self._expanded_result in self._base_results:
+            active_result_index = self._base_results.index(self._expanded_result) + 1
+            # Mark the expanded result as selected so Window knows to restore selection
+            self._expanded_result["selected"] = True
+            # Create new list with action results after the selected result
+            callback(
+                self._base_results[:active_result_index]
+                + list(self._get_action_results(self._expanded_result))
+                + self._base_results[active_result_index:]
+            )
+        else:
+            callback(self._base_results)
 
     def _show_placeholder(self, callback: Callable[[Iterable[Result]], None]) -> None:
         placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
@@ -166,7 +190,7 @@ class UlauncherCore:
                     self._mode_map[fallback_result] = mode
 
         result_objects = [res if isinstance(res, Result) else Result(**res) for res in results]
-        callback(result_objects)
+        self._show_results(result_objects, callback)
 
     def handle_backspace(self, query_str: str) -> bool:
         if self._mode:
@@ -178,18 +202,51 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
-        if isinstance(result, KeywordTrigger):
-            from ulauncher.internals.action_handler import handle_action
+        from ulauncher.internals.action_handler import handle_action
 
+        if isinstance(result, KeywordTrigger):
             handle_action(actions.set_query(f"{result.keyword} "))
             return
 
+        # Handle ActionResult activation (activate parent result with given action_id, then collapse)
+        if isinstance(result, ActionResult) and result.parent_result and result.action_id:
+            mode = self._mode_map.get(result.parent_result, self._mode)
+            if mode:
+                # Collapse the action list after activating, keeping parent selected
+                parent = result.parent_result
+                self._expanded_result = None
+                parent["selected"] = True
+                mode.activate_result(result.action_id, parent, self.query, self._mode_callback(mode, callback))
+                return
+
+        # Get the mode for this result
         mode = self._mode_map.get(result, self._mode)
         if not mode:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
 
-        mode.activate_result(result, self.query, alt, self._mode_callback(mode, callback))
+        if result.actions:
+            # Untoggle/collapse result actions if they are showing
+            if self._expanded_result is result:
+                self._expanded_result = None
+                # Keep the parent result selected when collapsing
+                result["selected"] = True
+                self._show_results(self._base_results, callback)
+                return
+
+            # Show/expand result actions if alt is pressed
+            if alt:
+                self._expanded_result = result
+                self._show_results(self._base_results, callback)
+                return
+
+            # Normal activation: execute first action
+            first_action_id = next(iter(result.actions))
+            mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
+            return
+
+        # Result with no actions can be used as headers, spacers or status messages - do nothing
+        handle_action(actions.do_nothing())
 
     def _mode_callback(
         self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
@@ -209,3 +266,13 @@ class UlauncherCore:
                 self._show_results(action_msg, callback)
 
         return _callback
+
+    def _get_action_results(self, result: Result) -> Iterable[Result]:
+        for action_id, action_data in result.actions.items():
+            yield ActionResult(
+                name=action_data["name"],
+                icon=action_data.get("icon", result.icon or ""),
+                action_id=action_id,
+                compact=True,
+                parent_result=result,
+            )

@@ -19,6 +19,7 @@ class AppResult(Result):
     searchable = True
     app_id = ""
     _executable = ""
+    actions = {"launch": {"name": "Launch application", "icon": "system-run"}}
 
     def __init__(self, app_info: DesktopAppInfo) -> None:
         super().__init__(

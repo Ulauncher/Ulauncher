@@ -67,6 +67,16 @@ class ItemEnterEvent(BaseEvent):
         return self.args[0]
 
 
+class ResultActivationEvent(BaseEvent):
+    """
+    Is triggered when user activates a result action.
+    Args: [action_id: str, result: Result]
+
+    :param str action_id: The ID of the action that was activated
+    :param Result result: The Result object that was activated
+    """
+
+
 class UnloadEvent(BaseEvent):
     """
     Is triggered when extension is about to be unloaded (terminated).
@@ -112,6 +122,7 @@ class EventType:
     INPUT_TRIGGER: Final = "event:input_trigger"
     ACTIVATE_CUSTOM: Final = "event:activate_custom"
     LAUNCH_TRIGGER: Final = "event:launch_trigger"
+    RESULT_ACTIVATION: Final = "event:result_activation"
     UPDATE_PREFERENCES: Final = "event:update_preferences"
     LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
     UNLOAD: Final = "event:unload"
@@ -124,4 +135,5 @@ events = {
     EventType.UNLOAD: UnloadEvent,
     EventType.INPUT_TRIGGER: InputTriggerEvent,
     EventType.ACTIVATE_CUSTOM: ItemEnterEvent,
+    EventType.RESULT_ACTIVATION: ResultActivationEvent,
 }
