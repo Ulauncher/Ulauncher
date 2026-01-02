@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal, cast
+from typing import Any, Callable, Iterator, Literal, TypedDict, cast
 
 from gi.repository import GLib
 
@@ -21,6 +21,17 @@ from ulauncher.utils.singleton import Singleton
 
 logger = logging.getLogger()
 events = EventBus("extensions")
+
+
+class ExtensionResponseEvent(TypedDict, total=False):
+    interaction_id: int
+    keep_app_open: bool
+
+
+class ExtensionResponse(TypedDict, total=False):
+    event: ExtensionResponseEvent
+    action: ActionMessage | list[dict[str, Any]]
+
 
 # Maps action types that require async extension communication to their event types
 ASYNC_ACTION_TYPES = {
@@ -210,7 +221,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         self.active_ext.send_message(event)
 
     @events.on
-    def handle_response(self, ext_id: str, response: dict[str, Any]) -> None:
+    def handle_response(self, ext_id: str, response: ExtensionResponse) -> None:
         if not self.active_ext:
             logger.error("No active extension to handle response")
             return
@@ -221,16 +232,21 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        action_msg: ActionMessage | list[Result] = response.get("action", actions.do_nothing())
+        raw_action_msg = response.get("action", actions.do_nothing())
+        action_msg: ActionMessage | list[Result]
 
-        if isinstance(action_msg, list):
-            for result in action_msg:
-                result["icon"] = self.active_ext.get_normalized_icon_path(result.get("icon"))
-
-            action_msg = [Result(**res) for res in action_msg]
+        if isinstance(raw_action_msg, list):
+            action_msg = []
+            for result_dict in raw_action_msg:
+                result = Result(**result_dict)
+                result.icon = self.active_ext.get_normalized_icon_path(result_dict.get("icon")) or ""
+                action_msg.append(result)
 
         elif not response.get("event", {}).get("keep_app_open", True):
-            action_msg = actions.action_list([action_msg, actions.close_window()])
+            action_msg = actions.action_list([raw_action_msg, actions.close_window()])
+
+        else:
+            action_msg = raw_action_msg
 
         self._pending_callback(action_msg)
         self._pending_callback = None
