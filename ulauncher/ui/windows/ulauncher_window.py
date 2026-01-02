@@ -225,9 +225,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Activate the selected result
         """
         if self._results_nav and (result := self._results_nav.get_active_result()):
-            self.core.activate_result(result, self.show_results, alt)
             if not alt:
                 self._results_nav.remember_result_for_query(str(self.core.query), result)
+            self.core.activate_result(result, self.show_results, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
