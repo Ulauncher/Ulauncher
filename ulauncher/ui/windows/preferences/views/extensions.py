@@ -615,4 +615,3 @@ class ExtensionsView(BaseView):
                 self.save_button.set_sensitive(False)
                 return True
         return False
-
