@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import html
+import re
 from typing import Literal
 
 from ulauncher.modes.extensions.extension_controller import ExtensionController
@@ -8,7 +10,23 @@ ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
 
 
 def fmt_pango_code_block(text: str) -> str:
-    return f'<span face="monospace" bgcolor="#90600050">{text}</span>'
+    """Format text as an inline code block with Pango markup (monospace font with background)."""
+    return f'<span face="monospace" bgcolor="#90600050">{html.escape(text)}</span>'
+
+
+_CODE_TAG_RE = re.compile(r"<code(?:\s+[^>]*)?>(.*?)</code>", flags=re.IGNORECASE | re.DOTALL)
+
+
+def autofmt_pango_code_block(text: str) -> str:
+    """Convert HTML <code> tags to Pango-formatted inline code blocks."""
+    if "<code" not in text:
+        return text
+
+    def repl(match: re.Match[str]) -> str:
+        code_text = html.unescape(match.group(1))
+        return fmt_pango_code_block(code_text)
+
+    return _CODE_TAG_RE.sub(repl, text)
 
 
 def get_status_str(ext: ExtensionController) -> ExtStatus:
