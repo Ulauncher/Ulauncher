@@ -19,7 +19,7 @@ def run_script(script: str, arg: str) -> None:
         os.chmod(file_path, 0o700)
         logger.debug("Running a script from %s", file_path)
         output = subprocess.check_output([file_path + " " + shlex.quote(arg)], shell=True).decode("utf-8")
-        logger.debug("Script action output:\n%s", output)
+        logger.debug("Script output:\n%s", output)
     finally:
         logger.debug("Deleting a temporary file %s", file_path)
         os.remove(file_path)
