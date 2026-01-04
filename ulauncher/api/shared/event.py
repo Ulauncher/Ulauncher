@@ -54,15 +54,15 @@ class KeywordQueryEvent(BaseEvent):
 
 class ItemEnterEvent(BaseEvent):
     """
-    Is triggered when selected item has action of type :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
-    Whatever data you've passed to action will be available in in this class using method :meth:`get_data`
+    Handler for legacy `ExtensionCustomAction`.
+    The data object passed to the action will be available using :meth:`get_data`
 
     :param str data:
     """
 
     def get_data(self) -> Any:
         """
-        :returns: whatever object you have passed to :class:`~ulauncher.api.shared.action.ExtensionCustomAction`
+        :returns: data object passed to `ExtensionCustomAction`
         """
         return self.args[0]
 
