@@ -129,6 +129,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         _query: Query,
         callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
+        action_msg: ActionMessage | list[Result] | None = None
         if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             action_msg = cast(
                 "actions.LaunchTriggerAction",
