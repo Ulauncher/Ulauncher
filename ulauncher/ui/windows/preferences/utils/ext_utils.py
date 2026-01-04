@@ -14,7 +14,7 @@ def fmt_pango_code_block(text: str) -> str:
     return f'<span face="monospace" bgcolor="#90600050">{html.escape(text)}</span>'
 
 
-_CODE_TAG_RE = re.compile(r"<code(?:\\s+[^>]*)?>(.*?)</code>", flags=re.IGNORECASE | re.DOTALL)
+_CODE_TAG_RE = re.compile(r"<code(?:\s+[^>]*)?>(.*?)</code>", flags=re.IGNORECASE | re.DOTALL)
 
 
 def autofmt_pango_code_block(text: str) -> str:

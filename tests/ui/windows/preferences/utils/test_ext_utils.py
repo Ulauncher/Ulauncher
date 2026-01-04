@@ -10,3 +10,8 @@ class TestAutofmtPangoCodeBlock:
         text = "Run <code>pip install</code> to install"
         result = autofmt_pango_code_block(text)
         assert result == 'Run <span face="monospace" bgcolor="#90600050">pip install</span> to install'
+
+    def test_converts_code_tags_with_attributes_to_pango_markup(self) -> None:
+        text = 'Run <code class="highlight">pip install</code> to install'
+        result = autofmt_pango_code_block(text)
+        assert result == 'Run <span face="monospace" bgcolor="#90600050">pip install</span> to install'
