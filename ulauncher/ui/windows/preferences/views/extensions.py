@@ -339,7 +339,7 @@ class ExtensionsView(BaseView):
 
             # Instructions content with HTML rendering
             instructions_label = Gtk.Label(
-                label=ext.manifest.instructions,
+                label=ext_utils.autofmt_pango_code_block(ext.manifest.instructions),
                 use_markup=True,
                 selectable=True,
                 margin=10,
@@ -376,7 +376,11 @@ class ExtensionsView(BaseView):
 
                 if trigger.description:
                     footnotes_label = styled(
-                        Gtk.Label(label=trigger.description, use_markup=True, halign=Gtk.Align.START),
+                        Gtk.Label(
+                            label=ext_utils.autofmt_pango_code_block(trigger.description),
+                            use_markup=True,
+                            halign=Gtk.Align.START,
+                        ),
                         "caption",
                         "dim-label",
                     )
@@ -412,7 +416,14 @@ class ExtensionsView(BaseView):
 
                 if descr := pref.description:
                     desc_label = styled(
-                        Gtk.Label(label=descr, halign=Gtk.Align.START, wrap=True), "caption", "dim-label"
+                        Gtk.Label(
+                            label=ext_utils.autofmt_pango_code_block(descr),
+                            halign=Gtk.Align.START,
+                            wrap=True,
+                            use_markup=True,
+                        ),
+                        "caption",
+                        "dim-label",
                     )
                     pref_box.pack_start(desc_label, False, False, 0)
 
