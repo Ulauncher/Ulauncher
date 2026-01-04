@@ -5,6 +5,7 @@ from typing import Any
 
 from gi.repository import GLib, Gtk, Pango
 
+from ulauncher import version
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
@@ -28,6 +29,17 @@ logger = logging.getLogger()
 REFRESH_INTERVAL = 250
 
 
+def _compatible_extensions_link() -> str:
+    """checks the version and return compatible extensions registry link"""
+    extension_registry_url = "https://ext.ulauncher.io"
+    if version.startswith("6"):
+        return f"{extension_registry_url}/?versions=2%2C3"
+    if version.startswith("5"):
+        return f"{extension_registry_url}/?versions=2"
+
+    return extension_registry_url
+
+
 class ExtensionsView(BaseView):
     extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
     active_ext: ExtensionController | None = None
@@ -44,7 +56,11 @@ class ExtensionsView(BaseView):
         self.layout = SidebarLayout(
             footer_actions=[
                 ("Add extension", "list-add-symbolic", self._on_add_extension),
-                ("Discover extensions", "system-search-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
+                (
+                    "Discover extensions",
+                    "system-search-symbolic",
+                    lambda _: open_detached(_compatible_extensions_link()),
+                ),
                 ("Develop your own", "text-x-generic-symbolic", lambda _: open_detached("https://docs.ulauncher.io")),
             ],
         )
@@ -599,3 +615,4 @@ class ExtensionsView(BaseView):
                 self.save_button.set_sensitive(False)
                 return True
         return False
+
