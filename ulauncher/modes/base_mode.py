@@ -6,8 +6,6 @@ from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 
-DEFAULT_ACTION = True  #  keep window open and do nothing
-
 
 class BaseMode:
     def matches_query_str(self, _query_str: str) -> bool:
