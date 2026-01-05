@@ -129,7 +129,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         _query: Query,
         callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        action_msg: ActionMessage | list[Result] = actions.do_nothing()
+        action_msg: ActionMessage | list[Result] = actions.close_window()
         if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             action_msg = cast(
                 "actions.LaunchTriggerAction",
@@ -252,7 +252,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        raw_action_msg = response.get("action", actions.do_nothing())
+        raw_action_msg = response.get("action", actions.close_window())
         action_msg: ActionMessage | list[Result]
 
         if isinstance(raw_action_msg, list):
