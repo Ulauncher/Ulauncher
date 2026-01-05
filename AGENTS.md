@@ -184,32 +184,16 @@ def something_happened(data):
 
 ### Mode system
 
-Ulauncher uses a mode-based architecture where different input handlers inherit from `BaseMode`:
+Ulauncher uses a mode-based architecture where different input handlers inherit from `BaseMode`. Each mode is responsible for matching user input, handling queries, and activating results.
 
-```python
-from ulauncher.modes.base_mode import BaseMode
+The `BaseMode` class defines the interface for these modes. Key methods include:
+- `matches_query_str()`: This method determines if a particular mode should handle the current user input. It typically checks for specific keywords or patterns.
+- `handle_query()`: If a mode matches the input, this method is called to process the query. It generates a list of potential results and passes them to a callback function.
+- `activate_result()`: This method is invoked when a user selects one of the results. It can perform an action, such as launching an application or opening a file, or it might return new results to be displayed.
+- `get_triggers()`: This method returns any trigger keywords or shortcuts associated with the mode.
+- `get_fallback_results()`: This method provides results when no other mode or specific query matches are found.
 
-class MyMode(BaseMode):
-    def matches_query_str(self, query_str: str) -> bool:
-        """Return True if this mode should handle the input"""
-        return query_str.startswith("my ")
-
-    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
-        """Process query and call callback with results"""
-        results = [...]  # Generate result list
-        callback(results)
-
-    def activate_result(self, result: Result, query: Query, alt: bool, callback: Callable) -> None:
-        """Handle when user selects a result"""
-        # Perform action or return new results
-```
-
-**Key methods:**
-- `matches_query_str()` - Determines if mode handles the input
-- `handle_query()` - Processes input and provides results via callback
-- `activate_result()` - Handles result activation
-- `get_triggers()` - Returns trigger results (keywords/shortcuts)
-- `get_fallback_results()` - Returns results when nothing matches
+UlauncherCore interacts with these modes by iterating through them to find one that matches the user's input using `matches_query_str()`. Once a match is found, `handle_query()` is called to get the results. When a user selects a result, `activate_result()` is then used to perform the corresponding action. This design allows for extensible functionality, as new modes can be created to handle different types of user input and actions without modifying the core Ulauncher application.
 
 ### Async patterns
 
@@ -218,14 +202,6 @@ class MyMode(BaseMode):
 - GTK operations use GLib's async patterns (e.g., `Gio.Subprocess.wait_async()`)
 - Avoid using `threading.Thread` - use GLib's event loop instead when possible
 - For delayed execution, use `GLib.timeout_add()` or `timer` utility
-
-**Example:**
-```python
-def long_operation(callback: Callable[[list[Result]], None]) -> None:
-    # Do work...
-    results = [...]
-    callback(results)  # Call callback when done
-```
 
 ### Custom data structures
 
