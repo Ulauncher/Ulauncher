@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, Iterable
 
-from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals.effects import EffectMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 
@@ -20,7 +20,7 @@ class BaseMode:
         """
         return None
 
-    def handle_query(self, _query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
+    def handle_query(self, _query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         """
         Handle a query and provide the result list via callback.
         """
@@ -58,7 +58,7 @@ class BaseMode:
         action_id: str,
         result: Result,
         query: Query,
-        callback: Callable[[ActionMessage | list[Result]], None],
+        callback: Callable[[EffectMessage | list[Result]], None],
     ) -> None:
         """
         Called when a result is activated.

@@ -5,7 +5,7 @@ from typing import cast
 
 from gi.repository import Gdk, Gtk
 
-from ulauncher.internals.actions import ActionMessage, ActionType
+from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.modes.shortcuts.run_script import run_script
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import open_detached
@@ -26,42 +26,42 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_action(action_msg: ActionMessage | None) -> None:
-    if not _handle_action(action_msg):
+def handle_effect(effect_msg: EffectMessage | None) -> None:
+    if not _handle_effect(effect_msg):
         _events.emit("app:hide_launcher")
 
 
-def _handle_action(action_msg: ActionMessage | None) -> bool:  # noqa: PLR0911
-    if action_msg is None:
+def _handle_effect(effect_msg: EffectMessage | None) -> bool:  # noqa: PLR0911
+    if effect_msg is None:
         return False
 
-    event_type = action_msg.get("type", "")
+    event_type = effect_msg.get("type", "")
 
-    if event_type == ActionType.DO_NOTHING:
+    if event_type == EffectType.DO_NOTHING:
         return True
-    if event_type == ActionType.CLOSE_WINDOW:
+    if event_type == EffectType.CLOSE_WINDOW:
         return False
-    if event_type == ActionType.SET_QUERY:
-        _events.emit("app:set_query", action_msg.get("data", ""))
+    if event_type == EffectType.SET_QUERY:
+        _events.emit("app:set_query", effect_msg.get("data", ""))
         return True
 
-    if data := action_msg.get("data"):
-        if event_type == ActionType.OPEN:
+    if data := effect_msg.get("data"):
+        if event_type == EffectType.OPEN:
             open_detached(cast("str", data))
             return False
-        if event_type == ActionType.COPY:
+        if event_type == EffectType.COPY:
             clipboard_store(cast("str", data))
             return False
-        if event_type == ActionType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+        if event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
             run_script(*data)
             return False
-        if event_type == ActionType.LEGACY_RUN_MANY and isinstance(data, list):
+        if event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
             keep_open = False
-            for action_ in data:
-                assert isinstance(action_, dict)
-                if _handle_action(action_):
+            for effect in data:
+                assert isinstance(effect, dict)
+                if _handle_effect(effect):
                     keep_open = True
             return keep_open
 
-    _logger.warning("Unknown action type: %s", event_type)
+    _logger.warning("Unknown effect type: %s", event_type)
     return False

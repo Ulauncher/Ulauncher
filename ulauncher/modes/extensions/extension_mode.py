@@ -9,8 +9,8 @@ from typing import Any, Callable, Iterator, Literal, TypedDict, cast
 from gi.repository import GLib
 
 from ulauncher.api.shared.event import EventType
-from ulauncher.internals import actions
-from ulauncher.internals.actions import ActionMessage, ActionType
+from ulauncher.internals import effects
+from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
@@ -30,13 +30,13 @@ class ExtensionResponseEvent(TypedDict, total=False):
 
 class ExtensionResponse(TypedDict, total=False):
     event: ExtensionResponseEvent
-    action: ActionMessage | list[dict[str, Any]]
+    effect: EffectMessage | list[dict[str, Any]]
 
 
-# Maps action types that require async extension communication to their event types
-ASYNC_ACTION_TYPES = {
-    ActionType.LEGACY_ACTIVATE_CUSTOM: EventType.LEGACY_ACTIVATE_CUSTOM,
-    ActionType.LAUNCH_TRIGGER: EventType.LAUNCH_TRIGGER,
+# Maps effect types that require async extension communication to their event types
+ASYNC_EFFECT_TYPES = {
+    EffectType.LEGACY_ACTIVATE_CUSTOM: EventType.LEGACY_ACTIVATE_CUSTOM,
+    EffectType.LAUNCH_TRIGGER: EventType.LAUNCH_TRIGGER,
 }
 
 
@@ -55,7 +55,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
-    _pending_callback: Callable[[ActionMessage | list[Result]], None] | None = None
+    _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
     _interaction_id: int = 0
 
     def __init__(self) -> None:
@@ -77,7 +77,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
-    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
@@ -127,22 +127,22 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[ActionMessage | list[Result]], None],
+        callback: Callable[[EffectMessage | list[Result]], None],
     ) -> None:
-        action_msg: ActionMessage | list[Result] = actions.close_window()
+        effect_msg: EffectMessage | list[Result] = effects.close_window()
         if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            action_msg = cast(
-                "actions.LaunchTrigger",
+            effect_msg = cast(
+                "effects.LaunchTrigger",
                 {
-                    "type": ActionType.LAUNCH_TRIGGER,
+                    "type": EffectType.LAUNCH_TRIGGER,
                     "args": [result.trigger_id],
                     "ext_id": result.ext_id,
                 },
             )
         elif action_id == "__legacy_on_enter__" and result.on_enter:
-            action_msg = result.on_enter
+            effect_msg = result.on_enter
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
-            action_msg = result.on_alt_enter
+            effect_msg = result.on_alt_enter
         else:
             event_type = EventType.RESULT_ACTIVATION
             event_args = [action_id, result]
@@ -150,15 +150,15 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return
 
         if (
-            isinstance(action_msg, dict)
-            and (action_type := action_msg.get("type", ""))
-            and (evt_type := ASYNC_ACTION_TYPES.get(action_type))
+            isinstance(effect_msg, dict)
+            and (effect_type := effect_msg.get("type", ""))
+            and (evt_type := ASYNC_EFFECT_TYPES.get(effect_type))
         ):
             # for async flow, set up the callback, trigger an extension event and wait for the response
-            self.trigger_event({**action_msg, "type": evt_type}, callback)
+            self.trigger_event({**effect_msg, "type": evt_type}, callback)
             return
 
-        callback(action_msg)
+        callback(effect_msg)
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
@@ -223,7 +223,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, pref.value]}
                     ext.send_message(event_data)
 
-    def trigger_event(self, event: dict[str, Any], callback: Callable[[ActionMessage | list[Result]], None]) -> None:
+    def trigger_event(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         self._interaction_id += 1
         self._pending_callback = callback
         event["interaction_id"] = self._interaction_id
@@ -252,12 +252,12 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             logger.debug("Ignoring outdated extension response")
             return
 
-        raw_action_msg = response.get("action", actions.close_window())
-        action_msg: ActionMessage | list[Result]
+        raw_effect_msg = response.get("effect", effects.close_window())
+        effect_msg: EffectMessage | list[Result]
 
-        if isinstance(raw_action_msg, list):
-            action_msg = []
-            for result_dict in raw_action_msg:
+        if isinstance(raw_effect_msg, list):
+            effect_msg = []
+            for result_dict in raw_effect_msg:
                 result = Result(**result_dict)
                 result.icon = self.active_ext.get_normalized_icon_path(result_dict.get("icon")) or ""
 
@@ -268,15 +268,15 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     if "on_alt_enter" in result:
                         result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
 
-                action_msg.append(result)
+                effect_msg.append(result)
 
         elif not response.get("event", {}).get("keep_app_open", True):
-            action_msg = actions.action_list([raw_action_msg, actions.close_window()])
+            effect_msg = effects.effect_list([raw_effect_msg, effects.close_window()])
 
         else:
-            action_msg = raw_action_msg
+            effect_msg = raw_effect_msg
 
-        self._pending_callback(action_msg)
+        self._pending_callback(effect_msg)
         self._pending_callback = None
 
     @events.on

@@ -13,7 +13,7 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.action_input import ActionMessageInput, convert_to_action_message
+from ulauncher.internals.effect_input import EffectMessageInput, convert_to_effect_message
 from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.timer import TimerContext, timer
@@ -145,25 +145,25 @@ class Extension:
     def run_event_listener(
         self,
         event: dict[str, Any],
-        method: Callable[..., ActionMessageInput | None],
+        method: Callable[..., EffectMessageInput | None],
         args: tuple[Any],
     ) -> None:
         current_input = self._input
-        input_action_msg = method(*args)
+        input_effect_msg = method(*args)
         # ignore outdated responses
         if current_input == self._input:
-            action_msg = convert_to_action_message(input_action_msg)
+            effect_msg = convert_to_effect_message(input_effect_msg)
 
             # Cache Result objects before sending them, keyed by their Python object ID
-            if isinstance(action_msg, list):
+            if isinstance(effect_msg, list):
                 self._result_cache.clear()
-                for result in action_msg:
+                for result in effect_msg:
                     result_id = id(result)
                     self._result_cache[result_id] = result
                     # Add the result_id to the dict representation so Ulauncher can send it back
                     result["__result_id__"] = result_id
 
-            self._client.send({"event": event, "action": action_msg})
+            self._client.send({"event": event, "effect": effect_msg})
 
     def run(self) -> None:
         """
@@ -178,19 +178,19 @@ class Extension:
     def on_launch(self, trigger_id: str) -> None:
         pass
 
-    def on_item_enter(self, data: Any) -> ActionMessageInput | None:
+    def on_item_enter(self, data: Any) -> EffectMessageInput | None:
         pass
 
     def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
 
-    def on_result_activation(self, action_id: str, result: Result) -> ActionMessageInput | None:
+    def on_result_activation(self, action_id: str, result: Result) -> EffectMessageInput | None:
         """
         Called when user activates a result action.
 
         :param action_id: The ID of the action that was activated (key from Result.actions dict)
         :param result: The Result object that was activated
-        :return: The action to execute
+        :return: The effect to execute
         """
 
     def on_unload(self) -> None:
