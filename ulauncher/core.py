@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
-from ulauncher.internals import actions
+from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
@@ -178,10 +178,10 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
-        from ulauncher.internals.action_handler import handle_action
+        from ulauncher.internals.effect_handler import handle_effect
 
         if isinstance(result, KeywordTrigger):
-            handle_action(actions.set_query(f"{result.keyword} "))
+            handle_effect(effects.set_query(f"{result.keyword} "))
             return
 
         # Handle ActionResult activation (activate parent result with given action_id)
@@ -207,25 +207,25 @@ class UlauncherCore:
             mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
             return
 
-        # Result with no actions can be used as headers, spacers or status messages - do nothing
-        handle_action(actions.do_nothing())
+        # Result with no actions should have no effect - can be used as headers, spacers or status messages
+        handle_effect(effects.do_nothing())
 
     def _mode_callback(
         self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
-    ) -> Callable[[actions.ActionMessage | list[Result]], None]:
-        """Callback to handle results and actions from modes."""
+    ) -> Callable[[effects.EffectMessage | list[Result]], None]:
+        """Callback to handle results and effects from modes."""
 
-        def _callback(action_msg: actions.ActionMessage | list[Result]) -> None:
+        def _callback(effect_msg: effects.EffectMessage | list[Result]) -> None:
             # Ensure the mode hasn't changed
             if self._mode != mode:
                 return
 
-            if isinstance(action_msg, dict):
-                from ulauncher.internals.action_handler import handle_action
+            if isinstance(effect_msg, dict):
+                from ulauncher.internals.effect_handler import handle_effect
 
-                handle_action(action_msg)
-            elif isinstance(action_msg, list):
-                self._show_results(action_msg, callback)
+                handle_effect(effect_msg)
+            elif isinstance(effect_msg, list):
+                self._show_results(effect_msg, callback)
 
         return _callback
 

@@ -25,8 +25,8 @@ class TestCalcMode:
         return CalcMode()
 
     @pytest.fixture
-    def copy_action(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.calc.calc_mode.actions.copy")
+    def copy_effect(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.calc.calc_mode.effects.copy")
 
     def test_is_enabled(self, mode: CalcMode) -> None:
         assert mode.matches_query_str("5")
@@ -91,12 +91,12 @@ class TestCalcMode:
         assert get_results(mode, Query(None, "2-2"))[0].result == "0"
         assert get_results(mode, Query(None, "5%2"))[0].result == "1"
 
-    def test_handle_query__copy_action_called(self, mode: CalcMode, copy_action: MagicMock) -> None:
+    def test_handle_query__copy_effect_called(self, mode: CalcMode, copy_effect: MagicMock) -> None:
         query = Query(None, "3+2")
         result = get_results(mode, query)[0]
         assert result.result == "5"
         mode.activate_result("copy", result, query, lambda _: None)
-        copy_action.assert_called_once_with("5")
+        copy_effect.assert_called_once_with("5")
 
     def test_handle_query__invalid_expr(self, mode: CalcMode, caplog: pytest.LogCaptureFixture) -> None:
         bad_queries = [

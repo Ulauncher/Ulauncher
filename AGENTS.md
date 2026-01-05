@@ -189,7 +189,7 @@ Ulauncher uses a mode-based architecture where different modes are responsible f
 The `BaseMode` class defines the interface for these modes. Key methods include:
 - `matches_query_str()`: This method determines if a particular mode should handle the current user input. It typically checks for specific keywords or patterns.
 - `handle_query()`: If a mode matches the input, this method is called to process the query. It generates a list of potential results and passes them to a callback function.
-- `activate_result()`: This method is invoked when a user selects one of the results. It can perform an action, such as launching an application or opening a file, or it might return new results to be displayed.
+- `activate_result()`: This method is invoked when a user selects one of the results. It can perform an effect, such as launching an application or opening a file, or return new results to be displayed.
 - `get_triggers()`: This method returns any trigger keywords or shortcuts associated with the mode.
 - `get_fallback_results()`: This method provides results when no other mode or specific query matches are found.
 

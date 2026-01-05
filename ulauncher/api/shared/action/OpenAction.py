@@ -1,1 +1,1 @@
-from ulauncher.internals.actions import open as OpenAction  # noqa: F401, N999, N812
+from ulauncher.internals.effects import open as OpenAction  # noqa: F401, N999, N812

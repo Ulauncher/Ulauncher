@@ -4,64 +4,64 @@ import logging
 from typing import Any, Final, Literal, TypedDict, Union
 
 
-class ActionType:
-    DO_NOTHING: Final = "action:do_nothing"
-    CLOSE_WINDOW: Final = "action:close_window"
-    SET_QUERY: Final = "action:set_query"
-    LAUNCH_TRIGGER: Final = "action:launch_trigger"
-    OPEN: Final = "action:open"
-    COPY: Final = "action:clipboard_store"
-    LEGACY_RUN_SCRIPT: Final = "action:legacy_run_script"
-    LEGACY_RUN_MANY: Final = "action:legacy_run_many"
-    LEGACY_ACTIVATE_CUSTOM: Final = "action:legacy_activate_custom"
+class EffectType:
+    DO_NOTHING: Final = "effect:do_nothing"
+    CLOSE_WINDOW: Final = "effect:close_window"
+    SET_QUERY: Final = "effect:set_query"
+    LAUNCH_TRIGGER: Final = "effect:launch_trigger"
+    OPEN: Final = "effect:open"
+    COPY: Final = "effect:clipboard_store"
+    LEGACY_RUN_SCRIPT: Final = "effect:legacy_run_script"
+    LEGACY_RUN_MANY: Final = "effect:legacy_run_many"
+    LEGACY_ACTIVATE_CUSTOM: Final = "effect:legacy_activate_custom"
 
 
 class DoNothing(TypedDict):
-    type: Literal["action:do_nothing"]
+    type: Literal["effect:do_nothing"]
 
 
 class CloseWindow(TypedDict):
-    type: Literal["action:close_window"]
+    type: Literal["effect:close_window"]
 
 
 class SetQuery(TypedDict):
-    type: Literal["action:set_query"]
+    type: Literal["effect:set_query"]
     data: str
 
 
 class LaunchTrigger(TypedDict):
-    type: Literal["action:launch_trigger"]
+    type: Literal["effect:launch_trigger"]
     args: list[str]
     ext_id: str
 
 
 class Open(TypedDict):
-    type: Literal["action:open"]
+    type: Literal["effect:open"]
     data: str
 
 
 class Copy(TypedDict):
-    type: Literal["action:clipboard_store"]
+    type: Literal["effect:clipboard_store"]
     data: str
 
 
 class LegacyRunScript(TypedDict):
-    type: Literal["action:legacy_run_script"]
+    type: Literal["effect:legacy_run_script"]
     data: list[str]
 
 
 class LegacyRunMany(TypedDict):
-    type: Literal["action:legacy_run_many"]
-    data: list[Any]  # list of other ActionMessages (can't be expressed with TypedDict)
+    type: Literal["effect:legacy_run_many"]
+    data: list[Any]  # list of other EffectMessages (can't be expressed with TypedDict)
 
 
 class LegacyActivateCustom(TypedDict):
-    type: Literal["action:legacy_activate_custom"]
+    type: Literal["effect:legacy_activate_custom"]
     ref: int
     keep_app_open: bool
 
 
-ActionMessage = Union[
+EffectMessage = Union[
     DoNothing,
     CloseWindow,
     SetQuery,
@@ -74,19 +74,19 @@ ActionMessage = Union[
 ]
 
 logger = logging.getLogger()
-_VALID_ACTION_TYPES: Final = frozenset(getattr(ActionType, key) for key in ActionType.__annotations__)
+_VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
 
 
-def is_valid(action_msg: Any) -> bool:
-    return isinstance(action_msg, dict) and action_msg.get("type") in _VALID_ACTION_TYPES
+def is_valid(effect_msg: Any) -> bool:
+    return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
 
 
 def do_nothing() -> DoNothing:
-    return {"type": ActionType.DO_NOTHING}
+    return {"type": EffectType.DO_NOTHING}
 
 
 def close_window() -> CloseWindow:
-    return {"type": ActionType.CLOSE_WINDOW}
+    return {"type": EffectType.CLOSE_WINDOW}
 
 
 def set_query(query: str) -> SetQuery:
@@ -94,7 +94,7 @@ def set_query(query: str) -> SetQuery:
         msg = f'Query argument "{query}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
-    return {"type": ActionType.SET_QUERY, "data": query}
+    return {"type": EffectType.SET_QUERY, "data": query}
 
 
 def copy(text: str) -> Copy:
@@ -102,7 +102,7 @@ def copy(text: str) -> Copy:
         msg = f'Copy argument "{text}" is invalid. It must be a string'
         logger.error(msg)
         raise TypeError(msg)
-    return {"type": ActionType.COPY, "data": text}
+    return {"type": EffectType.COPY, "data": text}
 
 
 def open(item: str) -> Open:  # noqa: A001
@@ -114,7 +114,7 @@ def open(item: str) -> Open:  # noqa: A001
         msg = "Open argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    return {"type": ActionType.OPEN, "data": item}
+    return {"type": EffectType.OPEN, "data": item}
 
 
 def run_script(script: str, args: str = "") -> LegacyRunScript:
@@ -126,8 +126,8 @@ def run_script(script: str, args: str = "") -> LegacyRunScript:
         msg = "Script argument cannot be empty"
         logger.error(msg)
         raise ValueError(msg)
-    return {"type": ActionType.LEGACY_RUN_SCRIPT, "data": [script, args]}
+    return {"type": EffectType.LEGACY_RUN_SCRIPT, "data": [script, args]}
 
 
-def action_list(actions: list[Any]) -> LegacyRunMany:
-    return {"type": ActionType.LEGACY_RUN_MANY, "data": actions}
+def effect_list(effects: list[Any]) -> LegacyRunMany:
+    return {"type": EffectType.LEGACY_RUN_MANY, "data": effects}

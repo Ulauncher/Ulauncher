@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-from ulauncher.internals.action_input import convert_to_action_message
-from ulauncher.internals.actions import ActionMessage
+from ulauncher.internals.effect_input import convert_to_effect_message
+from ulauncher.internals.effects import EffectMessage
 from ulauncher.utils.basedataclass import BaseDataClass
 
 if TYPE_CHECKING:
-    from ulauncher.internals.action_input import ActionMessageInput
+    from ulauncher.internals.effect_input import EffectMessageInput
 
 
 class Result(BaseDataClass):
@@ -17,9 +17,9 @@ class Result(BaseDataClass):
 
     :param actions: Optional dict of actions for this result. When provided, on_enter/on_alt_enter are ignored.
                     Format: {"action_id": {"name": "Display Name", "icon": "optional-icon-name"}}
-    :param on_enter: The action to be performed when the result is activated (legacy: please use `actions` instead).
+    :param on_enter: The effect to be performed when the result is activated (legacy: please use `actions` instead).
                      Should be a return value of the `ExtensionCustomAction` function.
-    :param on_alt_enter: The action to be performed when the result is activated with the Alt key pressed
+    :param on_alt_enter: The effect to be performed when the result is activated with the Alt key pressed
                          (legacy: please use `actions` instead).
     """
 
@@ -33,8 +33,8 @@ class Result(BaseDataClass):
         ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
     )
     actions: dict[str, dict[Literal["name", "icon"], str]] = {}  #: dict of actions with display names and icons
-    on_enter: ActionMessage | list[Result] | None = None
-    on_alt_enter: ActionMessage | list[Result] | None = None
+    on_enter: EffectMessage | list[Result] | None = None
+    on_alt_enter: EffectMessage | list[Result] | None = None
 
     def __init__(
         self,
@@ -47,8 +47,8 @@ class Result(BaseDataClass):
         keyword: str | None = None,
         icon: str | None = None,
         actions: dict[str, dict[Literal["name", "icon"], str]] | None = None,
-        on_enter: ActionMessageInput | None = None,
-        on_alt_enter: ActionMessageInput | None = None,
+        on_enter: EffectMessageInput | None = None,
+        on_alt_enter: EffectMessageInput | None = None,
         **kwargs: Any,
     ) -> None:
         # Build kwargs dict with all provided arguments
@@ -80,7 +80,7 @@ class Result(BaseDataClass):
 
     def __setitem__(self, key: str, value: Any) -> None:
         if key in ["on_enter", "on_alt_enter"] and value is not None:
-            value = convert_to_action_message(value)
+            value = convert_to_effect_message(value)
 
         super().__setitem__(key, value)
 

@@ -54,8 +54,8 @@ class KeywordQueryEvent(BaseEvent):
 
 class ItemEnterEvent(BaseEvent):
     """
-    Handler for legacy `ExtensionCustomAction`.
-    The data object passed to the action will be available using :meth:`get_data`
+    Handler for legacy effect `ExtensionCustomAction`.
+    The data object passed to the effect will be available using :meth:`get_data`
 
     :param str data:
     """

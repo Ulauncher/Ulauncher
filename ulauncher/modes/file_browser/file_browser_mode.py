@@ -6,7 +6,7 @@ from os.path import dirname, expandvars, isdir, join
 from pathlib import Path
 from typing import Callable
 
-from ulauncher.internals import actions
+from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
@@ -46,7 +46,7 @@ class FileBrowserMode(BaseMode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: Query, callback: Callable[[actions.ActionMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
         results: list[Result] = []
         try:
             path_str = query.argument
@@ -97,16 +97,16 @@ class FileBrowserMode(BaseMode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[actions.ActionMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage | list[Result]], None],
     ) -> None:
         if action_id == "go_to":
-            callback(actions.set_query(join(fold_user_path(result.path), "")))
+            callback(effects.set_query(join(fold_user_path(result.path), "")))
         elif action_id == "open":
-            callback(actions.open(result.path))
+            callback(effects.open(result.path))
         elif action_id == "open_parent":
-            callback(actions.open(dirname(result.path)))
+            callback(effects.open(dirname(result.path)))
         elif action_id == "copy_path":
-            callback(actions.copy(result.path))
+            callback(effects.copy(result.path))
         else:
             logger.error("Unexpected action '%s' for File Browser mode result '%s'", action_id, result)
-            callback(actions.do_nothing())
+            callback(effects.do_nothing())

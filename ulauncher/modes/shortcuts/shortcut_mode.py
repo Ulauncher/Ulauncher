@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Iterator
 
-from ulauncher.internals import actions
+from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
@@ -45,7 +45,7 @@ class ShortcutMode(BaseMode):
 
         return None
 
-    def handle_query(self, query: Query, callback: Callable[[actions.ActionMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
             msg = "Query doesn't match any shortcut"
@@ -70,7 +70,7 @@ class ShortcutMode(BaseMode):
         action_id: str,
         result: Result,
         query: Query,
-        callback: Callable[[actions.ActionMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage | list[Result]], None],
     ) -> None:
         if action_id == "run_static":
             callback(run_shortcut(result.cmd))
@@ -80,7 +80,7 @@ class ShortcutMode(BaseMode):
             if argument:
                 callback(run_shortcut(result.cmd, argument))
             else:
-                callback(actions.do_nothing())
+                callback(effects.do_nothing())
         else:
             logger.error("Unexpected action '%s' for Shortcut mode result '%s'", action_id, result)
-            callback(actions.do_nothing())
+            callback(effects.do_nothing())
