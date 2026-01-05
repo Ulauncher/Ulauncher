@@ -132,7 +132,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         action_msg: ActionMessage | list[Result] = actions.close_window()
         if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             action_msg = cast(
-                "actions.LaunchTriggerAction",
+                "actions.LaunchTrigger",
                 {
                     "type": ActionType.LAUNCH_TRIGGER,
                     "args": [result.trigger_id],

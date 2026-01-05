@@ -55,7 +55,7 @@ class ActivateCustom(TypedDict):
     keep_app_open: bool
 
 
-class LaunchTriggerAction(TypedDict):
+class LaunchTrigger(TypedDict):
     type: Literal["action:launch_trigger"]
     args: list[str]
     ext_id: str
@@ -70,7 +70,7 @@ ActionMessage = Union[
     LegacyRunScript,
     LegacyRunMany,
     ActivateCustom,
-    LaunchTriggerAction,
+    LaunchTrigger,
 ]
 
 logger = logging.getLogger()
