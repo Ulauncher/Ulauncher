@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, cast
+from typing import Any, Callable, Iterable, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -172,8 +172,8 @@ class Extension:
         self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
         self._client.connect()
 
-    def on_input(self, query_str: str, trigger_id: str) -> ActionMessageInput | None:
-        pass
+    def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result]:
+        return []
 
     def on_launch(self, trigger_id: str) -> None:
         pass
