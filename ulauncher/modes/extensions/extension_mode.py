@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal, TypedDict, cast
+from typing import Any, Callable, Iterator, Literal, TypedDict
 
 from gi.repository import GLib
 
@@ -31,13 +31,6 @@ class ExtensionResponseEvent(TypedDict, total=False):
 class ExtensionResponse(TypedDict, total=False):
     event: ExtensionResponseEvent
     effect: EffectMessage | list[dict[str, Any]]
-
-
-# Maps effect types that require async extension communication to their event types
-ASYNC_EFFECT_TYPES = {
-    EffectType.LEGACY_ACTIVATE_CUSTOM: EventType.LEGACY_ACTIVATE_CUSTOM,
-    EffectType.LAUNCH_TRIGGER: EventType.LAUNCH_TRIGGER,
-}
 
 
 class ExtensionLaunchTrigger(Result):
@@ -130,32 +123,28 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         callback: Callable[[EffectMessage | list[Result]], None],
     ) -> None:
         effect_msg: EffectMessage | list[Result] = effects.close_window()
-        if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            effect_msg = cast(
-                "effects.LaunchTrigger",
-                {
-                    "type": EffectType.LAUNCH_TRIGGER,
-                    "args": [result.trigger_id],
-                    "ext_id": result.ext_id,
-                },
-            )
-        elif action_id == "__legacy_on_enter__" and result.on_enter:
+        if action_id == "__legacy_on_enter__" and result.on_enter:
             effect_msg = result.on_enter
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
+        elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
+            self.trigger_event(
+                {
+                    "type": EventType.LAUNCH_TRIGGER,
+                    "args": [result.trigger_id],
+                    "ext_id": result.ext_id,
+                },
+                callback,
+            )
+            return
         else:
             event_type = EventType.RESULT_ACTIVATION
             event_args = [action_id, result]
             self.trigger_event({"type": event_type, "args": event_args}, callback)
             return
 
-        if (
-            isinstance(effect_msg, dict)
-            and (effect_type := effect_msg.get("type", ""))
-            and (evt_type := ASYNC_EFFECT_TYPES.get(effect_type))
-        ):
-            # for async flow, set up the callback, trigger an extension event and wait for the response
-            self.trigger_event({**effect_msg, "type": evt_type}, callback)
+        if isinstance(effect_msg, dict) and effect_msg.get("type") == EffectType.LEGACY_ACTIVATE_CUSTOM:
+            self.trigger_event({**effect_msg, "type": EventType.LEGACY_ACTIVATE_CUSTOM}, callback)
             return
 
         callback(effect_msg)

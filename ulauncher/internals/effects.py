@@ -8,7 +8,6 @@ class EffectType:
     DO_NOTHING: Final = "effect:do_nothing"
     CLOSE_WINDOW: Final = "effect:close_window"
     SET_QUERY: Final = "effect:set_query"
-    LAUNCH_TRIGGER: Final = "effect:launch_trigger"
     OPEN: Final = "effect:open"
     COPY: Final = "effect:clipboard_store"
     LEGACY_RUN_SCRIPT: Final = "effect:legacy_run_script"
@@ -27,12 +26,6 @@ class CloseWindow(TypedDict):
 class SetQuery(TypedDict):
     type: Literal["effect:set_query"]
     data: str
-
-
-class LaunchTrigger(TypedDict):
-    type: Literal["effect:launch_trigger"]
-    args: list[str]
-    ext_id: str
 
 
 class Open(TypedDict):
@@ -67,7 +60,6 @@ EffectMessage = Union[
     SetQuery,
     Open,
     Copy,
-    LaunchTrigger,
     LegacyRunScript,
     LegacyRunMany,
     LegacyActivateCustom,
