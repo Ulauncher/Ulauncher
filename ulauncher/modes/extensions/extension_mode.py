@@ -129,7 +129,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         _query: Query,
         callback: Callable[[ActionMessage | list[Result]], None],
     ) -> None:
-        action_msg: ActionMessage | list[Result] | None = None
+        action_msg: ActionMessage | list[Result] = actions.do_nothing()
         if action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             action_msg = cast(
                 "actions.LaunchTriggerAction",
@@ -139,9 +139,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     "ext_id": result.ext_id,
                 },
             )
-        elif action_id == "__legacy_on_enter__" and "on_enter" in result:
+        elif action_id == "__legacy_on_enter__" and result.on_enter:
             action_msg = result.on_enter
-        elif action_id == "__legacy_on_alt_enter__" and "on_alt_enter" in result:
+        elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             action_msg = result.on_alt_enter
         else:
             event_type = EventType.RESULT_ACTIVATION
@@ -158,7 +158,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             self.trigger_event({**action_msg, "type": evt_type}, callback)
             return
 
-        callback(actions.do_nothing() if action_msg is None else action_msg)
+        callback(action_msg)
 
     def run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
