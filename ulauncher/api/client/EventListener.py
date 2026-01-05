@@ -1,11 +1,11 @@
 from __future__ import annotations  # noqa: N999
 
-from typing import Iterable
+from typing import TYPE_CHECKING
 
-import ulauncher.api.extension
-import ulauncher.api.shared.event
-from ulauncher.internals import actions
-from ulauncher.internals.result import Result
+if TYPE_CHECKING:
+    from ulauncher.api.extension import Extension
+    from ulauncher.api.shared.event import BaseEvent
+    from ulauncher.internals.action_input import ActionMessageInput
 
 
 class EventListener:
@@ -13,10 +13,7 @@ class EventListener:
     Base event listener class
     """
 
-    def on_event(
-        self, _event: ulauncher.api.shared.event.BaseEvent, _extension: ulauncher.api.extension.Extension
-    ) -> actions.ActionMessage | Iterable[Result]:
+    def on_event(self, _event: BaseEvent, _extension: Extension) -> ActionMessageInput | None:
         """
         :return: Action to run (for KeywordQueryEvent, this should only return Iterable[Result])
         """
-        return actions.do_nothing()
