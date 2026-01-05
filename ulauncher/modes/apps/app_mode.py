@@ -5,7 +5,6 @@ from typing import Callable, Iterator
 
 from ulauncher import app_id
 from ulauncher.internals import actions
-from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_result import AppResult
@@ -51,7 +50,7 @@ class AppMode(BaseMode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[ActionMessage | list[Result]], None],
+        callback: Callable[[actions.ActionMessage | list[Result]], None],
     ) -> None:
         if action_id == "launch":
             if not isinstance(result, AppResult):

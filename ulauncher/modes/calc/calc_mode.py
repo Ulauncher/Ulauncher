@@ -10,7 +10,6 @@ from functools import lru_cache
 from typing import Callable
 
 from ulauncher.internals import actions
-from ulauncher.internals.actions import ActionMessage
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
@@ -147,7 +146,7 @@ class CalcMode(BaseMode):
     def matches_query_str(self, query_str: str) -> bool:
         return _is_enabled(query_str)
 
-    def handle_query(self, query: Query, callback: Callable[[ActionMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[actions.ActionMessage | list[Result]], None]) -> None:
         try:
             calc_result = str(eval_expr(query.argument))
             result = CalcResult(
@@ -166,7 +165,7 @@ class CalcMode(BaseMode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[ActionMessage | list[Result]], None],
+        callback: Callable[[actions.ActionMessage | list[Result]], None],
     ) -> None:
         if action_id == "copy":
             assert isinstance(result, CalcResult)
