@@ -16,4 +16,4 @@ def ExtensionCustomAction(data: Any, keep_app_open: bool = False) -> dict[str, A
     """
     ref = id(data)
     custom_data_store[ref] = data
-    return {"type": ActionType.ACTIVATE_CUSTOM, "ref": ref, "keep_app_open": keep_app_open}
+    return {"type": ActionType.LEGACY_ACTIVATE_CUSTOM, "ref": ref, "keep_app_open": keep_app_open}

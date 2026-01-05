@@ -35,7 +35,7 @@ class ExtensionResponse(TypedDict, total=False):
 
 # Maps action types that require async extension communication to their event types
 ASYNC_ACTION_TYPES = {
-    ActionType.ACTIVATE_CUSTOM: EventType.ACTIVATE_CUSTOM,
+    ActionType.LEGACY_ACTIVATE_CUSTOM: EventType.LEGACY_ACTIVATE_CUSTOM,
     ActionType.LAUNCH_TRIGGER: EventType.LAUNCH_TRIGGER,
 }
 
