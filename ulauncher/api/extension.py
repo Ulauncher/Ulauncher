@@ -53,7 +53,7 @@ class Extension:
         if self.__class__.on_launch is not Extension.on_launch:
             self.subscribe(events[EventType.LAUNCH_TRIGGER], "on_launch")
         if self.__class__.on_item_enter is not Extension.on_item_enter:
-            self.subscribe(events[EventType.ACTIVATE_CUSTOM], "on_item_enter")
+            self.subscribe(events[EventType.LEGACY_ACTIVATE_CUSTOM], "on_item_enter")
         if self.__class__.on_unload is not Extension.on_unload:
             self.subscribe(events[EventType.UNLOAD], "on_unload")
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
@@ -81,7 +81,7 @@ class Extension:
             argument, trigger_id = args
             return KeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
 
-        if event_type == EventType.ACTIVATE_CUSTOM:
+        if event_type == EventType.LEGACY_ACTIVATE_CUSTOM:
             ref = event.get("ref", "")
             data = custom_data_store.get(ref)
             # Remove all entries except the one the user choose, because get_data can be called more than once

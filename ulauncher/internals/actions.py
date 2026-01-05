@@ -8,12 +8,12 @@ class ActionType:
     DO_NOTHING: Final = "action:do_nothing"
     CLOSE_WINDOW: Final = "action:close_window"
     SET_QUERY: Final = "action:set_query"
+    LAUNCH_TRIGGER: Final = "action:launch_trigger"
     OPEN: Final = "action:open"
     COPY: Final = "action:clipboard_store"
     LEGACY_RUN_SCRIPT: Final = "action:legacy_run_script"
     LEGACY_RUN_MANY: Final = "action:legacy_run_many"
-    ACTIVATE_CUSTOM: Final = "action:activate_custom"
-    LAUNCH_TRIGGER: Final = "action:launch_trigger"
+    LEGACY_ACTIVATE_CUSTOM: Final = "action:legacy_activate_custom"
 
 
 class DoNothing(TypedDict):
@@ -50,7 +50,7 @@ class LegacyRunMany(TypedDict):
 
 
 class ActivateCustom(TypedDict):
-    type: Literal["action:activate_custom"]
+    type: Literal["action:legacy_activate_custom"]
     ref: int
     keep_app_open: bool
 

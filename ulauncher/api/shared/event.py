@@ -120,20 +120,20 @@ SystemExitEvent = UnloadEvent
 
 class EventType:
     INPUT_TRIGGER: Final = "event:input_trigger"
-    ACTIVATE_CUSTOM: Final = "event:activate_custom"
     LAUNCH_TRIGGER: Final = "event:launch_trigger"
     RESULT_ACTIVATION: Final = "event:result_activation"
     UPDATE_PREFERENCES: Final = "event:update_preferences"
-    LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
     UNLOAD: Final = "event:unload"
+    LEGACY_ACTIVATE_CUSTOM: Final = "event:legacy_activate_custom"
+    LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
 
 
 events = {
-    EventType.LAUNCH_TRIGGER: LaunchTriggerEvent,
-    EventType.UPDATE_PREFERENCES: PreferencesUpdateEvent,
-    EventType.LEGACY_PREFERENCES_LOAD: PreferencesEvent,
-    EventType.UNLOAD: UnloadEvent,
     EventType.INPUT_TRIGGER: InputTriggerEvent,
-    EventType.ACTIVATE_CUSTOM: ItemEnterEvent,
+    EventType.LAUNCH_TRIGGER: LaunchTriggerEvent,
     EventType.RESULT_ACTIVATION: ResultActivationEvent,
+    EventType.UPDATE_PREFERENCES: PreferencesUpdateEvent,
+    EventType.UNLOAD: UnloadEvent,
+    EventType.LEGACY_ACTIVATE_CUSTOM: ItemEnterEvent,
+    EventType.LEGACY_PREFERENCES_LOAD: PreferencesEvent,
 }
