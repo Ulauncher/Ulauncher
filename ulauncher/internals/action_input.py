@@ -11,9 +11,9 @@ if TYPE_CHECKING:
 ActionMessageInput = Union[actions.ActionMessage, bool, str, Iterable["Result"]]
 
 
-def convert_to_action_message(input_data: ActionMessageInput) -> actions.ActionMessage | list[Result]:
+def convert_to_action_message(input_data: ActionMessageInput | None) -> actions.ActionMessage | list[Result]:
     """Normalize input format that supports iterable lists for results and boolean and string actions"""
-    if isinstance(input_data, bool):
+    if isinstance(input_data, bool) or input_data is None:
         return actions.do_nothing() if input_data else actions.close_window()
     if isinstance(input_data, str):
         return actions.set_query(input_data)

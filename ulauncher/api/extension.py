@@ -152,7 +152,7 @@ class Extension:
         input_action_msg = method(*args)
         # ignore outdated responses
         if current_input == self._input:
-            action_msg = convert_to_action_message(input_action_msg if input_action_msg is not None else False)
+            action_msg = convert_to_action_message(input_action_msg)
 
             # Cache Result objects before sending them, keyed by their Python object ID
             if isinstance(action_msg, list):
