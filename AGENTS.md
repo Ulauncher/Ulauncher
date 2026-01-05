@@ -184,7 +184,7 @@ def something_happened(data):
 
 ### Mode system
 
-Ulauncher uses a mode-based architecture where different input handlers inherit from `BaseMode`. Each mode is responsible for matching user input, handling queries, and activating results.
+Ulauncher uses a mode-based architecture where different modes are responsible for matching user input, handling queries, and activating results.
 
 The `BaseMode` class defines the interface for these modes. Key methods include:
 - `matches_query_str()`: This method determines if a particular mode should handle the current user input. It typically checks for specific keywords or patterns.
