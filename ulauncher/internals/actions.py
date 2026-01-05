@@ -29,6 +29,12 @@ class SetQuery(TypedDict):
     data: str
 
 
+class LaunchTrigger(TypedDict):
+    type: Literal["action:launch_trigger"]
+    args: list[str]
+    ext_id: str
+
+
 class Open(TypedDict):
     type: Literal["action:open"]
     data: str
@@ -49,16 +55,10 @@ class LegacyRunMany(TypedDict):
     data: list[Any]  # list of other ActionMessages (can't be expressed with TypedDict)
 
 
-class ActivateCustom(TypedDict):
+class LegacyActivateCustom(TypedDict):
     type: Literal["action:legacy_activate_custom"]
     ref: int
     keep_app_open: bool
-
-
-class LaunchTrigger(TypedDict):
-    type: Literal["action:launch_trigger"]
-    args: list[str]
-    ext_id: str
 
 
 ActionMessage = Union[
@@ -67,10 +67,10 @@ ActionMessage = Union[
     SetQuery,
     Open,
     Copy,
+    LaunchTrigger,
     LegacyRunScript,
     LegacyRunMany,
-    ActivateCustom,
-    LaunchTrigger,
+    LegacyActivateCustom,
 ]
 
 logger = logging.getLogger()
