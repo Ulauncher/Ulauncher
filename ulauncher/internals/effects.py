@@ -102,7 +102,3 @@ def open(item: str) -> Open:  # noqa: A001
         logger.error(msg)
         raise ValueError(msg)
     return {"type": EffectType.OPEN, "data": item}
-
-
-def effect_list(effect_list: list[EffectMessage | list[Result]]) -> LegacyRunMany:
-    return {"type": EffectType.LEGACY_RUN_MANY, "data": effect_list}
