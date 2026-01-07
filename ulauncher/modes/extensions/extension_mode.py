@@ -23,13 +23,9 @@ logger = logging.getLogger()
 events = EventBus("extensions")
 
 
-class ExtensionResponseEvent(TypedDict, total=False):
+class ExtensionResponse(TypedDict, total=False):
     interaction_id: int
     keep_app_open: bool
-
-
-class ExtensionResponse(TypedDict, total=False):
-    event: ExtensionResponseEvent
     effect: EffectMessage | list[dict[str, Any]]
 
 
@@ -237,7 +233,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
-        if not self._pending_callback or response.get("event", {}).get("interaction_id") != self._interaction_id:
+        if not self._pending_callback or response.get("interaction_id") != self._interaction_id:
             logger.debug("Ignoring outdated extension response")
             return
 
@@ -259,7 +255,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
 
                 effect_msg.append(result)
 
-        elif not response.get("event", {}).get("keep_app_open", True):
+        elif not response.get("keep_app_open", True):
             effect_msg = effects.effect_list([raw_effect_msg, effects.close_window()])
 
         else:

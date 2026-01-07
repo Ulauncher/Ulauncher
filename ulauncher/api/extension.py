@@ -163,7 +163,8 @@ class Extension:
                     # Add the result_id to the dict representation so Ulauncher can send it back
                     result["__result_id__"] = result_id
 
-            self._client.send({"event": event, "effect": effect_msg})
+            event["effect"] = effect_msg
+            self._client.send(event)
 
     def run(self) -> None:
         """
