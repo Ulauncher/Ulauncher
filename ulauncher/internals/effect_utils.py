@@ -54,10 +54,6 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         from ulauncher.utils.launch_detached import open_detached
 
         open_detached(data)
-    elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
-        from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
-
-        do_run_script(*data)
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
         for effect in cast("list[EffectMessage]", data):
             handle(effect, True)

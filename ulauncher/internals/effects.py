@@ -14,7 +14,6 @@ class EffectType:
     SET_QUERY: Final = "effect:set_query"
     OPEN: Final = "effect:open"
     COPY: Final = "effect:clipboard_store"
-    LEGACY_RUN_SCRIPT: Final = "effect:legacy_run_script"
     LEGACY_RUN_MANY: Final = "effect:legacy_run_many"
     LEGACY_ACTIVATE_CUSTOM: Final = "effect:legacy_activate_custom"
 
@@ -42,11 +41,6 @@ class Copy(TypedDict):
     data: str
 
 
-class LegacyRunScript(TypedDict):
-    type: Literal["effect:legacy_run_script"]
-    data: list[str]
-
-
 class LegacyRunMany(TypedDict):
     type: Literal["effect:legacy_run_many"]
     data: list[Any]  # list of other EffectMessages (can't be expressed with TypedDict)
@@ -64,7 +58,6 @@ EffectMessage = Union[
     SetQuery,
     Open,
     Copy,
-    LegacyRunScript,
     LegacyRunMany,
     LegacyActivateCustom,
 ]
@@ -109,18 +102,6 @@ def open(item: str) -> Open:  # noqa: A001
         logger.error(msg)
         raise ValueError(msg)
     return {"type": EffectType.OPEN, "data": item}
-
-
-def run_script(script: str, args: str = "") -> LegacyRunScript:
-    if not isinstance(script, str):
-        msg = f'Script argument "{script}" is invalid. It must be a string'
-        logger.error(msg)
-        raise TypeError(msg)
-    if not script:
-        msg = "Script argument cannot be empty"
-        logger.error(msg)
-        raise ValueError(msg)
-    return {"type": EffectType.LEGACY_RUN_SCRIPT, "data": [script, args]}
 
 
 def effect_list(effect_list: list[EffectMessage | list[Result]]) -> LegacyRunMany:
