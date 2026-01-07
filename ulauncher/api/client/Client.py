@@ -70,7 +70,7 @@ class Client:
         if self.mainloop.is_running():
             self.mainloop.quit()
 
-    def send(self, response: dict[str, Any]) -> None:
+    def send(self, message: dict[str, Any]) -> None:
         """Send a JSON object as a message."""
-        logger.debug('Send message with keys "%s"', set(response))
-        self.msg_controller.send(response)
+        logger.debug('Send message with keys "%s"', set(message))
+        self.msg_controller.send(message)
