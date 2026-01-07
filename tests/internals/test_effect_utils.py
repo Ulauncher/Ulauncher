@@ -35,11 +35,6 @@ class TestShouldClose:
         effect = effects.copy("text to copy")
         assert effect_utils.should_close(effect)
 
-    def test_run_script_closes_window(self) -> None:
-        """LEGACY_RUN_SCRIPT effect should close the window."""
-        effect = effects.run_script("#!/bin/bash\necho test")
-        assert effect_utils.should_close(effect)
-
     def test_effect_list_with_do_nothing_keeps_open(self) -> None:
         """Effect list with DO_NOTHING should keep the window open."""
         effect = effects.effect_list(
