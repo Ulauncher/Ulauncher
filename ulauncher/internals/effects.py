@@ -87,7 +87,7 @@ def should_close(effect_msg: EffectMessage) -> bool:
         if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY):
             return False
         if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            effect_list = cast("list[EffectMessage]", effect_msg.get("data"))
+            effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
             return all(map(should_close, effect_list))
     return True
 
