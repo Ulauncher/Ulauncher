@@ -199,6 +199,7 @@ class UlauncherCore:
             logger.warning("Cannot activate result '%s' because no mode is set", result)
             return
 
+        # Ignore results with no actions (can be used as headers, spacers or status messages)
         if result.actions:
             if alt:
                 self._show_results(self._get_action_results(result), callback)
@@ -206,9 +207,6 @@ class UlauncherCore:
             first_action_id = next(iter(result.actions))
             mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
             return
-
-        # Result with no actions should have no effect - can be used as headers, spacers or status messages
-        handle_effect(effects.do_nothing())
 
     def _mode_callback(
         self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
