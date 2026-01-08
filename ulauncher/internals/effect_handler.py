@@ -26,15 +26,12 @@ def clipboard_store(data: str) -> None:
     timer(1, lambda: _events.emit("app:toggle_hold", False))
 
 
-def handle_effect(effect_msg: EffectMessage | None) -> None:
+def handle_effect(effect_msg: EffectMessage) -> None:
     if not _handle_effect(effect_msg):
         _events.emit("app:hide_launcher")
 
 
-def _handle_effect(effect_msg: EffectMessage | None) -> bool:  # noqa: PLR0911
-    if effect_msg is None:
-        return False
-
+def _handle_effect(effect_msg: EffectMessage) -> bool:  # noqa: PLR0911
     event_type = effect_msg.get("type", "")
 
     if event_type == EffectType.DO_NOTHING:
