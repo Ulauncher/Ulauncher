@@ -169,11 +169,13 @@ class UlauncherApp(Gtk.Application):
     def delegate_custom_message(self, json_message: str) -> None:
         """Parses and delegates custom JSON messages to the EventBus listener (if any)"""
         try:
-            data = json.loads(json_message)
-            if isinstance(data, dict) and "name" in data:
-                events.emit(data["name"], data.get("message"))
-                return
-            logger.error("Custom message missing required 'name' field: %s", json_message)
+            if (data := json.loads(json_message)) and isinstance(data, dict):
+                name = data.get("name")
+                args = data.get("args")
+                if isinstance(name, str) and isinstance(args, list):
+                    events.emit(name, *args)
+                    return
+            logger.error("Custom message fields 'name' or 'args' are missing or invalid: %s", json_message)
         except json.JSONDecodeError:
             logger.exception("Failed to parse custom message as JSON: %s", json_message)
 

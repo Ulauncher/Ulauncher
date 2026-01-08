@@ -66,7 +66,7 @@ def get_ulauncher_dbus_action_group(bus: Gio.DBusConnection) -> Gio.DBusActionGr
     return Gio.DBusActionGroup.get(bus, ulauncher.app_id, ulauncher.dbus_path)
 
 
-def dbus_trigger_event(name: str, message: Any | None = None) -> None:
+def dbus_trigger_event(name: str, *args: Any) -> None:
     """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name."""
     bus = Gio.bus_get_sync(Gio.BusType.SESSION)
 
@@ -74,5 +74,5 @@ def dbus_trigger_event(name: str, message: Any | None = None) -> None:
         logger.debug("Ulauncher app is not running, skipping D-Bus trigger event: %s", name)
         return
 
-    json_message = json.dumps({"name": name, "message": message})
+    json_message = json.dumps({"name": name, "args": list(args)})
     get_ulauncher_dbus_action_group(bus).activate_action("trigger-event", GLib.Variant.new_string(json_message))
