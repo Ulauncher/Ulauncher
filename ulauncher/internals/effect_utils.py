@@ -42,7 +42,7 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     """Process effects by dispatching to appropriate handlers."""
     event_type = effect_msg.get("type", "")
     data = effect_msg.get("data")
-    _is_valid = event_type in _VALID_EFFECT_TYPES
+    has_valid_type = event_type in _VALID_EFFECT_TYPES
 
     if event_type == EffectType.SET_QUERY:
         _events.emit("app:set_query", effect_msg.get("data", ""))
@@ -62,10 +62,10 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         for effect in cast("list[EffectMessage]", data):
             handle(effect, True)
 
-    elif not _is_valid:
+    elif not has_valid_type:
         _logger.warning("Unknown effect type: %s", event_type)
 
-    if _is_valid and should_close(effect_msg) and not prevent_close:
+    if has_valid_type and should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
 
 
