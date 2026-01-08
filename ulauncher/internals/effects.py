@@ -123,5 +123,5 @@ def run_script(script: str, args: str = "") -> LegacyRunScript:
     return {"type": EffectType.LEGACY_RUN_SCRIPT, "data": [script, args]}
 
 
-def effect_list(effects: list[Any]) -> LegacyRunMany:
-    return {"type": EffectType.LEGACY_RUN_MANY, "data": effects}
+def effect_list(effect_list: list[EffectMessage | list[Result]]) -> LegacyRunMany:
+    return {"type": EffectType.LEGACY_RUN_MANY, "data": effect_list}
