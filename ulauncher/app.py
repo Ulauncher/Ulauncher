@@ -53,7 +53,7 @@ class UlauncherApp(Gtk.Application):
             [
                 ("show-preferences", lambda *_: self.show_preferences(), None),
                 ("show-window", lambda *_: self.show_launcher(), None),
-                ("hide-window", lambda *_: self.hide_launcher(), None),
+                ("hide-window", lambda *_: self.close_launcher(), None),
                 ("toggle-window", lambda *_: self.toggle_window(), None),
                 ("toggle-tray-icon", lambda *args: self.toggle_tray_icon(args[1].get_boolean()), "b"),
                 ("set-query", lambda *args: self.activate_query(args[1].get_string()), "s"),
@@ -121,7 +121,7 @@ class UlauncherApp(Gtk.Application):
         clipboard.set_text(data, -1)
         clipboard.store()
         self.toggle_hold(True)
-        self.hide_launcher()
+        self.close_launcher()
         # Hold the app for 1 second (hopefully enough, 0.25s wasn't) to allow it time to store the clipboard
         # before exiting. There is no gtk3 event or method that works for this unfortunately
         timer(1, lambda: self.toggle_hold(False))
@@ -132,7 +132,7 @@ class UlauncherApp(Gtk.Application):
             self.windows["main"] = UlauncherWindow(application=self)
 
     @events.on
-    def hide_launcher(self) -> None:
+    def close_launcher(self) -> None:
         if main_window := self.windows.get("main"):
             main_window.close()
 
@@ -162,7 +162,7 @@ class UlauncherApp(Gtk.Application):
     def toggle_window(self) -> None:
         """Toggle window visibility - for explicit toggle requests only."""
         if "main" in self.windows:
-            self.hide_launcher()
+            self.close_launcher()
         else:
             self.show_launcher()
 

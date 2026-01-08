@@ -14,7 +14,7 @@ _events = EventBus()
 
 def handle_effect(effect_msg: EffectMessage) -> None:
     if not _handle_effect(effect_msg):
-        _events.emit("app:hide_launcher")
+        _events.emit("app:close_launcher")
 
 
 def _handle_effect(effect_msg: EffectMessage) -> bool:  # noqa: PLR0911
