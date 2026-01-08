@@ -79,7 +79,8 @@ def is_valid(effect_msg: Any) -> bool:
     return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
 
 
-def should_close(effect_msg: Any) -> bool:
+def should_close(effect_msg: EffectMessage) -> bool:
+    """Whether or not the effect should close the window."""
     if isinstance(effect_msg, list):
         return False
     if isinstance(effect_msg, dict):
@@ -91,7 +92,8 @@ def should_close(effect_msg: Any) -> bool:
     return True
 
 
-def handle(effect_msg: EffectMessage) -> None:
+def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
+    """Process effects by dispatching to appropriate handlers."""
     event_type = effect_msg.get("type", "")
     if event_type == EffectType.SET_QUERY:
         _events.emit("app:set_query", effect_msg.get("data", ""))
@@ -105,9 +107,9 @@ def handle(effect_msg: EffectMessage) -> None:
             do_run_script(*data)
         elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
             for effect in cast("list[EffectMessage]", data):
-                handle(effect)
+                handle(effect, True)
 
-    if should_close(effect_msg):
+    if should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
 
 
