@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
-from ulauncher.internals import effects
+from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.base_mode import BaseMode
@@ -179,7 +179,7 @@ class UlauncherCore:
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
         if isinstance(result, KeywordTrigger):
-            effects.handle(effects.set_query(f"{result.keyword} "))
+            effect_utils.handle(effects.set_query(f"{result.keyword} "))
             return
 
         # Handle ActionResult activation (activate parent result with given action_id)
@@ -217,7 +217,7 @@ class UlauncherCore:
                 return
 
             if isinstance(effect_msg, dict):
-                effects.handle(effect_msg)
+                effect_utils.handle(effect_msg)
             elif isinstance(effect_msg, list):
                 self._show_results(effect_msg, callback)
 

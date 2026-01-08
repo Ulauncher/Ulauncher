@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, TypedDict, Union, cast
+from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, TypedDict, Union
 
 # if type checking import Result
 if TYPE_CHECKING:
     from ulauncher.internals.result import Result
-
-from ulauncher.utils.eventbus import EventBus
-
-_events = EventBus()
 
 
 class EffectType:
@@ -73,50 +69,10 @@ EffectMessage = Union[
     LegacyActivateCustom,
 ]
 
+# Input format that we will convert to an EffectMessage
+EffectMessageInput = Union[EffectMessage, bool, str, Iterable["Result"]]
+
 logger = logging.getLogger()
-_VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
-
-
-def is_valid(effect_msg: Any) -> bool:
-    return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
-
-
-def should_close(effect_msg: EffectMessage | list[Result]) -> bool:
-    """Whether or not the effect should close the window."""
-    if isinstance(effect_msg, list):
-        return False
-    if isinstance(effect_msg, dict):
-        if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY):
-            return False
-        if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
-            return all(map(should_close, effect_list))
-    return True
-
-
-def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
-    """Process effects by dispatching to appropriate handlers."""
-    event_type = effect_msg.get("type", "")
-    if event_type == EffectType.SET_QUERY:
-        _events.emit("app:set_query", effect_msg.get("data", ""))
-
-    elif data := effect_msg.get("data"):
-        if event_type == EffectType.OPEN and isinstance(data, str):
-            from ulauncher.utils.launch_detached import open_detached
-
-            open_detached(data)
-        elif event_type == EffectType.COPY:
-            _events.emit("app:clipboard_store", data)
-        elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
-            from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
-
-            do_run_script(*data)
-        elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-            for effect in cast("list[EffectMessage]", data):
-                handle(effect, True)
-
-    if should_close(effect_msg) and not prevent_close:
-        _events.emit("app:close_launcher")
 
 
 def do_nothing() -> DoNothing:

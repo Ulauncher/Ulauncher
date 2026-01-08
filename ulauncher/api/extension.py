@@ -13,7 +13,7 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals.effect_input import EffectMessageInput, convert_to_effect_message
+from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.timer import TimerContext, timer
@@ -145,14 +145,14 @@ class Extension:
     def run_event_listener(
         self,
         event: dict[str, Any],
-        method: Callable[..., EffectMessageInput | None],
+        method: Callable[..., effects.EffectMessageInput | None],
         args: tuple[Any],
     ) -> None:
         current_input = self._input
         input_effect_msg = method(*args)
         # ignore outdated responses
         if current_input == self._input:
-            effect_msg = convert_to_effect_message(input_effect_msg)
+            effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
 
             # Cache Result objects before sending them, keyed by their Python object ID
             if isinstance(effect_msg, list):
@@ -179,13 +179,13 @@ class Extension:
     def on_launch(self, trigger_id: str) -> None:
         pass
 
-    def on_item_enter(self, data: Any) -> EffectMessageInput | None:
+    def on_item_enter(self, data: Any) -> effects.EffectMessageInput | None:
         pass
 
     def on_preferences_update(self, pref_id: str, value: str | int | bool, previous_value: str | int | bool) -> None:
         pass
 
-    def on_result_activation(self, action_id: str, result: Result) -> EffectMessageInput | None:
+    def on_result_activation(self, action_id: str, result: Result) -> effects.EffectMessageInput | None:
         """
         Called when user activates a result action.
 
