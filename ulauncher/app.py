@@ -5,7 +5,7 @@ import logging
 from typing import Any, Literal, cast
 from weakref import WeakValueDictionary
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gdk, Gio, Gtk
 
 import ulauncher
 from ulauncher import app_id, first_run
@@ -15,6 +15,7 @@ from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.singleton import get_instance
+from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
 events = EventBus("app")
@@ -113,6 +114,17 @@ class UlauncherApp(Gtk.Application):
         notification.set_body(body)
         notification.set_priority(Gio.NotificationPriority.URGENT)
         self.send_notification(notification_id, notification)
+
+    @events.on
+    def clipboard_store(self, data: str) -> None:
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(data, -1)
+        clipboard.store()
+        self.toggle_hold(True)
+        self.hide_launcher()
+        # Hold the app for 1 second (hopefully enough, 0.25s wasn't) to allow it time to store the clipboard
+        # before exiting. There is no gtk3 event or method that works for this unfortunately
+        timer(1, lambda: self.toggle_hold(False))
 
     @events.on
     def show_launcher(self) -> None:
