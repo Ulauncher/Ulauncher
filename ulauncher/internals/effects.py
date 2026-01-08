@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Final, Literal, TypedDict, Union
+from typing import Any, Final, Literal, TypedDict, Union, cast
+
+from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
+from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.launch_detached import open_detached
+
+_events = EventBus()
 
 
 class EffectType:
@@ -71,6 +77,38 @@ _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in Effec
 
 def is_valid(effect_msg: Any) -> bool:
     return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
+
+
+def should_close(effect_msg: Any) -> bool:
+    if isinstance(effect_msg, list):
+        return False
+    if isinstance(effect_msg, dict):
+        if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY):
+            return False
+        if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
+            effect_list = cast("list[EffectMessage]", effect_msg.get("data"))
+            return all(map(should_close, effect_list))
+    return True
+
+
+def handle(effect_msg: EffectMessage) -> None:
+    event_type = effect_msg.get("type", "")
+    if event_type == EffectType.SET_QUERY:
+        _events.emit("app:set_query", effect_msg.get("data", ""))
+
+    elif data := effect_msg.get("data"):
+        if event_type == EffectType.OPEN:
+            open_detached(cast("str", data))
+        elif event_type == EffectType.COPY:
+            _events.emit("app:clipboard_store", data)
+        elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+            do_run_script(*data)
+        elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
+            for effect in cast("list[EffectMessage]", data):
+                handle(effect)
+
+    if should_close(effect_msg):
+        _events.emit("app:close_launcher")
 
 
 def do_nothing() -> DoNothing:

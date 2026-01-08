@@ -178,10 +178,8 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
-        from ulauncher.internals.effect_handler import handle_effect
-
         if isinstance(result, KeywordTrigger):
-            handle_effect(effects.set_query(f"{result.keyword} "))
+            effects.handle(effects.set_query(f"{result.keyword} "))
             return
 
         # Handle ActionResult activation (activate parent result with given action_id)
@@ -219,9 +217,7 @@ class UlauncherCore:
                 return
 
             if isinstance(effect_msg, dict):
-                from ulauncher.internals.effect_handler import handle_effect
-
-                handle_effect(effect_msg)
+                effects.handle(effect_msg)
             elif isinstance(effect_msg, list):
                 self._show_results(effect_msg, callback)
 
