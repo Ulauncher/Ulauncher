@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Final, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, TypedDict, Union
+
+# if type checking import Result
+if TYPE_CHECKING:
+    from ulauncher.internals.result import Result
 
 
 class EffectType:
@@ -65,12 +69,10 @@ EffectMessage = Union[
     LegacyActivateCustom,
 ]
 
+# Input format that we will convert to an EffectMessage
+EffectMessageInput = Union[EffectMessage, bool, str, Iterable["Result"]]
+
 logger = logging.getLogger()
-_VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
-
-
-def is_valid(effect_msg: Any) -> bool:
-    return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
 
 
 def do_nothing() -> DoNothing:
