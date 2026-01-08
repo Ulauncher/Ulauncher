@@ -39,23 +39,25 @@ def should_close(effect_msg: EffectMessage | list[Result]) -> bool:
 def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     """Process effects by dispatching to appropriate handlers."""
     event_type = effect_msg.get("type", "")
+    data = effect_msg.get("data")
+
     if event_type == EffectType.SET_QUERY:
         _events.emit("app:set_query", effect_msg.get("data", ""))
 
-    elif data := effect_msg.get("data"):
-        if event_type == EffectType.OPEN and isinstance(data, str):
-            from ulauncher.utils.launch_detached import open_detached
+    elif event_type == EffectType.COPY and isinstance(data, str):
+        _events.emit("app:clipboard_store", data)
 
-            open_detached(data)
-        elif event_type == EffectType.COPY:
-            _events.emit("app:clipboard_store", data)
-        elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
-            from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
+    elif event_type == EffectType.OPEN and isinstance(data, str):
+        from ulauncher.utils.launch_detached import open_detached
 
-            do_run_script(*data)
-        elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-            for effect in cast("list[EffectMessage]", data):
-                handle(effect, True)
+        open_detached(data)
+    elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+        from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
+
+        do_run_script(*data)
+    elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
+        for effect in cast("list[EffectMessage]", data):
+            handle(effect, True)
 
     if should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
