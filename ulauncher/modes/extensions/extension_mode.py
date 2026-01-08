@@ -9,7 +9,7 @@ from typing import Any, Callable, Iterator, Literal, TypedDict
 from gi.repository import GLib
 
 from ulauncher.api.shared.event import EventType
-from ulauncher.internals import effects
+from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
@@ -256,7 +256,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                 effect_msg.append(result)
 
         elif not response.get("keep_app_open", True):
-            effect_msg = effects.effect_list([raw_effect_msg, effects.close_window()])
+            effect_utils.handle(raw_effect_msg, prevent_close=True)
+            effect_msg = effects.close_window()
 
         else:
             effect_msg = raw_effect_msg
