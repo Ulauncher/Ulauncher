@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Final, Literal, TypedDict, Union, cast
 
-from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.launch_detached import open_detached
 
 _events = EventBus()
 
@@ -99,11 +97,15 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         _events.emit("app:set_query", effect_msg.get("data", ""))
 
     elif data := effect_msg.get("data"):
-        if event_type == EffectType.OPEN:
-            open_detached(cast("str", data))
+        if event_type == EffectType.OPEN and isinstance(data, str):
+            from ulauncher.utils.launch_detached import open_detached
+
+            open_detached(data)
         elif event_type == EffectType.COPY:
             _events.emit("app:clipboard_store", data)
         elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+            from ulauncher.modes.shortcuts.run_script import run_script as do_run_script
+
             do_run_script(*data)
         elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
             for effect in cast("list[EffectMessage]", data):
