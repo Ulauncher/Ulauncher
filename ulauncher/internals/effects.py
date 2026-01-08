@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Final, Literal, TypedDict, Union, cast
+from typing import TYPE_CHECKING, Any, Final, Literal, TypedDict, Union, cast
+
+# if type checking import Result
+if TYPE_CHECKING:
+    from ulauncher.internals.result import Result
 
 from ulauncher.utils.eventbus import EventBus
 
@@ -77,7 +81,7 @@ def is_valid(effect_msg: Any) -> bool:
     return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
 
 
-def should_close(effect_msg: EffectMessage) -> bool:
+def should_close(effect_msg: EffectMessage | list[Result]) -> bool:
     """Whether or not the effect should close the window."""
     if isinstance(effect_msg, list):
         return False
