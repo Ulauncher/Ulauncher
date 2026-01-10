@@ -233,6 +233,8 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             return
         if name == "response":
             self.handle_response(ext_id, args[0])
+        elif name == "clipboard_store":
+            events.emit("app:clipboard_store", args[0])
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, name)
 
