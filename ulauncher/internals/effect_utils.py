@@ -47,13 +47,14 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     if event_type == EffectType.SET_QUERY and isinstance(data, str):
         _events.emit("app:set_query", data)
 
-    elif event_type == EffectType.COPY and isinstance(data, str):
-        _events.emit("app:clipboard_store", data)
-
     elif event_type == EffectType.OPEN and isinstance(data, str):
         from ulauncher.utils.launch_detached import open_detached
 
         open_detached(data)
+
+    elif event_type == EffectType.LEGACY_COPY and isinstance(data, str):
+        _events.emit("app:clipboard_store", data)
+
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
         for effect in cast("list[EffectMessage]", data):
             handle(effect, True)
