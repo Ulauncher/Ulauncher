@@ -11,8 +11,10 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.file_browser.results import FileResult, FolderResult
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.fold_user_path import fold_user_path
 
+_events = EventBus()
 logger = logging.getLogger()
 
 
@@ -106,7 +108,8 @@ class FileBrowserMode(BaseMode):
         elif action_id == "open_parent":
             callback(effects.open(dirname(result.path)))
         elif action_id == "copy_path":
-            callback(effects.copy(result.path))
+            _events.emit("app:clipboard_store", result.path)
+            callback(effects.close_window())
         else:
             logger.error("Unexpected action '%s' for File Browser mode result '%s'", action_id, result)
             callback(effects.do_nothing())
