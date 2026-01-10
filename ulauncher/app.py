@@ -107,6 +107,7 @@ class UlauncherApp(Gtk.Application):
             # Remove json file setting so the notification won't show again
             settings.save(hotkey_show_app="")
 
+    @events.on
     def show_notification(self, notification_id: str | None, title: str, body: str, default_action: str = "-") -> None:
         notification = Gio.Notification.new(title)
         # Defaults to non-existing action "-" to prevent activating on click
