@@ -13,7 +13,7 @@ class EffectType:
     CLOSE_WINDOW: Final = "effect:close_window"
     SET_QUERY: Final = "effect:set_query"
     OPEN: Final = "effect:open"
-    COPY: Final = "effect:clipboard_store"
+    LEGACY_COPY: Final = "effect:legacy_copy"
     LEGACY_RUN_MANY: Final = "effect:legacy_run_many"
     LEGACY_ACTIVATE_CUSTOM: Final = "effect:legacy_activate_custom"
 
@@ -36,8 +36,8 @@ class Open(TypedDict):
     data: str
 
 
-class Copy(TypedDict):
-    type: Literal["effect:clipboard_store"]
+class LegacyCopy(TypedDict):
+    type: Literal["effect:legacy_copy"]
     data: str
 
 
@@ -57,7 +57,7 @@ EffectMessage = Union[
     CloseWindow,
     SetQuery,
     Open,
-    Copy,
+    LegacyCopy,
     LegacyRunMany,
     LegacyActivateCustom,
 ]
@@ -82,14 +82,6 @@ def set_query(query: str) -> SetQuery:
         logger.error(msg)
         raise TypeError(msg)
     return {"type": EffectType.SET_QUERY, "data": query}
-
-
-def copy(text: str) -> Copy:
-    if not isinstance(text, str):
-        msg = f'Copy argument "{text}" is invalid. It must be a string'
-        logger.error(msg)
-        raise TypeError(msg)
-    return {"type": EffectType.COPY, "data": text}
 
 
 def open(item: str) -> Open:  # noqa: A001

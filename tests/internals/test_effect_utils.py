@@ -29,8 +29,3 @@ class TestShouldClose:
         """OPEN effect should close the window."""
         effect = effects.open("/path/to/file")
         assert effect_utils.should_close(effect)
-
-    def test_copy_closes_window(self) -> None:
-        """COPY effect should close the window."""
-        effect = effects.copy("text to copy")
-        assert effect_utils.should_close(effect)
