@@ -48,9 +48,9 @@ class SocketMsgController:
             self._output_stream.close(None)
         self._trigger_close()
 
-    def send(self, data: dict[str, Any]) -> None:
+    def send(self, data: Any) -> None:
         """
-        Serialize a dictionary to JSON and send it to the socket.
+        Serialize data to JSON and send it to the socket.
         """
         try:
             json_str = json.dumps(data)
@@ -65,7 +65,7 @@ class SocketMsgController:
             logger.warning("Failed to send message, connection likely closed: %s", e)
             self._trigger_close()
 
-    def listen(self, on_message: Callable[[dict[str, Any]], None]) -> None:
+    def listen(self, on_message: Callable[[Any], None]) -> None:
         """
         Listen to and deserialize JSON messages from the socket.
 

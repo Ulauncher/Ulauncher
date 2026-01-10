@@ -164,7 +164,7 @@ class Extension:
                     result["__result_id__"] = result_id
 
             event["effect"] = effect_msg
-            self._client.send(event)
+            self._client.send("response", event)
 
     def run(self) -> None:
         """
