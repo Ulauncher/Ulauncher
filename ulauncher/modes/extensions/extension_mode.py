@@ -226,6 +226,16 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         self.active_ext.send_message(event)
 
     @events.on
+    def handle_message(self, ext_id: str, name: str, *args: Any) -> None:
+        logger.debug('Incoming %s message with arguments "%s" from "%s"', name, args, ext_id)
+        if not args:
+            logger.warning("Received '%s' message without event payload from %s", name, ext_id)
+            return
+        if name == "response":
+            self.handle_response(ext_id, args[0])
+        else:
+            logger.warning("Received unknown message from %s: %s", ext_id, name)
+
     def handle_response(self, ext_id: str, response: ExtensionResponse) -> None:
         if not self.active_ext:
             logger.error("No active extension to handle response")
