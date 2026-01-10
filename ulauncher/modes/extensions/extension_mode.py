@@ -235,6 +235,22 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
             self.handle_response(ext_id, args[0])
         elif name == "clipboard_store":
             events.emit("app:clipboard_store", args[0])
+        elif name == "notify":
+            ext = extension_registry.get(ext_id)
+            if not ext:
+                logger.warning("Notification sent from an extension, '%s', which was not found", ext_id)
+                return
+            try:
+                body, notification_id = args
+            except ValueError:
+                logger.warning("notify expects two arguments, got %s from %s", len(args), ext_id)
+            else:
+                events.emit(
+                    "app:show_notification",
+                    f"ext-{ext.id}-{notification_id}",
+                    f"Message from {ext.manifest.name} extension",
+                    body,
+                )
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, name)
 

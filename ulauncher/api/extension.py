@@ -181,6 +181,22 @@ class Extension:
 
         self._client.send("clipboard_store", text)
 
+    def notify(self, body: str = "", notification_id: str | None = None) -> None:
+        """
+        Show a desktop notification.
+
+        :param str body: Notification body text (optional)
+        :param str | None notification_id: Optional ID for notification deduplication
+        """
+        if not isinstance(body, str):
+            msg = f'Notification body "{body}" is invalid. It must be a string'
+            raise TypeError(msg)
+        if notification_id is not None and not isinstance(notification_id, str):
+            msg = f'Notification ID "{notification_id}" is invalid. It must be a string or None'
+            raise TypeError(msg)
+
+        self._client.send("notify", body, notification_id)
+
     def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result]:
         return []
 
