@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals.effects import EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.calc.calc_mode import CalcMode, eval_expr
@@ -25,8 +26,8 @@ class TestCalcMode:
         return CalcMode()
 
     @pytest.fixture
-    def copy_effect(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.calc.calc_mode.effects.copy")
+    def event_emit(self, mocker: MockerFixture) -> MagicMock:
+        return mocker.patch("ulauncher.modes.calc.calc_mode._events.emit")
 
     def test_is_enabled(self, mode: CalcMode) -> None:
         assert mode.matches_query_str("5")
@@ -91,12 +92,16 @@ class TestCalcMode:
         assert get_results(mode, Query(None, "2-2"))[0].result == "0"
         assert get_results(mode, Query(None, "5%2"))[0].result == "1"
 
-    def test_handle_query__copy_effect_called(self, mode: CalcMode, copy_effect: MagicMock) -> None:
+    def test_handle_query__copy_called(self, mode: CalcMode, event_emit: MagicMock, mocker: MockerFixture) -> None:
         query = Query(None, "3+2")
         result = get_results(mode, query)[0]
         assert result.result == "5"
-        mode.activate_result("copy", result, query, lambda _: None)
-        copy_effect.assert_called_once_with("5")
+        callback = mocker.MagicMock()
+        mode.activate_result("copy", result, query, callback)
+        event_emit.assert_called_once_with("app:clipboard_store", "5")
+        callback.assert_called_once()
+        # Verify callback was called with close_window effect
+        assert callback.call_args[0][0]["type"] == EffectType.CLOSE_WINDOW
 
     def test_handle_query__invalid_expr(self, mode: CalcMode, caplog: pytest.LogCaptureFixture) -> None:
         bad_queries = [

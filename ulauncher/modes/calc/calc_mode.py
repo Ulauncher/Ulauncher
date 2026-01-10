@@ -14,6 +14,9 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcErrorResult, CalcResult
+from ulauncher.utils.eventbus import EventBus
+
+_events = EventBus()
 
 # supported operators
 operators: dict[type, Callable[..., int | float]] = {
@@ -169,7 +172,8 @@ class CalcMode(BaseMode):
     ) -> None:
         if action_id == "copy":
             assert isinstance(result, CalcResult)
-            callback(effects.copy(result.result))
+            _events.emit("app:clipboard_store", result.result)
+            callback(effects.close_window())
         else:
             logger.error("Unexpected action '%s' for Calc mode result '%s'", action_id, result)
             callback(effects.do_nothing())
