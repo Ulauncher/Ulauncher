@@ -173,6 +173,14 @@ class Extension:
         self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
         self._client.connect()
 
+    def clipboard_store(self, text: str) -> None:
+        """Copy text to the clipboard."""
+        if not isinstance(text, str):
+            msg = f'Clipboard text "{text}" is invalid. It must be a string'
+            raise TypeError(msg)
+
+        self._client.send("clipboard_store", text)
+
     def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result]:
         return []
 
