@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, TypedDict, Union
 
 # if type checking import Result
@@ -65,8 +64,6 @@ EffectMessage = Union[
 # Input format that we will convert to an EffectMessage
 EffectMessageInput = Union[EffectMessage, bool, str, Iterable["Result"]]
 
-logger = logging.getLogger()
-
 
 def do_nothing() -> DoNothing:
     return {"type": EffectType.DO_NOTHING}
@@ -79,7 +76,6 @@ def close_window() -> CloseWindow:
 def set_query(query: str) -> SetQuery:
     if not isinstance(query, str):
         msg = f'Query argument "{query}" is invalid. It must be a string'
-        logger.error(msg)
         raise TypeError(msg)
     return {"type": EffectType.SET_QUERY, "data": query}
 
@@ -87,10 +83,8 @@ def set_query(query: str) -> SetQuery:
 def open(item: str) -> Open:  # noqa: A001
     if not isinstance(item, str):
         msg = f'Open argument "{item}" is invalid. It must be a string'
-        logger.error(msg)
         raise TypeError(msg)
     if not item:
         msg = "Open argument cannot be empty"
-        logger.error(msg)
         raise ValueError(msg)
     return {"type": EffectType.OPEN, "data": item}
