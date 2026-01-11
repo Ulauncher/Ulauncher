@@ -184,8 +184,8 @@ class UlauncherCore:
             effect_utils.handle(effects.set_query(f"{result.keyword} "))
             return
 
-        if result.actions and alt:
-            # alt activation: show action result list
+        if alt and result.actions and not isinstance(result, ActionResult):
+            # alt activation: show action result list (unless it's already showing)
             self._show_results(self._get_action_results(result), callback)
             return
 
