@@ -181,6 +181,7 @@ class UlauncherCore:
         action_id: str | None = None
 
         if isinstance(result, KeywordTrigger):
+            # activate keyword trigger
             effect_utils.handle(effects.set_query(f"{result.keyword} "))
             return
 
@@ -190,14 +191,14 @@ class UlauncherCore:
             return
 
         if isinstance(result, ActionResult) and result.parent_result and result.action_id:
-            # ActionResult activation (activate parent result with given action_id)
+            # activated an action from the action list: use parent with given action id
             action_id = result.action_id
             result = result.parent_result
         elif result.actions:
-            # normal result main activation: get first action
+            # activated result without alt: use first action
             action_id = next(iter(result.actions))
         else:
-            # Ignore results with no actions (can be used as headers, spacers or status messages)
+            # ignore results with no actions (can be used as headers, spacers or status messages)
             pass
 
         if action_id is not None:
