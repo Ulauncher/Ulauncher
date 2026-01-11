@@ -33,7 +33,7 @@ def should_close(effect_msg: EffectMessage | list[Result]) -> bool:
         if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY):
             return False
         if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
+            effect_list = cast("list[EffectMessage | list[Result]]", effect_msg.get("data", []))
             return all(map(should_close, effect_list))
     return True
 
@@ -56,8 +56,11 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         _events.emit("app:clipboard_store", data)
 
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-        for effect in cast("list[EffectMessage]", data):
-            handle(effect, True)
+        for effect in cast("list[EffectMessage | list[Result]]", data):
+            if isinstance(effect, list):
+                _events.emit("app:show_results", effect)
+            else:
+                handle(effect, True)
 
     elif not has_valid_type:
         _logger.warning("Unknown effect type: %s", event_type)
