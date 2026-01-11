@@ -178,32 +178,34 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
+        action_id: str | None = None
+
         if isinstance(result, KeywordTrigger):
             effect_utils.handle(effects.set_query(f"{result.keyword} "))
             return
 
-        # Handle ActionResult activation (activate parent result with given action_id)
-        if isinstance(result, ActionResult) and result.parent_result and result.action_id:
-            mode = self._mode_map.get(result.parent_result, self._mode)
-            if mode:
-                mode.activate_result(
-                    result.action_id, result.parent_result, self.query, self._mode_callback(mode, callback)
-                )
-                return
-
-        # Get the mode for this result
-        mode = self._mode_map.get(result, self._mode)
-        if not mode:
-            logger.warning("Cannot activate result '%s' because no mode is set", result)
+        if result.actions and alt:
+            # alt activation: show action result list
+            self._show_results(self._get_action_results(result), callback)
             return
 
-        # Ignore results with no actions (can be used as headers, spacers or status messages)
-        if result.actions:
-            if alt:
-                self._show_results(self._get_action_results(result), callback)
+        if isinstance(result, ActionResult) and result.parent_result and action_id:
+            # ActionResult activation (activate parent result with given action_id)
+            action_id = result.action_id
+            result = result.parent_result
+        elif result.actions:
+            # normal result main activation: get first action
+            action_id = next(iter(result.actions))
+        else:
+            # Ignore results with no actions (can be used as headers, spacers or status messages)
+            pass
+
+        if action_id is not None:
+            mode = self._mode_map.get(result, self._mode)
+            if not mode:
+                logger.warning("Cannot activate result '%s' because no mode is set", result)
                 return
-            first_action_id = next(iter(result.actions))
-            mode.activate_result(first_action_id, result, self.query, self._mode_callback(mode, callback))
+            mode.activate_result(action_id, result, self.query, self._mode_callback(mode, callback))
             return
 
     def _mode_callback(
