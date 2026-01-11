@@ -189,7 +189,7 @@ class UlauncherCore:
             self._show_results(self._get_action_results(result), callback)
             return
 
-        if isinstance(result, ActionResult) and result.parent_result and action_id:
+        if isinstance(result, ActionResult) and result.parent_result and result.action_id:
             # ActionResult activation (activate parent result with given action_id)
             action_id = result.action_id
             result = result.parent_result
