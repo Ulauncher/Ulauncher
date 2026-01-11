@@ -44,7 +44,11 @@ class ExtensionsView(BaseView):
         self.layout = SidebarLayout(
             footer_actions=[
                 ("Add extension", "list-add-symbolic", self._on_add_extension),
-                ("Discover extensions", "system-search-symbolic", lambda _: open_detached("https://ext.ulauncher.io")),
+                (
+                    "Discover extensions",
+                    "system-search-symbolic",
+                    lambda _: open_detached("https://ext.ulauncher.io/?versions=2%2C3"),
+                ),
                 ("Develop your own", "text-x-generic-symbolic", lambda _: open_detached("https://docs.ulauncher.io")),
             ],
         )
