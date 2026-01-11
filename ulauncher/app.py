@@ -10,6 +10,7 @@ from gi.repository import Gdk, Gio, Gtk
 import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
+from ulauncher.internals.result import Result
 from ulauncher.ui.windows.preferences.preferences_window import PreferencesWindow
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
@@ -131,6 +132,12 @@ class UlauncherApp(Gtk.Application):
     def show_launcher(self) -> None:
         if "main" not in self.windows:
             self.windows["main"] = UlauncherWindow(application=self)
+
+    @events.on
+    def show_results(self, results: list[Result]) -> None:
+        """Do not use. This is only needed because legacy ActionList can contain result lists"""
+        if main_window := cast("UlauncherWindow | None", self.windows.get("main")):
+            main_window.show_results(results)
 
     @events.on
     def close_launcher(self) -> None:

@@ -1,9 +1,14 @@
 from __future__ import annotations  # noqa: N999
 
+from typing import TYPE_CHECKING
+
 from ulauncher.internals import effects
 
+if TYPE_CHECKING:
+    from ulauncher.internals.result import Result
 
-def ActionList(effect_list: list[effects.EffectMessage]) -> effects.LegacyRunMany:  # noqa: N802
+
+def ActionList(effect_list: list[effects.EffectMessage | list[Result]]) -> effects.LegacyRunMany:  # noqa: N802
     """
     ActionList is deprecated but maintained for backward compatibility.
 
