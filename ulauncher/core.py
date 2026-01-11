@@ -206,17 +206,22 @@ class UlauncherCore:
             if not mode:
                 logger.warning("Cannot activate result '%s' because no mode is set", result)
                 return
-            mode.activate_result(action_id, result, self.query, self._mode_callback(mode, callback))
+            valid_mode = mode if self._mode == mode else None
+            mode.activate_result(action_id, result, self.query, self._mode_callback(valid_mode, callback))
             return
 
     def _mode_callback(
-        self, mode: BaseMode, callback: Callable[[Iterable[Result]], None]
+        self, valid_mode: BaseMode | None, callback: Callable[[Iterable[Result]], None]
     ) -> Callable[[effects.EffectMessage | list[Result]], None]:
-        """Callback to handle results and effects from modes."""
+        """
+        Callback to handle results and effects from modes.
+
+        valid_mode: Ensures this mode is still active when the callback is called (set to None to skip validation).
+        callback: The callback function to handle results and effects.
+        """
 
         def _callback(effect_msg: effects.EffectMessage | list[Result]) -> None:
-            # Ensure the mode hasn't changed
-            if self._mode != mode:
+            if valid_mode not in (self._mode, None):
                 return
 
             if isinstance(effect_msg, dict):
