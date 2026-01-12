@@ -9,6 +9,7 @@ _settings_file = f"{paths.CONFIG}/settings.json"
 
 
 class Settings(JsonConf):
+    disable_layer_shell = False
     disable_desktop_filters = False
     clear_previous_query = True
     close_on_focus_out = True

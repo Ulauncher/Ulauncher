@@ -32,6 +32,8 @@ def enable(window: Gtk.Window) -> bool:
         return False
 
     GtkLayerShell.init_for_window(window)
+    # Set namespace otherwise it defaults to `gtk-layer-shell`
+    GtkLayerShell.set_namespace(window, "ulauncher")
     GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
     GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
     # Ask to be moved when over some other shell component
