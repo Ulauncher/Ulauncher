@@ -59,12 +59,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         )
 
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
-        if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and layer_shell.is_supported():
+        if (
+            not IS_X11_COMPATIBLE
+            and DESKTOP_ID != "GNOME"
+            and not self.settings.disable_layer_shell
+            and layer_shell.is_supported()
+        ):
             self.layer_shell_enabled = layer_shell.enable(self)
             if self.layer_shell_enabled:
                 logger.info("Layer shell support is enabled")
-            elif self.settings.disable_layer_shell:
-                logger.info("Layer shell support is disabled")
             else:
                 logger.warning(
                     "Layer shell is not supported. If you have issues with window positioning, "

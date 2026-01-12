@@ -8,14 +8,8 @@ Uses the wlr-layer-shell protocol [1]
 [1]: https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml
 """
 
-from __future__ import annotations  # noqa: N999
-
 import gi
 from gi.repository import GLib, Gtk
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 
 try:
     gi.require_version("GtkLayerShell", "0.1")
@@ -33,10 +27,8 @@ def is_supported() -> bool:
         return False
 
 
-def enable(window: UlauncherWindow) -> bool:
+def enable(window: Gtk.Window) -> bool:
     if not is_supported():
-        return False
-    if window.settings.disable_layer_shell:
         return False
 
     GtkLayerShell.init_for_window(window)
