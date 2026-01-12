@@ -30,6 +30,8 @@ def is_supported() -> bool:
 def enable(window: Gtk.Window) -> bool:
     if not is_supported():
         return False
+    if window.settings.disable_layer_shell:
+        return False
 
     GtkLayerShell.init_for_window(window)
     GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)

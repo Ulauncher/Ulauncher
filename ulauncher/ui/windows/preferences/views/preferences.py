@@ -250,6 +250,15 @@ class PreferencesView(BaseView):
         desc = "Show applications that are hidden for your desktop environment by ignoring desktop filters."
         self._add_setting_row(advanced_box, "Include foreign desktop apps", filters_switch, desc)
 
+        # GTK Layer Shell
+        layer_switch = Gtk.Switch(active=self.settings.disable_layer_shell, sensitive=not IS_X11)
+        layer_switch.connect("notify::active", self._on_layer_toggled)
+        desc = (
+            "Disables the GTK Layer Shell. Useful for window manager customisation and handling behavioural "
+            "quirks. Applies only to Wayland compositors."
+        )
+        self._add_setting_row(advanced_box, "Disable GTK Layer Shell", layer_switch, desc)
+
         # Daemonless mode
         daemonless_switch = Gtk.Switch(active=self.settings.daemonless)
         daemonless_switch.connect("notify::active", self._on_daemonless_toggled)
@@ -322,6 +331,9 @@ class PreferencesView(BaseView):
     def _on_recent_apps_changed(self, spin: Gtk.SpinButton) -> None:
         count = spin.get_value_as_int()
         self.settings.save({"max_recent_apps": count})
+
+    def _on_layer_toggled(self, switch: Gtk.Switch, _: Any) -> None:
+        self.settings.save({"disable_layer_shell": switch.get_active()})
 
     def _on_tray_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()

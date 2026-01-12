@@ -63,6 +63,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.layer_shell_enabled = layer_shell.enable(self)
             if self.layer_shell_enabled:
                 logger.info("Layer shell support is enabled")
+            elif self.settings.disable_layer_shell:
+                logger.info("Layer shell support is disabled")
             else:
                 logger.warning(
                     "Layer shell is not supported. If you have issues with window positioning, "
