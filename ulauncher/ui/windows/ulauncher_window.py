@@ -359,7 +359,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             else:
                 self.move(int(pos_x + monitor_size.x), int(pos_y + monitor_size.y))
 
-        if self.is_composited():
+        if self.is_composited() and DESKTOP_ID is not None:
             self.frame.set_properties(
                 margin_top=margin_y,
                 margin_bottom=margin_y,
