@@ -15,11 +15,11 @@ class Settings(JsonConf):
     close_on_focus_out = True
     daemonless = False
     disable_desktop_filters = False
-    disable_layer_shell = False
     enable_application_mode = True
     grab_mouse_pointer = False
     hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
+    layer_shell = True
     max_recent_apps = 0
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"
