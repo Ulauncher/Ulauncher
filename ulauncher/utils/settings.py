@@ -9,23 +9,23 @@ _settings_file = f"{paths.CONFIG}/settings.json"
 
 
 class Settings(JsonConf):
-    disable_layer_shell = False
-    disable_desktop_filters = False
+    arrow_key_aliases = "hjkl"
+    base_width = 750
     clear_previous_query = True
     close_on_focus_out = True
+    daemonless = False
+    disable_desktop_filters = False
+    disable_layer_shell = False
+    enable_application_mode = True
     grab_mouse_pointer = False
     hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
-    enable_application_mode = True
     max_recent_apps = 0
-    base_width = 750
     raise_if_started = False
     render_on_screen = "mouse-pointer-monitor"
     show_tray_icon = True
     terminal_command = ""
     theme_name = "light"
-    arrow_key_aliases = "hjkl"
-    daemonless = False
     tray_icon_name = "ulauncher-indicator-symbolic"
 
     # Convert dash to underscore
