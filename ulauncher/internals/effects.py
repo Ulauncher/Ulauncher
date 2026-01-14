@@ -13,6 +13,7 @@ class EffectType:
     SET_QUERY: Final = "effect:set_query"
     OPEN: Final = "effect:open"
     LEGACY_COPY: Final = "effect:legacy_copy"
+    LEGACY_RUN_SCRIPT: Final = "effect:legacy_run_script"
     LEGACY_RUN_MANY: Final = "effect:legacy_run_many"
     LEGACY_ACTIVATE_CUSTOM: Final = "effect:legacy_activate_custom"
 
@@ -40,6 +41,11 @@ class LegacyCopy(TypedDict):
     data: str
 
 
+class LegacyRunScript(TypedDict):
+    type: Literal["effect:legacy_run_script"]
+    data: list[str]
+
+
 class LegacyRunMany(TypedDict):
     type: Literal["effect:legacy_run_many"]
     data: list[Any]  # list of other EffectMessages (can't be expressed with TypedDict)
@@ -57,6 +63,7 @@ EffectMessage = Union[
     SetQuery,
     Open,
     LegacyCopy,
+    LegacyRunScript,
     LegacyRunMany,
     LegacyActivateCustom,
 ]

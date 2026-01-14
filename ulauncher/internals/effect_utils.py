@@ -55,6 +55,10 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     elif event_type == EffectType.LEGACY_COPY and isinstance(data, str):
         _events.emit("app:clipboard_store", data)
 
+    elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+        from ulauncher.modes.shortcuts.run_script import run_script
+
+        run_script(*data)
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
         for effect in cast("list[EffectMessage | list[Result]]", data):
             if isinstance(effect, list):
