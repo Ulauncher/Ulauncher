@@ -26,7 +26,7 @@ class CloseWindow(TypedDict):
     type: Literal["effect:close_window"]
 
 
-class SetQuery(TypedDict):
+class SetQuery(TypedDict, total=False):
     type: Literal["effect:set_query"]
     data: str
 
@@ -80,11 +80,27 @@ def close_window() -> CloseWindow:
     return {"type": EffectType.CLOSE_WINDOW}
 
 
-def set_query(query: str) -> SetQuery:
+def set_query(query: str, ext_trigger_id: str | None = "") -> SetQuery:
+    """
+    Set the user query in Ulauncher.
+
+    :param query: The query string
+    :param ext_trigger_id: Optional extension trigger id (for extensions with keyword triggers only)
+        Used to look up the corresponding user keyword.
+        When used, the "query" param will be used for the query argument.
+
+        Empty string (default) means use query as-is.
+        None means keep current keyword and replace argument.
+    """
     if not isinstance(query, str):
         msg = f'Query argument "{query}" is invalid. It must be a string'
         raise TypeError(msg)
-    return {"type": EffectType.SET_QUERY, "data": query}
+
+    effect: SetQuery = {"type": EffectType.SET_QUERY, "data": query}
+    if ext_trigger_id != "":
+        effect["ext_trigger_id"] = ext_trigger_id  # pyrefly: ignore[bad-typed-dict-key]
+
+    return effect
 
 
 def open(item: str) -> Open:  # noqa: A001

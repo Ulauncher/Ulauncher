@@ -9,11 +9,13 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterable, cast
 
+from ulauncher.api.client import set_query_transformer
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.internals import effect_utils, effects
+from ulauncher.internals.effects import EffectType
 from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.timer import TimerContext, timer
@@ -153,6 +155,11 @@ class Extension:
         # ignore outdated responses
         if current_input == self._input:
             effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
+
+            # Transform set_query effects to substitute trigger_id with actual keywords
+            # This won't work for set_query effects inside ActionList, but ActionList is already deprecated.
+            if isinstance(effect_msg, dict) and effect_msg.get("type") == EffectType.SET_QUERY:
+                effect_msg = set_query_transformer.transform(self._input, cast("effects.SetQuery", effect_msg))
 
             # Cache Result objects before sending them, keyed by their Python object ID
             if isinstance(effect_msg, list):

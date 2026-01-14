@@ -280,13 +280,20 @@ class ExtensionController:
                 cmd = [sys.executable, "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", extension_main]
 
             prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
-            triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
+            trigger_prefs = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
             # backwards compatible v2 preferences format (with keywords added back)
-            v2_prefs = {**triggers, **prefs}
+            v2_prefs = {**trigger_prefs, **prefs}
+            # default trigger keywords from manifest (for set_query validation/substitution)
+            triggers = {
+                t_id: {"default_keyword": t.default_keyword, "keyword": t.keyword}
+                for t_id, t in self.triggers.items()
+                if t.keyword
+            }
             env = {
                 "VERBOSE": str(int(get_cli_args().verbose)),
                 "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
                 "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+                "EXTENSION_TRIGGERS": json.dumps(triggers, separators=(",", ":")),
                 "ULAUNCHER_EXTENSION_ID": self.id,
                 "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
             }
