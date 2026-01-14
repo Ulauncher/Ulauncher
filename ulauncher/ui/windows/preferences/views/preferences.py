@@ -251,13 +251,13 @@ class PreferencesView(BaseView):
         self._add_setting_row(advanced_box, "Include foreign desktop apps", filters_switch, desc)
 
         # GTK Layer Shell
-        layer_switch = Gtk.Switch(active=self.settings.disable_layer_shell, sensitive=not IS_X11)
+        layer_switch = Gtk.Switch(active=self.settings.layer_shell, sensitive=not IS_X11)
         layer_switch.connect("notify::active", self._on_layer_toggled)
         desc = (
-            "Disables the GTK Layer Shell. Useful for window manager customisation and handling behavioural "
-            "quirks. Applies only to Wayland compositors."
+            "Use Layer Shell for positioning on Wayland (when supported). "
+            "Recommended unless your desktop handles Wayland positioning separately (Hyprland)"
         )
-        self._add_setting_row(advanced_box, "Disable GTK Layer Shell", layer_switch, desc)
+        self._add_setting_row(advanced_box, "Enable Layer Shell", layer_switch, desc)
 
         # Daemonless mode
         daemonless_switch = Gtk.Switch(active=self.settings.daemonless)
@@ -333,7 +333,7 @@ class PreferencesView(BaseView):
         self.settings.save({"max_recent_apps": count})
 
     def _on_layer_toggled(self, switch: Gtk.Switch, _: Any) -> None:
-        self.settings.save({"disable_layer_shell": switch.get_active()})
+        self.settings.save({"layer_shell": switch.get_active()})
 
     def _on_tray_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
