@@ -38,7 +38,7 @@ If you find yourself adding code like "this shouldn't be called" or fallback bra
 ### Quality assurance
 
 - `python -m py_compile <file_paths>` - Check that edited files are valid Python syntax.
-- `make format` - autoformat code before committing
+- `make format` - Fix code with formatting errors
 - `make check` - run all linting and tests (ruff, pyrefly, typo, pytest)
 - Check the Makefile for running individual linters or targeting specific paths
 
@@ -62,44 +62,6 @@ If you find yourself adding code like "this shouldn't be called" or fallback bra
 - git (for extension installation/updates)
 
 Avoid adding new dependencies unless necessary.
-
----
-
-## Code Style
-
-### Type hints
-
-- All method arguments and return types must have type annotations (including `-> None`)
-- Use `| None` instead of `Optional[]` (Python 3.10+ style, backported via `from __future__ import annotations`, which must be at the top of the file when using these type hints)
-- Use `list[T]`, `dict[K, V]` instead of `List[T]`, `Dict[K, V]`
-
-### Logging
-
-Use structured logging with `%s` placeholders, not f-strings:
-
-```python
-logger.info("Processing %s items for user %s", len(items), user_id)
-```
-
-### String formatting
-
-- Use `%s` placeholders for logging (for performance)
-- Use f-strings for user-facing strings
-- Don't use `str.format()`
-
-### Naming conventions
-
-- `snake_case` for functions, methods, variables
-- `PascalCase` for classes
-- `UPPER_CASE` for constants
-
-### Formatting rules
-
-- Use **double quotes** for strings, except strings containing double quotes (use single quotes to avoid escaping)
-- No trailing whitespace on any lines, including empty lines
-- Use trailing commas for **multi-line** lists, dicts and function arguments
-- Maximum 120 characters per line
-- Run `make format` to autofix formatting issues
 
 ---
 
