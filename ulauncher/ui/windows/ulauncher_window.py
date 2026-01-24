@@ -71,21 +71,25 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         # Widget structure
         #
-        # frame (positioning container, not affected by theme)
-        # └── theme_root(.app)
-        #     ├── drag_listener
-        #     │   └── prompt
-        #     │       ├── prompt_input (.input)
-        #     │       └── prefs_btn (.prefs-btn)
-        #     └── results_scroller
-        #         └── results (.result-box)
-        #             └── ResultWidget (multiple)
+        # frame (positioning container for Gnome, not affected by theme)
+        # └── shadow_container (provides space for shadow when enabled)
+        #     └── theme_root(.app)
+        #         ├── drag_listener
+        #         │   └── prompt
+        #         │       ├── prompt_input (.input)
+        #         │       └── prefs_btn (.prefs-btn)
+        #         └── results_scroller
+        #             └── results (.result-box)
+        #                 └── ResultWidget (multiple)
 
         self.frame = Gtk.Box(valign=Gtk.Align.START)
         self.add(self.frame)
 
+        shadow_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=self._get_shadow_size())
+        self.frame.pack_start(shadow_container, True, True, 0)
+
         self.theme_root = Gtk.Box(app_paintable=True, orientation=Gtk.Orientation.VERTICAL)
-        self.frame.pack_start(self.theme_root, True, True, 0)
+        shadow_container.pack_start(self.theme_root, True, True, 0)
 
         self.prompt = Gtk.Box()
         drag_listener = Gtk.EventBox()
@@ -317,12 +321,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if isinstance(widget, Gtk.Container):
             widget.forall(self.apply_css)
 
+    def _get_shadow_size(self) -> int:
+        if not self.is_composited():
+            return 0
+
+        return self.settings.window_shadow
+
     def apply_theme(self) -> None:
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        theme_css = Theme.load(self.settings.theme_name).get_css().encode()
-        self._css_provider.load_from_data(theme_css)
+        # Load theme CSS and apply shadow
+        theme_css = Theme.load(self.settings.theme_name).get_css(self._get_shadow_size())
+        self._css_provider.load_from_data(theme_css.encode())
         self.apply_css(self)
+        logger.info('Applying theme "%s"', self.settings.theme_name)
         visual = self.get_screen().get_rgba_visual()
         if visual:
             self.set_visual(visual)
@@ -333,8 +345,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         return None
 
     def position_window(self) -> None:
-        margin_x = margin_y = 20.0
-
         if monitor_size := self.get_monitor_size():
             window_width = self.settings.base_width
             pos_x = (monitor_size.width - window_width) / 2
@@ -345,22 +355,19 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.results_scroller.set_property("max-content-height", max_height)
 
             # Part II of the Gnome Wayland fix (see above in __init__)
+            # Use margins to center the visible content within the full-screen window
             if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
-                margin_x = pos_x
-                margin_y = max(margin_y, pos_y)
+                self.frame.set_properties(
+                    margin_top=pos_y,
+                    margin_bottom=pos_y,
+                    margin_start=pos_x,
+                    margin_end=pos_x,
+                )
 
             elif self.layer_shell_enabled:
                 layer_shell.set_vertical_position(self, pos_y)
             else:
                 self.move(int(pos_x + monitor_size.x), int(pos_y + monitor_size.y))
-
-        if self.is_composited():
-            self.frame.set_properties(
-                margin_top=margin_y,
-                margin_bottom=margin_y,
-                margin_start=margin_x,
-                margin_end=margin_x,
-            )
 
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
