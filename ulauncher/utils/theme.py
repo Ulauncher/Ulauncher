@@ -87,6 +87,8 @@ class Theme(JsonConf):
 
     @classmethod
     def load(cls, theme_name: str) -> Theme:  # type: ignore[override]
+        # Note: This return type should not be made a generic because it will return either Theme or LegacyTheme
+        # depending on what the theme is. LegacyTheme is a Theme subclass though.
         themes = get_themes()
         if theme_name in themes:
             return themes[theme_name]
