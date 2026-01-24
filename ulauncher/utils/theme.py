@@ -74,10 +74,17 @@ class Theme(JsonConf):
     def get_css_path(self) -> Path:
         return Path(self.base_path, f"{self.name}.css")
 
-    def get_css(self) -> str:
+    def get_shadow_css(self, shadow_size: int) -> str:
+        return "\n.app { box-shadow: 0 0 " + str(max(0, shadow_size)) + "px rgba(0, 0, 0, 0.5); }"
+
+    def get_css(self, shadow_size: int) -> str:
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
-        return CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
+        return (
+            CSS_RESET
+            + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
+            + self.get_shadow_css(shadow_size)
+        )
 
     def validate(self) -> None:
         try:
@@ -111,21 +118,21 @@ class LegacyTheme(Theme):
         # `css_file_gtk_3.20+` is the only supported one if both are specified, otherwise css_file is
         return Path(self.base_path, self.get("css_file_gtk_3.20+", self.css_file))
 
-    def get_css(self) -> str:
+    def get_css(self, shadow_size: int) -> str:
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
         css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
         if self.extend_theme:
             parent_theme = LegacyTheme.load(self.extend_theme)
             if parent_theme.get_css_path().is_file():
-                css = f"{parent_theme.get_css()}\n\n{css}"
+                css = f"{parent_theme.get_css(shadow_size)}\n\n{css}"
             else:
                 logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
         if highlight_color := self.matched_text_hl_colors.get("when_not_selected"):
             css += f".item-highlight {{ color: {highlight_color} }}"
         if selected_highlight_color := self.matched_text_hl_colors.get("when_selected"):
             css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
-        return css
+        return css + self.get_shadow_css(shadow_size)
 
     def validate(self) -> None:
         try:

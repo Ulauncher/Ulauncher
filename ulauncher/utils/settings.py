@@ -27,6 +27,7 @@ class Settings(JsonConf):
     terminal_command = ""
     theme_name = "light"
     tray_icon_name = "ulauncher-indicator-symbolic"
+    window_shadow = 5
 
     # Convert dash to underscore
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]

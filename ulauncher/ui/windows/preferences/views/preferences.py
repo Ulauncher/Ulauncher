@@ -250,6 +250,16 @@ class PreferencesView(BaseView):
         desc = "Show applications that are hidden for your desktop environment by ignoring desktop filters."
         self._add_setting_row(advanced_box, "Include foreign desktop apps", filters_switch, desc)
 
+        # Window shadow
+        shadow_adjustment = Gtk.Adjustment(value=self.settings.window_shadow, lower=0, upper=25, step_increment=1)
+        shadow_spin = Gtk.SpinButton(adjustment=shadow_adjustment)
+        shadow_spin.connect("value-changed", self._on_shadow_changed)
+        desc = (
+            "The window shadow size. Set to 0 to disable. "
+            "Shadows are also disabled if we detect your window manager cannot support them."
+        )
+        self._add_setting_row(advanced_box, "Window shadow size", shadow_spin, desc)
+
         # GTK Layer Shell
         layer_switch = Gtk.Switch(active=self.settings.layer_shell, sensitive=not IS_X11)
         layer_switch.connect("notify::active", self._on_layer_toggled)
@@ -331,6 +341,9 @@ class PreferencesView(BaseView):
     def _on_recent_apps_changed(self, spin: Gtk.SpinButton) -> None:
         count = spin.get_value_as_int()
         self.settings.save({"max_recent_apps": count})
+
+    def _on_shadow_changed(self, spin: Gtk.SpinButton) -> None:
+        self.settings.save({"window_shadow": spin.get_value_as_int()})
 
     def _on_layer_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         self.settings.save({"layer_shell": switch.get_active()})

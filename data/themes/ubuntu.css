@@ -31,7 +31,7 @@
 @define-color item_highlight_selected #ffcbbd;
 
 .app {
-  box-shadow: 0 0 5px @window_shadow;
+  /* Note: box-shadow is now controlled by the application based on user settings */
   background-color: @window_bg;
   border: 1px solid @window_border_color;
   border-radius: 4px;
