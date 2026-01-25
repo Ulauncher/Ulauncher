@@ -167,13 +167,15 @@ pytest: check-dev-deps
 
 # Auto format the code
 format: check-dev-deps
-	ruff check . --fix
+	@ruff check . --fix
 	ruff format .
-	@if command -v rumdl >/dev/null 2>&1; then \
+	if command -v rumdl >/dev/null 2>&1; then \
 		rumdl fmt .; \
 	else \
 		echo -e "${YELLOW}Skipping optional markdown formatting (rumdl not found)${RESET}"; \
 	fi
+	# Ensure all text files end with a newline (POSIX compliance)
+	git ls-files -z '*.py' '*.md' '*.json' '*.toml' '*.yml' '*.yaml' '*.txt' '*.css' '*.desktop' '*.service' '*.nix' .editorconfig .gitignore .dockerignore makefile | xargs -0 sh -c 'for file; do [ -n "$$(tail -c1 "$$file" 2>/dev/null)" ] && echo >> "$$file" || true; done' sh
 
 #=Build Commands
 
