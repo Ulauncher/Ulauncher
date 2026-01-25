@@ -105,3 +105,41 @@ Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discu
 There are some more helpful developer and maintainer commands provided by using our `make` targets. Run `make` to list them all.
 
 If you have any questions, feel free to ask in our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.
+
+## Project Structure
+
+```
+ulauncher/
+├── api/          # Extension API (runs in separate process)
+│   ├── client/   # Extension-side IPC client
+│   └── shared/   # Shared types between Ulauncher and extensions
+├── modes/        # Query handlers (apps, files, extensions, etc.)
+├── ui/           # GTK components and windows
+└── utils/        # Shared utilities (event bus, timers, IPC, etc.)
+```
+
+## Async
+
+Ulauncher uses **GLib callback patterns**, not Python's `async/await`:
+- GTK/GLib operations use GLib async patterns (e.g., `Gio.Subprocess.wait_async()`)
+- Avoid `threading.Thread` - use GLib's event loop
+- For delayed execution: `GLib.timeout_add()` or the `timer` utility
+- For main thread execution: `GLib.idle_add()`
+
+## Architecture
+
+Try to understand and follow these, when applicable.
+
+### [EventBus](docs/architecture/eventbus.md)
+For cross-module communication when modules can't directly reference each other (avoid circular imports, decouple core from UI).
+
+### [Mode System](docs/architecture/mode-system.md)
+Ulauncher's query handling architecture. Each mode handles specific types of queries (apps, files, calculator, extensions, etc.).
+
+### Custom Data Structures
+- **[BaseDataClass](docs/architecture/basedataclass.md)** - Lightweight dict-based dataclass alternative
+- **[JsonConf](docs/architecture/jsonconf.md)** - Config files with auto-deduplication and safe concurrent access
+- **[Singleton](docs/architecture/singleton.md)** - Ensure single instance of managers and state classes
+
+### [Extension IPC](docs/architecture/extension-ipc.md)
+Multi-process architecture for extensions. Unix socket pairs with JSON-line protocol for communication between Ulauncher and extension processes.
