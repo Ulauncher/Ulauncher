@@ -49,6 +49,7 @@ assert manager1 is manager2  # True - same instance
 ## Common Use Cases
 
 **Application state:**
+
 ```python
 class UlauncherApp(Gtk.Application):
     def __call__(self, *args, **kwargs):
@@ -59,6 +60,7 @@ app = UlauncherApp()  # Returns same instance
 ```
 
 **Manager classes:**
+
 ```python
 class ExtensionManager(metaclass=Singleton):
     def __init__(self):
@@ -67,6 +69,7 @@ class ExtensionManager(metaclass=Singleton):
 ```
 
 **Registry classes:**
+
 ```python
 class ModeRegistry(metaclass=Singleton):
     def __init__(self):

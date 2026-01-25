@@ -35,6 +35,7 @@ data.name  # Also works like an object
 ## Common Use Cases
 
 **Structured data objects:**
+
 ```python
 class SearchResult(BaseDataClass):
     name = ""
