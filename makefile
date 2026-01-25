@@ -175,7 +175,7 @@ format: check-dev-deps
 		echo -e "${YELLOW}Skipping optional markdown formatting (rumdl not found)${RESET}"; \
 	fi
 	# Ensure all text files end with a newline (POSIX compliance)
-	git ls-files -z *.{py,md,json,toml,yml,yaml,txt,css,desktop,service,nix} .editorconfig .gitignore .dockerignore makefile | xargs -0 sh -c 'for file; do [ -n "$$(tail -c1 "$$file" 2>/dev/null)" ] && echo >> "$$file" || true; done' sh
+	git ls-files -z '*.py' '*.md' '*.json' '*.toml' '*.yml' '*.yaml' '*.txt' '*.css' '*.desktop' '*.service' '*.nix' .editorconfig .gitignore .dockerignore makefile | xargs -0 sh -c 'for file; do [ -n "$$(tail -c1 "$$file" 2>/dev/null)" ] && echo >> "$$file" || true; done' sh
 
 #=Build Commands
 
