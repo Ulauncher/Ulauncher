@@ -107,7 +107,7 @@ run-container:
 
 #=Lint/test Commands
 
-.PHONY: check lint format pyrefly ruff typos pytest check-dev-deps
+.PHONY: check lint format pyrefly ruff rumdl typos pytest check-dev-deps
 
 # Check if development dependencies are properly installed
 check-dev-deps:
@@ -130,7 +130,7 @@ check-dev-deps:
 	fi
 
 # Run all linters
-lint: check-dev-deps typos ruff pyrefly
+lint: check-dev-deps typos ruff pyrefly rumdl
 
 # Run all linters and test
 check: lint pytest
@@ -147,6 +147,14 @@ ruff: check-dev-deps
 typos: check-dev-deps
 	typos .
 
+# Lint markdown files with rumdl (optional, requires Python 3.9+)
+rumdl:
+	@if command -v rumdl >/dev/null 2>&1; then \
+		rumdl check .; \
+	else \
+		echo -e "${YELLOW}Skipping optional markdown linting (rumdl not found)${RESET}"; \
+	fi
+
 # Run unit tests
 pytest: check-dev-deps
 	@set -euo pipefail
@@ -161,6 +169,11 @@ pytest: check-dev-deps
 format: check-dev-deps
 	ruff check . --fix
 	ruff format .
+	@if command -v rumdl >/dev/null 2>&1; then \
+		rumdl fmt .; \
+	else \
+		echo -e "${YELLOW}Skipping optional markdown formatting (rumdl not found)${RESET}"; \
+	fi
 
 #=Build Commands
 

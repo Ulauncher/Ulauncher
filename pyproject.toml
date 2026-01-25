@@ -144,3 +144,15 @@ per-file-ignores = {"tests/**/*.py" = [ # Relax some linting rules for tests
 
 [tool.pytest.ini_options]
 log_cli = true
+
+[tool.rumdl]
+respect-gitignore = true
+exclude = [".git"] # rumdl will check .git/refs/ otherwise
+disable = [
+  "MD013",  # Line length
+  "MD033",  # Allow HTML in markdown (useful for docs)
+  "MD040",  # Allow code blocks without language specified
+  "MD041",  # Allow first line not to be the heading (because GitHub readme.md badges)
+  "MD059",  # Allow non-descriptive link texts (also because of GitHub readme.md badges)
+]
+MD048 = {style = "backtick"}  # Use ``` only, no ~~~

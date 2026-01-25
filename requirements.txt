@@ -5,4 +5,5 @@ pyrefly >= 0.42.0
 pytest
 pytest-mock
 ruff >= 0.14.4
+rumdl >= 0.1.0; python_version >= '3.9'
 typos
