@@ -26,7 +26,7 @@ RESET := \\e[0m
 # 3. Use ${VAR} to use makefile variables and $$VAR for runtime/bash variables
 # 4. Instead of $(cmd) for subshells you need to run $(shell eval "cmd")
 # 5. You can't pass arguments. ie: `make run build` will run `make run`, then `make build`
-#    What you should do instead is to set override the vars `make run VAR=build`
+#    What you should do instead is to override the vars `make run VAR=build`
 
 #=General Commands
 
