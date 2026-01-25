@@ -5,7 +5,7 @@ Lightweight dict-based dataclass alternative used throughout Ulauncher.
 ## When to Use
 
 Use `BaseDataClass` instead of:
-- Standard `dataclasses` (for Python 3.8 compatibility)
+- Standard `dataclasses`
 - Plain `dict` (when you want named fields with defaults)
 - Manual `__init__` methods with many parameters
 
