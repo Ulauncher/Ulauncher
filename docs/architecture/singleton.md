@@ -5,6 +5,7 @@ Use for classes that should only have one instance throughout the application li
 ## When to Use
 
 Use singletons for:
+
 - Application state that must be shared globally
 - Manager classes (extension manager, mode manager, etc.)
 - Registry classes (event bus, configuration registry)
@@ -79,6 +80,7 @@ class ModeRegistry(metaclass=Singleton):
 ## When NOT to Use
 
 ❌ Don't use singletons for:
+
 - Classes that might need multiple instances in tests
 - Classes that should be scoped to a specific context
 - Simple data containers (use BaseDataClass instead)

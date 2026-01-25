@@ -35,10 +35,12 @@ def something_happened(data):
 ## When to Use
 
 ✅ Use when:
+
 - Module A needs to notify module B, but A can't import B (circular dependency)
 - Multiple modules need to react to the same event
 - Decoupling UI from core logic
 
 ❌ Avoid when:
+
 - Direct function calls would work (simpler)
 - Only one listener will ever exist (use callbacks instead)
