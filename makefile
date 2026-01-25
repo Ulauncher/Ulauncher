@@ -32,18 +32,20 @@ RESET := \\e[0m
 
 .PHONY: help version run docker venv
 
-help: # Shows this list of available actions (targets)
-	@# Only includes targets with comments, but not if they have Commands with two ## chars
-	sed -nr \
+# Shows this list of available actions (targets)
+help:
+	@sed -nr \
 		-e 's|^#=(.*)|\n\1:|p' \
-		-e 's|^([a-zA-Z-]*):([^#]*?\s# (.*))| \1\x1b[35m - \3\x1b[0m|p' \
+		-e '/^# (.*)/ { N; s|^# (.*)\n([a-zA-Z-]*):.*| \2\x1b[35m - \1\x1b[0m|p }' \
 		$(lastword $(MAKEFILE_LIST)) \
 		| expand -t20
 
-version: # Print the Ulauncher version
+# Print the Ulauncher version
+version:
 	@echo ${VERSION}
 
-venv: # Creates a python virtual environment and installs dependencies
+# Creates a python virtual environment and installs dependencies
+venv:
 	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	python3 -m venv --system-site-packages .venv
 	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
@@ -60,7 +62,8 @@ venv: # Creates a python virtual environment and installs dependencies
 	echo -e "\nDo the activation each time you open the terminal."
 	echo "Now you can run make commands in this environment."
 
-run: prefs # Run ulauncher from source
+# Run ulauncher from source
+run: prefs
 	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
 	@if [ -n $(shell eval "command -v systemctl") ] && [ "inactive" != $(shell eval "systemctl --user is-active ulauncher") ]; then
 		systemctl --user stop ulauncher
@@ -69,7 +72,8 @@ run: prefs # Run ulauncher from source
 	fi
 	./bin/ulauncher --dev
 
-run-container: # Start a bash session in the Ulauncher Docker build container (Ubuntu)
+# Start a bash session in the Ulauncher Docker build container (Ubuntu)
+run-container:
 	@set -euo pipefail
 	SHELL_CMD=bash
 	VOL_SUFFIX=""
@@ -105,7 +109,8 @@ run-container: # Start a bash session in the Ulauncher Docker build container (U
 
 .PHONY: check lint format pyrefly ruff typos pytest check-dev-deps
 
-check-dev-deps: # Check if development dependencies are properly installed
+# Check if development dependencies are properly installed
+check-dev-deps:
 	@set -euo pipefail
 	if [ "$${GITHUB_ACTIONS:-}" = "true" ]; then
 	  exit 0
@@ -124,20 +129,26 @@ check-dev-deps: # Check if development dependencies are properly installed
 		exit 1
 	fi
 
-lint: check-dev-deps typos ruff pyrefly # Run all linters
+# Run all linters
+lint: check-dev-deps typos ruff pyrefly
 
-check: lint pytest # Run all linters and test
+# Run all linters and test
+check: lint pytest
 
-pyrefly: check-dev-deps # Lint with pyrefly (type checker)
+# Lint with pyrefly (type checker)
+pyrefly: check-dev-deps
 	pyrefly check
 
-ruff: check-dev-deps # Lint with ruff
+# Lint with ruff
+ruff: check-dev-deps
 	ruff check . && ruff format --check .
 
-typos: check-dev-deps # Lint with typos (typo checker)
+# Lint with typos (typo checker)
+typos: check-dev-deps
 	typos .
 
-pytest: check-dev-deps # Run unit tests
+# Run unit tests
+pytest: check-dev-deps
 	@set -euo pipefail
 	if [ -z $(shell eval "command -v xvfb-run") ]; then
 		pytest -p no:cacheprovider tests
@@ -146,7 +157,8 @@ pytest: check-dev-deps # Run unit tests
 		xvfb-run --auto-servernum -- pytest -p no:cacheprovider tests
 	fi
 
-format: check-dev-deps # Auto format the code
+# Auto format the code
+format: check-dev-deps
 	ruff check . --fix
 	ruff format .
 
@@ -154,13 +166,16 @@ format: check-dev-deps # Auto format the code
 
 .PHONY: prefs docker sdist manpage deb nix-run nix-build-dev nix-build
 
-docker: # Build the docker image (only needed if you make changes to it)
+# Build the docker image (only needed if you make changes to it)
+docker:
 	docker build -t "${DOCKER_IMAGE}" .
 
-prefs: # Build the preferences web app
+# Build the preferences web app
+prefs:
 	@echo "make prefs is no longer needed"
 
-sdist: manpage prefs # Build a source tarball
+# Build a source tarball
+sdist: manpage prefs
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
 	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
@@ -171,7 +186,8 @@ sdist: manpage prefs # Build a source tarball
 	rm .tarignore
 	echo -e "Built source dist tarball to ${BOLD}${GREEN}./dist/ulauncher-${VERSION}.tar.gz${RESET}"
 
-deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: $`make deb DEB_DISTRO=focal`
+# Build a deb package. Optionally override DEB_DISTRO arguments. Ex: $`make deb DEB_DISTRO=focal`
+deb: sdist
 	@set -euo pipefail
 	export NAME=${DEB_PACKAGER_NAME}
 	export EMAIL=${DEB_PACKAGER_EMAIL}
@@ -190,16 +206,20 @@ deb: sdist # Build a deb package. Optionally override DEB_DISTRO arguments. Ex: 
 	rm -rf dist/ulauncher_deb
 	echo -e "Package saved to ${BOLD}${GREEN}./dist/ulauncher_${DEB_VERSION}_all.deb${RESET}"
 
-nix-run: # Build and run Ulauncher Nix package
+# Build and run Ulauncher Nix package
+nix-run:
 	exec nix run --show-trace --print-build-logs '.#default' -- $(ARGS)
 
-nix-build-dev: # Build Ulauncher Nix package for development
+# Build Ulauncher Nix package for development
+nix-build-dev:
 	exec nix build --out-link nix/dev --show-trace --print-build-logs $(ARGS) '.#development'
 
-nix-build: # Build Ulauncher Nix package
+# Build Ulauncher Nix package
+nix-build:
 	exec nix build --out-link nix/result --show-trace --print-build-logs $(ARGS) '.#default'
 
-manpage: # Generate manpage
+# Generate manpage
+manpage:
 	@if [ -z $(shell eval "command -v help2man") ]; then
 		echo -e "${BOLD}${RED}You need help2man to (re)generate the manpage${RESET}"
 		exit 1
