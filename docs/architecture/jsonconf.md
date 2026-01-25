@@ -35,6 +35,7 @@ config.save()
 ## Why Instance Deduplication Matters
 
 Without deduplication:
+
 ```python
 # BAD: Two separate instances, changes conflict
 config1 = MyConfig.load("/path/to/config.json")
@@ -46,6 +47,7 @@ config2.save()  # Overwrites with value2 - value1 is lost!
 ```
 
 With deduplication:
+
 ```python
 # GOOD: Same instance, no conflicts
 config1 = MyConfig.load("/path/to/config.json")
@@ -59,6 +61,7 @@ config1.save()  # Writes value2 (both references point to same object)
 ## Common Use Cases
 
 **User preferences:**
+
 ```python
 class UserPreferences(JsonConf):
     theme = "light"
@@ -69,6 +72,7 @@ prefs = UserPreferences.load("~/.config/ulauncher/settings.json")
 ```
 
 **Extension config:**
+
 ```python
 class ExtensionConfig(JsonConf):
     api_key = ""

@@ -45,6 +45,7 @@ class SearchResult(BaseDataClass):
 ```
 
 **Event payloads:**
+
 ```python
 class QueryEvent(BaseDataClass):
     query = ""
@@ -53,6 +54,7 @@ class QueryEvent(BaseDataClass):
 ```
 
 **API responses:**
+
 ```python
 class ExtensionManifest(BaseDataClass):
     name = ""
