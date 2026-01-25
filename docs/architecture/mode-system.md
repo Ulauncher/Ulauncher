@@ -22,6 +22,7 @@ Located in `ulauncher/modes/base_mode.py`. Key methods:
 ## When to Create a New Mode
 
 Create a mode when adding a new query handler type:
+
 - New special command syntax (like `!` for calculator)
 - New keyword-triggered feature (like file browser)
 - New fallback result provider
@@ -29,6 +30,7 @@ Create a mode when adding a new query handler type:
 ## Examples
 
 See existing modes in `ulauncher/modes/`:
+
 - `apps/` - Application launcher
 - `calc/` - Calculator mode
 - `file_browser/` - File navigation

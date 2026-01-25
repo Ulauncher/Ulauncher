@@ -5,6 +5,7 @@ Config file handling with automatic instance deduplication and safe concurrent a
 ## When to Use
 
 Use `JsonConf` for:
+
 - User settings/preferences files
 - Extension manifests and configs
 - Any JSON file that multiple parts of the code might access

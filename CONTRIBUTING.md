@@ -1,6 +1,6 @@
 # Communication
 
-Please read our General [communication guidelines](CODE_OF_CONDUCT.md#General_communication_guidelines).
+Please read our General [communication guidelines](CODE_OF_CONDUCT.md).
 
 ## Code contributions
 
@@ -14,9 +14,9 @@ Although there are no releases for it yet as of writing this, all the active dev
 
 You need the following to set up the local build environment:
 
-* Git
-* python3-pip and python3-setuptools
-* Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-xlib is new for v6**)
+- Git
+- python3-pip and python3-setuptools
+- Application runtime dependencies (if you already installed Ulauncher you should have most of these, but **python-xlib is new for v6**)
 
 #### Distro specific instructions
 
@@ -69,8 +69,8 @@ You need the following to set up the local build environment:
 
 1. build your development interpreter with `make nix-build-dev`
 2. use the development interpreter (`./nix/dev/bin/python`) by either of:
-   * pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
-   * using it directly from repository root (otherwise you will use the version of code built with environment),
+   - pointing your favorite IDE to use it, make sure it adds repository root to `PYTHONPATH`,
+   - using it directly from repository root (otherwise you will use the version of code built with environment),
 3. rebuild the interpreter when project dependencies change,
 
 Alternatively you can run the current code directly `make nix-run ARGS="<arg1> <arg2...>"`, without any IDE completion.
@@ -121,6 +121,7 @@ ulauncher/
 ## Async
 
 Ulauncher uses **GLib callback patterns**, not Python's `async/await`:
+
 - GTK/GLib operations use GLib async patterns (e.g., `Gio.Subprocess.wait_async()`)
 - Avoid `threading.Thread` - use GLib's event loop
 - For delayed execution: `GLib.timeout_add()` or the `timer` utility
@@ -131,15 +132,19 @@ Ulauncher uses **GLib callback patterns**, not Python's `async/await`:
 Try to understand and follow these, when applicable.
 
 ### [EventBus](docs/architecture/eventbus.md)
+
 For cross-module communication when modules can't directly reference each other (avoid circular imports, decouple core from UI).
 
 ### [Mode System](docs/architecture/mode-system.md)
+
 Ulauncher's query handling architecture. Each mode handles specific types of queries (apps, files, calculator, extensions, etc.).
 
 ### Custom Data Structures
+
 - **[BaseDataClass](docs/architecture/basedataclass.md)** - Lightweight dict-based dataclass alternative
 - **[JsonConf](docs/architecture/jsonconf.md)** - Config files with auto-deduplication and safe concurrent access
 - **[Singleton](docs/architecture/singleton.md)** - Ensure single instance of managers and state classes
 
 ### [Extension IPC](docs/architecture/extension-ipc.md)
+
 Multi-process architecture for extensions. Unix socket pairs with JSON-line protocol for communication between Ulauncher and extension processes.

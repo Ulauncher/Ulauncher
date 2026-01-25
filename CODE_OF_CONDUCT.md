@@ -1,8 +1,11 @@
+# Ulauncher Code of Conduct
+
 ## General communication guidelines
 
 Ulauncher is a free, open source software project developed by a small team of volunteers and contributors.
 
 We are here because we want Ulauncher to improve, and for that we have to:
+
 * Act respectful towards each other.
 * Give each other the benefit of the doubt.
 * Give and accept constructive feedback.
@@ -14,7 +17,7 @@ We are here because we want Ulauncher to improve, and for that we have to:
 
 We will not tolerate harassment, personal attacks, derogatory comments, trolling, or uncivil behavior. Failure to comply will result in comments being hidden, moderated or removed. On very serious or repeat offenses users violating our terms will be blocked from the repository.
 
-### Asking for help or requesting changes
+## Asking for help or requesting changes
 
 The maintainers and contributors want their time spent contributing to Ulauncher to be as productive and constructive as possible. Please respect this time when you are requesting help, improvements, or new features. Do your due diligence before you report issues or contact us asking for help. Read the actual error messages you are getting (if any), and don't ask us about things that are documented or previously covered. We have to prioritize tasks based on how helpful the reports were, and close issues that don't provide enough information.
 
