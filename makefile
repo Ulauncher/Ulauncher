@@ -167,9 +167,9 @@ pytest: check-dev-deps
 
 # Auto format the code
 format: check-dev-deps
-	ruff check . --fix
+	@ruff check . --fix
 	ruff format .
-	@if command -v rumdl >/dev/null 2>&1; then \
+	if command -v rumdl >/dev/null 2>&1; then \
 		rumdl fmt .; \
 	else \
 		echo -e "${YELLOW}Skipping optional markdown formatting (rumdl not found)${RESET}"; \
