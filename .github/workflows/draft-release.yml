@@ -5,24 +5,91 @@ on:
     tags:
       - '*'
 
+  workflow_dispatch:
+    inputs:
+      ref_name:
+        description: 'Tag name to use instead of github.ref_name'
+        required: true
+        default: '5.15.15'
+
+env:
+  REF_NAME: "${{ inputs.ref_name || github.ref_name }}"
+
 jobs:
-  release:
+  build-deb:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
-      - name: Build release
+      - name: Build release packages
         run: |
-          echo "Tag is created: $GITHUB_REF_NAME"
+          echo "Tag is created: $REF_NAME"
           source ./scripts/common.sh
           docker pull $BUILD_IMAGE
-          ./ul build-release $GITHUB_REF_NAME
+          ./ul build-release $REF_NAME
 
-      - name: Make draft GitHub release
-        uses: softprops/action-gh-release@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          draft: true
-          files: |
+          name: deb-artifacts
+          path: |
             *.tar.gz
             *.deb
+
+
+  build-rpm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Build rpm release (AlmaLinux 9.7)
+        run: |
+          docker run --rm \
+            -e REF_NAME="$REF_NAME" \
+            -v $PWD:/build \
+            -w /build \
+            almalinux:9.7 \
+            bash -c "
+              dnf -y install epel-release &&
+              dnf -y install rpm-build rpmdevtools python3 yarnpkg rsync python3-distutils-extra python3-gobject python3-websocket-client python3-pyxdg python3-inotify python3-pyxdameraulevenshtein gcc make &&
+              ./ul build-preferences &&
+              ./ul build-rpm "$REF_NAME" almalinux9 &&
+              cp /tmp/ulauncher_${REF_NAME}_almalinux9.rpm /build/
+            "
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: rpm-artifact
+          path: |
+            *.rpm
+
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-deb
+      - build-rpm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: deb-artifacts
+          path: ./artifacts
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: rpm-artifact
+          path: ./artifacts
+
+      - name: Make draft GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: ./artifacts/**
