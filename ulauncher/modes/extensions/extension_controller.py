@@ -18,7 +18,6 @@ from ulauncher.modes.extensions.extension_dependencies import ExtensionDependenc
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifest,
     ExtensionManifestPreference,
-    ExtensionManifestTrigger,
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
@@ -32,8 +31,12 @@ class ExtensionPreference(ExtensionManifestPreference):
     value: str | int | None = None
 
 
-class ExtensionControllerTrigger(ExtensionManifestTrigger):
-    pass
+class ExtensionControllerTrigger(JsonConf):
+    name = ""
+    description = ""
+    default_keyword = ""
+    icon = ""
+    keyword = ""
 
 
 class ExtensionState(JsonConf):
@@ -153,8 +156,7 @@ class ExtensionController:
         triggers = {}
         for t_id, manifest_trigger in self.manifest.triggers.items():
             trigger = ExtensionControllerTrigger(manifest_trigger)
-            if user_keyword := user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.keyword):
-                trigger.keyword = user_keyword
+            trigger.keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.default_keyword)
             triggers[t_id] = trigger
 
         return triggers
@@ -278,7 +280,7 @@ class ExtensionController:
                 cmd = [sys.executable, "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", extension_main]
 
             prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
-            triggers = {t_id: t.keyword for t_id, t in self.manifest.triggers.items() if t.keyword}
+            triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
             # backwards compatible v2 preferences format (with keywords added back)
             v2_prefs = {**triggers, **prefs}
             env = {
