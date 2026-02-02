@@ -29,8 +29,14 @@ class ExtensionManifestPreference(JsonConf):
 class ExtensionManifestTrigger(JsonConf):
     name = ""
     description = ""
-    keyword = ""
+    default_keyword = ""
     icon = ""
+
+    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
+        # Backwards compatibility: rename "keyword" to "default_keyword"
+        if key == "keyword":
+            key = "default_keyword"
+        super().__setitem__(key, value)
 
 
 class ExtensionManifest(JsonConf):
@@ -76,7 +82,7 @@ class ExtensionManifest(JsonConf):
                                 self.triggers[p_id] = ExtensionManifestTrigger(
                                     name=pref.name,
                                     description=pref.description,
-                                    keyword=pref.default_value,
+                                    default_keyword=pref.default_value,
                                     icon=pref.get("icon", ""),
                                 )
                 value = prefs
