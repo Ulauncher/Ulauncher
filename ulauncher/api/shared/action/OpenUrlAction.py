@@ -1,1 +1,3 @@
-from ulauncher.internals.effects import open as OpenUrlAction  # noqa: F401, N999, N812
+from ulauncher.internals.effects import open as OpenUrlAction  # noqa: N812, N999
+
+__all__ = ["OpenUrlAction"]
