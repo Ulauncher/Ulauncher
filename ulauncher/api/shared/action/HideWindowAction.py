@@ -1,1 +1,3 @@
-from ulauncher.internals.effects import close_window as HideWindowAction  # noqa: F401, N812, N999
+from ulauncher.internals.effects import close_window as HideWindowAction  # noqa: N812, N999
+
+__all__ = ["HideWindowAction"]
