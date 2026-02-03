@@ -1,0 +1,170 @@
+name: Build and Publish APT Repository
+
+on:
+  # Trigger on new releases in the main repository
+  repository_dispatch:
+    types: [new-release]
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (leave empty to auto-detect)'
+        required: false
+        type: string
+
+  # Trigger on push to main (for testing)
+  push:
+    branches:
+      - main
+    paths:
+      - 'apt/**'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          repository: Ulauncher/Ulauncher
+          path: ulauncher-src
+      
+      - name: Checkout apt repository
+        uses: actions/checkout@v4
+        with:
+          path: apt-repo
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      
+      - name: Install nfpm
+        run: |
+          curl -sfL https://goreleaser.com/install.sh | sh -s -- -b /usr/local/bin nfpm
+          nfpm --version
+      
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            dpkg-dev \
+            dpkg-sig \
+            apt-utils \
+            gzip \
+            rsync
+      
+      - name: Get Ulauncher version
+        id: version
+        working-directory: ulauncher-src
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=$(python3 -c "import ulauncher; print(ulauncher.version)")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+      
+      - name: Copy source to build location
+        run: |
+          # Copy apt directory to ulauncher-src for building
+          cp -r apt-repo/apt ulauncher-src/
+      
+      - name: Build packages
+        working-directory: ulauncher-src/apt/scripts
+        run: |
+          ./build.sh
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-packages
+          path: ulauncher-src/apt/dist/*.deb
+          retention-days: 90
+      
+      - name: Attach to GitHub Release (if release event)
+        if: github.event_name == 'repository_dispatch' && github.event.action == 'new-release'
+        uses: softprops/action-gh-release@v1
+        with:
+          repository: Ulauncher/Ulauncher
+          tag_name: ${{ steps.version.outputs.version }}
+          files: ulauncher-src/apt/dist/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sign-and-publish:
+    name: Sign and Publish to APT Repository
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout apt repository
+        uses: actions/checkout@v4
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-packages
+          path: apt/dist
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            dpkg-dev \
+            dpkg-sig \
+            apt-utils \
+            gnupg
+      
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+          
+          # Get the key ID
+          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2 | head -n1)
+          echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+          echo "Using GPG key: $KEY_ID"
+      
+      - name: Sign packages
+        env:
+          GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        working-directory: apt/scripts
+        run: |
+          export GPG_KEY_ID=${{ env.GPG_KEY_ID }}
+          ./sign.sh
+      
+      - name: Publish APT repository
+        working-directory: apt/scripts
+        run: |
+          export GPG_KEY_ID=${{ env.GPG_KEY_ID }}
+          ./publish.sh
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apt/repo
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: Summary
+        run: |
+          echo "## APT Repository Published! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Repository URL: https://apt.ulauncher.io" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Packages built:" >> $GITHUB_STEP_SUMMARY
+          ls -lh apt/dist/*.deb | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY

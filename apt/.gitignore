@@ -1,0 +1,36 @@
+# Build artifacts
+build/
+dist/
+*.deb
+*.changes
+*.buildinfo
+*.dsc
+*.tar.gz
+*.tar.xz
+
+# Repository artifacts (will be in gh-pages branch)
+repo/
+
+# GPG keys (NEVER commit private keys)
+*.key
+*.asc
+*.gpg
+!repo/KEY.gpg
+!repo/KEY.asc
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

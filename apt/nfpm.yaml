@@ -1,0 +1,149 @@
+# nfpm configuration for building Ulauncher .deb packages
+# See: https://nfpm.goreleaser.com/configuration/
+
+name: ulauncher
+arch: all
+platform: linux
+
+# Version will be overridden by build script from ulauncher.version
+# Format: X.Y.Z or X.Y.Z~distro for specific distros
+version: ${VERSION}
+
+section: python
+priority: optional
+maintainer: Aleksandr Gornostal <ulauncher.app@gmail.com>
+
+description: |
+  Application launcher for Linux
+  .
+  Ulauncher is a fast application launcher for Linux. It's written in Python
+  using GTK+, and features an extensions framework for adding custom
+  functionality.
+  .
+  See https://ulauncher.io for more information.
+
+homepage: https://ulauncher.io/
+license: GPL-3.0
+
+# Source repository metadata
+changelog: https://github.com/Ulauncher/Ulauncher/releases
+vendor: Ulauncher
+vcs: https://github.com/Ulauncher/Ulauncher
+
+# Dependencies
+depends:
+  # Python 3.8+ support (handled by debhelper)
+  - python3 (>= 3.8)
+  - libgtk-3-0 (>= 3.22)
+  - gir1.2-gtk-3.0
+  - gir1.2-glib-2.0
+  - gir1.2-gdkpixbuf-2.0
+  - python3-gi
+  - python3-gi-cairo
+
+recommends:
+  - gir1.2-gtklayershell-0.1
+  - python3-levenshtein
+  - python3-xlib
+  - gir1.2-ayatanaappindicator3-0.1
+
+suggests:
+  - git
+
+# Files to include in the package
+# These paths are relative to the build directory where we'll prepare the package
+contents:
+  # Python package files
+  - src: ulauncher/**/*.py
+    dst: /usr/lib/python3/dist-packages/ulauncher/
+    type: tree
+    file_info:
+      mode: 0644
+
+  # Executables
+  - src: bin/ulauncher
+    dst: /usr/bin/ulauncher
+    type: file
+    file_info:
+      mode: 0755
+
+  - src: bin/ulauncher-toggle
+    dst: /usr/bin/ulauncher-toggle
+    type: file
+    file_info:
+      mode: 0755
+
+  # Application data
+  - src: data/**/*
+    dst: /usr/share/ulauncher/
+    type: tree
+    file_info:
+      mode: 0644
+
+  # Desktop entry
+  - src: io.ulauncher.Ulauncher.desktop
+    dst: /usr/share/applications/io.ulauncher.Ulauncher.desktop
+    type: file
+    file_info:
+      mode: 0644
+
+  # D-Bus service
+  - src: io.ulauncher.Ulauncher.service
+    dst: /usr/share/dbus-1/services/io.ulauncher.Ulauncher.service
+    type: file
+    file_info:
+      mode: 0644
+
+  # Systemd user service
+  - src: ulauncher.service
+    dst: /usr/lib/systemd/user/ulauncher.service
+    type: file
+    file_info:
+      mode: 0644
+
+  # Icons (system theme)
+  - src: data/icons/system/**/*.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/
+    type: tree
+    file_info:
+      mode: 0644
+
+  # Man page (will be gzipped by build script)
+  - src: ulauncher.1.gz
+    dst: /usr/share/man/man1/ulauncher.1.gz
+    type: file
+    file_info:
+      mode: 0644
+
+  # License
+  - src: LICENSE
+    dst: /usr/share/licenses/ulauncher/LICENSE
+    type: file
+    file_info:
+      mode: 0644
+
+  # Additional metadata files
+  - src: README.md
+    dst: /usr/share/doc/ulauncher/README.md
+    type: file
+    file_info:
+      mode: 0644
+
+# Debian-specific fields
+deb:
+  fields:
+    Rules-Requires-Root: "no"
+    X-Python3-Version: ">= 3.8"
+    Standards-Version: "4.6.2"
+    Vcs-Browser: https://github.com/Ulauncher/Ulauncher
+    Vcs-Git: https://github.com/Ulauncher/Ulauncher.git
+
+  # Compression (xz is smaller and modern)
+  compression: xz
+
+  # Signature (will be handled by reprepro/aptly)
+  signature:
+    type: origin
+
+# Override destination for building
+# The actual deb will be created in the directory specified by --target flag
