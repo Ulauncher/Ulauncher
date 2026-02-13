@@ -3,8 +3,10 @@ import sys
 
 # spec: https://specifications.freedesktop.org/menu-spec/latest/ar01s02.html
 APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# ULAUNCHER_SYSTEM_PREFIX is used by a third party packagers like Nix
-SYSTEM_PREFIX = os.environ.get("ULAUNCHER_SYSTEM_PREFIX", sys.prefix)
+BIN_DIR = os.path.abspath(sys.argv[0])
+# ULAUNCHER_SYSTEM_PREFIX can be used by third party packagers like Nix
+# If not set, derive sys prefix from binary location likely /usr, /usr/local, or ~/.local
+SYSTEM_PREFIX = os.environ.get("ULAUNCHER_SYSTEM_PREFIX", os.path.dirname(os.path.dirname(BIN_DIR)))
 # ULAUNCHER_SYSTEM_DATA_DIR is used when running in dev mode from source and during tests
 ASSETS = os.path.abspath(os.environ.get("ULAUNCHER_SYSTEM_DATA_DIR", f"{SYSTEM_PREFIX}/share/ulauncher"))
 HOME = os.path.expanduser("~")
