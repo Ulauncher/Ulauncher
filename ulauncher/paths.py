@@ -6,7 +6,7 @@ APPLICATION = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # ULAUNCHER_SYSTEM_PREFIX is used by a third party packagers like Nix
 SYSTEM_PREFIX = os.environ.get("ULAUNCHER_SYSTEM_PREFIX", sys.prefix)
 # ULAUNCHER_SYSTEM_DATA_DIR is used when running in dev mode from source and during tests
-ASSETS = os.path.abspath(os.environ.get("ULAUNCHER_SYSTEM_DATA_DIR", f"{SYSTEM_PREFIX}/share/ulauncher"))
+ASSETS = os.path.abspath(os.environ.get("ULAUNCHER_SYSTEM_DATA_DIR", f"{SYSTEM_PREFIX}/local/share/ulauncher"))
 HOME = os.path.expanduser("~")
 XDG_DATA_DIRS = os.environ.get("XDG_DATA_DIRS", f"/usr/local/share/{os.path.pathsep}/usr/share/").split(os.path.pathsep)
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ulauncher")
