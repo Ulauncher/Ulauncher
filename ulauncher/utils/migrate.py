@@ -61,7 +61,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
         return user_prefs
-    new_prefs: dict[str, dict[str, Any]] = {"preferences": {}, "triggers": {}}
+    new_prefs: dict[str, dict[str, Any]] = {"preferences": {}, "triggers": {}}  # pyrefly: ignore[implicit-any]
     controller = extension_registry.load(ext_id)
     for p_id, pref in user_prefs.items():
         try:

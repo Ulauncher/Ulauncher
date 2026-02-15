@@ -35,7 +35,7 @@ def json_load(path: str | Path) -> Any:
             logger.exception('Error opening JSON file "%s"', file_path)
             logger.warning('Moving invalid JSON file to "%s"', backup_path)
             shutil.move(str(file_path), backup_path)
-    return {}
+    return {}  # pyrefly: ignore[implicit-any]
 
 
 def json_stringify(
