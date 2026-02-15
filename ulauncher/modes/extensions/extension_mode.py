@@ -24,7 +24,7 @@ events = EventBus("extensions")
 
 
 class ExtensionResponse(TypedDict, total=False):
-    interaction_id: int
+    event_nr: int
     keep_app_open: bool
     effect: EffectMessage | list[dict[str, Any]]
 
@@ -45,7 +45,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
-    _interaction_id: int = 0
+    _event_nr: int = 0
 
     def __init__(self) -> None:
         events.set_self(self)
@@ -209,9 +209,9 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     ext.send_message(event_data)
 
     def trigger_event(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
-        self._interaction_id += 1
+        self._event_nr += 1
         self._pending_callback = callback
-        event["interaction_id"] = self._interaction_id
+        event["event_nr"] = self._event_nr
 
         # If active_ext is not set (e.g., for launch triggers, without keywords),
         # try to get it from the event's ext_id
@@ -261,7 +261,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
-        if not self._pending_callback or response.get("interaction_id") != self._interaction_id:
+        if not self._pending_callback or response.get("event_nr") != self._event_nr:
             logger.debug("Ignoring outdated extension response")
             return
 
