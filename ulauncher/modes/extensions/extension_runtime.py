@@ -47,7 +47,7 @@ class ExtensionRuntime:
         self._recent_errors = deque(maxlen=1)
         self._start_time = time()
 
-        extension_env = env.copy() if env else {}
+        extension_env: dict[str, str] = env.copy() if env else {}
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
 
         for env_name, env_value in extension_env.items():

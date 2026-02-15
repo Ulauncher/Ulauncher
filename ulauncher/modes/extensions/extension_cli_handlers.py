@@ -110,7 +110,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return False
 
-    updated_extensions = []
+    updated_extensions: list[str] = []
 
     for controller in extension_registry.load_all():
         if not controller.is_manageable or not controller.state.url:

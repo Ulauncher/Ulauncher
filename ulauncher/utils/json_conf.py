@@ -38,7 +38,7 @@ class JsonConf(BaseDataClass):
 
     @classmethod
     def load(cls: type[T], path: str | Path) -> T:
-        data = {}
+        data: dict[str, Any] = {}
         file_path = Path(path).resolve()
         key = (file_path, cls)
         data = json_load(file_path)
