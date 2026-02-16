@@ -9,6 +9,8 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterable, cast
 
+from gi.repository import GLib
+
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
@@ -157,8 +159,17 @@ class Extension:
         # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
         effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
+        # Schedule the response on the main thread to avoid races on shared state
+        GLib.idle_add(self._send_response, event, effect_msg, input_event_nr)
+
+    def _send_response(
+        self,
+        event: dict[str, Any],
+        effect_msg: effects.EffectMessage | None,
+        input_event_nr: int | None,
+    ) -> bool:
         if input_event_nr is not None and input_event_nr != self._input_event_nr:
-            return
+            return False
 
         # Cache Result objects before sending them, keyed by their Python object ID
         if isinstance(effect_msg, list):
@@ -171,6 +182,7 @@ class Extension:
 
         event["effect"] = effect_msg
         self._client.send("response", event)
+        return False
 
     def run(self) -> None:
         """
