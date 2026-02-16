@@ -116,6 +116,15 @@ check-dev-deps:
 	  exit 0
 	fi
 	STDERR_OUTPUT=$$(python3 -m pip freeze -r requirements.txt 2>&1 >/dev/null)
+	# Remove warnings for packages with python_version markers not met by this Python
+	PY_VERSION=$$(python3 --version | sed 's/Python \([0-9]*\.[0-9]*\).*/\1/')
+	while IFS= read -r req; do
+		required=$$(echo "$$req" | sed -n "s/.*; *python_version *>= *['\"]\\([0-9.]*\\).*/\\1/p")
+		if [ -n "$$required" ] && ! printf '%s\n' "$$required" "$$PY_VERSION" | sort -V -C; then
+			pkg=$$(echo "$$req" | sed 's/[<>=! ;].*//')
+			STDERR_OUTPUT=$$(echo "$$STDERR_OUTPUT" | grep -v "$$pkg" || true)
+		fi
+	done < requirements.txt
 	if [ -n "$$STDERR_OUTPUT" ]; then
 		echo -e "${BOLD}${RED}Development dependencies not met:${RESET}" >&2
 		echo -e "${YELLOW}$$STDERR_OUTPUT\n${RESET}" >&2
