@@ -150,10 +150,9 @@ class Extension:
     ) -> None:
         current_input = self._input
         input_effect_msg = method(*args)
+        effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
         # ignore outdated responses
         if current_input == self._input:
-            effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
-
             # Cache Result objects before sending them, keyed by their Python object ID
             if isinstance(effect_msg, list):
                 self._result_cache.clear()
