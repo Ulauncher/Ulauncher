@@ -100,7 +100,7 @@ class ExtensionController:
     ) -> ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
-        is_new_install = not Path(remote.target_dir).exists()
+        is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
         commit_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
 
         try:
