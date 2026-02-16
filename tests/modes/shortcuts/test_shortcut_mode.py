@@ -16,7 +16,7 @@ from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
 def get_results(mode: ShortcutMode, query: Query) -> list[Result]:
     """Helper to collect results from callback-based handle_query."""
     results = []
-    mode.handle_query(query, lambda r: results.extend(r))
+    mode.handle_query(query, results.extend)
     return results
 
 

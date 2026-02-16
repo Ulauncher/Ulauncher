@@ -14,7 +14,7 @@ from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
 def get_results(mode: FileBrowserMode, query: Query) -> list[Result]:
     """Helper to collect results from callback-based handle_query."""
     results = []
-    mode.handle_query(query, lambda r: results.extend(r))
+    mode.handle_query(query, results.extend)
     return results
 
 

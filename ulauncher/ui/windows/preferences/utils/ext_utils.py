@@ -87,7 +87,7 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionControl
         return message
 
     message = error_message or f"Unknown error type: {error_type}"
-    if ext_url and error_type not in ["MissingModule"]:
+    if ext_url and error_type != "MissingModule":
         message += "\n\n<small>You can let the author know about this problem by creating an issue: "
         message += f'<a href="{ext_url}/issues">{ext_url}/issues</a></small>'
     return message
