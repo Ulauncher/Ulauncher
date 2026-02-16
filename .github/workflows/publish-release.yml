@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.4
+    container: ulauncher/build-image:6.5
     steps:
       - uses: actions/checkout@v5
       - name: Publish to Launchpad
