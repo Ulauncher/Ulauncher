@@ -31,7 +31,6 @@ class Extension:
     def __init__(self) -> None:
         self.ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
         assert self.ext_id, "ULAUNCHER_EXTENSION_ID env variable not set"
-        self._input: str = ""
         self._client = Client(self)
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
@@ -40,6 +39,7 @@ class Extension:
 
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self.preferences = {}
+        self._input_event_nr: int = 0
         self._input_debounce_timer: TimerContext | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
         self._result_cache: dict[int, Result] = {}
@@ -125,6 +125,7 @@ class Extension:
             return
 
         event_type = type(base_event)
+        input_event_nr: int | None = None
         listeners = self._listeners[event_type]
 
         # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
@@ -132,7 +133,8 @@ class Extension:
             self.logger.debug("No listener for event %s", event_type.__name__)
 
         if event.get("type") == EventType.INPUT_TRIGGER:
-            self._input = event.get("args", [])[0]
+            self._input_event_nr += 1
+            input_event_nr = self._input_event_nr
 
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
@@ -140,30 +142,35 @@ class Extension:
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
             args = tuple(base_event.args) if method_name else (base_event, self)
             # Run in a separate thread to avoid blocking the message listener thread (client.py)
-            threading.Thread(target=self.run_event_listener, args=(event, method, args)).start()
+            # It's not possible to cancel threads without process isolation, so we run multiple simultaneous threads,
+            # then discard the result for stale events
+            threading.Thread(target=self.run_event_listener, args=(event, method, args, input_event_nr)).start()
 
     def run_event_listener(
         self,
         event: dict[str, Any],
         method: Callable[..., effects.EffectMessageInput | None],
         args: tuple[Any],
+        input_event_nr: int | None = None,
     ) -> None:
-        current_input = self._input
+        # For extensions using yield to generate results, the method call will take no time, while
+        # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
         effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
-        # ignore outdated responses
-        if current_input == self._input:
-            # Cache Result objects before sending them, keyed by their Python object ID
-            if isinstance(effect_msg, list):
-                self._result_cache.clear()
-                for result in effect_msg:
-                    result_id = id(result)
-                    self._result_cache[result_id] = result
-                    # Add the result_id to the dict representation so Ulauncher can send it back
-                    result["__result_id__"] = result_id
+        if input_event_nr is not None and input_event_nr != self._input_event_nr:
+            return
 
-            event["effect"] = effect_msg
-            self._client.send("response", event)
+        # Cache Result objects before sending them, keyed by their Python object ID
+        if isinstance(effect_msg, list):
+            self._result_cache.clear()
+            for result in effect_msg:
+                result_id = id(result)
+                self._result_cache[result_id] = result
+                # Add the result_id to the dict representation so Ulauncher can send it back
+                result["__result_id__"] = result_id
+
+        event["effect"] = effect_msg
+        self._client.send("response", event)
 
     def run(self) -> None:
         """
