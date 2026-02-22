@@ -213,7 +213,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         Send an event to the extension, expecting a response (passed to the callback).
         The event is enriched with a request_id property, used to filter out stale responses.
 
-        For one-off notifications that don't need a response, use ext.send_message() directly instead.
+        For one-off messages, use ext.send_message() directly instead.
         """
         self._request_id += 1
         self._pending_callback = callback
