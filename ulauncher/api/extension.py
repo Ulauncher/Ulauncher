@@ -41,7 +41,7 @@ class Extension:
 
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self.preferences = {}
-        self._input_event_nr: int = 0
+        self._input_request_id: int = 0
         self._input_debounce_timer: TimerContext | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
         self._result_cache: dict[int, Result] = {}
@@ -127,19 +127,19 @@ class Extension:
             return
 
         event_type = type(base_event)
-        input_event_nr: int | None = None
+        input_request_id: int | None = None
         listeners = self._listeners[event_type]
 
         if event.get("type") == EventType.INPUT_TRIGGER:
-            self._input_event_nr += 1
-            input_event_nr = self._input_event_nr
+            self._input_request_id += 1
+            input_request_id = self._input_request_id
 
         # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
         if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
-            if "event_nr" in event:
-                # Events with event_nr have a pending callback in extension_mode that needs a response
-                self._send_response(event, effects.do_nothing(), input_event_nr)
+            if "request_id" in event:
+                # Events with request_id need a response to be able to garbage collect their callbacks
+                self._send_response(event, effects.do_nothing(), input_request_id)
             return
 
         for listener, method_name in listeners:
@@ -150,29 +150,29 @@ class Extension:
             # Run in a separate thread to avoid blocking the message listener thread (client.py)
             # It's not possible to cancel threads without process isolation, so we run multiple simultaneous threads,
             # then discard the result for stale events
-            threading.Thread(target=self.run_event_listener, args=(event, method, args, input_event_nr)).start()
+            threading.Thread(target=self.run_event_listener, args=(event, method, args, input_request_id)).start()
 
     def run_event_listener(
         self,
         event: dict[str, Any],
         method: Callable[..., effects.EffectMessageInput | None],
         args: tuple[Any],
-        input_event_nr: int | None = None,
+        input_request_id: int | None = None,
     ) -> None:
         # For extensions using yield to generate results, the method call will take no time, while
         # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
         effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
         # Schedule the response on the main thread to avoid races on shared state
-        GLib.idle_add(self._send_response, event, effect_msg, input_event_nr)
+        GLib.idle_add(self._send_response, event, effect_msg, input_request_id)
 
     def _send_response(
         self,
         event: dict[str, Any],
         effect_msg: effects.EffectMessage | None,
-        input_event_nr: int | None,
+        input_request_id: int | None,
     ) -> bool:
-        if input_event_nr is not None and input_event_nr != self._input_event_nr:
+        if input_request_id is not None and input_request_id != self._input_request_id:
             return False
 
         # Cache Result objects before sending them, keyed by their Python object ID

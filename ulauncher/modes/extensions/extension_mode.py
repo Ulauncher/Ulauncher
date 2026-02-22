@@ -24,7 +24,7 @@ events = EventBus("extensions")
 
 
 class ExtensionResponse(TypedDict, total=False):
-    event_nr: int
+    request_id: int
     keep_app_open: bool
     effect: EffectMessage | list[dict[str, Any]]
 
@@ -45,7 +45,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
     active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
-    _event_nr: int = 0
+    _request_id: int = 0
 
     def __init__(self) -> None:
         events.set_self(self)
@@ -81,7 +81,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     "args": [query.argument, trigger_id],
                 }
 
-                self.trigger_event(event, callback)
+                self.send_request(event, callback)
                 return
 
         msg = f"Query not valid for extension mode '{query}'"
@@ -124,7 +124,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            self.trigger_event(
+            self.send_request(
                 {
                     "type": EventType.LAUNCH_TRIGGER,
                     "args": [result.trigger_id],
@@ -136,11 +136,11 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         else:
             event_type = EventType.RESULT_ACTIVATION
             event_args = [action_id, result]
-            self.trigger_event({"type": event_type, "args": event_args}, callback)
+            self.send_request({"type": event_type, "args": event_args}, callback)
             return
 
         if isinstance(effect_msg, dict) and effect_msg.get("type") == EffectType.LEGACY_ACTIVATE_CUSTOM:
-            self.trigger_event({**effect_msg, "type": EventType.LEGACY_ACTIVATE_CUSTOM}, callback)
+            self.send_request({**effect_msg, "type": EventType.LEGACY_ACTIVATE_CUSTOM}, callback)
             return
 
         callback(effect_msg)
@@ -208,10 +208,16 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
                     event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, pref.value]}
                     ext.send_message(event_data)
 
-    def trigger_event(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
-        self._event_nr += 1
+    def send_request(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+        """
+        Send an event to the extension, expecting a response (passed to the callback).
+        The event is enriched with a request_id property, used to filter out stale responses.
+
+        For one-off notifications that don't need a response, use ext.send_message() directly instead.
+        """
+        self._request_id += 1
         self._pending_callback = callback
-        event["event_nr"] = self._event_nr
+        event["request_id"] = self._request_id
 
         # If active_ext is not set (e.g., for launch triggers, without keywords),
         # try to get it from the event's ext_id
@@ -261,7 +267,7 @@ class ExtensionMode(BaseMode, metaclass=Singleton):
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
-        if not self._pending_callback or response.get("event_nr") != self._event_nr:
+        if not self._pending_callback or response.get("request_id") != self._request_id:
             logger.debug("Ignoring outdated extension response")
             return
 
