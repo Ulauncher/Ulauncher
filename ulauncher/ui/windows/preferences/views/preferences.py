@@ -227,7 +227,7 @@ class PreferencesView(BaseView):
         desc = "Set the launcher width between 540 and 2000 pixels to match your workspace."
         self._add_setting_row(applications_box, "Window width", width_spin, desc)
 
-        # Recent apps
+        # Top apps
         recent_adjustment = Gtk.Adjustment(value=self.settings.max_recent_apps, lower=0, upper=20, step_increment=1)
         recent_spin = Gtk.SpinButton(adjustment=recent_adjustment)
         recent_spin.connect("value-changed", self._on_recent_apps_changed)
