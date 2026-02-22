@@ -26,7 +26,7 @@ version = {attr = "ulauncher.version"}
 [tool.pyrefly]
 python-platform = "linux"
 python-version = "3.8"
-project-includes = ["ulauncher"]
+project-includes = ["ulauncher", "tests"]
 
 [tool.pyrefly.errors]
 bad-param-name-override = false
