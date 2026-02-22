@@ -130,13 +130,17 @@ class Extension:
         input_event_nr: int | None = None
         listeners = self._listeners[event_type]
 
-        # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
-        if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
-            self.logger.debug("No listener for event %s", event_type.__name__)
-
         if event.get("type") == EventType.INPUT_TRIGGER:
             self._input_event_nr += 1
             input_event_nr = self._input_event_nr
+
+        # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
+        if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
+            self.logger.debug("No listener for event %s", event_type.__name__)
+            if "event_nr" in event:
+                # Events with event_nr have a pending callback in extension_mode that needs a response
+                self._send_response(event, effects.do_nothing(), input_event_nr)
+            return
 
         for listener, method_name in listeners:
             method = getattr(listener, method_name or "on_event")
