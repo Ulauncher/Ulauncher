@@ -130,8 +130,15 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_launcher(self) -> None:
+        if (main_window := self.windows.get("main")) and main_window.get_window() is None:
+            logger.warning("Ignoring stale main window reference")
+            del self.windows["main"]
+
         if "main" not in self.windows:
-            self.windows["main"] = UlauncherWindow(application=self)
+            main_window = UlauncherWindow(application=self)
+            # Drop the reference on destroy to prevent stale window references
+            main_window.connect("destroy", lambda *_: self.windows.pop("main", None))
+            self.windows["main"] = main_window
 
     @events.on
     def show_results(self, results: list[Result]) -> None:
