@@ -12,8 +12,8 @@ from typing import Callable
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.calc.calc_result import CalcErrorResult, CalcResult
+from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 
 _events = EventBus()
@@ -145,7 +145,7 @@ def _eval(node: ast.expr) -> int | float | Decimal:
     raise TypeError(node)
 
 
-class CalcMode(BaseMode):
+class CalcMode(Mode):
     def matches_query_str(self, query_str: str) -> bool:
         return _is_enabled(query_str)
 

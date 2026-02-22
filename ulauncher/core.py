@@ -10,7 +10,7 @@ from weakref import WeakKeyDictionary
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
-from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import TimerContext, timer
@@ -22,14 +22,14 @@ PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 
 
 @lru_cache(maxsize=None)
-def get_app_mode() -> BaseMode:
+def get_app_mode() -> Mode:
     from ulauncher.modes.apps.app_mode import AppMode
 
     return AppMode()
 
 
 @lru_cache(maxsize=None)
-def get_modes() -> list[BaseMode]:
+def get_modes() -> list[Mode]:
     from ulauncher.modes.calc.calc_mode import CalcMode
     from ulauncher.modes.extensions.extension_mode import ExtensionMode
     from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
@@ -41,17 +41,17 @@ def get_modes() -> list[BaseMode]:
 class UlauncherCore:
     """Core application logic to handle the query events and delegate them to the modes."""
 
-    _mode: BaseMode | None = None
-    _keyword_cache: defaultdict[BaseMode, dict[str, Result]] = defaultdict(dict)
-    _trigger_cache: defaultdict[BaseMode, list[Result]] = defaultdict(list)
-    _mode_map: WeakKeyDictionary[Result, BaseMode] = WeakKeyDictionary()
+    _mode: Mode | None = None
+    _keyword_cache: defaultdict[Mode, dict[str, Result]] = defaultdict(dict)
+    _trigger_cache: defaultdict[Mode, list[Result]] = defaultdict(list)
+    _mode_map: WeakKeyDictionary[Result, Mode] = WeakKeyDictionary()
     query: Query = Query(None, "")
     _placeholder_timer: TimerContext | None = None
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
         claimed_keywords: dict[str, Result] = {}
-        outdated_modes: set[BaseMode] = set()
+        outdated_modes: set[Mode] = set()
 
         # load claimed keywords and modes that need to be refreshed
         for mode in get_modes():
@@ -211,7 +211,7 @@ class UlauncherCore:
             return
 
     def _mode_callback(
-        self, valid_mode: BaseMode | None, callback: Callable[[Iterable[Result]], None]
+        self, valid_mode: Mode | None, callback: Callable[[Iterable[Result]], None]
     ) -> Callable[[effects.EffectMessage | list[Result]], None]:
         """
         Callback to handle results and effects from modes.

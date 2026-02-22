@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABCMeta
 from typing import Any
 
 # Store singleton instances with proper type tracking to prevent type confusion
@@ -14,6 +15,6 @@ def get_instance(supercls: Any, cls: Any, *args: Any, **kwargs: Any) -> Any:
 
 
 # Use with metaclass=Singleton (not possible when inheriting from Gtk classes for example)
-class Singleton(type):
+class Singleton(ABCMeta):
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         return get_instance(super(), cls, *args, **kwargs)
