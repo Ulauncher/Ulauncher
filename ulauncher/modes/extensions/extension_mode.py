@@ -242,6 +242,10 @@ class ExtensionMode(Mode, metaclass=Singleton):
             logger.error("No active extension to send event to")
             return
 
+        if not self.active_ext.is_running:
+            logger.warning("Cannot send event to inactive extension %s", self.active_ext.id)
+            return
+
         self._request_id += 1
         self._pending_callback = callback
         event["request_id"] = self._request_id
