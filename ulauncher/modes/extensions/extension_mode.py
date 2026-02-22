@@ -42,7 +42,7 @@ class ExtensionMode(Mode, metaclass=Singleton):
     Is singleton because it owns the ExtensionSocketServer instance.
     """
 
-    active_ext: ExtensionController | None = None
+    _active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
     _request_id: int = 0
@@ -65,6 +65,16 @@ class ExtensionMode(Mode, metaclass=Singleton):
     @events.on
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
+
+    @property
+    def active_ext(self) -> ExtensionController | None:
+        return self._active_ext
+
+    @active_ext.setter
+    def active_ext(self, ext: ExtensionController | None) -> None:
+        if ext is not self._active_ext:
+            self._pending_callback = None
+            self._active_ext = ext
 
     def handle_query(self, query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         if not query.keyword:
