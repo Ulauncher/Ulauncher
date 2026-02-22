@@ -215,10 +215,6 @@ class ExtensionMode(Mode, metaclass=Singleton):
 
         For one-off messages, use ext.send_message() directly instead.
         """
-        self._request_id += 1
-        self._pending_callback = callback
-        event["request_id"] = self._request_id
-
         # If active_ext is not set (e.g., for launch triggers, without keywords),
         # try to get it from the event's ext_id
         if not self.active_ext:
@@ -229,6 +225,10 @@ class ExtensionMode(Mode, metaclass=Singleton):
         if not self.active_ext:
             logger.error("No active extension to send event to")
             return
+
+        self._request_id += 1
+        self._pending_callback = callback
+        event["request_id"] = self._request_id
         self.active_ext.send_message(event)
 
     @events.on
