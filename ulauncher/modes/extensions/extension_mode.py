@@ -66,6 +66,12 @@ class ExtensionMode(Mode, metaclass=Singleton):
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
+    @events.on
+    def exited(self, ext_id: str, cause: str) -> None:
+        if self.active_ext and self.active_ext.id == ext_id:
+            logger.debug("Active extension %s exited (%s), clearing pending callback", ext_id, cause)
+            self._pending_callback = None
+
     @property
     def active_ext(self) -> ExtensionController | None:
         return self._active_ext

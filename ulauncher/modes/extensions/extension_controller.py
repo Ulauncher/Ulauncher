@@ -259,6 +259,8 @@ class ExtensionController:
                     extension_runtimes.pop(self.id, None)
                     self.state.save(error_type=cause, error_message=error_msg)
 
+                events.emit("extensions:exited", self.id, cause)
+
             try:
                 self.manifest.validate()
                 self.manifest.check_compatibility(verbose=True)
