@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Iterator
 
 import pytest
-from gi.repository import Gio
 from pytest_mock import MockerFixture
 
 from ulauncher.modes.apps.app_result import AppResult
@@ -18,14 +17,14 @@ ENTRIES_DIR = Path(__file__).parent.joinpath("mock_desktop_entries").resolve()
 class TestAppResult:
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_new(self, mocker: MockerFixture) -> Any:
-        def mkappinfo(app_id: str) -> Gio.DesktopAppInfo | None:
+        def mkappinfo(app_id: str) -> DesktopAppInfo | None:
             return DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
 
         return mocker.patch("ulauncher.modes.apps.app_result.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_get_all(self, mocker: MockerFixture) -> Any:
-        def get_all_appinfo() -> Iterator[Gio.DesktopAppInfo]:
+        def get_all_appinfo() -> Iterator[DesktopAppInfo]:
             for path in ["trueapp.desktop", "falseapp.desktop"]:
                 if app_info := DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}"):
                     yield app_info

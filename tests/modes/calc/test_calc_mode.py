@@ -15,8 +15,8 @@ from ulauncher.modes.calc.calc_result import CalcErrorResult
 
 def get_results(mode: CalcMode, query: Query) -> list[Result]:
     """Helper to collect results from callback-based handle_query."""
-    results = []
-    mode.handle_query(query, results.extend)
+    results: list[Result] = []
+    mode.handle_query(query, lambda msg: results.extend(msg) if isinstance(msg, list) else None)
     return results
 
 
