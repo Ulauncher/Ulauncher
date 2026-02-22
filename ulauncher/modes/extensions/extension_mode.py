@@ -13,9 +13,9 @@ from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
-from ulauncher.modes.base_mode import BaseMode
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.singleton import Singleton
 
@@ -36,7 +36,7 @@ class ExtensionLaunchTrigger(Result):
     actions = {"__launch__": {"name": "Launch"}}
 
 
-class ExtensionMode(BaseMode, metaclass=Singleton):
+class ExtensionMode(Mode, metaclass=Singleton):
     """
     Mode that handles extension triggers and communication with extensions.
     Is singleton because it owns the ExtensionSocketServer instance.

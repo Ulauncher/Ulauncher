@@ -6,7 +6,7 @@ from typing import Callable, Iterator
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
-from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.mode import Mode
 from ulauncher.modes.shortcuts import results
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
@@ -32,7 +32,7 @@ def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> results
     )
 
 
-class ShortcutMode(BaseMode):
+class ShortcutMode(Mode):
     shortcuts_db: dict[str, Shortcut]
 
     def __init__(self) -> None:

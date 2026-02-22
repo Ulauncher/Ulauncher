@@ -9,14 +9,18 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
-from ulauncher.modes.base_mode import BaseMode
+from ulauncher.modes.mode import Mode
 from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger()
 
 
-class AppMode(BaseMode):
+class AppMode(Mode):
+    def handle_query(self, _query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
+        # App mode contributes search triggers but does not handle direct query-mode execution.
+        callback([])
+
     def get_triggers(self) -> Iterator[AppResult]:
         settings = Settings.load()
 
