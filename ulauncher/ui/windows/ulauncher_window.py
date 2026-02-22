@@ -21,6 +21,12 @@ logger = logging.getLogger()
 events = EventBus()
 
 
+def emit_show_results(results: Iterable[Result]) -> None:
+    # Keep this callback outside the window class so async mode callbacks never
+    # retain a window instance through a bound method reference.
+    events.emit("app:show_results", list(results))
+
+
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
     _results_nav: ItemNavigation | None = None
@@ -57,7 +63,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             height_request=height_request,
             **kwargs,
         )
-
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
         if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and self.settings.layer_shell and layer_shell.is_supported():
             self.layer_shell_enabled = layer_shell.enable(self)
@@ -198,7 +203,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.prompt_input.select_region(0, -1)
         self.apply_styling()
         self.core.load_triggers(force=True)
-        self.core.set_query(self.query_str, self.show_results)
+        self.core.set_query(self.query_str, emit_show_results)
 
     ######################################
     # GTK Signal Handlers
@@ -222,7 +227,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Triggered by user input
         """
         events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
-        self.core.set_query(self.query_str, self.show_results)
+        self.core.set_query(self.query_str, emit_show_results)
 
     def activate_result(self, alt: bool) -> None:
         """
@@ -231,7 +236,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if self._results_nav and (result := self._results_nav.get_active_result()):
             if not alt:
                 self._results_nav.remember_result_for_query(str(self.core.query), result)
-            self.core.activate_result(result, self.show_results, alt)
+            self.core.activate_result(result, emit_show_results, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """

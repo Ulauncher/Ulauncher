@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Literal, cast
+from typing import Any, Iterable, Literal, cast
 from weakref import WeakValueDictionary
 
 from gi.repository import Gdk, Gio, Gtk
@@ -141,8 +141,8 @@ class UlauncherApp(Gtk.Application):
             self.windows["main"] = main_window
 
     @events.on
-    def show_results(self, results: list[Result]) -> None:
-        """Do not use. This is only needed because legacy ActionList can contain result lists"""
+    def show_results(self, results: Iterable[Result]) -> None:
+        """Render results in the launcher window if it is currently open."""
         if main_window := cast("UlauncherWindow | None", self.windows.get("main")):
             main_window.show_results(results)
 
