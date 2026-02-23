@@ -29,7 +29,7 @@ Use these patterns when applicable:
 
 **Singleton** (`ulauncher.utils.singleton.Singleton`) - Use for classes that should only have one instance (app state, managers, registries). See [docs/architecture/singleton.md](docs/architecture/singleton.md) for usage.
 
-**Modes** - Examine `BaseMode` and existing modes in `ulauncher/modes/` when adding new query handlers. See [docs/architecture/mode-system.md](docs/architecture/mode-system.md) for the interface.
+**Modes** - Examine `Mode` and existing modes in `ulauncher/modes/` when adding new query handlers. See [docs/architecture/mode-system.md](docs/architecture/mode-system.md) for the interface.
 
 **Extension IPC** - When modifying extension communication, see [docs/architecture/extension-ipc.md](docs/architecture/extension-ipc.md) for the multi-process architecture.
 

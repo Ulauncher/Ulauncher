@@ -2,9 +2,9 @@
 
 Ulauncher's query handling uses a mode-based architecture. Each mode handles specific types of queries.
 
-## BaseMode Interface
+## Mode Interface
 
-Located in `ulauncher/modes/base_mode.py`. Key methods:
+Located in `ulauncher/modes/mode.py`. Key methods:
 
 - **`matches_query_str(query)`** - Return True if this mode should handle the query
 - **`handle_query(query, callback)`** - Process query and call callback with results
