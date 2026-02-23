@@ -87,7 +87,7 @@ class UlauncherCore:
     def set_query(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
         """Set the query string and propagate the update to the modes."""
         if not query_str:
-            callback(self.get_result_for_empty_query())
+            callback(self.get_home_results())
             return
 
         self._mode = None
@@ -123,10 +123,10 @@ class UlauncherCore:
         sorted_ = sorted(flattened_, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
         return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
 
-    def get_result_for_empty_query(self) -> Iterable[Result]:
+    def get_home_results(self) -> Iterable[Result]:
         if limit := Settings.load().max_recent_apps:
             app_mode = get_app_mode()
-            for app_result in app_mode.get_initial_results(limit):
+            for app_result in app_mode.get_home_results(limit):
                 self._mode_map[app_result] = app_mode
                 yield app_result
 

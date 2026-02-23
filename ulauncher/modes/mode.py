@@ -48,7 +48,7 @@ class Mode(ABC):
         """
         return False
 
-    def get_initial_results(self, _limit: int) -> Iterable[Result]:
+    def get_home_results(self, _limit: int) -> Iterable[Result]:
         """
         Get results to show when there is no query input (on startup or when you delete the query)
         Only implemented for AppMode.
