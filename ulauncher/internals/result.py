@@ -39,6 +39,7 @@ class Result(BaseDataClass):
         self,
         *,
         compact: bool | None = None,
+        multiline: bool | None = None,
         highlightable: bool | None = None,
         searchable: bool | None = None,
         name: str | None = None,
@@ -55,6 +56,8 @@ class Result(BaseDataClass):
         init_kwargs: dict[str, Any] = {}
         if compact is not None:
             init_kwargs["compact"] = compact
+        if multiline is not None:
+            init_kwargs["multiline"] = multiline
         if highlightable is not None:
             init_kwargs["highlightable"] = highlightable
         if searchable is not None:
