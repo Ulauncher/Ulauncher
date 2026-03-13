@@ -1,6 +1,7 @@
 build
 lefthook
 mypy < 1.17.0
+PyGObject
 pyrefly >= 0.52.0
 pytest
 pytest-mock

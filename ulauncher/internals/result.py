@@ -22,6 +22,7 @@ class Result(BaseDataClass):
     """
 
     compact = False  #: If True, the result will be displayed in a single line without a title
+    multiline = False  #: If True, the description will wrap to multiple lines instead of being ellipsized
     highlightable = False  #: If True, a substring matching the query will be highlighted
     searchable = False
     name = ""  #: The name of the result item

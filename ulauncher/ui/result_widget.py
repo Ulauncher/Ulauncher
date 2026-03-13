@@ -86,7 +86,11 @@ class ResultWidget(Gtk.EventBox):
         item_container.set_property("margin-bottom", margin_y)
 
         if result.description and not result.compact:
-            descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
+            if result.multiline:
+                descr_label = Gtk.Label(hexpand=True, xalign=0, yalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR)
+                self.text_container.set_valign(Gtk.Align.START)
+            else:
+                descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
             descr_label.get_style_context().add_class("item-descr")
             descr_label.get_style_context().add_class("item-text")
             descr_label.set_text(unescape(result.description))
