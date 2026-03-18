@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 import pytest
 
@@ -8,7 +9,7 @@ from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.json_utils import json_stringify
 
-valid_manifest: dict[str, str | dict[str, dict[str, str]]] = {
+valid_manifest: dict[str, Any] = {
     "api_version": "1",
     "name": "Timer",
     "authors": "Aleksandr Gornostal",
@@ -33,29 +34,156 @@ class TestExtensionManifest:
         manifest.validate()
 
     def test_validate__prefs_incorrect_type__exception_raised(self) -> None:
-        valid_manifest["preferences"] = {"id": {"type": "incorrect"}}
-        manifest = ExtensionManifest(valid_manifest)
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"id": {"type": "incorrect"}}})
         with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__type_kw_empty_name__exception_raised(self) -> None:
-        valid_manifest["preferences"] = {"id": {"type": "incorrect", "keyword": "kw"}}
-        manifest = ExtensionManifest(valid_manifest)
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"id": {"type": "incorrect", "keyword": "kw"}}})
         with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__raises_error_if_empty_default_value_for_keyword(self) -> None:
-        valid_manifest["preferences"] = {"id": {"type": "keyword", "name": "My Keyword"}}
-        manifest = ExtensionManifest(valid_manifest)
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"id": {"type": "keyword", "name": "My Keyword"}}}
+        )
         with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
     def test_validate__doesnt_raise_if_empty_default_value_for_non_keyword(self) -> None:
-        valid_manifest["preferences"] = {
-            "city": {"type": "input", "name": "City"},
-        }
-        manifest = ExtensionManifest(valid_manifest)
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"city": {"type": "input", "name": "City"}}})
         manifest.validate()
+
+    def test_validate__trigger_missing_name__exception_raised(self) -> None:
+        manifest = ExtensionManifest({**valid_manifest, "triggers": {"t": {}}})
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__pref_missing_name__exception_raised(self) -> None:
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"p": {"type": "input"}}})
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__min_on_non_number__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "input", "name": "Text", "min": 5}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__max_on_non_number__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "input", "name": "Text", "max": 5}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__checkbox_bool_default__no_exception(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "checkbox", "name": "Flag", "default_value": True}}}
+        )
+        manifest.validate()
+
+    def test_validate__checkbox_no_default__no_exception(self) -> None:
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"p": {"type": "checkbox", "name": "Flag"}}})
+        manifest.validate()
+
+    def test_validate__checkbox_non_bool_default__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "checkbox", "name": "Flag", "default_value": "yes"}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_valid__no_exception(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "number", "name": "Count", "default_value": 5}}}
+        )
+        manifest.validate()
+
+    def test_validate__number_no_default__exception_raised(self) -> None:
+        manifest = ExtensionManifest({**valid_manifest, "preferences": {"p": {"type": "number", "name": "Count"}}})
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_bool_default__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "number", "name": "Count", "default_value": True}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_min_zero__no_exception(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "number", "name": "Count", "default_value": 0, "min": 0}}}
+        )
+        manifest.validate()
+
+    def test_validate__number_default_below_min__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "number", "name": "Count", "default_value": 3, "min": 5}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_default_above_max__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {
+                **valid_manifest,
+                "preferences": {"p": {"type": "number", "name": "Count", "default_value": 15, "max": 10}},
+            }
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_min_above_max__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {
+                **valid_manifest,
+                "preferences": {"p": {"type": "number", "name": "Count", "default_value": 10, "min": 8, "max": 3}},
+            }
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_bool_min__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {
+                **valid_manifest,
+                "preferences": {"p": {"type": "number", "name": "Count", "default_value": 5, "min": True}},
+            }
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__number_bool_max__exception_raised(self) -> None:
+        manifest = ExtensionManifest(
+            {
+                **valid_manifest,
+                "preferences": {"p": {"type": "number", "name": "Count", "default_value": 5, "max": True}},
+            }
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
+
+    def test_validate__select_with_options__no_exception(self) -> None:
+        manifest = ExtensionManifest(
+            {
+                **valid_manifest,
+                "preferences": {"p": {"type": "select", "name": "Choice", "options": [{"value": "a", "text": "A"}]}},
+            }
+        )
+        manifest.validate()
+
+    def test_validate__select_empty_options__exception_raised(self) -> None:
+        # Workaround: pyrefly raises implicit-any for `[]` literals, but ruff rejects `list()`.
+        # Typed variable avoids both. See https://github.com/facebook/pyrefly/issues/2442
+        empty: list[str] = []
+        manifest = ExtensionManifest(
+            {**valid_manifest, "preferences": {"p": {"type": "select", "name": "Choice", "options": empty}}}
+        )
+        with pytest.raises(ext_exceptions.ManifestError):
+            manifest.validate()
 
     def test_check_compatibility__manifest_version_0__exception_raised(self) -> None:
         manifest = ExtensionManifest({"name": "Test", "api_version": "0"})
