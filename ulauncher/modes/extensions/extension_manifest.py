@@ -17,7 +17,7 @@ class ExtensionManifestPreference(JsonConf):
     type = ""
     description = ""
     options: list[dict[str, Any]] = []
-    default_value: str | int = ""
+    default_value: str | int | bool = ""
     max: int | None = None
     min: int | None = None
 
@@ -109,7 +109,6 @@ class ExtensionManifest(JsonConf):
 
     def _validate_pref(self, pref: ExtensionManifestPreference) -> str | None:  # noqa: PLR0911, PLR0912
         valid_types = ["input", "checkbox", "number", "select", "text"]
-        default = pref.default_value
         if not pref.name:
             return 'missing non-optional field "name"'
         if not pref.type:
@@ -120,21 +119,27 @@ class ExtensionManifest(JsonConf):
             return '"min" must be a number type'
         if pref.max is not None and pref.type != "number":
             return '"max" must be a number type'
-        if pref.type == "checkbox" and default and not isinstance(default, bool):
+        if (
+            pref.type == "checkbox"
+            and pref.default_value != ExtensionManifestPreference.default_value
+            and not isinstance(pref.default_value, bool)
+        ):
             return '"default_value" must be a boolean'
         if pref.type == "number":
-            if not isinstance(default, int) or isinstance(default, bool):
-                return "default_value must not be a decimal number"
-            if pref.min is not None and not isinstance(pref.min, int):
-                return '"min" value must not be a decimal number'
-            if pref.max is not None and not isinstance(pref.max, int):
-                return '"max" value must not be a decimal number'
-            if pref.min is not None and pref.max is not None and pref.min >= pref.max:
-                return '"min" value must not be higher than "max"'
-            if pref.max is not None and default > pref.max:
-                return '"default_value" must not be higher than "max"'
-            if pref.min is not None and default < pref.min:
-                return '"min" value must not be higher than "default_value"'
+            if type(pref.default_value) is not int:
+                return "default_value must be a non-decimal number"
+            if pref.min is not None:
+                if type(pref.min) is not int:
+                    return '"min" value must be a non-decimal number'
+                if pref.default_value < pref.min:
+                    return '"min" value must not be higher than "default_value"'
+            if pref.max is not None:
+                if type(pref.max) is not int:
+                    return '"max" value must be a non-decimal number'
+                if pref.default_value > pref.max:
+                    return '"default_value" must not be higher than "max"'
+            if type(pref.min) is int and type(pref.max) is int and pref.min >= pref.max:
+                return '"min" value must be lower than "max"'
         if pref.type == "select":
             if not isinstance(pref.options, list):
                 return "options field must be a list"
