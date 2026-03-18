@@ -122,6 +122,7 @@ select = [
   "RSE",      # flake8-raise
   "RUF",      # Ruff-specific rules
   # "S",      # flake8-bandit (assumes you are writing a web server and that all params you use with subshells etc are untrusted input)
+  "S101",     # flake8-bandit: Disable runtime asserts
   "SLF",      # flake8-self
   "SLOT",     # flake8-slots
   "SIM",      # flake8-simplify
@@ -139,6 +140,7 @@ select = [
 per-file-ignores = {"tests/**/*.py" = [ # Relax some linting rules for tests
   "PLR2004",    # Allow direct comparison with integers (magic-value)
   "SLF001",     # Allow accessing private members (obj._hello)
+  "S101",       # Allow asserts in tests
   "T201",       # Allow print statements
 ]}
 

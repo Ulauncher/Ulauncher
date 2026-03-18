@@ -340,8 +340,12 @@ class ExtensionMode(Mode, metaclass=Singleton):
         ext_id = payload.get("ext_id")
         path = payload.get("path")
         with_debugger = bool(payload.get("with_debugger"))
-        assert ext_id, "preview_ext called without ext_id"
-        assert path, "preview_ext called without path"
+        if not isinstance(ext_id, str) or not ext_id.strip():
+            logger.error("preview_ext called without valid ext_id: %s", payload)
+            return
+        if not isinstance(path, str) or not path.strip():
+            logger.error("preview_ext called without valid path: %s", payload)
+            return
 
         logger.info(
             "[preview] Received preview request for ext_id=%s path=%s debugger=%s",

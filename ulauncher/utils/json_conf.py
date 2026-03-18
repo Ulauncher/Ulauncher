@@ -50,7 +50,9 @@ class JsonConf(BaseDataClass):
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
-        file_path = next((key[0] for key, inst in _file_instances.items() if inst == self), None)
-        assert file_path
+        file_path = next((key[0] for key, inst in _file_instances.items() if inst is self), None)
+        if file_path is None:
+            logger.error("Could not resolve file path for JsonConf instance %s", self.__class__.__name__)
+            return False
 
         return json_save(self, file_path)
