@@ -143,5 +143,5 @@ class LegacyTheme(Theme):
             raise ThemeError(msg)
 
 
-class ThemeError(Exception):
+class ThemeError(ValueError):
     pass
