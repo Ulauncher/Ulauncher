@@ -11,7 +11,9 @@ logger = logging.getLogger()
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
     display = Gdk.Display.get_default()
-    assert display
+    if not display:
+        logger.warning("Could not get default display")
+        return None
 
     if use_mouse_position:
         if x11_display := GdkX11.X11Display.get_default():

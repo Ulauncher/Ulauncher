@@ -26,7 +26,9 @@ def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSur
 
             icon = get_icon_path(icon, real_size) or DEFAULT_EXE_ICON
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon, real_size, real_size)
-        assert pixbuf
+        if not pixbuf:
+            msg = f"Could not load icon pixbuf: {icon}"
+            raise RuntimeError(msg)
         return Gdk.cairo_surface_create_from_pixbuf(pixbuf, scaling_factor)
     except GLib.Error as e:
         if icon == DEFAULT_EXE_ICON:

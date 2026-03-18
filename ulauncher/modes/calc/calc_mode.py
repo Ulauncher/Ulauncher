@@ -171,7 +171,10 @@ class CalcMode(Mode):
         callback: Callable[[effects.EffectMessage | list[Result]], None],
     ) -> None:
         if action_id == "copy":
-            assert isinstance(result, CalcResult)
+            if not isinstance(result, CalcResult):
+                logger.error("Unexpected result type for calc copy action: %s", type(result).__name__)
+                callback(effects.do_nothing())
+                return
             _events.emit("app:clipboard_store", result.result)
             callback(effects.close_window())
         else:

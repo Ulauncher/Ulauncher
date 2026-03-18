@@ -87,10 +87,9 @@ class Theme(JsonConf):
         )
 
     def validate(self) -> None:
-        try:
-            assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
-        except AssertionError as e:
-            raise ThemeError(e) from e
+        if not self.get_css_path().is_file():
+            msg = f"{self.get_css_path()} is not a file"
+            raise ThemeError(msg)
 
     @classmethod
     def load(cls, theme_name: str) -> Theme:  # type: ignore[override]
@@ -135,12 +134,13 @@ class LegacyTheme(Theme):
         return css + self.get_shadow_css(shadow_size)
 
     def validate(self) -> None:
-        try:
-            for prop in ["name", "css_file"]:
-                assert self.get(prop), f'"{prop}" is empty'
-            assert self.get_css_path().is_file(), f"{self.get_css_path()} is not a file"
-        except AssertionError as e:
-            raise ThemeError(e) from e
+        for prop in ["name", "css_file"]:
+            if not self.get(prop):
+                msg = f'"{prop}" is empty'
+                raise ThemeError(msg)
+        if not self.get_css_path().is_file():
+            msg = f"{self.get_css_path()} is not a file"
+            raise ThemeError(msg)
 
 
 class ThemeError(Exception):

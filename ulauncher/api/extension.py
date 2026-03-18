@@ -32,7 +32,9 @@ class Extension:
 
     def __init__(self) -> None:
         self.ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
-        assert self.ext_id, "ULAUNCHER_EXTENSION_ID env variable not set"
+        if not self.ext_id:
+            err_msg = "ULAUNCHER_EXTENSION_ID env variable not set"
+            raise RuntimeError(err_msg)
         self._client = Client(self)
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
