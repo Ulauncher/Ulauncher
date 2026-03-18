@@ -97,50 +97,50 @@ class ExtensionManifest(JsonConf):
             err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
             raise ext_exceptions.ManifestError(err_msg)
 
-        try:
-            for t_id, t in self.triggers.items():
-                assert t.name, f'"{t_id}" missing non-optional field "name"'
-        except AssertionError as e:
-            msg = f"Invalid triggers in Extension manifest: {e}"
-            raise ext_exceptions.ManifestError(msg) from None
+        for t_id, t in self.triggers.items():
+            if not t.name:
+                msg = f'Invalid triggers in Extension manifest: "{t_id}" missing non-optional field "name"'
+                raise ext_exceptions.ManifestError(msg)
 
-        try:
-            for p_id, p in self.preferences.items():
-                valid_types = ["input", "checkbox", "number", "select", "text"]
-                default = p.default_value
-                assert p.name, f'"{p_id}" missing non-optional field "name"'
-                assert p.type, f'"{p_id}" missing non-optional field "type"'
-                assert p.type in valid_types, (
-                    f'"{p_id}" invalid type "{p.type}" (should be either "{", ".join(valid_types)}")'
-                )
-                assert p.min is None or p.type == "number", f'"min" specified for "{p_id}", which is not a number type'
-                assert p.max is None or p.type == "number", f'"max" specified for "{p_id}", which is not a number type'
-                if p.type == "checkbox" and default:
-                    assert isinstance(default, bool), f'"{p_id}" "default_value" must be a boolean'
-                if p.type == "number":
-                    assert isinstance(default, int), f'"{p_id}" default_value must be a non-decimal number'
-                    assert not isinstance(default, bool), f'"{p_id}" default_value must be a non-decimal number'
-                    assert not p.min or isinstance(p.min, int), (
-                        f'"{p_id}" "min" value must be non-decimal number if specified'
-                    )
-                    assert not p.max or isinstance(p.max, int), (
-                        f'"{p_id}" "max" value must be non-decimal number if specified'
-                    )
-                    assert not p.min or not p.max or p.min < p.max, (
-                        f'"{p_id}" "min" value must be lower than "max" if specified'
-                    )
-                    assert not default or not p.max or default <= p.max, (
-                        f'"{p_id}" "default_value" must not be higher than "max"'
-                    )
-                    assert not default or not p.min or default >= p.min, (
-                        f'"{p_id}" "min" value must not be higher than "default_value"'
-                    )
-                if p.type == "select":
-                    assert isinstance(p.options, list), f'"{p_id}" options field must be a list'
-                    assert p.options, f'"{p_id}" option cannot be empty for select type'
-        except AssertionError as e:
-            msg = f"Invalid preferences in Extension manifest: {e}"
-            raise ext_exceptions.ManifestError(msg) from None
+        for p_id, p in self.preferences.items():
+            err_msg = self._validate_pref(p)
+            if err_msg:
+                raise ext_exceptions.ManifestError(f'Invalid preferences in Extension manifest: "{p_id}": ' + err_msg)
+
+    def _validate_pref(self, pref: ExtensionManifestPreference) -> str | None:  # noqa: PLR0911, PLR0912
+        valid_types = ["input", "checkbox", "number", "select", "text"]
+        default = pref.default_value
+        if not pref.name:
+            return 'missing non-optional field "name"'
+        if not pref.type:
+            return 'missing non-optional field "type"'
+        if pref.type not in valid_types:
+            return f'invalid type "{pref.type}" (should be either "{", ".join(valid_types)}")'
+        if pref.min is not None and pref.type != "number":
+            return '"min" must be a number type'
+        if pref.max is not None and pref.type != "number":
+            return '"max" must be a number type'
+        if pref.type == "checkbox" and default and not isinstance(default, bool):
+            return '"default_value" must be a boolean'
+        if pref.type == "number":
+            if not isinstance(default, int) or isinstance(default, bool):
+                return "default_value must not be a decimal number"
+            if pref.min is not None and not isinstance(pref.min, int):
+                return '"min" value must not be a decimal number'
+            if pref.max is not None and not isinstance(pref.max, int):
+                return '"max" value must not be a decimal number'
+            if pref.min is not None and pref.max is not None and pref.min >= pref.max:
+                return '"min" value must not be higher than "max"'
+            if pref.max is not None and default > pref.max:
+                return '"default_value" must not be higher than "max"'
+            if pref.min is not None and default < pref.min:
+                return '"min" value must not be higher than "default_value"'
+        if pref.type == "select":
+            if not isinstance(pref.options, list):
+                return "options field must be a list"
+            if not pref.options:
+                return "option cannot be empty for select type"
+        return None
 
     def check_compatibility(self, verbose: bool = False) -> None:
         """
