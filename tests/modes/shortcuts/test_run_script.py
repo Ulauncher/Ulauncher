@@ -1,5 +1,6 @@
 import textwrap
 from pathlib import Path
+from unittest.mock import patch
 
 from ulauncher.modes.shortcuts.run_script import run_script
 
@@ -21,3 +22,15 @@ class TestRunScript:
         thread = run_script(script, arg)
         thread.join()
         assert test_file.read_text() == f"{arg}\n"
+
+    def test_temp_file_cleaned_up_on_success(self) -> None:
+        with patch("ulauncher.modes.shortcuts.run_script.os.remove") as mock_remove:
+            thread = run_script("#!/bin/sh\ntrue", "")
+            thread.join()
+        mock_remove.assert_called_once()
+
+    def test_temp_file_cleaned_up_on_script_failure(self) -> None:
+        with patch("ulauncher.modes.shortcuts.run_script.os.remove") as mock_remove:
+            thread = run_script("#!/bin/bash\nexit 1", "")
+            thread.join()
+        mock_remove.assert_called_once()
