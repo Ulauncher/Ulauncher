@@ -279,7 +279,7 @@ class ExtensionController:
 
             # If debugger mode is enabled, prepend debugger command
             if with_debugger:
-                cmd = [sys.executable, "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", extension_main]
+                cmd = [sys.executable, "-m", "debugpy", "--listen", "127.0.0.1:5678", "--wait-for-client", extension_main]
 
             prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
             triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
