@@ -23,6 +23,16 @@ class TestRunScript:
         thread.join()
         assert test_file.read_text() == f"{arg}\n"
 
+    def test_run_without_shebang(self, tmp_path: Path) -> None:
+        # shell=True means the shell invokes the temp file directly. If the kernel
+        # returns ENOEXEC (no shebang / unrecognised format), the shell falls back to
+        # interpreting the file as a shell script, so shebang-less scripts work fine.
+        test_file = tmp_path / "test_output.txt"
+        script = f"echo hello > {test_file}\n"
+        thread = run_script(script, "")
+        thread.join()
+        assert test_file.read_text().strip() == "hello"
+
     def test_temp_file_cleaned_up_on_success(self) -> None:
         with patch("ulauncher.modes.shortcuts.run_script.os.remove") as mock_remove:
             thread = run_script("#!/bin/sh\ntrue", "")
