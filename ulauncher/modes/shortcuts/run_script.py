@@ -20,7 +20,8 @@ def run_script(script: str, arg: str) -> None:
         logger.debug("Running a script from %s", file_path)
         # shell=True lets shebang-less scripts work: if exec(2) returns ENOEXEC the
         # shell falls back to interpreting the file as a shell script.
-        output = subprocess.check_output(file_path + " " + shlex.quote(arg), shell=True).decode("utf-8")
+        command = f"{shlex.quote(file_path)} {shlex.quote(arg)}"
+        output = subprocess.check_output(command, shell=True).decode("utf-8")
         logger.debug("Script output:\n%s", output)
     finally:
         if file_path:
