@@ -18,6 +18,8 @@ def run_script(script: str, arg: str) -> None:
             os.fchmod(tmp.fileno(), 0o700)
             tmp.write(script)
         logger.debug("Running a script from %s", file_path)
+        # shell=True lets shebang-less scripts work: if exec(2) returns ENOEXEC the
+        # shell falls back to interpreting the file as a shell script.
         output = subprocess.check_output(file_path + " " + shlex.quote(arg), shell=True).decode("utf-8")
         logger.debug("Script output:\n%s", output)
     finally:
