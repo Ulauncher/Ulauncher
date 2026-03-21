@@ -18,10 +18,10 @@ class CLIArguments(argparse.Namespace):
     daemon: bool
     dev: bool
     verbose: bool
-    hide_window: bool
-    no_extensions: bool
-    no_window: bool
-    no_window_shadow: bool
+    hide_window: bool  # deprecated
+    no_extensions: bool  # deprecated
+    no_window: bool  # deprecated unreleased alias for hide_window (made more sense semantically)
+    no_window_shadow: bool  # deprecated
 
 
 @lru_cache(maxsize=None)
