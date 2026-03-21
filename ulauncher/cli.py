@@ -51,7 +51,7 @@ def get_cli_args() -> CLIArguments:
     parser.add_argument(
         "--dev",
         action="store_true",
-        help=_("Developer mode (enables verbose logging and Preferences UI context menu)"),
+        help=_("Enable verbose logging (alias for --verbose)"),
     )
     # deprecated
     parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
