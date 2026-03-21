@@ -38,7 +38,10 @@ class Extension:
         self._client = Client(self)
         log_handler = logging.StreamHandler()
         log_handler.setFormatter(ColoredFormatter())
-        logging.basicConfig(level=logging.DEBUG if os.getenv("VERBOSE") else logging.WARNING, handlers=[log_handler])
+        logging.basicConfig(
+            level=logging.DEBUG if os.getenv("VERBOSE") == "1" else logging.WARNING,
+            handlers=[log_handler],
+        )
         self.logger = logging.getLogger(self.ext_id)
 
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
