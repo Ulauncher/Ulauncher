@@ -28,7 +28,7 @@ from ulauncher.utils.json_utils import json_load
 
 
 class ExtensionPreference(ExtensionManifestPreference):
-    value: str | int | None = None
+    value: str | int | bool | None = None
 
 
 class ExtensionControllerTrigger(JsonConf):
