@@ -20,7 +20,7 @@ from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
 
 
-def main() -> None:  # noqa: PLR0915
+def main() -> None:  # noqa: PLR0912, PLR0915
     """
     Main function that starts everything
     """
@@ -45,6 +45,10 @@ def main() -> None:  # noqa: PLR0915
         # from starting a second Ulauncher background process we have to make sure the
         # --daemon flag prevents the app from starting.
         print("The --hide-window argument has been renamed to --daemon")  # noqa: T201
+        sys.exit(2)
+    if cli_args.no_window:
+        # --hide-window was renamed to --no-window for a while in v6 beta (never released)
+        print("The --no-window argument has been renamed to --daemon")  # noqa: T201
         sys.exit(2)
 
     # Set up global logging for stdout and file
