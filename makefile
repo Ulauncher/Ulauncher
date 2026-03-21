@@ -70,7 +70,7 @@ run: prefs
 	else
 		killall -eq ulauncher || true
 	fi
-	./bin/ulauncher --dev
+	./bin/ulauncher --verbose
 
 # Start a bash session in the Ulauncher Docker build container (Ubuntu)
 run-container:
