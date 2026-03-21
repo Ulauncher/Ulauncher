@@ -16,7 +16,7 @@ from ulauncher.modes.extensions.extension_cli_handlers import (
 
 class CLIArguments(argparse.Namespace):
     daemon: bool
-    dev: bool
+    dev: bool  # deprecated
     verbose: bool
     hide_window: bool  # deprecated
     no_extensions: bool  # deprecated
@@ -48,12 +48,8 @@ def get_cli_args() -> CLIArguments:
         action="store_true",
         help=_("Run Ulauncher as a background process, without initially showing the window"),
     )
-    parser.add_argument(
-        "--dev",
-        action="store_true",
-        help=_("Enable verbose logging (alias for --verbose)"),
-    )
     # deprecated
+    parser.add_argument("--dev", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
@@ -122,7 +118,4 @@ def get_cli_args() -> CLIArguments:
     preview_parser.add_argument("path", help="Path to the extension source directory")
     preview_parser.set_defaults(handler=partial(preview_extension, preview_parser))
 
-    args = parser.parse_args(namespace=CLIArguments())
-    if args.dev:
-        args.verbose = True
-    return args
+    return parser.parse_args(namespace=CLIArguments())
