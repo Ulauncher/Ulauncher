@@ -49,6 +49,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     if cli_args.no_window:
         # --hide-window was renamed to --no-window for a while in v6 beta (never released)
         print("The --no-window argument has been renamed to --daemon")  # noqa: T201
+        sys.exit(2)
     if cli_args.dev:
         print("The --dev argument has been removed (use --verbose instead)")  # noqa: T201
         sys.exit(2)
