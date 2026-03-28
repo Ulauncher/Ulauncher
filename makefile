@@ -189,7 +189,7 @@ format: check-dev-deps
 
 #=Build Commands
 
-.PHONY: prefs docker sdist manpage deb nix-run nix-build-dev nix-build
+.PHONY: prefs docker sdist manpage set-version deb nix-run nix-build-dev nix-build
 
 # Build the docker image (only needed if you make changes to it)
 docker:
@@ -254,3 +254,12 @@ manpage:
 	if [ -n "${INTERACTIVE}" ]; then
 		man -l ulauncher.1
 	fi
+
+# Set the Ulauncher version. Usage: make set-version NEW_VERSION=1.2.3
+set-version:
+	@if [ -z "${NEW_VERSION}" ]; then
+		echo -e "${BOLD}${RED}NEW_VERSION must be set${RESET}"
+		exit 1
+	fi
+	sed -i 's/^version = ".*"/version = "${NEW_VERSION}"/' ${VERSION_FILE}
+	echo -e "${GREEN}Version set to ${BOLD}${NEW_VERSION}${RESET}"
