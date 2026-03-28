@@ -21,7 +21,7 @@ dependencies = [ "PyGObject", "pycairo", "python-xlib" ]
 dynamic = ["version", "license"]
 
 [tool.setuptools.dynamic]
-version = {attr = "ulauncher.version"}
+version = {attr = "ulauncher._version.version"}
 
 [tool.pyrefly]
 python-platform = "linux"
