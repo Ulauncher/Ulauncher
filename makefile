@@ -263,3 +263,10 @@ set-version:
 	fi
 	sed -i 's/^version = ".*"/version = "${NEW_VERSION}"/' ${VERSION_FILE}
 	echo -e "${GREEN}Version set to ${BOLD}${NEW_VERSION}${RESET}"
+
+# Make a release commit and tag. Usage: make release NEW_VERSION=1.2.3
+release: set-version manpage
+	@set -euo pipefail
+	git add ${VERSION_FILE} ulauncher.1
+	git commit -m "chore(release): v${NEW_VERSION}" --no-verify
+	git tag "v${NEW_VERSION}"
