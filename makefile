@@ -189,7 +189,7 @@ format: check-dev-deps
 
 #=Build Commands
 
-.PHONY: prefs docker sdist manpage set-version deb nix-run nix-build-dev nix-build
+.PHONY: prefs docker sdist manpage set-version release deb nix-run nix-build-dev nix-build
 
 # Build the docker image (only needed if you make changes to it)
 docker:
