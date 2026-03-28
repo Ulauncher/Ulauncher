@@ -268,3 +268,11 @@ release: set-version manpage
 	git add ${VERSION_FILE} ulauncher.1
 	git commit -m "chore(release): v${NEW_VERSION}" --no-verify
 	git tag "v${NEW_VERSION}"
+	echo -e "${GREEN}Created commit and tag v${NEW_VERSION}${RESET}"
+	read -r -p "Do you want to push the release? [y/N] " PUSH_ANSWER
+	if [[ "$$PUSH_ANSWER" =~ ^[Yy]$$ ]]; then
+		git push && git push origin "v${NEW_VERSION}"
+		echo -e "${GREEN}Pushed commit and tag v${NEW_VERSION}${RESET}"
+	else
+		echo -e "${YELLOW}Skipped push. Run 'git push && git push origin v${NEW_VERSION}' to push manually.${RESET}"
+	fi
