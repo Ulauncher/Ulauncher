@@ -250,10 +250,8 @@ manpage:
 		exit 1
 	fi
 	help2man --section=1 --name="Feature rich application Launcher for Linux" --no-info ./bin/ulauncher > ulauncher.1
-	echo -e "Generated manpage to ${BOLD}${GREEN}./ulauncher.1${RESET}"
-	if [ -n "${INTERACTIVE}" ]; then
-		man -l ulauncher.1
-	fi
+	echo -e "Generated manpage\n"
+	echo -e "Run '${BOLD}${GREEN}man -l ulauncher.1${RESET}' if you want to preview it."
 
 # Set the Ulauncher version. Usage: make set-version NEW_VERSION=1.2.3
 set-version:
