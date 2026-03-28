@@ -4,7 +4,8 @@ INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.5
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
 ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-VERSION = $(shell eval 'python3 -c "import ulauncher; print(ulauncher.version)"')
+VERSION_FILE = ulauncher/_version.py
+VERSION = $(shell sed -n 's/^version = "\(.*\)"$$/\1/p' ${VERSION_FILE})
 DPKG_ARGS := "--post-clean --build=all --no-sign"
 DEB_VERSION = $(subst -,~,$(VERSION))
 DEB_DISTRO = $(shell eval lsb_release -sc)
