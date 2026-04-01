@@ -53,7 +53,7 @@ class ExtensionMode(Mode, metaclass=Singleton):
 
     def start_extensions(self) -> None:
         for ext in extension_registry.load_all():
-            if ext.is_enabled and not ext.has_error:
+            if ext.state.is_enabled:
                 ext.start()
                 # legacy_preferences_load is useless and deprecated
                 prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
