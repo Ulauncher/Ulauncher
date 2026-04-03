@@ -29,7 +29,7 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     query = ""
-    windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
+    windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()  # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
