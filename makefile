@@ -66,11 +66,11 @@ venv:
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
 
 	echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
-	echo -e "\nTo activate it, run:"
-	echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
-	echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish\n"
-	echo -e "\nmake commands will use .venv/bin automatically."
-	echo "Activate it if you want direct access to the tools in your shell."
+	echo -e "$(GREEN)[✓] make commands and the pre-commit hook will use it automatically.$(RESET)"
+	echo -e "\nIf you need direct access to the underlying CLI tools, you can manually load the venv:"
+	echo -e "* Bash/Zsh: $(BOLD)source .venv/bin/activate$(RESET)"
+	echo -e "* Fish: $(BOLD)source .venv/bin/activate.fish$(RESET)"
+
 
 # Run ulauncher from source
 run: prefs
