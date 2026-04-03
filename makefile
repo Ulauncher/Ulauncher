@@ -11,6 +11,7 @@ DEB_VERSION = $(subst -,~,$(VERSION))
 DEB_DISTRO = $(shell eval lsb_release -sc)
 DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
+export PATH := $(ROOT_DIR).venv/bin:$(PATH)
 
 # cli font vars
 BOLD := \\e[1m
