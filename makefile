@@ -13,7 +13,9 @@ DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 VENV_REQUIREMENTS_SNAPSHOT := .venv/.requirements.txt
 PYTHON_BIN := $(shell command -v python3)
+ifndef NO_VENV
 export PATH := $(ROOT_DIR).venv/bin:$(PATH)
+endif
 
 # cli font vars
 BOLD := \\e[1m
@@ -120,7 +122,7 @@ run-container:
 # Check if the development environment exists and matches requirements.txt
 check-dev-deps:
 	@set -euo pipefail
-	if [ "$${GITHUB_ACTIONS:-}" = "true" ]; then
+	if [ "$${GITHUB_ACTIONS:-}" = "true" ] || [ -n "$${NO_VENV:-}" ]; then
 	  exit 0
 	fi
 	if [ ! -x ".venv/bin/python" ]; then

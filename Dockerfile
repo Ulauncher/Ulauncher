@@ -9,6 +9,7 @@ LABEL maintainer="ulauncher.app@gmail.com"
 
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
+ENV NO_VENV=1
 
 RUN apt-get update --fix-missing
 RUN apt-get install -y tzdata
