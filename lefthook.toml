@@ -9,22 +9,20 @@ skip_lfs = true
 # and jobs can fail because a previous job created the git lockfile,
 parallel = true
 
-[pre-commit.commands.venv]
-run = "make check-dev-deps"
-
 [pre-commit.commands.typos]
 glob = "*"
-run = "typos --force-exclude {staged_files}"
+run = "make check-dev-deps && ./.venv/bin/typos --force-exclude {staged_files}"
 
 [pre-commit.commands.ruff]
 glob = "*.py"
 run = """
-  ruff check --fix {staged_files}
-  ruff format {staged_files}
+  make check-dev-deps &&
+  ./.venv/bin/ruff check --fix {staged_files} &&
+  ./.venv/bin/ruff format {staged_files}
   """
 stage_fixed = true
 
 [pre-commit.commands.pyrefly]
 root = "ulauncher"
 glob = "*.py"
-run = "pyrefly check {staged_files}"
+run = "make -C .. check-dev-deps && ../.venv/bin/pyrefly check {staged_files}"
