@@ -3,6 +3,7 @@
 **/*~
 **/*#
 .cache
+.codex
 ulauncherc
 *.egg-info
 dist
