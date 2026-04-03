@@ -1,7 +1,7 @@
 .ONESHELL:
 SHELL := bash
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
-DOCKER_IMAGE := ulauncher/build-image:6.5
+DOCKER_IMAGE := ulauncher/build-image:6.6
 DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
 ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION_FILE = ulauncher/_version.py
