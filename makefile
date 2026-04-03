@@ -11,6 +11,7 @@ DEB_VERSION = $(subst -,~,$(VERSION))
 DEB_DISTRO = $(shell eval lsb_release -sc)
 DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
+VENV_REQUIREMENTS_SNAPSHOT := .venv/.requirements.txt
 export PATH := $(ROOT_DIR).venv/bin:$(PATH)
 
 # cli font vars
@@ -56,13 +57,16 @@ venv:
 
 	# Update to the latest (v2.13.0) after migration to python>=9 in Dockerfile
 	.venv/bin/python -m pip install pygobject-stubs==2.12.0 --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
+	# Keep a copy of the requirements used for this environment so make targets can
+	# tell when the local venv needs to be refreshed.
+	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
 
 	echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
 	echo -e "\nTo activate it, run:"
 	echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
 	echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish\n"
-	echo -e "\nDo the activation each time you open the terminal."
-	echo "Now you can run make commands in this environment."
+	echo -e "\nmake commands will use .venv/bin automatically."
+	echo "Activate it if you want direct access to the tools in your shell."
 
 # Run ulauncher from source
 run: prefs
@@ -111,32 +115,20 @@ run-container:
 
 .PHONY: check lint format pyrefly ruff rumdl typos pytest check-dev-deps
 
-# Check if development dependencies are properly installed
+# Check if the development environment exists and matches requirements.txt
 check-dev-deps:
 	@set -euo pipefail
 	if [ "$${GITHUB_ACTIONS:-}" = "true" ]; then
 	  exit 0
 	fi
-	STDERR_OUTPUT=$$(python3 -m pip freeze -r requirements.txt 2>&1 >/dev/null)
-	# Remove warnings for packages with python_version markers not met by this Python
-	PY_VERSION=$$(python3 --version | sed 's/Python \([0-9]*\.[0-9]*\).*/\1/')
-	while IFS= read -r req; do
-		required=$$(echo "$$req" | sed -n "s/.*; *python_version *>= *['\"]\\([0-9.]*\\).*/\\1/p")
-		if [ -n "$$required" ] && ! printf '%s\n' "$$required" "$$PY_VERSION" | sort -V -C; then
-			pkg=$$(echo "$$req" | sed 's/[<>=! ;].*//')
-			STDERR_OUTPUT=$$(echo "$$STDERR_OUTPUT" | grep -v "$$pkg" || true)
-		fi
-	done < requirements.txt
-	if [ -n "$$STDERR_OUTPUT" ]; then
-		echo -e "${BOLD}${RED}Development dependencies not met:${RESET}" >&2
-		echo -e "${YELLOW}$$STDERR_OUTPUT\n${RESET}" >&2
-		if [ ! -d ".venv" ]; then
-			echo -e "${BOLD}${RED}Please run 'make venv' to set up the development environment.${RESET}" >&2
-		else \
-			echo -e "Please activate the virtual environment:"
-			echo -e "  $(GREEN)source .venv/bin/activate$(RESET)      # Bash/Zsh"
-			echo -e "  $(GREEN)source .venv/bin/activate.fish$(RESET) # Fish\n"
-		fi;
+	if [ ! -x ".venv/bin/python" ]; then
+		echo -e "${BOLD}${RED}Development environment not set up.${RESET}" >&2
+		echo -e "${YELLOW}Please run 'make venv' to set up the development environment.${RESET}\n" >&2
+		exit 1
+	fi
+	if [ ! -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] || ! cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
+		echo -e "${BOLD}${RED}Development environment is out of date.${RESET}" >&2
+		echo -e "${YELLOW}Please run 'make venv' to refresh the development environment.${RESET}\n" >&2
 		exit 1
 	fi
 
