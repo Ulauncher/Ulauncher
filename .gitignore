@@ -4,6 +4,7 @@
 *#
 .DS_Store
 .cache
+.codex
 *.egg-info
 dist
 build
