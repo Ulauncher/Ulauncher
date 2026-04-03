@@ -1,9 +1,9 @@
 build
 lefthook
 mypy < 1.17.0
-pyrefly >= 0.52.0
+pyrefly >= 0.59.1
 pytest
 pytest-mock
-ruff >= 0.15.1
+ruff >= 0.15.9
 rumdl >= 0.1.22; python_version >= '3.9'
 typos
