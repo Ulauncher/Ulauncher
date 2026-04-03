@@ -10,44 +10,44 @@ LABEL maintainer="ulauncher.app@gmail.com"
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update --fix-missing
-RUN apt install -y tzdata
-RUN apt install -y keyboard-configuration
+RUN apt-get update --fix-missing
+RUN apt-get install -y tzdata
+RUN apt-get install -y keyboard-configuration
 
 # CLI dependencies for building and testing
-RUN apt install -y software-properties-common
-RUN apt install -y git
-RUN apt install -y vim
-RUN apt install -y curl
-RUN apt install -y wget
-RUN apt install -y xvfb
-RUN apt install -y help2man
-RUN apt install -y python3-venv
+RUN apt-get install -y software-properties-common
+RUN apt-get install -y git
+RUN apt-get install -y vim
+RUN apt-get install -y curl
+RUN apt-get install -y wget
+RUN apt-get install -y xvfb
+RUN apt-get install -y help2man
+RUN apt-get install -y python3-venv
 
 # deb package build dependencies and helpers
-RUN apt install -y debhelper
-RUN apt install -y dh-python
-RUN apt install -y devscripts
-RUN apt install -y git-buildpackage
+RUN apt-get install -y debhelper
+RUN apt-get install -y dh-python
+RUN apt-get install -y devscripts
+RUN apt-get install -y git-buildpackage
 
 # ubuntu launchpad upload dependencies
-RUN apt install -y dput
-RUN apt install -y python3-paramiko
+RUN apt-get install -y dput
+RUN apt-get install -y python3-paramiko
 
 # App dependencies
-RUN apt install -y gobject-introspection
-RUN apt install -y python3-all
-RUN apt install -y python3-gi
-RUN apt install -y python3-gi-cairo
-RUN apt install -y gir1.2-glib-2.0
-RUN apt install -y gir1.2-gtk-3.0
+RUN apt-get install -y gobject-introspection
+RUN apt-get install -y python3-all
+RUN apt-get install -y python3-gi
+RUN apt-get install -y python3-gi-cairo
+RUN apt-get install -y gir1.2-glib-2.0
+RUN apt-get install -y gir1.2-gtk-3.0
 
 # Workaround only needed for 20.04 and older: https://github.com/pypa/setuptools/issues/2956
 # Replace with python3-setuptools after upgrading to 22.04
-RUN apt install -y python3
-RUN apt install -y python3-dev
-RUN apt install -y build-essential
-RUN apt install -y fdupes
+RUN apt-get install -y python3
+RUN apt-get install -y python3-dev
+RUN apt-get install -y build-essential
+RUN apt-get install -y fdupes
 WORKDIR /root
 RUN git clone -b alvistack/v60.0.4 https://github.com/alvistack/pypa-setuptools.git
 WORKDIR /root/pypa-setuptools
@@ -59,16 +59,16 @@ RUN debuild -uc -us
 WORKDIR /root
 
 # Clean up
-RUN apt update
-RUN apt autoremove -y
-RUN apt clean
+RUN apt-get update
+RUN apt-get autoremove -y
+RUN apt-get clean
 
 COPY [ "requirements.txt", "./" ]
 
 # Update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 COPY [ "scripts/dput.cf", "/etc" ]
 
-RUN apt install -y python3-pip
+RUN apt-get install -y python3-pip
 RUN pip3 install -r requirements.txt
 RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install pygobject-stubs --no-cache-dir
 
