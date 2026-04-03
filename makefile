@@ -49,7 +49,8 @@ version:
 
 # Creates a python virtual environment and installs dependencies
 venv:
-	@echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
+	@set -euo pipefail
+	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	python3 -m venv --system-site-packages .venv
 	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
 	.venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
