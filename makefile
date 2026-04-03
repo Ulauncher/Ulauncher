@@ -12,6 +12,7 @@ DEB_DISTRO = $(shell eval lsb_release -sc)
 DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 VENV_REQUIREMENTS_SNAPSHOT := .venv/.requirements.txt
+PYTHON_BIN := $(shell command -v python3)
 export PATH := $(ROOT_DIR).venv/bin:$(PATH)
 
 # cli font vars
@@ -51,7 +52,7 @@ version:
 venv:
 	@set -euo pipefail
 	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
-	python3 -m venv --system-site-packages .venv
+	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
 	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
 	.venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
 	echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
