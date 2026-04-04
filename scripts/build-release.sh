@@ -109,6 +109,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $focal && $jammy && $noble && $questing && $resolute"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $resolute"
     set +x
 }
