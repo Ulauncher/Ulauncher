@@ -95,8 +95,8 @@ launchpad_upload() {
         PPA="agornostal/ulauncher"
     fi
 
+    resolute="PPA=$PPA RELEASE=resolute ./ul build-deb $VERSION --upload"
     questing="PPA=$PPA RELEASE=questing ./ul build-deb $VERSION --upload"
-    plucky="PPA=$PPA RELEASE=plucky ./ul build-deb $VERSION --upload"
     noble="PPA=$PPA RELEASE=noble ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
