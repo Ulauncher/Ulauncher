@@ -23,6 +23,9 @@ def is_port_in_use(port, host='127.0.0.1'):
     """
     :rtype bool:
     """
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex((host, port))
-    return result == 0
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind((host, port))
+            return False
+        except OSError:
+            return True
