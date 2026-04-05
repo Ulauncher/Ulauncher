@@ -73,7 +73,7 @@ venv:
 
 
 # Run ulauncher from source
-run: prefs
+run:
 	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
 	@if [ -n $(shell eval "command -v systemctl") ] && [ "inactive" != $(shell eval "systemctl --user is-active ulauncher") ]; then
 		systemctl --user stop ulauncher
@@ -197,7 +197,7 @@ prefs:
 	@echo "make prefs is no longer needed"
 
 # Build a source tarball
-sdist: manpage prefs
+sdist: manpage
 	@set -euo pipefail
 	# See https://github.com/Ulauncher/Ulauncher/pull/1337 for why we're not using setuptools
 	# copy gitignore to .tarignore, remove data/preferences and add others to ignore instead
