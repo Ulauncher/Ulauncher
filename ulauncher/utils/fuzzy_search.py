@@ -1,7 +1,11 @@
 import operator
 from functools import lru_cache
 # pylint: disable=no-name-in-module
-from Levenshtein import distance
+try:
+    from Levenshtein import distance
+
+except ImportError:
+    from pyxdameraulevenshtein import damerau_levenshtein_distance as distance
 
 
 @lru_cache(maxsize=150)
