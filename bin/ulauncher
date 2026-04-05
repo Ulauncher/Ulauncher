@@ -10,10 +10,6 @@ locale.textdomain("ulauncher")
 def format_err(text: str):
     return f"\033[01;31m{text}\033[01;0m\n"
 
-
-if sys.version_info.major != 3:  # noqa: PLR2004
-    sys.exit(format_err("Ulauncher requires Python version 3."))
-
 # Add project root directory (enable symlink and trunk execution)
 PYTHONPATH = os.getenv("PYTHONPATH", "")
 PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
