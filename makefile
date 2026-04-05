@@ -74,8 +74,8 @@ venv:
 
 # Run ulauncher from source
 run:
-	# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
-	@if [ -n $(shell eval "command -v systemctl") ] && [ "inactive" != $(shell eval "systemctl --user is-active ulauncher") ]; then
+	@# If systemd unit running, stop it, else try killall. We want to make sure to be the main/daemon instance of Ulauncher
+	if [ -n $(shell eval "command -v systemctl") ] && [ "inactive" != $(shell eval "systemctl --user is-active ulauncher") ]; then
 		systemctl --user stop ulauncher
 	else
 		killall -eq ulauncher || true
