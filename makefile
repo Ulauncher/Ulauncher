@@ -2,7 +2,7 @@
 SHELL := bash
 INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 DOCKER_IMAGE := ulauncher/build-image:6.6
-DOCKER_BIN = $(shell eval 'command -v podman || command -v docker')
+DOCKER_BIN = $(shell eval 'command -v docker || command -v podman')
 ROOT_DIR = $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION_FILE = ulauncher/_version.py
 VERSION = $(shell sed -n 's/^version = "\(.*\)"$$/\1/p' ${VERSION_FILE})
