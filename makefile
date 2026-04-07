@@ -140,15 +140,15 @@ check: lint pytest
 
 # Lint with pyrefly (type checker)
 pyrefly: check-dev-deps
-	pyrefly check
+	@pyrefly check
 
 # Lint with ruff
 ruff: check-dev-deps
-	ruff check . && ruff format --check .
+	@ruff check . && ruff format --check .
 
 # Lint with typos (typo checker)
 typos: check-dev-deps
-	typos .
+	@typos .
 
 # Lint markdown files with rumdl (optional, requires Python 3.9+)
 rumdl:
