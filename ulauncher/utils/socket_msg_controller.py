@@ -5,9 +5,9 @@ import json
 import logging
 from typing import Any, Callable
 
-from gi.repository import GLib
+from gi.repository import Gio, GLib
 
-from ulauncher.utils.gio_compat import Gio
+from ulauncher.utils.giounix import GioUnix
 
 logger = logging.getLogger()
 
@@ -23,8 +23,8 @@ class SocketMsgController:
     def __init__(self, file_descriptor: int, on_close: Callable[[], None] | None = None) -> None:
         self.file_descriptor = file_descriptor
         self._on_close = on_close
-        unix_in_stream = Gio.UnixInputStream.new(file_descriptor, True)
-        unix_out_stream = Gio.UnixOutputStream.new(file_descriptor, False)
+        unix_in_stream = GioUnix.InputStream.new(file_descriptor, True)
+        unix_out_stream = GioUnix.OutputStream.new(file_descriptor, False)
         self._input_stream = Gio.DataInputStream.new(unix_in_stream)
         self._output_stream = Gio.DataOutputStream.new(unix_out_stream)
 

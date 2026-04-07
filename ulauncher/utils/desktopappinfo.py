@@ -2,24 +2,22 @@ from __future__ import annotations
 
 from gi.repository import Gio
 
+from ulauncher.utils.giounix import GioUnix
+
 try:
-    SystemDesktopAppInfo = Gio.DesktopAppInfo
+    SystemDesktopAppInfo = GioUnix.DesktopAppInfo
 except AttributeError:
-    import gi
-
-    gi.require_version("GioUnix", "2.0")
-    from gi.repository import GioUnix  # type: ignore[attr-defined]
-
-    SystemDesktopAppInfo = GioUnix.DesktopAppInfo  # type: ignore[assignment,misc,unused-ignore]
+    # Some GLib/PyGObject combinations still expose this only through Gio.
+    SystemDesktopAppInfo = Gio.DesktopAppInfo  # type: ignore[assignment, misc, unused-ignore]
 
 
 class DesktopAppInfo:
-    _app_info: Gio.DesktopAppInfo
+    _app_info: GioUnix.DesktopAppInfo
     """
     Wrapper for Gio.DesktopAppInfo without the bork.
     """
 
-    def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
+    def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
         self._app_info = app_info
 
     @staticmethod
@@ -38,7 +36,7 @@ class DesktopAppInfo:
     def get_all() -> list[DesktopAppInfo]:
         return [DesktopAppInfo(app_info) for app_info in SystemDesktopAppInfo.get_all()]  # type: ignore[arg-type]
 
-    ## Methods copied from Gio.DesktopAppInfo (these work fine)
+    ## Methods copied from GioUnix.DesktopAppInfo (these work fine)
 
     def get_id(self) -> str | None:
         return self._app_info.get_id()
