@@ -2,8 +2,10 @@
 Centralized GI module imports for Ulauncher.
 
 This is the single canonical place to import all GI/GObject-Introspection modules.
-gi.require_versions() is called here; ulauncher/__init__.py guarantees this module
-loads before any other code imports from gi.repository.
+gi.require_versions() is called eagerly (it must run before any gi.repository access),
+but all actual module imports are deferred via module-level __getattr__ (PEP 562).
+Each module is loaded once on first access, then cached in globals() for subsequent
+imports. Extensions only pay the cost of the modules they actually use.
 
 Do NOT use `from gi.repository import ...` elsewhere; use `from ulauncher.gi import ...`.
 """
@@ -11,8 +13,10 @@ Do NOT use `from gi.repository import ...` elsewhere; use `from ulauncher.gi imp
 from __future__ import annotations
 
 import contextlib
+import importlib
 import types
 import warnings
+from typing import TYPE_CHECKING
 
 import gi  # absolute import — finds the real gi package, not this file
 
@@ -26,16 +30,23 @@ gi.require_versions(
     }
 )
 
-from gi.repository import (  # type: ignore[attr-defined]  # noqa: E402
-    Gdk,
-    GdkPixbuf,
-    GdkX11,  # pyrefly: ignore[missing-module-attribute]
-    Gio,
-    GLib,
-    GObject,
-    Gtk,
-    Pango,
-)
+if TYPE_CHECKING:
+    # Runtime imports are deferred via __getattr__; these declarations exist for type
+    # checkers only and have zero runtime cost.
+    from gi.repository import (  # type: ignore[attr-defined]
+        Gdk,
+        GdkPixbuf,
+        GdkX11,  # pyrefly: ignore[missing-module-attribute]
+        Gio,
+        GLib,
+        GObject,
+        Gtk,
+        Pango,
+    )
+
+    GioUnix: _GioUnixCompat  # set by _setup_gio_unix()
+
+_LAZY_MODULES = frozenset({"Gdk", "GdkPixbuf", "GdkX11", "Gio", "GLib", "GObject", "Gtk", "Pango"})
 
 __all__ = [
     "GLib",
@@ -92,73 +103,46 @@ class _GioUnixCompat(types.SimpleNamespace):
     Depending on the GLib/PyGObject combination the namespace can be either missing or broken.
     """
 
-    DesktopAppInfo: type[DesktopAppInfo]  # forward ref; class is defined below and patched in
+    DesktopAppInfo: type[DesktopAppInfo]  # forward ref; patched in by _setup_gio_unix()
     InputStream: type[Gio.UnixInputStream]
     OutputStream: type[Gio.UnixOutputStream]
 
-
-GioUnix = _GioUnixCompat()
-
-with contextlib.suppress(ImportError, ValueError):
-    gi.require_version("GioUnix", "2.0")
-    from gi.repository import GioUnix as _SystemGioUnix  # type: ignore[no-redef, attr-defined]
-
-    for _attr_name in ("DesktopAppInfo", "InputStream", "OutputStream"):
-        with contextlib.suppress(AttributeError):
-            setattr(GioUnix, _attr_name, getattr(_SystemGioUnix, _attr_name))
-
-
-def _ensure_attr(attr_name: str, gio_attr_name: str) -> None:
-    if hasattr(GioUnix, attr_name):
-        return
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
-        fallback = getattr(Gio, gio_attr_name, None)
-
-    if fallback is None:
-        err_msg = f"Neither GioUnix.{attr_name} nor Gio.{gio_attr_name} could be found"
-        raise ImportError(err_msg)
-
-    setattr(GioUnix, attr_name, fallback)
-
-
-_ensure_attr("InputStream", "UnixInputStream")
-_ensure_attr("OutputStream", "UnixOutputStream")
-_ensure_attr("DesktopAppInfo", "DesktopAppInfo")
 
 # ─── DesktopAppInfo wrapper ────────────────────────────────────────────────────
 #
 # GioUnix.DesktopAppInfo has unbound method bugs across certain GLib/PyGObject
 # version combinations. We wrap it and patch it back onto GioUnix so all callers
 # get the fixed version transparently via GioUnix.DesktopAppInfo.
-
-_RawDesktopAppInfo = GioUnix.DesktopAppInfo  # the raw (potentially broken) class
+#
+# DesktopAppInfo._raw holds the unwrapped gi class. It is assigned by _setup_gio_unix()
+# and is guaranteed to exist before any DesktopAppInfo method is callable, because those
+# methods are only reachable via GioUnix.DesktopAppInfo which requires _setup_gio_unix().
 
 
 class DesktopAppInfo:
     """Wrapper for GioUnix.DesktopAppInfo without the bork."""
 
-    _app_info: _RawDesktopAppInfo  # type: ignore[valid-type]
+    _raw: type[Gio.DesktopAppInfo]  # assigned by _setup_gio_unix()
+    _app_info: Gio.DesktopAppInfo
 
-    def __init__(self, app_info: _RawDesktopAppInfo) -> None:  # type: ignore[valid-type]
+    def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
         self._app_info = app_info
 
     @staticmethod
     def new(app_id: str) -> DesktopAppInfo | None:
-        if app_info := _RawDesktopAppInfo.new(app_id):
+        if app_info := DesktopAppInfo._raw.new(app_id):
             return DesktopAppInfo(app_info)
         return None
 
     @staticmethod
     def new_from_filename(filename: str) -> DesktopAppInfo | None:
-        if app_info := _RawDesktopAppInfo.new_from_filename(filename):
+        if app_info := DesktopAppInfo._raw.new_from_filename(filename):
             return DesktopAppInfo(app_info)
         return None
 
     @staticmethod
     def get_all() -> list[DesktopAppInfo]:
-        return [DesktopAppInfo(app_info) for app_info in _RawDesktopAppInfo.get_all()]  # type: ignore[arg-type]
+        return [DesktopAppInfo(app_info) for app_info in DesktopAppInfo._raw.get_all()]  # type: ignore[arg-type]
 
     # Methods copied from GioUnix.DesktopAppInfo (these work fine)
 
@@ -185,25 +169,75 @@ class DesktopAppInfo:
 
     # Borked unbound methods that we have to call via the class to work consistently
     def get_boolean(self, name: str) -> bool:
-        return _RawDesktopAppInfo.get_boolean(self._app_info, name)
+        return DesktopAppInfo._raw.get_boolean(self._app_info, name)
 
     def get_string(self, name: str) -> str | None:
-        return _RawDesktopAppInfo.get_string(self._app_info, name)
+        return DesktopAppInfo._raw.get_string(self._app_info, name)
 
     def get_generic_name(self) -> str | None:
-        return _RawDesktopAppInfo.get_generic_name(self._app_info)
+        return DesktopAppInfo._raw.get_generic_name(self._app_info)
 
     def get_filename(self) -> str | None:
-        return _RawDesktopAppInfo.get_filename(self._app_info)
+        return DesktopAppInfo._raw.get_filename(self._app_info)
 
     def get_keywords(self) -> list[str]:
-        return _RawDesktopAppInfo.get_keywords(self._app_info)
+        return DesktopAppInfo._raw.get_keywords(self._app_info)
 
     def get_show_in(self) -> bool:
-        return _RawDesktopAppInfo.get_show_in(self._app_info)
+        return DesktopAppInfo._raw.get_show_in(self._app_info)
 
     def get_nodisplay(self) -> bool:
-        return _RawDesktopAppInfo.get_nodisplay(self._app_info)
+        return DesktopAppInfo._raw.get_nodisplay(self._app_info)
 
 
-GioUnix.DesktopAppInfo = DesktopAppInfo  # type: ignore[assignment]
+# ─── Deferred setup functions ──────────────────────────────────────────────────
+
+
+def _setup_gio_unix() -> None:
+    """Set up the GioUnix compat namespace and DesktopAppInfo wrapper. Called once on first access."""
+    from gi.repository import Gio
+
+    gio_unix = _GioUnixCompat()
+
+    with contextlib.suppress(ImportError, ValueError):
+        gi.require_version("GioUnix", "2.0")
+        from gi.repository import GioUnix as _SystemGioUnix  # type: ignore[attr-defined]
+
+        for attr_name in ("DesktopAppInfo", "InputStream", "OutputStream"):
+            with contextlib.suppress(AttributeError):
+                setattr(gio_unix, attr_name, getattr(_SystemGioUnix, attr_name))
+
+    def _ensure_attr(attr_name: str, gio_attr_name: str) -> None:
+        if hasattr(gio_unix, attr_name):
+            return
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            fallback = getattr(Gio, gio_attr_name, None)
+        if fallback is None:
+            err_msg = f"Neither GioUnix.{attr_name} nor Gio.{gio_attr_name} could be found"
+            raise ImportError(err_msg)
+        setattr(gio_unix, attr_name, fallback)
+
+    _ensure_attr("InputStream", "UnixInputStream")
+    _ensure_attr("OutputStream", "UnixOutputStream")
+    _ensure_attr("DesktopAppInfo", "DesktopAppInfo")
+
+    # _raw is the real DesktopAppInfo class; must be assigned before immediately overwritten
+    DesktopAppInfo._raw = gio_unix.DesktopAppInfo  # type: ignore[attr-defined]  # noqa: SLF001
+    gio_unix.DesktopAppInfo = DesktopAppInfo  # type: ignore[assignment]
+    globals()["GioUnix"] = gio_unix
+
+
+# ─── Lazy loader (PEP 562) ────────────────────────────────────────────────────
+
+
+def __getattr__(name: str) -> object:
+    if name in _LAZY_MODULES:
+        module = importlib.import_module(f"gi.repository.{name}")
+        globals()[name] = module
+        return module
+    if name == "GioUnix":
+        _setup_gio_unix()
+        return globals()["GioUnix"]
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
