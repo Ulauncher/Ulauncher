@@ -146,6 +146,11 @@ per-file-ignores = {"tests/**/*.py" = [ # Relax some linting rules for tests
 
 [tool.pytest.ini_options]
 log_cli = true
+filterwarnings = [
+  # PyGObject uses deprecated asyncio APIs (AbstractEventLoopPolicy, get_event_loop_policy)
+  # slated for removal in Python 3.16. Not fixable from our side; filter until upstream fixes it.
+  "ignore::DeprecationWarning:gi",
+]
 
 [tool.rumdl]
 respect-gitignore = true
