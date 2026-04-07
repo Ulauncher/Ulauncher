@@ -6,9 +6,8 @@ import logging
 from threading import Thread
 from typing import Any, Callable, Iterator, Literal, TypedDict
 
-from gi.repository import GLib
-
 from ulauncher.api.shared.event import EventType
+from ulauncher.gi import GLib
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query

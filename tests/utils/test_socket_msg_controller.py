@@ -6,8 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from gi.repository import GLib
 
+from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 

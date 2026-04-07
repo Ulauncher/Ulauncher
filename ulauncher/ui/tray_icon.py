@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any, Callable, Literal
 
 import gi
-from gi.repository import GObject, Gtk
 
 from ulauncher import paths
+from ulauncher.gi import GObject, Gtk
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings

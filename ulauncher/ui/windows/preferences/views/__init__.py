@@ -3,7 +3,7 @@ from __future__ import annotations
 from time import time
 from typing import Any, Callable, TypeVar, cast
 
-from gi.repository import GLib, Gtk
+from ulauncher.gi import GLib, Gtk
 
 T = TypeVar("T", bound=Gtk.Widget)
 

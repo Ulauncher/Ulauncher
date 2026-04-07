@@ -5,9 +5,7 @@ import json
 import logging
 from typing import Any, Callable
 
-from gi.repository import Gio, GLib
-
-from ulauncher.utils.giounix import GioUnix
+from ulauncher.gi import Gio, GioUnix, GLib
 
 logger = logging.getLogger()
 

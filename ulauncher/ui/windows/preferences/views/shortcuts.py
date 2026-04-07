@@ -4,8 +4,7 @@ import uuid
 from time import time
 from typing import cast
 
-from gi.repository import Gtk, Pango
-
+from ulauncher.gi import Gtk, Pango
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
 from ulauncher.ui.windows.preferences import views
 from ulauncher.ui.windows.preferences.utils.ext_utils import autofmt_pango_code_block

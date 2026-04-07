@@ -9,12 +9,11 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterable, cast
 
-from gi.repository import GLib
-
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.gi import GLib
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.result import Result
 from ulauncher.utils.logging_color_formatter import ColoredFormatter

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from gi.repository import GLib
+from ulauncher.gi import GLib
 
 
 class TimerContext:

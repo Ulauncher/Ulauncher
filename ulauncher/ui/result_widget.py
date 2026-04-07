@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from html import unescape
 
-from gi.repository import Gdk, Gtk, Pango
-
+from ulauncher.gi import Gdk, Gtk, Pango
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.utils.load_icon_surface import load_icon_surface

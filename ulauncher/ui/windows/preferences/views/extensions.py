@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import GLib, Gtk, Pango
-
+from ulauncher.gi import GLib, Gtk, Pango
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,

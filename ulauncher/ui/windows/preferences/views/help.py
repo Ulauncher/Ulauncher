@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from gi.repository import Gtk
-
+from ulauncher.gi import Gtk
 from ulauncher.ui.windows.preferences.views import BaseView, styled
 from ulauncher.utils.launch_detached import open_detached
 

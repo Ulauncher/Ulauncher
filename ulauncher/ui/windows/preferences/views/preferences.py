@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gtk
-
+from ulauncher.gi import Gtk
 from ulauncher.ui.windows.preferences.views import BaseView, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus

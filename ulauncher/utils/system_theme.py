@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from gi.repository import Gio, GLib
+from ulauncher.gi import Gio, GLib
 
 
 def _get_interface_settings() -> Gio.Settings | None:

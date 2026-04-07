@@ -2,7 +2,7 @@ import mimetypes
 import os
 from pathlib import Path
 
-from gi.repository import GLib
+from ulauncher.gi import GLib
 
 SPECIAL_DIRS = {
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD): "folder-download",

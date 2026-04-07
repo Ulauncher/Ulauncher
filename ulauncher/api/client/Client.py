@@ -4,10 +4,9 @@ import logging
 import os
 from typing import Any
 
-from gi.repository import GLib
-
 import ulauncher.api
 from ulauncher.api.shared.event import EventType
+from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 logger = logging.getLogger()

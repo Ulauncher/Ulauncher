@@ -3,8 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Sequence
 
-from gi.repository import Gtk, Pango
-
+from ulauncher.gi import Gtk, Pango
 from ulauncher.ui.windows.preferences.views import SIDEBAR_WIDTH, DataListBoxRow, styled
 
 
