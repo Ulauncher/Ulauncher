@@ -4,13 +4,13 @@ import logging
 from typing import Callable, Iterator
 
 from ulauncher import app_id
+from ulauncher.gi import GioUnix
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.mode import Mode
-from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger()
@@ -27,7 +27,7 @@ class AppMode(Mode):
         if not settings.enable_application_mode:
             return
 
-        apps: list[DesktopAppInfo] = DesktopAppInfo.get_all()
+        apps: list[GioUnix.DesktopAppInfo] = GioUnix.DesktopAppInfo.get_all()
         for app in apps:
             executable = app.get_executable()
             if not executable or not app.get_display_name():

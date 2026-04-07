@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.gi import GioUnix
 from ulauncher.modes.apps.app_result import AppResult
-from ulauncher.utils.desktopappinfo import DesktopAppInfo
 
 # Note: These mock apps actually need real values for Exec or Icon, or they won't load,
 # and they need to load from actual files or get_id() and get_filename() will return None
@@ -17,19 +17,21 @@ ENTRIES_DIR = Path(__file__).parent.joinpath("mock_desktop_entries").resolve()
 class TestAppResult:
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_new(self, mocker: MockerFixture) -> Any:
-        def mkappinfo(app_id: str) -> DesktopAppInfo | None:
-            return DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
+        def mkappinfo(app_id: str) -> GioUnix.DesktopAppInfo | None:
+            return GioUnix.DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{app_id}")
 
-        return mocker.patch("ulauncher.modes.apps.app_result.DesktopAppInfo.new", new=mkappinfo)
+        return mocker.patch("ulauncher.modes.apps.app_result.GioUnix.DesktopAppInfo.new", new=mkappinfo)
 
     @pytest.fixture(autouse=True)
     def patch_desktop_app_info_get_all(self, mocker: MockerFixture) -> Any:
-        def get_all_appinfo() -> Iterator[DesktopAppInfo]:
-            for path in ["trueapp.desktop", "falseapp.desktop"]:
-                if app_info := DesktopAppInfo.new(f"{ENTRIES_DIR}/{path}"):
-                    yield app_info
+        def get_all_appinfo() -> list[GioUnix.DesktopAppInfo]:
+            return [
+                app_info
+                for path in ["trueapp.desktop", "falseapp.desktop"]
+                if (app_info := GioUnix.DesktopAppInfo.new_from_filename(f"{ENTRIES_DIR}/{path}"))
+            ]
 
-        return mocker.patch("ulauncher.modes.apps.app_result.DesktopAppInfo.get_all", new=get_all_appinfo)
+        return mocker.patch("ulauncher.modes.apps.app_result.GioUnix.DesktopAppInfo.get_all", new=get_all_appinfo)
 
     @pytest.fixture
     def app1(self) -> AppResult | None:

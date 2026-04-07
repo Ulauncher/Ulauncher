@@ -5,7 +5,7 @@ import re
 import shlex
 from pathlib import Path
 
-from ulauncher.utils.desktopappinfo import DesktopAppInfo
+from ulauncher.gi import GioUnix
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.wm import try_raise_app
@@ -16,7 +16,7 @@ logger = logging.getLogger()
 def launch_app(desktop_entry_name: str) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
-    app = DesktopAppInfo.new(desktop_entry_name)
+    app = GioUnix.DesktopAppInfo.new(desktop_entry_name)
     cmd: list[str] = []
     if not app:
         logger.error("Could not load app %s", desktop_entry_name)

@@ -5,9 +5,8 @@ import logging
 from functools import lru_cache
 from typing import Any
 
-from gi.repository import Gio, GLib
-
 import ulauncher
+from ulauncher.gi import Gio, GLib
 
 logger = logging.getLogger(__name__)
 

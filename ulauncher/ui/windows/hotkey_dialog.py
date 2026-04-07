@@ -4,7 +4,7 @@ import logging
 from types import SimpleNamespace
 from typing import Any
 
-from gi.repository import Gdk, Gtk
+from ulauncher.gi import Gdk, Gtk
 
 logger = logging.getLogger()
 footer_notice = "Be aware that keyboard shortcuts may be reserved by, or conflict with your system."

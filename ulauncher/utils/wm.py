@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from gi.repository import Gdk, GdkX11, Gio  # type: ignore[attr-defined]
-
+from ulauncher.gi import Gdk, GdkX11, Gio
 from ulauncher.utils.environment import IS_X11
 
 logger = logging.getLogger()

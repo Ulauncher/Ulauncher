@@ -8,8 +8,7 @@ from time import time
 from typing import Any, Callable, Literal
 from weakref import WeakSet
 
-from gi.repository import Gio, GLib
-
+from ulauncher.gi import Gio, GLib
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 from ulauncher.utils.timer import timer

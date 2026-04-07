@@ -4,8 +4,7 @@ import logging
 import os
 import sys
 
-from gi.repository import GLib
-
+from ulauncher.gi import GLib
 from ulauncher.utils.systemd_controller import SystemdController
 
 logger = logging.getLogger()

@@ -6,8 +6,8 @@ import operator
 from os.path import basename
 
 from ulauncher import paths
+from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
-from ulauncher.utils.desktopappinfo import DesktopAppInfo
 from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
@@ -21,7 +21,7 @@ class AppResult(Result):
     _executable = ""
     actions = {"launch": {"name": "Launch application", "icon": "system-run"}}
 
-    def __init__(self, app_info: DesktopAppInfo) -> None:
+    def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
         super().__init__(
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
@@ -38,7 +38,7 @@ class AppResult(Result):
     def from_id(app_id: str) -> AppResult | None:
         # Suppress errors due to app being uninstalled/not found
         with contextlib.suppress(TypeError):
-            if app_info := DesktopAppInfo.new(app_id):
+            if app_info := GioUnix.DesktopAppInfo.new(app_id):
                 return AppResult(app_info)
         return None
 

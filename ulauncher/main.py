@@ -8,12 +8,12 @@ import sys
 from types import TracebackType
 
 import gi
-from gi.repository import GLib, Gtk
 
 import ulauncher.utils.xinit  # noqa: F401 - must import this before any GUI libraries are initialized
 from ulauncher import api_version, paths, version
 from ulauncher.app import UlauncherApp
 from ulauncher.cli import get_cli_args
+from ulauncher.gi import GLib, Gtk
 from ulauncher.ui import layer_shell
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
