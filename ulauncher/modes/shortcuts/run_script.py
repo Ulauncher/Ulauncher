@@ -23,6 +23,8 @@ def run_script(script: str, arg: str) -> None:
         command = f"{shlex.quote(file_path)} {shlex.quote(arg)}"
         output = subprocess.check_output(command, shell=True).decode("utf-8")
         logger.debug("Script output:\n%s", output)
+    except subprocess.CalledProcessError as e:
+        logger.warning("Script exited with non-zero return code %s", e.returncode)
     finally:
         if file_path:
             logger.debug("Deleting a temporary file %s", file_path)
