@@ -1,6 +1,12 @@
+# Keep all .venv depdencencies in this file.
+# It's used as the source of truth to determine if a .venv is outdated
+#
+# NOTE: pygobject-stubs needs PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2
+
 build
 lefthook
 mypy < 1.17.0
+pygobject-stubs==2.12.0
 pyrefly >= 0.60.0
 pytest
 pytest-mock

@@ -1,5 +1,4 @@
 FROM ubuntu:20.04
-# Update pygobject-stubs version in the makefile after upgrading ubuntu version
 # Run `make docker` to build this image
 
 LABEL maintainer="ulauncher.app@gmail.com"
@@ -70,8 +69,7 @@ COPY [ "requirements.txt", "./" ]
 COPY [ "scripts/dput.cf", "/etc" ]
 
 RUN apt-get install -y python3-pip
-RUN pip3 install -r requirements.txt
-RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install pygobject-stubs --no-cache-dir
+RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
 
 # Create container dir for the repo root dir to mount to
 # This is needed because dpkg-buildpackage is stupid and outputs are hard coded to be the parent dir

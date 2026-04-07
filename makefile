@@ -56,11 +56,7 @@ venv:
 	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
 	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
-	.venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
-	echo -e "$(GREEN)[+] Installing pygobject-stubs with Gtk3 compatibility...$(RESET)"
-
-	# Update to the latest (v2.13.0) after migration to python>=9 in Dockerfile
-	.venv/bin/python -m pip install pygobject-stubs==2.12.0 --no-cache-dir --config-settings=config=Gtk3,Gdk3,Soup2
+	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
 	# Keep a copy of the requirements used for this environment so make targets can
 	# tell when the local venv needs to be refreshed.
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
