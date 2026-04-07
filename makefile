@@ -135,8 +135,9 @@ check-dev-deps:
 # Run all linters
 lint: check-dev-deps typos ruff pyrefly rumdl
 
-# Run all linters and test
-check: lint pytest
+# Run all linters and unit tests (terse output, use `make pytest` for verbose)
+check: lint
+	@$(MAKE) --no-print-directory pytest PYTEST_ARGS="--no-header -q --override-ini=log_cli=false"
 
 # Lint with pyrefly (type checker)
 pyrefly: check-dev-deps
@@ -162,10 +163,10 @@ rumdl:
 pytest: check-dev-deps
 	@set -euo pipefail
 	if [ -z $(shell eval "command -v xvfb-run") ]; then
-		pytest -p no:cacheprovider tests
+		pytest -p no:cacheprovider $(PYTEST_ARGS) tests
 	else
 		echo -e "xvfb-run detected. Running pytest in a virtual X server environment."
-		xvfb-run --auto-servernum -- pytest -p no:cacheprovider tests
+		xvfb-run --auto-servernum -- pytest -p no:cacheprovider $(PYTEST_ARGS) tests
 	fi
 
 # Auto format the code
