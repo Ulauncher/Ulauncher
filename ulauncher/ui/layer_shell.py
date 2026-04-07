@@ -9,11 +9,12 @@ Uses the wlr-layer-shell protocol [1]
 """
 
 import gi
-from gi.repository import GLib, Gtk
+
+from ulauncher.gi import GLib, Gtk
 
 try:
     gi.require_version("GtkLayerShell", "0.1")
-    from gi.repository import GtkLayerShell  # type: ignore[attr-defined]
+    from gi.repository import GtkLayerShell  # type: ignore[attr-defined]  # noqa: TID251
 except (ValueError, ImportError):
     GtkLayerShell = None
 
