@@ -73,15 +73,24 @@ __all__ = [
 #   https://download.gnome.org/sources/glib/2.86/glib-2.86.0.news
 #   https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4761
 #
-# * PyGObject 3.54.0 (2025-09-06) added partially broken aliases back, to support GLib 2.86.0+
+# * PyGObject 3.54.0 (2025-09-06) added aliases back, to support GLib 2.86.0+, but with two critical issues:
+#   1. Some aliases were incorrectly skipped (ex UnixInputStream)
+#   2. Missing `is_method` symbols for DesktopAppInfo causes methods to be unbound (excluding the ones that were
+#      inherited from Gio.AppInfo, when running against GLib 2.84.x.
 #   https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/445
 #
-# * PyGObject 3.54.3 (2025-09-21) fixed a problem where wrappers like UnixInputStream were incorrectly skipped
+# * Debian python3-gi 3.50.0-5 (2025-09-10) backported the GLib 2.86 compatibility patches, including both issues
+#
+# * PyGObject 3.54.3 (2025-09-28) fixed critical issue #1, leaving only issue #2 unaddressed
+#   This fix was also backported in Debian python3-gi 3.50.0-7 (2025-09-23) from the merged PR 452
 #   https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/452
 #
-# * PyGObject 3.55.0 (2025-11-15) fixed methods being unbound when using PyGObject 3.54.x with GLib 2.84.x
-#   https://gitlab.gnome.org/GNOME/pygobject/-/issues/719
+# * Debian python3-gi 3.50.0-8 (2025-10-12) fixed issue #2 (unbound methods) by backporting from the unmerged PR 456
+#   https://bugs.debian.org/1117444
 #   https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/456
+#
+# * PyGObject 3.55.0 (2025-11-15) finally released a version with the fixed unbound methods themselves
+#   https://gitlab.gnome.org/GNOME/pygobject/-/issues/719
 #
 # * pygobject-stubs 2.17.0 (2026-03-20) added stubs for the GioUnix symbols (Py3.10+)
 #   This only affects the dev experience and code, and we control the pygobject-stubs version ourselves
@@ -91,7 +100,8 @@ __all__ = [
 # Which means we need to handle all of these cases:
 # - GioUnix missing entirely
 # - GioUnix imports, but symbols are missing
-# - GioUnix imports, but older GLib with PyGObject 3.54.x still gives unbound methods
+# - GioUnix imports, but GLib 2.84.x with unbound methods — affects upstream PyGObject 3.54.x and
+#   Debian's backport-patched python3-gi 3.50.0-7 (which backported the GLib 2.86 compat patches)
 # - PyGObject 3.55.0+ should be safe to use with all versions of GLib
 
 
