@@ -6,10 +6,12 @@ from os.path import expanduser, isfile, join
 from typing import TYPE_CHECKING, Iterator
 
 from ulauncher import paths
-from ulauncher.gi import Gdk, GdkX11, Gio, GLib, Gtk
+from ulauncher.gi import Gio, GLib
 
 if TYPE_CHECKING:
     from cairo import ImageSurface  # pyrefly: ignore - this fails in our docker image for some reason
+
+    from ulauncher.gi import Gdk
 
 
 DEFAULT_EXE_ICON = f"{paths.ASSETS}/icons/executable.png"
@@ -17,6 +19,8 @@ logger = logging.getLogger()
 
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
+    from ulauncher.gi import Gdk, GdkX11
+
     display = Gdk.Display.get_default()
     if not display:
         logger.warning("Could not get default display")
@@ -39,6 +43,7 @@ def get_text_scaling_factor() -> float:
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
     # Text_scaling allow fractional scaling
+
     return Gio.Settings.new("org.gnome.desktop.interface").get_double("text-scaling-factor")
 
 
@@ -53,6 +58,8 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
             if isfile(expanded_path):
                 return expanded_path
 
+            from ulauncher.gi import Gtk
+
             if themed_icon := Gtk.IconTheme.get_default().lookup_icon(icon, size, Gtk.IconLookupFlags.FORCE_SIZE):
                 return themed_icon.get_filename()
 
@@ -65,7 +72,7 @@ def get_icon_path(icon: str, size: int = 32, base_path: str = "") -> str | None:
 
 @lru_cache(maxsize=50)
 def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSurface:
-    from ulauncher.gi import Gdk, GdkPixbuf, GLib
+    from ulauncher.gi import Gdk, GdkPixbuf
 
     real_size = size * scaling_factor
     try:
