@@ -118,15 +118,9 @@ def main() -> None:  # noqa: PLR0912, PLR0915
 
     sys.excepthook = except_hook
 
-    # Ensure that Ulauncher v5 is not running
-    # TODO: Remove this 4-6 months after v6 release
-    # Import here because of the dependency on the logger setup
-    from ulauncher.utils.v5_killer import kill_ulauncher_v5
-
-    kill_ulauncher_v5()
-
     from ulauncher.gi import GLib, Gtk, gi
     from ulauncher.ui.app import UlauncherApp
+    from ulauncher.utils.v5_killer import kill_ulauncher_v5
 
     if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
@@ -135,6 +129,11 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     logger.info("Extension API version %s", api_version)
     logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
     logger.info("PyGObject+ %i.%i.%i", *gi.version_info)  # type: ignore[attr-defined]
+
+    # Ensure that Ulauncher v5 is not running
+    # TODO: Remove this 4-6 months after v6 release
+    # Import here because of the dependency on the logger setup
+    kill_ulauncher_v5()
 
     # Migrate user data to v6 compatible
     v5_to_v6()
