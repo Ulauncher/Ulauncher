@@ -6,10 +6,8 @@ from html import unescape
 from ulauncher.gi import Gdk, Gtk, Pango
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.utils.load_icon_surface import load_icon_surface
+from ulauncher.ui import get_text_scaling_factor, highlight_text, load_icon_surface
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.text_highlighter import highlight_text
-from ulauncher.utils.wm import get_text_scaling_factor
 
 ELLIPSIZE_MIN_LENGTH = 6
 ELLIPSIZE_FORCE_AT_LENGTH = 20

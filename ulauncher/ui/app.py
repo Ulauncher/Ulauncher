@@ -10,8 +10,8 @@ from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
 from ulauncher.gi import Gdk, Gio, Gtk
 from ulauncher.internals.result import Result
-from ulauncher.ui.windows.preferences.preferences_window import PreferencesWindow
-from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
+from ulauncher.ui.preferences.preferences_window import PreferencesWindow
+from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.singleton import get_instance
@@ -30,7 +30,7 @@ class UlauncherApp(Gtk.Application):
     query = ""
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
-    _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
+    _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
         return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
@@ -86,7 +86,7 @@ class UlauncherApp(Gtk.Application):
                 self.toggle_tray_icon(True)
 
         if first_run or settings.hotkey_show_app:
-            from ulauncher.utils.hotkey_controller import HotkeyController
+            from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 
             if HotkeyController.is_supported():
                 hotkey = "<Primary>space"
@@ -197,7 +197,7 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
         if not self._tray_icon:
-            from ulauncher.ui.tray_icon import TrayIcon
+            from ulauncher.ui.helpers.tray_icon import TrayIcon
 
             self._tray_icon = TrayIcon()
         self._tray_icon.switch(enable)

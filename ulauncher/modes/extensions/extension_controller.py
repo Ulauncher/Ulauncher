@@ -22,7 +22,6 @@ from ulauncher.modes.extensions.extension_manifest import (
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
 
@@ -166,6 +165,9 @@ class ExtensionController:
         user_prefs_json.save(data)
 
     def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
+        # get_icon_path uses Gtk, lazy load to avoid loading it in the extension or cli runtime
+        from ulauncher.ui import get_icon_path
+
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
     async def remove(self) -> None:
