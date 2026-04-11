@@ -9,7 +9,7 @@ from ulauncher import paths
 from ulauncher.gi import GLib, Gtk
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.ui.windows.preferences.views import DialogLauncher, get_window_for_widget, styled
+from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
 
 logger = logging.getLogger()
 

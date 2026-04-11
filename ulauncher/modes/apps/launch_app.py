@@ -6,9 +6,9 @@ import shlex
 from pathlib import Path
 
 from ulauncher.gi import GioUnix
+from ulauncher.modes.apps.try_raise_app import try_raise_app
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.wm import try_raise_app
 
 logger = logging.getLogger()
 

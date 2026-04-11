@@ -7,14 +7,13 @@ from ulauncher import paths
 from ulauncher.core import UlauncherCore
 from ulauncher.gi import Gdk, GLib, Gtk
 from ulauncher.internals.result import Result
-from ulauncher.ui import layer_shell
+from ulauncher.ui import get_monitor, load_icon_surface
+from ulauncher.ui.helpers import layer_shell
+from ulauncher.ui.helpers.theme import Theme
 from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.load_icon_surface import load_icon_surface
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.theme import Theme
-from ulauncher.utils.wm import get_monitor
 
 logger = logging.getLogger()
 events = EventBus()

@@ -1,4 +1,4 @@
-from ulauncher.utils.text_highlighter import highlight_text as hl
+from ulauncher.ui import highlight_text as hl
 
 
 def test_highlight_text() -> None:

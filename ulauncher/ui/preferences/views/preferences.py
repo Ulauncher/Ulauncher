@@ -4,13 +4,13 @@ import logging
 from typing import Any
 
 from ulauncher.gi import Gtk
-from ulauncher.ui.windows.preferences.views import BaseView, styled
+from ulauncher.ui.helpers.hotkey_controller import HotkeyController
+from ulauncher.ui.helpers.theme import get_themes
+from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.hotkey_controller import HotkeyController
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
-from ulauncher.utils.theme import get_themes
 
 logger = logging.getLogger()
 events = EventBus()

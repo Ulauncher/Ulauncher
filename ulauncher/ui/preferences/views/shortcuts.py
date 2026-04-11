@@ -6,16 +6,16 @@ from typing import cast
 
 from ulauncher.gi import Gtk, Pango
 from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
-from ulauncher.ui.windows.preferences import views
-from ulauncher.ui.windows.preferences.utils.ext_utils import autofmt_pango_code_block
-from ulauncher.ui.windows.preferences.utils.sidebar_layout import SidebarItem, SidebarLayout
-from ulauncher.ui.windows.preferences.views import (
+from ulauncher.ui import load_icon_surface
+from ulauncher.ui.preferences import views
+from ulauncher.ui.preferences.utils.ext_utils import autofmt_pango_code_block
+from ulauncher.ui.preferences.utils.sidebar_layout import SidebarItem, SidebarLayout
+from ulauncher.ui.preferences.views import (
     DialogLauncher,
     TextArea,
     get_window_for_widget,
     styled,
 )
-from ulauncher.utils.load_icon_surface import load_icon_surface
 
 
 class ShortcutsView(views.BaseView):

@@ -21,8 +21,8 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.ui import get_icon_path
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.get_icon_path import get_icon_path
 from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
 
