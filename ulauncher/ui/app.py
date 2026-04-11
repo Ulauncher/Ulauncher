@@ -32,6 +32,11 @@ class UlauncherApp(Gtk.Application):
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
+    @staticmethod
+    def get_gtk_version() -> tuple[int, int, int]:
+        """Return GTK version as a tuple (major, minor, micro)."""
+        return (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
+
     def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
         return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
 
