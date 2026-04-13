@@ -2,26 +2,43 @@ from __future__ import annotations
 
 import operator
 import time
-from typing import Any, TypedDict
+from typing import Any
 
 from ulauncher import paths
+from ulauncher.utils.base_data_class import BaseDataClass
 from ulauncher.utils.json_conf import JsonKeyValueConf
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"
 
 
-class _AppHistoryData(TypedDict):
-    count: int
-    last_launches: list[float]
+class _AppHistoryData(BaseDataClass):
+    count = 0
+    last_launches: list[float] = []
 
 
 class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
     _ranking_cache: list[str] | None = None
 
     def _coerce_value(self, value: Any) -> _AppHistoryData:
+        if isinstance(value, _AppHistoryData):
+            return value
+        valid_count = 0
+        valid_launches: list[float] = []
+
         if isinstance(value, int):
-            return {"count": value, "last_launches": []}
-        return {"count": value.get("count", 0), "last_launches": value.get("last_launches", [])}
+            valid_count = value
+        elif isinstance(value, dict):
+            raw_count = value.get("count")
+            if isinstance(raw_count, int):
+                valid_count = raw_count
+            elif isinstance(raw_count, str) and raw_count.isdigit():
+                valid_count = int(raw_count)
+
+            raw_launches = value.get("last_launches")
+            if isinstance(raw_launches, (list, tuple)):
+                valid_launches = [float(x) for x in raw_launches if isinstance(x, (int, float))][-10:]
+
+        return _AppHistoryData(count=valid_count, last_launches=valid_launches)
 
     def get_app_ranking(self) -> list[str]:
         if self._ranking_cache is None:
@@ -36,8 +53,8 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
     @staticmethod
     def _calculate_score(data: _AppHistoryData) -> float:
         now = time.time()
-        score = data["count"] * 0.1
-        for launch_time in data["last_launches"]:
+        score = data.count * 0.1
+        for launch_time in data.last_launches:
             diff = now - launch_time
             if diff < 86400:
                 score += 100
@@ -54,12 +71,16 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
         return score
 
     def bump(self, app_id: str) -> None:
-        data = self.get(app_id, {"count": 0, "last_launches": []})
-        data["count"] += 1
-        data["last_launches"].append(time.time())
-        if len(data["last_launches"]) > 10:
-            data["last_launches"].pop(0)
-        self[app_id] = data
+        data = self.get(app_id)
+        if not data:
+            data = _AppHistoryData()
+            self[app_id] = data
+
+        data.count += 1
+        data.last_launches.append(time.time())
+        if len(data.last_launches) > 10:
+            data.last_launches.pop(0)
+
         self.clear_ranking_cache()
         self.save()
 
