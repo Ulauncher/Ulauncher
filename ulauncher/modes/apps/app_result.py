@@ -3,7 +3,9 @@ from __future__ import annotations
 import contextlib
 import logging
 import operator
+import time
 from os.path import basename
+from typing import TypedDict
 
 from ulauncher import paths
 from ulauncher.gi import GioUnix
@@ -12,7 +14,18 @@ from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
 app_starts_path = f"{paths.STATE}/app_starts.json"
-app_starts: dict[str, int] = json_load(app_starts_path)
+
+class AppStartData(TypedDict):
+    count: int
+    last_launches: list[float]
+
+_raw_app_starts = json_load(app_starts_path)
+app_starts: dict[str, AppStartData] = {}
+for _app_id, _data in _raw_app_starts.items():
+    if isinstance(_data, int):
+        app_starts[_app_id] = {"count": _data, "last_launches": []}
+    elif isinstance(_data, dict):
+        app_starts[_app_id] = {"count": _data.get("count", 0), "last_launches": _data.get("last_launches", [])}
 
 
 class AppResult(Result):
@@ -44,8 +57,29 @@ class AppResult(Result):
 
     @staticmethod
     def get_top_app_ids() -> list[str]:
-        sorted_tuples = sorted(app_starts.items(), key=operator.itemgetter(1), reverse=True)
-        return [*map(operator.itemgetter(0), sorted_tuples)]
+        scores = {app_id: AppResult._calculate_score(data) for app_id, data in app_starts.items()}
+        sorted_ids = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
+        return [app_id for app_id, score in sorted_ids]
+
+    @staticmethod
+    def _calculate_score(data: AppStartData) -> float:
+        now = time.time()
+        score = data["count"] * 0.1
+        for launch_time in data["last_launches"]:
+            diff = now - launch_time
+            if diff < 86400:
+                score += 100
+            elif diff < 259200:
+                score += 80
+            elif diff < 604800:
+                score += 60
+            elif diff < 1209600:
+                score += 40
+            elif diff < 2592000:
+                score += 20
+            else:
+                score += 10
+        return score
 
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         frequency_weight = 1.0
@@ -62,6 +96,11 @@ class AppResult(Result):
         ]
 
     def bump_starts(self) -> None:
-        starts = app_starts.get(self.app_id, 0)
-        app_starts[self.app_id] = starts + 1
+        data = app_starts.get(self.app_id, {"count": 0, "last_launches": []})
+        data["count"] += 1
+        data["last_launches"].append(time.time())
+        if len(data["last_launches"]) > 10:
+            data["last_launches"].pop(0)
+
+        app_starts[self.app_id] = data
         json_save(app_starts, app_starts_path)
