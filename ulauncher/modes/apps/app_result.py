@@ -5,27 +5,41 @@ import logging
 import operator
 import time
 from os.path import basename
-from typing import TypedDict
 
 from ulauncher import paths
 from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
+from ulauncher.utils.basedataclass import BaseDataClass
 from ulauncher.utils.json_utils import json_load, json_save
 
 logger = logging.getLogger()
 app_starts_path = f"{paths.STATE}/app_starts.json"
 
-class AppStartData(TypedDict):
-    count: int
-    last_launches: list[float]
+
+class AppStartData(BaseDataClass):
+    count = 0
+    last_launches: list[float] = []
 
 _raw_app_starts = json_load(app_starts_path)
 app_starts: dict[str, AppStartData] = {}
 for _app_id, _data in _raw_app_starts.items():
+    _valid_count = 0
+    _valid_launches: list[float] = []
+
     if isinstance(_data, int):
-        app_starts[_app_id] = {"count": _data, "last_launches": []}
+        _valid_count = _data
     elif isinstance(_data, dict):
-        app_starts[_app_id] = {"count": _data.get("count", 0), "last_launches": _data.get("last_launches", [])}
+        _raw_count = _data.get("count")
+        if isinstance(_raw_count, int):
+            _valid_count = _raw_count
+        elif isinstance(_raw_count, str) and _raw_count.isdigit():
+            _valid_count = int(_raw_count)
+
+        _raw_launches = _data.get("last_launches")
+        if isinstance(_raw_launches, (list, tuple)):
+            _valid_launches = [float(_x) for _x in _raw_launches if isinstance(_x, (int, float))][-10:]
+
+    app_starts[_app_id] = AppStartData(count=_valid_count, last_launches=_valid_launches)
 
 
 class AppResult(Result):
@@ -96,11 +110,14 @@ class AppResult(Result):
         ]
 
     def bump_starts(self) -> None:
-        data = app_starts.get(self.app_id, {"count": 0, "last_launches": []})
-        data["count"] += 1
-        data["last_launches"].append(time.time())
-        if len(data["last_launches"]) > 10:
-            data["last_launches"].pop(0)
+        data = app_starts.get(self.app_id)
+        if not data:
+            data = AppStartData()
+            app_starts[self.app_id] = data
 
-        app_starts[self.app_id] = data
+        data.count += 1
+        data.last_launches.append(time.time())
+        if len(data.last_launches) > 10:
+            data.last_launches.pop(0)
+
         json_save(app_starts, app_starts_path)
