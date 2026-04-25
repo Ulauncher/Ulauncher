@@ -9,6 +9,7 @@ from ulauncher.utils.base_data_class import BaseDataClass
 from ulauncher.utils.json_conf import JsonKeyValueConf
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"
+_MAX_APP_HISTORY = 10
 
 
 class _AppHistoryData(BaseDataClass):
@@ -36,7 +37,7 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
 
             raw_launches = value.get("last_launches")
             if isinstance(raw_launches, (list, tuple)):
-                valid_launches = [float(x) for x in raw_launches if isinstance(x, (int, float))][-10:]
+                valid_launches = [float(x) for x in raw_launches if isinstance(x, (int, float))][-_MAX_APP_HISTORY:]
 
         return _AppHistoryData(count=valid_count, last_launches=valid_launches)
 
@@ -78,7 +79,7 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
 
         data.count += 1
         data.last_launches.append(time.time())
-        if len(data.last_launches) > 10:
+        if len(data.last_launches) > _MAX_APP_HISTORY:
             data.last_launches.pop(0)
 
         self.clear_ranking_cache()
