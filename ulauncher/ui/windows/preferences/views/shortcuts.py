@@ -5,7 +5,7 @@ from time import time
 from typing import cast
 
 from ulauncher.gi import Gtk, Pango
-from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
+from ulauncher.modes.shortcuts.shortcuts import Shortcut, Shortcuts
 from ulauncher.ui.windows.preferences import views
 from ulauncher.ui.windows.preferences.utils.ext_utils import autofmt_pango_code_block
 from ulauncher.ui.windows.preferences.utils.sidebar_layout import SidebarItem, SidebarLayout
@@ -230,7 +230,7 @@ class ShortcutsView(views.BaseView):
     def _load_shortcut_list(self) -> None:
         """Load shortcuts from database and populate sidebar"""
         # Load shortcuts data
-        self.shortcuts = cast("dict[str, Shortcut]", ShortcutsDb.load())
+        self.shortcuts = cast("dict[str, Shortcut]", Shortcuts.load())
 
         # Convert shortcuts to SidebarItems
         items: list[SidebarItem] = []
@@ -280,8 +280,8 @@ class ShortcutsView(views.BaseView):
         )
         if response == Gtk.ResponseType.YES:
             # Remove from database
-            shortcuts_db = ShortcutsDb.load()
-            shortcuts_db.save({self.active_shortcut_id: None})
+            shortcuts = Shortcuts.load()
+            shortcuts.save({self.active_shortcut_id: None})
             self.active_shortcut_id = None
             self._load_shortcut_list()
             # Show placeholder after deletion
@@ -341,8 +341,8 @@ class ShortcutsView(views.BaseView):
             added=existing_shortcut.get("added", int(time())),
         )
 
-        shortcuts_db = ShortcutsDb.load()
-        shortcuts_db.save({shortcut_id: shortcut})
+        shortcuts = Shortcuts.load()
+        shortcuts.save({shortcut_id: shortcut})
 
         # Disable save button after successful save
         save_button.set_sensitive(False)

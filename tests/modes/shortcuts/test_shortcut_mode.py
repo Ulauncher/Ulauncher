@@ -10,7 +10,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
-from ulauncher.modes.shortcuts.shortcuts_db import Shortcut
+from ulauncher.modes.shortcuts.shortcuts import Shortcut
 
 
 def get_results(mode: ShortcutMode, query: Query) -> list[Result]:
@@ -26,8 +26,8 @@ class TestShortcutMode:
         return ShortcutMode()
 
     @pytest.fixture(autouse=True)
-    def shortcuts_db(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.ShortcutsDb.load").return_value
+    def shortcuts(self, mocker: MockerFixture) -> Any:
+        return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.Shortcuts.load").return_value
 
     @pytest.fixture(autouse=True)
     def run_shortcut(self, mocker: MockerFixture) -> Any:
@@ -37,55 +37,53 @@ class TestShortcutMode:
     def shortcut_result(self, mocker: MockerFixture) -> Any:
         return mocker.patch("ulauncher.modes.shortcuts.shortcut_mode.results.ShortcutResult")
 
-    def test_is_enabled__query_starts_with_query__returns_false(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock
-    ) -> None:
+    def test_is_enabled__query_starts_with_query__returns_false(self, mode: ShortcutMode, shortcuts: MagicMock) -> None:
         query = "kw"
         shortcut = Shortcut(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
 
         assert not mode.matches_query_str(query)
 
     def test_is_enabled__query_doesnt_start_with_query__returns_false(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock
+        self, mode: ShortcutMode, shortcuts: MagicMock
     ) -> None:
         query = "wk something"
         shortcut = Shortcut(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
 
         assert not mode.matches_query_str(query)
 
     def test_handle_query__return_value__is(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
+        self, mode: ShortcutMode, shortcuts: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
         query = Query("kw", "something")
         shortcut = Shortcut(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
 
         assert get_results(mode, query)[0] == shortcut_result.return_value
 
     def test_handle_query__shortcut_result__is_called(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
+        self, mode: ShortcutMode, shortcuts: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
         query = Query("kw", "something")
         shortcut = Shortcut(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
 
         get_results(mode, query)
 
         shortcut_result.assert_called_once_with(**shortcut, description="")
 
     def test_get_default_items__shortcut_results__returned(
-        self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
+        self, mode: ShortcutMode, shortcuts: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
         shortcut = Shortcut(keyword="kw", is_default_search=True)
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
 
         assert mode.get_fallback_results("") == [shortcut_result.return_value]
 
-    def test_get_triggers(self, mode: ShortcutMode, shortcuts_db: MagicMock) -> None:
+    def test_get_triggers(self, mode: ShortcutMode, shortcuts: MagicMock) -> None:
         shortcut = Shortcut(keyword="kw")
-        shortcuts_db.values.return_value = [shortcut]
+        shortcuts.values.return_value = [shortcut]
         assert next(mode.get_triggers()).keyword == "kw"
 
     def test_activate_static_trigger(self, mode: ShortcutMode, run_shortcut: MagicMock) -> None:
