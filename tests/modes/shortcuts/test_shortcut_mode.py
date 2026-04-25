@@ -10,7 +10,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
 from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
-from ulauncher.modes.shortcuts.shortcuts_db import Shortcut as ShortcutRecord
+from ulauncher.modes.shortcuts.shortcuts_db import Shortcut
 
 
 def get_results(mode: ShortcutMode, query: Query) -> list[Result]:
@@ -41,7 +41,7 @@ class TestShortcutMode:
         self, mode: ShortcutMode, shortcuts_db: MagicMock
     ) -> None:
         query = "kw"
-        shortcut = ShortcutRecord(keyword="kw")
+        shortcut = Shortcut(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert not mode.matches_query_str(query)
@@ -50,7 +50,7 @@ class TestShortcutMode:
         self, mode: ShortcutMode, shortcuts_db: MagicMock
     ) -> None:
         query = "wk something"
-        shortcut = ShortcutRecord(keyword="kw")
+        shortcut = Shortcut(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert not mode.matches_query_str(query)
@@ -59,7 +59,7 @@ class TestShortcutMode:
         self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
         query = Query("kw", "something")
-        shortcut = ShortcutRecord(keyword="kw")
+        shortcut = Shortcut(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         assert get_results(mode, query)[0] == shortcut_result.return_value
@@ -68,7 +68,7 @@ class TestShortcutMode:
         self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
         query = Query("kw", "something")
-        shortcut = ShortcutRecord(keyword="kw")
+        shortcut = Shortcut(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
 
         get_results(mode, query)
@@ -78,13 +78,13 @@ class TestShortcutMode:
     def test_get_default_items__shortcut_results__returned(
         self, mode: ShortcutMode, shortcuts_db: MagicMock, shortcut_result: ShortcutResult
     ) -> None:
-        shortcut = ShortcutRecord(keyword="kw", is_default_search=True)
+        shortcut = Shortcut(keyword="kw", is_default_search=True)
         shortcuts_db.values.return_value = [shortcut]
 
         assert mode.get_fallback_results("") == [shortcut_result.return_value]
 
     def test_get_triggers(self, mode: ShortcutMode, shortcuts_db: MagicMock) -> None:
-        shortcut = ShortcutRecord(keyword="kw")
+        shortcut = Shortcut(keyword="kw")
         shortcuts_db.values.return_value = [shortcut]
         assert next(mode.get_triggers()).keyword == "kw"
 
