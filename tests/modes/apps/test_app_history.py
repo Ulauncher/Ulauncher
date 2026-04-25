@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.modes.apps.app_history import _AppHistory
+from ulauncher.modes.apps.app_history import _AppHistory, _AppHistoryData
 
 
 class AppHistory(_AppHistory):
@@ -16,9 +16,9 @@ class TestAppHistory:
         assert ids[1] == "app2.desktop"
 
     def test_bump_increments_count(self) -> None:
-        app_history = AppHistory({"app.desktop": 100})
+        app_history = AppHistory({"app.desktop": _AppHistoryData(count=100)})
         app_history.bump("app.desktop")
-        assert app_history.get("app.desktop") == 101
+        assert app_history["app.desktop"].count == 101
 
     def test_bump_updates_top_app_ids(self) -> None:
         app_history = AppHistory({"app1.desktop": 1, "app2.desktop": 1})
