@@ -9,7 +9,7 @@ from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.mode import Mode
 from ulauncher.modes.shortcuts import results
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
-from ulauncher.modes.shortcuts.shortcuts_db import Shortcut, ShortcutsDb
+from ulauncher.modes.shortcuts.shortcuts import Shortcut, Shortcuts
 
 logger = logging.getLogger()
 
@@ -33,13 +33,13 @@ def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> results
 
 
 class ShortcutMode(Mode):
-    shortcuts_db: dict[str, Shortcut]
+    shortcuts: dict[str, Shortcut]
 
     def __init__(self) -> None:
-        self.shortcuts_db = ShortcutsDb.load()
+        self.shortcuts = Shortcuts.load()
 
     def _get_active_shortcut(self, query: Query) -> Shortcut | None:
-        for s in self.shortcuts_db.values():
+        for s in self.shortcuts.values():
             if query.keyword == s.keyword and (query.is_active or s.run_without_argument):
                 return s
 
@@ -55,10 +55,10 @@ class ShortcutMode(Mode):
 
     def get_fallback_results(self, query_str: str) -> list[results.ShortcutResult]:
         query = Query(None, query_str)
-        return [convert_to_result(s, query) for s in self.shortcuts_db.values() if s["is_default_search"]]
+        return [convert_to_result(s, query) for s in self.shortcuts.values() if s["is_default_search"]]
 
     def get_triggers(self) -> Iterator[Result]:
-        for shortcut in self.shortcuts_db.values():
+        for shortcut in self.shortcuts.values():
             yield (
                 results.ShortcutStaticTrigger(**shortcut, description=get_description(shortcut))
                 if shortcut.run_without_argument

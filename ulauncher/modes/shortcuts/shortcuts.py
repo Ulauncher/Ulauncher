@@ -27,7 +27,7 @@ class Shortcut(JsonConf):
         super().__setitem__(key, value)
 
 
-class ShortcutsDb(JsonConf):
+class Shortcuts(JsonConf):
     # Coerce all values to Shortcuts instead of dict and fold the icon path
     def __setitem__(self, key: str, value: dict[str, Any], validate_type: bool = True) -> None:
         if value is None:
@@ -41,7 +41,7 @@ class ShortcutsDb(JsonConf):
         super().__setitem__(key, Shortcut(value), validate_type)
 
     @classmethod
-    def load(cls) -> ShortcutsDb:  # type: ignore[override]
+    def load(cls) -> Shortcuts:  # type: ignore[override]
         file_path = Path(f"{paths.CONFIG}/shortcuts.json")
         instance = super().load(file_path)
         if not file_path.exists():
