@@ -59,23 +59,13 @@ venv:
 	if [ -z "$(NOCACHE)" ] && [ -x ".venv/bin/python" ] && [ -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] && cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
 	  exit 0
 	fi
-	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
+	echo -e "$(BOLD)[+] Setting up Python virtual environment...$(RESET)"
 	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
-	if [ -z "$(QUIET)" ]; then echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"; fi
 	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade $(if $(QUIET),-q) -r requirements.txt
 	# Keep a copy of the requirements used for this environment so make targets can
 	# tell when the local venv needs to be refreshed.
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
-	if [ -n "$(QUIET)" ]; then
-		echo -e "$(GREEN)[✓] Virtual environment set up$(RESET)"
-	else
-		echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
-		echo -e "$(GREEN)[✓] make commands and the pre-commit hook will use it automatically.$(RESET)"
-		echo -e "\nIf you need direct access to the underlying CLI tools, you can manually load the venv:"
-		echo -e "* Bash/Zsh: $(BOLD)source .venv/bin/activate$(RESET)"
-		echo -e "* Fish: $(BOLD)source .venv/bin/activate.fish$(RESET)"
-	fi
-
+	echo -e "$(BOLD)[✓] Virtual environment set up$(RESET)"
 
 # Run ulauncher from source
 run:
