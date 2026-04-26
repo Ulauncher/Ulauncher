@@ -21,23 +21,23 @@ class Shortcut(JsonConf):
     id = ""
 
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
+        if key == "added" and isinstance(value, float):
+            # convert legacy float timestamps ulauncher used
+            value = int(value)
+
         # icon path has changed in v6, from /media/{google-search,stackoverflow,wikipedia}-icon.svg to /icons/*.svg
-        if key == "icon":
+        if key == "icon" and isinstance(value, str):
+            value = fold_user_path(value)
             value = re.sub(r"/media/(.*?)-icon", "/icons/\\1", value)
         super().__setitem__(key, value)
 
 
 class Shortcuts(JsonConf):
-    # Coerce all values to Shortcuts instead of dict and fold the icon path
+    # Coerce all dict values to Shortcut instances
     def __setitem__(self, key: str, value: dict[str, Any], validate_type: bool = True) -> None:
         if value is None:
             del self[key]
             return
-        if "added" in value and isinstance(value.get("added"), float):
-            # convert legacy float timestamps ulauncher used
-            value["added"] = int(value["added"])
-        if "icon" in value:
-            value["icon"] = fold_user_path(value["icon"])
         super().__setitem__(key, Shortcut(value), validate_type)
 
     @classmethod
