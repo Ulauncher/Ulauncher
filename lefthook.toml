@@ -1,18 +1,27 @@
-# NOTE: These scripts are intended to run very fast , not to become frustrating,
+# NOTE: These scripts are intended to run very fast, not to become frustrating,
 # pytest was the clear bottleneck (and can't check only staged files), so it was not included.
 
 skip_lfs = true
+output = ["failure", "success", "execution_out"]
 
-[pre-commit.commands.creating-venv]
-# simulate file change only if needed, to skip step otherwise
+[[pre-commit.jobs]]
+name = "Creating venv (this can take a minute)"
 files = "bash -c '[ -x .venv/bin/python ] && cmp -s requirements.txt .venv/.requirements.txt || echo requirements.txt'"
 run = "make venv QUIET=1"
 
-[pre-commit.commands.typos]
+[[pre-commit.jobs]]
+name = "Checking"
+
+[pre-commit.jobs.group]
+parallel = true
+
+[[pre-commit.jobs.group.jobs]]
+name = "Spell checking"
 glob = "*"
 run = "./.venv/bin/typos --force-exclude {staged_files}"
 
-[pre-commit.commands.ruff]
+[[pre-commit.jobs.group.jobs]]
+name = "Linting (ruff)"
 glob = "*.py"
 run = """
   ./.venv/bin/ruff check --fix {staged_files} &&
@@ -20,7 +29,8 @@ run = """
   """
 stage_fixed = true
 
-[pre-commit.commands.pyrefly]
+[[pre-commit.jobs.group.jobs]]
+name = "Type checking"
 root = "ulauncher"
 glob = "*.py"
 run = "../.venv/bin/pyrefly check {staged_files}"
