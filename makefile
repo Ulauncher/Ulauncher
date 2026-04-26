@@ -50,22 +50,36 @@ help:
 version:
 	@echo ${VERSION}
 
-# Creates a python virtual environment and installs dependencies
+# Creates or updates the Python virtual environment. Use NOCACHE=1 to force recreation and/or QUIET=1 to suppress output.
 venv:
 	@set -euo pipefail
-	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
+	if [ "$${GITHUB_ACTIONS:-}" = "true" ] || [ -n "$${NO_VENV:-}" ]; then
+	  exit 0
+	fi
+	if [ -z "$(NOCACHE)" ] && [ -x ".venv/bin/python" ] && [ -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] && cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
+	  exit 0
+	fi
+	MSG="[+] Setting up Python virtual environment..."
+	if [ -n "$(QUIET)" ]; then
+		echo "$$MSG"
+	else
+		echo -e "$(GREEN)$$MSG$(RESET)"
+	fi
 	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
-	echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"
-	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade -r requirements.txt
+	if [ -z "$(QUIET)" ]; then echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"; fi
+	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade $(if $(QUIET),-q) -r requirements.txt
 	# Keep a copy of the requirements used for this environment so make targets can
 	# tell when the local venv needs to be refreshed.
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
-
-	echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
-	echo -e "$(GREEN)[✓] make commands and the pre-commit hook will use it automatically.$(RESET)"
-	echo -e "\nIf you need direct access to the underlying CLI tools, you can manually load the venv:"
-	echo -e "* Bash/Zsh: $(BOLD)source .venv/bin/activate$(RESET)"
-	echo -e "* Fish: $(BOLD)source .venv/bin/activate.fish$(RESET)"
+	if [ -n "$(QUIET)" ]; then
+		echo "[✓] Virtual environment set up"
+	else
+		echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
+		echo -e "$(GREEN)[✓] make commands and the pre-commit hook will use it automatically.$(RESET)"
+		echo -e "\nIf you need direct access to the underlying CLI tools, you can manually load the venv:"
+		echo -e "* Bash/Zsh: $(BOLD)source .venv/bin/activate$(RESET)"
+		echo -e "* Fish: $(BOLD)source .venv/bin/activate.fish$(RESET)"
+	fi
 
 
 # Run ulauncher from source
@@ -116,42 +130,25 @@ run-container:
 
 #=Lint/test Commands
 
-.PHONY: check lint format pyrefly ruff rumdl typos pytest check-dev-deps
-
-# Check if the development environment exists and matches requirements.txt
-check-dev-deps:
-	@set -euo pipefail
-	if [ "$${GITHUB_ACTIONS:-}" = "true" ] || [ -n "$${NO_VENV:-}" ]; then
-	  exit 0
-	fi
-	if [ ! -x ".venv/bin/python" ]; then
-		echo -e "${BOLD}${RED}Development environment not set up.${RESET}" >&2
-		echo -e "${YELLOW}Please run 'make venv' to set up the development environment.${RESET}\n" >&2
-		exit 1
-	fi
-	if [ ! -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] || ! cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
-		echo -e "${BOLD}${RED}Development environment is out of date.${RESET}" >&2
-		echo -e "${YELLOW}Please run 'make venv' to refresh the development environment.${RESET}\n" >&2
-		exit 1
-	fi
+.PHONY: check lint format pyrefly ruff rumdl typos pytest
 
 # Run all linters
-lint: check-dev-deps typos ruff pyrefly rumdl
+lint: venv typos ruff pyrefly rumdl
 
 # Run all linters and unit tests (terse output, use `make pytest` for verbose)
 check: lint
 	@$(MAKE) --no-print-directory pytest PYTEST_ARGS="--no-header -q --override-ini=log_cli=false"
 
 # Lint with pyrefly (type checker)
-pyrefly: check-dev-deps
+pyrefly: venv
 	@pyrefly check
 
 # Lint with ruff
-ruff: check-dev-deps
+ruff: venv
 	@ruff check . && ruff format --check .
 
 # Lint with typos (typo checker)
-typos: check-dev-deps
+typos: venv
 	@typos .
 
 # Lint markdown files with rumdl (optional, requires Python 3.9+)
@@ -163,7 +160,7 @@ rumdl:
 	fi
 
 # Run unit tests
-pytest: check-dev-deps
+pytest: venv
 	@set -euo pipefail
 	if [ -z $(shell eval "command -v xvfb-run") ]; then
 		pytest -p no:cacheprovider $(PYTEST_ARGS) tests
@@ -173,7 +170,7 @@ pytest: check-dev-deps
 	fi
 
 # Auto format the code
-format: check-dev-deps
+format: venv
 	@ruff check . --fix
 	ruff format .
 	if command -v rumdl >/dev/null 2>&1; then \

@@ -3,20 +3,18 @@
 
 skip_lfs = true
 
-[pre-commit]
-# make sure to only run one job with stage_fixed, or disable parallel
-# otherwise one job might might overwrite the changes of another job
-# and jobs can fail because a previous job created the git lockfile,
-parallel = true
+[pre-commit.commands.creating-venv]
+# simulate file change only if needed, to skip step otherwise
+files = "bash -c '[ -x .venv/bin/python ] && cmp -s requirements.txt .venv/.requirements.txt || echo requirements.txt'"
+run = "make venv QUIET=1"
 
 [pre-commit.commands.typos]
 glob = "*"
-run = "make check-dev-deps && ./.venv/bin/typos --force-exclude {staged_files}"
+run = "./.venv/bin/typos --force-exclude {staged_files}"
 
 [pre-commit.commands.ruff]
 glob = "*.py"
 run = """
-  make check-dev-deps &&
   ./.venv/bin/ruff check --fix {staged_files} &&
   ./.venv/bin/ruff format {staged_files}
   """
@@ -25,4 +23,4 @@ stage_fixed = true
 [pre-commit.commands.pyrefly]
 root = "ulauncher"
 glob = "*.py"
-run = "make -C .. check-dev-deps && ../.venv/bin/pyrefly check {staged_files}"
+run = "../.venv/bin/pyrefly check {staged_files}"
