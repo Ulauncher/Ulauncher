@@ -63,7 +63,7 @@ class Shortcuts(JsonConf):
     # Coerce all dict values to Shortcut instances
     def __setitem__(self, key: str, value: dict[str, Any] | None, validate_type: bool = True) -> None:
         if value is None:
-            del self[key]
+            self.pop(key, None)
             return
         super().__setitem__(key, Shortcut(value), validate_type)
 
