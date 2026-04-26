@@ -24,6 +24,7 @@ dynamic = ["version", "license"]
 version = {attr = "ulauncher._version.version"}
 
 [tool.pyrefly]
+python-interpreter-path = ".venv/bin/python"
 python-platform = "linux"
 python-version = "3.8"
 project-includes = ["ulauncher", "tests"]
