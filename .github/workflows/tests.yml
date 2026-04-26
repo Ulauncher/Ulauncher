@@ -12,6 +12,12 @@ jobs:
     container: ulauncher/build-image:6.6
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ hashFiles('requirements.txt', 'makefile', '.github/workflows/tests.yml') }}
+      - name: venv
+        run: make venv QUIET=1
       - name: ruff
         run: make ruff
       - name: pyrefly
