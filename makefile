@@ -56,10 +56,16 @@ venv:
 	if [ "$${GITHUB_ACTIONS:-}" = "true" ] || [ -n "$${NO_VENV:-}" ]; then
 	  exit 0
 	fi
-	if [ -z "$(NOCACHE)" ] && [ -x ".venv/bin/python" ] && [ -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] && cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
-	  exit 0
+	if [ -z "$(NOCACHE)" ]; then
+	  if [ ! -x ".venv/bin/python" ]; then
+	    echo -e "$(BOLD)$(YELLOW)[!] Virtual environment missing$(RESET)"
+	  elif [ ! -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] || ! cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
+	    echo -e "$(BOLD)$(YELLOW)[!] Virtual environment outdated$(RESET)"
+	  else
+	    exit 0
+	  fi
 	fi
-	echo -e "$(BOLD)[+] Setting up Python virtual environment...$(RESET)"
+	echo -e "$(BOLD)[+] Setting up virtual environment...$(RESET)"
 	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
 	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade $(if $(QUIET),-q) -r requirements.txt
 	# Keep a copy of the requirements used for this environment so make targets can
