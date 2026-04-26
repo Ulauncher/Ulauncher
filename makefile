@@ -59,12 +59,7 @@ venv:
 	if [ -z "$(NOCACHE)" ] && [ -x ".venv/bin/python" ] && [ -f "$(VENV_REQUIREMENTS_SNAPSHOT)" ] && cmp -s requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"; then
 	  exit 0
 	fi
-	MSG="[+] Setting up Python virtual environment..."
-	if [ -n "$(QUIET)" ]; then
-		echo "$$MSG"
-	else
-		echo -e "$(GREEN)$$MSG$(RESET)"
-	fi
+	echo -e "$(GREEN)[+] Setting up Python virtual environment...$(RESET)"
 	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
 	if [ -z "$(QUIET)" ]; then echo -e "$(GREEN)[+] Installing dependencies from requirements.txt...$(RESET)"; fi
 	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade $(if $(QUIET),-q) -r requirements.txt
@@ -72,7 +67,7 @@ venv:
 	# tell when the local venv needs to be refreshed.
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
 	if [ -n "$(QUIET)" ]; then
-		echo "[✓] Virtual environment set up"
+		echo -e "$(GREEN)[✓] Virtual environment set up$(RESET)"
 	else
 		echo -e "\n$(GREEN)[✓] Virtual environment has been set up and is ready to use.$(RESET)"
 		echo -e "$(GREEN)[✓] make commands and the pre-commit hook will use it automatically.$(RESET)"
