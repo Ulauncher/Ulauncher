@@ -29,6 +29,7 @@ yarn-debug.log*
 yarn-error.log*
 data/preferences
 .venv
+/.container-env
 /nix/result
 /nix/dev
 /result

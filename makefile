@@ -82,12 +82,14 @@ run:
 run-container:
 	@set -euo pipefail
 	SHELL_CMD=bash
+	HISTFILE_CONTAINER_PATH=/root/.bash_history
 	VOL_SUFFIX=""
 	if [ -z "${DOCKER_BIN}" ]; then
 		echo -e "${BOLD}You need podman or docker to run this command${RESET}"
 		exit 1
 	fi
 	if [[ "${DOCKER_BIN}" == $(shell eval "command -v docker") ]]; then
+		HISTFILE_CONTAINER_PATH=/home/ulauncher/.bash_history
 		SHELL_CMD="usermod -a -G sudo ulauncher; echo 'ulauncher ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; sudo --preserve-env -H -u ulauncher bash"
 		if [[ $$UID != 1000 ]]; then
 			SHELL_CMD="usermod -u $$UID ulauncher; $$SHELL_CMD"
@@ -100,12 +102,13 @@ run-container:
 	if command -v selinuxenabled && selinuxenabled; then
 		VOL_SUFFIX=":z"
 	fi
+	mkdir -p .container-env && touch .container-env/.bash_history
 	# port 3002 is used for developing Preferences UI
 	exec ${DOCKER_BIN} run \
 		--rm \
 		-it \
 		-v "${PWD}:/src/ulauncher$$VOL_SUFFIX" \
-		-v "$$HOME/.bash_history:/home/ulauncher/.bash_history$$VOL_SUFFIX" \
+		-v "${PWD}/.container-env/.bash_history:$$HISTFILE_CONTAINER_PATH$$VOL_SUFFIX" \
 		-p 3002:3002 \
 		--name ulauncher \
 		"docker.io/${DOCKER_IMAGE}" \
