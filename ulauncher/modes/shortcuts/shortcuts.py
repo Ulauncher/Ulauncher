@@ -9,6 +9,33 @@ from ulauncher import paths
 from ulauncher.utils.fold_user_path import fold_user_path
 from ulauncher.utils.json_conf import JsonConf
 
+INITIAL_SHORTCUTS = [
+    {
+        "id": "googlesearch",
+        "keyword": "g",
+        "name": "Google Search",
+        "cmd": "https://google.com/search?q=%s",
+        "icon": f"{paths.ASSETS}/icons/google-search.png",
+        "is_default_search": True,
+    },
+    {
+        "id": "stackoverflow",
+        "keyword": "so",
+        "name": "Stack Overflow",
+        "cmd": "https://stackoverflow.com/search?q=%s",
+        "icon": f"{paths.ASSETS}/icons/stackoverflow.svg",
+        "is_default_search": True,
+    },
+    {
+        "id": "wikipedia",
+        "keyword": "wiki",
+        "name": "Wikipedia",
+        "cmd": "https://en.wikipedia.org/wiki/%s",
+        "icon": f"{paths.ASSETS}/icons/wikipedia.png",
+        "is_default_search": True,
+    },
+]
+
 
 class Shortcut(JsonConf):
     name = ""
@@ -46,35 +73,7 @@ class Shortcuts(JsonConf):
         instance = super().load(file_path)
         if not file_path.exists():
             added = int(time())
-            keywords = [
-                Shortcut(
-                    id="googlesearch",
-                    added=added,
-                    keyword="g",
-                    name="Google Search",
-                    cmd="https://google.com/search?q=%s",
-                    icon=f"{paths.ASSETS}/icons/google-search.png",
-                    is_default_search=True,
-                ),
-                Shortcut(
-                    id="stackoverflow",
-                    added=added,
-                    keyword="so",
-                    name="Stack Overflow",
-                    cmd="https://stackoverflow.com/search?q=%s",
-                    icon=f"{paths.ASSETS}/icons/stackoverflow.svg",
-                    is_default_search=True,
-                ),
-                Shortcut(
-                    id="wikipedia",
-                    added=added,
-                    keyword="wiki",
-                    name="Wikipedia",
-                    cmd="https://en.wikipedia.org/wiki/%s",
-                    icon=f"{paths.ASSETS}/icons/wikipedia.png",
-                    is_default_search=True,
-                ),
-            ]
+            keywords = [Shortcut(**kw, added=added) for kw in INITIAL_SHORTCUTS]
             instance.save({keyword.id: keyword for keyword in keywords})
 
         return instance
