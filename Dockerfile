@@ -8,7 +8,6 @@ LABEL maintainer="ulauncher.app@gmail.com"
 
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
-ENV NO_VENV=1
 
 RUN apt-get update --fix-missing
 RUN apt-get install -y tzdata
@@ -63,13 +62,10 @@ RUN apt-get update
 RUN apt-get autoremove -y
 RUN apt-get clean
 
-COPY [ "requirements.txt", "./" ]
-
 # Update /etc/dput.cf to use sftp for upload to ppa.launchpad.net
 COPY [ "scripts/dput.cf", "/etc" ]
 
 RUN apt-get install -y python3-pip
-RUN PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 pip3 install -r requirements.txt
 
 # Create container dir for the repo root dir to mount to
 # This is needed because dpkg-buildpackage is stupid and outputs are hard coded to be the parent dir
