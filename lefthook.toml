@@ -6,6 +6,7 @@ output = ["failure", "success", "execution_out"]
 
 [[pre-commit.jobs]]
 name = "Creating venv (this can take a minute)"
+# simulate file change only if .venv is outdated (hooks into the lefthook skipped detection)
 files = "bash -c '[ -x .venv/bin/python ] && cmp -s requirements.txt .venv/.requirements.txt || echo requirements.txt'"
 run = "make venv QUIET=1"
 
