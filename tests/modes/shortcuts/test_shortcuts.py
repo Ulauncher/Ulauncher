@@ -39,9 +39,10 @@ class TestShortcuts:
         assert shortcuts["test"] == shortcut
 
     def test_none_value_deletes_key(self) -> None:
-        shortcuts = Shortcuts()
-        shortcuts["custom"] = {"keyword": "c"}
+        shortcuts = Shortcuts({"custom": {"keyword": "c"}})
 
         shortcuts["custom"] = None
 
         assert "custom" not in shortcuts
+
+        shortcuts["custom"] = None  # ensure it does not raise KeyError if key already deleted
