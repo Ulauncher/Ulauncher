@@ -13,9 +13,7 @@ DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 VENV_REQUIREMENTS_SNAPSHOT := .venv/.requirements.txt
 PYTHON_BIN := $(shell command -v python3)
-ifndef NO_VENV
 export PATH := $(ROOT_DIR).venv/bin:$(PATH)
-endif
 
 # cli font vars
 BOLD := \\e[1m
@@ -53,9 +51,6 @@ version:
 # Creates or updates the Python virtual environment. Use NOCACHE=1 to force recreation and/or QUIET=1 to suppress output.
 venv:
 	@set -euo pipefail
-	if [ "$${GITHUB_ACTIONS:-}" = "true" ] || [ -n "$${NO_VENV:-}" ]; then
-	  exit 0
-	fi
 	if [ -z "$(NOCACHE)" ]; then
 	  if [ ! -x ".venv/bin/python" ]; then
 	    echo -e "$(BOLD)$(YELLOW)[!] Virtual environment missing$(RESET)"
@@ -107,12 +102,14 @@ run-container:
 	if command -v selinuxenabled && selinuxenabled; then
 		VOL_SUFFIX=":z"
 	fi
-	mkdir -p .container-env && touch .container-env/.bash_history
+	mkdir -p .container-env/.venv
+	touch .container-env/.bash_history
 	# port 3002 is used for developing Preferences UI
 	exec ${DOCKER_BIN} run \
 		--rm \
 		-it \
 		-v "${PWD}:/src/ulauncher$$VOL_SUFFIX" \
+		-v "${PWD}/.container-env/.venv:/src/ulauncher/.venv$$VOL_SUFFIX" \
 		-v "${PWD}/.container-env/.bash_history:$$HISTFILE_CONTAINER_PATH$$VOL_SUFFIX" \
 		-p 3002:3002 \
 		--name ulauncher \
