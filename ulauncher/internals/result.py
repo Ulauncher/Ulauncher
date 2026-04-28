@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-from ulauncher.utils.basedataclass import BaseDataClass
+from ulauncher.utils.base_data_class import BaseDataClass
 
 if TYPE_CHECKING:
     from ulauncher.internals import effects

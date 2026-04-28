@@ -23,7 +23,7 @@ Use these patterns when applicable:
 
 **EventBus** (`ulauncher.utils.eventbus.EventBus`) - Use for cross-module communication when modules can't directly reference each other (e.g., core notifying UI, registry notifying modes). See [docs/architecture/eventbus.md](docs/architecture/eventbus.md) for usage.
 
-**BaseDataClass** (`ulauncher.utils.basedataclass.BaseDataClass`) - Use instead of dataclasses or plain dicts for structured data. See [docs/architecture/basedataclass.md](docs/architecture/basedataclass.md) for examples.
+**BaseDataClass** (`ulauncher.utils.base_data_class.BaseDataClass`) - Use instead of dataclasses or plain dicts for structured data. See [docs/architecture/base_data_class.md](docs/architecture/base_data_class.md) for examples.
 
 **JsonConf** (`ulauncher.utils.json_conf.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/jsonconf.md](docs/architecture/jsonconf.md) for examples.
 

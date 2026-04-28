@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
-from ulauncher.utils.basedataclass import BaseDataClass
+from ulauncher.utils.base_data_class import BaseDataClass
 from ulauncher.utils.json_utils import json_load, json_save
 
 # See https://stackoverflow.com/a/63237226/633921 for why JsonConf is quoted

@@ -13,7 +13,7 @@ Use `BaseDataClass` instead of:
 ## Example
 
 ```python
-from ulauncher.utils.basedataclass import BaseDataClass
+from ulauncher.utils.base_data_class import BaseDataClass
 
 class MyData(BaseDataClass):
     name = ""  # Declare with default values

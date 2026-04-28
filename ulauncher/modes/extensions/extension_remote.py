@@ -17,7 +17,7 @@ from ulauncher import (
 )
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
-from ulauncher.utils.basedataclass import BaseDataClass
+from ulauncher.utils.base_data_class import BaseDataClass
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
 
