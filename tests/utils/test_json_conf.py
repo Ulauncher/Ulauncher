@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.utils.json_conf import JsonConf, JsonKeyValueConf
 from ulauncher.utils.json_utils import json_load, json_save, json_stringify
 
 
@@ -174,3 +174,160 @@ class TestJsonConf:
         # Since it's the same cached instance, the original reference should also be updated
         assert c1.a == 2
         assert id(c1) == id(c1_again)
+
+
+class TestJsonKeyValueConf:
+    def test_save(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class Store(JsonKeyValueConf[str, str]):
+            pass
+
+        store = Store.load(json_file)
+        store["asdf"] = "xyz"
+        store.save()
+        assert json_load(json_file).get("asdf") == "xyz"
+
+        store.save({"asdf": "zyx"})
+        assert json_load(json_file).get("asdf") == "zyx"
+
+        store.save(asdf="yxz")
+        assert json_load(json_file).get("asdf") == "yxz"
+
+    def test_value_coercion(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class Record(JsonConf):
+            value = ""
+
+        class Store(JsonKeyValueConf[str, Record]):
+            pass
+
+        store = Store.load(json_file)
+        store["one"] = {"value": "1"}
+        assert isinstance(store["one"], Record)
+        assert store["one"].value == "1"
+
+        store.save()
+        assert json_load(json_file) == {"one": {"value": "1"}}
+
+    def test_none_value_deletes_key(self) -> None:
+        class Store(JsonKeyValueConf[str, str]):
+            pass
+
+        store = Store({"custom": "value"})
+
+        store["custom"] = None
+
+        assert "custom" not in store
+
+        store["custom"] = None
+
+    def test_accepts_existing_value_instances(self) -> None:
+        class Record(JsonConf):
+            value = ""
+
+        class Store(JsonKeyValueConf[str, Record]):
+            pass
+
+        record = Record(value="1")
+        store = Store({"record": record})
+
+        assert store["record"] == record
+
+    def test_infers_runtime_coercion_from_generic_value_type(self) -> None:
+        class Record(JsonConf):
+            value = ""
+
+        class Store(JsonKeyValueConf[str, Record]):
+            pass
+
+        assert Store._value_type is Record
+
+    def test_setitem_coerces_raw_values(self) -> None:
+        class Store(JsonKeyValueConf[str, Path]):
+            pass
+
+        store = Store({"a": "/tmp/a"})
+        store["b"] = "/tmp/b"
+
+        assert store["a"] == Path("/tmp/a")
+        assert store["b"] == Path("/tmp/b")
+
+    def test_file_cache(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class C1(JsonKeyValueConf[str, str]):
+            pass
+
+        class C2(JsonKeyValueConf[str, str]):
+            pass
+
+        c1 = C1.load(json_file)
+        c2a = C2.load(json_file)
+        c2b = C2.load(json_file)
+        c2a["unique_cache_key"] = "1"
+        assert "unique_cache_key" not in c1
+        assert "unique_cache_key" in c2a
+        assert "unique_cache_key" in c2b
+
+    def test_load_always_reads_file(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class Store(JsonKeyValueConf[str, int]):
+            pass
+
+        json_save({"a": 1}, json_file)
+
+        store = Store.load(json_file)
+        assert store["a"] == 1
+
+        json_save({"a": 2}, json_file)
+
+        store_again = Store.load(json_file)
+        assert store_again["a"] == 2
+        assert store["a"] == 2
+        assert id(store) == id(store_again)
+
+    def test_raises_on_invalid_type_arguments(self) -> None:
+        with pytest.raises(TypeError, match="key type must be str"):
+
+            class NonStrKey(JsonKeyValueConf[int, str]):  # type: ignore[type-arg]
+                pass
+
+        with pytest.raises(TypeError, match="concrete type"):
+
+            class ForwardRefValue(JsonKeyValueConf[str, "str"]):  # type: ignore[type-arg]
+                pass
+
+        with pytest.raises(TypeError, match="concrete type"):
+
+            class NoGenerics(JsonKeyValueConf):  # type: ignore[type-arg]
+                pass
+
+    def test_subclass_of_subclass_inherits_value_type(self) -> None:
+        class Store(JsonKeyValueConf[str, int]):
+            pass
+
+        class SubStore(Store):
+            pass
+
+        assert SubStore._value_type is int
+
+    def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class Store(JsonKeyValueConf[str, int]):
+            pass
+
+        json_save({"a": 1, "b": 2}, json_file)
+
+        store = Store.load(json_file)
+        assert dict(store.items()) == {"a": 1, "b": 2}
+
+        json_save({"a": 3}, json_file)
+
+        store_again = Store.load(json_file)
+        assert dict(store_again.items()) == {"a": 3}
+        assert dict(store.items()) == {"a": 3}
+        assert id(store) == id(store_again)

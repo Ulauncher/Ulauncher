@@ -27,6 +27,8 @@ Use these patterns when applicable:
 
 **JsonConf** (`ulauncher.utils.json_conf.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/json_conf.md](docs/architecture/json_conf.md) for examples.
 
+**JsonKeyValueConf** (`ulauncher.utils.json_conf.JsonKeyValueConf`) - Use for JSON files that are flat key/value dicts with uniformly-typed values. See [docs/architecture/json_key_value_conf.md](docs/architecture/json_key_value_conf.md) for examples.
+
 **Singleton** (`ulauncher.utils.singleton.Singleton`) - Use for classes that should only have one instance (app state, managers, registries). See [docs/architecture/singleton.md](docs/architecture/singleton.md) for usage.
 
 **Modes** - Examine `Mode` and existing modes in `ulauncher/modes/` when adding new query handlers. See [docs/architecture/mode-system.md](docs/architecture/mode-system.md) for the interface.

@@ -7,7 +7,7 @@ from typing import Any
 
 from ulauncher import paths
 from ulauncher.utils.fold_user_path import fold_user_path
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.utils.json_conf import JsonConf, JsonKeyValueConf
 
 INITIAL_SHORTCUTS = [
     {
@@ -59,14 +59,7 @@ class Shortcut(JsonConf):
         super().__setitem__(key, value)
 
 
-class Shortcuts(JsonConf):
-    # Coerce all dict values to Shortcut instances
-    def __setitem__(self, key: str, value: dict[str, Any] | None, validate_type: bool = True) -> None:
-        if value is None:
-            self.pop(key, None)
-            return
-        super().__setitem__(key, Shortcut(value), validate_type)
-
+class Shortcuts(JsonKeyValueConf[str, Shortcut]):
     @classmethod
     def load(cls) -> Shortcuts:  # type: ignore[override]
         file_path = Path(f"{paths.CONFIG}/shortcuts.json")
