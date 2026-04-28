@@ -25,7 +25,7 @@ Use these patterns when applicable:
 
 **BaseDataClass** (`ulauncher.utils.base_data_class.BaseDataClass`) - Use instead of dataclasses or plain dicts for structured data. See [docs/architecture/base_data_class.md](docs/architecture/base_data_class.md) for examples.
 
-**JsonConf** (`ulauncher.utils.json_conf.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/jsonconf.md](docs/architecture/jsonconf.md) for examples.
+**JsonConf** (`ulauncher.utils.json_conf.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/json_conf.md](docs/architecture/json_conf.md) for examples.
 
 **Singleton** (`ulauncher.utils.singleton.Singleton`) - Use for classes that should only have one instance (app state, managers, registries). See [docs/architecture/singleton.md](docs/architecture/singleton.md) for usage.
 

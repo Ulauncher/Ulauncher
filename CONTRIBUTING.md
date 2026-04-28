@@ -142,7 +142,7 @@ Ulauncher's query handling architecture. Each mode handles specific types of que
 ### Custom Data Structures
 
 - **[BaseDataClass](docs/architecture/base_data_class.md)** - Lightweight dict-based dataclass alternative
-- **[JsonConf](docs/architecture/jsonconf.md)** - Config files with auto-deduplication and safe concurrent access
+- **[JsonConf](docs/architecture/json_conf.md)** - Config files with auto-deduplication and safe concurrent access
 - **[Singleton](docs/architecture/singleton.md)** - Ensure single instance of managers and state classes
 
 ### [Extension IPC](docs/architecture/extension-ipc.md)
