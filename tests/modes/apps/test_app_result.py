@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import pytest
 from pytest_mock import MockerFixture
@@ -43,13 +43,13 @@ class TestAppResult:
 
     @pytest.fixture(autouse=True)
     def mock_app_starts(self, mocker: MockerFixture) -> dict[str, int]:
-        app_starts_data = {"falseapp.desktop": 3000, "trueapp.desktop": 765}
+        class _MockStarts(Dict[str, int]):
+            def save(self) -> None:
+                pass
+
+        app_starts_data: dict[str, int] = _MockStarts({"falseapp.desktop": 3000, "trueapp.desktop": 765})
         mocker.patch("ulauncher.modes.apps.app_result.app_starts", app_starts_data)
         return app_starts_data
-
-    @pytest.fixture(autouse=True)
-    def mock_json_save(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.modes.apps.app_result.json_save")
 
     def test_get_name(self, app1: AppResult) -> None:
         assert app1.name == "TrueApp - Full Name"
