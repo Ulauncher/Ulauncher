@@ -9,6 +9,7 @@ from ulauncher.utils.json_utils import json_load, json_save
 
 # See https://stackoverflow.com/a/63237226/633921 for why JsonConf is quoted
 _file_instances: dict[tuple[Path, type], JsonConf] = {}
+_instance_paths: dict[int, Path] = {}
 logger = logging.getLogger()
 T = TypeVar("T", bound="JsonConf")
 
@@ -46,11 +47,12 @@ class JsonConf(BaseDataClass):
         instance = _file_instances.get(key, cls())
         instance.update(data)
         _file_instances[key] = instance
+        _instance_paths[id(instance)] = file_path
         return cast("T", instance)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
-        file_path = next((key[0] for key, inst in _file_instances.items() if inst is self), None)
+        file_path = _instance_paths.get(id(self))
         if file_path is None:
             logger.error("Could not resolve file path for JsonConf instance %s", self.__class__.__name__)
             return False
