@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from ulauncher import paths
+from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
     from cairo import ImageSurface  # pyrefly: ignore - this fails in our docker image for some reason
