@@ -24,9 +24,11 @@ def _load_cached_file_instance(cls: type[FileInstanceT], path: str | Path) -> tu
     file_path = Path(path).resolve()
     key = (file_path, cls)
     data = json_load(file_path)
-    instance = cast("FileInstanceT", _file_instances.get(key, cls()))
-    _file_instances[key] = instance
-    _instance_paths[id(instance)] = file_path
+    instance = cast("FileInstanceT", _file_instances.get(key))
+    if instance is None:
+        instance = cls()
+        _file_instances[key] = instance
+        _instance_paths[id(instance)] = file_path
     return instance, data
 
 
