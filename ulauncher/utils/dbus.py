@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 import logging
-from functools import lru_cache
 from typing import Any
 
 import ulauncher
 from ulauncher.gi import Gio, GLib
+from ulauncher.utils.lru_cache import lru_cache
 
 logger = logging.getLogger(__name__)
 

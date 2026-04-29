@@ -141,6 +141,7 @@ select = [
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "gi.repository" = {msg = "Import GI modules from ulauncher.gi, not gi.repository directly."}
+"functools.lru_cache" = {msg = "Use ulauncher.utils.lru_cache instead to preserve parameter types."}
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [  # Relax some linting rules for tests
@@ -150,6 +151,7 @@ select = [
   "T201",       # Allow print statements
 ]
 "ulauncher/gi.py" = ["TID251"]           # This IS the canonical gi import module
+"ulauncher/utils/lru_cache.py" = ["TID251"]  # This IS the lru_cache wrapper
 
 [tool.pytest.ini_options]
 log_cli = true

@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 import unicodedata
 from difflib import Match, SequenceMatcher
-from functools import lru_cache
+
+from ulauncher.utils.lru_cache import lru_cache
 
 logger = logging.getLogger()
 

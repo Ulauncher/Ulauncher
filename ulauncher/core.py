@@ -3,7 +3,6 @@ from __future__ import annotations
 import itertools
 import logging
 from collections import defaultdict
-from functools import lru_cache
 from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
@@ -12,6 +11,7 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.lru_cache import lru_cache
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import TimerContext, timer
 

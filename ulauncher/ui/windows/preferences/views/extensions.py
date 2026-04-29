@@ -97,7 +97,7 @@ class ExtensionsView(BaseView):
         # Convert extensions to SidebarItems
         items: list[SidebarItem] = []
         for ext_id, (name, status, icon_path) in self.extension_cache.items():
-            icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_M, self.get_scale_factor())
+            icon_surface = load_icon_surface(icon_path or "", views.ICON_SIZE_M, self.get_scale_factor())
             icon_image = Gtk.Image.new_from_surface(icon_surface)
 
             # Only show status badge if not "on" (enabled extensions don't need a badge)
@@ -201,7 +201,7 @@ class ExtensionsView(BaseView):
 
         # Large icon
         icon_path = ext.get_normalized_icon_path()
-        icon_surface = load_icon_surface(icon_path, views.ICON_SIZE_L, self.get_scale_factor())
+        icon_surface = load_icon_surface(icon_path or "", views.ICON_SIZE_L, self.get_scale_factor())
         icon_image = Gtk.Image.new_from_surface(icon_surface)
         left_box.pack_start(icon_image, False, False, 0)
 

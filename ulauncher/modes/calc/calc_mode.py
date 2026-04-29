@@ -6,7 +6,6 @@ import math
 import operator as op
 import re
 from decimal import Decimal
-from functools import lru_cache
 from typing import Callable
 
 from ulauncher.internals import effects
@@ -15,6 +14,7 @@ from ulauncher.internals.result import Result
 from ulauncher.modes.calc.calc_result import CalcErrorResult, CalcResult
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.lru_cache import lru_cache
 
 _events = EventBus()
 
@@ -151,7 +151,7 @@ class CalcMode(Mode):
 
     def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
         try:
-            calc_result = str(eval_expr(query.argument))
+            calc_result = str(eval_expr(query.argument or ""))
             result = CalcResult(
                 name=f"{Decimal(calc_result):n}",
                 description="Enter to copy to the clipboard",

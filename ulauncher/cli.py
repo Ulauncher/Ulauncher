@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from functools import lru_cache, partial
+from functools import partial
 
 from ulauncher import version
 from ulauncher.modes.extensions.extension_cli_handlers import (
@@ -11,6 +11,7 @@ from ulauncher.modes.extensions.extension_cli_handlers import (
     uninstall_extension,
     upgrade_extensions,
 )
+from ulauncher.utils.lru_cache import lru_cache
 
 
 class CLIArguments(argparse.Namespace):
