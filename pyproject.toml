@@ -142,6 +142,8 @@ select = [
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "gi.repository" = {msg = "Import GI modules from ulauncher.gi, not gi.repository directly."}
 "functools.lru_cache" = {msg = "Use ulauncher.utils.lru_cache instead to preserve parameter types."}
+"functools.cache" = {msg = "Use ulauncher.utils.lru_cache instead to preserve parameter types."}
+"functools.cached_property" = {msg = "cached_property erases property types. If you need to use this, create a typed wrapper similar to ulauncher.utils.lru_cache"}
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [  # Relax some linting rules for tests
