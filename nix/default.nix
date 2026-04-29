@@ -198,6 +198,7 @@ let
       homepage = "https://ulauncher.io/";
       license = licenses.gpl3;
       platforms = platforms.linux;
+      mainProgram = "ulauncher";
       maintainers = with maintainers; [ nazarewk ];
     };
   };
