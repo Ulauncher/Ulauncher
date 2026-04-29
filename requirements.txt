@@ -4,11 +4,11 @@
 # NOTE: pygobject-stubs needs PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2
 
 build
-lefthook
+lefthook >= 2.1.5, < 3.0.0
 pygobject-stubs==2.12.0
-pyrefly >= 0.60.0
+pyrefly >= 0.63.0, < 0.64.0
 pytest
 pytest-mock
-ruff >= 0.15.9
-rumdl >= 0.1.22; python_version >= '3.9'
-typos
+ruff >= 0.15.12, < 0.16.0
+rumdl >= 0.1.83, < 0.2.0; python_version >= '3.9'
+typos >= 1.45.2, < 2.0.0
