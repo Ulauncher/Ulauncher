@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import pytest
 from pytest_mock import MockerFixture
@@ -42,14 +42,15 @@ class TestAppResult:
         return AppResult.from_id("falseapp.desktop")
 
     @pytest.fixture(autouse=True)
-    def mock_app_starts(self, mocker: MockerFixture) -> dict[str, int]:
-        app_starts_data = {"falseapp.desktop": 3000, "trueapp.desktop": 765}
+    def mock_app_starts(self, mocker: MockerFixture) -> Any:
+        class _MockStarts(Dict[str, int]):
+            def save(self) -> None:
+                pass
+
+        app_starts_data = _MockStarts({"falseapp.desktop": 3000, "trueapp.desktop": 765})
+        mocker.spy(app_starts_data, "save")
         mocker.patch("ulauncher.modes.apps.app_result.app_starts", app_starts_data)
         return app_starts_data
-
-    @pytest.fixture(autouse=True)
-    def mock_json_save(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.modes.apps.app_result.json_save")
 
     def test_get_name(self, app1: AppResult) -> None:
         assert app1.name == "TrueApp - Full Name"
@@ -63,6 +64,7 @@ class TestAppResult:
     def test_search_score(self, app1: AppResult) -> None:
         assert app1.search_score("true") > app1.search_score("trivago")
 
-    def test_bump(self, app1: AppResult, mock_app_starts: dict[str, int]) -> None:
+    def test_bump(self, app1: AppResult, mock_app_starts: Any) -> None:
         app1.bump_starts()
         assert mock_app_starts.get("trueapp.desktop") == 766
+        mock_app_starts.save.assert_called_once()

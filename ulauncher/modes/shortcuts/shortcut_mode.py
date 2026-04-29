@@ -33,7 +33,7 @@ def convert_to_result(shortcut: Shortcut, query: Query | None = None) -> results
 
 
 class ShortcutMode(Mode):
-    shortcuts: dict[str, Shortcut]
+    shortcuts: Shortcuts
 
     def __init__(self) -> None:
         self.shortcuts = Shortcuts.load()

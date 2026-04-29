@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import uuid
 from time import time
-from typing import cast
 
 from ulauncher.gi import Gtk, Pango
 from ulauncher.modes.shortcuts.shortcuts import Shortcut, Shortcuts
@@ -20,7 +19,7 @@ from ulauncher.utils.load_icon_surface import load_icon_surface
 
 class ShortcutsView(views.BaseView):
     active_shortcut_id: str | None = None
-    shortcuts: dict[str, Shortcut] = {}
+    shortcuts: Shortcuts
     save_button: Gtk.Button | None = None
     """Shortcuts management page"""
 
@@ -230,7 +229,7 @@ class ShortcutsView(views.BaseView):
     def _load_shortcut_list(self) -> None:
         """Load shortcuts from database and populate sidebar"""
         # Load shortcuts data
-        self.shortcuts = cast("dict[str, Shortcut]", Shortcuts.load())
+        self.shortcuts = Shortcuts.load()
 
         # Convert shortcuts to SidebarItems
         items: list[SidebarItem] = []

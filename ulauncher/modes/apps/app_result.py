@@ -8,11 +8,17 @@ from os.path import basename
 from ulauncher import paths
 from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_conf import JsonKeyValueConf
 
 logger = logging.getLogger()
 app_starts_path = f"{paths.STATE}/app_starts.json"
-app_starts: dict[str, int] = json_load(app_starts_path)
+
+
+class _AppStarts(JsonKeyValueConf[str, int]):
+    pass
+
+
+app_starts = _AppStarts.load(app_starts_path)
 
 
 class AppResult(Result):
@@ -64,4 +70,4 @@ class AppResult(Result):
     def bump_starts(self) -> None:
         starts = app_starts.get(self.app_id, 0)
         app_starts[self.app_id] = starts + 1
-        json_save(app_starts, app_starts_path)
+        app_starts.save()

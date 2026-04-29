@@ -11,6 +11,8 @@ Use `JsonConf` for:
 - Any JSON file that multiple parts of the code might access
 - Files that need automatic save debouncing
 
+Use [`JsonKeyValueConf`](json_key_value_conf.md) instead when the file represents a key/value dict with arbitrary string keys and uniformly-typed values.
+
 ## Example
 
 ```python
