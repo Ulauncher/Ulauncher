@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import MutableMapping as MutableMappingABC
 from pathlib import Path
 
 # MutableMapping from typing (not collections.abc) supports subscript syntax on Python 3.8 for class bases.
@@ -138,14 +137,6 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
 
     def __repr__(self) -> str:
         return repr(self._data)
-
-    def __hash__(self) -> int:
-        return id(self)
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, MutableMappingABC):
-            return dict(self.items()) == dict(other.items())
-        return False
 
     @classmethod
     def load(cls: type[KVC], path: str | Path) -> KVC:
