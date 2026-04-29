@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from collections import defaultdict
 from functools import wraps
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from typing import TypeVar
+
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec("P")
+    R = TypeVar("R")
 
 _listeners: dict[str, set[Callable[..., Any]]] = defaultdict(set)
 
@@ -23,7 +31,7 @@ class EventBus:
     def _full_event_name(self, event_name: str) -> str:
         return ":".join(filter(None, (self.namespace, event_name)))
 
-    def on(self, listener: Callable[..., Any]) -> Callable[..., Any]:
+    def on(self, listener: Callable[P, R]) -> Callable[P, R]:
         @wraps(listener)
         def wrapper(*args: Any, **kwargs: Any) -> None:
             if self.skip_if_not_bound and not self.self_arg:
