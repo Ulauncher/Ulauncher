@@ -14,11 +14,11 @@ logger = logging.getLogger()
 app_starts_path = f"{paths.STATE}/app_starts.json"
 
 
-class _AppStarts(JsonKeyValueConf[str, int]):
+class AppStarts(JsonKeyValueConf[str, int]):
     pass
 
 
-app_starts = _AppStarts.load(app_starts_path)
+app_starts = AppStarts.load(app_starts_path)
 
 
 class AppResult(Result):
