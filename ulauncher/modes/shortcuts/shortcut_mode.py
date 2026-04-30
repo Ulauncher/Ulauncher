@@ -51,7 +51,8 @@ class ShortcutMode(Mode):
             msg = "Query doesn't match any shortcut"
             raise RuntimeError(msg)
 
-        callback([convert_to_result(shortcut, query)])
+        result: Result = convert_to_result(shortcut, query)
+        callback([result])
 
     def get_fallback_results(self, query_str: str) -> list[results.ShortcutResult]:
         query = Query(None, query_str)
