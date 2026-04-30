@@ -2,23 +2,13 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import operator
 from os.path import basename
 
-from ulauncher import paths
 from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
-from ulauncher.utils.json_conf import JsonKeyValueConf
+from ulauncher.modes.apps.app_starts import app_starts
 
 logger = logging.getLogger()
-app_starts_path = f"{paths.STATE}/app_starts.json"
-
-
-class AppStarts(JsonKeyValueConf[str, int]):
-    pass
-
-
-app_starts = AppStarts.load(app_starts_path)
 
 
 class AppResult(Result):
@@ -48,14 +38,9 @@ class AppResult(Result):
                 return AppResult(app_info)
         return None
 
-    @staticmethod
-    def get_top_app_ids() -> list[str]:
-        sorted_tuples = sorted(app_starts.items(), key=operator.itemgetter(1), reverse=True)
-        return [*map(operator.itemgetter(0), sorted_tuples)]
-
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         frequency_weight = 1.0
-        sorted_app_ids = AppResult.get_top_app_ids()
+        sorted_app_ids = app_starts.get_top_app_ids()
         if count := len(sorted_app_ids):
             index = sorted_app_ids.index(self.app_id) if self.app_id in sorted_app_ids else count
             frequency_weight = 1.0 - (index / count * 0.1) + 0.05
@@ -66,8 +51,3 @@ class AppResult(Result):
             (self.description, 0.7 * frequency_weight),
             *[(k, 0.6 * frequency_weight) for k in self.keywords],
         ]
-
-    def bump_starts(self) -> None:
-        starts = app_starts.get(self.app_id, 0)
-        app_starts[self.app_id] = starts + 1
-        app_starts.save()

@@ -9,6 +9,7 @@ from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_result import AppResult
+from ulauncher.modes.apps.app_starts import app_starts
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.settings import Settings
@@ -47,7 +48,7 @@ class AppMode(Mode):
     def get_home_results(self, limit: int) -> list[AppResult]:
         """Get the top {N} apps (based on number of launches) to show when the query is empty"""
         # TODO: filter out old apps
-        return list(filter(None, map(AppResult.from_id, AppResult.get_top_app_ids())))[:limit]
+        return list(filter(None, map(AppResult.from_id, app_starts.get_top_app_ids())))[:limit]
 
     def activate_result(
         self,
@@ -61,7 +62,7 @@ class AppMode(Mode):
                 logger.error("Expected AppResult but got %s", type(result).__name__)
                 callback(effects.do_nothing())
                 return
-            result.bump_starts()
+            app_starts.bump(result.app_id)
             if not launch_app(result.app_id):
                 logger.error("Could not launch app %s", result.app_id)
             callback(effects.close_window())
