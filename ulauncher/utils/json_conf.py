@@ -32,13 +32,13 @@ def _load_cached_file_instance(cls: type[FileInstanceT], path: str | Path) -> tu
     return instance, data
 
 
-def _save_cached_file_instance(instance: object, data: Any) -> bool:
+def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool = True) -> bool:
     file_path = _instance_paths.get(id(instance))
     if file_path is None:
         logger.error("Could not resolve file path for instance %s", instance.__class__.__name__)
         return False
 
-    return json_save(data, file_path)
+    return json_save(data, file_path, sort_keys=sort_keys)
 
 
 class JsonConf(BaseDataClass):
@@ -170,4 +170,4 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
-        return _save_cached_file_instance(self, dict(self.items()))
+        return _save_cached_file_instance(self, dict(self.items()), sort_keys=False)

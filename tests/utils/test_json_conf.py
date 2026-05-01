@@ -194,6 +194,19 @@ class TestJsonKeyValueConf:
         store.save(asdf="yxz")
         assert json_load(json_file).get("asdf") == "yxz"
 
+    def test_save_preserves_insertion_order(self, tmp_path: Path) -> None:
+        json_file = tmp_path / "jsonkvconf.json"
+
+        class Store(JsonKeyValueConf[str, str]):
+            pass
+
+        store = Store.load(json_file)
+        store["z"] = "last"
+        store["a"] = "first"
+        store.save()
+
+        assert json_file.read_text() == '{\n  "z": "last",\n  "a": "first"\n}'
+
     def test_value_coercion(self, tmp_path: Path) -> None:
         json_file = tmp_path / "jsonkvconf.json"
 
