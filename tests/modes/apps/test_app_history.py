@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from ulauncher.modes.apps.app_history import AppHistory as AppHistory_
+from ulauncher.modes.apps.app_history import _AppHistory
 
 
-class AppHistory(AppHistory_):
+class AppHistory(_AppHistory):
     def save(self) -> bool:
         return False
 
