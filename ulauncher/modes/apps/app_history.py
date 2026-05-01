@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import operator
+import math
 import time
 from typing import Any
 
@@ -10,6 +10,8 @@ from ulauncher.utils.json_conf import JsonKeyValueConf
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"
 _MAX_APP_HISTORY = 10
+_SEARCH_SCORE_HALF_TIME = 5 * 24 * 60 * 60  # 5 days
+_SCORE_DECAY = math.log(2) / _SEARCH_SCORE_HALF_TIME
 
 
 class _AppHistoryData(BaseDataClass):
@@ -44,8 +46,7 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
     def get_app_ranking(self) -> list[str]:
         if self._ranking_cache is None:
             scores = {app_id: _AppHistory._calculate_score(data) for app_id, data in self.items()}
-            sorted_ids = sorted(scores.items(), key=operator.itemgetter(1), reverse=True)
-            self._ranking_cache = [app_id for app_id, score in sorted_ids]
+            self._ranking_cache = sorted(scores, key=scores.get, reverse=True)  # type: ignore[arg-type]
         return self._ranking_cache
 
     def clear_ranking_cache(self) -> None:
@@ -55,20 +56,9 @@ class _AppHistory(JsonKeyValueConf[str, _AppHistoryData]):
     def _calculate_score(data: _AppHistoryData) -> float:
         now = time.time()
         score = data.count * 0.1
+        # Exponential decay: score halves every SEARCH_SCORE_HALF_TIME, approaches 0 for old launches
         for launch_time in data.last_launches:
-            diff = now - launch_time
-            if diff < 86400:
-                score += 100
-            elif diff < 259200:
-                score += 80
-            elif diff < 604800:
-                score += 60
-            elif diff < 1209600:
-                score += 40
-            elif diff < 2592000:
-                score += 20
-            else:
-                score += 10
+            score += 100 * math.exp(-_SCORE_DECAY * (now - launch_time))
         return score
 
     def bump(self, app_id: str) -> None:
