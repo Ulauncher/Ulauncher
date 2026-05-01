@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 import pytest
 
@@ -305,14 +305,70 @@ class TestJsonKeyValueConf:
             class NoGenerics(JsonKeyValueConf):  # type: ignore[type-arg]
                 pass
 
-    def test_subclass_of_subclass_inherits_value_type(self) -> None:
-        class Store(JsonKeyValueConf[str, int]):
+        with pytest.raises(TypeError, match="unparameterized"):
+
+            class UnparamList(JsonKeyValueConf[str, list]):  # type: ignore[type-arg]
+                pass
+
+        with pytest.raises(TypeError, match="unparameterized"):
+
+            class UnparamDict(JsonKeyValueConf[str, dict]):  # type: ignore[type-arg]
+                pass
+
+        with pytest.raises(TypeError, match="unsupported parameterized"):
+
+            class TupleValue(JsonKeyValueConf[str, Tuple[str, int]]):  # type: ignore[type-arg]
+                pass
+
+    def test_primitive_value_types_accepted(self) -> None:
+        class StrStore(JsonKeyValueConf[str, str]):
+            pass
+
+        class IntStore(JsonKeyValueConf[str, int]):
+            pass
+
+        s = StrStore()
+        s["key"] = "hello"
+        assert s["key"] == "hello"
+
+        i = IntStore()
+        i["key"] = 42
+        assert i["key"] == 42
+
+    def test_parameterized_list_and_dict_accepted(self) -> None:
+        class ListStore(JsonKeyValueConf[str, List[int]]):
+            pass
+
+        class DictStore(JsonKeyValueConf[str, Dict[str, int]]):
+            pass
+
+        ls = ListStore()
+        ls["nums"] = [1, 2, 3]
+        assert ls["nums"] == [1, 2, 3]
+
+        ds = DictStore()
+        ds["mapping"] = {"a": 1}
+        assert ds["mapping"] == {"a": 1}
+
+    def test_coerce_value_skips_if_already_correct_type(self) -> None:
+        class PathStore(JsonKeyValueConf[str, Path]):
+            pass
+
+        store = PathStore()
+        existing = Path("/tmp/test")
+        store["key"] = existing
+        assert store["key"] is existing
+
+    def test_subclass_of_subclass_coerces_values(self) -> None:
+        class Store(JsonKeyValueConf[str, Path]):
             pass
 
         class SubStore(Store):
             pass
 
-        assert SubStore._value_type is int
+        sub = SubStore()
+        sub["key"] = "/tmp/test"  # type: ignore[assignment]
+        assert isinstance(sub["key"], Path)
 
     def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
         json_file = tmp_path / "jsonkvconf.json"
