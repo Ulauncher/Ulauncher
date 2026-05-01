@@ -91,15 +91,33 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
                 if len(args) != 2:  # noqa: PLR2004
                     msg = f"{cls.__name__}: JsonKeyValueConf requires exactly 2 type args, got {len(args)}"
                     raise TypeError(msg)
+                key_type, value_type = args
                 # `is str` is intentional: we're checking type identity, not equality.
                 # The builtin `str` type object is a singleton, so `is` is correct here.
-                if args[0] is not str:
-                    msg = f"{cls.__name__}: key type must be str, got {args[0]!r}"
+                if key_type is not str:
+                    msg = f"{cls.__name__}: key type must be str, got {key_type!r}"
                     raise TypeError(msg)
-                if not isinstance(args[1], type):
-                    msg = f"{cls.__name__}: value type must be a concrete type, got {args[1]!r}"
+                if value_type in (str, int, float, bool):
+                    return  # no coercion needed
+                if value_type in (list, dict):
+                    msg = (
+                        f"{cls.__name__}: unparameterized {value_type} not supported. "
+                        f"Use list[...] for lists and BaseDataClass subclasses or dict[K, V] for dicts"
+                    )
                     raise TypeError(msg)
-                cls._value_type = args[1]
+                if origin := get_origin(value_type):
+                    if origin in (list, dict):
+                        return  # no coercion needed
+                    msg = (
+                        f"{cls.__name__}: unsupported parameterized value type. "
+                        f"Only list and dict supported, got {value_type!r}"
+                    )
+                    raise TypeError(msg)
+                if isinstance(value_type, type):
+                    cls._value_type = value_type
+                else:
+                    msg = f"{cls.__name__}: value type must be a concrete type, got {value_type!r}"
+                    raise TypeError(msg)
                 return
 
         if cls._value_type is None:
