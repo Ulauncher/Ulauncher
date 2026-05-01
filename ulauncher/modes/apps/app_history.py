@@ -3,10 +3,10 @@ from __future__ import annotations
 from ulauncher import paths
 from ulauncher.utils.json_conf import JsonKeyValueConf
 
-app_starts_path = f"{paths.STATE}/app_starts.json"
+app_history_path = f"{paths.STATE}/app_starts.json"
 
 
-class AppStarts(JsonKeyValueConf[str, int]):
+class AppHistory(JsonKeyValueConf[str, int]):
     def get_top_app_ids(self) -> list[str]:
         return sorted(self, key=lambda k: self.get(k, 0), reverse=True)
 
@@ -15,4 +15,4 @@ class AppStarts(JsonKeyValueConf[str, int]):
         self.save()
 
 
-app_starts = AppStarts.load(app_starts_path)
+app_history = AppHistory.load(app_history_path)
