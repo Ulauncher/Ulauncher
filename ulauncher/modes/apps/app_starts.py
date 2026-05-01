@@ -7,15 +7,10 @@ app_starts_path = f"{paths.STATE}/app_starts.json"
 
 
 class AppStarts(JsonKeyValueConf[str, int]):
-    _top_ids: list[str] | None = None
-
     def get_top_app_ids(self) -> list[str]:
-        if self._top_ids is None:
-            self._top_ids = sorted(self, key=lambda k: self.get(k, 0), reverse=True)
-        return self._top_ids
+        return sorted(self, key=lambda k: self.get(k, 0), reverse=True)
 
     def bump(self, app_id: str) -> None:
-        self._top_ids = None
         self[app_id] = self.get(app_id, 0) + 1
         self.save()
 

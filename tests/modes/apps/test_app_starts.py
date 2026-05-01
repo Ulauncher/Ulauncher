@@ -30,7 +30,6 @@ class TestAppStarts:
         assert mock_app_starts.get("trueapp.desktop") == 766
         self.save_spy.assert_called_once()
 
-    def test_bump_invalidates_cache(self, mock_app_starts: AppStarts) -> None:
-        mock_app_starts.get_top_app_ids()  # populate cache
+    def test_bump_updates_top_app_ids(self, mock_app_starts: AppStarts) -> None:
         mock_app_starts.bump("trueapp.desktop")
-        assert mock_app_starts._top_ids is None
+        assert mock_app_starts.get_top_app_ids() == ["falseapp.desktop", "trueapp.desktop"]
