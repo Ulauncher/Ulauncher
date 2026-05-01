@@ -7,7 +7,8 @@ _app_history_path = f"{paths.STATE}/app_starts.json"
 
 
 class _AppHistory(JsonKeyValueConf[str, int]):
-    def get_top_app_ids(self) -> list[str]:
+    def get_app_ranking(self) -> list[str]:
+        """Get list of app IDs sorted by launch count"""
         return sorted(self, key=lambda k: self.get(k, 0), reverse=True)
 
     def bump(self, app_id: str) -> None:

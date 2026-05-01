@@ -11,7 +11,7 @@ class AppHistory(_AppHistory):
 class TestAppHistory:
     def test_get_top_app_ids_sorted_by_count(self) -> None:
         app_history = AppHistory({"app1.desktop": 3000, "app2.desktop": 765})
-        ids = app_history.get_top_app_ids()
+        ids = app_history.get_app_ranking()
         assert ids[0] == "app1.desktop"
         assert ids[1] == "app2.desktop"
 
@@ -23,4 +23,4 @@ class TestAppHistory:
     def test_bump_updates_top_app_ids(self) -> None:
         app_history = AppHistory({"app1.desktop": 1, "app2.desktop": 1})
         app_history.bump("app2.desktop")
-        assert app_history.get_top_app_ids() == ["app2.desktop", "app1.desktop"]
+        assert app_history.get_app_ranking() == ["app2.desktop", "app1.desktop"]

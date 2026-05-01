@@ -48,7 +48,7 @@ class AppMode(Mode):
     def get_home_results(self, limit: int) -> list[AppResult]:
         """Get the top {N} apps (based on number of launches) to show when the query is empty"""
         # TODO: filter out old apps
-        return list(filter(None, map(AppResult.from_id, app_history.get_top_app_ids())))[:limit]
+        return list(filter(None, map(AppResult.from_id, app_history.get_app_ranking())))[:limit]
 
     def activate_result(
         self,
