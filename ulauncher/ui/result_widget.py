@@ -21,14 +21,16 @@ class ResultWidget(Gtk.EventBox):
     name: str
     query: Query
     result: Result
+    jump_keys: list[str]
     item_box: Gtk.EventBox
     shortcut_label: Gtk.Label
     title_box: Gtk.Box
     text_container: Gtk.Box
 
-    def __init__(self, result: Result, index: int, query: Query) -> None:
+    def __init__(self, result: Result, index: int, query: Query, jump_keys: list[str] | None = None) -> None:
         self.result = result
         self.query = query
+        self.jump_keys = jump_keys if jump_keys is not None else Settings.load().get_jump_keys()
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
         inner_margin_x = int(12.0 * text_scaling_factor)
@@ -96,10 +98,9 @@ class ResultWidget(Gtk.EventBox):
         """
         Set index for the item and assign shortcut
         """
-        jump_keys = Settings.load().get_jump_keys()
-        if index < len(jump_keys):
+        if index < len(self.jump_keys):
             self.index = index
-            self.shortcut_label.set_text(f"Alt+{jump_keys[index]}")
+            self.shortcut_label.set_text(f"Alt+{self.jump_keys[index]}")
 
     def select(self) -> None:
         self.item_box.get_style_context().add_class("selected")

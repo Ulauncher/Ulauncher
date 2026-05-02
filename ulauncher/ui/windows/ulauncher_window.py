@@ -410,7 +410,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
 
-        limit = len(self.settings.get_jump_keys()) or 25
+        jump_keys = self.settings.get_jump_keys()
+        limit = len(jump_keys) or 25
         result_list = list(results)[:limit]
 
         if result_list:
@@ -418,7 +419,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(result_list):
-                result_widget = ResultWidget(result, index, self.core.query)
+                result_widget = ResultWidget(result, index, self.core.query, jump_keys)
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
 
