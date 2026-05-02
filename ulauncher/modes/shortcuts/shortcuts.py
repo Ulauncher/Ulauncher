@@ -6,7 +6,7 @@ from time import time
 from typing import Any
 
 from ulauncher import paths
-from ulauncher.data import JsonConf, JsonKeyValueConf
+from ulauncher.data import BaseDataClass, JsonKeyValueConf
 from ulauncher.utils.fold_user_path import fold_user_path
 
 INITIAL_SHORTCUTS = [
@@ -37,7 +37,7 @@ INITIAL_SHORTCUTS = [
 ]
 
 
-class Shortcut(JsonConf):
+class Shortcut(BaseDataClass):
     name = ""
     keyword = ""
     cmd = ""

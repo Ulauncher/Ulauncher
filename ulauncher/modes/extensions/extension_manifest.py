@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from ulauncher import api_version
-from ulauncher.data import JsonConf
+from ulauncher.data import BaseDataClass, JsonConf
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()
 
 
-class ExtensionManifestPreference(JsonConf):
+class ExtensionManifestPreference(BaseDataClass):
     name = ""
     type = ""
     description = ""
@@ -22,7 +22,7 @@ class ExtensionManifestPreference(JsonConf):
     min: int | None = None
 
 
-class ExtensionManifestTrigger(JsonConf):
+class ExtensionManifestTrigger(BaseDataClass):
     name = ""
     description = ""
     default_keyword = ""

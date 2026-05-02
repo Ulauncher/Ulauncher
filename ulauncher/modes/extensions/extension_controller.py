@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
-from ulauncher.data import JsonConf
+from ulauncher.data import BaseDataClass, JsonConf
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
@@ -31,7 +31,7 @@ class ExtensionPreference(ExtensionManifestPreference):
     value: str | int | bool | None = None
 
 
-class ExtensionControllerTrigger(JsonConf):
+class ExtensionControllerTrigger(BaseDataClass):
     name = ""
     description = ""
     default_keyword = ""
