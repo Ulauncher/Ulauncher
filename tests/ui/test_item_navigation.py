@@ -21,7 +21,7 @@ class TestItemNavigation:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.ui.item_navigation.query_history")
+        return mocker.patch("ulauncher.ui.item_navigation.get_query_history", return_value={})
 
     @pytest.fixture(autouse=True)
     def json_save(self, mocker: MockerFixture) -> Any:
