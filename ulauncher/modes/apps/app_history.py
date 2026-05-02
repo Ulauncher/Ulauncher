@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ulauncher import paths
 from ulauncher.utils.json_conf import JsonKeyValueConf
+from ulauncher.utils.lru_cache import lru_cache
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"
 
@@ -24,4 +25,6 @@ class _AppHistory(JsonKeyValueConf[str, int]):
         self.save()
 
 
-app_history = _AppHistory.load(_APP_HISTORY_PATH)
+@lru_cache(maxsize=1)
+def get_app_history() -> _AppHistory:
+    return _AppHistory.load(_APP_HISTORY_PATH)

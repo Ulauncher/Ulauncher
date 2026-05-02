@@ -6,7 +6,7 @@ from os.path import basename
 
 from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
-from ulauncher.modes.apps.app_history import app_history
+from ulauncher.modes.apps.app_history import get_app_history
 
 logger = logging.getLogger()
 
@@ -40,6 +40,7 @@ class AppResult(Result):
 
     def get_searchable_fields(self) -> list[tuple[str, float]]:
         frequency_weight = 1.0
+        app_history = get_app_history()
         sorted_app_ids = app_history.get_app_ranking()
         if count := len(sorted_app_ids):
             index = sorted_app_ids.index(self.app_id) if self.app_id in sorted_app_ids else count
