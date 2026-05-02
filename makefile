@@ -78,7 +78,7 @@ run:
 	fi
 	./bin/ulauncher --verbose
 
-# Start a bash session in the Ulauncher Docker build container (Ubuntu)
+# Start a bash session in the Ulauncher Docker build container (Ubuntu). Set CONTAINER_CMD to run a command non-interactively.
 run-container:
 	@set -euo pipefail
 	SHELL_CMD=bash
@@ -90,13 +90,19 @@ run-container:
 	fi
 	if [[ "${DOCKER_BIN}" == $(shell eval "command -v docker") ]]; then
 		HISTFILE_CONTAINER_PATH=/home/ulauncher/.bash_history
-		SHELL_CMD="usermod -a -G sudo ulauncher; echo 'ulauncher ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; sudo --preserve-env -H -u ulauncher bash"
+		USER_CMD=bash
+		if [ -n "${CONTAINER_CMD}" ]; then
+			USER_CMD="bash -c '${CONTAINER_CMD}'"
+		fi
+		SHELL_CMD="usermod -a -G sudo ulauncher; echo 'ulauncher ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; sudo --preserve-env -H -u ulauncher $$USER_CMD"
 		if [[ $$UID != 1000 ]]; then
 			SHELL_CMD="usermod -u $$UID ulauncher; $$SHELL_CMD"
 		fi
 		if [[ $(shell eval "id -g") != 1000 ]]; then
 			SHELL_CMD="groupmod -g $(shell eval "id -g") ulauncher; $$SHELL_CMD"
 		fi
+	elif [ -n "${CONTAINER_CMD}" ]; then
+		SHELL_CMD="${CONTAINER_CMD}"
 	fi
 	# If SELinux is enabled, append ":z" to get the right label
 	if command -v selinuxenabled && selinuxenabled; then
@@ -104,10 +110,14 @@ run-container:
 	fi
 	mkdir -p .container-env/.venv
 	touch .container-env/.bash_history
+	IT_FLAGS=""
+	if [ -z "${CONTAINER_CMD}" ]; then
+		IT_FLAGS="-it"
+	fi
 	# port 3002 is used for developing Preferences UI
 	exec ${DOCKER_BIN} run \
 		--rm \
-		-it \
+		$$IT_FLAGS \
 		-v "${PWD}:/src/ulauncher$$VOL_SUFFIX" \
 		-v "${PWD}/.container-env/.venv:/src/ulauncher/.venv$$VOL_SUFFIX" \
 		-v "${PWD}/.container-env/.bash_history:$$HISTFILE_CONTAINER_PATH$$VOL_SUFFIX" \
@@ -118,7 +128,7 @@ run-container:
 
 #=Lint/test Commands
 
-.PHONY: check lint format pyrefly ruff rumdl typos pytest
+.PHONY: check lint format check-container check-all pyrefly ruff rumdl typos pytest
 
 # Run all linters
 lint: venv typos ruff pyrefly rumdl
@@ -126,6 +136,14 @@ lint: venv typos ruff pyrefly rumdl
 # Run all linters and unit tests (terse output, use `make pytest` for verbose)
 check: lint
 	@$(MAKE) --no-print-directory pytest PYTEST_ARGS="--no-header -q --override-ini=log_cli=false"
+
+# Run all linters and unit tests inside the Docker build container
+check-container:
+	@$(MAKE) --no-print-directory run-container CONTAINER_CMD="make check"
+
+# Run all checks locally and in the Docker build container
+check-all: check
+	@$(MAKE) --no-print-directory check-container
 
 # Lint with pyrefly (type checker)
 pyrefly: venv
