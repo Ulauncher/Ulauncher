@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ulauncher import paths
-from ulauncher.utils.json_conf import JsonKeyValueConf
+from ulauncher.data import JsonKeyValueConf
 from ulauncher.utils.lru_cache import lru_cache
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"

@@ -6,8 +6,8 @@ from time import time
 from typing import Any
 
 from ulauncher import paths
+from ulauncher.data import JsonConf, JsonKeyValueConf
 from ulauncher.utils.fold_user_path import fold_user_path
-from ulauncher.utils.json_conf import JsonConf, JsonKeyValueConf
 
 INITIAL_SHORTCUTS = [
     {

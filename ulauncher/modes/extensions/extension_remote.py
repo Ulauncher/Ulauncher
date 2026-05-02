@@ -15,9 +15,9 @@ from ulauncher import (
     api_version,
     paths,
 )
+from ulauncher.data import BaseDataClass
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
-from ulauncher.utils.base_data_class import BaseDataClass
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
 

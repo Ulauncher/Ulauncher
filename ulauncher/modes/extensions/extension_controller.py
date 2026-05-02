@@ -13,6 +13,7 @@ from typing import Any, Callable
 
 from ulauncher import paths
 from ulauncher.cli import get_cli_args
+from ulauncher.data import JsonConf
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
@@ -23,7 +24,6 @@ from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.get_icon_path import get_icon_path
-from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.json_utils import json_load
 
 

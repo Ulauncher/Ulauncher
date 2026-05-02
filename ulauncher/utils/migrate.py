@@ -119,7 +119,7 @@ def v5_to_v6() -> None:  # noqa: PLR0912
 
     # Convert show_recent_apps to max_recent_apps
     # Not using settings class because we don't want to convert the keys
-    from ulauncher.utils.json_conf import JsonConf
+    from ulauncher.data import JsonConf
 
     settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
     legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
@@ -172,7 +172,7 @@ def v5_to_v6_destructive() -> None:
         rmtree(CACHE_PATH)
 
     # Delete old preferences
-    from ulauncher.utils.json_conf import JsonConf
+    from ulauncher.data import JsonConf
 
     settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
     _logger.info("Pruning settings")
