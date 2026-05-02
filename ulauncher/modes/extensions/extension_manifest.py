@@ -21,10 +21,6 @@ class ExtensionManifestPreference(JsonConf):
     max: int | None = None
     min: int | None = None
 
-    def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
-        validate_type = key in ["name", "type", "description", "options"]
-        super().__setitem__(key, value, validate_type)
-
 
 class ExtensionManifestTrigger(JsonConf):
     name = ""
