@@ -20,8 +20,6 @@ from ulauncher.utils.timer import timer
 logger = logging.getLogger()
 events = EventBus("app")
 
-cli_args = get_cli_args()
-
 
 class UlauncherApp(Gtk.Application):
     # Gtk.Applications check if the app is already registered and if so,
@@ -78,6 +76,7 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
+        cli_args = get_cli_args()
         if not settings.daemonless or cli_args.daemon:
             # Keep the app running even without a window
             self.hold()
