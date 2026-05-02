@@ -42,11 +42,12 @@ class ExtensionMode(Mode, metaclass=Singleton):
     """
 
     _active_ext: ExtensionController | None = None
-    _trigger_cache: dict[str, tuple[str, str]] = {}  # keyword: (trigger_id, ext_id)
+    _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
     _request_id: int = 0
 
     def __init__(self) -> None:
+        self._trigger_cache = {}
         events.set_self(self)
         GLib.idle_add(self.start_extensions)
 
