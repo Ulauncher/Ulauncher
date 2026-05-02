@@ -14,7 +14,6 @@ from ulauncher.ui.windows.preferences.preferences_window import PreferencesWindo
 from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.singleton import get_instance
 from ulauncher.utils.timer import timer
 
 logger = logging.getLogger()
@@ -29,9 +28,6 @@ class UlauncherApp(Gtk.Application):
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
-
-    def __call__(self, *args: Any, **kwargs: Any) -> UlauncherApp:
-        return cast("UlauncherApp", get_instance(super(), self, *args, **kwargs))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=app_id, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
