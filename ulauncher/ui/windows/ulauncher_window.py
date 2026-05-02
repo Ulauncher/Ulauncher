@@ -31,11 +31,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     _results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
-    settings = Settings.load()
-    core = UlauncherCore()
+    settings: Settings
+    core: UlauncherCore
 
     def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
+        self.settings = Settings.load()
+        self.core = UlauncherCore()
         width_request = int(self.settings.base_width)
         height_request = -1
 
