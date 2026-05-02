@@ -58,6 +58,7 @@ class TrayIcon(GObject.Object):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        settings = Settings.load()
         menu = Gtk.Menu()
         show_menu_item: Gtk.MenuItem | None = None
         if self.supports_appindicator():
@@ -72,7 +73,7 @@ class TrayIcon(GObject.Object):
         gtk_icon_theme = Gtk.IconTheme.get_default()
         icon_name = "find"  # standard find icon, in case the app is not installed
         icon_dir = ""
-        icons = list({Settings.load().tray_icon_name, default_icon_name, "ulauncher-indicator"})
+        icons = list({settings.tray_icon_name, default_icon_name, "ulauncher-indicator"})
 
         # check preferred, fallback on default v6 icon name, then the v5 icon name if v5 is installed
         for _icon in icons:
