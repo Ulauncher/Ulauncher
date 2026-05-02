@@ -16,7 +16,6 @@ from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
-from ulauncher.utils.singleton import Singleton
 
 logger = logging.getLogger()
 events = EventBus("extensions")
@@ -35,11 +34,8 @@ class ExtensionLaunchTrigger(Result):
     actions = {"__launch__": {"name": "Launch"}}
 
 
-class ExtensionMode(Mode, metaclass=Singleton):
-    """
-    Mode that handles extension triggers and communication with extensions.
-    Is singleton because it owns the ExtensionSocketServer instance.
-    """
+class ExtensionMode(Mode):
+    """Mode that handles extension triggers and communication with extensions."""
 
     _active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
