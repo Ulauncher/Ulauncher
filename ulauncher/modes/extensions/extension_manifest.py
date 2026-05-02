@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from ulauncher import api_version
+from ulauncher.data import JsonConf
 from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.utils.json_conf import JsonConf
 from ulauncher.utils.version import satisfies
 
 logger = logging.getLogger()

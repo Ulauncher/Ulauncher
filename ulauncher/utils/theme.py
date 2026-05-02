@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 from ulauncher import paths
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.data import JsonConf
 
 logger = logging.getLogger()
 DEFAULT_THEME = "light"
