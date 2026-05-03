@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, TypeVar
 
-from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
+from ulauncher.data._file_cache import _get_or_create_instance, _reload_file_instance, _save_cached_file_instance
 from ulauncher.data.base_data_class import BaseDataClass
 
 T = TypeVar("T", bound="JsonConf")
@@ -22,7 +22,10 @@ class JsonConf(BaseDataClass):
 
     @classmethod
     def load(cls: type[T], path: str) -> T:
-        return _load_cached_file_instance(cls, path)
+        return _get_or_create_instance(cls, path)
+
+    def reload(self) -> None:
+        _reload_file_instance(self)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)

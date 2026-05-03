@@ -148,32 +148,39 @@ class TestJsonConf:
         assert hasattr(c2a, "unique_cache_key")
         assert hasattr(c2b, "unique_cache_key")
 
-    def test_load_always_reads_file(self, tmp_path: Path) -> None:
-        """Test that load() always reads from file and updates cached instance"""
+    def test_load_is_lazy(self, tmp_path: Path) -> None:
+        """Test that load() returns the cached instance without re-reading the file"""
         json_file = str(tmp_path / "jsonconf.json")
 
         class C1(JsonConf):
             pass
 
-        # Create initial file with data
         json_save({"a": 1}, json_file)
-
-        # Load and verify
         c1 = C1.load(json_file)
         assert c1.a == 1
 
-        # Write a different value directly to the file
         json_save({"a": 2}, json_file)
-
-        # Load again - should read the new value and update the cached instance
         c1_again = C1.load(json_file)
-        assert c1_again.a == 2
-        # Since it's the same cached instance, the original reference should also be updated
-        assert c1.a == 2
+        assert c1_again.a == 1  # not re-read
         assert id(c1) == id(c1_again)
 
-    def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
-        """Test that reloading removes keys absent from the file, while preserving class defaults"""
+    def test_reload_reads_file(self, tmp_path: Path) -> None:
+        """Test that reload() re-reads from disk and updates the instance"""
+        json_file = str(tmp_path / "jsonconf.json")
+
+        class C1(JsonConf):
+            pass
+
+        json_save({"a": 1}, json_file)
+        c1 = C1.load(json_file)
+        assert c1.a == 1
+
+        json_save({"a": 2}, json_file)
+        c1.reload()
+        assert c1.a == 2
+
+    def test_reload_removes_deleted_keys(self, tmp_path: Path) -> None:
+        """Test that reload() removes keys absent from the file, while preserving class defaults"""
         json_file = str(tmp_path / "jsonconf.json")
 
         class C1(JsonConf):
@@ -186,8 +193,7 @@ class TestJsonConf:
         assert c1.default_key == "default"
 
         json_save({"a": 3}, json_file)
-        c1_again = C1.load(json_file)
-        assert c1_again.a == 3
-        assert "b" not in c1_again
-        assert c1_again.default_key == "default"
-        assert id(c1) == id(c1_again)
+        c1.reload()
+        assert c1.a == 3
+        assert "b" not in c1
+        assert c1.default_key == "default"
