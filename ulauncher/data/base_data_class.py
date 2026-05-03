@@ -4,6 +4,18 @@ from copy import deepcopy
 from typing import Any
 
 
+def _apply_class_defaults(instance: BaseDataClass) -> None:
+    for cls in reversed(instance.__class__.__mro__):
+        if cls in BaseDataClass.__mro__:
+            continue
+        defaults = {
+            k: deepcopy(v)  # deep copy to handle https://stackoverflow.com/q/1132941/633921
+            for k, v in vars(cls).items()
+            if (not k.startswith("__") and not callable(getattr(cls, k)))
+        }
+        instance.update(defaults)
+
+
 class BaseDataClass(dict):  # type: ignore [type-arg]
     """
     BaseDataClass
@@ -31,20 +43,17 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__()
-        # loop through class inheritance chain and add class props (defaults) as to the instance
-        # this is the same as the python dataclass decorators does
-        for cls in reversed(self.__class__.__mro__):
-            if cls in BaseDataClass.__mro__:
-                continue
-            defaults = {
-                k: deepcopy(v)  # deep copy to handle https://stackoverflow.com/q/1132941/633921
-                for k, v in vars(cls).items()
-                if (not k.startswith("__") and not callable(getattr(cls, k)))
-            }
-            self.update(defaults)
-
-        # set values
+        _apply_class_defaults(self)
         self.update(*args, **kwargs)
+
+    def clear(self) -> None:
+        """Reset to class defaults, removing any runtime-added keys.
+
+        Overrides dict.clear so that declared fields are always present after a clear,
+        preserving the type contract of subclasses that declare non-optional fields.
+        """
+        super().clear()
+        _apply_class_defaults(self)
 
     def __hash__(self) -> int:  # type: ignore [override]
         """
