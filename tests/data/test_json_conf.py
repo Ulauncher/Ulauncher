@@ -124,8 +124,8 @@ class TestJsonConf:
 
     def test_setitem_always_used(self) -> None:
         class UnderscorePrefix(JsonConf):
-            def __setitem__(self, key: str, value: Any, validate_type: bool = True) -> None:
-                super().__setitem__("_" + key, value, validate_type)
+            def __setitem__(self, key: str, value: Any) -> None:
+                super().__setitem__("_" + key, value)
 
         data = UnderscorePrefix({"one": 1})
         data.update({"two": 2})
