@@ -109,4 +109,4 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
-        return _save_cached_file_instance(self, dict(self.items()), sort_keys=False)
+        return _save_cached_file_instance(self, dict(self.items()))

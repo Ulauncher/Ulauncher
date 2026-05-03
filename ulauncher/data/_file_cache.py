@@ -24,7 +24,7 @@ def _load_cached_file_instance(cls: type[FileInstanceT], path: str | Path) -> tu
     return instance, data
 
 
-def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool = True) -> bool:
+def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool = False) -> bool:
     file_path = _instance_paths.get(id(instance))
     if file_path is None:
         logger.error("Could not resolve file path for instance %s", instance.__class__.__name__)
