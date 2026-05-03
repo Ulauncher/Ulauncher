@@ -7,6 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.ui.item_navigation import ItemNavigation
+from ulauncher.ui.query_history import QueryHistory
 from ulauncher.ui.result_widget import ResultWidget
 
 
@@ -21,11 +22,9 @@ class TestItemNavigation:
 
     @pytest.fixture(autouse=True)
     def query_history(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.ui.item_navigation.get_query_history", return_value={})
-
-    @pytest.fixture(autouse=True)
-    def json_save(self, mocker: MockerFixture) -> Any:
-        return mocker.patch("ulauncher.ui.item_navigation.json_save")
+        mock = MagicMock(spec=QueryHistory)
+        mock.get.return_value = None
+        return mocker.patch("ulauncher.ui.item_navigation.QueryHistory.load", return_value=mock)
 
     def test_select_is_called(self, nav: ItemNavigation, items: list[MagicMock]) -> None:
         nav.select(1)

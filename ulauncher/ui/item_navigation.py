@@ -2,20 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ulauncher import paths
-from ulauncher.utils.json_utils import json_load, json_save
-from ulauncher.utils.lru_cache import lru_cache
+from ulauncher.ui.query_history import QueryHistory
 
 if TYPE_CHECKING:
     from ulauncher.internals.result import Result
     from ulauncher.ui.result_widget import ResultWidget
-
-query_history_path = f"{paths.STATE}/query_history.json"
-
-
-@lru_cache(maxsize=1)
-def get_query_history() -> dict[str, str]:
-    return json_load(query_history_path)
 
 
 class ItemNavigation:
@@ -39,7 +30,7 @@ class ItemNavigation:
         """
         Get the index of the result that should be selected (0 by default)
         """
-        previous_pick = get_query_history().get(query)
+        previous_pick = QueryHistory.load().get(query)
 
         for index, widget in enumerate(self.result_widgets):
             if widget.result.searchable and widget.result.name == previous_pick:
@@ -74,6 +65,6 @@ class ItemNavigation:
     def remember_result_for_query(self, query: str, result: Result) -> None:
         """Mark as activated in query history"""
         if query and result.searchable:
-            query_history = get_query_history()
+            query_history = QueryHistory.load()
             query_history[query] = result.name
-            json_save(query_history, query_history_path)
+            query_history.save()
