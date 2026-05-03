@@ -8,7 +8,7 @@ Located in `ulauncher/modes/mode.py`. Key methods:
 
 - **`matches_query_str(query)`** - Return True if this mode should handle the query
 - **`handle_query(query, callback)`** - Process query and call callback with results
-- **`activate_result(result)`** - Handle user selecting a result (perform action or return new results)
+- **`activate_result(action_id, result, query, callback)`** - Handle user selecting a result; `action_id` is empty string for the default action, `callback` receives an action or new results list
 - **`get_triggers()`** - Return trigger keywords/shortcuts for this mode
 - **`get_fallback_results()`** - Provide results when no specific matches found
 
