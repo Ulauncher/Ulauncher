@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any
 
 from ulauncher import api_version
@@ -162,7 +161,7 @@ class ExtensionManifest(JsonConf):
                 raise ext_exceptions.CompatibilityError(msg)
 
     @classmethod
-    def load(cls, path: str | Path) -> ExtensionManifest:
-        if not str(path).endswith("/manifest.json"):
-            path = Path(path, "manifest.json")
+    def load(cls, path: str) -> ExtensionManifest:
+        if not path.endswith("/manifest.json"):
+            path = f"{path}/manifest.json"
         return super().load(path)

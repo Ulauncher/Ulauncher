@@ -11,7 +11,7 @@ from ulauncher.utils.json_utils import json_load, json_save
 
 class TestJsonKeyValueConf:
     def test_save(self, tmp_path: Path) -> None:
-        json_file = tmp_path / "jsonkvconf.json"
+        json_file = str(tmp_path / "jsonkvconf.json")
 
         class Store(JsonKeyValueConf[str, str]):
             pass
@@ -33,7 +33,7 @@ class TestJsonKeyValueConf:
         class Store(JsonKeyValueConf[str, str]):
             pass
 
-        store = Store.load(json_file)
+        store = Store.load(str(json_file))
         store["z"] = "last"
         store["a"] = "first"
         store.save()
@@ -41,7 +41,7 @@ class TestJsonKeyValueConf:
         assert json_file.read_text() == '{\n  "z": "last",\n  "a": "first"\n}'
 
     def test_value_coercion(self, tmp_path: Path) -> None:
-        json_file = tmp_path / "jsonkvconf.json"
+        json_file = str(tmp_path / "jsonkvconf.json")
 
         class Record(JsonConf):
             value = ""
@@ -101,7 +101,7 @@ class TestJsonKeyValueConf:
         assert store["b"] == Path("/tmp/b")
 
     def test_file_cache(self, tmp_path: Path) -> None:
-        json_file = tmp_path / "jsonkvconf.json"
+        json_file = str(tmp_path / "jsonkvconf.json")
 
         class C1(JsonKeyValueConf[str, str]):
             pass
@@ -118,7 +118,7 @@ class TestJsonKeyValueConf:
         assert "unique_cache_key" in c2b
 
     def test_load_always_reads_file(self, tmp_path: Path) -> None:
-        json_file = tmp_path / "jsonkvconf.json"
+        json_file = str(tmp_path / "jsonkvconf.json")
 
         class Store(JsonKeyValueConf[str, int]):
             pass
@@ -217,7 +217,7 @@ class TestJsonKeyValueConf:
         assert isinstance(sub["key"], Path)
 
     def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
-        json_file = tmp_path / "jsonkvconf.json"
+        json_file = str(tmp_path / "jsonkvconf.json")
 
         class Store(JsonKeyValueConf[str, int]):
             pass

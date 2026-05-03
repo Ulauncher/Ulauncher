@@ -30,7 +30,7 @@ class TestJsonConf:
 
     def test_new_file_file_cache(self, tmp_path: Path) -> None:
         """Test that JsonConf.load returns the same cached instance for the same path"""
-        file_path = tmp_path / "jsonconf_test_cache.json"
+        file_path = str(tmp_path / "jsonconf_test_cache.json")
 
         jc1 = JsonConf.load(file_path)
         jc2 = JsonConf.load(file_path)
@@ -46,7 +46,7 @@ class TestJsonConf:
 
     def test_save(self, tmp_path: Path) -> None:
         """Test that save() writes the correct data using json_save"""
-        json_file = tmp_path / "jsonconf.json"
+        json_file = str(tmp_path / "jsonconf.json")
 
         jc = JsonConf.load(json_file)
         jc.asdf = "xyz"
@@ -65,7 +65,7 @@ class TestJsonConf:
 
     def test_save_external(self, tmp_path: Path) -> None:
         """Test saving to external paths"""
-        json_file = tmp_path / "jsonconf.json"
+        json_file = str(tmp_path / "jsonconf.json")
         file_path = tmp_path / "jsonconf_save_as.json"
 
         jc_static = JsonConf(abc=123)
@@ -105,7 +105,7 @@ class TestJsonConf:
         assert json_stringify(SubclassWDefault(), sort_keys=True) == '{"a": 2, "b": 1, "c": 3}'
 
         # Test file operations with real files
-        json_ko_file = tmp_path / "jsonconf-key-order.json"
+        json_ko_file = str(tmp_path / "jsonconf-key-order.json")
         inst = ClassWDefault.load(json_ko_file)
         inst.save()
         assert list(json_load(json_ko_file).keys()) == ["a", "b"]
@@ -132,7 +132,7 @@ class TestJsonConf:
 
     def test_file_cache(self, tmp_path: Path) -> None:
         """Test that different JsonConf subclasses maintain separate file caches"""
-        json_file = tmp_path / "jsonconf.json"
+        json_file = str(tmp_path / "jsonconf.json")
 
         class C1(JsonConf):
             pass
@@ -150,7 +150,7 @@ class TestJsonConf:
 
     def test_load_always_reads_file(self, tmp_path: Path) -> None:
         """Test that load() always reads from file and updates cached instance"""
-        json_file = tmp_path / "jsonconf.json"
+        json_file = str(tmp_path / "jsonconf.json")
 
         class C1(JsonConf):
             pass
@@ -174,7 +174,7 @@ class TestJsonConf:
 
     def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
         """Test that reloading removes keys absent from the file, while preserving class defaults"""
-        json_file = tmp_path / "jsonconf.json"
+        json_file = str(tmp_path / "jsonconf.json")
 
         class C1(JsonConf):
             default_key = "default"

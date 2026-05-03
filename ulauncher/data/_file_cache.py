@@ -20,7 +20,7 @@ def _get_or_create_instance(cls: type[FileInstanceT], file_path: Path) -> FileIn
     return cast("FileInstanceT", instance)
 
 
-def _load_cached_file_instance(cls: type[_MappingT], path: str | Path) -> _MappingT:
+def _load_cached_file_instance(cls: type[_MappingT], path: str) -> _MappingT:
     file_path = Path(path).resolve()
     data = json_load(file_path)
     instance = _get_or_create_instance(cls, file_path)

@@ -86,8 +86,9 @@ class ExtensionController:
         self.path = path
         self.manifest = ExtensionManifest.load(path)
         self.is_manageable = extension_finder.is_manageable(path)
-        self._state_path = Path(f"{paths.EXTENSIONS_STATE}/{self.id}.json")
-        self.state = ExtensionState.load(self._state_path)
+        _state_path = f"{paths.EXTENSIONS_STATE}/{self.id}.json"
+        self._state_path = Path(_state_path)
+        self.state = ExtensionState.load(_state_path)
 
         if not self.state.id:
             self.state.id = self.id

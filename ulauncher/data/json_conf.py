@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, TypeVar
 
 from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
@@ -22,7 +21,7 @@ class JsonConf(BaseDataClass):
     """
 
     @classmethod
-    def load(cls: type[T], path: str | Path) -> T:
+    def load(cls: type[T], path: str) -> T:
         return _load_cached_file_instance(cls, path)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:

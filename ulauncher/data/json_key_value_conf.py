@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 # MutableMapping from typing (not collections.abc) supports subscript syntax on Python 3.8 for class bases.
 from typing import Any, Callable, Generic, Iterator, MutableMapping, TypeVar, cast, get_args, get_origin
 
@@ -96,7 +94,7 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
         return repr(self._data)
 
     @classmethod
-    def load(cls: type[KVC], path: str | Path) -> KVC:
+    def load(cls: type[KVC], path: str) -> KVC:
         return _load_cached_file_instance(cls, path)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:

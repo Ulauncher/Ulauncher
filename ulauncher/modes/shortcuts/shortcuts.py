@@ -62,9 +62,9 @@ class Shortcut(BaseDataClass):
 class Shortcuts(JsonKeyValueConf[str, Shortcut]):
     @classmethod
     def load(cls) -> Shortcuts:  # type: ignore[override]
-        file_path = Path(f"{paths.CONFIG}/shortcuts.json")
+        file_path = f"{paths.CONFIG}/shortcuts.json"
         instance = super().load(file_path)
-        if not file_path.exists():
+        if not Path(file_path).exists():
             added = int(time())
             keywords = [Shortcut(**kw, added=added) for kw in INITIAL_SHORTCUTS]
             instance.save({keyword.id: keyword for keyword in keywords})
