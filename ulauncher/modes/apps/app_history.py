@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from ulauncher import paths
 from ulauncher.data import JsonKeyValueConf
-from ulauncher.utils.lru_cache import lru_cache
 
 _APP_HISTORY_PATH = f"{paths.STATE}/app_starts.json"
 
 
-class _AppHistory(JsonKeyValueConf[str, int]):
+class AppHistory(JsonKeyValueConf[str, int]):
     _ranking_cache: list[str] | None = None
 
     def get_app_ranking(self) -> list[str]:
@@ -24,7 +23,6 @@ class _AppHistory(JsonKeyValueConf[str, int]):
         self.clear_ranking_cache()
         self.save()
 
-
-@lru_cache(maxsize=1)
-def get_app_history() -> _AppHistory:
-    return _AppHistory.load(_APP_HISTORY_PATH)
+    @classmethod
+    def load(cls) -> AppHistory:  # type: ignore[override]
+        return super().load(_APP_HISTORY_PATH)

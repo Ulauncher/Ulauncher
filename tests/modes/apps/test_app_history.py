@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ulauncher.modes.apps.app_history import _AppHistory
+from ulauncher.modes.apps.app_history import AppHistory as _AppHistory
 
 
 class AppHistory(_AppHistory):
