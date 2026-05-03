@@ -4,24 +4,19 @@ import logging
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_utils import json_save
+from ulauncher.utils.lru_cache import lru_cache
 
 logger = logging.getLogger()
 FileInstanceT = TypeVar("FileInstanceT")
-_file_instances: dict[tuple[Path, type[object]], object] = {}
 _instance_paths: dict[int, Path] = {}
 
 
-def _load_cached_file_instance(cls: type[FileInstanceT], path: str | Path) -> tuple[FileInstanceT, Any]:
-    file_path = Path(path).resolve()
-    key = (file_path, cls)
-    data = json_load(file_path)
-    instance = cast("FileInstanceT", _file_instances.get(key))
-    if instance is None:
-        instance = cls()
-        _file_instances[key] = instance
-        _instance_paths[id(instance)] = file_path
-    return instance, data
+@lru_cache(maxsize=None)
+def _get_or_create_instance(cls: type[FileInstanceT], file_path: Path) -> FileInstanceT:
+    instance = cls()
+    _instance_paths[id(instance)] = file_path
+    return cast("FileInstanceT", instance)
 
 
 def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool = False) -> bool:
