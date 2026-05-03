@@ -198,6 +198,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.set_opacity(1)
 
     def deferred_init(self) -> None:
+        self.settings.reload()
         if self.query_str:
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
