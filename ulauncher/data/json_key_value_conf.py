@@ -6,7 +6,8 @@ from pathlib import Path
 # MutableMapping from typing (not collections.abc) supports subscript syntax on Python 3.8 for class bases.
 from typing import Any, Callable, Generic, Iterator, MutableMapping, TypeVar, cast, get_args, get_origin
 
-from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
+from ulauncher.data._file_cache import _get_or_create_instance, _save_cached_file_instance
+from ulauncher.utils.json_utils import json_load
 
 logger = logging.getLogger()
 V = TypeVar("V")
@@ -99,7 +100,9 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
 
     @classmethod
     def load(cls: type[KVC], path: str | Path) -> KVC:
-        instance, data = _load_cached_file_instance(cls, path)
+        file_path = Path(path).resolve()
+        data = json_load(file_path)
+        instance = _get_or_create_instance(cls, file_path)
         if isinstance(data, dict):
             instance.clear()
             instance.update(data)

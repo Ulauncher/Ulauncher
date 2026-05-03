@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, TypeVar
 
-from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
+from ulauncher.data._file_cache import _get_or_create_instance, _save_cached_file_instance
 from ulauncher.data.base_data_class import BaseDataClass
+from ulauncher.utils.json_utils import json_load
 
 T = TypeVar("T", bound="JsonConf")
 
@@ -23,7 +24,9 @@ class JsonConf(BaseDataClass):
 
     @classmethod
     def load(cls: type[T], path: str | Path) -> T:
-        instance, data = _load_cached_file_instance(cls, path)
+        file_path = Path(path).resolve()
+        data = json_load(file_path)
+        instance = _get_or_create_instance(cls, file_path)
         instance.update(data)
         return instance
 
