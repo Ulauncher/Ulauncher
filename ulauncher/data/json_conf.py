@@ -27,6 +27,7 @@ class JsonConf(BaseDataClass):
         file_path = Path(path).resolve()
         data = json_load(file_path)
         instance = _get_or_create_instance(cls, file_path)
+        instance.clear()
         instance.update(data)
         return instance
 

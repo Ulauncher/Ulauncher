@@ -29,15 +29,12 @@ class TestJsonConf:
         assert JsonConf(a=1, b=2) != JsonConf({"a": 1})
 
     def test_new_file_file_cache(self, tmp_path: Path) -> None:
-        """Test that JsonConf.load uses file cache for the same path"""
+        """Test that JsonConf.load returns the same cached instance for the same path"""
         file_path = tmp_path / "jsonconf_test_cache.json"
 
         jc1 = JsonConf.load(file_path)
-        assert not hasattr(jc1, "a")
-        jc1.a = 1
         jc2 = JsonConf.load(file_path)
-        assert id(jc2) == id(jc1)  # tests that it's actually the same object in memory
-        assert jc2.a == 1
+        assert id(jc2) == id(jc1)
 
     def test_stringify(self) -> None:
         assert json_stringify(JsonConf(a=1, c=3, b=2)) == '{"a": 1, "c": 3, "b": 2}'
@@ -173,4 +170,24 @@ class TestJsonConf:
         assert c1_again.a == 2
         # Since it's the same cached instance, the original reference should also be updated
         assert c1.a == 2
+        assert id(c1) == id(c1_again)
+
+    def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
+        """Test that reloading removes keys absent from the file, while preserving class defaults"""
+        json_file = tmp_path / "jsonconf.json"
+
+        class C1(JsonConf):
+            default_key = "default"
+
+        json_save({"a": 1, "b": 2}, json_file)
+        c1 = C1.load(json_file)
+        assert c1.a == 1
+        assert c1.b == 2
+        assert c1.default_key == "default"
+
+        json_save({"a": 3}, json_file)
+        c1_again = C1.load(json_file)
+        assert c1_again.a == 3
+        assert "b" not in c1_again
+        assert c1_again.default_key == "default"
         assert id(c1) == id(c1_again)
