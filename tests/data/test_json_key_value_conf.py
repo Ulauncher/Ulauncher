@@ -117,23 +117,34 @@ class TestJsonKeyValueConf:
         assert "unique_cache_key" in c2a
         assert "unique_cache_key" in c2b
 
-    def test_load_always_reads_file(self, tmp_path: Path) -> None:
+    def test_load_is_lazy(self, tmp_path: Path) -> None:
         json_file = str(tmp_path / "jsonkvconf.json")
 
         class Store(JsonKeyValueConf[str, int]):
             pass
 
         json_save({"a": 1}, json_file)
-
         store = Store.load(json_file)
         assert store["a"] == 1
 
         json_save({"a": 2}, json_file)
-
         store_again = Store.load(json_file)
-        assert store_again["a"] == 2
-        assert store["a"] == 2
+        assert store_again["a"] == 1  # not re-read
         assert id(store) == id(store_again)
+
+    def test_load_force_reads_file(self, tmp_path: Path) -> None:
+        json_file = str(tmp_path / "jsonkvconf.json")
+
+        class Store(JsonKeyValueConf[str, int]):
+            pass
+
+        json_save({"a": 1}, json_file)
+        store = Store.load(json_file)
+        assert store["a"] == 1
+
+        json_save({"a": 2}, json_file)
+        Store.load(json_file, force=True)
+        assert store["a"] == 2
 
     def test_raises_on_invalid_type_arguments(self) -> None:
         with pytest.raises(TypeError, match="key type must be str"):
@@ -216,20 +227,16 @@ class TestJsonKeyValueConf:
         sub["key"] = "/tmp/test"  # type: ignore[assignment]
         assert isinstance(sub["key"], Path)
 
-    def test_load_removes_deleted_keys(self, tmp_path: Path) -> None:
+    def test_load_force_removes_deleted_keys(self, tmp_path: Path) -> None:
         json_file = str(tmp_path / "jsonkvconf.json")
 
         class Store(JsonKeyValueConf[str, int]):
             pass
 
         json_save({"a": 1, "b": 2}, json_file)
-
         store = Store.load(json_file)
         assert dict(store.items()) == {"a": 1, "b": 2}
 
         json_save({"a": 3}, json_file)
-
-        store_again = Store.load(json_file)
-        assert dict(store_again.items()) == {"a": 3}
+        Store.load(json_file, force=True)
         assert dict(store.items()) == {"a": 3}
-        assert id(store) == id(store_again)

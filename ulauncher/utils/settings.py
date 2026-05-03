@@ -40,5 +40,5 @@ class Settings(JsonConf):
         return list(dict.fromkeys(list(self.jump_keys)))
 
     @classmethod
-    def load(cls) -> Settings:  # type: ignore[override]
-        return super().load(_settings_file)
+    def load(cls, *, force: bool = False) -> Settings:  # type: ignore[override]
+        return super().load(_settings_file, force=force)

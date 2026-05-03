@@ -21,8 +21,8 @@ class JsonConf(BaseDataClass):
     """
 
     @classmethod
-    def load(cls: type[T], path: str) -> T:
-        return _load_cached_file_instance(cls, path)
+    def load(cls: type[T], path: str, *, force: bool = False) -> T:
+        return _load_cached_file_instance(cls, path, force=force)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
