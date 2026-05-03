@@ -16,7 +16,7 @@ Use [`JsonKeyValueConf`](json_key_value_conf.md) instead when the file represent
 ## Example
 
 ```python
-from ulauncher.utils.json_conf import JsonConf
+from ulauncher.data import JsonConf
 
 class MyConfig(JsonConf):
     setting1 = "default"

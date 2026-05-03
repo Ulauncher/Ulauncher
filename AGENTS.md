@@ -23,11 +23,11 @@ Use these patterns when applicable:
 
 **EventBus** (`ulauncher.utils.eventbus.EventBus`) - Use for cross-module communication when modules can't directly reference each other (e.g., core notifying UI, registry notifying modes). See [docs/architecture/eventbus.md](docs/architecture/eventbus.md) for usage.
 
-**BaseDataClass** (`ulauncher.utils.base_data_class.BaseDataClass`) - Use instead of dataclasses or plain dicts for structured data. See [docs/architecture/base_data_class.md](docs/architecture/base_data_class.md) for examples.
+**BaseDataClass** (`ulauncher.data.BaseDataClass`) - Use instead of dataclasses or plain dicts for structured data. See [docs/architecture/base_data_class.md](docs/architecture/base_data_class.md) for examples.
 
-**JsonConf** (`ulauncher.utils.json_conf.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/json_conf.md](docs/architecture/json_conf.md) for examples.
+**JsonConf** (`ulauncher.data.JsonConf`) - Use for config files that need auto-deduplication and safe concurrent access. See [docs/architecture/json_conf.md](docs/architecture/json_conf.md) for examples.
 
-**JsonKeyValueConf** (`ulauncher.utils.json_conf.JsonKeyValueConf`) - Use for JSON files that are flat key/value dicts with uniformly-typed values. See [docs/architecture/json_key_value_conf.md](docs/architecture/json_key_value_conf.md) for examples.
+**JsonKeyValueConf** (`ulauncher.data.JsonKeyValueConf`) - Use for JSON files that are flat key/value dicts with uniformly-typed values. See [docs/architecture/json_key_value_conf.md](docs/architecture/json_key_value_conf.md) for examples.
 
 **Modes** - Examine `Mode` and existing modes in `ulauncher/modes/` when adding new query handlers. See [docs/architecture/mode-system.md](docs/architecture/mode-system.md) for the interface.
 
@@ -38,6 +38,7 @@ Use these patterns when applicable:
 ```
 ulauncher/
 ├── api/          # Extension API (separate process)
+├── data/         # Core data classes (BaseDataClass, JsonConf, JsonKeyValueConf)
 ├── modes/        # Query handlers (apps, files, extensions, etc.)
 ├── ui/           # GTK components
 └── utils/        # Shared utilities

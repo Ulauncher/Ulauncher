@@ -1,6 +1,6 @@
 # JsonKeyValueConf
 
-File-backed mapping config for JSON objects with arbitrary string keys and uniformly-typed values. Lives in `ulauncher/utils/json_conf.py` alongside `JsonConf`, sharing the same file-instance cache.
+File-backed mapping config for JSON objects with arbitrary string keys and uniformly-typed values. Lives in `ulauncher/data/json_key_value_conf.py` alongside `JsonConf` in `ulauncher/data/json_conf.py`, sharing the same file-instance cache.
 
 ## When to Use
 
@@ -15,7 +15,7 @@ Use [`JsonConf`](json_conf.md) instead for files with a known set of named field
 ## Example
 
 ```python
-from ulauncher.utils.json_conf import JsonConf, JsonKeyValueConf
+from ulauncher.data import JsonConf, JsonKeyValueConf
 
 class Record(JsonConf):
     name = ""
