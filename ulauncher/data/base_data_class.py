@@ -3,17 +3,24 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from ulauncher.utils.lru_cache import lru_cache
+
+
+@lru_cache(maxsize=None)
+def _class_defaults(cls: type) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for base_cls in reversed(cls.__mro__):
+        if base_cls in BaseDataClass.__mro__:
+            continue
+        result.update(
+            {k: v for k, v in vars(base_cls).items() if not k.startswith("__") and not callable(getattr(base_cls, k))}
+        )
+    return result
+
 
 def _apply_class_defaults(instance: BaseDataClass) -> None:
-    for cls in reversed(instance.__class__.__mro__):
-        if cls in BaseDataClass.__mro__:
-            continue
-        defaults = {
-            k: deepcopy(v)  # deep copy to handle https://stackoverflow.com/q/1132941/633921
-            for k, v in vars(cls).items()
-            if (not k.startswith("__") and not callable(getattr(cls, k)))
-        }
-        instance.update(defaults)
+    # deep copy to handle https://stackoverflow.com/q/1132941/633921
+    instance.update(deepcopy(_class_defaults(type(instance))))
 
 
 class BaseDataClass(dict):  # type: ignore [type-arg]
