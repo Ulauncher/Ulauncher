@@ -39,7 +39,7 @@ def json_load(path: str | Path) -> Any:
 
 
 def json_stringify(
-    data: Any, indent: int | str | None = None, sort_keys: bool = True, value_blacklist: list[Any] | None = None
+    data: Any, indent: int | str | None = None, sort_keys: bool = False, value_blacklist: list[Any] | None = None
 ) -> str:
     # When serializing to JSON, filter out common empty default values like None, empty list or dict
     # These are default values when initializing the objects, but they are not actual data
@@ -53,7 +53,7 @@ def json_save(
     data: Any,
     path: str | Path,
     indent: int | str | None = 2,
-    sort_keys: bool = True,
+    sort_keys: bool = False,
     value_blacklist: list[Any] | None = None,
 ) -> bool:
     """Save self to file path"""

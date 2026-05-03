@@ -29,4 +29,4 @@ class JsonConf(BaseDataClass):
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
-        return _save_cached_file_instance(self, self)
+        return _save_cached_file_instance(self, self, sort_keys=True)
