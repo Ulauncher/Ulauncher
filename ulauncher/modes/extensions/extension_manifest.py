@@ -161,7 +161,7 @@ class ExtensionManifest(JsonConf):
                 raise ext_exceptions.CompatibilityError(msg)
 
     @classmethod
-    def load(cls, path: str) -> ExtensionManifest:
+    def load(cls, path: str, *, force: bool = False) -> ExtensionManifest:
         if not path.endswith("/manifest.json"):
             path = f"{path}/manifest.json"
-        return super().load(path)
+        return super().load(path, force=force)

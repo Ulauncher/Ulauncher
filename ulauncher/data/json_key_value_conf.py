@@ -94,8 +94,8 @@ class JsonKeyValueConf(MutableMapping[str, V], Generic[K, V]):
         return repr(self._data)
 
     @classmethod
-    def load(cls: type[KVC], path: str) -> KVC:
-        return _load_cached_file_instance(cls, path)
+    def load(cls: type[KVC], path: str, *, force: bool = False) -> KVC:
+        return _load_cached_file_instance(cls, path, force=force)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:
         self.update(*args, **kwargs)
