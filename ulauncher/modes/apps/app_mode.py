@@ -23,8 +23,6 @@ class AppMode(Mode):
         callback([])
 
     def get_triggers(self) -> Iterator[AppResult]:
-        app_history = AppHistory.load()
-        app_history.clear_ranking_cache()
         settings = Settings.load()
 
         if not settings.enable_application_mode:
