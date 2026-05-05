@@ -9,6 +9,7 @@ from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     ExtensionPreference,
 )
+from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.preferences import views
 from ulauncher.ui.preferences.utils import ext_utils
 from ulauncher.ui.preferences.utils.ext_handlers import ExtensionHandlers
@@ -21,7 +22,6 @@ from ulauncher.ui.preferences.views import (
     styled,
 )
 from ulauncher.utils.launch_detached import open_detached
-from ulauncher.utils.load_icon_surface import load_icon_surface
 
 logger = logging.getLogger()
 REFRESH_INTERVAL = 250

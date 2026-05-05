@@ -4,13 +4,13 @@ from typing import Any
 
 from ulauncher import paths
 from ulauncher.gi import Gdk, Gtk
+from ulauncher.ui.helpers.system_theme import SystemThemeWatcher
 from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.ui.preferences.views.about import AboutView
 from ulauncher.ui.preferences.views.extensions import ExtensionsView
 from ulauncher.ui.preferences.views.help import HelpView
 from ulauncher.ui.preferences.views.preferences import PreferencesView
 from ulauncher.ui.preferences.views.shortcuts import ShortcutsView
-from ulauncher.utils.system_theme import SystemThemeWatcher
 
 VIEW_CONFIG: list[tuple[str, type[BaseView]]] = [
     ("Preferences", PreferencesView),
