@@ -10,8 +10,8 @@ from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
 from ulauncher.gi import Gdk, Gio, Gtk
 from ulauncher.internals.result import Result
-from ulauncher.ui.windows.preferences.preferences_window import PreferencesWindow
-from ulauncher.ui.windows.ulauncher_window import UlauncherWindow
+from ulauncher.ui.preferences.preferences_window import PreferencesWindow
+from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import timer

@@ -1,4 +1,4 @@
-from ulauncher.ui.windows.preferences.utils.ext_utils import autofmt_pango_code_block
+from ulauncher.ui.preferences.utils.ext_utils import autofmt_pango_code_block
 
 
 class TestAutofmtPangoCodeBlock:

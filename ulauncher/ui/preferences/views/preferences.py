@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from ulauncher.gi import Gtk
-from ulauncher.ui.windows.preferences.views import BaseView, styled
+from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.hotkey_controller import HotkeyController
