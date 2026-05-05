@@ -13,7 +13,7 @@ import ulauncher.utils.xinit  # noqa: F401 - must import this before any GUI lib
 from ulauncher import api_version, paths, version
 from ulauncher.app import UlauncherApp
 from ulauncher.cli import get_cli_args
-from ulauncher.gi import GLib, Gtk
+from ulauncher.gi import GLib
 from ulauncher.ui import layer_shell
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
@@ -36,7 +36,8 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     cli_args = get_cli_args()
     in_cli_mode = hasattr(cli_args, "handler")
 
-    if (Gtk.get_major_version(), Gtk.get_minor_version()) < (3, 22):
+    gtk_version = UlauncherApp.get_gtk_version()
+    if gtk_version < (3, 22, 0):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
         sys.exit(2)
     if cli_args.hide_window:
@@ -90,7 +91,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
 
     logger.info("Ulauncher version %s", version)
     logger.info("Extension API version %s", api_version)
-    logger.info("GTK+ %s.%s.%s", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
+    logger.info("GTK+ %s.%s.%s", *gtk_version)
     logger.info("PyGObject+ %i.%i.%i", *gi.version_info)  # type: ignore[attr-defined]
 
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
