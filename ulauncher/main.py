@@ -7,14 +7,9 @@ import signal
 import sys
 from types import TracebackType
 
-import gi
-
 import ulauncher.utils.xinit  # noqa: F401 - must import this before any GUI libraries are initialized
 from ulauncher import api_version, paths, version
 from ulauncher.cli import get_cli_args
-from ulauncher.gi import GLib
-from ulauncher.ui.app import UlauncherApp
-from ulauncher.ui.helpers import layer_shell
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 from ulauncher.utils.migrate import v5_to_v6
@@ -36,10 +31,6 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     cli_args = get_cli_args()
     in_cli_mode = hasattr(cli_args, "handler")
 
-    gtk_version = UlauncherApp.get_gtk_version()
-    if gtk_version < (3, 22, 0):
-        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
-        sys.exit(2)
     if cli_args.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
         # it was implemented using XDG autostart. To prevent files created the old way
@@ -89,10 +80,11 @@ def main() -> None:  # noqa: PLR0912, PLR0915
         success = cli_args.handler(cli_args)
         sys.exit(0 if success else 1)
 
-    logger.info("Ulauncher version %s", version)
-    logger.info("Extension API version %s", api_version)
-    logger.info("GTK+ %s.%s.%s", *gtk_version)
-    logger.info("PyGObject+ %i.%i.%i", *gi.version_info)  # type: ignore[attr-defined]
+    # log uncaught exceptions
+    def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
+        logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))
+
+    sys.excepthook = except_hook
 
     logger.info("Desktop: %s (%s) on %s", DESKTOP_NAME, XDG_SESSION_TYPE, DISTRO)
     if "-" in version:
@@ -106,7 +98,26 @@ def main() -> None:  # noqa: PLR0912, PLR0915
             "\n\n"
         )
 
+    from ulauncher.gi import GLib, gi
+    from ulauncher.ui.app import UlauncherApp
+    from ulauncher.utils.v5_killer import kill_ulauncher_v5
+
+    gtk_version = UlauncherApp.get_gtk_version()
+    if gtk_version < (3, 22, 0):
+        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
+        sys.exit(2)
+    logger.info("Ulauncher version %s", version)
+    logger.info("Extension API version %s", api_version)
+    logger.info("GTK+ %s.%s.%s", *gtk_version)
+    logger.info("PyGObject+ %i.%i.%i", *gi.version_info)  # type: ignore[attr-defined]
+    if cli_args.no_extensions:
+        logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
+    if cli_args.no_window_shadow:
+        logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
+
     if XDG_SESSION_TYPE != "X11":
+        from ulauncher.ui.helpers import layer_shell
+
         layer_shell_supported = layer_shell.is_supported()
         logger.info("Layer shell: %s", ("Yes" if layer_shell_supported else "No"))
         if not layer_shell_supported and DESKTOP_ID == "PLASMA":
@@ -119,22 +130,10 @@ def main() -> None:  # noqa: PLR0912, PLR0915
                 "\n\n"
             )
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
-    if cli_args.no_extensions:
-        logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
-    if cli_args.no_window_shadow:
-        logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
-
-    # log uncaught exceptions
-    def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
-        logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))
-
-    sys.excepthook = except_hook
 
     # Ensure that Ulauncher v5 is not running
     # TODO: Remove this 4-6 months after v6 release
     # Import here because of the dependency on the logger setup
-    from ulauncher.utils.v5_killer import kill_ulauncher_v5
-
     kill_ulauncher_v5()
 
     # Migrate user data to v6 compatible
