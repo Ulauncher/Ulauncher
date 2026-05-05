@@ -58,6 +58,7 @@ __all__ = [
     "GioUnix",
     "Gtk",
     "Pango",
+    "gi",
 ]
 
 # ─── GioUnix compatibility namespace ──────────────────────────────────────────
