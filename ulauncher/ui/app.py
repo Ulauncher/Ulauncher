@@ -27,7 +27,7 @@ class UlauncherApp(Gtk.Application):
     query = ""
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
-    _tray_icon: ulauncher.ui.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
+    _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
     @staticmethod
     def get_gtk_version() -> tuple[int, int, int]:
@@ -85,7 +85,7 @@ class UlauncherApp(Gtk.Application):
                 self.toggle_tray_icon(True)
 
         if first_run or settings.hotkey_show_app:
-            from ulauncher.utils.hotkey_controller import HotkeyController
+            from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 
             if HotkeyController.is_supported():
                 hotkey = "<Primary>space"
@@ -196,7 +196,7 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def toggle_tray_icon(self, enable: bool) -> None:
         if not self._tray_icon:
-            from ulauncher.ui.tray_icon import TrayIcon
+            from ulauncher.ui.helpers.tray_icon import TrayIcon
 
             self._tray_icon = TrayIcon()
         self._tray_icon.switch(enable)
