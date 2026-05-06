@@ -6,7 +6,7 @@ from shutil import which
 
 from ulauncher import app_id
 from ulauncher.gi import Gio, GLib
-from ulauncher.ui.windows.hotkey_dialog import HotkeyDialog
+from ulauncher.ui.hotkey_dialog import HotkeyDialog
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.systemd_controller import SystemdController

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Callable, Sequence
 
 from ulauncher.gi import Gtk, Pango
-from ulauncher.ui.windows.preferences.views import SIDEBAR_WIDTH, DataListBoxRow, styled
+from ulauncher.ui.preferences.views import SIDEBAR_WIDTH, DataListBoxRow, styled
 
 
 @dataclass
