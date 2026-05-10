@@ -5,6 +5,7 @@ import logging
 from typing import Any, Iterable, Literal, cast
 from weakref import WeakValueDictionary
 
+import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
@@ -34,6 +35,10 @@ class UlauncherApp(Gtk.Application):
     @staticmethod
     def get_gtk_version() -> tuple[int, int, int]:
         return (Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version())
+
+    @staticmethod
+    def get_pygobject_version() -> tuple[int, int, int]:
+        return gi.version_info  # type: ignore[attr-defined]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=app_id, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
