@@ -81,7 +81,7 @@ class ExtensionsView(BaseView):
                 extension_cache[ext.id] = (
                     ext.manifest.name,
                     ext_utils.get_status_str(ext),
-                    ext.get_normalized_icon_path(),
+                    ext.get_icon_value(),
                 )
 
         if extension_cache == self.extension_cache:
@@ -202,7 +202,7 @@ class ExtensionsView(BaseView):
         left_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
 
         # Large icon
-        icon_path = ext.get_normalized_icon_path()
+        icon_path = ext.get_icon_value()
         icon_surface = load_icon_surface(icon_path or "", views.ICON_SIZE_L, self.get_scale_factor())
         icon_image = Gtk.Image.new_from_surface(icon_surface)
         left_box.pack_start(icon_image, False, False, 0)

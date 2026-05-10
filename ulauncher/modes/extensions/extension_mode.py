@@ -108,7 +108,7 @@ class ExtensionMode(Mode):
             for trigger_id, trigger in ext.triggers.items():
                 name = html.escape(trigger.name)
                 description = html.escape(trigger.description)
-                icon = ext.get_normalized_icon_path(trigger.icon)
+                icon = ext.get_icon_value(trigger.icon)
 
                 if trigger.keyword:
                     self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
@@ -120,7 +120,7 @@ class ExtensionMode(Mode):
 
     def get_placeholder_icon(self) -> str | None:
         if self.active_ext:
-            return self.active_ext.get_normalized_icon_path()
+            return self.active_ext.get_icon_value()
         return None
 
     def activate_result(
@@ -294,7 +294,7 @@ class ExtensionMode(Mode):
             effect_msg = []
             for result_dict in raw_effect_msg:
                 result = Result(**result_dict)
-                result.icon = self.active_ext.get_normalized_icon_path(result_dict.get("icon")) or ""
+                result.icon = self.active_ext.get_icon_value(result_dict.get("icon"))
 
                 # Convert legacy actions to the new actions dictionary format
                 if not result.actions:
