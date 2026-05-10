@@ -2,7 +2,7 @@
 Module for detecting the display protocol.
 
 These constants are in a standalone module to minimize the dependencies so that
-ulauncher.utils.xinit can safely use it.
+ulauncher.init_helpers.init_x11_threads can safely use it.
 """
 
 from __future__ import annotations
