@@ -7,6 +7,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from datetime import datetime
+from os.path import isfile, join
 from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Callable
@@ -165,13 +166,12 @@ class ExtensionController:
         user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
 
-    def get_normalized_icon_path(self, icon: str | None = None) -> str | None:
-        # get_icon_path uses Gtk, but this function is only used in the UI layer
-        # so lazy loading avoid loading it in the extension or cli runtime
-        # TODO: move functionality to UI layer (having it here is still a perf footgun)
-        from ulauncher.ui.get_icon_path import get_icon_path  # noqa: TID251
-
-        return get_icon_path(icon or self.manifest.icon, base_path=self.path)
+    def get_icon_value(self, icon: str | None = None) -> str:
+        icon_value = icon or self.manifest.icon
+        expanded_path = join(self.path, icon_value)
+        if isfile(expanded_path):
+            return expanded_path
+        return icon_value
 
     async def remove(self) -> None:
         if not self.is_manageable:
