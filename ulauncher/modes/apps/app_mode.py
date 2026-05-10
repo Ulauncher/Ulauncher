@@ -8,7 +8,7 @@ from ulauncher.gi import GioUnix
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.apps.app_history import AppHistory
+from ulauncher.modes.apps.app_rankings import AppRankings
 from ulauncher.modes.apps.app_result import AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.mode import Mode
@@ -46,10 +46,8 @@ class AppMode(Mode):
             yield AppResult(app)
 
     def get_home_results(self, limit: int) -> list[AppResult]:
-        """Get the top {N} apps (based on number of launches) to show when the query is empty"""
-        # TODO: filter out old apps
-        app_history = AppHistory.load()
-        return list(filter(None, map(AppResult.from_id, app_history.get_app_ranking())))[:limit]
+        """Get the top {N} apps (by recency-weighted score) to show when the query is empty"""
+        return list(filter(None, map(AppResult.from_id, AppRankings.load().get_app_ids())))[:limit]
 
     def activate_result(
         self,
@@ -63,8 +61,7 @@ class AppMode(Mode):
                 logger.error("Expected AppResult but got %s", type(result).__name__)
                 callback(effects.do_nothing())
                 return
-            app_history = AppHistory.load()
-            app_history.bump(result.app_id)
+            AppRankings.load().bump(result.app_id)
             if not launch_app(result.app_id):
                 logger.error("Could not launch app %s", result.app_id)
             callback(effects.close_window())

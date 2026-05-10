@@ -55,6 +55,15 @@ def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
     return new_format
 
 
+def _normalize_app_rankings(old_data: dict[str, int]) -> dict[str, float]:
+    # Convert integer launch counts to the adaptive decay score scale.
+    # Dividing by (DECAY_RATE + 1) satisfies the invariant sum = (N + DECAY_RATE) / (DECAY_RATE + 1),
+    # so the implied total launch count is recovered correctly on first use.
+    from ulauncher.modes.apps import app_rankings
+
+    return {app_id: count / (app_rankings.DECAY_RATE + 1) for app_id, count in old_data.items() if count > 0}
+
+
 def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     from ulauncher.modes.extensions import extension_registry
 
@@ -108,6 +117,8 @@ def v5_to_v6() -> None:  # noqa: PLR0912
 
     # Convert app_stat.db to JSON and put in STATE_DIR
     _migrate_file(f"{paths.DATA}/app_stat_v2.db", f"{paths.STATE}/app_starts.json", _migrate_app_state)
+    # Normalize integer counts from app_starts.json into the float score scale used by the new ranking
+    _migrate_file(f"{paths.STATE}/app_starts.json", f"{paths.STATE}/app_rankings.json", _normalize_app_rankings)
 
     # Convert query_history.db to JSON and put in STATE_DIR
     # Needs a module hack for pickle because v5 stored these as the "ulauncher.search.Query" type
