@@ -2,34 +2,39 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import os
 import signal
 import sys
 from types import TracebackType
 
-import ulauncher.utils.xinit  # noqa: F401 - must import this before any GUI libraries are initialized
-from ulauncher import api_version, paths, version
+from ulauncher import api_version, init_helpers, version
 from ulauncher.cli import get_cli_args
-from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
-from ulauncher.utils.migrate import v5_to_v6
 
 
-def main() -> None:  # noqa: PLR0912, PLR0915
+def main() -> None:  # noqa: PLR0915
     """
     Main function that starts everything
     """
-    if not os.path.exists(paths.ASSETS):
-        raise OSError(paths.ASSETS)
-
-    os.makedirs(paths.CONFIG, exist_ok=True)
-    os.makedirs(paths.STATE, exist_ok=True)
-    os.makedirs(paths.USER_EXTENSIONS, exist_ok=True)
-    os.makedirs(paths.EXTENSIONS_CONFIG, exist_ok=True)
-    os.makedirs(paths.USER_THEMES, exist_ok=True)
-
-    cli_args = get_cli_args()
+    cli_args = get_cli_args()  # sys.exit() here for --help / --version
     in_cli_mode = hasattr(cli_args, "handler")
+
+    init_helpers.ensure_runtime_dirs()
+
+    if in_cli_mode:
+        init_helpers.configure_logging(verbose=cli_args.verbose, use_app_logging=False)
+        sys.exit(0 if cli_args.handler(cli_args) else 1)
+
+    init_helpers.init_x11_threads()
+
+    from ulauncher.gi import GLib
+    from ulauncher.ui.app import UlauncherApp  # noqa: TID251
+    from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
+    from ulauncher.utils.migrate import v5_to_v6
+    from ulauncher.utils.v5_killer import kill_ulauncher_v5
+
+    gtk_version = UlauncherApp.get_gtk_version()
+    if gtk_version < (3, 22, 0):
+        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
+        sys.exit(2)
 
     if cli_args.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
@@ -46,39 +51,10 @@ def main() -> None:  # noqa: PLR0912, PLR0915
         print("The --dev argument has been removed (use --verbose instead)")  # noqa: T201
         sys.exit(2)
 
-    # Set up global logging for stdout and file
-    file_handler = logging.FileHandler(paths.LOG_FILE, mode="w+")
-    stream_handler = logging.StreamHandler()
-    level = logging.WARNING
-    if cli_args.verbose:
-        level = logging.DEBUG
-    elif in_cli_mode:
-        level = logging.INFO
-    stream_handler.setLevel(level)
-    if not in_cli_mode:
-        stream_handler.setFormatter(ColoredFormatter())
-
-    logging.getLogger("asyncio").setLevel(logging.WARNING)  # disable asyncio debug messages
-    logging.root.handlers = []
-    # If the user is using CLI commands so output only a message
-    log_format = (
-        "%(message)s"
-        if in_cli_mode
-        else "%(asctime)s | %(levelname)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
-    )
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format=log_format,
-        handlers=[stream_handler] if in_cli_mode else [file_handler, stream_handler],
-    )
+    init_helpers.configure_logging(verbose=cli_args.verbose, use_app_logging=True)
 
     # Logger for actual use in this file
     logger = logging.getLogger()
-
-    # Run CLI handlers
-    if in_cli_mode:
-        success = cli_args.handler(cli_args)
-        sys.exit(0 if success else 1)
 
     # log uncaught exceptions
     def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
@@ -98,14 +74,6 @@ def main() -> None:  # noqa: PLR0912, PLR0915
             "\n\n"
         )
 
-    from ulauncher.gi import GLib
-    from ulauncher.ui.app import UlauncherApp  # noqa: TID251
-    from ulauncher.utils.v5_killer import kill_ulauncher_v5
-
-    gtk_version = UlauncherApp.get_gtk_version()
-    if gtk_version < (3, 22, 0):
-        print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
-        sys.exit(2)
     logger.info("Ulauncher version %s", version)
     logger.info("Extension API version %s", api_version)
     logger.info("GTK+ %s.%s.%s", *gtk_version)
