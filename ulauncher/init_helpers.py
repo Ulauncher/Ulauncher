@@ -8,7 +8,8 @@ from ulauncher import paths
 def ensure_runtime_dirs() -> None:
     """Validate installation assets and create any missing directories required by the runtime."""
     if not os.path.exists(paths.ASSETS):
-        raise OSError(paths.ASSETS)
+        path_err_msg = f"paths not found: {paths.ASSETS}"
+        raise OSError(path_err_msg)
 
     for path in (
         paths.CONFIG,
