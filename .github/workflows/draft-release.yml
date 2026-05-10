@@ -11,6 +11,12 @@ jobs:
     container: ulauncher/build-image:6.6
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Set up virtual environment
+        run: make venv
+      - name: Generate release notes
+        run: .venv/bin/git-cliff --current > RELEASE_NOTES.md
       - name: Check
         run: make check
       - name: Build release
@@ -27,6 +33,7 @@ jobs:
         with:
           draft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
+          body_path: RELEASE_NOTES.md
           files: |
             dist/*.tar.gz
             dist/*.deb

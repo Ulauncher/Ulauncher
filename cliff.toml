@@ -1,0 +1,35 @@
+[changelog]
+body = """
+{% if commits | length != 0 %}
+## What's Changed{% for group, commits in commits | filter(attribute="merge_commit", value=false) | group_by(attribute="group") %}
+
+### {{ group | striptags | trim }}
+{% for commit in commits %}* {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}
+{% endfor %}{% endfor %}
+{% else %}
+## What's Changed
+
+* No user-facing changes were captured for this release.
+{% endif %}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+filter_commits = true
+sort_commits = "oldest"
+tag_pattern = "v[0-9].*"
+link_parsers = [
+    { pattern = "#(\\d+)", href = "https://github.com/Ulauncher/Ulauncher/pull/$1" },
+]
+# Group names carry <!-- N --> prefixes so git-cliff sorts them correctly;
+# striptags in the template strips these before rendering.
+commit_parsers = [
+    { breaking = true, group = "<!-- -1 -->💥 Breaking Changes" },
+    { message = "^feat(\\(.+\\))?!?:", group = "<!-- 0 -->✨ New Features" },
+    { message = "^fix(\\(.+\\))?!?:", group = "<!-- 1 -->🐛 Bug Fixes" },
+    { message = "^perf(\\(.+\\))?!?:", group = "<!-- 2 -->⚡ Performance" },
+    { message = "^(build|chore|ci|docs|refactor|style|test)(\\(.+\\))?!?:", skip = true },
+    { message = "^revert(\\(.+\\))?!?:", skip = true },
+]
