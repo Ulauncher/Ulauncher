@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 
-from ulauncher.gi import Gdk, GdkX11, Gio
+from gi.repository import Gdk, GdkX11  # pyrefly: ignore[missing-module-attribute]
+
+from ulauncher.gi import Gio
 
 logger = logging.getLogger()
 

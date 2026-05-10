@@ -3,7 +3,8 @@ from __future__ import annotations
 import uuid
 from time import time
 
-from ulauncher.gi import Gtk, Pango
+from gi.repository import Gtk, Pango
+
 from ulauncher.modes.shortcuts.shortcuts import Shortcut, Shortcuts
 from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.preferences import views

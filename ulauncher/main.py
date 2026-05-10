@@ -99,7 +99,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
         )
 
     from ulauncher.gi import GLib, gi
-    from ulauncher.ui.app import UlauncherApp
+    from ulauncher.ui.app import UlauncherApp  # noqa: TID251
     from ulauncher.utils.v5_killer import kill_ulauncher_v5
 
     gtk_version = UlauncherApp.get_gtk_version()
@@ -116,7 +116,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
         logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
 
     if XDG_SESSION_TYPE != "X11":
-        from ulauncher.ui.helpers import layer_shell
+        from ulauncher.ui.helpers import layer_shell  # noqa: TID251
 
         layer_shell_supported = layer_shell.is_supported()
         logger.info("Layer shell: %s", ("Yes" if layer_shell_supported else "No"))

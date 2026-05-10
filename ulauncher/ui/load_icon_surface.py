@@ -17,7 +17,9 @@ DEFAULT_EXE_ICON = f"{paths.ASSETS}/icons/executable.png"
 
 @lru_cache(maxsize=50)
 def load_icon_surface(icon: str, size: int, scaling_factor: int = 1) -> ImageSurface:
-    from ulauncher.gi import Gdk, GdkPixbuf, GLib
+    from gi.repository import Gdk, GdkPixbuf
+
+    from ulauncher.gi import GLib
 
     real_size = size * scaling_factor
     try:

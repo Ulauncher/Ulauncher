@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any, Callable, Literal
 
 import gi
+from gi.repository import GObject, Gtk
 
 from ulauncher import paths
-from ulauncher.gi import GObject, Gtk
 from ulauncher.utils.environment import IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -26,7 +26,7 @@ default_icon_name = Settings.tray_icon_name  # intentionally using the class, no
 if IS_X11_COMPATIBLE:
     with contextlib.suppress(ImportError, ValueError):
         gi.require_version("XApp", "1.0")
-        from gi.repository import XApp  # noqa: TID251
+        from gi.repository import XApp
 
         # Older versions of XApp doesn't have StatusIcon
         if hasattr(XApp, "StatusIcon"):
@@ -35,14 +35,14 @@ if IS_X11_COMPATIBLE:
 if tray_icon_lib is None:
     try:
         gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3 as AyatanaIndicator  # noqa: TID251
+        from gi.repository import AppIndicator3 as AyatanaIndicator
 
         tray_icon_lib = "AyatanaIndicator"
 
     except (ImportError, ValueError):
         with contextlib.suppress(ImportError, ValueError):
             gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3 as AyatanaIndicator  # type: ignore[no-redef]  # noqa: TID251
+            from gi.repository import AyatanaAppIndicator3 as AyatanaIndicator  # type: ignore[no-redef]
 
             tray_icon_lib = "AyatanaIndicator"
 

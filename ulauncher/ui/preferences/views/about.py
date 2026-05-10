@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from gi.repository import Gtk
+
 from ulauncher import api_version, paths, version
-from ulauncher.gi import Gtk
 from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.utils.launch_detached import open_detached
