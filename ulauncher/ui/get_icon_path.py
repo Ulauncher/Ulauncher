@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 from os.path import expanduser, isfile, join
 
-from ulauncher.gi import GLib, Gtk
+from gi.repository import Gtk
+
+from ulauncher.gi import GLib
 
 icon_theme = Gtk.IconTheme.get_default()
 logger = logging.getLogger()

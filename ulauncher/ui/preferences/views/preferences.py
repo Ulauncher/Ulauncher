@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from ulauncher.gi import Gtk
+from gi.repository import Gtk
+
 from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 from ulauncher.ui.helpers.theme import get_themes
 from ulauncher.ui.preferences.views import BaseView, styled

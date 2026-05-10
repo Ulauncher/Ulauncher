@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from html import unescape
 
-from ulauncher.gi import Gdk, Gtk, Pango
+from gi.repository import Gdk, Gtk, Pango
+
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.ui.helpers.monitor import get_text_scaling_factor

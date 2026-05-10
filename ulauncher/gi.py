@@ -1,13 +1,12 @@
 """
-Centralized GI module imports for Ulauncher.
+GLib, Gio, and GioUnix imports for the non-UI Ulauncher runtime.
 
-This is the single canonical place to import all GI/GObject-Introspection modules.
-gi.require_versions() is called eagerly (it must run before any gi.repository access),
-but all actual module imports are deferred via module-level __getattr__ (PEP 562).
+All actual module imports are deferred via module-level __getattr__ (PEP 562).
 Each module is loaded once on first access, then cached in globals() for subsequent
 imports. Extensions only pay the cost of the modules they actually use.
 
-Do NOT use `from gi.repository import ...` elsewhere; use `from ulauncher.gi import ...`.
+GTK and display modules (Gtk, Gdk, GdkPixbuf, GdkX11, GObject, Pango) are only
+available in the UI layer - import them from gi.repository within ulauncher/ui/.
 """
 
 from __future__ import annotations
@@ -20,44 +19,19 @@ from typing import TYPE_CHECKING
 
 import gi  # absolute import — finds the real gi package, not this file
 
-gi.require_versions(
-    {
-        "Gtk": "3.0",
-        "Gdk": "3.0",
-        "GdkX11": "3.0",
-        "GdkPixbuf": "2.0",
-        "Pango": "1.0",
-    }
-)
-
 if TYPE_CHECKING:
     # Runtime imports are deferred via __getattr__; these declarations exist for type
     # checkers only and have zero runtime cost.
-    from gi.repository import (  # type: ignore[attr-defined]
-        Gdk,
-        GdkPixbuf,
-        GdkX11,  # pyrefly: ignore[missing-module-attribute]
-        Gio,
-        GLib,
-        GObject,
-        Gtk,
-        Pango,
-    )
+    from gi.repository import Gio, GLib  # type: ignore[attr-defined]
 
     GioUnix: _GioUnixCompat  # set by _setup_gio_unix()
 
-_LAZY_MODULES = frozenset({"Gdk", "GdkPixbuf", "GdkX11", "Gio", "GLib", "GObject", "Gtk", "Pango"})
+_LAZY_MODULES = frozenset({"Gio", "GLib"})
 
 __all__ = [
     "GLib",
-    "GObject",
-    "Gdk",
-    "GdkPixbuf",
-    "GdkX11",
     "Gio",
     "GioUnix",
-    "Gtk",
-    "Pango",
     "gi",
 ]
 

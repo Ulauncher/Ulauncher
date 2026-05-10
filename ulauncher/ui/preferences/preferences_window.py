@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from gi.repository import Gdk, Gtk
+
 from ulauncher import paths
-from ulauncher.gi import Gdk, Gtk
 from ulauncher.ui.helpers.system_theme import SystemThemeWatcher
 from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.ui.preferences.views.about import AboutView

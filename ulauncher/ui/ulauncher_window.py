@@ -3,9 +3,11 @@ from __future__ import annotations
 import logging
 from typing import Any, Iterable
 
+from gi.repository import Gdk, Gtk
+
 from ulauncher import paths
 from ulauncher.core import UlauncherCore
-from ulauncher.gi import Gdk, GLib, Gtk
+from ulauncher.gi import GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor

@@ -169,7 +169,7 @@ class ExtensionController:
         # get_icon_path uses Gtk, but this function is only used in the UI layer
         # so lazy loading avoid loading it in the extension or cli runtime
         # TODO: move functionality to UI layer (having it here is still a perf footgun)
-        from ulauncher.ui.get_icon_path import get_icon_path
+        from ulauncher.ui.get_icon_path import get_icon_path  # noqa: TID251
 
         return get_icon_path(icon or self.manifest.icon, base_path=self.path)
 
