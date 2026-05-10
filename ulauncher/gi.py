@@ -32,7 +32,6 @@ __all__ = [
     "GLib",
     "Gio",
     "GioUnix",
-    "gi",
 ]
 
 # ─── GioUnix compatibility namespace ──────────────────────────────────────────

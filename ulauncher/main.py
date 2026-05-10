@@ -98,7 +98,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
             "\n\n"
         )
 
-    from ulauncher.gi import GLib, gi
+    from ulauncher.gi import GLib
     from ulauncher.ui.app import UlauncherApp  # noqa: TID251
     from ulauncher.utils.v5_killer import kill_ulauncher_v5
 
@@ -109,7 +109,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     logger.info("Ulauncher version %s", version)
     logger.info("Extension API version %s", api_version)
     logger.info("GTK+ %s.%s.%s", *gtk_version)
-    logger.info("PyGObject+ %i.%i.%i", *gi.version_info)  # type: ignore[attr-defined]
+    logger.info("PyGObject+ %i.%i.%i", *UlauncherApp.get_pygobject_version())
     if cli_args.no_extensions:
         logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
     if cli_args.no_window_shadow:
