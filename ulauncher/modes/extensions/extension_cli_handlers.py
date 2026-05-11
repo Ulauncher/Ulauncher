@@ -95,6 +95,17 @@ def uninstall_extension(parser: ArgumentParser, args: Namespace) -> bool:
     return False
 
 
+def _warn_url_error(ext_id: str, url: str) -> None:
+    if url.startswith(("/", "file://")):
+        logger.warning(
+            "Could not upgrade %s: local path '%s' no longer exists. Reinstall with: ulauncher install <new-path>",
+            ext_id,
+            url,
+        )
+    else:
+        logger.warning("Could not upgrade %s: invalid URL '%s'", ext_id, url)
+
+
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     from ulauncher.modes.extensions import extension_registry
 
@@ -103,6 +114,9 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         if controller := get_ext_controller(args.input):
             try:
                 asyncio.run(controller.update())
+            except ext_exceptions.UrlError:
+                _warn_url_error(args.input, controller.state.url)
+                return False
             except ext_exceptions.RemoteError:
                 logger.warning("Network error: Could not upgrade %s", args.input)
             dbus_trigger_event("extensions:reload", [controller.id])
@@ -120,6 +134,8 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             updated = asyncio.run(controller.update())
             if updated:
                 updated_extensions.append(controller.id)
+        except ext_exceptions.UrlError:
+            _warn_url_error(controller.id, controller.state.url)
         except ext_exceptions.RemoteError:
             logger.warning("Network error: Could not upgrade %s", controller.id)
 
