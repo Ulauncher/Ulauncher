@@ -4,6 +4,7 @@
 # NOTE: pygobject-stubs needs PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2
 
 build
+git-cliff >= 2.7, < 3
 lefthook == 2.*
 pygobject-stubs==2.12.0
 pyrefly >= 0.63.0, < 0.64.0
