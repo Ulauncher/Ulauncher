@@ -165,6 +165,7 @@ class ExtensionController:
     def save_user_preferences(self, data: Any) -> None:
         user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
+        events.emit("extensions:update_preferences", self.id, data)
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
