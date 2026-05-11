@@ -115,7 +115,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             try:
                 asyncio.run(controller.update())
             except ext_exceptions.UrlError:
-                _warn_url_error(args.input, controller.state.url)
+                _warn_url_error(controller.id, controller.state.url)
                 return False
             except ext_exceptions.RemoteError:
                 logger.warning("Network error: Could not upgrade %s", args.input)
