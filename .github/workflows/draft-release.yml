@@ -26,6 +26,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             dist/*.tar.gz
             dist/*.deb
