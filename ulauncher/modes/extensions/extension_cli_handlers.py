@@ -106,9 +106,28 @@ def _warn_url_error(ext_id: str, url: str) -> None:
         logger.warning("Could not upgrade %s: invalid URL '%s'", ext_id, url)
 
 
-def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
+async def _upgrade_all_extensions() -> list[str]:
     from ulauncher.modes.extensions import extension_registry
 
+    updated_extensions: list[str] = []
+
+    for controller in extension_registry.load_all():
+        if not controller.is_manageable or not controller.state.url:
+            continue
+
+        try:
+            updated = await controller.update()
+            if updated:
+                updated_extensions.append(controller.id)
+        except ext_exceptions.UrlError:
+            _warn_url_error(controller.id, controller.state.url)
+        except ext_exceptions.RemoteError:
+            logger.warning("Network error: Could not upgrade %s", controller.id)
+
+    return updated_extensions
+
+
+def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     if "input" in args and args.input:
         # Upgrade specific extension
         if controller := get_ext_controller(args.input):
@@ -125,21 +144,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return False
 
-    updated_extensions: list[str] = []
-
-    for controller in extension_registry.load_all():
-        if not controller.is_manageable or not controller.state.url:
-            continue
-
-        try:
-            updated = asyncio.run(controller.update())
-            if updated:
-                updated_extensions.append(controller.id)
-        except ext_exceptions.UrlError:
-            _warn_url_error(controller.id, controller.state.url)
-        except ext_exceptions.RemoteError:
-            logger.warning("Network error: Could not upgrade %s", controller.id)
-
+    updated_extensions = asyncio.run(_upgrade_all_extensions())
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
 
