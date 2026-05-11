@@ -119,6 +119,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
                 return False
             except ext_exceptions.RemoteError:
                 logger.warning("Network error: Could not upgrade %s", args.input)
+                return False
             dbus_trigger_event("extensions:reload", [controller.id])
             return True
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
