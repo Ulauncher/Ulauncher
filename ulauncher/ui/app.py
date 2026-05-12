@@ -10,8 +10,7 @@ import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
-from ulauncher import app_id, first_run
-from ulauncher.cli import get_cli_args
+from ulauncher import app_id, cli, first_run
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.preferences.preferences_window import PreferencesWindow
@@ -92,7 +91,7 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
-        cli_args = get_cli_args()
+        cli_args = cli.get_args()
         if not settings.daemonless or cli_args.daemon:
             # Keep the app running even without a window
             self.hold()
