@@ -5,25 +5,18 @@ import logging
 import signal
 import sys
 from types import TracebackType
+from typing import TYPE_CHECKING
 
-from ulauncher import api_version, cli, init_helpers, version
+if TYPE_CHECKING:
+    from ulauncher.cli import CLIArguments
 
 
-def main() -> None:  # noqa: PLR0915
-    """
-    Main function that starts everything
-    """
-    cli_args = cli.get_args()  # sys.exit() here for --help / --version
-    in_cli_mode = hasattr(cli_args, "handler")
-
-    init_helpers.ensure_runtime_dirs()
-
-    if in_cli_mode:
-        init_helpers.configure_logging(verbose=cli_args.verbose, use_app_logging=False)
-        sys.exit(0 if cli_args.handler(cli_args) else 1)
+def run(cli_args: CLIArguments) -> bool:  # noqa: PLR0915
+    from ulauncher import init_helpers
 
     init_helpers.init_x11_threads()
 
+    from ulauncher import api_version, version
     from ulauncher.gi import GLib
     from ulauncher.ui.app import UlauncherApp  # noqa: TID251
     from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
@@ -33,7 +26,7 @@ def main() -> None:  # noqa: PLR0915
     gtk_version = UlauncherApp.get_gtk_version()
     if gtk_version < (3, 22, 0):
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
-        sys.exit(2)
+        raise SystemExit(2)
 
     if cli_args.hide_window:
         # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
@@ -41,21 +34,17 @@ def main() -> None:  # noqa: PLR0915
         # from starting a second Ulauncher background process we have to make sure the
         # --daemon flag prevents the app from starting.
         print("The --hide-window argument has been renamed to --daemon")  # noqa: T201
-        sys.exit(2)
+        raise SystemExit(2)
     if cli_args.no_window:
         # --hide-window was renamed to --no-window for a while in v6 beta (never released)
         print("The --no-window argument has been renamed to --daemon")  # noqa: T201
-        sys.exit(2)
+        raise SystemExit(2)
     if cli_args.dev:
         print("The --dev argument has been removed (use --verbose instead)")  # noqa: T201
-        sys.exit(2)
+        raise SystemExit(2)
 
-    init_helpers.configure_logging(verbose=cli_args.verbose, use_app_logging=True)
-
-    # Logger for actual use in this file
     logger = logging.getLogger(__name__)
 
-    # log uncaught exceptions
     def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
         logger.error("Uncaught exception", exc_info=(exctype, exception, traceback))
 
@@ -98,12 +87,7 @@ def main() -> None:  # noqa: PLR0915
             )
         logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
 
-    # Ensure that Ulauncher v5 is not running
-    # TODO: Remove this 4-6 months after v6 release
-    # Import here because of the dependency on the logger setup
     kill_ulauncher_v5()
-
-    # Migrate user data to v6 compatible
     v5_to_v6()
 
     app = UlauncherApp()
@@ -116,3 +100,5 @@ def main() -> None:  # noqa: PLR0915
 
     with contextlib.suppress(KeyboardInterrupt):
         app.run(sys.argv)
+
+    return True

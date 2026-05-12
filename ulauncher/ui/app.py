@@ -74,12 +74,12 @@ class UlauncherApp(Gtk.Application):
         # `command_line` is the arguments from the process that activated the app, unlike sys.argv, which is
         # the CLI arguments for the initial call that started the Ulauncher app.
         # argparse calls sys.exit(2) on unrecognized args - swallow it so a weird remote invocation
-        # can never kill the running daemon, and fall back to activating the launcher.
+        # can never kill the running daemon. Don't activate the launcher in that case either, since
+        # showing a window on garbled input would be misleading.
         try:
             args = cli.parse(command_line.get_arguments()[1:])
         except SystemExit:
-            self.activate()
-            return 0
+            return 1
         # --no-window was a temporary name in the v6 beta (never released stable)
         if not args.daemon and not args.no_window:
             self.activate()
