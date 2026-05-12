@@ -214,10 +214,12 @@ class ExtensionMode(Mode):
     @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
         if ext := extension_registry.get(ext_id):
+            old_preferences = data.get("old_preferences", {})
             for p_id, new_value in data.get("preferences", {}).items():
                 pref = ext.preferences.get(p_id)
-                if pref and new_value != pref.value:
-                    event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, pref.value]}
+                old_value = old_preferences.get(p_id, pref.value if pref else None)
+                if pref and new_value != old_value:
+                    event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, old_value]}
                     ext.send_message(event_data)
 
     def send_request(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
