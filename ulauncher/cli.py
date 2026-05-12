@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from functools import partial
 
 from ulauncher import version
@@ -25,8 +26,13 @@ class CLIArguments(argparse.Namespace):
 
 
 @lru_cache(maxsize=None)
-def get_cli_args() -> CLIArguments:
-    """Command Line options for the initial ulauncher (daemon) call"""
+def get_args() -> CLIArguments:
+    """Get the command line arguments for the current runtime."""
+    return parse(sys.argv[1:])
+
+
+def parse(input_args: list[str]) -> CLIArguments:
+    """Parse CLI arguments"""
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
     parser = argparse.ArgumentParser(
@@ -118,4 +124,4 @@ def get_cli_args() -> CLIArguments:
     preview_parser.add_argument("path", help="Path to the extension source directory")
     preview_parser.set_defaults(handler=partial(preview_extension, preview_parser))
 
-    return parser.parse_args(namespace=CLIArguments())
+    return parser.parse_args(args=input_args, namespace=CLIArguments())

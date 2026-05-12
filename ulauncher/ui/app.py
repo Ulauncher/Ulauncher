@@ -9,8 +9,7 @@ import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
-from ulauncher import app_id, first_run
-from ulauncher.cli import get_cli_args
+from ulauncher import app_id, cli, first_run
 from ulauncher.gi import Gio
 from ulauncher.internals.result import Result
 from ulauncher.ui.preferences.preferences_window import PreferencesWindow
@@ -72,18 +71,24 @@ class UlauncherApp(Gtk.Application):
         self.show_launcher()
 
     def do_command_line(self, command_line: Gio.ApplicationCommandLine, *_args: Any, **_kwargs: Any) -> int:
-        # command_line is the cli arguments from the process that activated the app
-        # This is unlike get_cli_args(), which is the arguments from the initial call that started ulauncher
-        args = command_line.get_arguments()
+        # `command_line` is the arguments from the process that activated the app, unlike sys.argv, which is
+        # the CLI arguments for the initial call that started the Ulauncher app.
+        # argparse calls sys.exit(2) on unrecognized args - swallow it so a weird remote invocation
+        # can never kill the running daemon, and fall back to activating the launcher.
+        try:
+            args = cli.parse(command_line.get_arguments()[1:])
+        except SystemExit:
+            self.activate()
+            return 0
         # --no-window was a temporary name in the v6 beta (never released stable)
-        if "--daemon" not in args and "--no-window" not in args:
+        if not args.daemon and not args.no_window:
             self.activate()
 
         return 0
 
     def setup(self) -> None:
         settings = Settings.load()
-        cli_args = get_cli_args()
+        cli_args = cli.get_args()
         if not settings.daemonless or cli_args.daemon:
             # Keep the app running even without a window
             self.hold()

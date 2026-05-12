@@ -6,15 +6,14 @@ import signal
 import sys
 from types import TracebackType
 
-from ulauncher import api_version, init_helpers, version
-from ulauncher.cli import get_cli_args
+from ulauncher import api_version, cli, init_helpers, version
 
 
 def main() -> None:  # noqa: PLR0915
     """
     Main function that starts everything
     """
-    cli_args = get_cli_args()  # sys.exit() here for --help / --version
+    cli_args = cli.get_args()  # sys.exit() here for --help / --version
     in_cli_mode = hasattr(cli_args, "handler")
 
     init_helpers.ensure_runtime_dirs()
