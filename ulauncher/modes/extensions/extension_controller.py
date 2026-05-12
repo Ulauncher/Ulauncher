@@ -163,9 +163,10 @@ class ExtensionController:
         return triggers
 
     def save_user_preferences(self, data: Any) -> None:
+        old_preferences = {p_id: pref.value for p_id, pref in self.preferences.items()}
         user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
-        events.emit("extensions:update_preferences", self.id, data)
+        events.emit("extensions:update_preferences", self.id, {**data, "old_preferences": old_preferences})
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
