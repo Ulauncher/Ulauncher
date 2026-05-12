@@ -13,18 +13,13 @@ from ulauncher.utils.lru_cache import lru_cache
 CommandName = Literal["extensions", "install", "uninstall", "upgrade", "preview"]
 
 
-class CLIArguments(argparse.Namespace):
-    daemon: bool
-    dev: bool  # deprecated
-    verbose: bool
-    hide_window: bool  # deprecated
-    no_extensions: bool  # deprecated
-    no_window: bool  # deprecated unreleased alias for hide_window (made more sense semantically)
-    no_window_shadow: bool  # deprecated
-    input: str
-    path: str
-    with_debugger: bool
-    command: CommandName | None
+class CLIArguments(BaseDataClass):
+    daemon = False
+    verbose = False
+    input = ""
+    path = ""
+    with_debugger = False
+    command: CommandName | None = None
 
 
 CLICommandHandler = Callable[[CLIArguments], int]
@@ -132,9 +127,6 @@ def _get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
 
-    # Ensure subcommand-specific attrs are always present on the namespace
-    parser.set_defaults(input="", path="", with_debugger=False)
-
     subparsers = parser.add_subparsers(
         title="commands",
         description="Available commands",
@@ -179,4 +171,28 @@ def parse(input_args: list[str]) -> CLIArguments:
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
     parser = _get_parser()
-    return parser.parse_args(args=input_args, namespace=CLIArguments())
+
+    args = parser.parse_args(args=input_args)
+    namespace = vars(args)
+
+    legacy_args: dict[str, tuple[str | None, str | None]] = {
+        "dev": ("verbose", "--verbose"),
+        "no_window": ("daemon", "--daemon"),
+        # intentionally break hide_window to prevent legacy XDG autostart entries from starting
+        "hide_window": (None, "--daemon"),
+        "no_extensions": (None, "--help to list available commands"),
+        "no_window_shadow": (None, "the Window shadow size setting"),
+    }
+
+    for legacy_arg, (shim, subst) in legacy_args.items():
+        if namespace.pop(legacy_arg, False):
+            msg = f"The --{legacy_arg.replace('_', '-')} argument has been removed"
+            if subst:
+                msg += f" (use {subst})"
+            sys.stderr.write(f"\033[33m{msg}\033[0m\n")
+            if shim:
+                namespace[shim] = True
+            else:
+                sys.exit(2)
+
+    return CLIArguments(**namespace)
