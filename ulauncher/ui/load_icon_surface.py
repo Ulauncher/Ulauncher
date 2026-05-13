@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from cairo import ImageSurface  # pyrefly: ignore - this fails in our docker image for some reason
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 DEFAULT_EXE_ICON = f"{paths.ASSETS}/icons/executable.png"
 

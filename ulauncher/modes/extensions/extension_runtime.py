@@ -17,7 +17,7 @@ ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
 ]
 ExitHandlerCallback = Callable[[ExtensionExitCause, str], None]
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus()
 
 

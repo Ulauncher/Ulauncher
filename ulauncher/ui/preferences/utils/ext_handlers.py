@@ -13,7 +13,7 @@ from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ExtensionHandlers:

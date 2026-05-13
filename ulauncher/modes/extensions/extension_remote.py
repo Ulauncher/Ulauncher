@@ -21,7 +21,7 @@ from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import satisfies
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class UrlParseResult(BaseDataClass):

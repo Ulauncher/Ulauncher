@@ -6,7 +6,7 @@ from typing import Any, TypeVar, cast
 from ulauncher.utils.json_utils import json_load, json_save
 from ulauncher.utils.lru_cache import lru_cache
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 FileInstanceT = TypeVar("FileInstanceT")
 _instance_paths: dict[int, str] = {}
 

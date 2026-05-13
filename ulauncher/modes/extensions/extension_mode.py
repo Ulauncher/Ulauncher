@@ -17,7 +17,7 @@ from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus("extensions")
 
 

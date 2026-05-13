@@ -9,7 +9,7 @@ from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("extension_lifecycle")
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 _ext_controllers: dict[str, ExtensionController] = {}
 
 

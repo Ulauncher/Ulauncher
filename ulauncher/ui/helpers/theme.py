@@ -8,7 +8,7 @@ from pathlib import Path
 from ulauncher import paths
 from ulauncher.data import JsonConf
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 DEFAULT_THEME = "light"
 CSS_RESET = """
 * {

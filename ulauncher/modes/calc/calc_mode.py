@@ -54,7 +54,7 @@ functions: dict[str, Callable[..., float | Decimal]] = {
 }
 
 constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"

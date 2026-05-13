@@ -15,7 +15,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.fold_user_path import fold_user_path
 
 _events = EventBus()
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class FileBrowserMode(Mode):

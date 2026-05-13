@@ -4,7 +4,7 @@ import logging
 
 from ulauncher.utils.environment import IS_X11
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def try_raise_app(app_id: str) -> bool:

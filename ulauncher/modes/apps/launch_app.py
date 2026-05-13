@@ -10,7 +10,7 @@ from ulauncher.modes.apps.try_raise_app import try_raise_app
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def launch_app(desktop_entry_name: str) -> bool:

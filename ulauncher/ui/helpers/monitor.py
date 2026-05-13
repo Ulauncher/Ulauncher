@@ -6,7 +6,7 @@ from gi.repository import Gdk, GdkX11  # pyrefly: ignore[missing-module-attribut
 
 from ulauncher.gi import Gio
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:

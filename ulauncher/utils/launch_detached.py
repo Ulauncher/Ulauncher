@@ -7,7 +7,7 @@ import sys
 from ulauncher.gi import GLib
 from ulauncher.utils.systemd_controller import SystemdController
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def detach_child() -> None:

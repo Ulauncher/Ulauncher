@@ -13,7 +13,7 @@ import os
 import pathlib
 from typing import Literal
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 GDK_BACKEND = os.environ.get("GDK_BACKEND", "").upper()
 XDG_SESSION_TYPE = os.environ.get("XDG_SESSION_TYPE", "").upper()

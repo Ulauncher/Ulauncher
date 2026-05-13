@@ -25,7 +25,7 @@ from ulauncher.ui.preferences.views import (
 )
 from ulauncher.utils.launch_detached import open_detached
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 REFRESH_INTERVAL = 250
 
 

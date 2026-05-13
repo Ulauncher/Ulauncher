@@ -54,7 +54,7 @@ def main() -> None:  # noqa: PLR0915
     init_helpers.configure_logging(verbose=cli_args.verbose, use_app_logging=True)
 
     # Logger for actual use in this file
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
 
     # log uncaught exceptions
     def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:

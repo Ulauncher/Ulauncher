@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 # remove json nulls

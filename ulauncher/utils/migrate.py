@@ -9,7 +9,7 @@ from typing import Any, Callable
 
 from ulauncher import first_v6_run, paths
 
-_logger = logging.getLogger()
+_logger = logging.getLogger(__name__)
 CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache"), "ulauncher_cache")  # See issue#40
 
 

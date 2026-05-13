@@ -7,7 +7,7 @@ from os.path import isdir, isfile
 
 from ulauncher.modes.extensions import ext_exceptions
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ExtensionDependencies:

@@ -14,7 +14,7 @@ from ulauncher.utils.settings import Settings
 
 ELLIPSIZE_MIN_LENGTH = 6
 ELLIPSIZE_FORCE_AT_LENGTH = 20
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ResultWidget(Gtk.EventBox):

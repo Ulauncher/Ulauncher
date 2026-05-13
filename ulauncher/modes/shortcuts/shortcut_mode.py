@@ -11,7 +11,7 @@ from ulauncher.modes.shortcuts import results
 from ulauncher.modes.shortcuts.run_shortcut import run_shortcut
 from ulauncher.modes.shortcuts.shortcuts import Shortcut, Shortcuts
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def get_description(shortcut: Shortcut, query: Query | None = None) -> str:

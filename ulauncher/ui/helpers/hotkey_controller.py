@@ -11,7 +11,7 @@ from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.systemd_controller import SystemdController
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 launch_command = f"gapplication launch {app_id}"
 
 
