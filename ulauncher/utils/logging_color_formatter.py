@@ -27,7 +27,8 @@ class ColoredFormatter(logging.Formatter):
             # Ensure the same name gets the same color every time
             random.seed(record.name)
             name_color = random.randint(32, 37)
-            prefix += f"{mkcolor(name_color, True)} {record.name}{mkcolor(0)}:"
-        suffix = f"{mkcolor(2)}{record.module}.{record.funcName}:{record.lineno}{mkcolor(0)}"  # 2 means faded
+            name = record.name[len("ulauncher.") :] if record.name.startswith("ulauncher.") else record.name
+            prefix += f"{mkcolor(name_color, True)} {name}{mkcolor(0)}:"
+        suffix = f"{mkcolor(2)}{record.funcName}:{record.lineno}{mkcolor(0)}"  # 2 means faded
         formatter = logging.Formatter(f"%(asctime)s {prefix} %(message)s {suffix}")
         return formatter.format(record)
