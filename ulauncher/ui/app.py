@@ -78,8 +78,8 @@ class UlauncherApp(Gtk.Application):
         # showing a window on garbled input would be misleading.
         try:
             args = cli.parse(command_line.get_arguments()[1:])
-        except SystemExit:
-            return 1
+        except SystemExit as exc:
+            return 0 if exc.code in (0, None) else 1
         # --no-window was a temporary name in the v6 beta (never released stable)
         if not args.daemon and not args.no_window:
             self.activate()
