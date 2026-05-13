@@ -2,7 +2,7 @@ import logging
 import subprocess
 from shutil import which
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def systemctl_run(*args: str) -> str:

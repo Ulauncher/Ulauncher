@@ -8,7 +8,7 @@ from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_rankings import AppRankings
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class AppResult(Result):

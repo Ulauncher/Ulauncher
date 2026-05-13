@@ -18,7 +18,7 @@ from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus()
 
 

@@ -14,7 +14,7 @@ from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.settings import Settings
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class AppMode(Mode):

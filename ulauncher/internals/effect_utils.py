@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
 _events = EventBus()
-_logger = logging.getLogger()
+_logger = logging.getLogger(__name__)
 
 
 def is_valid(effect_msg: Any) -> bool:

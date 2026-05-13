@@ -9,7 +9,7 @@ from ulauncher.api.shared.event import EventType
 from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class Client:

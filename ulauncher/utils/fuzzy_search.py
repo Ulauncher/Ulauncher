@@ -6,7 +6,7 @@ from difflib import Match, SequenceMatcher
 
 from ulauncher.utils.lru_cache import lru_cache
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def _get_matching_blocks_native(query_str: str, text: str) -> list[Match]:

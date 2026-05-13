@@ -8,7 +8,7 @@ from ulauncher.data import BaseDataClass, JsonConf
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.version import satisfies
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ExtensionManifestPreference(BaseDataClass):

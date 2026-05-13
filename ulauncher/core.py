@@ -16,7 +16,7 @@ from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import TimerContext, timer
 
 _events = EventBus()
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
 

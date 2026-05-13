@@ -4,7 +4,7 @@ import signal
 
 from ulauncher import first_v6_run
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 v5_service_name = "net.launchpad.ulauncher"
 
 

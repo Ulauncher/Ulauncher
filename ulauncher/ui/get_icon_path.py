@@ -8,7 +8,7 @@ from gi.repository import Gtk
 from ulauncher.gi import GLib
 
 icon_theme = Gtk.IconTheme.get_default()
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def get_icon_path(icon: str, size: int = 32) -> str | None:

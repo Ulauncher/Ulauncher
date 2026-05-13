@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from ulauncher.gi import Gio, GioUnix, GLib
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class SocketMsgController:

@@ -6,7 +6,7 @@ import tempfile
 
 from ulauncher.utils.decorator.run_async import run_async
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 @run_async  # must be async because the script may be launching blocking processes like pkexec (issue 1299)

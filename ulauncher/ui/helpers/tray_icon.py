@@ -17,7 +17,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
 tray_icon_lib: Literal["AyatanaIndicator", "XApp"] | None = None
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus()
 icon_asset_path = f"{paths.ASSETS}/icons/system/status"
 default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default

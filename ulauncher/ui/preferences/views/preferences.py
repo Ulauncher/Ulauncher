@@ -13,7 +13,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.systemd_controller import SystemdController
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus()
 
 

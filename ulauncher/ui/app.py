@@ -19,7 +19,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 from ulauncher.utils.timer import timer
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 events = EventBus("app")
 
 

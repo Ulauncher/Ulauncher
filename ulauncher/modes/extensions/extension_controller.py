@@ -58,7 +58,7 @@ class ExtensionState(JsonConf):
         super().__setitem__(key, value)
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 extension_runtimes: dict[str, ExtensionRuntime] = {}
 stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 

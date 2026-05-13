@@ -6,7 +6,7 @@ from typing import Any
 
 from gi.repository import Gdk, Gtk
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 footer_notice = "Be aware that keyboard shortcuts may be reserved by, or conflict with your system."
 
 RESPONSES = SimpleNamespace(OK=-5, CLOSE=-7)
