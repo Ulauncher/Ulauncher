@@ -30,9 +30,8 @@ def get_cli_args() -> CLIArguments:
     # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
     # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
     parser = argparse.ArgumentParser(
-        None,
-        "%(prog)s OPTIONS or ARGUMENT",
-        "Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
+        usage="%(prog)s OPTIONS or ARGUMENT",
+        description="Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
     )
     parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
