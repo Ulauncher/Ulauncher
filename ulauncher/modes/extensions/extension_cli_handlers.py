@@ -74,7 +74,7 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         dbus_trigger_event("extensions:reload", [controller.id])
     except (ValueError, ext_exceptions.UrlError):  # error already logged
         return False
-    except ext_exceptions.RemoteError:
+    except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
         logger.warning("Network error: Could not install %s", args.input)
         return False
     return True
@@ -121,7 +121,7 @@ async def _upgrade_all_extensions() -> list[str]:
                 updated_extensions.append(controller.id)
         except ext_exceptions.UrlError:
             _warn_url_error(controller.id, controller.state.url)
-        except ext_exceptions.RemoteError:
+        except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
             logger.warning("Network error: Could not upgrade %s", controller.id)
 
     return updated_extensions
@@ -136,7 +136,7 @@ def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
             except ext_exceptions.UrlError:
                 _warn_url_error(controller.id, controller.state.url)
                 return False
-            except ext_exceptions.RemoteError:
+            except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
                 logger.warning("Network error: Could not upgrade %s", args.input)
                 return False
             dbus_trigger_event("extensions:reload", [controller.id])
