@@ -82,13 +82,13 @@ class UlauncherApp(Gtk.Application):
         logger.debug("Activated via gapplication")
         self.show_launcher()
 
-    def start(self, *, activate: bool = True) -> int:
+    def start(self, *, activate: bool = True) -> None:
         self.register()
         if self.get_is_remote() and not activate:
             # Daemon already running in another process; this invocation has nothing to do.
-            return 0
+            return
         self.skip_next_activate = not activate
-        return self.run([])
+        self.run([])
 
     def setup(self) -> None:
         settings = Settings.load()
