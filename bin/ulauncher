@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def format_err(text: str):
+def format_err(text: str) -> str:
     return f"\033[01;31m{text}\033[01;0m\n"
 
 # Add project root directory (enable symlink and trunk execution)
@@ -19,23 +19,29 @@ if IS_DEV:
     os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
 
 try:
-    from ulauncher.main import main
+    from ulauncher import cli
 except ModuleNotFoundError:
     ulauncher_module_path = list(Path("/usr/lib/").glob("python*/site-packages/ulauncher"))
     if os.path.isfile("/etc/arch-release") and ulauncher_module_path:
         sys.path.append(str(ulauncher_module_path[-1].parent))
-        from ulauncher.main import main
-        sys.stderr.write(format_err(
-            "Your Arch Linux system Python version is updated after installing Ulauncher.\n"
-            "Please do a clean reinstall of Ulauncher, and any other AUR packages that may be affected by this.\n"
-            "For more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280"
-        ))
+        from ulauncher import cli
+
+        sys.stderr.write(
+            format_err(
+                "Your Arch Linux system Python version is updated after installing Ulauncher.\n"
+                "Please do a clean reinstall of Ulauncher, and any other AUR packages that may be affected by this.\n"
+                "For more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280"
+            )
+        )
     else:
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         sys.exit(
             format_err("Ulauncher is not properly installed on your system.") +
             "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
         )
 
-main()
+args = cli.get_args()
+
+sys.exit(cli.run_command(args))
