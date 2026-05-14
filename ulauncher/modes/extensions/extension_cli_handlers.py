@@ -65,8 +65,8 @@ def install_extension(parser: ArgumentParser, args: Namespace) -> bool:
         parser.print_help()
         return False
 
-    if get_ext_controller(args.input):
-        return upgrade_extensions(parser, args)
+    if controller := get_ext_controller(args.input):
+        return _upgrade_one(controller)
 
     url = normalize_arg(args.input)
     try:
@@ -127,21 +127,24 @@ async def _upgrade_all_extensions() -> list[str]:
     return updated_extensions
 
 
+def _upgrade_one(controller: ExtensionController) -> bool:
+    try:
+        updated = asyncio.run(controller.update())
+    except ext_exceptions.UrlError:
+        _warn_url_error(controller.id, controller.state.url)
+        return False
+    except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
+        logger.warning("Network error: Could not upgrade %s", controller.id)
+        return False
+    if updated:
+        dbus_trigger_event("extensions:reload", [controller.id])
+    return True
+
+
 def upgrade_extensions(_: ArgumentParser, args: Namespace) -> bool:
     if "input" in args and args.input:
-        # Upgrade specific extension
         if controller := get_ext_controller(args.input):
-            try:
-                updated = asyncio.run(controller.update())
-            except ext_exceptions.UrlError:
-                _warn_url_error(controller.id, controller.state.url)
-                return False
-            except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
-                logger.warning("Network error: Could not upgrade %s", args.input)
-                return False
-            if updated:
-                dbus_trigger_event("extensions:reload", [controller.id])
-            return True
+            return _upgrade_one(controller)
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return False
 
