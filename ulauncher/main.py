@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import signal
 import sys
 from types import TracebackType
 
@@ -25,7 +24,6 @@ def main() -> None:  # noqa: PLR0915
 
     init_helpers.init_x11_threads()
 
-    from ulauncher.gi import GLib
     from ulauncher.ui.app import UlauncherApp  # noqa: TID251
     from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
     from ulauncher.utils.migrate import v5_to_v6
@@ -108,12 +106,6 @@ def main() -> None:  # noqa: PLR0915
     v5_to_v6()
 
     app = UlauncherApp()
-
-    def handler() -> bool:
-        app.quit()
-        return False
-
-    GLib.unix_signal_add(priority=GLib.PRIORITY_DEFAULT, signum=signal.SIGTERM, handler=handler)
 
     with contextlib.suppress(KeyboardInterrupt):
         app.run(sys.argv)

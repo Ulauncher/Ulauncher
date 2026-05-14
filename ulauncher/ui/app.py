@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import signal
 from typing import Any, Iterable, Literal, cast
 from weakref import WeakValueDictionary
 
@@ -11,7 +12,7 @@ from gi.repository import Gdk, Gtk
 import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.cli import get_cli_args
-from ulauncher.gi import Gio
+from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.preferences.preferences_window import PreferencesWindow
 from ulauncher.ui.ulauncher_window import UlauncherWindow
@@ -66,6 +67,11 @@ class UlauncherApp(Gtk.Application):
                 ("trigger-event", lambda *args: self.delegate_custom_message(args[1].get_string()), "s"),
             ],
         )
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, self._on_sigterm)
+
+    def _on_sigterm(self) -> bool:
+        self.quit()
+        return False
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
         logger.debug("Activated via gapplication")
