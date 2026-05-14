@@ -236,13 +236,13 @@ def preview_extension(_: ArgumentParser, args: Namespace) -> bool:  # noqa: PLR0
             .decode()
             .strip()
         )
-
-        if git_url:
-            url_to_parse = git_url
-            logger.debug("Found git remote URL: %s", git_url)
     except (subprocess.CalledProcessError, FileNotFoundError):
         # Not a git repository or git not available, use path as is
         logger.debug("No git remote found, using path as URL input")
+    else:
+        if git_url:
+            url_to_parse = git_url
+            logger.debug("Found git remote URL: %s", git_url)
 
     # Parse the URL/path to get extension ID
     try:
