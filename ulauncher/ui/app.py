@@ -29,6 +29,8 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     query = ""
+    # One-shot: set to True to make the next activation a no-op (e.g. for --daemon startup).
+    skip_next_activate: bool = False
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
@@ -42,7 +44,7 @@ class UlauncherApp(Gtk.Application):
         return gi.version_info  # type: ignore[attr-defined]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        kwargs.update(application_id=app_id, flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+        kwargs.update(application_id=app_id)
         super().__init__(*args, **kwargs)
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
@@ -74,18 +76,19 @@ class UlauncherApp(Gtk.Application):
         return False
 
     def do_activate(self, *_args: Any, **_kwargs: Any) -> None:
+        if self.skip_next_activate:
+            self.skip_next_activate = False
+            return
         logger.debug("Activated via gapplication")
         self.show_launcher()
 
-    def do_command_line(self, command_line: Gio.ApplicationCommandLine, *_args: Any, **_kwargs: Any) -> int:
-        # command_line is the cli arguments from the process that activated the app
-        # This is unlike get_cli_args(), which is the arguments from the initial call that started ulauncher
-        args = command_line.get_arguments()
-        # --no-window was a temporary name in the v6 beta (never released stable)
-        if "--daemon" not in args and "--no-window" not in args:
-            self.activate()
-
-        return 0
+    def start(self, *, activate: bool = True) -> int:
+        self.register()
+        if self.get_is_remote() and not activate:
+            # Daemon already running in another process; this invocation has nothing to do.
+            return 0
+        self.skip_next_activate = not activate
+        return self.run([])
 
     def setup(self) -> None:
         settings = Settings.load()

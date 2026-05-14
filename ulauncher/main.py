@@ -108,4 +108,4 @@ def main() -> None:  # noqa: PLR0915
     app = UlauncherApp()
 
     with contextlib.suppress(KeyboardInterrupt):
-        app.run(sys.argv)
+        app.start(activate=not cli_args.daemon)
