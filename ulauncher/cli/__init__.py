@@ -187,7 +187,9 @@ def parse(input_args: list[str]) -> CLIArguments:
     for legacy_arg, (shim, hint) in legacy_args.items():
         if namespace.pop(legacy_arg, False):
             msg = f"The --{legacy_arg.replace('_', '-')} argument has been removed ({hint})"
-            sys.stderr.write(f"\033[33m{msg}\033[0m\n")
+            if sys.stderr.isatty():
+                msg = f"\033[33m{msg}\033[0m"
+            sys.stderr.write(f"{msg}\n")
             if shim:
                 namespace[shim] = True
             else:
