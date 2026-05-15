@@ -37,7 +37,7 @@ class TestCLI:
         with pytest.raises(SystemExit) as exc_info:
             cli.parse(["--no-extensions"])
         assert exc_info.value.code == 2
-        assert "use --help to list available commands" in capsys.readouterr().err
+        assert "see --help for available commands" in capsys.readouterr().err
 
     def test_parse_no_window_shadow_exits(self) -> None:
         with pytest.raises(SystemExit) as exc_info:

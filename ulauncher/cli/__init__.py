@@ -175,20 +175,18 @@ def parse(input_args: list[str]) -> CLIArguments:
     args = parser.parse_args(args=input_args)
     namespace = vars(args)
 
-    legacy_args: dict[str, tuple[str | None, str | None]] = {
-        "dev": ("verbose", "--verbose"),
-        "no_window": ("daemon", "--daemon"),
+    legacy_args: dict[str, tuple[str | None, str]] = {
+        "dev": ("verbose", "use --verbose"),
+        "no_window": ("daemon", "use --daemon"),
         # intentionally break hide_window to prevent legacy XDG autostart entries from starting
-        "hide_window": (None, "--daemon"),
-        "no_extensions": (None, "--help to list available commands"),
-        "no_window_shadow": (None, "the Window shadow size setting"),
+        "hide_window": (None, "use --daemon"),
+        "no_extensions": (None, "see --help for available commands"),
+        "no_window_shadow": (None, "configure via the Window shadow size setting in preferences"),
     }
 
-    for legacy_arg, (shim, subst) in legacy_args.items():
+    for legacy_arg, (shim, hint) in legacy_args.items():
         if namespace.pop(legacy_arg, False):
-            msg = f"The --{legacy_arg.replace('_', '-')} argument has been removed"
-            if subst:
-                msg += f" (use {subst})"
+            msg = f"The --{legacy_arg.replace('_', '-')} argument has been removed ({hint})"
             sys.stderr.write(f"\033[33m{msg}\033[0m\n")
             if shim:
                 namespace[shim] = True
