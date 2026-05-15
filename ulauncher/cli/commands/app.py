@@ -26,21 +26,6 @@ def run(cli_args: CLIArguments) -> int:
         print("Ulauncher requires GTK+ version 3.22 or newer. Please upgrade your GTK version.")  # noqa: T201
         return 1
 
-    if cli_args.hide_window:
-        # Ulauncher's "Launch at Login" is now implemented with systemd, but originally
-        # it was implemented using XDG autostart. To prevent files created the old way
-        # from starting a second Ulauncher background process we have to make sure the
-        # --daemon flag prevents the app from starting.
-        print("The --hide-window argument has been renamed to --daemon")  # noqa: T201
-        return 2
-    if cli_args.no_window:
-        # --hide-window was renamed to --no-window for a while in v6 beta (never released)
-        print("The --no-window argument has been renamed to --daemon")  # noqa: T201
-        return 2
-    if cli_args.dev:
-        print("The --dev argument has been removed (use --verbose instead)")  # noqa: T201
-        return 2
-
     logger = logging.getLogger(__name__)
 
     def except_hook(exctype: type[BaseException], exception: BaseException, traceback: TracebackType | None) -> None:
@@ -64,10 +49,6 @@ def run(cli_args: CLIArguments) -> int:
     logger.info("Extension API version %s", api_version)
     logger.info("GTK+ %s.%s.%s", *gtk_version)
     logger.info("PyGObject+ %i.%i.%i", *UlauncherApp.get_pygobject_version())
-    if cli_args.no_extensions:
-        logger.warning("The --no-extensions argument has been removed in Ulauncher v6")
-    if cli_args.no_window_shadow:
-        logger.warning("The --no-window-shadow argument has been removed in Ulauncher v6")
 
     if XDG_SESSION_TYPE != "X11":
         from ulauncher.ui.helpers import layer_shell  # noqa: TID251
