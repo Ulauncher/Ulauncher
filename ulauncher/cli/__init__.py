@@ -117,14 +117,9 @@ def _get_parser() -> argparse.ArgumentParser:
         description="Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
     )
-    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show debug log messages")
-    parser.add_argument(
-        "--version",
-        action="version",
-        help="Show version number and exit",
-        version=f"Ulauncher {version}",
-    )
+    parser.add_argument("--version", action="version", help="Show version", version=f"Ulauncher {version}")
+    parser.add_argument("-h", "--help", action="help", help="Show help")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Use verbose logging")
     parser.add_argument(
         "--daemon",
         action="store_true",
