@@ -250,6 +250,9 @@ manpage:
 		exit 1
 	fi
 	help2man --section=1 --name="Feature rich application Launcher for Linux" --no-info ./bin/ulauncher > ulauncher.1
+	# help2man renders any heading with a trailing colon as .SS (indented subsection).
+	# Convert those to .SH with uppercased names, which is the man page section convention.
+	sed -i 's/^\.SS "\(.*\):"$$/.SH \U\1/' ulauncher.1
 	echo -e "Generated manpage\n"
 	echo -e "Run '${BOLD}${GREEN}man -l ulauncher.1${RESET}' if you want to preview it."
 
