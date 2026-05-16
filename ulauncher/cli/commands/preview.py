@@ -117,8 +117,8 @@ def run(args: CLIArguments) -> int:  # noqa: PLR0911, PLR0912, PLR0915 - intenti
 
     preview_ext_id = f"{ext_id}.preview"
 
-    # Block SIGINT so sigwait() can accept it atomically without the default
-    # KeyboardInterrupt or a pause()-style missed-signal race.
+    # Block SIGINT so sigwait() can dequeue it atomically without racing
+    # with Python's default KeyboardInterrupt handler.
     signal.pthread_sigmask(signal.SIG_BLOCK, [signal.SIGINT])
     logger.info("Press Ctrl+C to stop previewing extension '%s'...", ext_id)
     signal.sigwait([signal.SIGINT])
