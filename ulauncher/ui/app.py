@@ -92,7 +92,7 @@ class UlauncherApp(Gtk.Application):
     def setup(self) -> None:
         settings = Settings.load()
         cli_args = cli.get_args()
-        if not settings.daemonless or cli_args.daemon:
+        if settings.keep_alive or cli_args.daemon:
             # Keep the app running even without a window
             self.hold()
 
