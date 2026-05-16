@@ -143,7 +143,7 @@ class ShortcutsView(views.BaseView):
                 "<b>Script shortcut example</b> (send notification)\n"
                 '<code>#!/bin/bash\nnotify-send "Notification" "$*"</code>\n\n'
                 "*1 Note that scripts must start with a shebang (<code>#!</code>)\n"
-                "*2 Run <code>ulauncher --verbose</code> to see any output from scripts"
+                "*2 Run <code>ulauncher start --verbose</code> to see any output from scripts"
             ),
             use_markup=True,
             halign=Gtk.Align.START,

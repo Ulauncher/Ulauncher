@@ -76,7 +76,7 @@ run:
 	else
 		killall -eq ulauncher || true
 	fi
-	./bin/ulauncher --verbose
+	./bin/ulauncher start --verbose
 
 # Start a bash session in the Ulauncher Docker build container (Ubuntu). Set CONTAINER_CMD to run a command non-interactively.
 run-container:

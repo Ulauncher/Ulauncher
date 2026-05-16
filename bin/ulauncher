@@ -18,15 +18,17 @@ while [ "$walked" -lt "$orig_count" ]; do
   arg=$1; shift; walked=$((walked + 1))
   case "$arg" in
     --hide-window)
-      print_color 33 "The --hide-window argument has been removed (use --daemon)"; exit 2 ;;
+      print_color 33 "The --hide-window argument has been removed (use start)"; exit 2 ;;
     --no-extensions)
       print_color 33 "The --no-extensions argument has been removed (see --help for available commands)"; exit 2 ;;
     --no-window-shadow)
       print_color 33 "The --no-window-shadow argument has been removed (configure via the Window shadow size setting in preferences)"; exit 2 ;;
     --dev)
       print_color 33 "The --dev argument has been removed (use --verbose)"; set -- "$@" --verbose ;;
+    --daemon)
+      print_color 33 "The --daemon argument has been removed (use start)"; set -- "$@" start ;;
     --no-window)
-      print_color 33 "The --no-window argument has been removed (use --daemon)"; set -- "$@" --daemon ;;
+      print_color 33 "The --no-window argument has been removed (use start)"; set -- "$@" start ;;
     *) set -- "$@" "$arg" ;;
   esac
 done

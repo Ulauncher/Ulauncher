@@ -75,6 +75,6 @@ def run(cli_args: CLIArguments) -> int:
     app = UlauncherApp()
 
     with contextlib.suppress(KeyboardInterrupt):
-        app.start(activate=not cli_args.daemon)
+        app.start(activate=cli_args.command is None)
 
     return 0

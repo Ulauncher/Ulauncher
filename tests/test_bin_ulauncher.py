@@ -12,7 +12,7 @@ BIN_ULAUNCHER = REPO_ROOT / "bin/ulauncher"
 @pytest.mark.parametrize(
     ("flag", "hint"),
     [
-        ("--hide-window", "use --daemon"),
+        ("--hide-window", "use start"),
         ("--no-extensions", "see --help for available commands"),
         ("--no-window-shadow", "the Window shadow size setting"),
     ],
@@ -29,7 +29,8 @@ def test_legacy_terminal_flags_exit_without_python(flag: str, hint: str) -> None
     ("legacy", "replacement"),
     [
         ("--dev", "--verbose"),
-        ("--no-window", "--daemon"),
+        ("--daemon", "start"),
+        ("--no-window", "start"),
     ],
 )
 def test_legacy_rewrite_flags_substitute_and_warn(legacy: str, replacement: str, tmp_path: Path) -> None:

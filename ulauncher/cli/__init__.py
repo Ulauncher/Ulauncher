@@ -10,11 +10,10 @@ from ulauncher.data import BaseDataClass
 from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs
 from ulauncher.utils.lru_cache import lru_cache
 
-CommandName = Literal["extensions", "install", "uninstall", "upgrade", "preview"]
+CommandName = Literal["start", "extensions", "install", "uninstall", "upgrade", "preview"]
 
 
 class CLIArguments(BaseDataClass):
-    daemon = False
     verbose = False
     input = ""
     path = ""
@@ -31,7 +30,6 @@ class CLICommandArgument(BaseDataClass):
 
 
 class CLICommand(BaseDataClass):
-    handler_path: str = ""
     summary: str = ""  # one-line, shown in the master `ulauncher --help` listing
     description: str = ""  # longer sentence, shown at the top of `ulauncher <cmd> --help`
     aliases: tuple[str, ...] = ()
@@ -47,14 +45,16 @@ def get_args() -> CLIArguments:
 @lru_cache(maxsize=None)
 def _get_commands() -> dict[CommandName, CLICommand]:
     return {
+        "start": CLICommand(
+            summary="Start the Ulauncher background process",
+            description="Start the Ulauncher background process",
+        ),
         "extensions": CLICommand(
-            handler_path="ulauncher.cli.commands.extensions:run",
             aliases=("e",),
             summary="List installed extensions",
             description="List all installed extensions with their status and information",
         ),
         "install": CLICommand(
-            handler_path="ulauncher.cli.commands.install:run",
             aliases=("i",),
             summary="Install an extension from URL",
             description="Install an extension from a Git URL or local path",
@@ -63,14 +63,12 @@ def _get_commands() -> dict[CommandName, CLICommand]:
             ),
         ),
         "uninstall": CLICommand(
-            handler_path="ulauncher.cli.commands.uninstall:run",
             aliases=("rm",),
             summary="Uninstall an extension",
             description="Remove an installed extension by ID or URL",
             arguments=(CLICommandArgument(args=("input",), kwargs={"help": "Extension ID or URL to uninstall"}),),
         ),
         "upgrade": CLICommand(
-            handler_path="ulauncher.cli.commands.upgrade:run",
             aliases=("up",),
             summary="Upgrade extensions",
             description="Upgrade one or all installed extensions to their latest versions",
@@ -86,7 +84,6 @@ def _get_commands() -> dict[CommandName, CLICommand]:
             ),
         ),
         "preview": CLICommand(
-            handler_path="ulauncher.cli.commands.preview:run",
             aliases=("pr",),
             summary="Preview extension",
             description="Starts extension from a local path for development and debugging purposes",
@@ -115,11 +112,6 @@ def _get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", help="Show version", version=f"Ulauncher {version}")
     parser.add_argument("-h", "--help", action="help", help="Show help")
     parser.add_argument("-v", "--verbose", action="store_true", help="Use verbose logging")
-    parser.add_argument(
-        "--daemon",
-        action="store_true",
-        help="Run Ulauncher as a background process, without initially showing the window",
-    )
 
     subparsers = parser.add_subparsers(
         title="commands",
@@ -142,22 +134,16 @@ def _get_parser() -> argparse.ArgumentParser:
     return parser
 
 
-@lru_cache(maxsize=None)
-def _load_handler(handler_path: str) -> CLICommandHandler:
+def _load_handler(command_name: str) -> CLICommandHandler:
     # Keep non-selected command implementations off the default startup path.
-    module_name, function_name = handler_path.split(":")
-    module = importlib.import_module(module_name)
-    return cast("CLICommandHandler", getattr(module, function_name))
+    module = importlib.import_module(f"ulauncher.cli.commands.{command_name}")
+    return cast("CLICommandHandler", module.run)
 
 
 def run_command(args: CLIArguments) -> int:
     ensure_runtime_dirs()
-    if args.command is None:
-        configure_logging(verbose=args.verbose, use_app_logging=True)
-        return _load_handler("ulauncher.cli.commands.app:run")(args)
-    command = _get_commands()[args.command]
-    configure_logging(verbose=args.verbose, use_app_logging=False)
-    return _load_handler(command.handler_path)(args)
+    configure_logging(verbose=args.verbose, use_app_logging=args.command in (None, "start"))
+    return _load_handler(args.command or "start")(args)
 
 
 def parse(input_args: list[str]) -> CLIArguments:

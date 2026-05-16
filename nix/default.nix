@@ -158,7 +158,7 @@ let
         logfile="$test_dir/log.txt"
         env -i HOME="$test_dir" \
           "$(command -v xvfb-run)" --auto-servernum -- \
-          $out/bin/ulauncher --verbose &>"$logfile" &
+          $out/bin/ulauncher start --verbose &>"$logfile" &
         ulauncher_pid=$!
 
         while IFS= read -r line; do
