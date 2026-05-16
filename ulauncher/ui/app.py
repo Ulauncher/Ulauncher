@@ -92,7 +92,12 @@ class UlauncherApp(Gtk.Application):
     def setup(self) -> None:
         settings = Settings.load()
         cli_args = cli.get_args()
-        if settings.keep_alive or cli_args.daemon:
+        # On systemd systems, the unit's enabled state is the source of truth for "should this
+        # run as a service" - keep_alive only applies as a fallback for users without systemd.
+        from ulauncher.utils.systemd_controller import SystemdController
+
+        is_persistent = cli_args.daemon or (settings.keep_alive and not SystemdController("ulauncher").supported)
+        if is_persistent:
             # Keep the app running even without a window
             self.hold()
 
