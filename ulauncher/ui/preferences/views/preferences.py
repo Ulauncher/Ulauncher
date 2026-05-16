@@ -106,6 +106,7 @@ class PreferencesView(BaseView):
                 wrap=True,
                 max_width_chars=70,
                 margin_top=2,
+                use_markup=True,
             ),
             "preferences-setting-description",
         )
@@ -134,23 +135,19 @@ class PreferencesView(BaseView):
     def _add_general_section(self, parent: Gtk.Box) -> None:
         """Add general settings section"""
         general_box = self._create_section_container(parent, "General")
+        background_recommendation = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
 
-        # Launch at login
+        # Launch at login / Keep running in background
         if self.autostart_pref.can_start():
             autostart_switch = Gtk.Switch(active=self.autostart_pref.is_enabled())
             autostart_switch.connect("notify::active", self._on_autostart_toggled)
-
-            desc = "Start Ulauncher automatically whenever your desktop session begins."
-            if not self.settings.keep_alive:
-                desc += " Enabling this will turn off Daemonless mode."
+            desc = f"Start Ulauncher in the background when your desktop session starts. {background_recommendation}"
             self._add_setting_row(general_box, "Launch at login", autostart_switch, desc)
         else:
-            warning_text = (
-                "Automatic startup via systemd is not available on your system. "
-                "To start Ulauncher at login, add it to your desktop environment's autostart settings."
-            )
-            unavailable_label = Gtk.Label(label="Not available", sensitive=False)
-            self._add_setting_row(general_box, "Launch at login", unavailable_label, warning_text, is_warning=True)
+            keep_alive_switch = Gtk.Switch(active=self.settings.keep_alive)
+            keep_alive_switch.connect("notify::active", self._on_keep_alive_toggled)
+            desc = f"Keep Ulauncher running in the background. {background_recommendation}"
+            self._add_setting_row(general_box, "Keep running in background", keep_alive_switch, desc)
 
         # Hotkey
         if HotkeyController.is_supported():
@@ -269,15 +266,6 @@ class PreferencesView(BaseView):
         )
         self._add_setting_row(advanced_box, "Enable Layer Shell", layer_switch, desc)
 
-        # Daemonless mode
-        daemonless_switch = Gtk.Switch(active=not self.settings.keep_alive)
-        daemonless_switch.connect("notify::active", self._on_daemonless_toggled)
-        desc = (
-            "Only run Ulauncher on demand without a background daemon. Startup may be slower and quick launch "
-            "features like auto-start are disabled."
-        )
-        self._add_setting_row(advanced_box, "Daemonless mode", daemonless_switch, desc)
-
         # Jump keys
         jump_entry = Gtk.Entry(text=self.settings.jump_keys, width_chars=50)
         jump_entry.connect("changed", self._on_jump_keys_changed)
@@ -297,8 +285,6 @@ class PreferencesView(BaseView):
         is_enabled = switch.get_active()
         try:
             self.autostart_pref.toggle(is_enabled)
-            if is_enabled and not self.settings.keep_alive:
-                self.settings.save({"keep_alive": True})
         except OSError:
             logger.exception("Failed to toggle autostart")
             switch.set_active(not is_enabled)
@@ -356,12 +342,10 @@ class PreferencesView(BaseView):
     def _on_filters_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         self.settings.save({"disable_desktop_filters": switch.get_active()})
 
-    def _on_daemonless_toggled(self, switch: Gtk.Switch, _: Any) -> None:
+    def _on_keep_alive_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
-        self.settings.save({"keep_alive": not is_enabled})
-        events.emit("app:toggle_hold", not is_enabled)
-        if is_enabled:
-            SystemdController("ulauncher").stop()
+        self.settings.save({"keep_alive": is_enabled})
+        events.emit("app:toggle_hold", is_enabled)
 
     def _on_jump_keys_changed(self, entry: Gtk.Entry) -> None:
         self.settings.save({"jump_keys": entry.get_text()})
