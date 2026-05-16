@@ -1,3 +1,3 @@
 [D-BUS Service]
 Name=io.ulauncher.Ulauncher
-Exec=/usr/bin/ulauncher
+Exec=/usr/bin/ulauncher start

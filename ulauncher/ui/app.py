@@ -28,7 +28,7 @@ class UlauncherApp(Gtk.Application):
     # new instances sends the signals to the registered one
     # So all methods except __init__ runs on the main app
     query = ""
-    # One-shot: set to True to make the next activation a no-op (e.g. for --daemon startup).
+    # One-shot: set to True to make the next activation a no-op.
     skip_next_activate: bool = False
     # Whether the app should keep running with no windows open. Set in setup() from the
     # systemd unit state (or keep_alive fallback) and kept in sync by toggle_hold().

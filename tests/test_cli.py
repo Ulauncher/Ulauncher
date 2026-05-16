@@ -17,12 +17,12 @@ class TestCLIParse:
         [
             pytest.param(
                 [],
-                {"command": None, "verbose": False, "daemon": False},
+                {"command": None, "verbose": False},
                 id="defaults",
             ),
-            pytest.param(["--daemon"], {"command": None, "daemon": True}, id="daemon"),
             pytest.param(["--verbose"], {"command": None, "verbose": True}, id="verbose"),
             pytest.param(["-v"], {"command": None, "verbose": True}, id="v-short"),
+            pytest.param(["start"], {"command": "start"}, id="start"),
             pytest.param(["extensions"], {"command": "extensions"}, id="extensions"),
             pytest.param(["install", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
             pytest.param(["uninstall", "ext-id"], {"command": "uninstall", "input": "ext-id"}, id="uninstall"),
@@ -76,7 +76,7 @@ class TestCLIParse:
 
 
 class TestCLIRunCommand:
-    def test_run_command_dispatches_default_app_handler(self, mocker: MockerFixture) -> None:
+    def test_run_command_dispatches_default_start_handler(self, mocker: MockerFixture) -> None:
         ensure_runtime_dirs = mocker.patch("ulauncher.cli.ensure_runtime_dirs")
         mocker.patch("ulauncher.cli.configure_logging")
         handler = mocker.Mock(return_value=True)
@@ -87,5 +87,5 @@ class TestCLIRunCommand:
         assert cli.run_command(args) is True
 
         ensure_runtime_dirs.assert_called_once_with()
-        load_handler.assert_called_once_with("ulauncher.cli.commands.app:run")
+        load_handler.assert_called_once_with("start")
         handler.assert_called_once_with(args)
