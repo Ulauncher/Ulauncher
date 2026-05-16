@@ -13,12 +13,12 @@ class Settings(JsonConf):
     base_width = 750
     clear_previous_query = True
     close_on_focus_out = True
-    daemonless = False
     disable_desktop_filters = False
     enable_application_mode = True
     grab_mouse_pointer = False
     hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
     jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
+    keep_alive = True
     layer_shell = True
     max_recent_apps = 0
     raise_if_started = False
@@ -31,9 +31,13 @@ class Settings(JsonConf):
 
     # Convert dash to underscore
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
-        if key.replace("-", "_") == "show_indicator_icon":
-            key = "show_tray_icon"
-        super().__setitem__(key.replace("-", "_"), value)
+        normalized = key.replace("-", "_")
+        if normalized == "show_indicator_icon":
+            normalized = "show_tray_icon"
+        elif normalized == "daemonless":
+            normalized = "keep_alive"
+            value = not value
+        super().__setitem__(normalized, value)
 
     def get_jump_keys(self) -> list[str]:
         # convert to list and filter out duplicates

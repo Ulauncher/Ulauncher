@@ -141,7 +141,7 @@ class PreferencesView(BaseView):
             autostart_switch.connect("notify::active", self._on_autostart_toggled)
 
             desc = "Start Ulauncher automatically whenever your desktop session begins."
-            if self.settings.daemonless:
+            if not self.settings.keep_alive:
                 desc += " Enabling this will turn off Daemonless mode."
             self._add_setting_row(general_box, "Launch at login", autostart_switch, desc)
         else:
@@ -270,7 +270,7 @@ class PreferencesView(BaseView):
         self._add_setting_row(advanced_box, "Enable Layer Shell", layer_switch, desc)
 
         # Daemonless mode
-        daemonless_switch = Gtk.Switch(active=self.settings.daemonless)
+        daemonless_switch = Gtk.Switch(active=not self.settings.keep_alive)
         daemonless_switch.connect("notify::active", self._on_daemonless_toggled)
         desc = (
             "Only run Ulauncher on demand without a background daemon. Startup may be slower and quick launch "
@@ -297,8 +297,8 @@ class PreferencesView(BaseView):
         is_enabled = switch.get_active()
         try:
             self.autostart_pref.toggle(is_enabled)
-            if is_enabled and self.settings.daemonless:
-                self.settings.save({"daemonless": False})
+            if is_enabled and not self.settings.keep_alive:
+                self.settings.save({"keep_alive": True})
         except OSError:
             logger.exception("Failed to toggle autostart")
             switch.set_active(not is_enabled)
@@ -358,7 +358,7 @@ class PreferencesView(BaseView):
 
     def _on_daemonless_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
-        self.settings.save({"daemonless": is_enabled})
+        self.settings.save({"keep_alive": not is_enabled})
         events.emit("app:toggle_hold", not is_enabled)
         if is_enabled:
             SystemdController("ulauncher").stop()
