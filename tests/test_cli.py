@@ -112,3 +112,35 @@ class TestCLIRunCommand:
 
         load_handler.assert_called_once_with(command_name)
         handler.assert_called_once_with(args)
+
+
+class TestCLIHelp:
+    def test_groups_top_level_commands_in_help_output(self) -> None:
+        help_text = cli._get_parser().format_help()
+        start_summary = cli._get_commands()["start"].summary
+
+        app_group_index = help_text.index("App commands:")
+        show_index = help_text.index("Show the Ulauncher window (default command)")
+        help_index = help_text.index("Show help")
+        extension_group_index = help_text.index("Extension commands:")
+        extensions_index = help_text.index("List installed extensions")
+        preview_index = help_text.index("Preview extension")
+
+        assert app_group_index < show_index < help_index < extension_group_index < extensions_index < preview_index
+        assert "Available commands" not in help_text
+        assert "Options:" not in help_text
+        assert "\nApp commands:\n  start" in help_text
+        assert "\nExtension commands:\n  extensions (e)" in help_text
+        assert f"start {start_summary}" in " ".join(help_text.split())
+
+    def test_subcommand_help_does_not_repeat_top_level_command_groups(self, capsys: pytest.CaptureFixture[str]) -> None:
+        with pytest.raises(SystemExit) as exc_info:
+            cli.parse(["show", "--help"])
+
+        assert exc_info.value.code == 0
+
+        captured = capsys.readouterr()
+        assert "App commands:" not in captured.out
+        assert "Extension commands:" not in captured.out
+        assert "\nOptions:\n" in captured.out
+        assert captured.err == ""
