@@ -1,55 +1,130 @@
+from __future__ import annotations
+
 import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher import cli
 
 
-class TestCLI:
-    def test_parse_empty_args_defaults(self, capsys: pytest.CaptureFixture[str]) -> None:
-        args = cli.parse([])
+def assert_cli_args(args: cli.CLIArguments, expected_attrs: dict[str, object]) -> None:
+    for attr, value in expected_attrs.items():
+        assert getattr(args, attr) == value
 
-        assert args.daemon is False
-        assert args.verbose is False
-        assert args.command is None
-        assert capsys.readouterr().out == ""
 
-    def test_parse_no_window_maps_to_daemon(self, capsys: pytest.CaptureFixture[str]) -> None:
-        args = cli.parse(["--no-window"])
+class TestCLIParse:
+    @pytest.mark.parametrize(
+        ("input_args", "expected_attrs"),
+        [
+            pytest.param(
+                [],
+                {"command": None, "verbose": False, "daemon": False},
+                id="defaults",
+            ),
+            pytest.param(["--daemon"], {"command": None, "daemon": True}, id="daemon"),
+            pytest.param(["--verbose"], {"command": None, "verbose": True}, id="verbose"),
+            pytest.param(["-v"], {"command": None, "verbose": True}, id="v-short"),
+            pytest.param(["extensions"], {"command": "extensions"}, id="extensions"),
+            pytest.param(["install", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
+            pytest.param(["uninstall", "ext-id"], {"command": "uninstall", "input": "ext-id"}, id="uninstall"),
+            pytest.param(["upgrade"], {"command": "upgrade", "input": ""}, id="upgrade-all"),
+            pytest.param(["upgrade", "ext-id"], {"command": "upgrade", "input": "ext-id"}, id="upgrade-one"),
+            pytest.param(["preview", "/tmp/demo"], {"command": "preview", "path": "/tmp/demo"}, id="preview"),
+            pytest.param(
+                ["preview", "--with-debugger", "/tmp/demo"],
+                {"command": "preview", "path": "/tmp/demo", "with_debugger": True},
+                id="preview-with-debugger",
+            ),
+        ],
+    )
+    def test_parse_commands(
+        self,
+        input_args: list[str],
+        expected_attrs: dict[str, object],
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        args = cli.parse(input_args)
 
-        assert args.daemon is True
-        assert not hasattr(args, "no_window")
-        assert "use --daemon" in capsys.readouterr().err
+        assert_cli_args(args, expected_attrs)
 
-    def test_parse_dev_maps_to_verbose(self, capsys: pytest.CaptureFixture[str]) -> None:
-        args = cli.parse(["--dev"])
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert captured.err == ""
 
-        assert args.verbose is True
-        assert not hasattr(args, "dev")
-        assert "use --verbose" in capsys.readouterr().err
+    @pytest.mark.parametrize(
+        ("input_args", "expected_attrs"),
+        [
+            pytest.param(["e"], {"command": "extensions"}, id="extensions"),
+            pytest.param(["i", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
+            pytest.param(["rm", "ext-id"], {"command": "uninstall", "input": "ext-id"}, id="uninstall"),
+            pytest.param(["up"], {"command": "upgrade", "input": ""}, id="upgrade"),
+            pytest.param(["pr", "/tmp/demo"], {"command": "preview", "path": "/tmp/demo"}, id="preview"),
+        ],
+    )
+    def test_parse_command_aliases(
+        self,
+        input_args: list[str],
+        expected_attrs: dict[str, object],
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        args = cli.parse(input_args)
 
-    def test_parse_hide_window_exits(self, capsys: pytest.CaptureFixture[str]) -> None:
+        assert_cli_args(args, expected_attrs)
+
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert captured.err == ""
+
+    @pytest.mark.parametrize(
+        ("input_args", "expected_attrs", "removed_attr", "stderr_substring"),
+        [
+            pytest.param(
+                ["--no-window"], {"command": None, "daemon": True}, "no_window", "use --daemon", id="no-window"
+            ),
+            pytest.param(["--dev"], {"command": None, "verbose": True}, "dev", "use --verbose", id="dev"),
+        ],
+    )
+    def test_parse_legacy_argument_shims(
+        self,
+        input_args: list[str],
+        expected_attrs: dict[str, object],
+        removed_attr: str,
+        stderr_substring: str,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        args = cli.parse(input_args)
+
+        assert_cli_args(args, expected_attrs)
+        assert not hasattr(args, removed_attr)
+
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert stderr_substring in captured.err
+
+    @pytest.mark.parametrize(
+        ("input_args", "stderr_substring"),
+        [
+            pytest.param(["--hide-window"], "use --daemon", id="hide-window"),
+            pytest.param(["--no-extensions"], "see --help for available commands", id="no-extensions"),
+            pytest.param(["--no-window-shadow"], "the Window shadow size setting", id="no-window-shadow"),
+        ],
+    )
+    def test_parse_errors(
+        self,
+        input_args: list[str],
+        stderr_substring: str,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
         with pytest.raises(SystemExit) as exc_info:
-            cli.parse(["--hide-window"])
-        assert exc_info.value.code == 2
-        assert "use --daemon" in capsys.readouterr().err
+            cli.parse(input_args)
 
-    def test_parse_no_extensions_exits(self, capsys: pytest.CaptureFixture[str]) -> None:
-        with pytest.raises(SystemExit) as exc_info:
-            cli.parse(["--no-extensions"])
-        assert exc_info.value.code == 2
-        assert "see --help for available commands" in capsys.readouterr().err
-
-    def test_parse_no_window_shadow_exits(self) -> None:
-        with pytest.raises(SystemExit) as exc_info:
-            cli.parse(["--no-window-shadow"])
         assert exc_info.value.code == 2
 
-    def test_parse_upgrade_normalizes_alias(self, capsys: pytest.CaptureFixture[str]) -> None:
-        args = cli.parse(["up"])
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert stderr_substring in captured.err
 
-        assert args.command == "upgrade"
-        assert capsys.readouterr().out == ""
 
+class TestCLIRunCommand:
     def test_run_command_dispatches_default_app_handler(self, mocker: MockerFixture) -> None:
         ensure_runtime_dirs = mocker.patch("ulauncher.cli.ensure_runtime_dirs")
         mocker.patch("ulauncher.cli.configure_logging")
