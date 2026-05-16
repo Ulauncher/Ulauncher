@@ -177,8 +177,6 @@ def run_command(args: CLIArguments) -> int:
 
 def parse(input_args: list[str]) -> CLIArguments:
     """Parse CLI arguments"""
-    # Python's argparse is very similar to Gtk.Application.add_main_option_entries,
-    # but GTK adds in their own options we don't want like --help-gtk --help-gapplication --help-all
     parser = _get_parser()
 
     args = parser.parse_args(args=input_args)
