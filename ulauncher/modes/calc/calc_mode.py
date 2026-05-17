@@ -175,7 +175,7 @@ class CalcMode(Mode):
                 logger.error("Unexpected result type for calc copy action: %s", type(result).__name__)
                 callback(effects.do_nothing())
                 return
-            _events.emit("app:clipboard_store", result.result)
+            _events.emit("app:copy_and_close", result.result)
             callback(effects.close_window())
         else:
             logger.error("Unexpected action '%s' for Calc mode result '%s'", action_id, result)

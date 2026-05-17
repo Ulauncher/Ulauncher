@@ -98,7 +98,7 @@ class TestCalcMode:
         assert result.result == "5"
         callback = mocker.MagicMock()
         mode.activate_result("copy", result, query, callback)
-        event_emit.assert_called_once_with("app:clipboard_store", "5")
+        event_emit.assert_called_once_with("app:copy_and_close", "5")
         callback.assert_called_once()
         # Verify callback was called with close_window effect
         assert callback.call_args[0][0]["type"] == EffectType.CLOSE_WINDOW

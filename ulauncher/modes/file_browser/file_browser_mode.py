@@ -108,7 +108,7 @@ class FileBrowserMode(Mode):
         elif action_id == "open_parent":
             callback(effects.open(dirname(result.path)))
         elif action_id == "copy_path":
-            _events.emit("app:clipboard_store", result.path)
+            _events.emit("app:copy_and_close", result.path)
             callback(effects.close_window())
         else:
             logger.error("Unexpected action '%s' for File Browser mode result '%s'", action_id, result)

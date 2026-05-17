@@ -258,6 +258,8 @@ class ExtensionMode(Mode):
         if name == "response":
             self.handle_response(ext_id, args[0])
         elif name == "clipboard_store":
+            # Extension API: only copies; the launcher stays open and the extension is
+            # responsible for any subsequent UI changes.
             events.emit("app:clipboard_store", args[0])
         elif name == "notify":
             ext = extension_registry.get(ext_id)

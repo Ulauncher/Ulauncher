@@ -53,7 +53,7 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         open_detached(data)
 
     elif event_type == EffectType.LEGACY_COPY and isinstance(data, str):
-        _events.emit("app:clipboard_store", data)
+        _events.emit("app:copy_and_close", data)
 
     elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
         from ulauncher.modes.shortcuts.run_script import run_script

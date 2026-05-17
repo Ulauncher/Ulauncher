@@ -141,6 +141,10 @@ class UlauncherApp(Gtk.Application):
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(data, -1)
         clipboard.store()
+
+    @events.on
+    def copy_and_close(self, data: str) -> None:
+        self.clipboard_store(data)
         self.toggle_hold(True)
         self.close_launcher()
         # Clipboard contents only live as long as the owning app does, so we need to give clipboard
