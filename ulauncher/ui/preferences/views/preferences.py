@@ -135,19 +135,19 @@ class PreferencesView(BaseView):
     def _add_general_section(self, parent: Gtk.Box) -> None:
         """Add general settings section"""
         general_box = self._create_section_container(parent, "General")
-        background_recommendation = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
+        run_in_bg_footer = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
 
-        # Launch at login / Keep running in background
+        # Run in background (via systemd autostart, or keep-alive fallback)
         if self.autostart_pref.can_start():
             autostart_switch = Gtk.Switch(active=self.autostart_pref.is_enabled())
             autostart_switch.connect("notify::active", self._on_autostart_toggled)
-            desc = f"Start Ulauncher in the background when your desktop session starts. {background_recommendation}"
-            self._add_setting_row(general_box, "Launch at login", autostart_switch, desc)
+            desc = "Start Ulauncher automatically with your desktop session so it's ready when you need it."
+            self._add_setting_row(general_box, "Run in background", autostart_switch, f"{desc}{run_in_bg_footer}")
         else:
             keep_alive_switch = Gtk.Switch(active=self.settings.keep_alive)
             keep_alive_switch.connect("notify::active", self._on_keep_alive_toggled)
-            desc = f"Keep Ulauncher running in the background. {background_recommendation}"
-            self._add_setting_row(general_box, "Keep running in background", keep_alive_switch, desc)
+            desc = "Keep Ulauncher running in the background after first use so it stays ready"
+            self._add_setting_row(general_box, "Run in background", keep_alive_switch, f"{desc}{run_in_bg_footer}")
 
         # Hotkey
         if HotkeyController.is_supported():
@@ -291,6 +291,8 @@ class PreferencesView(BaseView):
         except OSError:
             logger.exception("Failed to toggle autostart")
             switch.set_active(not is_enabled)
+            return
+        events.emit("app:toggle_hold", is_enabled)
 
     def _on_hotkey_clicked(self, _: Gtk.Button) -> None:
         HotkeyController.show_dialog()
