@@ -145,16 +145,7 @@ class UlauncherApp(Gtk.Application):
     @events.on
     def copy_and_close(self, data: str) -> None:
         self.clipboard_store(data)
-        self.toggle_hold(True)
         self.close_launcher()
-        # Clipboard contents only live as long as the owning app does, so we need to give clipboard
-        # managers (klipper, gpaste, wl-clip-persist, ...) time to snapshot them after we set
-        # ownership. X11/Wayland have no "snapshot done" event, and managers react on their own
-        # schedule with non-trivial wakeup latency
-        # GTK4's Gdk.Clipboard.store_async closes this gap properly, but we're using GTK3.
-        # The timeout is set to one second to give clipboard managers enough time to snapshot.
-        # I tried 0.25s but it wasn't enough. 1s seems to be, but maybe not on all systems?
-        timer(1, lambda: self.toggle_hold(False))
 
     @events.on
     def show_launcher(self) -> None:
@@ -169,6 +160,16 @@ class UlauncherApp(Gtk.Application):
 
     def _on_window_destroyed(self, _window: Gtk.Window, key: Literal["main", "preferences"]) -> None:
         self.windows.pop(key, None)
+        if not self.windows:
+            # Clipboard contents only live as long as the owning app, and clipboard managers
+            # (klipper, gpaste, wl-clip-persist, ...) need time to snapshot them after we set
+            # ownership. X11/Wayland have no "snapshot done" event, and managers react on their
+            # own schedule with non-trivial wakeup latency. GTK4's Gdk.Clipboard.store_async
+            # closes this gap properly, but we're using GTK3. So hold the app for 1s on the
+            # chance the user's last action was a clipboard copy. 0.25s wasn't enough; 1s seems
+            # to work, but maybe not on all systems.
+            self.toggle_hold(True)
+            timer(1, lambda: self.toggle_hold(False))
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
