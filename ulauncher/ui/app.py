@@ -164,9 +164,11 @@ class UlauncherApp(Gtk.Application):
 
         if "main" not in self.windows:
             main_window = UlauncherWindow(application=self)
-            # Drop the reference on destroy to prevent stale window references
-            main_window.connect("destroy", lambda *_: self.windows.pop("main", None))
+            main_window.connect("destroy", self._on_window_destroyed, "main")
             self.windows["main"] = main_window
+
+    def _on_window_destroyed(self, _window: Gtk.Window, key: Literal["main", "preferences"]) -> None:
+        self.windows.pop(key, None)
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
@@ -193,8 +195,7 @@ class UlauncherApp(Gtk.Application):
             cast("PreferencesWindow", preferences).present(page)
         else:
             preferences = PreferencesWindow(application=self)
-            # Drop the weakref entry on destroy so we don't keep a stale window around.
-            preferences.connect("destroy", lambda *_: self.windows.pop("preferences", None))
+            preferences.connect("destroy", self._on_window_destroyed, "preferences")
             self.windows["preferences"] = preferences
             preferences.show(page)
 
