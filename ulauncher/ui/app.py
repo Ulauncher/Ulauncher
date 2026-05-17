@@ -183,21 +183,26 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        if main_window := self.windows.get("main"):
-            cast("UlauncherWindow", main_window).close(save_query=True)
-
-        if preferences := self.windows.get("preferences"):
-            if preferences.get_window() is None:
-                logger.warning("Ignoring stale Preferences window reference (suspecting a memory leak)")
-                del self.windows["preferences"]
-                self.show_preferences(page)
-                return
-            cast("PreferencesWindow", preferences).present(page)
-        else:
+        # Register prefs in self.windows before closing main, so the destroy handler sees a
+        # remaining window during the transition.
+        preferences = cast("PreferencesWindow | None", self.windows.get("preferences"))
+        if preferences and preferences.get_window() is None:
+            logger.warning("Ignoring stale Preferences window reference (suspecting a memory leak)")
+            del self.windows["preferences"]
+            preferences = None
+        is_new = preferences is None
+        if preferences is None:
             preferences = PreferencesWindow(application=self)
             preferences.connect("destroy", self._on_window_destroyed, "preferences")
             self.windows["preferences"] = preferences
+
+        if main_window := self.windows.get("main"):
+            cast("UlauncherWindow", main_window).close(save_query=True)
+
+        if is_new:
             preferences.show(page)
+        else:
+            preferences.present(page)
 
     def activate_query(self, query_str: str) -> None:
         self.activate()
