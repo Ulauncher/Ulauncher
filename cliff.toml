@@ -25,7 +25,20 @@ link_parsers = [
 ]
 # Group names carry <!-- N --> prefixes so git-cliff sorts them correctly;
 # striptags in the template strips these before rendering.
+#
+# To omit a follow-up commit from the changelog (e.g. one that should have been
+# part of an earlier commit but was made separately), add an `Amends:` trailer
+# to the commit body. The first parser below skips any commit with such a
+# trailer. Two forms:
+# Amends: <sha>           - when the amended commit is already on main
+# Amends: HEAD^ or HEAD~2 - when the amended commit is in the same PR (survives the
+#                           SHA churn from GitHub's rebase-merge, since the literal
+#                           text is preserved and rebase-merge keeps commit order)
+#
+# NOTE: The filtering will just skip it unconditionally, so ONLY use this if the original
+# commit has not yet been released.
 commit_parsers = [
+    { footer = "^Amends:", skip = true },
     { breaking = true, group = "<!-- -1 -->💥 Breaking Changes" },
     { message = "^feat(\\(.+\\))?!?:", group = "<!-- 0 -->✨ New Features" },
     { message = "^fix(\\(.+\\))?!?:", group = "<!-- 1 -->🐛 Bug Fixes" },
