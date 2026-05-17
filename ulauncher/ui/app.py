@@ -143,8 +143,13 @@ class UlauncherApp(Gtk.Application):
         clipboard.store()
         self.toggle_hold(True)
         self.close_launcher()
-        # Hold the app for 1 second (hopefully enough, 0.25s wasn't) to allow it time to store the clipboard
-        # before exiting. There is no gtk3 event or method that works for this unfortunately
+        # Clipboard contents only live as long as the owning app does, so we need to give clipboard
+        # managers (klipper, gpaste, wl-clip-persist, ...) time to snapshot them after we set
+        # ownership. X11/Wayland have no "snapshot done" event, and managers react on their own
+        # schedule with non-trivial wakeup latency
+        # GTK4's Gdk.Clipboard.store_async closes this gap properly, but we're using GTK3.
+        # The timeout is set to one second to give clipboard managers enough time to snapshot.
+        # I tried 0.25s but it wasn't enough. 1s seems to be, but maybe not on all systems?
         timer(1, lambda: self.toggle_hold(False))
 
     @events.on
