@@ -23,7 +23,8 @@ class TestCLIParse:
             pytest.param(["show"], {"command": "show", "query": None}, id="show"),
             pytest.param(["show", "foo"], {"command": "show", "query": "foo"}, id="show-with-query"),
             pytest.param(["toggle"], {"command": "toggle"}, id="toggle"),
-            pytest.param(["--verbose"], {"command": "show", "verbose": True}, id="verbose-default-command"),
+            pytest.param(["show", "--verbose"], {"command": "show", "verbose": True}, id="show-verbose"),
+            pytest.param(["--verbose"], {"command": "show", "verbose": True}, id="bare-verbose"),
             pytest.param(["start"], {"command": "start"}, id="start"),
             pytest.param(["extensions"], {"command": "extensions"}, id="extensions"),
             pytest.param(["install", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
@@ -35,6 +36,14 @@ class TestCLIParse:
                 ["preview", "--with-debugger", "/tmp/demo"],
                 {"command": "preview", "path": "/tmp/demo", "with_debugger": True},
                 id="preview-with-debugger",
+            ),
+            pytest.param(["start", "--verbose"], {"command": "start", "verbose": True}, id="start-verbose"),
+            pytest.param(["--verbose", "start"], {"command": "start", "verbose": True}, id="verbose-before-start"),
+            pytest.param(["-v", "extensions"], {"command": "extensions", "verbose": True}, id="v-before-extensions"),
+            pytest.param(
+                ["--verbose", "install", "git://example"],
+                {"command": "install", "input": "git://example", "verbose": True},
+                id="verbose-before-install",
             ),
         ],
     )
@@ -79,12 +88,14 @@ class TestCLIParse:
 
 class TestCLIRunCommand:
     @pytest.mark.parametrize(
-        ("input_args", "command_name", "logging_mode"),
+        ("input_args", "command_name", "logging_mode", "verbose"),
         [
-            pytest.param([], "show", None, id="show"),
-            pytest.param(["toggle"], "toggle", None, id="toggle"),
-            pytest.param(["start"], "start", "app", id="start"),
-            pytest.param(["extensions"], "extensions", "cli", id="extensions"),
+            pytest.param([], "show", None, False, id="show"),
+            pytest.param(["toggle"], "toggle", None, False, id="toggle"),
+            pytest.param(["start"], "start", "app", False, id="start"),
+            pytest.param(["start", "--verbose"], "start", "app", True, id="start-verbose-trailing"),
+            pytest.param(["--verbose", "start"], "start", "app", True, id="start-verbose-leading"),
+            pytest.param(["extensions"], "extensions", "cli", False, id="extensions"),
         ],
     )
     def test_run_command_dispatches_handler_with_expected_bootstrap_mode(
@@ -92,6 +103,7 @@ class TestCLIRunCommand:
         input_args: list[str],
         command_name: str,
         logging_mode: str | None,
+        verbose: bool,
         mocker: MockerFixture,
     ) -> None:
         ensure_runtime_dirs = mocker.patch("ulauncher.cli.ensure_runtime_dirs")
@@ -105,13 +117,24 @@ class TestCLIRunCommand:
 
         if logging_mode is not None:
             ensure_runtime_dirs.assert_called_once_with()
-            configure_logging.assert_called_once_with(verbose=False, use_app_logging=logging_mode == "app")
+            configure_logging.assert_called_once_with(verbose=verbose, use_app_logging=logging_mode == "app")
         else:
             ensure_runtime_dirs.assert_not_called()
             configure_logging.assert_not_called()
 
         load_handler.assert_called_once_with(command_name)
         handler.assert_called_once_with(args)
+
+    def test_run_command_warns_when_verbose_set_on_runtimeless_command(
+        self,
+        mocker: MockerFixture,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        mocker.patch("ulauncher.cli._load_handler", return_value=mocker.Mock(return_value=0))
+
+        cli.run_command(cli.parse(["show", "--verbose"]))
+
+        assert "--verbose has no effect on the show command" in capsys.readouterr().err
 
 
 class TestCLIHelp:

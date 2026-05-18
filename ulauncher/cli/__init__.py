@@ -67,7 +67,6 @@ class CLIArgumentParser(argparse.ArgumentParser):
         self.help_option_actions: tuple[argparse.Action, ...] = (
             self.add_argument("--version", action="version", help="Show version", version=version),
             self.add_argument("-h", "--help", action="help", help="Show help"),
-            self.add_argument("-v", "--verbose", action="store_true", help="Use verbose logging"),
         )
 
     def format_help(self) -> str:
@@ -208,7 +207,7 @@ def _get_commands() -> dict[CommandName, CLICommand]:
 def _get_parser() -> CLIArgumentParser:
     parser = CLIArgumentParser(
         prog="ulauncher",  # override Python 3.14 argparse's `python3 -m ulauncher` auto-prog
-        usage="%(prog)s [OPTIONS] [COMMAND]",
+        usage="%(prog)s [COMMAND] [OPTIONS]",
         description=CLI_DESCRIPTION,
         formatter_class=CLIHelpFormatter,
         version=f"Ulauncher {version}",
@@ -231,6 +230,10 @@ def _get_parser() -> CLIArgumentParser:
         )
         for argument in command.arguments:
             command_parser.add_argument(*argument.args, **argument.kwargs)
+        # Accept --verbose on every subparser so users don't have to remember which commands
+        # use logging. Hidden (and warned-about post-parse) for commands that don't.
+        verbose_help = "Use verbose logging" if command.has_runtime else argparse.SUPPRESS
+        command_parser.add_argument("-v", "--verbose", action="store_true", help=verbose_help)
         command_parser.set_defaults(command=command_name)
 
     return parser
@@ -247,12 +250,22 @@ def run_command(args: CLIArguments) -> int:
     if command.has_runtime:
         ensure_runtime_dirs()
         configure_logging(verbose=args.verbose, use_app_logging=command.group == "App")
+    elif args.verbose:
+        _emit_warning(f"--verbose has no effect on the {args.command} command")
     return _load_handler(args.command)(args)
+
+
+def _emit_warning(msg: str) -> None:
+    if sys.stderr.isatty():
+        msg = f"\033[33m{msg}\033[0m"
+    sys.stderr.write(f"{msg}\n")
 
 
 def parse(input_args: list[str]) -> CLIArguments:
     """Parse CLI arguments"""
-    args = _get_parser().parse_args(args=input_args)
-    namespace = vars(args)
-    namespace["command"] = cast("CommandName", namespace["command"] or "show")
-    return CLIArguments(**namespace)
+    # --verbose/-v used to be a top-level argument, but is now subparser level.
+    # Sorting it last for compatibility.
+    args = sorted(input_args, key=lambda arg: arg in ("-v", "--verbose"))
+    if all(arg in ("-v", "--verbose") for arg in args):
+        args = ["show", *args]
+    return CLIArguments(**vars(_get_parser().parse_args(args=args)))
