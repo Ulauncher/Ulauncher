@@ -240,7 +240,8 @@ class UlauncherApp(Gtk.Application):
             from ulauncher.ui.helpers.tray_icon import TrayIcon
 
             self._tray_icon = TrayIcon()
-        self._tray_icon.switch(enable)
+        # A tray icon is only meaningful while the app keeps running in the background.
+        self._tray_icon.switch(enable and self._persistent)
 
     @events.on
     def toggle_hold(self, value: bool) -> None:
@@ -248,6 +249,7 @@ class UlauncherApp(Gtk.Application):
         if value != self._persistent:
             self._persistent = value
             self.hold() if value else self.release()
+            self.toggle_tray_icon(Settings.load().show_tray_icon)
 
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
