@@ -149,6 +149,8 @@ class PreferencesView(BaseView):
             desc = "Keep Ulauncher running in the background after first use so it stays ready"
             self._add_setting_row(general_box, "Run in background", keep_alive_switch, f"{desc}{run_in_bg_footer}")
 
+        self._add_tray_icon_row(general_box)
+
         # Hotkey
         if HotkeyController.is_supported():
             hotkey_button = Gtk.Button.new_with_label("Set hotkey")
@@ -235,12 +237,6 @@ class PreferencesView(BaseView):
         """Add advanced settings section"""
         advanced_box = self._create_section_container(parent, "Advanced")
 
-        # Show tray icon
-        tray_switch = Gtk.Switch(active=self.settings.show_tray_icon)
-        tray_switch.connect("notify::active", self._on_tray_toggled)
-        desc = "Display a tray icon for quick actions. Requires AppIndicator3 or XApp on X11."
-        self._add_setting_row(advanced_box, "Show tray icon", tray_switch, desc)
-
         # Desktop filters
         filters_switch = Gtk.Switch(active=self.settings.disable_desktop_filters)
         filters_switch.connect("notify::active", self._on_filters_toggled)
@@ -280,6 +276,22 @@ class PreferencesView(BaseView):
         )
         self._add_setting_row(advanced_box, "Terminal command", terminal_entry, desc, full_width=True)
 
+    def _add_tray_icon_row(self, parent: Gtk.Box) -> None:
+        # Placed next to "Run in background" because the tray icon is only effective while persistent.
+        self._tray_switch = Gtk.Switch(active=self.settings.show_tray_icon, sensitive=self._is_persistent())
+        self._tray_switch.connect("notify::active", self._on_tray_toggled)
+        desc = (
+            "Display a tray icon for quick actions. Only available while Ulauncher is set to "
+            "run in the background. Also requires AppIndicator3 or XApp on X11."
+        )
+        self._add_setting_row(parent, "Show tray icon", self._tray_switch, desc)
+
+    def _is_persistent(self) -> bool:
+        # Mirrors UlauncherApp.setup(): systemd autostart wins where supported, else keep_alive.
+        if self.autostart_pref.can_start():
+            return self.autostart_pref.is_enabled()
+        return self.settings.keep_alive
+
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
@@ -292,6 +304,7 @@ class PreferencesView(BaseView):
             logger.exception("Failed to toggle autostart")
             switch.set_active(not is_enabled)
             return
+        self._tray_switch.set_sensitive(is_enabled)
         events.emit("app:toggle_hold", is_enabled)
 
     def _on_hotkey_clicked(self, _: Gtk.Button) -> None:
@@ -350,6 +363,7 @@ class PreferencesView(BaseView):
     def _on_keep_alive_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
         self.settings.save({"keep_alive": is_enabled})
+        self._tray_switch.set_sensitive(is_enabled)
         events.emit("app:toggle_hold", is_enabled)
 
     def _on_jump_keys_changed(self, entry: Gtk.Entry) -> None:
