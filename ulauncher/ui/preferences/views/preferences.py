@@ -283,6 +283,9 @@ class PreferencesView(BaseView):
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
+        # Skip if already in sync - notably when set_active() below re-fires this handler.
+        if is_enabled == self.autostart_pref.is_enabled():
+            return
         try:
             self.autostart_pref.toggle(is_enabled)
         except OSError:
