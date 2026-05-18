@@ -1,20 +1,15 @@
-from __future__ import annotations
-
 import logging
 import signal
 import subprocess
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from ulauncher import app_id, paths
+from ulauncher.cli import CLIArguments
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_remote import parse_extension_url
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
-
-if TYPE_CHECKING:
-    from ulauncher.cli import CLIArguments
 
 logger = logging.getLogger(__name__)
 

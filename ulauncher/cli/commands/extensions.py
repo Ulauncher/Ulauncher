@@ -1,12 +1,7 @@
-from __future__ import annotations
-
 import logging
-from typing import TYPE_CHECKING
 
+from ulauncher.cli import CLIArguments
 from ulauncher.modes.extensions import extension_registry
-
-if TYPE_CHECKING:
-    from ulauncher.cli import CLIArguments
 
 logger = logging.getLogger(__name__)
 

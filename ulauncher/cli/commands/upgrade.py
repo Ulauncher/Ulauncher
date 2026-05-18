@@ -2,15 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
 
+from ulauncher.cli import CLIArguments
 from ulauncher.cli.commands import get_ext_controller
 from ulauncher.modes.extensions import ext_exceptions, extension_registry
+from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.utils.dbus import dbus_trigger_event
-
-if TYPE_CHECKING:
-    from ulauncher.cli import CLIArguments
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
 
 logger = logging.getLogger(__name__)
 

@@ -4,10 +4,8 @@ import contextlib
 import logging
 import sys
 from types import TracebackType
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from ulauncher.cli import CLIArguments
+from ulauncher.cli import CLIArguments
 
 
 def run(cli_args: CLIArguments) -> int:
