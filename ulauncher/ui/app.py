@@ -96,10 +96,14 @@ class UlauncherApp(Gtk.Application):
         from ulauncher.utils.systemd_controller import SystemdController
 
         settings = Settings.load()
+        # Always hold on app start (conditionally release after closing window)
         self.hold()
         # On systemd the unit's enabled state wins; keep_alive is the non-systemd fallback.
         controller = SystemdController("ulauncher")
         self._persistent = controller.is_enabled() or (settings.keep_alive and not controller.supported)
+        if self._persistent:
+            # Sync additional hold with user settings
+            self.hold()
 
         if settings.show_tray_icon and self._persistent:
             self.toggle_tray_icon(True)
