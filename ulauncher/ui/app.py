@@ -10,7 +10,7 @@ import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
-from ulauncher import app_id, cli, first_run
+from ulauncher import app_id, first_run
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.preferences.preferences_window import PreferencesWindow
@@ -30,6 +30,9 @@ class UlauncherApp(Gtk.Application):
     query = ""
     # One-shot: set to True to make the next activation a no-op (e.g. for --daemon startup).
     skip_next_activate: bool = False
+    # Whether the app should keep running with no windows open. Set in setup() from the
+    # systemd unit state (or keep_alive fallback) and kept in sync by toggle_hold().
+    _persistent: bool = False
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
@@ -90,19 +93,20 @@ class UlauncherApp(Gtk.Application):
         self.run([])
 
     def setup(self) -> None:
-        settings = Settings.load()
-        cli_args = cli.get_args()
-        # On systemd systems, the unit's enabled state is the source of truth for "should this
-        # run as a service" - keep_alive only applies as a fallback for users without systemd.
         from ulauncher.utils.systemd_controller import SystemdController
 
-        is_persistent = cli_args.daemon or (settings.keep_alive and not SystemdController("ulauncher").supported)
-        if is_persistent:
-            # Keep the app running even without a window
+        settings = Settings.load()
+        # Always hold on app start (conditionally release after closing window)
+        self.hold()
+        # On systemd the unit's enabled state wins; keep_alive is the non-systemd fallback.
+        controller = SystemdController("ulauncher")
+        self._persistent = controller.is_enabled() or (settings.keep_alive and not controller.supported)
+        if self._persistent:
+            # Sync additional hold with user settings
             self.hold()
 
-            if settings.show_tray_icon:
-                self.toggle_tray_icon(True)
+        if settings.show_tray_icon and self._persistent:
+            self.toggle_tray_icon(True)
 
         if first_run or settings.hotkey_show_app:
             from ulauncher.ui.helpers.hotkey_controller import HotkeyController
@@ -160,16 +164,17 @@ class UlauncherApp(Gtk.Application):
 
     def _on_window_destroyed(self, _window: Gtk.Window, key: Literal["main", "preferences"]) -> None:
         self.windows.pop(key, None)
-        if not self.windows:
+        if not self.windows and not self._persistent:
             # Clipboard contents only live as long as the owning app, and clipboard managers
             # (klipper, gpaste, wl-clip-persist, ...) need time to snapshot them after we set
             # ownership. X11/Wayland have no "snapshot done" event, and managers react on their
             # own schedule with non-trivial wakeup latency. GTK4's Gdk.Clipboard.store_async
-            # closes this gap properly, but we're using GTK3. So hold the app for 1s on the
+            # closes this gap properly, but we're using GTK3. So delay the quit by 1s on the
             # chance the user's last action was a clipboard copy. 0.25s wasn't enough; 1s seems
             # to work, but maybe not on all systems.
-            self.toggle_hold(True)
-            timer(1, lambda: self.toggle_hold(False))
+            #
+            # re-check windows in case the user re-opened it during the delay
+            timer(1, lambda: self.quit() if not self.windows else None)
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
@@ -184,8 +189,8 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        # Register prefs in self.windows before closing main, so the destroy handler sees a
-        # remaining window during the transition.
+        # Register prefs in self.windows before closing main, so the main destroy handler
+        # sees a remaining window and doesn't quit the app on non-persistent setups.
         preferences = cast("PreferencesWindow | None", self.windows.get("preferences"))
         if preferences and preferences.get_window() is None:
             logger.warning("Ignoring stale Preferences window reference (suspecting a memory leak)")
@@ -235,11 +240,16 @@ class UlauncherApp(Gtk.Application):
             from ulauncher.ui.helpers.tray_icon import TrayIcon
 
             self._tray_icon = TrayIcon()
-        self._tray_icon.switch(enable)
+        # A tray icon is only meaningful while the app keeps running in the background.
+        self._tray_icon.switch(enable and self._persistent)
 
     @events.on
     def toggle_hold(self, value: bool) -> None:
-        self.hold() if value else self.release()
+        # Idempotent: gio's release() logs a critical warning on underflow.
+        if value != self._persistent:
+            self._persistent = value
+            self.hold() if value else self.release()
+            self.toggle_tray_icon(Settings.load().show_tray_icon)
 
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
