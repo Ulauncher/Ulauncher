@@ -4,7 +4,8 @@ body = """
 ## What's Changed{% for group, commits in commits | filter(attribute="merge_commit", value=false) | group_by(attribute="group") %}
 
 ### {{ group | striptags | trim }}
-{% for commit in commits %}* {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}
+{% for commit in commits %}{% set breaking_footer = commit.footers | filter(attribute="token", value="BREAKING-CHANGE") | first %}* {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}{% if breaking_footer %}
+  > {{ breaking_footer.value | upper_first }}{% endif %}
 {% endfor %}{% endfor %}
 {% else %}
 ## What's Changed
@@ -12,7 +13,7 @@ body = """
 * No user-facing changes were captured for this release.
 {% endif %}
 """
-trim = true
+trim = false
 
 [git]
 conventional_commits = true
@@ -39,7 +40,8 @@ link_parsers = [
 # commit has not yet been released.
 commit_parsers = [
     { footer = "^Amends:", skip = true },
-    { breaking = true, group = "<!-- -1 -->💥 Breaking Changes" },
+    { footer = "^BREAKING[ -]?CHANGE", group = "<!-- -1 -->💥 Breaking Changes", breaking = true },
+    { message = "^[a-z]+(\\(.+\\))?!:", group = "<!-- -1 -->💥 Breaking Changes", breaking = true },
     { message = "^feat(\\(.+\\))?!?:", group = "<!-- 0 -->✨ New Features" },
     { message = "^fix(\\(.+\\))?!?:", group = "<!-- 1 -->🐛 Bug Fixes" },
     { message = "^perf(\\(.+\\))?!?:", group = "<!-- 2 -->⚡ Performance" },
