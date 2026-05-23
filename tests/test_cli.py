@@ -17,11 +17,13 @@ class TestCLIParse:
         [
             pytest.param(
                 [],
-                {"command": None, "verbose": False},
-                id="defaults",
+                {"command": "show", "verbose": False, "input": "", "path": "", "query": None, "with_debugger": False},
+                id="defaults-to-show",
             ),
-            pytest.param(["--verbose"], {"command": None, "verbose": True}, id="verbose"),
-            pytest.param(["-v"], {"command": None, "verbose": True}, id="v-short"),
+            pytest.param(["show"], {"command": "show", "query": None}, id="show"),
+            pytest.param(["show", "foo"], {"command": "show", "query": "foo"}, id="show-with-query"),
+            pytest.param(["toggle"], {"command": "toggle"}, id="toggle"),
+            pytest.param(["--verbose"], {"command": "show", "verbose": True}, id="verbose-default-command"),
             pytest.param(["start"], {"command": "start"}, id="start"),
             pytest.param(["extensions"], {"command": "extensions"}, id="extensions"),
             pytest.param(["install", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
@@ -76,16 +78,37 @@ class TestCLIParse:
 
 
 class TestCLIRunCommand:
-    def test_run_command_dispatches_default_start_handler(self, mocker: MockerFixture) -> None:
+    @pytest.mark.parametrize(
+        ("input_args", "command_name", "logging_mode"),
+        [
+            pytest.param([], "show", None, id="show"),
+            pytest.param(["toggle"], "toggle", None, id="toggle"),
+            pytest.param(["start"], "start", "app", id="start"),
+            pytest.param(["extensions"], "extensions", "cli", id="extensions"),
+        ],
+    )
+    def test_run_command_dispatches_handler_with_expected_bootstrap_mode(
+        self,
+        input_args: list[str],
+        command_name: str,
+        logging_mode: str | None,
+        mocker: MockerFixture,
+    ) -> None:
         ensure_runtime_dirs = mocker.patch("ulauncher.cli.ensure_runtime_dirs")
-        mocker.patch("ulauncher.cli.configure_logging")
+        configure_logging = mocker.patch("ulauncher.cli.configure_logging")
         handler = mocker.Mock(return_value=True)
         load_handler = mocker.patch("ulauncher.cli._load_handler", return_value=handler)
 
-        args = cli.parse([])
+        args = cli.parse(input_args)
 
         assert cli.run_command(args) is True
 
-        ensure_runtime_dirs.assert_called_once_with()
-        load_handler.assert_called_once_with("start")
+        if logging_mode is not None:
+            ensure_runtime_dirs.assert_called_once_with()
+            configure_logging.assert_called_once_with(verbose=False, use_app_logging=logging_mode == "app")
+        else:
+            ensure_runtime_dirs.assert_not_called()
+            configure_logging.assert_not_called()
+
+        load_handler.assert_called_once_with(command_name)
         handler.assert_called_once_with(args)

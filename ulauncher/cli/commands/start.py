@@ -8,7 +8,7 @@ from types import TracebackType
 from ulauncher.cli import CLIArguments
 
 
-def run(cli_args: CLIArguments) -> int:
+def run(_: CLIArguments) -> int:
     from ulauncher import init_helpers
 
     init_helpers.init_x11_threads()
@@ -75,6 +75,6 @@ def run(cli_args: CLIArguments) -> int:
     app = UlauncherApp()
 
     with contextlib.suppress(KeyboardInterrupt):
-        app.start(activate=cli_args.command is None)
+        app.start(activate=False)
 
     return 0
