@@ -94,7 +94,7 @@ let
     nativeCheckInputs = packages.tests.all python3Packages;
 
     postPatch = ''
-      patchShebangs bin/ulauncher-toggle
+      patchShebangs bin/ulauncher bin/ulauncher-toggle
 
       substituteInPlace \
           bin/ulauncher-toggle \
@@ -123,6 +123,16 @@ let
         ${lib.optionalString withXorg ''--prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libX11 ]}"''}
         --set-default ULAUNCHER_SYSTEM_PREFIX "$out"
       )
+    '';
+
+    # bin/ulauncher is now a shell script, so wrapPythonPrograms skips it.
+    # Wrap it manually to inject PYTHONPATH (so `python3 -m ulauncher` finds gi)
+    # plus the same gapps/X11/prefix args python scripts would get.
+    postFixup = ''
+      wrapProgram $out/bin/ulauncher \
+        --prefix PYTHONPATH : "$program_PYTHONPATH" \
+        --prefix PATH : "$program_PATH" \
+        "''${makeWrapperArgs[@]}"
     '';
 
     doCheck = true;
