@@ -1,47 +1,43 @@
-#!/usr/bin/env python3
-import os
-import sys
-from pathlib import Path
+#!/bin/sh
 
+# Print $2 to stderr (with backslash escapes like \n interpreted), wrapped in the ANSI SGR
+# code $1 when stderr is a TTY.
+print_color() {
+  if [ -t 2 ]; then
+    printf '\033[%sm%b\033[0m\n' "$1" "$2" >&2
+  else
+    printf '%b\n' "$2" >&2
+  fi
+}
 
-def format_err(text: str) -> str:
-    return f"\033[01;31m{text}\033[01;0m\n"
+SCRIPT_PATH=$(readlink -f "$0")
+PROJECT_ROOT=$(dirname "$(dirname "$SCRIPT_PATH")")
 
-# Add project root directory (enable symlink and trunk execution)
-PYTHONPATH = os.getenv("PYTHONPATH", "")
-PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
-IS_DEV = PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path
+if [ -d "$PROJECT_ROOT/ulauncher" ]; then
+  # Running from a dev checkout.
+  export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
+  export ULAUNCHER_SYSTEM_DATA_DIR="$PROJECT_ROOT/data"
+else
+  # paths.py previously derived the install prefix from sys.argv[0] (= /usr/bin/ulauncher),
+  # but `python3 -m ulauncher` makes sys.argv[0] point into site-packages. Pass it explicitly.
+  : "${ULAUNCHER_SYSTEM_PREFIX:=$PROJECT_ROOT}"
+  export ULAUNCHER_SYSTEM_PREFIX
+fi
 
-# Running in developer environment path
-if IS_DEV:
-    sys.path.insert(0, str(PROJECT_ROOT))
-    os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
-    os.environ["ULAUNCHER_SYSTEM_DATA_DIR"] = str(Path(PROJECT_ROOT, "data"))
+python3 -m ulauncher "$@"
+status=$?
 
-try:
-    from ulauncher import cli
-except ModuleNotFoundError:
-    ulauncher_module_path = list(Path("/usr/lib/").glob("python*/site-packages/ulauncher"))
-    if os.path.isfile("/etc/arch-release") and ulauncher_module_path:
-        sys.path.append(str(ulauncher_module_path[-1].parent))
-        from ulauncher import cli
+if [ "$status" -ne 0 ] && [ -f /etc/arch-release ] && ! python3 -c 'import ulauncher' 2>/dev/null; then
+  arch_pkg_found=0
+  for arch_pkg in /usr/lib/python*/site-packages/ulauncher; do
+    [ -d "$arch_pkg" ] || continue
+    arch_pkg_found=1
+    export PYTHONPATH="$(dirname "$arch_pkg")${PYTHONPATH:+:$PYTHONPATH}"
+  done
+  if [ "$arch_pkg_found" -eq 1 ]; then
+    print_color '1;31' 'Your Arch Linux system Python version is updated after installing Ulauncher.\nPlease do a clean reinstall of Ulauncher, and any other AUR packages that may be affected by this.\nFor more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280'
+    exec python3 -m ulauncher "$@"
+  fi
+fi
 
-        sys.stderr.write(
-            format_err(
-                "Your Arch Linux system Python version is updated after installing Ulauncher.\n"
-                "Please do a clean reinstall of Ulauncher, and any other AUR packages that may be affected by this.\n"
-                "For more info, see https://github.com/Ulauncher/Ulauncher/discussions/1280"
-            )
-        )
-    else:
-        import traceback
-
-        traceback.print_exc(file=sys.stderr)
-        sys.exit(
-            format_err("Ulauncher is not properly installed on your system.") +
-            "Please install or reinstall Ulauncher, and ensure you are not overriding your system Python version"
-        )
-
-args = cli.get_args()
-
-sys.exit(cli.run_command(args))
+exit "$status"
