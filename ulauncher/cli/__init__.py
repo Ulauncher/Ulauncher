@@ -10,15 +10,16 @@ from ulauncher.data import BaseDataClass
 from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs
 from ulauncher.utils.lru_cache import lru_cache
 
-CommandName = Literal["start", "extensions", "install", "uninstall", "upgrade", "preview"]
+CommandName = Literal["show", "toggle", "start", "extensions", "install", "uninstall", "upgrade", "preview"]
 
 
 class CLIArguments(BaseDataClass):
     verbose = False
     input = ""
     path = ""
+    query: str | None = None
     with_debugger = False
-    command: CommandName | None = None
+    command: CommandName = "show"
 
 
 CLICommandHandler = Callable[[CLIArguments], int]
@@ -34,6 +35,7 @@ class CLICommand(BaseDataClass):
     description: str = ""  # longer sentence, shown at the top of `ulauncher <cmd> --help`
     aliases: tuple[str, ...] = ()
     arguments: tuple[CLICommandArgument, ...] = ()
+    has_runtime: bool = True
 
 
 @lru_cache(maxsize=None)
@@ -48,6 +50,22 @@ def _get_commands() -> dict[CommandName, CLICommand]:
         "start": CLICommand(
             summary="Start the Ulauncher background process",
             description="Start the Ulauncher background process",
+        ),
+        "show": CLICommand(
+            summary="Show the Ulauncher window (default command)",
+            description="Show the Ulauncher window",
+            has_runtime=False,
+            arguments=(
+                CLICommandArgument(
+                    args=("query",),
+                    kwargs={"nargs": argparse.OPTIONAL, "default": None, "help": "Optional query to populate"},
+                ),
+            ),
+        ),
+        "toggle": CLICommand(
+            summary="Toggle the Ulauncher window",
+            description="Toggle the Ulauncher window",
+            has_runtime=False,
         ),
         "extensions": CLICommand(
             aliases=("e",),
@@ -105,6 +123,7 @@ def _get_commands() -> dict[CommandName, CLICommand]:
 @lru_cache(maxsize=None)
 def _get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
+        prog="ulauncher",  # override Python 3.14 argparse's `python3 -m ulauncher` auto-prog
         usage="%(prog)s [OPTIONS] [COMMAND]",
         description="Ulauncher is a GTK application launcher with support for extensions, shortcuts (scripts), calculator, file browser and custom themes.",  # noqa: E501
         add_help=False,
@@ -141,12 +160,16 @@ def _load_handler(command_name: str) -> CLICommandHandler:
 
 
 def run_command(args: CLIArguments) -> int:
-    ensure_runtime_dirs()
-    configure_logging(verbose=args.verbose, use_app_logging=args.command in (None, "start"))
-    return _load_handler(args.command or "start")(args)
+    command = _get_commands()[args.command]
+    if command.has_runtime:
+        ensure_runtime_dirs()
+        configure_logging(verbose=args.verbose, use_app_logging=args.command == "start")
+    return _load_handler(args.command)(args)
 
 
 def parse(input_args: list[str]) -> CLIArguments:
     """Parse CLI arguments"""
     args = _get_parser().parse_args(args=input_args)
-    return CLIArguments(**vars(args))
+    namespace = vars(args)
+    namespace["command"] = cast("CommandName", namespace["command"] or "show")
+    return CLIArguments(**namespace)
