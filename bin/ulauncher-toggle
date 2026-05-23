@@ -8,7 +8,12 @@ do
   arg="$1"
   shift
   if [ "$arg" = "--query" ] || [ "$arg" = "-q" ]; then
-    gapplication action io.ulauncher.Ulauncher set-query "'$1'"
+    if [ "$#" -eq 0 ]; then
+      printf '%s\n' 'ulauncher-toggle: missing value for --query/-q' >&2
+      exit 2
+    fi
+    escaped_query=$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e "s/'/\\\\'/g")
+    gapplication action io.ulauncher.Ulauncher set-query "'$escaped_query'"
     exit 0
   fi
 done
