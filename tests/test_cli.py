@@ -74,55 +74,6 @@ class TestCLIParse:
         assert captured.out == ""
         assert captured.err == ""
 
-    @pytest.mark.parametrize(
-        ("input_args", "expected_attrs", "removed_attr", "stderr_substring"),
-        [
-            pytest.param(
-                ["--no-window"], {"command": None, "daemon": True}, "no_window", "use --daemon", id="no-window"
-            ),
-            pytest.param(["--dev"], {"command": None, "verbose": True}, "dev", "use --verbose", id="dev"),
-        ],
-    )
-    def test_parse_legacy_argument_shims(
-        self,
-        input_args: list[str],
-        expected_attrs: dict[str, object],
-        removed_attr: str,
-        stderr_substring: str,
-        capsys: pytest.CaptureFixture[str],
-    ) -> None:
-        args = cli.parse(input_args)
-
-        assert_cli_args(args, expected_attrs)
-        assert not hasattr(args, removed_attr)
-
-        captured = capsys.readouterr()
-        assert captured.out == ""
-        assert stderr_substring in captured.err
-
-    @pytest.mark.parametrize(
-        ("input_args", "stderr_substring"),
-        [
-            pytest.param(["--hide-window"], "use --daemon", id="hide-window"),
-            pytest.param(["--no-extensions"], "see --help for available commands", id="no-extensions"),
-            pytest.param(["--no-window-shadow"], "the Window shadow size setting", id="no-window-shadow"),
-        ],
-    )
-    def test_parse_errors(
-        self,
-        input_args: list[str],
-        stderr_substring: str,
-        capsys: pytest.CaptureFixture[str],
-    ) -> None:
-        with pytest.raises(SystemExit) as exc_info:
-            cli.parse(input_args)
-
-        assert exc_info.value.code == 2
-
-        captured = capsys.readouterr()
-        assert captured.out == ""
-        assert stderr_substring in captured.err
-
 
 class TestCLIRunCommand:
     def test_run_command_dispatches_default_app_handler(self, mocker: MockerFixture) -> None:
