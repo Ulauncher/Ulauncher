@@ -7,7 +7,7 @@ from typing import Any
 import ulauncher.api
 from ulauncher.api.shared.event import EventType
 from ulauncher.gi import GLib
-from ulauncher.utils.socket_msg_controller import SocketMsgController
+from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize_ipc_args
 
 logger = logging.getLogger(__name__)
 
@@ -71,5 +71,5 @@ class Client:
 
     def send(self, name: str, *args: Any) -> None:
         """Send a message with name and argument(s) to the app"""
-        logger.debug('Send %s message with arguments "%s"', name, args)
+        logger.debug("Send %s message with arguments %s", name, summarize_ipc_args(args))
         self.msg_controller.send([name, *args])

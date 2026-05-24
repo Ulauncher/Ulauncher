@@ -9,6 +9,26 @@ from ulauncher.gi import Gio, GioUnix, GLib
 
 logger = logging.getLogger(__name__)
 
+_MAX_SCALAR_REPR = 120
+
+
+def _summarize_dict(a: dict[str, Any]) -> str:
+    fields = [f"{k}={a[k]!r}" for k in ("type", "request_id", "ext_id") if k in a]
+    fields.extend(f"{k}=[{len(v)} items]" for k, v in a.items() if isinstance(v, list))
+    return "{" + ", ".join(fields) + "}"
+
+
+def summarize_ipc_args(args: Any) -> str:
+    """Compact representation of IPC message args for logging"""
+    parts = []
+    for a in args:
+        if isinstance(a, dict):
+            parts.append(_summarize_dict(a))
+        else:
+            r = repr(a)
+            parts.append(r if len(r) <= _MAX_SCALAR_REPR else r[: _MAX_SCALAR_REPR - 3] + "...")
+    return "(" + ", ".join(parts) + ")"
+
 
 class SocketMsgController:
     """

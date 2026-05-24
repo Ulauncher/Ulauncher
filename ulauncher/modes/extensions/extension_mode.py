@@ -16,6 +16,7 @@ from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
 logger = logging.getLogger(__name__)
 events = EventBus("extensions")
@@ -251,7 +252,7 @@ class ExtensionMode(Mode):
 
     @events.on
     def handle_message(self, ext_id: str, name: str, *args: Any) -> None:
-        logger.debug('Incoming %s message with arguments "%s" from "%s"', name, args, ext_id)
+        logger.debug("Incoming %s message with arguments %s from %r", name, summarize_ipc_args(args), ext_id)
         if not args:
             logger.warning("Received '%s' message without event payload from %s", name, ext_id)
             return
