@@ -1,7 +1,6 @@
 import logging
 import signal
 import subprocess
-import time
 from pathlib import Path
 
 from ulauncher import app_id, paths
@@ -112,17 +111,12 @@ def run(args: CLIArguments) -> int:  # noqa: PLR0911, PLR0912, PLR0915 - intenti
         )
 
     preview_ext_id = f"{ext_id}.preview"
-    interrupted = False
 
-    def signal_handler(_sig: int, _frame: object) -> None:
-        nonlocal interrupted
-        interrupted = True
-
-    signal.signal(signal.SIGINT, signal_handler)
-
+    # Block SIGINT so sigwait() can dequeue it atomically without racing
+    # with Python's default KeyboardInterrupt handler.
+    signal.pthread_sigmask(signal.SIG_BLOCK, [signal.SIGINT])
     logger.info("Press Ctrl+C to stop previewing extension '%s'...", ext_id)
-    while not interrupted:
-        time.sleep(0.1)
+    signal.sigwait([signal.SIGINT])
 
     logger.info("Stopping '%s'...", ext_id)
     dbus_trigger_event("extensions:stop_preview", {"preview_ext_id": preview_ext_id, "original_ext_id": ext_id})
