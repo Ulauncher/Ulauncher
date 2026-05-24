@@ -107,6 +107,10 @@ def v5_to_v6() -> None:  # noqa: PLR0912
     # Migrate JSON to JSON first, assuming these are newer
     for file in ext_prefs.rglob("*.json"):
         try:
+            data = json_load(str(file))
+            # Skip files already in the v6 shape to avoid re-logging and rewriting on every startup
+            if sorted(data.keys()) == ["preferences", "triggers"]:
+                continue
             _migrate_file(str(file), str(file), partial(_migrate_user_prefs, file.stem), overwrite=True)
         except (OSError, KeyError, ValueError) as e:
             _logger.warning("Skipping migration for extension preference %s (extension not installed): %s", file, e)
