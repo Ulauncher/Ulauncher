@@ -10,15 +10,6 @@ from ulauncher.data import BaseDataClass
 from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs
 from ulauncher.utils.lru_cache import lru_cache
 
-_LEGACY_ARGS: dict[str, tuple[str | None, str]] = {
-    "dev": ("verbose", "use --verbose"),
-    "no_window": ("daemon", "use --daemon"),
-    # intentionally break hide_window to prevent legacy XDG autostart entries from starting
-    "hide_window": (None, "use --daemon"),
-    "no_extensions": (None, "see --help for available commands"),
-    "no_window_shadow": (None, "configure via the Window shadow size setting in preferences"),
-}
-
 CommandName = Literal["extensions", "install", "uninstall", "upgrade", "preview"]
 
 
@@ -129,12 +120,6 @@ def _get_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run Ulauncher as a background process, without initially showing the window",
     )
-    # deprecated
-    parser.add_argument("--dev", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--hide-window", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--no-extensions", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--no-window", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--no-window-shadow", action="store_true", help=argparse.SUPPRESS)
 
     subparsers = parser.add_subparsers(
         title="commands",
@@ -177,20 +162,5 @@ def run_command(args: CLIArguments) -> int:
 
 def parse(input_args: list[str]) -> CLIArguments:
     """Parse CLI arguments"""
-    parser = _get_parser()
-
-    args = parser.parse_args(args=input_args)
-    namespace = vars(args)
-
-    for legacy_arg, (shim, hint) in _LEGACY_ARGS.items():
-        if namespace.pop(legacy_arg, False):
-            msg = f"The --{legacy_arg.replace('_', '-')} argument has been removed ({hint})"
-            if sys.stderr.isatty():
-                msg = f"\033[33m{msg}\033[0m"
-            sys.stderr.write(f"{msg}\n")
-            if shim:
-                namespace[shim] = True
-            else:
-                sys.exit(2)
-
-    return CLIArguments(**namespace)
+    args = _get_parser().parse_args(args=input_args)
+    return CLIArguments(**vars(args))

@@ -10,6 +10,27 @@ print_color() {
   fi
 }
 
+# Rewrite legacy flags before handing argv to python. Direct `python -m ulauncher`
+# invocations bypass this and get argparse's "unrecognized arguments" error instead.
+orig_count=$#
+walked=0
+while [ "$walked" -lt "$orig_count" ]; do
+  arg=$1; shift; walked=$((walked + 1))
+  case "$arg" in
+    --hide-window)
+      print_color 33 "The --hide-window argument has been removed (use --daemon)"; exit 2 ;;
+    --no-extensions)
+      print_color 33 "The --no-extensions argument has been removed (see --help for available commands)"; exit 2 ;;
+    --no-window-shadow)
+      print_color 33 "The --no-window-shadow argument has been removed (configure via the Window shadow size setting in preferences)"; exit 2 ;;
+    --dev)
+      print_color 33 "The --dev argument has been removed (use --verbose)"; set -- "$@" --verbose ;;
+    --no-window)
+      print_color 33 "The --no-window argument has been removed (use --daemon)"; set -- "$@" --daemon ;;
+    *) set -- "$@" "$arg" ;;
+  esac
+done
+
 SCRIPT_PATH=$(readlink -f "$0")
 PROJECT_ROOT=$(dirname "$(dirname "$SCRIPT_PATH")")
 
