@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def run(args: CLIArguments) -> int:
+    # `install <path-or-url>` is idempotent by design: re-running on an already-installed
+    # extension upgrades it. Lets `ulauncher i .` work as a one-command dev loop. See #1505.
     if controller := get_ext_controller(args.input):
+        logger.info("Extension '%s' is already installed, checking for updates...", controller.id)
         return 0 if upgrade_one(controller) else 1
 
     url = normalize_ext_arg(args.input)
