@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Wrap a string as a GVariant text-format string literal,
+# escaping backslashes and single quotes per the GVariant syntax.
+gvariant_string() {
+  printf "'%s'" "$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e "s/'/\\\\'/g")"
+}
+
 # Print $2 to stderr (with backslash escapes like \n interpreted), wrapped in the ANSI SGR
 # code $1 when stderr is a TTY.
 print_color() {
@@ -10,7 +16,7 @@ print_color() {
   fi
 }
 
-# Rewrite legacy flags before handing argv to python. Direct `python -m ulauncher`
+# Rewrite legacy flags before any further argv handling. Direct `python -m ulauncher`
 # invocations bypass this and get argparse's "unrecognized arguments" error instead.
 orig_count=$#
 walked=0
@@ -32,6 +38,42 @@ while [ "$walked" -lt "$orig_count" ]; do
     *) set -- "$@" "$arg" ;;
   esac
 done
+
+# Fast path: bypass Python for the performance-critical commands (bare invocation, `show`,
+# `show <query>`, `toggle`). Any flag, unknown subcommand, or extra positional defers to
+# Python so it can produce the real parse output/error.
+subcmd=''
+query=''
+has_query=0
+needs_argparse=0
+for arg in "$@"; do
+  case "$arg" in
+    -*) needs_argparse=1 ;;
+    *)
+      if [ -z "$subcmd" ]; then
+        subcmd=$arg
+      elif [ "$subcmd" = show ] && [ "$has_query" -eq 0 ]; then
+        query=$arg; has_query=1
+      else
+        needs_argparse=1
+      fi
+      ;;
+  esac
+done
+
+if [ "$needs_argparse" -eq 0 ]; then
+  case "$subcmd" in
+    '')      exec gapplication action io.ulauncher.Ulauncher show-window ;;
+    toggle)  exec gapplication action io.ulauncher.Ulauncher toggle-window ;;
+    show)
+      if [ "$has_query" -eq 1 ]; then
+        exec gapplication action io.ulauncher.Ulauncher set-query "$(gvariant_string "$query")"
+      else
+        exec gapplication action io.ulauncher.Ulauncher show-window
+      fi
+      ;;
+  esac
+fi
 
 SCRIPT_PATH=$(readlink -f "$0")
 PROJECT_ROOT=$(dirname "$(dirname "$SCRIPT_PATH")")
