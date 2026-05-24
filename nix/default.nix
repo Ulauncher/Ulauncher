@@ -97,6 +97,7 @@ let
       patchShebangs bin/ulauncher bin/ulauncher-toggle
 
       substituteInPlace \
+          bin/ulauncher \
           bin/ulauncher-toggle \
           io.ulauncher.Ulauncher.desktop \
         --replace-fail gapplication ${glib}/bin/gapplication
