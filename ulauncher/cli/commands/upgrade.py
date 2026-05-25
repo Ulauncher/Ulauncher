@@ -12,15 +12,16 @@ from ulauncher.utils.dbus import dbus_trigger_event
 logger = logging.getLogger(__name__)
 
 
-def _warn_url_error(ext_id: str, url: str) -> None:
+def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
+    log = logger.error if fatal else logger.warning
     if url.startswith(("/", "file://")):
-        logger.warning(
+        log(
             "Could not upgrade %s: local path '%s' no longer exists. Reinstall with: ulauncher install <new-path>",
             ext_id,
             url,
         )
     else:
-        logger.warning("Could not upgrade %s: invalid URL '%s'", ext_id, url)
+        log("Could not upgrade %s: invalid URL '%s'", ext_id, url)
 
 
 async def _upgrade_all_extensions() -> list[str]:
@@ -35,7 +36,7 @@ async def _upgrade_all_extensions() -> list[str]:
             if updated:
                 updated_extensions.append(controller.id)
         except ext_exceptions.UrlError:
-            _warn_url_error(controller.id, controller.state.url)
+            _log_url_error(controller.id, controller.state.url, fatal=False)
         except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
             logger.warning("Network error: Could not upgrade %s", controller.id)
 
@@ -46,10 +47,10 @@ def upgrade_one(controller: ExtensionController) -> bool:
     try:
         updated = asyncio.run(controller.update())
     except ext_exceptions.UrlError:
-        _warn_url_error(controller.id, controller.state.url)
+        _log_url_error(controller.id, controller.state.url, fatal=True)
         return False
     except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
-        logger.warning("Network error: Could not upgrade %s", controller.id)
+        logger.error("Network error: Could not upgrade %s", controller.id)  # noqa: TRY400 - traceback is noise here
         return False
     if updated:
         dbus_trigger_event("extensions:reload", [controller.id])
