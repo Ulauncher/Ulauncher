@@ -1,0 +1,133 @@
+name: Startup perf
+
+# Informational: runs `make perf-compare` against the PR's base branch and posts a comment
+# if 3 consecutive runs all show |delta| >= 5%. Never fails the build -- per-sample variance
+# on this benchmark is large, so a single noisy run shouldn't gate a merge. The marker
+# (`<!-- startup-perf-comment -->`) lets the workflow update or clear the comment on later
+# pushes instead of stacking duplicates.
+
+on:
+  pull_request:
+    paths:
+      - "ulauncher/**"
+      - "bin/ulauncher"
+      - "makefile"
+      - ".github/workflows/perf.yml"
+
+# Cancel any superseded run for this PR -- only the latest commit's measurement is interesting.
+concurrency:
+  group: perf-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    container: ulauncher/build-image:6.6
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # `git worktree add` in `make perf-compare` needs base branch history
+
+      - name: Materialize base branch locally
+        # `make perf-compare` defaults BASE to `main`; checkout leaves us detached, so promote
+        # `origin/<base>` to a local branch under that name. Pass via env to avoid shell
+        # injection from a hostile branch name in `run:` interpolation.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git branch "$BASE_REF" "origin/$BASE_REF" 2>/dev/null || true
+
+      - uses: actions/cache@v4
+        with:
+          path: .venv
+          # Shared key with tests.yml so the two workflows reuse the same venv cache entry.
+          key: venv-${{ hashFiles('requirements.txt', 'makefile', '.github/workflows/tests.yml') }}
+
+      - name: venv
+        run: make venv QUIET=1
+
+      - name: Compare startup-perf against base
+        id: perf
+        env:
+          BASE: ${{ github.base_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          regression=true
+          deltas=""
+          for attempt in 1 2 3; do
+            echo "::group::Attempt $attempt of 3"
+            xvfb-run --auto-servernum -- make perf-compare 2>&1 | tee perf.log
+            echo "::endgroup::"
+            line=$(grep '^delta:' perf.log | tail -1)
+            pct=$(printf '%s' "$line" | sed -nE 's/.*\(([+-][0-9.]+)%.*/\1/p')
+            if [ -z "$pct" ]; then
+              echo "::error::could not parse delta from perf-compare output"
+              exit 1
+            fi
+            deltas+="- Attempt ${attempt}: ${pct}%"$'\n'
+            # awk handles signed-float comparison (bash arithmetic can't do floats).
+            if awk -v p="$pct" 'BEGIN { exit !(p < 5 && p > -5) }'; then
+              echo "|$pct%| < 5% on attempt $attempt; treating as noise."
+              regression=false
+              break
+            fi
+          done
+          {
+            echo "regression=$regression"
+            echo "deltas<<EOF"
+            printf '%s' "$deltas"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post or update PR comment
+        uses: actions/github-script@v7
+        env:
+          REGRESSION: ${{ steps.perf.outputs.regression }}
+          DELTAS: ${{ steps.perf.outputs.deltas }}
+          BASE_REF: ${{ github.base_ref }}
+        with:
+          script: |
+            const marker = '<!-- startup-perf-comment -->';
+            const regression = process.env.REGRESSION === 'true';
+            const baseRef = process.env.BASE_REF;
+            const deltas = process.env.DELTAS;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+
+            // Nothing to do if there's no regression and no prior comment to update.
+            if (!regression && !existing) {
+              core.info('No regression and no existing comment; nothing to do.');
+              return;
+            }
+
+            const body = regression
+              ? `${marker}
+            ## :warning: Significant startup-perf delta vs \`${baseRef}\`
+
+            All 3 \`make perf-compare\` runs (N=20) reported |delta| >= 5%:
+
+            ${deltas}
+            Per-sample variance is large on this benchmark; small deltas often persist
+            as noise, but a consistent >=5% delta is worth a closer look. Positive
+            values mean slower than base; negative means faster. Run
+            \`make perf-compare\` locally to confirm.`
+              : `${marker}
+            ## :white_check_mark: Startup-perf within noise floor
+
+            \`make perf-compare\` against \`${baseRef}\` produced |delta| < 5%.`;
+
+            const params = { owner: context.repo.owner, repo: context.repo.repo, body };
+            if (existing) {
+              await github.rest.issues.updateComment({ ...params, comment_id: existing.id });
+            } else {
+              await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
+            }
