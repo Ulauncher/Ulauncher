@@ -8,6 +8,7 @@ from pathlib import Path
 from ulauncher import app_id, paths
 from ulauncher.cli import CLIArguments
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
+from ulauncher.modes.extensions.extension_controller import DEBUGPY_HOST, DEBUGPY_PORT
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_remote import parse_extension_url
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
@@ -132,8 +133,10 @@ def run(args: CLIArguments) -> int:
 
     if args.with_debugger:
         logger.info(
-            "Connect your debugger to: localhost:5678\n"
-            "See https://github.com/Ulauncher/Ulauncher/wiki/How-to-debug-an-extension for instructions."
+            "Connect your debugger to: %s:%d\n"
+            "See https://github.com/Ulauncher/Ulauncher/wiki/How-to-debug-an-extension for instructions.",
+            DEBUGPY_HOST,
+            DEBUGPY_PORT,
         )
 
     _wait_for_interrupt(ext_id)

@@ -25,6 +25,9 @@ from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
 
+DEBUGPY_HOST = "127.0.0.1"
+DEBUGPY_PORT = 5678
+
 
 class ExtensionPreference(ExtensionManifestPreference):
     value: str | int | bool | None = None
@@ -290,7 +293,7 @@ class ExtensionController:
                     "-m",
                     "debugpy",
                     "--listen",
-                    "127.0.0.1:5678",
+                    f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
                     "--wait-for-client",
                     extension_main,
                 ]
