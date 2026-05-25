@@ -128,7 +128,7 @@ run-container:
 
 #=Lint/test Commands
 
-.PHONY: check lint format check-container check-all pyrefly ruff rumdl typos pytest
+.PHONY: check lint format check-container check-all pyrefly ruff rumdl typos pytest perf perf-compare
 
 # Run all linters
 lint: venv typos ruff pyrefly rumdl
@@ -174,6 +174,68 @@ pytest: venv
 		echo -e "xvfb-run detected. Running pytest in a virtual X server environment."
 		xvfb-run --auto-servernum -- pytest -p no:cacheprovider $(PYTEST_ARGS) tests
 	fi
+
+# Print the median first-draw time (in ms) across $$ITERATIONS runs of `bin/ulauncher start`.
+# Drives the probe in ulauncher/ui/ulauncher_window.py (gated on ULAUNCHER_PERF_START_BOOTTIME,
+# so this has zero effect on normal runs). DBUS_SESSION_BUS_ADDRESS=disabled: forces
+# GApplication into local-only mode so the test doesn't collide with a developer's running
+# ulauncher daemon, and sidesteps the xdg-desktop-portal / a11y activation storm that
+# `dbus-run-session` triggers on Wayland. Override with `make perf ITERATIONS=N`.
+perf:
+	@set -euo pipefail
+	root=$${ULAUNCHER_PERF_REPO_ROOT:-.}
+	iterations=$${ITERATIONS:-5}
+	samples=""
+	for _ in $$(seq 1 $$iterations); do
+		# Captured as late as possible (right before exec) so the measurement window matches
+		# what a hotkey-triggered dbus activation would see.
+		read -r t0 _ < /proc/uptime
+		# cd into the target checkout: `python -m ulauncher` (invoked by bin/ulauncher)
+		# prepends '' to sys.path BEFORE the PYTHONPATH the wrapper exports, so cwd decides
+		# which ulauncher package gets imported. Without this, perf-compare would silently
+		# import the current branch's code for both runs. `timeout` surfaces a missing probe
+		# (e.g. comparing against a base older than this commit) as a clear failure.
+		# `|| true` so a probe-less binary (the timeout path) reaches the diagnostic below
+		# instead of failing silently via set -e on the assignment's non-zero exit.
+		output=$$(cd "$$root" && DBUS_SESSION_BUS_ADDRESS=disabled: ULAUNCHER_PERF_START_BOOTTIME=$$t0 timeout 30 ./bin/ulauncher start 2>&1) || true
+		ms=$$(printf '%s\n' "$$output" | awk -F= '/^ULAUNCHER_PERF first_draw_ms=/ {print $$2; exit}')
+		if [ -z "$$ms" ]; then echo "probe output not found (likely missing in $$root); last subprocess output:" >&2; printf '%s\n' "$$output" >&2; exit 1; fi
+		samples+="$$ms"$$'\n'
+	done
+	printf '%s' "$$samples" | sort -n | awk -v n=$$iterations '
+		{ a[NR] = $$1 }
+		END {
+			if (n % 2 == 1) printf "%.1f\n", a[(n + 1) / 2]
+			else printf "%.1f\n", (a[n/2] + a[n/2+1]) / 2
+		}'
+
+# Run `make perf` against BASE (default main) in a temporary worktree, then again here;
+# reports the delta. Honors ITERATIONS like `make perf`.
+perf-compare:
+	@set -euo pipefail
+	base=$${BASE:-main}
+	current=$$(git rev-parse --abbrev-ref HEAD)
+	if [ "$$current" = "$$base" ]; then
+		echo "Currently on $$base; check out the branch to compare first."
+		exit 1
+	fi
+	# Per-sample variance on this benchmark is large (single runs span 30%+ of the median),
+	# so a pairwise comparison needs more samples than the standalone `make perf` ballpark.
+	# 20 keeps each side under ~6s while pulling the noise floor to ~2-3%; deltas under ~5%
+	# should still be treated as noise without rerunning. Override with `ITERATIONS=...`.
+	export ITERATIONS=$${ITERATIONS:-20}
+	worktree=$$(mktemp -d)
+	trap "git worktree remove --force $$worktree 2>/dev/null || true; rm -rf $$worktree" EXIT
+	git worktree add --quiet --detach "$$worktree" "$$base"
+
+	# ULAUNCHER_PERF_REPO_ROOT redirects the inline `perf` recipe at the worktree's checkout
+	# so the same measurement code runs against both sides even when base predates this target.
+	base_ms=$$(ULAUNCHER_PERF_REPO_ROOT="$$worktree" $(MAKE) -s perf)
+	current_ms=$$($(MAKE) -s perf)
+	awk -v b="$$base_ms" -v c="$$current_ms" -v bn="$$base" -v cn="$$current" 'BEGIN {
+		d = c - b; p = d / b * 100; w = (d > 0) ? "slower" : "faster"
+		printf "[%s] %.1fms\n[%s] %.1fms\ndelta: %+.1fms (%+.1f%%, %s)\n", bn, b, cn, c, d, p, w
+	}'
 
 # Auto format the code
 format: venv

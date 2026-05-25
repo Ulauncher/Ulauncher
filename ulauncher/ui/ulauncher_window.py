@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import logging
+import os
+import sys
+import time
 from typing import Any, Iterable
 
 from gi.repository import Gdk, Gtk
@@ -213,6 +216,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     def on_initial_draw(self, *_: tuple[Any]) -> None:
+        # ULAUNCHER_PERF_START_BOOTTIME is a perf-test probe (see tests/perf/test_startup_perf.py).
+        # When set, report elapsed time from the caller's externally-captured /proc/uptime and
+        # exit before deferred_init - this is the earliest point at which keyboard input registers.
+        if t0 := os.environ.get("ULAUNCHER_PERF_START_BOOTTIME"):
+            elapsed_ms = (time.clock_gettime(time.CLOCK_BOOTTIME) - float(t0)) * 1000
+            sys.stdout.write(f"ULAUNCHER_PERF first_draw_ms={elapsed_ms:.2f}\n")
+            sys.stdout.flush()
+            if app := self.get_application():
+                app.quit()
+            return
         logger.info("Window shown")
         self.disconnect_by_func(self.on_initial_draw)
         GLib.idle_add(self.deferred_init)
