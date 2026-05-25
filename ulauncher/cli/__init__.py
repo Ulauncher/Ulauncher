@@ -59,13 +59,13 @@ class CLIHelpFormatter(argparse.HelpFormatter):
 class CLIArgumentParser(argparse.ArgumentParser):
     """Render top-level help from explicit CLI metadata instead of parser internals."""
 
-    def __init__(self, *args: Any, version: str = "", **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, add_help=False, **kwargs)
         # Will appear at the tail of the "App commands" section in --help. Do not add to this
         # unless you know what you're doing -- Ulauncher's CLI is designed around "verbs" (e.g.
         # `ulauncher show`) implemented as sub-parsers, with flags only at the sub-parser level.
         self.help_option_actions: tuple[argparse.Action, ...] = (
-            self.add_argument("--version", action="version", help="Show version", version=version),
+            self.add_argument("--version", action="version", help="Show version", version=f"Ulauncher {version}"),
             self.add_argument("-h", "--help", action="help", help="Show help"),
         )
 
@@ -210,7 +210,6 @@ def _get_parser() -> CLIArgumentParser:
         usage="%(prog)s [COMMAND] [OPTIONS]",
         description=CLI_DESCRIPTION,
         formatter_class=CLIHelpFormatter,
-        version=f"Ulauncher {version}",
     )
 
     subparsers = parser.add_subparsers(
