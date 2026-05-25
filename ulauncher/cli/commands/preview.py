@@ -58,13 +58,17 @@ def _resolve_ext_id(path: Path) -> str | None:
     url_to_parse = str(path)
     try:
         git_url = (
-            subprocess.check_output(["git", "remote", "get-url", "origin"], cwd=str(path), stderr=subprocess.DEVNULL)
+            subprocess.check_output(
+                ["git", "remote", "get-url", "origin"], cwd=str(path), stderr=subprocess.DEVNULL, timeout=2
+            )
             .decode()
             .strip()
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         # Not a git repository or git not available, use path as is
         logger.debug("No git remote found, using path as URL input")
+    except subprocess.TimeoutExpired:
+        logger.debug("git remote lookup timed out, using path as URL input")
     else:
         if git_url:
             url_to_parse = git_url
