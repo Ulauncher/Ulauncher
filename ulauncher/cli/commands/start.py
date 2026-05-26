@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os
 import sys
 from types import TracebackType
 
@@ -73,6 +74,15 @@ def run(_: CLIArguments) -> int:
     v5_to_v6()
 
     app = UlauncherApp()
+
+    # Perf-test probe (see UlauncherWindow.on_initial_draw): when ULAUNCHER_PERF_START_BOOTTIME
+    # is set, schedule the launcher to open as soon as the main loop is idle so the probe can
+    # measure cold-start to first input. Without this, `ulauncher start` would register as a
+    # daemon and idle until an external D-Bus activation arrived.
+    if os.environ.get("ULAUNCHER_PERF_START_BOOTTIME"):
+        from ulauncher.gi import GLib
+
+        GLib.idle_add(app.show_launcher)
 
     with contextlib.suppress(KeyboardInterrupt):
         app.start(activate=False)
