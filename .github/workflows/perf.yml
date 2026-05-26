@@ -155,17 +155,25 @@ jobs:
               const word = isSlower ? 'regression' : 'improvement';
               const direction = isSlower ? 'slowdown' : 'speedup';
               return `${marker}
-            ## ${icon} Significant startup-perf ${word} vs \`${baseRef}\`
-
-            3 \`make perf-compare\` runs (N=20) reported a consistent ${direction}:
-
-            ${deltas}
-            Per-sample variance is large on this benchmark; small deltas often persist
-            as noise, but a consistent >=5% delta is worth a closer look. Positive
-            values mean slower than base; negative means faster. Run
-            \`make perf-compare\` locally to confirm.`;
+            const activeBody = (s) => {
+              const isSlower = s === 'slower';
+              const marker = isSlower ? REGRESSION_MARKER : IMPROVEMENT_MARKER;
+              const icon = isSlower ? ':warning:' : ':rocket:';
+              const word = isSlower ? 'regression' : 'improvement';
+              const direction = isSlower ? 'slowdown' : 'speedup';
+              return [
+                marker,
+                `## ${icon} Significant startup-perf ${word} vs \`${baseRef}\``,
+                '',
+                `3 \`make perf-compare\` runs (N=20) reported a consistent ${direction}:`,
+                '',
+                deltas,
+                'Per-sample variance is large on this benchmark; small deltas often persist',
+                'as noise, but a consistent >=5% delta is worth a closer look. Positive',
+                'values mean slower than base; negative means faster. Run',
+                '\`make perf-compare\` locally to confirm.',
+              ].join('\n');
             };
-
             // Same active state -> refresh metrics in place, no new comment.
             if (state === priorState) {
               await github.rest.issues.updateComment({ ...repo, comment_id: prior.id, body: activeBody(state) });
