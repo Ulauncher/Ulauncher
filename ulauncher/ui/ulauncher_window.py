@@ -216,7 +216,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     ######################################
 
     def on_initial_draw(self, *_: tuple[Any]) -> None:
-        # ULAUNCHER_PERF_START_BOOTTIME is a perf-test probe (see tests/perf/test_startup_perf.py).
+        # ULAUNCHER_PERF_START_BOOTTIME is a perf-test probe (see `make perf` in makefile).
         # When set, report elapsed time from the caller's externally-captured /proc/uptime and
         # exit before deferred_init - this is the earliest point at which keyboard input registers.
         if t0 := os.environ.get("ULAUNCHER_PERF_START_BOOTTIME"):
