@@ -173,7 +173,10 @@ jobs:
             }
 
             // State transitioned. Strip the marker on the previous active comment (so it
-            // stops being "the current alarm") and append a closing footer.
+            // stops being "the current alarm"), append a closing footer, and collapse it in
+            // the GitHub UI as "Outdated" so the active follow-up is what reviewers see by
+            // default. Minimizing is GraphQL-only and best-effort; a failure shouldn't gate
+            // the rest of the workflow.
             if (prior) {
               const footer = state === 'noise'
                 ? priorState === 'slower'
@@ -184,6 +187,18 @@ jobs:
               await github.rest.issues.updateComment({
                 ...repo, comment_id: prior.id, body: `${stripped}\n\n---\n\n${footer}`,
               });
+              try {
+                await github.graphql(
+                  `mutation($id: ID!) {
+                    minimizeComment(input: { subjectId: $id, classifier: OUTDATED }) {
+                      minimizedComment { isMinimized }
+                    }
+                  }`,
+                  { id: prior.node_id },
+                );
+              } catch (e) {
+                core.warning(`Failed to minimize comment ${prior.id} as outdated: ${e.message}`);
+              }
             }
 
             // Post the new state.
