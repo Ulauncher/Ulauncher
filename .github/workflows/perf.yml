@@ -54,6 +54,14 @@ jobs:
       - name: venv
         run: make venv QUIET=1
 
+      - name: Pretend ulauncher has run before
+        # `make perf` sets DBUS_SESSION_BUS_ADDRESS=disabled: to skip session-bus activation
+        # noise, but on a fresh checkout the missing state dir makes `first_v6_run` true, which
+        # routes startup through `kill_ulauncher_v5` -> a session-bus query that then crashes
+        # on the disabled transport. The probe wants to measure steady-state startup anyway,
+        # not the one-shot v5->v6 migration path.
+        run: mkdir -p "$HOME/.local/state/ulauncher"
+
       - name: Compare startup-perf against base
         id: perf
         env:
