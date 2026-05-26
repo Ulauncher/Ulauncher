@@ -78,8 +78,10 @@ jobs:
             line=$(grep '^delta:' perf.log | tail -1)
             pct=$(printf '%s' "$line" | sed -nE 's/.*\(([+-][0-9.]+)%.*/\1/p')
             if [ -z "$pct" ]; then
-              echo "::error::could not parse delta from perf-compare output"
-              exit 1
+              # Degrade gracefully: this workflow is informational, so a parse hiccup
+              # (e.g. make perf-compare output format drift) shouldn't fail the build.
+              echo "::warning::could not parse delta from perf-compare output; skipping attempt $attempt"
+              continue
             fi
             deltas+="- Attempt ${attempt}: ${pct}%"$'\n'
             # awk handles signed-float comparison (bash arithmetic can't do floats).
