@@ -154,13 +154,6 @@ jobs:
               const icon = isSlower ? ':warning:' : ':rocket:';
               const word = isSlower ? 'regression' : 'improvement';
               const direction = isSlower ? 'slowdown' : 'speedup';
-              return `${marker}
-            const activeBody = (s) => {
-              const isSlower = s === 'slower';
-              const marker = isSlower ? REGRESSION_MARKER : IMPROVEMENT_MARKER;
-              const icon = isSlower ? ':warning:' : ':rocket:';
-              const word = isSlower ? 'regression' : 'improvement';
-              const direction = isSlower ? 'slowdown' : 'speedup';
               return [
                 marker,
                 `## ${icon} Significant startup-perf ${word} vs \`${baseRef}\``,
