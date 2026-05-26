@@ -69,8 +69,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          regression=true
           deltas=""
+          sigs=""
           for attempt in 1 2 3; do
             echo "::group::Attempt $attempt of 3"
             xvfb-run --auto-servernum -- make perf-compare 2>&1 | tee perf.log
@@ -84,15 +84,30 @@ jobs:
               continue
             fi
             deltas+="- Attempt ${attempt}: ${pct}%"$'\n'
+            # Classify each attempt as slow (>=+5%), fast (<=-5%), or within noise.
             # awk handles signed-float comparison (bash arithmetic can't do floats).
-            if awk -v p="$pct" 'BEGIN { exit !(p < 5 && p > -5) }'; then
+            if awk -v p="$pct" 'BEGIN { exit !(p >= 5) }'; then
+              sigs+="+"
+            elif awk -v p="$pct" 'BEGIN { exit !(p <= -5) }'; then
+              sigs+="-"
+            else
+              # Any single noise reading -> not a stable signal; short-circuit.
               echo "|$pct%| < 5% on attempt $attempt; treating as noise."
-              regression=false
+              sigs+="0"
               break
             fi
           done
+
+          # `+++` and `---` are the only stable significant signals; everything else
+          # (mixed signs, any noise reading, parse failures) collapses to noise.
+          case "$sigs" in
+            +++) state="slower" ;;
+            ---) state="faster" ;;
+            *)   state="noise" ;;
+          esac
+          echo "Final state: $state (signs=$sigs)"
           {
-            echo "regression=$regression"
+            echo "state=$state"
             echo "deltas<<EOF"
             printf '%s' "$deltas"
             echo "EOF"
@@ -101,48 +116,85 @@ jobs:
       - name: Post or update PR comment
         uses: actions/github-script@v7
         env:
-          REGRESSION: ${{ steps.perf.outputs.regression }}
+          STATE: ${{ steps.perf.outputs.state }}
           DELTAS: ${{ steps.perf.outputs.deltas }}
           BASE_REF: ${{ github.base_ref }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         with:
           script: |
-            const marker = '<!-- startup-perf-comment -->';
-            const regression = process.env.REGRESSION === 'true';
-            const baseRef = process.env.BASE_REF;
+            // Two markers so we can detect the *type* of prior state directly. The marker
+            // is the first line; when an active comment is "resolved" or "flipped" we
+            // strip the marker so it stops being findable, and append a closing footer.
+            const REGRESSION_MARKER = '<!-- startup-perf-regression -->';
+            const IMPROVEMENT_MARKER = '<!-- startup-perf-improvement -->';
+
+            const state = process.env.STATE;          // 'noise' | 'slower' | 'faster'
             const deltas = process.env.DELTAS;
+            const baseRef = process.env.BASE_REF;
+            const sha = (process.env.COMMIT_SHA || '').slice(0, 7);
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+            const repo = { owner: context.repo.owner, repo: context.repo.repo };
+            const issue = { ...repo, issue_number: context.issue.number };
 
-            // Nothing to do if there's no regression and no prior comment to update.
-            if (!regression && !existing) {
-              core.info('No regression and no existing comment; nothing to do.');
+            const { data: comments } = await github.rest.issues.listComments(issue);
+            const prior = comments.find(c => c.body && (
+              c.body.startsWith(REGRESSION_MARKER) || c.body.startsWith(IMPROVEMENT_MARKER)
+            ));
+            const priorState = !prior ? 'none'
+              : prior.body.startsWith(REGRESSION_MARKER) ? 'slower' : 'faster';
+
+            if (priorState === 'none' && state === 'noise') {
+              core.info('Within noise floor and no active comment; nothing to do.');
               return;
             }
 
-            const body = regression
-              ? `${marker}
-            ## :warning: Significant startup-perf delta vs \`${baseRef}\`
+            const activeBody = (s) => {
+              const isSlower = s === 'slower';
+              const marker = isSlower ? REGRESSION_MARKER : IMPROVEMENT_MARKER;
+              const icon = isSlower ? ':warning:' : ':rocket:';
+              const word = isSlower ? 'regression' : 'improvement';
+              const direction = isSlower ? 'slowdown' : 'speedup';
+              return `${marker}
+            ## ${icon} Significant startup-perf ${word} vs \`${baseRef}\`
 
-            All 3 \`make perf-compare\` runs (N=20) reported |delta| >= 5%:
+            3 \`make perf-compare\` runs (N=20) reported a consistent ${direction}:
 
             ${deltas}
             Per-sample variance is large on this benchmark; small deltas often persist
             as noise, but a consistent >=5% delta is worth a closer look. Positive
             values mean slower than base; negative means faster. Run
-            \`make perf-compare\` locally to confirm.`
-              : `${marker}
-            ## :white_check_mark: Startup-perf within noise floor
+            \`make perf-compare\` locally to confirm.`;
+            };
 
-            \`make perf-compare\` against \`${baseRef}\` produced |delta| < 5%.`;
-
-            const params = { owner: context.repo.owner, repo: context.repo.repo, body };
-            if (existing) {
-              await github.rest.issues.updateComment({ ...params, comment_id: existing.id });
-            } else {
-              await github.rest.issues.createComment({ ...params, issue_number: context.issue.number });
+            // Same active state -> refresh metrics in place, no new comment.
+            if (state === priorState) {
+              await github.rest.issues.updateComment({ ...repo, comment_id: prior.id, body: activeBody(state) });
+              return;
             }
+
+            // State transitioned. Strip the marker on the previous active comment (so it
+            // stops being "the current alarm") and append a closing footer.
+            if (prior) {
+              const footer = state === 'noise'
+                ? priorState === 'slower'
+                  ? `:white_check_mark: **Resolved at ${sha}** - subsequent runs are within the noise floor.`
+                  : `:information_source: **No longer present at ${sha}** - subsequent runs are within the noise floor.`
+                : `:arrows_counterclockwise: **State changed at ${sha}** - now significantly ${state === 'slower' ? 'slower' : 'faster'} than \`${baseRef}\`.`;
+              const stripped = prior.body.split('\n').slice(1).join('\n').replace(/^\s+/, '');
+              await github.rest.issues.updateComment({
+                ...repo, comment_id: prior.id, body: `${stripped}\n\n---\n\n${footer}`,
+              });
+            }
+
+            // Post the new state.
+            const newBody = state === 'noise'
+              ? priorState === 'slower'
+                ? `## :white_check_mark: Startup-perf regression resolved
+
+            The earlier regression is no longer present as of ${sha}. \`make perf-compare\` against \`${baseRef}\` now produces |delta| < 5%.`
+                : `## :information_source: Startup-perf improvement no longer present
+
+            The earlier improvement is no longer measurable as of ${sha}. \`make perf-compare\` against \`${baseRef}\` now produces |delta| < 5%.`
+              : activeBody(state);
+
+            await github.rest.issues.createComment({ ...issue, body: newBody });
