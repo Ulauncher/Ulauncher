@@ -13,7 +13,6 @@ import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
-from ulauncher.ui.preferences.preferences_window import PreferencesWindow
 from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -191,6 +190,8 @@ class UlauncherApp(Gtk.Application):
     def show_preferences(self, page: str | None = None) -> None:
         # Register prefs in self.windows before closing main, so the main destroy handler
         # sees a remaining window and doesn't quit the app on non-persistent setups.
+        from ulauncher.ui.preferences.preferences_window import PreferencesWindow
+
         preferences = cast("PreferencesWindow | None", self.windows.get("preferences"))
         if preferences and preferences.get_window() is None:
             logger.warning("Ignoring stale Preferences window reference (suspecting a memory leak)")
