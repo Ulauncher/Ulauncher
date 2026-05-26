@@ -1,0 +1,216 @@
+name: Startup perf
+
+# Informational: runs `make perf-compare` against the PR's base branch and posts a comment
+# if 3 consecutive runs all show |delta| >= 5%. Never fails the build -- per-sample variance
+# on this benchmark is large, so a single noisy run shouldn't gate a merge. The marker
+# (`<!-- startup-perf-comment -->`) lets the workflow update or clear the comment on later
+# pushes instead of stacking duplicates.
+
+on:
+  pull_request:
+    paths:
+      - "ulauncher/**"
+      - "bin/ulauncher"
+      - "makefile"
+      - ".github/workflows/perf.yml"
+
+# Cancel any superseded run for this PR -- only the latest commit's measurement is interesting.
+concurrency:
+  group: perf-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    container: ulauncher/build-image:6.6
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # `git worktree add` in `make perf-compare` needs base branch history
+
+      - name: Mark workspace as a safe git directory
+        # The container runs as a different user than the one that owns the checkout, so git
+        # refuses to operate on the repo ("dubious ownership") without this opt-in.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Materialize base branch locally
+        # `make perf-compare` defaults BASE to `main`; checkout leaves us detached, so promote
+        # `origin/<base>` to a local branch under that name. Pass via env to avoid shell
+        # injection from a hostile branch name in `run:` interpolation.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git branch "$BASE_REF" "origin/$BASE_REF" 2>/dev/null || true
+
+      - uses: actions/cache@v4
+        with:
+          path: .venv
+          # Shared key with tests.yml so the two workflows reuse the same venv cache entry.
+          key: venv-${{ hashFiles('requirements.txt', 'makefile', '.github/workflows/tests.yml') }}
+
+      - name: venv
+        run: make venv QUIET=1
+
+      - name: Pretend ulauncher has run before
+        # `make perf` sets DBUS_SESSION_BUS_ADDRESS=disabled: to skip session-bus activation
+        # noise, but on a fresh checkout the missing state dir makes `first_v6_run` true, which
+        # routes startup through `kill_ulauncher_v5` -> a session-bus query that then crashes
+        # on the disabled transport. The probe wants to measure steady-state startup anyway,
+        # not the one-shot v5->v6 migration path.
+        run: mkdir -p "$HOME/.local/state/ulauncher"
+
+      - name: Compare startup-perf against base
+        id: perf
+        env:
+          BASE: ${{ github.base_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          deltas=""
+          sigs=""
+          for attempt in 1 2 3; do
+            echo "::group::Attempt $attempt of 3"
+            xvfb-run --auto-servernum -- make perf-compare 2>&1 | tee perf.log
+            echo "::endgroup::"
+            line=$(grep '^delta:' perf.log | tail -1)
+            pct=$(printf '%s' "$line" | sed -nE 's/.*\(([+-][0-9.]+)%.*/\1/p')
+            if [ -z "$pct" ]; then
+              # Degrade gracefully: this workflow is informational, so a parse hiccup
+              # (e.g. make perf-compare output format drift) shouldn't fail the build.
+              echo "::warning::could not parse delta from perf-compare output; skipping attempt $attempt"
+              continue
+            fi
+            deltas+="- Attempt ${attempt}: ${pct}%"$'\n'
+            # Classify each attempt as slow (>=+5%), fast (<=-5%), or within noise.
+            # awk handles signed-float comparison (bash arithmetic can't do floats).
+            if awk -v p="$pct" 'BEGIN { exit !(p >= 5) }'; then
+              sigs+="+"
+            elif awk -v p="$pct" 'BEGIN { exit !(p <= -5) }'; then
+              sigs+="-"
+            else
+              # Any single noise reading -> not a stable signal; short-circuit.
+              echo "|$pct%| < 5% on attempt $attempt; treating as noise."
+              sigs+="0"
+              break
+            fi
+          done
+
+          # `+++` and `---` are the only stable significant signals; everything else
+          # (mixed signs, any noise reading, parse failures) collapses to noise.
+          case "$sigs" in
+            +++) state="slower" ;;
+            ---) state="faster" ;;
+            *)   state="noise" ;;
+          esac
+          echo "Final state: $state (signs=$sigs)"
+          {
+            echo "state=$state"
+            echo "deltas<<EOF"
+            printf '%s' "$deltas"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post or update PR comment
+        uses: actions/github-script@v7
+        env:
+          STATE: ${{ steps.perf.outputs.state }}
+          DELTAS: ${{ steps.perf.outputs.deltas }}
+          BASE_REF: ${{ github.base_ref }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            // Two markers so we can detect the *type* of prior state directly. The marker
+            // is the first line; when an active comment is "resolved" or "flipped" we
+            // strip the marker so it stops being findable, and append a closing footer.
+            const REGRESSION_MARKER = '<!-- startup-perf-regression -->';
+            const IMPROVEMENT_MARKER = '<!-- startup-perf-improvement -->';
+
+            const state = process.env.STATE;          // 'noise' | 'slower' | 'faster'
+            const deltas = process.env.DELTAS;
+            const baseRef = process.env.BASE_REF;
+            const sha = (process.env.COMMIT_SHA || '').slice(0, 7);
+
+            const repo = { owner: context.repo.owner, repo: context.repo.repo };
+            const issue = { ...repo, issue_number: context.issue.number };
+
+            const { data: comments } = await github.rest.issues.listComments(issue);
+            const prior = comments.find(c => c.body && (
+              c.body.startsWith(REGRESSION_MARKER) || c.body.startsWith(IMPROVEMENT_MARKER)
+            ));
+            const priorState = !prior ? 'none'
+              : prior.body.startsWith(REGRESSION_MARKER) ? 'slower' : 'faster';
+
+            if (priorState === 'none' && state === 'noise') {
+              core.info('Within noise floor and no active comment; nothing to do.');
+              return;
+            }
+
+            const activeBody = (s) => {
+              const isSlower = s === 'slower';
+              const marker = isSlower ? REGRESSION_MARKER : IMPROVEMENT_MARKER;
+              const icon = isSlower ? ':warning:' : ':rocket:';
+              const word = isSlower ? 'regression' : 'improvement';
+              const direction = isSlower ? 'slowdown' : 'speedup';
+              return [
+                marker,
+                `## ${icon} Significant startup-perf ${word} vs \`${baseRef}\``,
+                '',
+                `3 \`make perf-compare\` runs (N=20) reported a consistent ${direction}:`,
+                '',
+                deltas,
+                'Per-sample variance is large on this benchmark; small deltas often persist',
+                'as noise, but a consistent >=5% delta is worth a closer look. Positive',
+                'values mean slower than base; negative means faster. Run',
+                '\`make perf-compare\` locally to confirm.',
+              ].join('\n');
+            };
+            // Same active state -> refresh metrics in place, no new comment.
+            if (state === priorState) {
+              await github.rest.issues.updateComment({ ...repo, comment_id: prior.id, body: activeBody(state) });
+              return;
+            }
+
+            // State transitioned. Strip the marker on the previous active comment (so it
+            // stops being "the current alarm"), append a closing footer, and collapse it in
+            // the GitHub UI as "Outdated" so the active follow-up is what reviewers see by
+            // default. Minimizing is GraphQL-only and best-effort; a failure shouldn't gate
+            // the rest of the workflow.
+            if (prior) {
+              const footer = state === 'noise'
+                ? priorState === 'slower'
+                  ? `:white_check_mark: **Resolved at ${sha}** - subsequent runs are within the noise floor.`
+                  : `:information_source: **No longer present at ${sha}** - subsequent runs are within the noise floor.`
+                : `:arrows_counterclockwise: **State changed at ${sha}** - now significantly ${state === 'slower' ? 'slower' : 'faster'} than \`${baseRef}\`.`;
+              const stripped = prior.body.split('\n').slice(1).join('\n').replace(/^\s+/, '');
+              await github.rest.issues.updateComment({
+                ...repo, comment_id: prior.id, body: `${stripped}\n\n---\n\n${footer}`,
+              });
+              try {
+                await github.graphql(
+                  `mutation($id: ID!) {
+                    minimizeComment(input: { subjectId: $id, classifier: OUTDATED }) {
+                      minimizedComment { isMinimized }
+                    }
+                  }`,
+                  { id: prior.node_id },
+                );
+              } catch (e) {
+                core.warning(`Failed to minimize comment ${prior.id} as outdated: ${e.message}`);
+              }
+            }
+
+            // Post the new state.
+            const newBody = state === 'noise'
+              ? priorState === 'slower'
+                ? `## :white_check_mark: Startup-perf regression resolved
+
+            The earlier regression is no longer present as of ${sha}. \`make perf-compare\` against \`${baseRef}\` now produces |delta| < 5%.`
+                : `## :information_source: Startup-perf improvement no longer present
+
+            The earlier improvement is no longer measurable as of ${sha}. \`make perf-compare\` against \`${baseRef}\` now produces |delta| < 5%.`
+              : activeBody(state);
+
+            await github.rest.issues.createComment({ ...issue, body: newBody });
