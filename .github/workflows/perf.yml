@@ -32,6 +32,11 @@ jobs:
         with:
           fetch-depth: 0 # `git worktree add` in `make perf-compare` needs base branch history
 
+      - name: Mark workspace as a safe git directory
+        # The container runs as a different user than the one that owns the checkout, so git
+        # refuses to operate on the repo ("dubious ownership") without this opt-in.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Materialize base branch locally
         # `make perf-compare` defaults BASE to `main`; checkout leaves us detached, so promote
         # `origin/<base>` to a local branch under that name. Pass via env to avoid shell
