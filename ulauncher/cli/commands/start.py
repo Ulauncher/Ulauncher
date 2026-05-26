@@ -10,6 +10,12 @@ from ulauncher.cli import CLIArguments
 
 
 def run(_: CLIArguments) -> int:
+    # TODO(perf-test): synthetic 100ms regression to exercise the perf-compare CI workflow's
+    # "regression detected" branch on PR 2. Drop this commit before merging.
+    import time
+
+    time.sleep(0.1)
+
     from ulauncher import init_helpers
 
     init_helpers.init_x11_threads()
