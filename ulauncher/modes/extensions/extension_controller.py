@@ -251,66 +251,71 @@ class ExtensionController:
         return False
 
     def start(self, with_debugger: bool = False) -> bool:
+        """
+        Starts the extension in a subprocess
+        Returns True if the extension was already running or successfully started, False otherwise.
+        """
         if self.shadowed_by_preview:
             return False
 
-        if not self.is_running:
+        if self.is_running:
+            return True  # if already started, count as successful
 
-            def exit_handler(cause: str, error_msg: str) -> None:
-                listeners = stopped_listeners.get(self.id, [])
-                for stop_listener in listeners:
-                    stop_listener()
+        def exit_handler(cause: str, error_msg: str) -> None:
+            listeners = stopped_listeners.get(self.id, [])
+            for stop_listener in listeners:
+                stop_listener()
 
-                listeners.clear()
+            listeners.clear()
 
-                if cause != "Stopped":
-                    logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
-                    extension_runtimes.pop(self.id, None)
-                    self.state.save(error_type=cause, error_message=error_msg)
+            if cause != "Stopped":
+                logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
+                extension_runtimes.pop(self.id, None)
+                self.state.save(error_type=cause, error_message=error_msg)
 
-                events.emit("extensions:exited", self.id, cause)
+            events.emit("extensions:exited", self.id, cause)
 
-            try:
-                self.manifest.validate()
-                self.manifest.check_compatibility(verbose=True)
-            except ext_exceptions.ManifestError as err:
-                exit_handler("Invalid", str(err))
-                return False
-            except ext_exceptions.CompatibilityError as err:
-                exit_handler("Incompatible", str(err))
-                return False
+        try:
+            self.manifest.validate()
+            self.manifest.check_compatibility(verbose=True)
+        except ext_exceptions.ManifestError as err:
+            exit_handler("Invalid", str(err))
+            return False
+        except ext_exceptions.CompatibilityError as err:
+            exit_handler("Incompatible", str(err))
+            return False
 
-            self.state.save(error_type="", error_message="")  # clear any previous error
+        self.state.save(error_type="", error_message="")  # clear any previous error
 
-            ext_deps = ExtensionDependencies(self.id, self.path)
-            extension_main = f"{self.path}/main.py"
-            cmd = [sys.executable, extension_main]
+        ext_deps = ExtensionDependencies(self.id, self.path)
+        extension_main = f"{self.path}/main.py"
+        cmd = [sys.executable, extension_main]
 
-            # If debugger mode is enabled, prepend debugger command
-            if with_debugger:
-                cmd = [
-                    sys.executable,
-                    "-m",
-                    "debugpy",
-                    "--listen",
-                    f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
-                    "--wait-for-client",
-                    extension_main,
-                ]
+        # If debugger mode is enabled, prepend debugger command
+        if with_debugger:
+            cmd = [
+                sys.executable,
+                "-m",
+                "debugpy",
+                "--listen",
+                f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
+                "--wait-for-client",
+                extension_main,
+            ]
 
-            prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
-            triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
-            # backwards compatible v2 preferences format (with keywords added back)
-            v2_prefs = {**triggers, **prefs}
-            env = {
-                "VERBOSE": str(int(cli.get_args().verbose)),
-                "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
-                "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
-                "ULAUNCHER_EXTENSION_ID": self.id,
-                "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
-            }
+        prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
+        triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
+        # backwards compatible v2 preferences format (with keywords added back)
+        v2_prefs = {**triggers, **prefs}
+        env = {
+            "VERBOSE": str(int(cli.get_args().verbose)),
+            "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
+            "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+            "ULAUNCHER_EXTENSION_ID": self.id,
+            "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
+        }
 
-            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
+        extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
         return self.is_running
 
     async def stop(self) -> None:
