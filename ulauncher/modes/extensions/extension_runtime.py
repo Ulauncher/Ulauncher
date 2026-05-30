@@ -14,7 +14,7 @@ from ulauncher.utils.socket_msg_controller import SocketMsgController
 from ulauncher.utils.timer import timer
 
 ExtensionExitCause = Literal[
-    "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid"
+    "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
 ]
 ExitHandlerCallback = Callable[[ExtensionExitCause, str], None]
 logger = logging.getLogger(__name__)

@@ -45,11 +45,19 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionControl
     """Generate appropriate error message based on error type"""
     ext_url = ext.state.url
 
-    if error_type == "Invalid":
-        return (
+    static_messages = {
+        "Invalid": (
             "The extension has an invalid manifest. Please report this issue to the extension "
             "developer, and attach the logs for details."
-        )
+        ),
+        "Incompatible": "The extension is not compatible with this version of Ulauncher.",
+        "FailedToStart": (
+            "Ulauncher could not start the extension process. This is usually a problem with the "
+            f"system rather than the extension itself.\n\n<small>Details: {error_message}</small>"
+        ),
+    }
+    if error_type in static_messages:
+        return static_messages[error_type]
 
     if error_type == "Terminated":
         message = (
@@ -59,9 +67,6 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionControl
         if ext_url:
             message += f'\n\n<small>Repository: <a href="{ext_url}">{ext_url}</a></small>'
         return message
-
-    if error_type == "Incompatible":
-        return "The extension is not compatible with this version of Ulauncher."
 
     if error_type == "MissingInternals":
         return (

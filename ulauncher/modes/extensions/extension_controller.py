@@ -14,6 +14,7 @@ from typing import Any, Callable
 
 from ulauncher import cli, paths
 from ulauncher.data import BaseDataClass, JsonConf
+from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
@@ -315,7 +316,15 @@ class ExtensionController:
             "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
         }
 
-        extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
+        # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
+        # missing interpreter). Route these through exit_handler like a crash so the error is
+        # surfaced consistently and any queued start listeners get cleaned up, rather than
+        # raising out into callers.
+        try:
+            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
+        except (OSError, GLib.Error) as err:
+            exit_handler("FailedToStart", str(err))
+            return False
         return self.is_running
 
     async def stop(self) -> None:
