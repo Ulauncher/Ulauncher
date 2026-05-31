@@ -34,7 +34,8 @@ def run_command(cmd: list[str], callback: CommandCallback, *, cwd: str | None = 
             callback(None, error)
             return
         if not subprocess_.get_successful():
-            exit_status = subprocess_.get_exit_status()
+            # if killed by a signal: report it as a negative status (subprocess convention)
+            exit_status = subprocess_.get_exit_status() if subprocess_.get_if_exited() else -subprocess_.get_term_sig()
             callback(None, subprocess.CalledProcessError(exit_status, cmd, output=stdout, stderr=stderr))
             return
         callback(stdout, None)

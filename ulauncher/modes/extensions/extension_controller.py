@@ -68,6 +68,37 @@ stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 events = EventBus()
 
 
+def _run_gio_blocking(start: Callable[[Callable[[Any, Any], None]], None]) -> Any:
+    """Drive a callback-based Gio operation to completion synchronously on the calling thread.
+
+    Temporary bridge for step one of the asyncio/threading removal: extension_remote is now
+    callback-based, but ExtensionController is still async and runs in worker threads (ext_handlers)
+    or the CLI's asyncio loop. Gio.Subprocess callbacks dispatch on a GLib main context, not the
+    asyncio loop, and no GLib loop runs in those threads, so a plain asyncio.Future shim would
+    never resolve. Running a private GLib main loop (pushed as the thread-default context) drives
+    the operation to completion. Remove this when the controller becomes callback-native.
+    """
+    context = GLib.MainContext.new()
+    context.push_thread_default()
+    box: dict[str, Any] = {}
+    try:
+        loop = GLib.MainLoop.new(context, False)
+
+        def done(result: Any, error: Exception | None) -> None:
+            box["result"], box["error"] = result, error
+            loop.quit()
+
+        start(done)
+        loop.run()
+    finally:
+        # Always restore the thread-default context, even if start() raises synchronously
+        # (a synchronous raise propagates to the caller, matching the pre-conversion behavior).
+        context.pop_thread_default()
+    if box.get("error"):
+        raise box["error"]
+    return box.get("result")
+
+
 def _load_preferences(ext_id: str) -> JsonConf:
     return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
@@ -105,7 +136,9 @@ class ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
-        commit_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
+        commit_hash, commit_timestamp = _run_gio_blocking(
+            lambda cb: remote.download(cb, commit_hash, warn_if_overwrite)
+        )
 
         try:
             # install python dependencies from requirements.txt
@@ -240,7 +273,7 @@ class ExtensionController:
         """
         Returns tuple with commit info about a new version
         """
-        commit_hash = ExtensionRemote(self.state.url).get_compatible_hash()
+        commit_hash = _run_gio_blocking(ExtensionRemote(self.state.url).get_compatible_hash)
         has_update = self.state.commit_hash != commit_hash
         return has_update, commit_hash
 

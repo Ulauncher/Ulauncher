@@ -1,15 +1,14 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
-import subprocess
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tarfile import TarError
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from urllib.error import HTTPError, URLError
+from typing import Callable
 from urllib.parse import urlparse
-from urllib.request import urlopen, urlretrieve
 
 from ulauncher import (
     api_version,
@@ -18,10 +17,15 @@ from ulauncher import (
 from ulauncher.data import BaseDataClass
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
+from ulauncher.utils.subprocess_utils import download_file, run_command
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import get_version, satisfies
 
 logger = logging.getLogger(__name__)
+
+RefsCallback = Callable[["dict[str, str] | None", "Exception | None"], None]
+HashCallback = Callable[["str | None", "Exception | None"], None]
+DownloadCallback = Callable[["tuple[str, float] | None", "Exception | None"], None]
 
 
 class UrlParseResult(BaseDataClass):
@@ -48,139 +52,219 @@ class ExtensionRemote(UrlParseResult):
         self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
 
-    def _get_refs(self) -> dict[str, str]:
-        refs = {}
-        ref = None
-        try:
-            if which("git"):
-                if isdir(self._git_dir):
-                    subprocess.check_call(
-                        [
-                            "git",
-                            f"--git-dir={self._git_dir}",
-                            "fetch",
-                            "origin",
-                            "+refs/heads/*:refs/heads/*",
-                            "--prune",
-                            "--prune-tags",
-                        ],
-                        stderr=subprocess.DEVNULL,
-                    )
-                else:
-                    os.makedirs(self._git_dir)
-                    subprocess.check_call(
-                        ["git", "clone", "--bare", self.remote_url, self._git_dir],
-                        stderr=subprocess.DEVNULL,
-                    )
-
-                response = subprocess.check_output(["git", "ls-remote", self._git_dir]).decode().strip().split("\n")
-            else:
-                with urlopen(f"{self.remote_url}/info/refs?service=git-upload-pack") as reader:
-                    response = reader.read().decode().strip().split("\n")
+    def _get_refs(self, callback: RefsCallback) -> None:
+        def parse_response(response_text: str) -> dict[str, str]:
+            refs: dict[str, str] = {}
+            response = response_text.strip().split("\n")
             if response:
                 if response[-1] == "0000":
                     # Convert "smart" response, to more readable "dumb" response
                     # See https://www.git-scm.com/docs/http-protocol#_discovering_references
                     response = [r.split("\x00")[0][8:] if r.startswith("0000") else r[4:] for r in response[1:-1]]
-
                 for row in response:
-                    commit, ref = row.split()
-                    refs[basename(ref)] = commit
+                    if row:
+                        commit, ref = row.split()
+                        refs[basename(ref)] = commit
+            return refs
 
-        except (HTTPError, URLError) as e:
-            msg = f'Could not access repository resource "{self.url}"'
-            raise ext_exceptions.NetworkError(msg) from e
-        except (subprocess.CalledProcessError, OSError) as e:
-            msg = f'Could not fetch reference "{ref}" for {self.url}.' if ref else f"Could not fetch remote {self.url}."
-            raise ext_exceptions.NetworkError(msg) from e
+        def on_ls_remote(stdout: str | None, error: Exception | None) -> None:
+            if error:
+                callback(None, ext_exceptions.NetworkError(f"Could not fetch remote {self.url}."))
+                return
+            try:
+                refs = parse_response(stdout or "")
+            except ValueError:
+                callback(None, ext_exceptions.NetworkError(f"Could not fetch remote {self.url}."))
+                return
+            callback(refs, None)
 
-        return refs
+        def after_sync(_stdout: str | None, error: Exception | None) -> None:
+            if error:
+                callback(None, ext_exceptions.NetworkError(f"Could not fetch remote {self.url}."))
+                return
+            run_command(["git", "ls-remote", self._git_dir], on_ls_remote)
 
-    def get_compatible_hash(self) -> str:
+        if which("git"):
+            if isdir(self._git_dir):
+                run_command(
+                    [
+                        "git",
+                        f"--git-dir={self._git_dir}",
+                        "fetch",
+                        "origin",
+                        "+refs/heads/*:refs/heads/*",
+                        "--prune",
+                        "--prune-tags",
+                    ],
+                    after_sync,
+                )
+            else:
+                try:
+                    os.makedirs(self._git_dir)
+                except OSError:
+                    callback(None, ext_exceptions.NetworkError(f"Could not fetch remote {self.url}."))
+                    return
+                run_command(["git", "clone", "--bare", self.remote_url, self._git_dir], after_sync)
+            return
+
+        # git is not installed: fetch the dumb HTTP info/refs endpoint instead
+        refs_url = f"{self.remote_url}/info/refs?service=git-upload-pack"
+        with NamedTemporaryFile(suffix=".refs", prefix="ulauncher_refs_", delete=False) as tmp:
+            refs_path = tmp.name
+
+        def on_refs_downloaded(_path: str | None, error: Exception | None) -> None:
+            try:
+                if error:
+                    callback(None, ext_exceptions.NetworkError(f'Could not access repository resource "{self.url}"'))
+                    return
+                with open(refs_path) as reader:
+                    refs = parse_response(reader.read())
+            except (OSError, ValueError):
+                callback(None, ext_exceptions.NetworkError(f'Could not access repository resource "{self.url}"'))
+                return
+            finally:
+                with contextlib.suppress(OSError):
+                    os.remove(refs_path)
+            callback(refs, None)
+
+        download_file(refs_url, refs_path, on_refs_downloaded)
+
+    def get_compatible_hash(self, callback: HashCallback) -> None:
         """
-        Returns the commit hash for the highest compatible version, matching using branch names
+        Resolves the commit hash for the highest compatible version, matching using branch names
         and tags names starting with "apiv", ex "apiv3" and "apiv3.2"
         New method for v6. The new behavior is intentionally undocumented because we still
         want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
         """
-        remote_refs = self._get_refs()
-        # Strip the "apiv" prefix so keys are bare version strings ("3", "3.2") usable with get_version
-        compatible = {
-            ver: sha
-            for ref, sha in remote_refs.items()
-            if ref.startswith("apiv") and satisfies(api_version, (ver := ref[4:]))
-        }
 
-        if compatible:
-            return compatible[max(compatible, key=get_version)]
+        def on_refs(remote_refs: dict[str, str] | None, error: Exception | None) -> None:
+            if error or remote_refs is None:
+                callback(None, error)
+                return
+            # Strip the "apiv" prefix so keys are bare version strings ("3", "3.2") usable with get_version
+            compatible = {
+                ver: sha
+                for ref, sha in remote_refs.items()
+                if ref.startswith("apiv") and satisfies(api_version, (ver := ref[4:]))
+            }
+            if compatible:
+                callback(compatible[max(compatible, key=get_version)], None)
+                return
+            # Fall back on "HEAD" as a string as that can be used also
+            callback(remote_refs.get("HEAD", "HEAD"), None)
 
-        # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
-        return remote_refs.get("HEAD", "HEAD")
+        self._get_refs(on_refs)
 
-    def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = False) -> tuple[str, float]:
-        if not commit_hash:
-            commit_hash = self.get_compatible_hash()
+    def download(
+        self,
+        callback: DownloadCallback,
+        commit_hash: str | None = None,
+        warn_if_overwrite: bool = False,
+    ) -> None:
+        if commit_hash:
+            self._download_with_hash(commit_hash, warn_if_overwrite, callback)
+            return
+
+        def on_hash(resolved_hash: str | None, error: Exception | None) -> None:
+            if error or resolved_hash is None:
+                callback(None, error)
+                return
+            self._download_with_hash(resolved_hash, warn_if_overwrite, callback)
+
+        self.get_compatible_hash(on_hash)
+
+    def _download_with_hash(self, commit_hash: str, warn_if_overwrite: bool, callback: DownloadCallback) -> None:
         output_dir_exists = isdir(self.target_dir)
-
         if output_dir_exists and warn_if_overwrite:
             logger.info('Extension with URL "%s" is already installed. Updating', self.url)
 
         if self.download_url_template:
-            with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
-                download_url = self.download_url_template.replace("[commit]", commit_hash)
-                try:
-                    urlretrieve(download_url, tmp_file.name)
-                except URLError as e:
-                    err_msg = f"Failed to download extension from {download_url}: {e}"
-                    raise ext_exceptions.RemoteError(err_msg) from e
-                with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
-                    try:
-                        untar(tmp_file.name, tmp_root_dir)
-                    except (TarError, OSError) as e:
-                        err_msg = f"Failed to extract extension from {tmp_file.name}: {e}"
-                        raise ext_exceptions.RemoteError(err_msg) from e
-                    subdirs = os.listdir(tmp_root_dir)
-                    if len(subdirs) != 1:
-                        msg = f"Invalid archive for {self.url}."
-                        raise ext_exceptions.RemoteError(msg)
-                    tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
-                    manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
-                    if not satisfies(api_version, manifest.api_version):
-                        if not satisfies("2.0", manifest.api_version):
-                            msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
-                            raise ext_exceptions.CompatibilityError(msg)
-                        logger.warning("Falling back on using API 2.0 version for %s.", self.url)
+            download_url = self.download_url_template.replace("[commit]", commit_hash)
+            with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_", delete=False) as tmp_file:
+                tmp_path = tmp_file.name
 
-                    if output_dir_exists:
-                        rmtree(self.target_dir)
-                    move(tmp_dir, self.target_dir)
-            commit_timestamp = getmtime(self.target_dir)
-            return commit_hash, commit_timestamp
+            def on_downloaded(_path: str | None, error: Exception | None) -> None:
+                try:
+                    if error:
+                        callback(
+                            None,
+                            ext_exceptions.RemoteError(f"Failed to download extension from {download_url}: {error}"),
+                        )
+                        return
+                    try:
+                        result = self._extract_and_install(tmp_path, commit_hash, output_dir_exists)
+                    except ext_exceptions.ExtensionError as install_error:
+                        callback(None, install_error)
+                        return
+                    callback(result, None)
+                finally:
+                    with contextlib.suppress(OSError):
+                        os.remove(tmp_path)
+
+            download_file(download_url, tmp_path, on_downloaded)
+            return
 
         if not which("git"):
-            msg = "This extension URL can only be supported if you have git installed."
-            raise ext_exceptions.RemoteError(msg)
+            callback(
+                None, ext_exceptions.RemoteError("This extension URL can only be supported if you have git installed.")
+            )
+            return
 
         os.makedirs(self.target_dir, exist_ok=True)
 
+        def after_checkout(_stdout: str | None, error: Exception | None) -> None:
+            if error:
+                callback(None, ext_exceptions.RemoteError(f"Failed to checkout commit {commit_hash}: {error}"))
+                return
+
+            def after_show(stdout: str | None, show_error: Exception | None) -> None:
+                if show_error or stdout is None:
+                    callback(None, ext_exceptions.RemoteError(f"Failed to checkout commit {commit_hash}: {show_error}"))
+                    return
+                try:
+                    commit_timestamp = float(stdout.strip())
+                except ValueError:
+                    callback(None, ext_exceptions.RemoteError(f"Failed to parse commit timestamp for {commit_hash}"))
+                    return
+                callback((commit_hash, commit_timestamp), None)
+
+            run_command(
+                ["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash],
+                after_show,
+            )
+
+        run_command(
+            ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
+            after_checkout,
+        )
+
+    def _extract_and_install(self, tar_path: str, commit_hash: str, output_dir_exists: bool) -> tuple[str, float]:
+        # All filesystem steps share the same failure semantics, so they live under one guard.
+        # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
+        # RemoteError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
+        # This must not let a raw OSError escape: it runs inside a Gio callback, where an uncaught
+        # exception would be swallowed and hang _run_gio_blocking instead of reaching the caller.
         try:
-            subprocess.run(
-                ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
-                check=True,
-                stderr=subprocess.DEVNULL,
-            )
-            commit_timestamp = float(
-                subprocess.check_output(
-                    ["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash]
-                )
-                .decode()
-                .strip()
-            )
-        except subprocess.CalledProcessError as e:
-            err_msg = f"Failed to checkout commit {commit_hash}: {e}"
-            raise ext_exceptions.RemoteError(err_msg) from e
-        else:
-            return commit_hash, commit_timestamp
+            with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
+                untar(tar_path, tmp_root_dir)
+                subdirs = os.listdir(tmp_root_dir)
+                if len(subdirs) != 1:
+                    msg = f"Invalid archive for {self.url}."
+                    raise ext_exceptions.RemoteError(msg)
+                tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
+                manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
+                if not satisfies(api_version, manifest.api_version):
+                    if not satisfies("2.0", manifest.api_version):
+                        msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
+                        raise ext_exceptions.CompatibilityError(msg)
+                    logger.warning("Falling back on using API 2.0 version for %s.", self.url)
+                if output_dir_exists:
+                    rmtree(self.target_dir)
+                move(tmp_dir, self.target_dir)
+            return commit_hash, getmtime(self.target_dir)
+        except (TarError, OSError) as e:
+            msg = f"Failed to install extension from {tar_path}: {e}"
+            raise ext_exceptions.RemoteError(msg) from e
 
 
 def parse_extension_url(input_url: str) -> UrlParseResult:
