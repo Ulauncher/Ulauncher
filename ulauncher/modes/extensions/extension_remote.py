@@ -169,6 +169,11 @@ class ExtensionRemote(UrlParseResult):
             msg = "This extension URL can only be supported if you have git installed."
             raise ext_exceptions.RemoteError(msg)
 
+        if not isdir(self._git_dir):
+            # A pinned install passes commit_hash in and so skips get_compatible_hash(), which is
+            # what clones the bare repo. Bootstrap it so the checkout below has a repo to read from.
+            self._get_refs()
+
         os.makedirs(self.target_dir, exist_ok=True)
 
         try:
