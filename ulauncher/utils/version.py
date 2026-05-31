@@ -10,28 +10,28 @@ from typing import Optional, Tuple
 # There is no support for "*", "||", comparison operators like ">=", "!=", or the pre-release annotation
 
 # versions like "1" and "1.x" will be parsed into (1, None)
-Version = Tuple[int, Optional[int]]
+VersionRepr = Tuple[int, Optional[int]]
 
 
-def get_version(version_string: str) -> Version:
+def _parse_version(version_string: str) -> VersionRepr:
     t_table = str.maketrans({"^": "", "~": "", "x": ""})
     sanitized = version_string.translate(t_table)
     parts = [int(x) if x else None for x in sanitized.split(".")] + [None]
     return (parts[0] or 0, parts[1])
 
 
-def unpack_range(range_str: str) -> tuple[Version, Version]:
+def _unpack_range(range_str: str) -> tuple[VersionRepr, VersionRepr]:
     if " - " in range_str:
-        [min_version, max_version] = map(get_version, range_str.split(" - "))
+        [min_version, max_version] = map(_parse_version, range_str.split(" - "))
     else:
-        min_version = get_version(range_str)
-        max_version = get_version(str(min_version[0]))
+        min_version = _parse_version(range_str)
+        max_version = _parse_version(str(min_version[0]))
     return min_version, max_version
 
 
-def valid_range(range_str: str) -> bool:
+def _valid_range(range_str: str) -> bool:
     try:
-        (min_version, max_version) = unpack_range(range_str)
+        (min_version, max_version) = _unpack_range(range_str)
     except (ValueError, TypeError):
         return False
     if min_version[1] is None or max_version[1] is None:
@@ -40,10 +40,10 @@ def valid_range(range_str: str) -> bool:
 
 
 def satisfies(version_string: str, expected_range: str) -> bool:
-    if not valid_range(expected_range):
+    if not _valid_range(expected_range):
         return False
-    version = get_version(version_string)
-    min_version, max_version = unpack_range(expected_range)
+    version = _parse_version(version_string)
+    min_version, max_version = _unpack_range(expected_range)
     if min_version[1] is None:
         min_version = (min_version[0], 0)
     if max_version[1] is None:
