@@ -19,7 +19,7 @@ from ulauncher.data import BaseDataClass
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.untar import untar
-from ulauncher.utils.version import satisfies
+from ulauncher.utils.version import get_version, satisfies
 
 logger = logging.getLogger(__name__)
 
@@ -104,12 +104,15 @@ class ExtensionRemote(UrlParseResult):
         want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
         """
         remote_refs = self._get_refs()
+        # Strip the "apiv" prefix so keys are bare version strings ("3", "3.2") usable with get_version
         compatible = {
-            ref: sha for ref, sha in remote_refs.items() if ref.startswith("apiv") and satisfies(api_version, ref[4:])
+            ver: sha
+            for ref, sha in remote_refs.items()
+            if ref.startswith("apiv") and satisfies(api_version, (ver := ref[4:]))
         }
 
         if compatible:
-            return compatible[max(compatible)]
+            return compatible[max(compatible, key=get_version)]
 
         # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
         return remote_refs.get("HEAD", "HEAD")

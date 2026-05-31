@@ -1,4 +1,4 @@
-from ulauncher.utils.version import _valid_range, satisfies
+from ulauncher.utils.version import _valid_range, get_version, satisfies
 
 
 class TestVersion:
@@ -29,3 +29,10 @@ class TestVersion:
         assert satisfies("2.3", "2 - 3.0")
         assert satisfies("2.3", "2 - 2.3")
         assert not satisfies("2.3", "2 - 2.2")
+
+    def test_get_version(self) -> None:
+        assert get_version("3") == (3, 0)
+        assert get_version("3.2") == (3, 2)
+        assert get_version("3.x") == (3, 0)
+        # Compares numerically, not lexicographically: 3.10 is higher than 3.2
+        assert get_version("3.10") > get_version("3.2")

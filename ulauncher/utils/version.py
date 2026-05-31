@@ -39,6 +39,12 @@ def _valid_range(range_str: str) -> bool:
     return min_version <= max_version
 
 
+def get_version(version_string: str) -> tuple[int, int]:
+    """Parse a version string into a (major, minor) tuple."""
+    major, minor = _parse_version(version_string)
+    return (major, minor or 0)
+
+
 def satisfies(version_string: str, expected_range: str) -> bool:
     if not _valid_range(expected_range):
         return False
