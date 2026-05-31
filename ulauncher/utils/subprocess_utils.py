@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from typing import Callable
 
 from ulauncher.gi import Gio, GLib
@@ -39,3 +40,28 @@ def run_command(cmd: list[str], callback: CommandCallback, *, cwd: str | None = 
         callback(stdout, None)
 
     proc.communicate_utf8_async(None, None, on_done)
+
+
+# Run Python/urllib.request inside a Gio.Subprocess to avoid needing a dependency like libsoup, gvfsd-http, curl or wget
+_DOWNLOAD_SCRIPT = (
+    "import sys, urllib.request, shutil; "
+    "r = urllib.request.urlopen(sys.argv[1], timeout=30); "
+    "f = open(sys.argv[2], 'wb'); "
+    "shutil.copyfileobj(r, f); "
+    "f.close(); r.close()"
+)
+
+# callback(dest_path, error): dest_path is the saved file path on success, error is set on failure.
+DownloadCallback = Callable[["str | None", "Exception | None"], None]
+
+
+def download_file(url: str, dest_path: str, callback: DownloadCallback) -> None:
+    """Download url to dest_path without blocking. See _DOWNLOAD_SCRIPT for why this spawns Python."""
+
+    def on_done(_stdout: str | None, error: Exception | None) -> None:
+        if error:
+            callback(None, error)
+            return
+        callback(dest_path, None)
+
+    run_command([sys.executable, "-c", _DOWNLOAD_SCRIPT, url, dest_path], on_done)
