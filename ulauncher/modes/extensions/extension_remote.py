@@ -68,10 +68,15 @@ class ExtensionRemote(UrlParseResult):
                     )
                 else:
                     os.makedirs(self._git_dir)
-                    subprocess.check_call(
-                        ["git", "clone", "--bare", self.remote_url, self._git_dir],
-                        stderr=subprocess.DEVNULL,
-                    )
+                    try:
+                        subprocess.check_call(
+                            ["git", "clone", "--bare", self.remote_url, self._git_dir],
+                            stderr=subprocess.DEVNULL,
+                        )
+                    except subprocess.CalledProcessError:
+                        # Otherwise the leftover empty dir sends future calls down the fetch path
+                        rmtree(self._git_dir, ignore_errors=True)
+                        raise
 
                 response = subprocess.check_output(["git", "ls-remote", self._git_dir]).decode().strip().split("\n")
             else:
