@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any, Callable
 
 from ulauncher.gi import GLib
-from ulauncher.utils.subprocess_utils import run_command
+from ulauncher.utils.subprocess_utils import download_file, run_command
 
 
 def _drive(
@@ -55,3 +56,20 @@ def test_run_command_spawn_failure() -> None:
     result, error = _drive(lambda ok, err: run_command(["definitely-not-a-real-binary-xyz"], ok, err))
     assert result is None
     assert isinstance(error, GLib.Error)
+
+
+def test_download_file_success(tmp_path: Path) -> None:
+    src = tmp_path / "src.txt"
+    src.write_text("payload")
+    dest = tmp_path / "out.txt"
+    result, error = _drive(lambda ok, err: download_file(src.as_uri(), str(dest), ok, err))
+    assert error is None
+    assert result == str(dest)
+    assert dest.read_text() == "payload"
+
+
+def test_download_file_failure(tmp_path: Path) -> None:
+    dest = tmp_path / "out.txt"
+    result, error = _drive(lambda ok, err: download_file("file:///nonexistent/nope.txt", str(dest), ok, err))
+    assert result is None
+    assert error is not None
