@@ -117,6 +117,38 @@ class ExtensionRemote(UrlParseResult):
         # Try to get the commit ref for head, fallback on "HEAD" as a string as that can be used also
         return remote_refs.get("HEAD", "HEAD")
 
+    def _install_from_archive(self, commit_hash: str, output_dir_exists: bool) -> tuple[str, float]:
+        with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
+            # download() only routes here when the template is set; "" keeps the type a plain str
+            download_url = (self.download_url_template or "").replace("[commit]", commit_hash)
+            try:
+                urlretrieve(download_url, tmp_file.name)
+            except URLError as e:
+                err_msg = f"Failed to download extension from {download_url}: {e}"
+                raise ext_exceptions.RemoteError(err_msg) from e
+            with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
+                try:
+                    untar(tmp_file.name, tmp_root_dir)
+                except (TarError, OSError) as e:
+                    err_msg = f"Failed to extract extension from {tmp_file.name}: {e}"
+                    raise ext_exceptions.RemoteError(err_msg) from e
+                subdirs = os.listdir(tmp_root_dir)
+                if len(subdirs) != 1:
+                    msg = f"Invalid archive for {self.url}."
+                    raise ext_exceptions.RemoteError(msg)
+                tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
+                manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
+                if not satisfies(api_version, manifest.api_version):
+                    if not satisfies("2.0", manifest.api_version):
+                        msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
+                        raise ext_exceptions.CompatibilityError(msg)
+                    logger.warning("Falling back on using API 2.0 version for %s.", self.url)
+
+                if output_dir_exists:
+                    rmtree(self.target_dir)
+                move(tmp_dir, self.target_dir)
+        return commit_hash, getmtime(self.target_dir)
+
     def download(self, commit_hash: str | None = None, warn_if_overwrite: bool = False) -> tuple[str, float]:
         if not commit_hash:
             commit_hash = self.get_compatible_hash()
@@ -126,36 +158,7 @@ class ExtensionRemote(UrlParseResult):
             logger.info('Extension with URL "%s" is already installed. Updating', self.url)
 
         if self.download_url_template:
-            with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_") as tmp_file:
-                download_url = self.download_url_template.replace("[commit]", commit_hash)
-                try:
-                    urlretrieve(download_url, tmp_file.name)
-                except URLError as e:
-                    err_msg = f"Failed to download extension from {download_url}: {e}"
-                    raise ext_exceptions.RemoteError(err_msg) from e
-                with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
-                    try:
-                        untar(tmp_file.name, tmp_root_dir)
-                    except (TarError, OSError) as e:
-                        err_msg = f"Failed to extract extension from {tmp_file.name}: {e}"
-                        raise ext_exceptions.RemoteError(err_msg) from e
-                    subdirs = os.listdir(tmp_root_dir)
-                    if len(subdirs) != 1:
-                        msg = f"Invalid archive for {self.url}."
-                        raise ext_exceptions.RemoteError(msg)
-                    tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
-                    manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
-                    if not satisfies(api_version, manifest.api_version):
-                        if not satisfies("2.0", manifest.api_version):
-                            msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
-                            raise ext_exceptions.CompatibilityError(msg)
-                        logger.warning("Falling back on using API 2.0 version for %s.", self.url)
-
-                    if output_dir_exists:
-                        rmtree(self.target_dir)
-                    move(tmp_dir, self.target_dir)
-            commit_timestamp = getmtime(self.target_dir)
-            return commit_hash, commit_timestamp
+            return self._install_from_archive(commit_hash, output_dir_exists)
 
         if not which("git"):
             msg = "This extension URL can only be supported if you have git installed."
