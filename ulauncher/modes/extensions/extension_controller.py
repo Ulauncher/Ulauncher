@@ -68,6 +68,45 @@ stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 events = EventBus()
 
 
+def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
+    """Drive a callback-based Gio operation to completion synchronously on the calling thread.
+
+    Temporary bridge for step one of the asyncio/threading removal: extension_remote is now
+    callback-based, but ExtensionController is still async and runs in worker threads (ext_handlers)
+    or the CLI's asyncio loop. Gio.Subprocess callbacks dispatch on a GLib main context, not the
+    asyncio loop, and no GLib loop runs in those threads, so a plain asyncio.Future shim would
+    never resolve. Running a private GLib main loop (pushed as the thread-default context) drives
+    the operation to completion. Remove this when the controller becomes callback-native.
+    """
+    context = GLib.MainContext.new()
+    context.push_thread_default()
+    box: dict[str, Any] = {}
+    completed = False
+    try:
+        loop = GLib.MainLoop.new(context, False)
+
+        def finish(result: Any = None, error: Exception | None = None) -> None:
+            nonlocal completed
+            box["result"], box["error"] = result, error
+            completed = True
+            loop.quit()
+
+        start(finish, lambda error: finish(error=error))
+        # done() can fire synchronously during start() (e.g. an immediate validation failure
+        # that calls back without spawning a subprocess). Then loop.quit() already ran before
+        # loop.run(), which GLib does not treat as a pending quit, so running the loop would
+        # block forever. Only enter the loop while the callback is still pending.
+        if not completed:
+            loop.run()
+    finally:
+        # Always restore the thread-default context, even if start() raises synchronously
+        # (a synchronous raise propagates to the caller, matching the pre-conversion behavior).
+        context.pop_thread_default()
+    if box.get("error"):
+        raise box["error"]
+    return box.get("result")
+
+
 def _load_preferences(ext_id: str) -> JsonConf:
     return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
@@ -105,7 +144,9 @@ class ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
-        downloaded_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
+        downloaded_hash, commit_timestamp = _run_gio_blocking(
+            lambda on_success, on_error: remote.download(on_success, on_error, commit_hash, warn_if_overwrite)
+        )
 
         try:
             # install python dependencies from requirements.txt
@@ -240,7 +281,7 @@ class ExtensionController:
         """
         Returns tuple with commit info about a new version
         """
-        commit_hash = ExtensionRemote(self.state.url).get_compatible_hash()
+        commit_hash = _run_gio_blocking(ExtensionRemote(self.state.url).get_compatible_hash)
         has_update = self.state.commit_hash != commit_hash
         return has_update, commit_hash
 
