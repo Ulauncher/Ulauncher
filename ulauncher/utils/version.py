@@ -48,7 +48,7 @@ def get_version(version_string: str) -> tuple[int, int]:
 def satisfies(version_string: str, expected_range: str) -> bool:
     if not _valid_range(expected_range):
         return False
-    version = _parse_version(version_string)
+    version = get_version(version_string)
     min_version, max_version = _unpack_range(expected_range)
     if min_version[1] is None:
         min_version = (min_version[0], 0)
