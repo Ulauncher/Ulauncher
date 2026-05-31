@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import socket
-from typing import Any
+from typing import Any, Generator
 from unittest.mock import Mock
 
 import pytest
@@ -25,15 +26,30 @@ def process_pending_events(iterations: int = 10) -> None:
 
 
 @pytest.fixture
-def socket_pair() -> tuple[socket.socket, socket.socket]:
-    return socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
+def socket_pair() -> Generator[tuple[socket.socket, socket.socket], None, None]:
+    parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
+    yield parent, child
+    # Suppress errors: tests or the controller may already have closed these fds.
+    with contextlib.suppress(OSError):
+        parent.close()
+    with contextlib.suppress(OSError):
+        child.close()
 
 
 @pytest.fixture
-def controller_pair(socket_pair: tuple[socket.socket, socket.socket]) -> tuple[SocketMsgController, socket.socket]:
+def controller_pair(
+    socket_pair: tuple[socket.socket, socket.socket],
+) -> Generator[tuple[SocketMsgController, socket.socket], None, None]:
     parent, child = socket_pair
     controller = SocketMsgController(parent.fileno())
-    return controller, child
+    yield controller, child
+    # Close child first so any pending read_line_async gets EOF and stops re-queuing.
+    with contextlib.suppress(OSError):
+        child.close()
+    controller.close()
+    # Drain pending GLib I/O callbacks so the fd watch is removed before new tests
+    # allocate fds that might reuse the same fd numbers.
+    process_pending_events()
 
 
 class TestSocketMsgController:
