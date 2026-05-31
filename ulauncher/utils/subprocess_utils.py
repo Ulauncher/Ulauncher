@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from typing import Callable
 
 from ulauncher.gi import Gio, GLib
@@ -38,3 +39,20 @@ def run_command(cmd: list[str], on_success: OnSuccess, on_error: OnError, *, cwd
         on_success(stdout)
 
     proc.communicate_utf8_async(None, None, on_done)
+
+
+# Run Python/urllib.request in a Gio.Subprocess to avoid needing a dependency like libsoup, gvfsd-http, curl or wget.
+_DOWNLOAD_SCRIPT = (
+    "import sys, urllib.request, shutil; "
+    "shutil.copyfileobj(urllib.request.urlopen(sys.argv[1], timeout=30), open(sys.argv[2], 'wb'))"
+)
+
+
+def download_file(url: str, dest_path: str, on_success: OnSuccess, on_error: OnError) -> None:
+    """Download url to dest_path without blocking. Calls on_success(dest_path) or on_error(error).
+    See _DOWNLOAD_SCRIPT for why this spawns Python."""
+    run_command(
+        [sys.executable, "-c", _DOWNLOAD_SCRIPT, url, dest_path],
+        lambda _stdout: on_success(dest_path),
+        on_error,
+    )
