@@ -105,7 +105,7 @@ class ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
-        commit_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
+        downloaded_hash, commit_timestamp = remote.download(commit_hash, warn_if_overwrite)
 
         try:
             # install python dependencies from requirements.txt
@@ -120,7 +120,7 @@ class ExtensionController:
         controller.state.save(
             url=url,
             browser_url=remote.browser_url or "",
-            commit_hash=commit_hash,
+            commit_hash=downloaded_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
             updated_at=datetime.now().isoformat(),
             error_type="",
