@@ -64,6 +64,19 @@ class TestRunScript:
         _drive_run_script(script, "")
         assert test_file.read_text().strip() == "hello"
 
+    def test_no_arg_passes_no_positional_params(self, tmp_path: Path) -> None:
+        # An empty arg must not be passed as a positional parameter, so $# stays 0.
+        test_file = tmp_path / "test_output.txt"
+        script = f"#!/bin/sh\necho $# > {test_file}\n"
+        _drive_run_script(script, "")
+        assert test_file.read_text().strip() == "0"
+
+    def test_arg_passed_as_single_positional_param(self, tmp_path: Path) -> None:
+        test_file = tmp_path / "test_output.txt"
+        script = f"#!/bin/sh\necho $# > {test_file}\n"
+        _drive_run_script(script, "some arg")
+        assert test_file.read_text().strip() == "1"
+
     def test_temp_file_cleaned_up_on_success(self) -> None:
         removed = _drive_run_script("#!/bin/sh\ntrue", "")
         assert len(removed) == 1

@@ -38,5 +38,9 @@ def run_script(script: str, arg: str) -> None:
     # `sh -c` invokes the temp file directly. If the kernel returns ENOEXEC (shebang-less script or
     # unrecognised format), the shell falls back to interpreting it as a shell script. This is the
     # same fallback the old subprocess `shell=True` call relied on.
-    command = f"{shlex.quote(file_path)} {shlex.quote(arg)}"
+    command = shlex.quote(file_path)
+    if arg:
+        # Only append when set, so a script invoked without an argument sees no positional
+        # parameters ($# == 0) rather than a single empty one.
+        command += f" {shlex.quote(arg)}"
     run_command(["/bin/sh", "-c", command], on_success, on_error)
