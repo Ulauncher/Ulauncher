@@ -361,10 +361,19 @@ class ExtensionMode(Mode):
                 controller.is_preview = True
 
                 # install python dependencies from requirements.txt
+                from ulauncher.modes.extensions import ext_exceptions
                 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 
                 deps = ExtensionDependencies(controller.id, controller.path)
-                deps.install()
+                try:
+                    deps.install()
+                except ext_exceptions.DependencyError:
+                    logger.exception("[preview] Failed to install dependencies for '%s'", preview_ext_id)
+                    # Don't leave the original extension stopped+shadowed; restore it.
+                    if (original := extension_registry.get(ext_id)) and original.shadowed_by_preview:
+                        original.shadowed_by_preview = False
+                        self.run_ext_batch_job([ext_id], ["start"])
+                    return
 
                 if controller.start(with_debugger=with_debugger):
                     logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
