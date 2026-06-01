@@ -20,9 +20,9 @@ def run_command(cmd: list[str], on_success: OnSuccess, on_error: OnError, *, cwd
     try:
         proc = launcher.spawnv(cmd)
     except GLib.Error as error:
-        # spawnv raises synchronously; schedule via idle_add so on_error fires inside the
-        # caller's main loop iteration rather than before loop.run().
-        GLib.idle_add(on_error, error)
+        # Report synchronously, not via GLib.idle_add: idle_add posts to the global default
+        # context, which _run_gio_blocking's private thread-default loop never iterates -> hangs.
+        on_error(error)
         return
 
     def on_done(subprocess_: Gio.Subprocess, result: Gio.AsyncResult) -> None:
