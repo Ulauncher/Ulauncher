@@ -137,7 +137,9 @@ class TestGetCompatibleHash:
     @patch("ulauncher.modes.extensions.extension_remote.isdir", return_value=True)
     @patch("ulauncher.modes.extensions.extension_remote.run_command")
     def test_maps_command_failure_to_network_error(self, mock_run: MagicMock, *_: Any) -> None:
-        def side_effect(cmd: list[str], on_success: Callable[[Any], None], on_error: Callable[[Any], None]) -> None:
+        def side_effect(
+            cmd: list[str], on_success: Callable[[Any], None], on_error: Callable[[Any], None], **_kw: Any
+        ) -> None:
             if "ls-remote" in cmd:
                 on_error(subprocess.CalledProcessError(128, cmd))
             else:

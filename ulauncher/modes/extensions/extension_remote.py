@@ -17,7 +17,7 @@ from ulauncher import (
 from ulauncher.data import BaseDataClass
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
-from ulauncher.utils.subprocess_utils import OnError, download_file, run_command
+from ulauncher.utils.subprocess_utils import OnError, OnSuccess, download_file, run_command
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import get_version, satisfies
 
@@ -43,6 +43,99 @@ def _parse_refs_response(response_text: str) -> dict[str, str]:
     return refs
 
 
+class _BareRepo:
+    """Owns the cached bare clone at git_dir.
+
+    Each method maps its own git/OS failure to the matching ext_exceptions error before reporting it to
+    the caller's on_error, so callers thread their raw on_error through without wrapping it per command.
+    """
+
+    def __init__(self, git_dir: str, remote_url: str, url: str) -> None:
+        self._git_dir = git_dir
+        self.remote_url = remote_url
+        self._url = url
+        self._synced = False
+
+    @property
+    def _is_repo(self) -> bool:
+        # ensure it's actually a bare git repo (has an objects dir), not just a directory
+        return isdir(f"{self._git_dir}/objects")
+
+    def _network_failure(self, on_error: OnError) -> OnError:
+        """Wrap a raw fetch/clone error as the NetworkError the caller expects"""
+        return lambda _error: on_error(ext_exceptions.NetworkError(f"Could not fetch remote {self._url}."))
+
+    def _remote_failure(self, on_error: OnError, message: str) -> OnError:
+        """Wrap a raw git error as a RemoteError prefixed with message"""
+        return lambda error: on_error(ext_exceptions.RemoteError(f"{message}: {error}"))
+
+    def _fetch(self, on_done: Callable[[], None], on_error: OnError) -> None:
+        """Fetch bare repo, or clone a fresh one."""
+        fail = self._network_failure(on_error)
+        if self._is_repo:
+            self._run_git(
+                ["fetch", "origin", "+refs/heads/*:refs/heads/*", "--prune", "--prune-tags"],
+                lambda _stdout: on_done(),
+                fail,
+                skip_sync=True,
+            )
+            return
+
+        # Missing, empty, or half-cloned: start from a clean empty dir so the next attempt always
+        # clones rather than fetching a leftover. This self-heals a previously botched clone.
+        rmtree(self._git_dir, ignore_errors=True)
+        try:
+            os.makedirs(self._git_dir)
+        except OSError as error:
+            self._remote_failure(on_error, f"Failed to create repository directory {self._git_dir}")(error)
+            return
+        self._run_git(["clone", "--bare", self.remote_url, "."], lambda _stdout: on_done(), fail, skip_sync=True)
+
+    def ls_remote(self, on_success: OnSuccess, on_error: OnError) -> None:
+        self._run_git(["ls-remote", "."], on_success, on_error)
+
+    def checkout(self, work_tree: str, commit_hash: str, on_done: Callable[[], None], on_error: OnError) -> None:
+        self._run_git(
+            [f"--work-tree={work_tree}", "checkout", commit_hash, "."],
+            lambda _stdout: on_done(),
+            on_error,
+            error_message=f"Failed to checkout commit {commit_hash}",
+        )
+
+    def get_commit_timestamp(self, commit_hash: str, on_success: OnSuccess, on_error: OnError) -> None:
+        self._run_git(
+            ["show", "-s", "--format=%ct", commit_hash],
+            on_success,
+            on_error,
+            error_message=f"Failed to read commit {commit_hash}",
+        )
+
+    def _run_git(
+        self,
+        args: list[str],
+        on_success: OnSuccess,
+        on_error: OnError,
+        *,
+        skip_sync: bool = False,
+        error_message: str | None = None,
+    ) -> None:
+        """Run a git subcommand in the repo's git_dir. Will git fetch first if needed unless passing skip_sync=True."""
+        fail = self._remote_failure(on_error, error_message) if error_message else self._network_failure(on_error)
+
+        def run() -> None:
+            run_command(["git", *args], on_success, fail, cwd=self._git_dir)
+
+        if skip_sync or self._synced:
+            run()
+            return
+
+        def on_fetched() -> None:
+            self._synced = True
+            run()
+
+        self._fetch(on_fetched, on_error)
+
+
 class UrlParseResult(BaseDataClass):
     ext_id: str
     remote_url: str
@@ -65,53 +158,25 @@ class ExtensionRemote(UrlParseResult):
             raise ext_exceptions.UrlError(msg) from e
 
         self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
-        self._git_dir = f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git"
+        self._repo = _BareRepo(f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git", self.remote_url, self.url)
+
+    def _network_error(self) -> ext_exceptions.NetworkError:
+        return ext_exceptions.NetworkError(f"Could not fetch remote {self.url}.")
 
     def _get_refs(self, on_success: RefsSuccess, on_error: OnError) -> None:
-        network_error = ext_exceptions.NetworkError(f"Could not fetch remote {self.url}.")
-
-        def on_ls_remote(stdout: str) -> None:
-            try:
-                refs = _parse_refs_response(stdout)
-            except ValueError:
-                on_error(network_error)
-                return
-            on_success(refs)
-
-        def on_synced(_stdout: str) -> None:
-            run_command(["git", "ls-remote", self._git_dir], on_ls_remote, lambda _error: on_error(network_error))
-
-        def on_clone_failed(_error: Exception) -> None:
-            # Otherwise the leftover empty dir sends future calls down the fetch path
-            rmtree(self._git_dir, ignore_errors=True)
-            on_error(network_error)
-
         if not which("git"):
             self._get_refs_http(on_success, on_error)
             return
 
-        if isdir(self._git_dir):
-            run_command(
-                [
-                    "git",
-                    f"--git-dir={self._git_dir}",
-                    "fetch",
-                    "origin",
-                    "+refs/heads/*:refs/heads/*",
-                    "--prune",
-                    "--prune-tags",
-                ],
-                on_synced,
-                lambda _error: on_error(network_error),
-            )
-            return
+        def deliver(stdout: str) -> None:
+            try:
+                refs = _parse_refs_response(stdout)
+            except ValueError:
+                on_error(self._network_error())
+                return
+            on_success(refs)
 
-        try:
-            os.makedirs(self._git_dir)
-        except OSError:
-            on_error(network_error)
-            return
-        run_command(["git", "clone", "--bare", self.remote_url, self._git_dir], on_synced, on_clone_failed)
+        self._repo.ls_remote(deliver, on_error)
 
     def _get_refs_http(self, on_success: RefsSuccess, on_error: OnError) -> None:
         # git is not installed: fetch the dumb HTTP info/refs endpoint instead
@@ -237,27 +302,10 @@ class ExtensionRemote(UrlParseResult):
                 return
             on_success((commit_hash, commit_timestamp))
 
-        def on_checkout(_stdout: str) -> None:
-            run_command(
-                ["git", f"--git-dir={self._git_dir}", "show", "-s", "--format=%ct", commit_hash],
-                on_timestamp,
-                lambda e: on_error(ext_exceptions.RemoteError(f"Failed to read commit {commit_hash}: {e}")),
-            )
+        def on_checked_out() -> None:
+            self._repo.get_commit_timestamp(commit_hash, on_timestamp, on_error)
 
-        def run_checkout() -> None:
-            run_command(
-                ["git", f"--git-dir={self._git_dir}", f"--work-tree={self.target_dir}", "checkout", commit_hash, "."],
-                on_checkout,
-                lambda e: on_error(ext_exceptions.RemoteError(f"Failed to checkout commit {commit_hash}: {e}")),
-            )
-
-        if not isdir(self._git_dir):
-            # A pinned install passes commit_hash in and so skips get_compatible_hash(), which is
-            # what clones the bare repo. Bootstrap it so the checkout below has a repo to read from.
-            self._get_refs(lambda _refs: run_checkout(), on_error)
-            return
-
-        run_checkout()
+        self._repo.checkout(self.target_dir, commit_hash, on_checked_out, on_error)
 
     def _extract_and_install(self, tar_path: str, commit_hash: str, output_dir_exists: bool) -> tuple[str, float]:
         # All filesystem steps share the same failure semantics, so they live under one guard.
