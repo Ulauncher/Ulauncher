@@ -366,9 +366,10 @@ class ExtensionMode(Mode):
                 deps = ExtensionDependencies(controller.id, controller.path)
                 deps.install()
 
-                controller.start(with_debugger=with_debugger)
-
-                logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+                if controller.start(with_debugger=with_debugger):
+                    logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+                else:
+                    logger.error("[preview] Failed to start preview extension '%s'", preview_ext_id)
 
         def on_stopped(ext_id: str) -> None:
             logger.info("[preview] Extension '%s' stopped", ext_id)
