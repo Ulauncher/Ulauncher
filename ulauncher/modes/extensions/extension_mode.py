@@ -42,6 +42,7 @@ class ExtensionMode(Mode):
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
     _request_id: int = 0
+    _pending_preview_id: str | None = None
 
     def __init__(self) -> None:
         self._trigger_cache = {}
@@ -358,30 +359,43 @@ class ExtensionMode(Mode):
         def load_preview_extension(ext_id: str) -> None:
             preview_ext_id = f"{ext_id}.preview"
             if controller := extension_registry.load(preview_ext_id, path):
-                controller.is_preview = True
+                ext = controller  # bind a non-optional local for the closures below
+                ext.is_preview = True
 
-                # install python dependencies from requirements.txt
-                from ulauncher.modes.extensions import ext_exceptions
+                # install python dependencies from requirements.txt, then launch
                 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+
+                # _pending_preview_id is a single-instance cancellation token: stop_preview clears it
+                # to abort a start still queued behind the dep install. Preview is one-at-a-time by
+                # design (the debugger binds a fixed port), so concurrent previews are unsupported; a
+                # superseded start aborts on the mismatch checks below without restoring its original.
+                self._pending_preview_id = preview_ext_id
 
                 def restore_shadowed_original() -> None:
                     if (original := extension_registry.get(ext_id)) and original.shadowed_by_preview:
                         original.shadowed_by_preview = False
                         self.run_ext_batch_job([ext_id], ["start"])
 
-                deps = ExtensionDependencies(controller.id, controller.path)
-                try:
-                    deps.install()
-                except ext_exceptions.DependencyError:
-                    logger.exception("[preview] Failed to install dependencies for '%s'", preview_ext_id)
-                    restore_shadowed_original()
-                    return
+                def on_deps_installed(_stdout: str) -> None:
+                    if self._pending_preview_id != preview_ext_id:
+                        return
+                    self._pending_preview_id = None
+                    if ext.start(with_debugger=with_debugger):
+                        logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
+                    else:
+                        logger.error("[preview] Failed to start preview extension '%s'", preview_ext_id)
+                        restore_shadowed_original()
 
-                if controller.start(with_debugger=with_debugger):
-                    logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
-                else:
-                    logger.error("[preview] Failed to start preview extension '%s'", preview_ext_id)
+                def on_deps_error(error: Exception) -> None:
+                    if self._pending_preview_id != preview_ext_id:
+                        return
+                    self._pending_preview_id = None
+                    logger.error("[preview] Failed to install dependencies for '%s': %s", preview_ext_id, error)
                     restore_shadowed_original()
+
+                deps = ExtensionDependencies(ext.id, ext.path)
+                # deps.install must run on the GLib main loop so use idle_add since this can run from a worker thread.
+                GLib.idle_add(lambda: deps.install(on_deps_installed, on_deps_error))
 
         def on_stopped(ext_id: str) -> None:
             logger.info("[preview] Extension '%s' stopped", ext_id)
@@ -425,6 +439,10 @@ class ExtensionMode(Mode):
             preview_ext_id,
             original_ext_id,
         )
+
+        # Cancel a start still deferred behind a dependency install (both run on the main loop).
+        if self._pending_preview_id == preview_ext_id:
+            self._pending_preview_id = None
 
         # Try to restart the original extension
         def restart_original_extension(ext_id: str) -> None:
