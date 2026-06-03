@@ -41,7 +41,11 @@ class ExtensionDependencies:
         Install the dependencies for the extension.
         Runs `pip install -r extension-X/requirements.txt --target extension-X/deps`
         """
-        requirements = self._read_requirements()
+        try:
+            requirements = self._read_requirements()
+        except OSError as e:
+            err_msg = f"Could not read {self.path}/requirements.txt: {e}"
+            raise ext_exceptions.DependencyError(err_msg) from e
 
         if not requirements:
             return
