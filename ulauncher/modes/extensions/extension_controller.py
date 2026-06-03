@@ -151,7 +151,7 @@ class ExtensionController:
         try:
             # install python dependencies from requirements.txt
             deps = ExtensionDependencies(remote.ext_id, remote.target_dir)
-            deps.install()
+            _run_gio_blocking(deps.install)
         except ext_exceptions.DependencyError:
             # clean up broken install
             rmtree(remote.target_dir)
