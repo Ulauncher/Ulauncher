@@ -63,9 +63,9 @@ class ExtensionDependencies:
             result = subprocess.run(command, check=True, capture_output=True, text=True)
             logger.info("Installation successful. Output: %s", result.stdout)
         except subprocess.CalledProcessError as e:
-            logger.exception("Error during installation. Output: %s", e.stderr)
-
-            err_msg = f"$ {command_str}\n{e.stderr}"
+            output = e.stderr or e.stdout
+            logger.exception("Error during installation. Output: %s", output)
+            err_msg = f"$ {command_str}\n{output}"
             raise ext_exceptions.DependencyError(err_msg) from e
 
     def _read_requirements(self) -> str | None:
