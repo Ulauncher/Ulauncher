@@ -364,21 +364,24 @@ class ExtensionMode(Mode):
                 from ulauncher.modes.extensions import ext_exceptions
                 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 
+                def restore_shadowed_original() -> None:
+                    if (original := extension_registry.get(ext_id)) and original.shadowed_by_preview:
+                        original.shadowed_by_preview = False
+                        self.run_ext_batch_job([ext_id], ["start"])
+
                 deps = ExtensionDependencies(controller.id, controller.path)
                 try:
                     deps.install()
                 except ext_exceptions.DependencyError:
                     logger.exception("[preview] Failed to install dependencies for '%s'", preview_ext_id)
-                    # Don't leave the original extension stopped+shadowed; restore it.
-                    if (original := extension_registry.get(ext_id)) and original.shadowed_by_preview:
-                        original.shadowed_by_preview = False
-                        self.run_ext_batch_job([ext_id], ["start"])
+                    restore_shadowed_original()
                     return
 
                 if controller.start(with_debugger=with_debugger):
                     logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
                 else:
                     logger.error("[preview] Failed to start preview extension '%s'", preview_ext_id)
+                    restore_shadowed_original()
 
         def on_stopped(ext_id: str) -> None:
             logger.info("[preview] Extension '%s' stopped", ext_id)
