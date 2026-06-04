@@ -269,10 +269,12 @@ class ExtensionController:
             except (ext_exceptions.ExtensionError, ValueError):
                 logger.exception("Could not update extension '%s'.", self.id)
                 copytree(backup_dir, ext_path, dirs_exist_ok=True)
-                await self.toggle_enabled(was_running)
+                if was_running:
+                    self.start()
                 raise
 
-        await self.toggle_enabled(was_running)
+        if was_running:
+            self.start()
         logger.info("Successfully updated extension: %s", self.id)
 
         return True
