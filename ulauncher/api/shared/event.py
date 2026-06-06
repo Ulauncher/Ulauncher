@@ -79,9 +79,9 @@ class ResultActivationEvent(BaseEvent):
 
 class UnloadEvent(BaseEvent):
     """
-    Is triggered when extension is about to be unloaded (terminated).
+    Is triggered when an extension is about to be unloaded (terminated).
 
-    Your extension has 300ms to handle this event and shut down properly.
+    The extension has 300ms to handle this event and shut down properly.
     After that it will be terminated with SIGKILL
     """
 
