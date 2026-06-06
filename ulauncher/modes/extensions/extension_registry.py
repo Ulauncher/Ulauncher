@@ -50,12 +50,12 @@ def load(ext_id: str, path: str | None = None) -> ExtensionController | None:
     return controller
 
 
-def load_all() -> Iterator[ExtensionController]:
+def load_all() -> list[ExtensionController]:
     """Load all extensions found by the extension finder into the registry."""
     for ext_id, ext_path in extension_finder.iterate():
         load(ext_id, ext_path)
 
-    yield from _ext_controllers.values()
+    return list(_ext_controllers.values())
 
 
 @events.on
