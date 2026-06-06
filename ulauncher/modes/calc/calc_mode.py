@@ -70,7 +70,6 @@ def normalize_expr(expr: str) -> str:
     return expr  # noqa: RET504
 
 
-@lru_cache(maxsize=1000)
 def eval_expr(expr: str) -> str:
     """
     >>> eval_expr('2^6')
@@ -82,7 +81,11 @@ def eval_expr(expr: str) -> str:
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = normalize_expr(expr)
+    return _eval_normalized(normalize_expr(expr))
+
+
+@lru_cache(maxsize=1000)
+def _eval_normalized(expr: str) -> str:
     tree = ast.parse(expr, mode="eval").body
     result = Decimal(_eval(tree)).quantize(Decimal("1e-15"))
     int_result = int(result)
@@ -93,7 +96,6 @@ def eval_expr(expr: str) -> str:
 
 @lru_cache(maxsize=1000)
 def _is_enabled(query_str: str) -> bool:
-    query_str = normalize_expr(query_str)
     try:
         node = ast.parse(query_str, mode="eval").body
         if isinstance(node, ast.Constant):
@@ -147,7 +149,7 @@ def _eval(node: ast.expr) -> int | float | Decimal:
 
 class CalcMode(Mode):
     def matches_query_str(self, query_str: str) -> bool:
-        return _is_enabled(query_str)
+        return _is_enabled(normalize_expr(query_str))
 
     def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
         try:
