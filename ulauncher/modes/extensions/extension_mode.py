@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 import html
 import logging
-from threading import Thread
 from typing import Any, Callable, Iterator, Literal, TypedDict
 
 from ulauncher.api.shared.event import EventType
@@ -219,22 +217,17 @@ class ExtensionMode(Mode):
             if ext := extension_registry.get(ext_id) or extension_registry.load(ext_id):
                 ext_controllers.append(ext)  # noqa: PERF401
 
-        # run the reload in a separate thread to avoid blocking the main thread
-        async def run_batch_async() -> None:
-            for job in jobs:
-                if job == "start":
-                    for controller in ext_controllers:
-                        if controller.is_enabled:
-                            controller.start()
-                elif job == "stop":
-                    await asyncio.gather(*[c.stop() for c in ext_controllers])
+        for job in jobs:
+            if job == "start":
+                for controller in ext_controllers:
+                    if controller.is_enabled:
+                        controller.start()
+            elif job == "stop":
+                for controller in ext_controllers:
+                    controller.stop()
 
-        def run_batch() -> None:
-            asyncio.run(run_batch_async())
-            if callback:
-                callback()
-
-        Thread(target=run_batch).start()
+        if callback:
+            callback()
 
     @events.on
     def reload(

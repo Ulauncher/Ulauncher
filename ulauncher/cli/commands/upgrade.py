@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
@@ -24,7 +23,7 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
         log("Could not upgrade %s: invalid URL '%s'", ext_id, url)
 
 
-async def _upgrade_all_extensions() -> list[str]:
+def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
 
     for controller in extension_registry.load_all():
@@ -32,7 +31,7 @@ async def _upgrade_all_extensions() -> list[str]:
             continue
 
         try:
-            updated = await controller.update()
+            updated = controller.update()
             if updated:
                 updated_extensions.append(controller.id)
         except ext_exceptions.UrlError:
@@ -45,7 +44,7 @@ async def _upgrade_all_extensions() -> list[str]:
 
 def upgrade_one(controller: ExtensionController) -> bool:
     try:
-        updated = asyncio.run(controller.update())
+        updated = controller.update()
     except ext_exceptions.UrlError:
         _log_url_error(controller.id, controller.state.url, fatal=True)
         return False
@@ -64,7 +63,7 @@ def run(args: CLIArguments) -> int:
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return 1
 
-    updated_extensions = asyncio.run(_upgrade_all_extensions())
+    updated_extensions = _upgrade_all_extensions()
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
 
