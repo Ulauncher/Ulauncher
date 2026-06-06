@@ -44,6 +44,7 @@ class TestCalcMode:
 
         assert not mode.matches_query_str("a+b")
         assert not mode.matches_query_str("Add/Remove")
+        assert not mode.matches_query_str("relative/path/to/file.ext")
         assert not mode.matches_query_str("+2")
         assert not mode.matches_query_str(")+3")
         assert not mode.matches_query_str("asdf()")

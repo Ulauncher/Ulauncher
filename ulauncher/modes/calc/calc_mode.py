@@ -94,22 +94,36 @@ def _eval_normalized(expr: str) -> str:
     return str(result.normalize())  # normalize strips trailing zeros from decimal
 
 
+def _is_math_operand(node: ast.expr) -> bool:
+    # ensure every leaf is a number, or a known constant or function call, but don't validate the operator type,
+    # because invalid math expressions should still count as expressions so we can show an error message
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, (int, float)) and not isinstance(node.value, bool)
+    if isinstance(node, ast.BinOp):
+        return _is_math_operand(node.left) and _is_math_operand(node.right)
+    if isinstance(node, ast.UnaryOp):
+        return _is_math_operand(node.operand)
+    if isinstance(node, ast.Name):
+        return node.id in constants
+    if isinstance(node, ast.Call):
+        return isinstance(node.func, ast.Name) and node.func.id in functions and all(map(_is_math_operand, node.args))
+    return False
+
+
 @lru_cache(maxsize=1000)
 def _is_enabled(query_str: str) -> bool:
     try:
         node = ast.parse(query_str, mode="eval").body
+        # A lone constant name (e.g. "pi") is a word, not a query worth answering, so unlike a nested operand it
+        # only counts as math inside an operator, call, or unary minus.
         if isinstance(node, ast.Constant):
-            return True
+            return isinstance(node.value, (int, float)) and not isinstance(node.value, bool)
         if isinstance(node, ast.BinOp):
-            # Check that left and right are valid constants if they are strings
-            if isinstance(node.left, ast.Name) and node.left.id not in constants:
-                return False
-            return not (isinstance(node.right, ast.Name) and node.right.id not in constants)
+            return _is_math_operand(node)
         if isinstance(node, ast.UnaryOp):
-            # Allow for minus, but no other operators
-            return isinstance(node.op, ast.USub)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-            return node.func.id in functions
+            return isinstance(node.op, ast.USub) and _is_math_operand(node.operand)
+        if isinstance(node, ast.Call):
+            return _is_math_operand(node)
     except SyntaxError:
         pass
     except (ValueError, TypeError, AttributeError, RecursionError, MemoryError) as e:
