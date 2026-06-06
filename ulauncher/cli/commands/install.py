@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
@@ -13,7 +12,7 @@ def run(args: CLIArguments) -> int:
     # registry.install is idempotent and will also upgrade to latest (if installed) or shadow non-manageable.
     url = normalize_ext_arg(args.input)
     try:
-        record = asyncio.run(get_ext_registry().install(url))
+        record = get_ext_registry().install(url)
         dbus_trigger_event("extensions:reload", [record.id])
     except (ValueError, ext_exceptions.UrlError):  # error already logged
         return 1

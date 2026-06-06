@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import sys
-from collections import defaultdict
-from threading import Thread
 from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 
 from ulauncher import cli, paths
@@ -47,13 +44,11 @@ class ExtensionService(ExtensionRegistry):
     """
 
     runtimes: dict[str, ExtensionRuntime]
-    stopped_listeners: dict[str, list[Callable[[], None]]]
     listener: ExtensionServiceListener | None
 
     def __init__(self) -> None:
         super().__init__(lifecycle=self)
         self.runtimes = {}
-        self.stopped_listeners = defaultdict(list)
         self.listener = None
         events.set_self(self)
 
@@ -81,31 +76,26 @@ class ExtensionService(ExtensionRegistry):
             if ext := self.get(ext_id):
                 records.append(ext)  # noqa: PERF401
 
-        # run the reload in a separate thread to avoid blocking the main thread
-        async def run_batch_async() -> None:
-            for job in jobs:
-                if job == "start":
-                    for record in records:
-                        if record.is_enabled:
-                            self.start_extension(record)
-                elif job == "stop":
-                    await asyncio.gather(*[self.stop_extension(record) for record in records])
+        for job in jobs:
+            if job == "start":
+                for record in records:
+                    if record.is_enabled:
+                        self.start_extension(record)
+            elif job == "stop":
+                for record in records:
+                    self.stop_extension(record)
 
-        def run_batch() -> None:
-            asyncio.run(run_batch_async())
-            if callback:
-                callback()
-
-        Thread(target=run_batch).start()
+        if callback:
+            callback()
 
     def is_running(self, record: ExtensionRecord) -> bool:
         return record.id in self.runtimes
 
-    async def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
+    def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
         record.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
             return self.start_extension(record)
-        await self.stop_extension(record)
+        self.stop_extension(record)
         return False
 
     def start_extension(self, record: ExtensionRecord) -> bool:
@@ -117,12 +107,6 @@ class ExtensionService(ExtensionRegistry):
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = self.stopped_listeners.get(record.id, [])
-            for stop_listener in listeners:
-                stop_listener()
-
-            listeners.clear()
-
             if listener := self.listener:
                 listener.invalidate_cache()
 
@@ -194,14 +178,10 @@ class ExtensionService(ExtensionRegistry):
             listener.started(record.id)
         return self.is_running(record)
 
-    async def stop_extension(self, record: ExtensionRecord) -> None:
+    def stop_extension(self, record: ExtensionRecord) -> None:
         """Stops the extension process if it is running."""
         if runtime := self.runtimes.pop(record.id, None):
-            stopped_future: asyncio.Future[None] = asyncio.Future()
-            self.stopped_listeners[record.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
-
-            await asyncio.wait_for(stopped_future, timeout=5.0)
 
     def send_message(self, record: ExtensionRecord, message: ipc.Event, request_id: int | None = None) -> None:
         """

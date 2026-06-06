@@ -18,13 +18,11 @@ logger = logging.getLogger(__name__)
 def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
     """Drive a callback-based Gio operation to completion synchronously on the calling thread.
 
-    Temporary bridge for step one of the asyncio/threading removal: extension_remote is now
-    callback-based, but the registry's install/update flows are still async and run in worker
-    threads (ext_handlers) or the CLI's asyncio loop. Gio.Subprocess callbacks dispatch on a GLib
-    main context, not the asyncio loop, and no GLib loop runs in those threads, so a plain
-    asyncio.Future shim would never resolve. Running a private GLib main loop (pushed as the
-    thread-default context) drives the operation to completion. Remove this when the registry
-    becomes callback-native.
+    The registry's install/update flows run either in a worker thread (the preferences UI's
+    ExtensionHandlers) or on the CLI's main thread, neither of which runs a GLib main loop.
+    Gio.Subprocess callbacks dispatch on a GLib main context, so without a running loop they would
+    never fire. A private GLib main loop (pushed as the thread-default context) drives the operation
+    to completion. Remove this once these call paths run on the main GLib loop.
     """
     context = GLib.MainContext.new()
     context.push_thread_default()
@@ -94,7 +92,7 @@ class ExtensionLifecycle(Protocol):
 
     def start_extension(self, record: ExtensionRecord) -> bool: ...
 
-    async def stop_extension(self, record: ExtensionRecord) -> None: ...
+    def stop_extension(self, record: ExtensionRecord) -> None: ...
 
 
 class _NoLifecycle:
@@ -104,7 +102,7 @@ class _NoLifecycle:
     def start_extension(self, _record: ExtensionRecord) -> bool:
         return False
 
-    async def stop_extension(self, _record: ExtensionRecord) -> None: ...
+    def stop_extension(self, _record: ExtensionRecord) -> None: ...
 
 
 class ExtensionRegistry:
@@ -148,20 +146,20 @@ class ExtensionRegistry:
 
         yield from sorted(records.values(), key=sort_key)
 
-    async def install(self, url: str, commit_hash: str | None = None) -> ExtensionRecord:
+    def install(self, url: str, commit_hash: str | None = None) -> ExtensionRecord:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
-        if Path(remote.target_dir).exists():  # noqa: ASYNC240
+        if Path(remote.target_dir).exists():
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
         record = ExtensionRecord(remote.ext_id, remote.target_dir)
-        await self._install_from_remote(record, remote, commit_hash, url=url)
+        self._install_from_remote(record, remote, commit_hash, url=url)
         logger.info("Extension %s installed successfully", record.id)
         return record
 
-    async def uninstall(self, record: ExtensionRecord) -> None:
+    def uninstall(self, record: ExtensionRecord) -> None:
         if record.is_manageable:
-            await self._lifecycle.stop_extension(record)
+            self._lifecycle.stop_extension(record)
         if not record.remove():
             return
         # A still-locatable extension after removal is a non-manageable copy (e.g. distro-packaged).
@@ -176,12 +174,12 @@ class ExtensionRegistry:
                 fallback_path,
             )
 
-    async def update(self, record: ExtensionRecord) -> bool:
+    def update(self, record: ExtensionRecord) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
         logger.debug("Checking for updates to %s", record.id)
-        has_update, commit_hash = await self.check_update(record)
+        has_update, commit_hash = self.check_update(record)
         if not has_update:
             logger.info('Extension "%s" is already on the latest version', record.id)
             return False
@@ -194,14 +192,14 @@ class ExtensionRegistry:
         )
 
         try:
-            await self._install_from_remote(record, ExtensionRemote(record.state.url), commit_hash)
+            self._install_from_remote(record, ExtensionRemote(record.state.url), commit_hash)
         except (ext_exceptions.ExtensionError, OSError):
             logger.exception("Could not update extension '%s'", record.id)
             raise
         logger.info("Successfully updated extension: %s", record.id)
         return True
 
-    async def check_update(self, record: ExtensionRecord) -> tuple[bool, str]:
+    def check_update(self, record: ExtensionRecord) -> tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """
@@ -209,7 +207,7 @@ class ExtensionRegistry:
         has_update = record.state.commit_hash != commit_hash
         return has_update, commit_hash
 
-    async def _install_from_remote(
+    def _install_from_remote(
         self, record: ExtensionRecord, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any
     ) -> None:
         """Install (atomically): download, stop, swap and restart (if previously running).
@@ -221,7 +219,7 @@ class ExtensionRegistry:
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
         staging_dir = str(Path(paths.EXTENSIONS_STAGING) / record.id)
         rmtree(staging_dir, ignore_errors=True)
-        Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
+        Path(staging_dir).mkdir(parents=True)
         remote.target_dir = staging_dir
         was_running = False
 
@@ -238,7 +236,7 @@ class ExtensionRegistry:
 
             was_running = self._lifecycle.is_running(record)
             if _should_restart():
-                await self._lifecycle.stop_extension(record)
+                self._lifecycle.stop_extension(record)
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)

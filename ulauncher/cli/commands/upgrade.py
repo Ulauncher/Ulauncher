@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
@@ -24,7 +23,7 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
         log("Could not upgrade %s: invalid URL '%s'", ext_id, url)
 
 
-async def _upgrade_all_extensions() -> list[str]:
+def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
     registry = get_ext_registry()
 
@@ -33,7 +32,7 @@ async def _upgrade_all_extensions() -> list[str]:
             continue
 
         try:
-            updated = await registry.update(record)
+            updated = registry.update(record)
             if updated:
                 updated_extensions.append(record.id)
         except ext_exceptions.UrlError:
@@ -52,7 +51,7 @@ def upgrade_one(record: ExtensionRecord) -> bool:
         logger.error("Extension %s is externally managed and can not be upgraded (%s)", record.id, record.path)
         return False
     try:
-        updated = asyncio.run(get_ext_registry().update(record))
+        updated = get_ext_registry().update(record)
     except ext_exceptions.UrlError:
         _log_url_error(record.id, record.state.url, fatal=True)
         return False
@@ -74,7 +73,7 @@ def run(args: CLIArguments) -> int:
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return 1
 
-    updated_extensions = asyncio.run(_upgrade_all_extensions())
+    updated_extensions = _upgrade_all_extensions()
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
 

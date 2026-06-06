@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
@@ -14,7 +13,7 @@ def run(args: CLIArguments) -> int:
             logger.error("Extension %s is externally managed and can not be uninstalled (%s)", record.id, record.path)
             return 1
         try:
-            asyncio.run(get_ext_registry().uninstall(record))
+            get_ext_registry().uninstall(record)
         except OSError:
             logger.error("Could not uninstall %s", record.id)  # noqa: TRY400 - traceback is noise here
             return 1
