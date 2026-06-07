@@ -10,13 +10,13 @@ from gi.repository import Gdk, Gtk
 
 from ulauncher import paths
 from ulauncher.core import UlauncherCore
-from ulauncher.gi import GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor
 from ulauncher.ui.helpers.theme import Theme
 from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.ui.load_icon_surface import load_icon_surface
+from ulauncher.utils import scheduling
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -228,7 +228,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return
         logger.info("Window shown")
         self.disconnect_by_func(self.on_initial_draw)
-        GLib.idle_add(self.deferred_init)
+        scheduling.run_when_idle(self.deferred_init)
 
     def on_focus_out(self) -> None:
         if self.settings.close_on_focus_out and not self.is_dragging:
