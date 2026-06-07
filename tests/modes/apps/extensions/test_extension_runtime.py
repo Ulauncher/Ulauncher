@@ -119,7 +119,7 @@ class TestExtensionRuntime:
         exit_handler = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
 
-        runtime._subprocess.get_exit_status.return_value = None
+        runtime._subprocess.get_identifier.return_value = "12345"
         runtime._msg_controller = Mock()
         runtime.stop()
 
@@ -132,9 +132,17 @@ class TestExtensionRuntime:
         extid = "mock.test_kill__sends_sigkill"
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
 
-        # Simulate process still running
-        runtime._subprocess.get_exit_status.return_value = None
+        runtime._subprocess.get_identifier.return_value = "12345"  # still running
         runtime._kill()
 
-        # Verify SIGKILL is sent
         runtime._subprocess.send_signal.assert_called_once_with(signal.SIGKILL)
+
+    def test_kill__noop_when_already_reaped(self) -> None:
+        """_kill() must not signal once the process has been reaped (get_identifier() is None)."""
+        extid = "mock.test_kill__noop_when_already_reaped"
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+
+        runtime._subprocess.get_identifier.return_value = None
+        runtime._kill()
+
+        runtime._subprocess.send_signal.assert_not_called()

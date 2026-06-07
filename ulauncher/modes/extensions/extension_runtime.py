@@ -104,11 +104,9 @@ class ExtensionRuntime:
         timer(0.5, self._kill)
 
     def _kill(self) -> None:
-        if self._subprocess.get_exit_status() is None:
-            logger.info("Extension %s still running, sending SIGKILL", self._ext_id)
-            # It is possible that the process exited between the check above and this signal,
-            # luckily the subprocess library handles the signal delivery in race-free way, so this
-            # is safe to do.
+        if self._subprocess.get_identifier():
+            logger.info("Sending SIGKILL to extension %s", self._ext_id)
+            # The process may exit between this check and the signal; Gio delivers it race-free.
             self._subprocess.send_signal(signal.SIGKILL)
 
     def read_stderr_line(self) -> None:
