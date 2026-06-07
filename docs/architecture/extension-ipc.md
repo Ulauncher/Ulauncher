@@ -1,6 +1,6 @@
 # Extension IPC Architecture
 
-Extensions run in **separate processes** and communicate with Ulauncher via Unix socket pairs using a JSON-line protocol.
+Extensions run in **separate processes** as the same user as Ulauncher (not sandboxed). They communicate with Ulauncher via Unix socket pairs using a JSON-line protocol.
 
 ## Architecture Diagram
 

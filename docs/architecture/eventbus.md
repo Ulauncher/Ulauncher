@@ -32,6 +32,8 @@ def something_happened(data):
 - `"extensions"` - The ExtensionMode class
 - `"extension_lifecycle"` - The extension_registry module
 
+Namespaces are not implemented with strict ownership/isolation. To avoid conflicts and/or confusion, make sure not to reuse the same namespace across different listeners.
+
 ## When to Use
 
 ✅ Use when:
