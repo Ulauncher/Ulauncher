@@ -121,9 +121,7 @@ def run(args: CLIArguments) -> int:
         return 1
     logger.info("Extension ID: %s", ext_id)
 
-    preview_message = {"ext_id": ext_id, "path": str(path), "with_debugger": args.with_debugger}
-    logger.debug("Sending preview request over D-Bus: %s", preview_message)
-    dbus_trigger_event("extensions:preview_ext", preview_message)
+    dbus_trigger_event("extensions:preview_ext", ext_id, str(path), args.with_debugger)
 
     logger.info(
         "Extension '%s' started.\nSee extension's output along with the Ulauncher's in %s",
@@ -142,5 +140,5 @@ def run(args: CLIArguments) -> int:
     _wait_for_interrupt(ext_id)
 
     logger.info("Stopping '%s'...", ext_id)
-    dbus_trigger_event("extensions:stop_preview", {"preview_ext_id": f"{ext_id}.preview", "original_ext_id": ext_id})
+    dbus_trigger_event("extensions:stop_preview", f"{ext_id}.preview", ext_id)
     return 0

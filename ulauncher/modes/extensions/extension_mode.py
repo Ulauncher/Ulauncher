@@ -322,32 +322,8 @@ class ExtensionMode(Mode):
         self._pending_callback = None
 
     @events.on
-    def preview_ext(self, payload: dict[str, Any] | None = None) -> None:
-        """Handle a preview extension request coming from the CLI (via D-Bus).
-
-        Stage: run the extension from an arbitrary filesystem path WITHOUT installing it.
-
-        Expected payload example:
-            {
-              "ext_id": "my-extension",
-              "path": "/abs/path/to/extension",
-              "with_debugger": false
-            }
-        """
-
-        if not payload or not isinstance(payload, dict):  # basic guard
-            logger.error("preview_ext called without valid payload: %s", payload)
-            return
-
-        ext_id = payload.get("ext_id")
-        path = payload.get("path")
-        with_debugger = bool(payload.get("with_debugger"))
-        if not isinstance(ext_id, str) or not ext_id.strip():
-            logger.error("preview_ext called without valid ext_id: %s", payload)
-            return
-        if not isinstance(path, str) or not path.strip():
-            logger.error("preview_ext called without valid path: %s", payload)
-            return
+    def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
+        """Handle a preview extension request coming from the CLI (via D-Bus)."""
 
         logger.info(
             "[preview] Received preview request for ext_id=%s path=%s debugger=%s",
@@ -414,25 +390,8 @@ class ExtensionMode(Mode):
             load_preview_extension(ext_id)
 
     @events.on
-    def stop_preview(self, payload: dict[str, Any] | None = None) -> None:
-        """Handle stopping a preview extension and restoring the previous version if any.
-
-        Expected payload example:
-            {
-              "preview_ext_id": "my-extension.preview",
-              "original_ext_id": "my-extension"
-            }
-        """
-        if not payload or not isinstance(payload, dict):
-            logger.error("stop_preview called without valid payload: %s", payload)
-            return
-
-        preview_ext_id = payload.get("preview_ext_id")
-        original_ext_id = payload.get("original_ext_id")
-
-        if not preview_ext_id or not original_ext_id:
-            logger.error("stop_preview called without required fields: %s", payload)
-            return
+    def stop_preview(self, preview_ext_id: str, original_ext_id: str) -> None:
+        """Handle stopping a preview extension and restoring the previous version if any."""
 
         logger.info(
             "[preview] Received stop preview request for preview_ext_id=%s, original_ext_id=%s",
