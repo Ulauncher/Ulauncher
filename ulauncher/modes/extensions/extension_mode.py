@@ -25,6 +25,7 @@ events = EventBus("extensions")
 class ExtensionResponse(TypedDict, total=False):
     request_id: int
     keep_app_open: bool
+    partial: bool
     effect: EffectMessage | list[dict[str, Any]]
 
 
@@ -316,7 +317,11 @@ class ExtensionMode(Mode):
             effect_msg = raw_effect_msg
 
         self._pending_callback(effect_msg)
-        self._pending_callback = None
+        # partials (result lists only) keep the callback alive for the rest of the request
+        if not (response.get("partial") and isinstance(effect_msg, list)):
+            if response.get("partial"):
+                logger.warning("Partial response from %s with a non-list effect ends the request", ext_id)
+            self._pending_callback = None
 
     @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:

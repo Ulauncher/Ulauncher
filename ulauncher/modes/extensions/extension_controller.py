@@ -357,6 +357,8 @@ class ExtensionController:
             "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             "ULAUNCHER_EXTENSION_ID": self.id,
             "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
+            # without this flag extensions must not stream (first response = final)
+            "ULAUNCHER_PARTIAL_RESPONSES": "1",
         }
 
         # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,

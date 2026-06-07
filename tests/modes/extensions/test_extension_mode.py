@@ -1,5 +1,11 @@
 from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, PropertyMock
+
+import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 from pytest_mock import MockerFixture
 
@@ -55,3 +61,51 @@ def test_update_preferences__uses_emitted_old_preferences(mocker: MockerFixture)
     ext.send_message.assert_called_once_with(
         {"type": EventType.UPDATE_PREFERENCES, "args": ["city", "Berlin", "Stockholm"]}
     )
+
+
+@pytest.fixture
+def pending_callback_setup() -> "Iterator[SimpleNamespace]":
+    from ulauncher.modes.extensions import extension_mode
+
+    mode = object.__new__(extension_mode.ExtensionMode)
+    mode.active_ext = cast("Any", SimpleNamespace(id="test.ext", get_icon_value=MagicMock(return_value="icon.png")))
+    mode._request_id = 1
+    mode._pending_callback = MagicMock()
+    extension_mode.events.set_self(mode)
+    yield SimpleNamespace(mode=mode, callback=mode._pending_callback)
+    extension_mode.events.set_self(None)  # the EventBus self is global state
+
+
+def test_handle_response__partial_keeps_the_callback_alive(pending_callback_setup: SimpleNamespace) -> None:
+    setup = pending_callback_setup
+
+    setup.mode.handle_response("test.ext", {"request_id": 1, "partial": True, "effect": [{"name": "a"}]})
+
+    setup.callback.assert_called_once()
+    assert setup.mode._pending_callback is setup.callback
+
+    setup.mode.handle_response("test.ext", {"request_id": 1, "effect": [{"name": "a"}, {"name": "b"}]})
+
+    assert setup.callback.call_count == 2
+    assert setup.mode._pending_callback is None
+
+
+def test_handle_response__partial_flag_is_ignored_for_non_list_effects(
+    pending_callback_setup: SimpleNamespace,
+) -> None:
+    setup = pending_callback_setup
+
+    setup.mode.handle_response("test.ext", {"request_id": 1, "partial": True, "effect": {"type": "effect:do_nothing"}})
+
+    setup.callback.assert_called_once()
+    assert setup.mode._pending_callback is None
+
+
+def test_handle_response__outdated_partial_is_ignored(pending_callback_setup: SimpleNamespace) -> None:
+    setup = pending_callback_setup
+    setup.mode._request_id = 2
+
+    setup.mode.handle_response("test.ext", {"request_id": 1, "partial": True, "effect": [{"name": "a"}]})
+
+    setup.callback.assert_not_called()
+    assert setup.mode._pending_callback is setup.callback
