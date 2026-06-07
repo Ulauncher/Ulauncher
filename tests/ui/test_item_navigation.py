@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals.result import Result
 from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.ui.query_history import QueryHistory
 from ulauncher.ui.result_widget import ResultWidget
@@ -61,3 +62,28 @@ class TestItemNavigation:
         nav.select(4)
         nav.go_down()
         items[0].select.assert_called_once_with()
+
+    def test_select_preferred__reselects_matching_result(self, nav: ItemNavigation, items: list[MagicMock]) -> None:
+        for index, item in enumerate(items):
+            item.result.name = f"item{index}"
+        nav.select_preferred("query", Result(name="item3"))
+        assert nav.index == 3
+        items[3].select.assert_called_once_with()
+
+    def test_select_preferred__falls_back_to_default_when_result_is_gone(
+        self, nav: ItemNavigation, items: list[MagicMock]
+    ) -> None:
+        for index, item in enumerate(items):
+            item.result.name = f"item{index}"
+        nav.select_preferred("query", Result(name="removed"))
+        assert nav.index == 0
+
+    def test_select_preferred__falls_back_to_default_without_previous_result(self, nav: ItemNavigation) -> None:
+        nav.select_preferred("query", None)
+        assert nav.index == 0
+
+    def test_select_preferred__first_of_duplicate_names_wins(self, nav: ItemNavigation, items: list[MagicMock]) -> None:
+        for item in items:
+            item.result.name = "same"
+        nav.select_preferred("query", Result(name="same"))
+        assert nav.index == 0

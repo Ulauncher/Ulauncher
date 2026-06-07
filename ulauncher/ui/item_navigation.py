@@ -40,6 +40,16 @@ class ItemNavigation:
     def select_default(self, query: str) -> None:
         self.select(self.get_default(query))
 
+    def select_preferred(self, query: str, previous_result: Result | None = None) -> None:
+        """Keep the user's selection across re-renders of the same query, else select
+        the default. Matches by name: first duplicate wins."""
+        if previous_result is not None:
+            for index, widget in enumerate(self.result_widgets):
+                if widget.result.name == previous_result.name:
+                    self.select(index)
+                    return
+        self.select_default(query)
+
     def select(self, index: int) -> None:
         if not 0 < index < len(self.result_widgets):
             index = 0

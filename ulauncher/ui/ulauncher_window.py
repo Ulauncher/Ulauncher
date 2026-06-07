@@ -422,6 +422,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.set_position(-1)
 
     def show_results(self, results: Iterable[Result]) -> None:
+        # only deliberate (non-default) selections survive re-renders
+        previous_nav = self._results_nav
+        previous_selection = previous_nav.get_active_result() if previous_nav and previous_nav.index > 0 else None
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
 
@@ -439,7 +442,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.results.add(result_widget)
 
             self._results_nav = ItemNavigation(result_widgets)
-            self._results_nav.select_default(str(self.core.query))
+            self._results_nav.select_preferred(str(self.core.query), previous_selection)
 
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)
