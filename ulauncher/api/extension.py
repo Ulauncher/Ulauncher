@@ -51,6 +51,7 @@ class Extension:
         self._result_cache: dict[int, Result] = {}
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
+            # TODO: #1741 - migration path to remove trigger keywords from preferences
             self.preferences = json.loads(os.environ.get("EXTENSION_PREFERENCES", "{}"))
 
         # subscribe with methods if user has added their own
