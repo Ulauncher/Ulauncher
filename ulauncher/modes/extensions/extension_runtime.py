@@ -9,9 +9,9 @@ from typing import Any, Callable, Literal
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
+from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
-from ulauncher.utils.timer import timer
 
 ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
@@ -101,7 +101,7 @@ class ExtensionRuntime:
 
         self._msg_controller.close()
         # wait for graceful shutdown before forcibly killing
-        timer(0.5, self._kill)
+        scheduling.timer(0.5, self._kill)
 
     def _kill(self) -> None:
         if self._subprocess.get_identifier():

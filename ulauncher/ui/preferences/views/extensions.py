@@ -5,7 +5,6 @@ from typing import Any
 
 from gi.repository import Gtk, Pango
 
-from ulauncher.gi import GLib
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
@@ -23,10 +22,11 @@ from ulauncher.ui.preferences.views import (
     start_spinner_button_animation,
     styled,
 )
+from ulauncher.utils import scheduling
 from ulauncher.utils.launch_detached import open_detached
 
 logger = logging.getLogger(__name__)
-REFRESH_INTERVAL = 250
+REFRESH_INTERVAL = 0.25
 
 
 class ExtensionsView(BaseView):
@@ -58,20 +58,23 @@ class ExtensionsView(BaseView):
         self._load_extension_list()
         self._show_placeholder()
 
-        def reload_extension_list() -> bool:
-            # Stop the timeout if the view or its toplevel window is destroyed
+        reload_loop: scheduling.Context | None = None
+
+        def reload_extension_list() -> None:
+            # Stop the loop once the view or its toplevel window is destroyed
             toplevel = get_window_for_widget(self)
             if not toplevel or not toplevel.get_window():
-                return False  # Stops the timeout
+                if reload_loop:
+                    reload_loop.cancel()
+                return
 
             self._load_extension_list()
-            return True
 
         # We need to reload extension state periodically to reflect changes
         # - The initial runtime state is misleading/confusing "stopped" before they have started
         # - If they are killed by task/oom killer
         # - If they are installed or uninstalled by the CLI
-        GLib.timeout_add(REFRESH_INTERVAL, reload_extension_list)
+        reload_loop = scheduling.timer(REFRESH_INTERVAL, reload_extension_list, repeat=True)
 
     def _list_has_changes(self) -> bool:
         extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}

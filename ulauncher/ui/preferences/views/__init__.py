@@ -5,7 +5,7 @@ from typing import Any, Callable, TypeVar, cast
 
 from gi.repository import Gtk
 
-from ulauncher.gi import GLib
+from ulauncher.utils import scheduling
 
 T = TypeVar("T", bound=Gtk.Widget)
 
@@ -15,7 +15,7 @@ ICON_SIZE_M = 32
 ICON_SIZE_L = 48
 ICON_SIZE_XL = 64
 SIDEBAR_WIDTH = 280
-SPINNER_MIN_ANIMATION_MS = 250
+SPINNER_MIN_ANIMATION = 0.25
 
 
 def get_window_for_widget(widget: Gtk.Widget) -> Gtk.Window | None:
@@ -46,9 +46,9 @@ def start_spinner_button_animation(button: Gtk.Button) -> Callable[[], None]:
         button.set_sensitive(True)
 
     def stop_animation() -> None:
-        time_passed = int((time() - start_time) * 1000)
-        timeout = max(0, SPINNER_MIN_ANIMATION_MS - time_passed)
-        GLib.timeout_add(timeout, do_stop_animation)
+        time_passed = time() - start_time
+        timeout = max(0, SPINNER_MIN_ANIMATION - time_passed)
+        scheduling.timer(timeout, do_stop_animation)
 
     return stop_animation
 
