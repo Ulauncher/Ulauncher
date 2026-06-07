@@ -16,8 +16,8 @@ from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, 
 from ulauncher.gi import GLib
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.result import Result
+from ulauncher.utils.glib_utils import SchedulerContext, timer
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
-from ulauncher.utils.timer import TimerContext, timer
 
 
 class Extension:
@@ -46,7 +46,7 @@ class Extension:
         self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
         self.preferences = {}
         self._input_request_id: int = 0
-        self._input_debounce_timer: TimerContext | None = None
+        self._input_debounce_timer: SchedulerContext | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
         self._result_cache: dict[int, Result] = {}
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())

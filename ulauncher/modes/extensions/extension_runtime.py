@@ -10,8 +10,8 @@ from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.glib_utils import timer
 from ulauncher.utils.socket_msg_controller import SocketMsgController
-from ulauncher.utils.timer import timer
 
 ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"

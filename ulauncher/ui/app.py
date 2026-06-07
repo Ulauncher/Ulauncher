@@ -15,8 +15,8 @@ from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.glib_utils import timer
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.timer import timer
 
 logger = logging.getLogger(__name__)
 events = EventBus("app")

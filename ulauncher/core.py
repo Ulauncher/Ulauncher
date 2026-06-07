@@ -11,9 +11,9 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.glib_utils import SchedulerContext, timer
 from ulauncher.utils.lru_cache import lru_cache
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.timer import TimerContext, timer
 
 _events = EventBus()
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class UlauncherCore:
     _trigger_cache: defaultdict[Mode, list[Result]] = defaultdict(list)
     _mode_map: WeakKeyDictionary[Result, Mode] = WeakKeyDictionary()
     query: Query = Query(None, "")
-    _placeholder_timer: TimerContext | None = None
+    _placeholder_timer: SchedulerContext | None = None
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
