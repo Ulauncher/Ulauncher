@@ -161,10 +161,12 @@ class ExtensionHandlers:
                     GLib.idle_add(update_ui)
 
                 except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
-                    progress_dialog.destroy()
-                    GLib.idle_add(
-                        self.dialog_launcher.show_error, "Failed to remove extension", "Remove operation failed"
-                    )
+
+                    def show_error() -> None:
+                        progress_dialog.destroy()
+                        self.dialog_launcher.show_error("Failed to remove extension", "Remove operation failed")
+
+                    GLib.idle_add(show_error)
 
             thread = threading.Thread(target=remove_async)
             thread.daemon = True
