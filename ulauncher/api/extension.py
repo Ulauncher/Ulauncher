@@ -198,8 +198,7 @@ class Extension:
         Subscribes to events and connects to Ulauncher socket server
         """
         self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
-        # Synthesize the deprecated PreferencesEvent locally so legacy extensions get it on every
-        # start. The prefs come from the env, so this fires regardless of how the process was started.
+        # Trigger legacy preferences load event synthetically
         self._do_trigger_event({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": [self.preferences]})
         self._client.connect()
 
