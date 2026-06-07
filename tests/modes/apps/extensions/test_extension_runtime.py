@@ -39,7 +39,7 @@ class TestExtensionRuntime:
     @pytest.fixture
     def mock_timer(self, mocker: MockerFixture) -> MagicMock:
         """Mock the timer utility function used for scheduling delayed kills."""
-        return mocker.patch("ulauncher.modes.extensions.extension_runtime.timer")
+        return mocker.patch("ulauncher.modes.extensions.extension_runtime.scheduling.timer")
 
     def test_run__basic_execution__is_called(self, subprocess_launcher: MagicMock) -> None:
         extid = "mock.test_run__basic_execution__is_called"

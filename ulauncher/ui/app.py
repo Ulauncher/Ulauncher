@@ -14,9 +14,9 @@ from ulauncher import app_id, first_run
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.ulauncher_window import UlauncherWindow
+from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
-from ulauncher.utils.timer import timer
 
 logger = logging.getLogger(__name__)
 events = EventBus("app")
@@ -173,7 +173,7 @@ class UlauncherApp(Gtk.Application):
             # to work, but maybe not on all systems.
             #
             # re-check windows in case the user re-opened it during the delay
-            timer(1, lambda: self.quit() if not self.windows else None)
+            scheduling.timer(1, lambda: self.quit() if not self.windows else None)
 
     @events.on
     def show_results(self, results: Iterable[Result]) -> None:
