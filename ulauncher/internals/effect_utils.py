@@ -86,4 +86,16 @@ def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMe
             return cast("EffectMessage", input_data)  # TypedDict unions can't be narrowed by runtime checks
         err_msg = f"Invalid effect message dict: {input_data}"
         raise ValueError(err_msg)
-    return list(cast("Iterable[Result]", input_data))  # collect/flatten iterators to lists
+    results: list[Result] = []
+    for item in cast("Iterable[Result | list[Result]]", input_data):
+        results = append_or_replace(results, item)
+    return results
+
+
+def append_or_replace(results: list[Result], item: Result | list[Result]) -> list[Result]:
+    """A produced Result appends, a produced list replaces — lets producers update
+    results they already produced (e.g. a growing LLM answer)."""
+    if isinstance(item, list):
+        return list(item)
+    results.append(item)
+    return results

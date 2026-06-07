@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Final, Iterable, List, Literal, TypedDict, Union
 
 # if type checking import Result
 if TYPE_CHECKING:
@@ -69,7 +69,8 @@ EffectMessage = Union[
 ]
 
 # Input format that we will convert to an EffectMessage
-EffectMessageInput = Union[EffectMessage, bool, str, Iterable["Result"]]
+# iterables may mix Results (append) and lists of Results (replace what came before)
+EffectMessageInput = Union[EffectMessage, bool, str, Iterable[Union["Result", List["Result"]]]]
 
 
 def do_nothing() -> DoNothing:

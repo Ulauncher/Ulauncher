@@ -7,7 +7,8 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, cast
+from time import monotonic
+from typing import Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -48,6 +49,9 @@ class Extension:
         self._input_request_id: int = 0
         self._input_debounce_timer: TimerContext | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
+        # Apps without this capability flag treat the first response as final
+        self._partial_responses_enabled = os.getenv("ULAUNCHER_PARTIAL_RESPONSES") == "1"
+        self._partial_response_interval = float(os.getenv("ULAUNCHER_PARTIAL_RESPONSE_INTERVAL", "0.1"))
         self._result_cache: dict[int, Result] = {}
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
@@ -164,17 +168,43 @@ class Extension:
         args: tuple[Any],
         input_request_id: int | None = None,
     ) -> None:
-        # For extensions using yield to generate results, the method call will take no time, while
-        # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
+        if self._partial_responses_enabled and isinstance(input_effect_msg, Iterator):
+            self._stream_event_response(event, input_effect_msg, input_request_id)
+            return
+        # collecting a generator can be slow; staleness is re-checked in _send_response
         effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
         # Schedule the response on the main thread to avoid races on shared state
         GLib.idle_add(self._send_response, event, effect_msg, input_request_id)
 
+    def _stream_event_response(
+        self,
+        event: dict[str, Any],
+        results_iter: Iterator[Result | list[Result]],
+        input_request_id: int | None,
+    ) -> None:
+        """Stream throttled partial result lists, then an unthrottled final response."""
+        accumulated: list[Result] = []
+        last_sent = 0.0
+        try:
+            for result in results_iter:
+                if input_request_id is not None and input_request_id != self._input_request_id:
+                    return  # superseded; the app would discard any response
+                accumulated = effect_utils.append_or_replace(accumulated, result)
+                now = monotonic()
+                if now - last_sent >= self._partial_response_interval:
+                    last_sent = now
+                    # copies: this thread and _send_response both mutate them before idle runs
+                    GLib.idle_add(self._send_response, {**event, "partial": True}, list(accumulated), input_request_id)
+        except Exception:  # extension code: anything can raise
+            # the app waits forever without a final response
+            self.logger.exception("Generator listener failed mid-stream")
+        GLib.idle_add(self._send_response, event, accumulated, input_request_id)
+
     def _send_response(
         self,
         event: dict[str, Any],
-        effect_msg: effects.EffectMessage | None,
+        effect_msg: effects.EffectMessage | list[Result] | None,
         input_request_id: int | None,
     ) -> bool:
         if input_request_id is not None and input_request_id != self._input_request_id:

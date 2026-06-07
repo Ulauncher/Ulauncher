@@ -29,3 +29,24 @@ class TestShouldClose:
         """OPEN effect should close the window."""
         effect = effects.open("/path/to/file")
         assert effect_utils.should_close(effect)
+
+
+class TestConvertToEffectMessage:
+    def test_iterable_results_are_collected(self) -> None:
+        from ulauncher.internals.result import Result
+
+        results = [Result(name="a"), Result(name="b")]
+        assert effect_utils.convert_to_effect_message(iter(results)) == results
+
+    def test_yielded_lists_replace_previous_results(self) -> None:
+        """Mirrors the streamed semantics: a yielded list replaces, a Result appends."""
+        from ulauncher.internals.result import Result
+
+        def listener_output():  # noqa: ANN202
+            yield [Result(name="answer: hello")]
+            yield [Result(name="answer: hello world!")]
+            yield Result(name="extra item")
+
+        converted = effect_utils.convert_to_effect_message(listener_output())
+        assert isinstance(converted, list)
+        assert [result.name for result in converted] == ["answer: hello world!", "extra item"]
