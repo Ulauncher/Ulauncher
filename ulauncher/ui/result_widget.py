@@ -88,12 +88,18 @@ class ResultWidget(Gtk.EventBox):
         item_container.set_property("margin-bottom", margin_y)
 
         if result.description and not result.compact:
-            descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
+            descr_label = self._make_text_label()
             descr_label.get_style_context().add_class("item-descr")
             descr_label.get_style_context().add_class("item-text")
             descr_label.set_text(unescape(result.description))
             self.text_container.pack_start(descr_label, False, True, 0)
         self.highlight_name()
+
+    def _make_text_label(self, text: str = "") -> Gtk.Label:
+        if self.result.wrap:
+            return Gtk.Label(label=text, hexpand=True, xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR)
+        # max_width_chars=1 lets the label shrink below its natural size so ellipsizing kicks in
+        return Gtk.Label(label=text, hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
 
     def set_index(self, index: int) -> None:
         """
@@ -124,6 +130,10 @@ class ResultWidget(Gtk.EventBox):
             viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
     def highlight_name(self) -> None:
+        if self.result.wrap:
+            # highlighting splits the name into labels that cannot reflow as one paragraph
+            self.title_box.pack_start(self._make_text_label(self.result.name), True, True, 0)
+            return
         highlightable_input = self.result.get_highlightable_input(str(self.query))
         if highlightable_input and (self.result.searchable or self.result.highlightable):
             labels = []

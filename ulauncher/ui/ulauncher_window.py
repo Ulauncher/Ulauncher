@@ -33,6 +33,7 @@ def emit_show_results(results: Iterable[Result]) -> None:
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
+    _has_wrapped_results = False
     _results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
@@ -139,6 +140,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             shadow_type=Gtk.ShadowType.IN,
         )
         self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.results.connect("size-allocate", self._fit_results_height)
         self.results_scroller.add(self.results)
 
         self.theme_root.pack_start(drag_listener, False, True, 0)
@@ -424,6 +426,25 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def reload_query(self) -> None:
         self.core.set_query(self.query_str, emit_show_results)
 
+    def _fit_results_height(self, box: Gtk.Box, allocation: Gdk.Rectangle) -> None:
+        """GtkScrolledWindow measures its natural height without height-for-width,
+        clipping wrapped (Result.wrap) labels — request the real height instead."""
+        current = self.results_scroller.get_min_content_height()
+        if not self._has_wrapped_results:
+            if current != -1:
+                self.results_scroller.set_min_content_height(-1)  # restore stock sizing
+            return
+        if allocation.width <= 0:
+            return  # early allocation pass, no usable width yet
+        max_height = self.results_scroller.get_property("max-content-height")
+        needed = box.get_preferred_height_for_width(allocation.width)[1]
+        if max_height > 0:
+            needed = min(needed, max_height)
+        if abs(needed - current) > 1:  # tolerance: a scrollbar can shift the width by ~1px
+            self.results_scroller.set_min_content_height(needed)
+            # the in-progress allocation pass ignores the new request
+            scheduling.run_when_idle(self.results_scroller.queue_resize)
+
     def show_results(self, results: Iterable[Result]) -> None:
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
@@ -431,6 +452,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         jump_keys = self.settings.get_jump_keys()
         limit = len(jump_keys) or 25
         result_list = list(results)[:limit]
+        # stock sizing works for single-line results; only wrapped ones need _fit_results_height
+        self._has_wrapped_results = any(result.wrap for result in result_list)
 
         if result_list:
             from ulauncher.ui.result_widget import ResultWidget
