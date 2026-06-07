@@ -56,3 +56,31 @@ Extensions run in **separate processes** as the same user as Ulauncher (not sand
 4. Extension handles action → may send new results back
 
 All communication is asynchronous using GLib's event loop.
+
+## Partial (Streamed) Responses
+
+Extension listeners that return a generator stream their results progressively: the
+accumulated results are sent as responses marked `"partial": true`, throttled to at most
+one per `ULAUNCHER_PARTIAL_RESPONSE_INTERVAL` seconds (default 0.1), followed by a final
+unmarked, unthrottled response with the complete list. Yields landing within the
+interval are not lost: they are included in the next response — the next partial, or the
+final one if nothing else is yielded. Ulauncher keeps the response callback alive until
+the final response, so each partial replaces the rendered list.
+
+`ULAUNCHER_PARTIAL_RESPONSES=1` is exported by the app when spawning extension
+processes. `ULAUNCHER_PARTIAL_RESPONSE_INTERVAL` is only read by the extension process
+from its inherited environment — a tuning knob the app never sets.
+
+Yielding a `Result` appends it to the streamed list; yielding a `list[Result]` replaces
+it, so producers can update results they already sent (e.g. an LLM answer growing as
+tokens arrive). If the generator raises, the error is logged and the accumulated results
+are sent as the final response, so the request always terminates.
+
+This only happens when the app advertises support via the `ULAUNCHER_PARTIAL_RESPONSES=1`
+environment variable; otherwise generators are collected into a single response, because
+older apps treat the first response as final. Stale partials are discarded through the
+existing `request_id` check; when newer input supersedes the request, the extension stops
+consuming the generator and sends nothing more — not even a final response.
+
+Primary use case: extensions backed by slow producers (LLM APIs, network searches) that
+can render results as they arrive.
