@@ -198,6 +198,8 @@ class Extension:
         Subscribes to events and connects to Ulauncher socket server
         """
         self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
+        # Trigger legacy preferences load event synthetically since the app no longer sends it
+        self._do_trigger_event({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": [self.preferences]})
         self._client.connect()
 
     def clipboard_store(self, text: str) -> None:

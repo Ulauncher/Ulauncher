@@ -53,9 +53,6 @@ class ExtensionMode(Mode):
         for ext in extension_registry.load_all():
             if ext.state.is_enabled:
                 ext.start()
-                # legacy_preferences_load is useless and deprecated
-                prefs = {p_id: pref.value for p_id, pref in ext.preferences.items()}
-                ext.send_message({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": [prefs]})
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
