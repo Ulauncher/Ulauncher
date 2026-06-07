@@ -80,9 +80,9 @@ def run(_: CLIArguments) -> int:
     # measure cold-start to first input. Without this, `ulauncher start` would register as a
     # daemon and idle until an external D-Bus activation arrived.
     if os.environ.get("ULAUNCHER_PERF_START_BOOTTIME"):
-        from ulauncher.gi import GLib
+        from ulauncher.utils.glib_utils import run_when_idle
 
-        GLib.idle_add(app.show_launcher)
+        run_when_idle(app.show_launcher)
 
     with contextlib.suppress(KeyboardInterrupt):
         app.start(activate=False)

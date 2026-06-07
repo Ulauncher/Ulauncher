@@ -7,7 +7,6 @@ from threading import Thread
 from typing import Any, Callable, Iterator, Literal, TypedDict
 
 from ulauncher.api.shared.event import EventType
-from ulauncher.gi import GLib
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
@@ -16,6 +15,7 @@ from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.glib_utils import run_when_idle
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class ExtensionMode(Mode):
     def __init__(self) -> None:
         self._trigger_cache = {}
         events.set_self(self)
-        GLib.idle_add(self.start_extensions)
+        run_when_idle(self.start_extensions)
 
     def start_extensions(self) -> None:
         for ext in extension_registry.load_all():
@@ -367,8 +367,8 @@ class ExtensionMode(Mode):
                     restore_shadowed_original()
 
                 deps = ExtensionDependencies(ext.id, ext.path)
-                # deps.install must run on the GLib main loop so use idle_add since this can run from a worker thread.
-                GLib.idle_add(lambda: deps.install(on_deps_installed, on_deps_error))
+                # use run_when_idle to ensure deps.install runs on the GLib main loop
+                run_when_idle(lambda: deps.install(on_deps_installed, on_deps_error))
 
         def on_stopped(ext_id: str) -> None:
             logger.info("[preview] Extension '%s' stopped", ext_id)
