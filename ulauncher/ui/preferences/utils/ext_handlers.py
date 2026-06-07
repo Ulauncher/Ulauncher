@@ -8,10 +8,10 @@ from typing import Callable
 from gi.repository import Gtk
 
 from ulauncher import paths
-from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
+from ulauncher.utils.scheduling import run_when_idle
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ class ExtensionHandlers:
                     progress_dialog.destroy()
                     callback(ext)
 
-                GLib.idle_add(update_ui)
+                run_when_idle(update_ui)
 
             except (ext_exceptions.ExtensionError, ValueError, asyncio.CancelledError) as error:
 
@@ -115,7 +115,7 @@ class ExtensionHandlers:
                     progress_dialog.destroy()
                     self._show_extension_operation_error(error, url, "install")
 
-                GLib.idle_add(show_error, error)
+                run_when_idle(show_error, error)
 
         # Run installation in background thread
         thread = threading.Thread(target=install_async)
@@ -132,7 +132,7 @@ class ExtensionHandlers:
             except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
                 failed_action = "enable" if state else "disable"
                 error_msg = f"Failed to {failed_action} extension"
-                GLib.idle_add(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
+                run_when_idle(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
 
         thread = threading.Thread(target=toggle_async)
         thread.daemon = True
@@ -158,7 +158,7 @@ class ExtensionHandlers:
                         progress_dialog.destroy()
                         callback()
 
-                    GLib.idle_add(update_ui)
+                    run_when_idle(update_ui)
 
                 except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
 
@@ -166,7 +166,7 @@ class ExtensionHandlers:
                         progress_dialog.destroy()
                         self.dialog_launcher.show_error("Failed to remove extension", "Remove operation failed")
 
-                    GLib.idle_add(show_error)
+                    run_when_idle(show_error)
 
             thread = threading.Thread(target=remove_async)
             thread.daemon = True
@@ -188,11 +188,11 @@ class ExtensionHandlers:
                             f"No updates available for {ext.manifest.name}", "The extension is up to date."
                         )
 
-                GLib.idle_add(update_ui)
+                run_when_idle(update_ui)
 
             except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
                 callback()
-                GLib.idle_add(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
+                run_when_idle(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
 
         thread = threading.Thread(target=check_async)
         thread.daemon = True
@@ -218,7 +218,7 @@ class ExtensionHandlers:
                         "Extension updated successfully", f"{ext.manifest.name} has been updated."
                     )
 
-                GLib.idle_add(update_ui)
+                run_when_idle(update_ui)
 
             except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
                 callback()
@@ -228,7 +228,7 @@ class ExtensionHandlers:
                     progress_dialog.destroy()
                     self._show_extension_operation_error(error, url, "update")
 
-                GLib.idle_add(show_error, e)
+                run_when_idle(show_error, e)
 
         thread = threading.Thread(target=update_async)
         thread.daemon = True

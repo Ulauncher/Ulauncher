@@ -13,7 +13,6 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.gi import GLib
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
@@ -169,7 +168,7 @@ class Extension:
         input_effect_msg = method(*args)
         effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
         # Schedule the response on the main thread to avoid races on shared state
-        GLib.idle_add(self._send_response, event, effect_msg, input_request_id)
+        scheduling.run_when_idle(self._send_response, event, effect_msg, input_request_id)
 
     def _send_response(
         self,

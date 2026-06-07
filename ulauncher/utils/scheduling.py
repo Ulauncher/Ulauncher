@@ -55,3 +55,16 @@ def timer(delay_sec: float, func: Callable[..., Any], *args: Any, repeat: bool =
     Returns a Context with a .cancel() method.
     """
     return Context(GLib.timeout_source_new(int(delay_sec * 1000)), func, repeat, args, kwargs)
+
+
+def run_when_idle(func: Callable[..., Any], *args: Any, repeat: bool = False, **kwargs: Any) -> Context:
+    """
+    Runs func when the GLib main loop is idle, in the GLib main thread. Repeats on every idle
+    iteration if repeat is True.
+
+    func is called with the provided positional and keyword arguments. For example:
+        run_when_idle(myfunc, arg1, arg2, kw=val)
+
+    Returns a Context with a .cancel() method.
+    """
+    return Context(GLib.idle_source_new(), func, repeat, args, kwargs)

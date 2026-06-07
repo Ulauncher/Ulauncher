@@ -70,3 +70,18 @@ class TestTimer:
         schedule = scheduling.timer(0.1, func, "arg1", "arg2", kw="value")
         schedule._trigger()
         func.assert_called_once_with("arg1", "arg2", kw="value")
+
+
+class TestRunWhenIdle:
+    def test_creates_idle_source(self, glib: MagicMock) -> None:
+        scheduling.run_when_idle(Mock())
+        glib.idle_source_new.assert_called_once_with()
+
+    def test_returns_a_schedule(self) -> None:
+        assert isinstance(scheduling.run_when_idle(Mock()), scheduling.Context)
+
+    def test_forwards_arguments_to_func(self) -> None:
+        func = Mock()
+        schedule = scheduling.run_when_idle(func, "arg1", "arg2", kw="value")
+        schedule._trigger()
+        func.assert_called_once_with("arg1", "arg2", kw="value")
