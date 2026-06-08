@@ -85,7 +85,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
     return {"preferences": preferences, "triggers": triggers}
 
 
-def v5_to_v6() -> None:  # noqa: PLR0912
+def v5_to_v6() -> None:
     # Migrate extension state to individual files
     from configparser import ConfigParser
     from functools import partial
@@ -152,12 +152,7 @@ def v5_to_v6() -> None:  # noqa: PLR0912
                 autostart_config = ConfigParser()
                 autostart_config.read(autostart_file)
                 if autostart_config["Desktop Entry"]["X-GNOME-Autostart-enabled"] == "true":
-                    if systemd_unit.can_start():
-                        systemd_unit.toggle(True)
-                    elif systemd_unit.supported:
-                        _logger.warning("Can't enable systemd unit. Not installed")
-                    else:
-                        _logger.warning("Can't enable systemd unit. Systemd does not have systemd")
+                    systemd_unit.toggle(True)
             _logger.info("Applied autostart settings to systemd")
         except (OSError, KeyError) as e:
             _logger.warning("Couldn't migrate autostart: %s", e)
