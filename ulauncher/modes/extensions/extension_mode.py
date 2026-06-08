@@ -329,22 +329,10 @@ class ExtensionMode(Mode):
         preview.set(ext_id, path, with_debugger)
 
         # Register a controller so a not-yet-installed extension's triggers become available; an
-        # installed one already has one (now launching from the preview path).
+        # installed one already has one (now launching from the preview path). Restart it so a
+        # background-running installed instance relaunches from the dev path.
         extension_registry.get(ext_id) or extension_registry.load(ext_id, path)
-
-        from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
-
-        def on_deps_installed(_stdout: str) -> None:
-            # Restart so a background-running installed instance relaunches from the dev path.
-            self.run_ext_batch_job([ext_id], ["stop", "start"])
-
-        def on_deps_error(error: Exception) -> None:
-            logger.error("[preview] Failed to install dependencies for '%s': %s", ext_id, error)
-            preview.clear()
-
-        deps = ExtensionDependencies(ext_id, path)
-        # deps.install must run on the GLib main loop so use idle_add since this can run from a worker thread.
-        scheduling.run_when_idle(lambda: deps.install(on_deps_installed, on_deps_error))
+        self.run_ext_batch_job([ext_id], ["stop", "start"])
 
     @events.on
     def stop_preview(self) -> None:

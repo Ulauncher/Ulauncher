@@ -7,10 +7,13 @@ from pathlib import Path
 
 from ulauncher import app_id, paths
 from ulauncher.cli import CLIArguments
+from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_controller import DEBUGPY_HOST, DEBUGPY_PORT
+from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_remote import parse_extension_url
+from ulauncher.utils import scheduling
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
 
 logger = logging.getLogger(__name__)
@@ -82,14 +85,6 @@ def _resolve_ext_id(path: Path) -> str | None:
         return None
 
 
-def _wait_for_interrupt(ext_id: str) -> None:
-    # Block SIGINT so sigwait() can dequeue it atomically without racing
-    # with Python's default KeyboardInterrupt handler.
-    signal.pthread_sigmask(signal.SIG_BLOCK, [signal.SIGINT])
-    logger.info("Press Ctrl+C to stop previewing extension '%s'...", ext_id)
-    signal.sigwait([signal.SIGINT])
-
-
 def run(args: CLIArguments) -> int:
     """
     Run an extension in preview mode (without installing it).
@@ -110,35 +105,55 @@ def run(args: CLIArguments) -> int:
     if not _validate_manifest(path):
         return 1
 
-    if (path / "requirements.txt").is_file():
-        logger.warning(
-            "The extension has a requirements.txt file. "
-            "Its dependencies will be installed in the '.dependencies' folder inside the extension path."
-        )
-
-    ext_id = _resolve_ext_id(path)
-    if ext_id is None:
+    resolved_id = _resolve_ext_id(path)
+    if resolved_id is None:
         return 1
+    ext_id: str = resolved_id
     logger.info("Extension ID: %s", ext_id)
 
-    dbus_trigger_event("extensions:preview_ext", ext_id, str(path), args.with_debugger)
+    loop = GLib.MainLoop()
+    exit_code = 0
 
-    logger.info(
-        "Extension '%s' started.\nSee extension's output along with the Ulauncher's in %s",
-        ext_id,
-        paths.LOG_FILE,
-    )
-
-    if args.with_debugger:
+    def start_preview() -> None:
+        dbus_trigger_event("extensions:preview_ext", ext_id, str(path), args.with_debugger)
         logger.info(
-            "Connect your debugger to: %s:%d\n"
-            "See https://github.com/Ulauncher/Ulauncher/wiki/How-to-debug-an-extension for instructions.",
-            DEBUGPY_HOST,
-            DEBUGPY_PORT,
+            "Previewing extension '%s'.\nSee its output along with Ulauncher's in %s",
+            ext_id,
+            paths.LOG_FILE,
         )
+        if args.with_debugger:
+            logger.info(
+                "Connect your debugger to: %s:%d\n"
+                "See https://github.com/Ulauncher/Ulauncher/wiki/How-to-debug-an-extension for instructions.",
+                DEBUGPY_HOST,
+                DEBUGPY_PORT,
+            )
+        logger.info("Press Ctrl+C to stop previewing extension '%s'...", ext_id)
 
-    _wait_for_interrupt(ext_id)
+    def on_deps_error(error: Exception) -> None:
+        nonlocal exit_code
+        logger.error("Error: Failed to install extension dependencies: %s", error)
+        exit_code = 1
+        loop.quit()
 
-    logger.info("Stopping '%s'...", ext_id)
-    dbus_trigger_event("extensions:stop_preview")
-    return 0
+    def begin() -> bool:
+        # Runs under the loop so a synchronous install callback can quit it without racing loop.run().
+        if (path / "requirements.txt").is_file():
+            logger.info("Installing extension dependencies in the '.dependencies' folder...")
+            ExtensionDependencies(ext_id, str(path)).install(lambda _stdout: start_preview(), on_deps_error)
+        else:
+            start_preview()
+        return False
+
+    def on_interrupt() -> bool:
+        logger.info("Stopping '%s'...", ext_id)
+        dbus_trigger_event("extensions:stop_preview")
+        loop.quit()
+        return False
+
+    # The dependency install is callback-based and must finish before the app launches the extension,
+    # so the CLI drives it (and Ctrl+C) on its own GLib loop.
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, on_interrupt)
+    scheduling.run_when_idle(begin)
+    loop.run()
+    return exit_code
