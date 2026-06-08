@@ -75,3 +75,6 @@ def dbus_trigger_event(name: str, *args: Any) -> None:
 
     json_message = json.dumps({"name": name, "args": list(args)})
     get_ulauncher_dbus_action_group(bus).activate_action("trigger-event", GLib.Variant.new_string(json_message))
+    # activate_action only queues the message; flush it so it reaches the bus before the short-lived
+    # CLI process exits and drops the still-pending write.
+    bus.flush_sync(None)
