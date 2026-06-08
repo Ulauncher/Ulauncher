@@ -11,6 +11,7 @@ from gi.repository import Gdk, Gtk
 
 import ulauncher
 from ulauncher import app_id, first_run
+from ulauncher.core import UlauncherCore
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.result import Result
 from ulauncher.ui.ulauncher_window import UlauncherWindow
@@ -32,6 +33,8 @@ class UlauncherApp(Gtk.Application):
     # Whether the app should keep running with no windows open. Set in setup() from the
     # systemd unit state (or keep_alive fallback) and kept in sync by toggle_hold().
     _persistent: bool = False
+    # App-scoped query/mode controller, shared by every launcher window.
+    core: UlauncherCore
     # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
@@ -93,12 +96,21 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
+        self.core = UlauncherCore()
         # Always hold on app start (conditionally release after closing window)
         self.hold()
         self._persistent = settings.is_persistent()
         if self._persistent:
             # Sync additional hold with user settings
             self.hold()
+
+            # Warm the modes so extension handlers register and enabled extensions start.
+            # Skip if a window exists - it needs to control when this runs for startup performance reasons.
+            def _warm_triggers() -> None:
+                if "main" not in self.windows:
+                    self.core.load_triggers()
+
+            scheduling.run_when_idle(_warm_triggers)
 
         if settings.show_tray_icon and self._persistent:
             self.toggle_tray_icon(True)
@@ -153,7 +165,7 @@ class UlauncherApp(Gtk.Application):
             del self.windows["main"]
 
         if "main" not in self.windows:
-            main_window = UlauncherWindow(application=self)
+            main_window = UlauncherWindow(core=self.core, application=self)
             main_window.connect("destroy", self._on_window_destroyed, "main")
             self.windows["main"] = main_window
 

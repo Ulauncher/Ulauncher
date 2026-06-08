@@ -39,10 +39,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     settings: Settings
     core: UlauncherCore
 
-    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
+    def __init__(self, core: UlauncherCore, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
+        self.core = core
         self.settings = Settings.load(force=True)
-        self.core = UlauncherCore()
         width_request = int(self.settings.base_width)
         height_request = -1
 
