@@ -138,8 +138,9 @@ class PreferencesView(BaseView):
         run_in_bg_footer = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
 
         # Run in background (via systemd autostart, or keep-alive fallback)
-        if self.autostart_pref.can_start():
-            autostart_switch = Gtk.Switch(active=self.autostart_pref.is_enabled())
+        autostart_status = self.autostart_pref.status()
+        if autostart_status.can_start:
+            autostart_switch = Gtk.Switch(active=autostart_status.is_enabled)
             autostart_switch.connect("notify::active", self._on_autostart_toggled)
             desc = "Start Ulauncher automatically with your desktop session so it's ready when you need it."
             self._add_setting_row(general_box, "Run in background", autostart_switch, f"{desc}{run_in_bg_footer}")
@@ -288,15 +289,16 @@ class PreferencesView(BaseView):
 
     def _is_persistent(self) -> bool:
         # Mirrors UlauncherApp.setup(): systemd autostart wins where supported, else keep_alive.
-        if self.autostart_pref.can_start():
-            return self.autostart_pref.is_enabled()
+        status = self.autostart_pref.status()
+        if status.can_start:
+            return status.is_enabled
         return self.settings.keep_alive
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
         # Skip if already in sync - notably when set_active() below re-fires this handler.
-        if is_enabled == self.autostart_pref.is_enabled():
+        if is_enabled == self.autostart_pref.status().is_enabled:
             return
         try:
             self.autostart_pref.toggle(is_enabled)

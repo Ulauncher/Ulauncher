@@ -99,7 +99,7 @@ class UlauncherApp(Gtk.Application):
         self.hold()
         # On systemd the unit's enabled state wins; keep_alive is the non-systemd fallback.
         controller = SystemdController("ulauncher")
-        self._persistent = controller.is_enabled() or (settings.keep_alive and not controller.supported)
+        self._persistent = controller.status().is_enabled or (settings.keep_alive and not controller.supported)
         if self._persistent:
             # Sync additional hold with user settings
             self.hold()

@@ -104,7 +104,7 @@ class HotkeyController:
             subprocess.run(["kwriteconfig5", *config_path, "_k_friendly_name", "Ulauncher"], check=True)
             subprocess.run(["kwriteconfig5", *config_path, "_launch", f"{hotkey},none,Ulauncher"], check=True)
             plasma_service_controller = SystemdController("plasma-kglobalaccel")
-            if plasma_service_controller.can_start():
+            if plasma_service_controller.status().can_start:
                 plasma_service_controller.restart()
             return True
         if IS_SUPPORTED:

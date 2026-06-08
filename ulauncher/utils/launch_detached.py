@@ -39,7 +39,7 @@ def detach_child() -> None:
 
 
 def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
-    use_systemd_run = SystemdController("ulauncher").is_active()
+    use_systemd_run = SystemdController("ulauncher").status().is_active
     if use_systemd_run:
         cmd = ["systemd-run", "--user", "--scope", *cmd]
 

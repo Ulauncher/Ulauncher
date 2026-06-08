@@ -148,7 +148,7 @@ def v5_to_v6() -> None:
         try:
             systemd_unit = SystemdController("ulauncher")
             autostart_file = Path(f"{paths.CONFIG}/../autostart/ulauncher.desktop").resolve()
-            if os.path.exists(autostart_file) and systemd_unit.can_start():
+            if os.path.exists(autostart_file) and systemd_unit.status().can_start:
                 autostart_config = ConfigParser()
                 autostart_config.read(autostart_file)
                 if autostart_config["Desktop Entry"]["X-GNOME-Autostart-enabled"] == "true":
