@@ -222,7 +222,8 @@ class ExtensionController:
 
     @property
     def has_error(self) -> bool:
-        return bool(self.state.error_type)
+        # A preview must not surface the installed extension's persisted error; it reports as a preview.
+        return not self.is_preview and bool(self.state.error_type)
 
     @property
     def is_running(self) -> bool:
