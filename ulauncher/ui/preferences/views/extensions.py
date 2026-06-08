@@ -80,12 +80,11 @@ class ExtensionsView(BaseView):
         extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
 
         for ext in extension_registry.iterate():
-            if not ext.shadowed_by_preview:
-                extension_cache[ext.id] = (
-                    ext.manifest.name,
-                    ext_utils.get_status_str(ext),
-                    ext.get_icon_value(),
-                )
+            extension_cache[ext.id] = (
+                ext.manifest.name,
+                ext_utils.get_status_str(ext),
+                ext.get_icon_value(),
+            )
 
         if extension_cache == self.extension_cache:
             return False

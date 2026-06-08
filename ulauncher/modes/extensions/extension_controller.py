@@ -68,6 +68,31 @@ stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 events = EventBus()
 
 
+class PreviewExtension:
+    """The single extension currently being previewed from a dev path via the CLI, if any.
+
+    Only one runs at a time (the debugger binds a fixed port). While active, the controller whose id
+    matches launches from `path` (with `with_debugger`) instead of its installed location.
+    """
+
+    ext_id: str | None = None
+    path: str = ""
+    with_debugger: bool = False
+
+    def set(self, ext_id: str, path: str, with_debugger: bool) -> None:
+        self.ext_id = ext_id
+        self.path = path
+        self.with_debugger = with_debugger
+
+    def clear(self) -> None:
+        self.ext_id = None
+        self.path = ""
+        self.with_debugger = False
+
+
+preview = PreviewExtension()
+
+
 def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
     """Drive a callback-based Gio operation to completion synchronously on the calling thread.
 
@@ -117,16 +142,12 @@ class ExtensionController:
     id: str
     path: str
     state: ExtensionState
-    manifest: ExtensionManifest
     is_manageable: bool
-    is_preview: bool = False
-    shadowed_by_preview: bool = False
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
         self.path = path
-        self.manifest = ExtensionManifest.load(path)
         self.is_manageable = extension_finder.is_manageable(path)
         _state_path = f"{paths.EXTENSIONS_STATE}/{self.id}.json"
         self._state_path = Path(_state_path)
@@ -173,8 +194,22 @@ class ExtensionController:
         return controller
 
     @property
+    def is_preview(self) -> bool:
+        return preview.ext_id == self.id
+
+    @property
+    def source_path(self) -> str:
+        """Where to load and launch the extension from: the dev path while it is being previewed,
+        otherwise `self.path`."""
+        return preview.path if self.is_preview else self.path
+
+    @property
+    def manifest(self) -> ExtensionManifest:
+        return ExtensionManifest.load(self.source_path)
+
+    @property
     def is_enabled(self) -> bool:
-        return self.state.is_enabled and not self.has_error
+        return self.is_preview or (self.state.is_enabled and not self.has_error)
 
     @property
     def has_error(self) -> bool:
@@ -214,7 +249,7 @@ class ExtensionController:
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
-        expanded_path = join(self.path, icon_value)
+        expanded_path = join(self.source_path, icon_value)
         if isfile(expanded_path):
             return expanded_path
         return icon_value
@@ -294,14 +329,11 @@ class ExtensionController:
         await self.stop()
         return False
 
-    def start(self, with_debugger: bool = False) -> bool:
+    def start(self) -> bool:
         """
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
-        if self.shadowed_by_preview:
-            return False
-
         if self.is_running:
             return True  # if already started, count as successful
 
@@ -331,12 +363,12 @@ class ExtensionController:
 
         self.state.save(error_type="", error_message="")  # clear any previous error
 
-        ext_deps = ExtensionDependencies(self.id, self.path)
-        extension_main = f"{self.path}/main.py"
+        ext_deps = ExtensionDependencies(self.id, self.source_path)
+        extension_main = f"{self.source_path}/main.py"
         cmd = [sys.executable, extension_main]
 
-        # If debugger mode is enabled, prepend debugger command
-        if with_debugger:
+        # Preview extensions can opt into the remote debugger
+        if self.is_preview and preview.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",

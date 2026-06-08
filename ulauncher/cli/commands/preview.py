@@ -140,5 +140,5 @@ def run(args: CLIArguments) -> int:
     _wait_for_interrupt(ext_id)
 
     logger.info("Stopping '%s'...", ext_id)
-    dbus_trigger_event("extensions:stop_preview", f"{ext_id}.preview", ext_id)
+    dbus_trigger_event("extensions:stop_preview")
     return 0
