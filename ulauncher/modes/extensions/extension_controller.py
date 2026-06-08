@@ -144,10 +144,14 @@ class ExtensionController:
     state: ExtensionState
     is_manageable: bool
     _state_path: Path
+    _manifest: ExtensionManifest | None
+    _manifest_path: str
 
     def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
         self.path = path
+        self._manifest = None
+        self._manifest_path = ""
         self.is_manageable = extension_finder.is_manageable(path)
         _state_path = f"{paths.EXTENSIONS_STATE}/{self.id}.json"
         self._state_path = Path(_state_path)
@@ -205,7 +209,12 @@ class ExtensionController:
 
     @property
     def manifest(self) -> ExtensionManifest:
-        return ExtensionManifest.load(self.source_path)
+        # Reload only when the source path changes (e.g. entering or leaving preview); the
+        # preferences list reads this for every extension on every refresh.
+        if self._manifest is None or self._manifest_path != self.source_path:
+            self._manifest_path = self.source_path
+            self._manifest = ExtensionManifest.load(self._manifest_path)
+        return self._manifest
 
     @property
     def is_enabled(self) -> bool:
