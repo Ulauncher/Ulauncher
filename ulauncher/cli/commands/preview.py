@@ -136,14 +136,13 @@ def run(args: CLIArguments) -> int:
         exit_code = 1
         loop.quit()
 
-    def begin() -> bool:
+    def begin() -> None:
         # Runs under the loop so a synchronous install callback can quit it without racing loop.run().
         if (path / "requirements.txt").is_file():
             logger.info("Installing extension dependencies in the '.dependencies' folder...")
             ExtensionDependencies(ext_id, str(path)).install(lambda _stdout: start_preview(), on_deps_error)
         else:
             start_preview()
-        return False
 
     def on_interrupt() -> bool:
         logger.info("Stopping '%s'...", ext_id)
