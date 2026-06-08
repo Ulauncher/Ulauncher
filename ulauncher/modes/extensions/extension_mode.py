@@ -12,7 +12,7 @@ from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.extensions import extension_registry
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, preview
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -42,7 +42,6 @@ class ExtensionMode(Mode):
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
     _request_id: int = 0
-    _pending_preview_id: str | None = None
 
     def __init__(self) -> None:
         self._trigger_cache = {}
@@ -320,101 +319,46 @@ class ExtensionMode(Mode):
 
     @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
-        """Handle a preview extension request coming from the CLI (via D-Bus)."""
+        """Run an extension from a dev path WITHOUT installing it. Triggered from the CLI via D-Bus.
 
-        logger.info(
-            "[preview] Received preview request for ext_id=%s path=%s debugger=%s",
-            ext_id,
-            path,
-            with_debugger,
-        )
+        While the preview is active, the controller with this id launches from the dev path; its
+        dependencies are installed by the CLI before this is called.
+        """
 
-        def load_preview_extension(ext_id: str) -> None:
-            preview_ext_id = f"{ext_id}.preview"
-            if controller := extension_registry.load(preview_ext_id, path):
-                ext = controller  # bind a non-optional local for the closures below
-                ext.is_preview = True
+        logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
+        preview.set(ext_id, path, with_debugger)
 
-                # install python dependencies from requirements.txt, then launch
-                from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+        # Register a controller so a not-yet-installed extension's triggers become available; an
+        # installed one already has one (now launching from the preview path). Restart it so a
+        # background-running installed instance relaunches from the dev path.
+        extension_registry.get(ext_id) or extension_registry.load(ext_id, path)
 
-                # _pending_preview_id is a single-instance cancellation token: stop_preview clears it
-                # to abort a start still queued behind the dep install. Preview is one-at-a-time by
-                # design (the debugger binds a fixed port), so concurrent previews are unsupported; a
-                # superseded start aborts on the mismatch checks below without restoring its original.
-                self._pending_preview_id = preview_ext_id
+        # Guard the restart against a stop_preview that races in during the stop: only relaunch if
+        # this preview is still the active one, otherwise stop_preview owns restoring the extension.
+        def start_if_still_previewing() -> None:
+            if preview.ext_id == ext_id:
+                self.run_ext_batch_job([ext_id], ["start"])
 
-                def restore_shadowed_original() -> None:
-                    if (original := extension_registry.get(ext_id)) and original.shadowed_by_preview:
-                        original.shadowed_by_preview = False
-                        self.run_ext_batch_job([ext_id], ["start"])
-
-                def on_deps_installed(_stdout: str) -> None:
-                    if self._pending_preview_id != preview_ext_id:
-                        return
-                    self._pending_preview_id = None
-                    if ext.start(with_debugger=with_debugger):
-                        logger.info("[preview] Preview extension '%s' started successfully", preview_ext_id)
-                    else:
-                        logger.error("[preview] Failed to start preview extension '%s'", preview_ext_id)
-                        restore_shadowed_original()
-
-                def on_deps_error(error: Exception) -> None:
-                    if self._pending_preview_id != preview_ext_id:
-                        return
-                    self._pending_preview_id = None
-                    logger.error("[preview] Failed to install dependencies for '%s': %s", preview_ext_id, error)
-                    restore_shadowed_original()
-
-                deps = ExtensionDependencies(ext.id, ext.path)
-                # use run_when_idle to ensure deps.install runs on the GLib main loop
-                scheduling.run_when_idle(lambda: deps.install(on_deps_installed, on_deps_error))
-
-        def on_stopped(ext_id: str) -> None:
-            logger.info("[preview] Extension '%s' stopped", ext_id)
-            if existing_controller := extension_registry.get(ext_id):  # reload to update is_running state
-                existing_controller.shadowed_by_preview = True
-            load_preview_extension(ext_id)
-
-        existing_controller = extension_registry.get(ext_id)
-        if existing_controller and existing_controller.is_running:
-            logger.info(
-                "[preview] Extension '%s' is currently running; stopping it before launching preview version",
-                ext_id,
-            )
-            self.run_ext_batch_job([ext_id], ["stop"], callback=lambda: on_stopped(ext_id))
-        else:
-            load_preview_extension(ext_id)
+        self.run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
 
     @events.on
-    def stop_preview(self, preview_ext_id: str, original_ext_id: str) -> None:
-        """Handle stopping a preview extension and restoring the previous version if any."""
+    def stop_preview(self) -> None:
+        """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
 
-        logger.info(
-            "[preview] Received stop preview request for preview_ext_id=%s, original_ext_id=%s",
-            preview_ext_id,
-            original_ext_id,
-        )
+        # The CLI sends this on Ctrl+C even when preview_ext was never delivered (e.g. interrupted
+        # mid dependency-install), in which case there is no preview to stop or extension to restore.
+        ext_id = preview.ext_id
+        if not ext_id:
+            logger.debug("[preview] Ignoring stop_preview; no preview active")
+            return
 
-        # Cancel a start still deferred behind a dependency install (both run on the main loop).
-        if self._pending_preview_id == preview_ext_id:
-            self._pending_preview_id = None
+        logger.info("[preview] Stopping preview %s", ext_id)
+        preview.clear()
 
-        # Try to restart the original extension
-        def restart_original_extension(ext_id: str) -> None:
-            ext = extension_registry.get(ext_id)
-            if ext:
-                logger.info(
-                    "[preview] Re-enabling original extension '%s'",
-                    ext_id,
-                )
-                ext.shadowed_by_preview = False
-                restart_msg = f"[preview] Original extension '{ext_id}' re-enabled"
-                self.run_ext_batch_job([ext_id], ["start"], callback=lambda: logger.info(restart_msg))
+        def restore_original() -> None:
+            # Reload from the installed path, or drop the controller if the extension was never installed.
+            controller = extension_registry.load(ext_id)
+            if controller and controller.is_enabled:
+                self.run_ext_batch_job([ext_id], ["start"])
 
-        def stopped_handler(original_ext_id: str) -> None:
-            logger.info("[preview] Preview extension stopped. Restarting %s", original_ext_id)
-            restart_original_extension(original_ext_id)
-
-        # Stop the preview extension
-        self.run_ext_batch_job([preview_ext_id], ["stop"], lambda: stopped_handler(original_ext_id))
+        self.run_ext_batch_job([ext_id], ["stop"], callback=restore_original)
