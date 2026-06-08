@@ -279,20 +279,13 @@ class PreferencesView(BaseView):
 
     def _add_tray_icon_row(self, parent: Gtk.Box) -> None:
         # Placed next to "Run in background" because the tray icon is only effective while persistent.
-        self._tray_switch = Gtk.Switch(active=self.settings.show_tray_icon, sensitive=self._is_persistent())
+        self._tray_switch = Gtk.Switch(active=self.settings.show_tray_icon, sensitive=self.settings.is_persistent())
         self._tray_switch.connect("notify::active", self._on_tray_toggled)
         desc = (
             "Display a tray icon for quick actions. Only available while Ulauncher is set to "
             "run in the background. Also requires AppIndicator3 or XApp on X11."
         )
         self._add_setting_row(parent, "Show tray icon", self._tray_switch, desc)
-
-    def _is_persistent(self) -> bool:
-        # Mirrors UlauncherApp.setup(): systemd autostart wins where supported, else keep_alive.
-        status = self.autostart_pref.status()
-        if status.can_start:
-            return status.is_enabled
-        return self.settings.keep_alive
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:

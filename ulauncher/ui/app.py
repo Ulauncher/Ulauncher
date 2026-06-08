@@ -92,14 +92,10 @@ class UlauncherApp(Gtk.Application):
         self.run([])
 
     def setup(self) -> None:
-        from ulauncher.utils.systemd_controller import SystemdController
-
         settings = Settings.load()
         # Always hold on app start (conditionally release after closing window)
         self.hold()
-        # On systemd the unit's enabled state wins; keep_alive is the non-systemd fallback.
-        controller = SystemdController("ulauncher")
-        self._persistent = controller.status().is_enabled or (settings.keep_alive and not controller.supported)
+        self._persistent = settings.is_persistent()
         if self._persistent:
             # Sync additional hold with user settings
             self.hold()

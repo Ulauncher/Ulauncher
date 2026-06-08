@@ -43,6 +43,18 @@ class Settings(JsonConf):
         # convert to list and filter out duplicates
         return list(dict.fromkeys(list(self.jump_keys)))
 
+    def is_persistent(self) -> bool:
+        """Whether the app should be kept alive after the window is closed.
+
+        Uses systemd when available, falling back to keep_alive.
+        """
+        from ulauncher.utils.systemd_controller import SystemdController
+
+        status = SystemdController("ulauncher").status()
+        if status.can_start:
+            return status.is_enabled
+        return self.keep_alive
+
     @classmethod
     def load(cls, *, force: bool = False) -> Settings:  # type: ignore[override]
         return super().load(_settings_file, force=force)
