@@ -356,7 +356,9 @@ class ExtensionController:
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
                 extension_runtimes.pop(self.id, None)
-                self.state.save(error_type=cause, error_message=error_msg)
+                # A failing preview must not disable the installed extension by persisting its error.
+                if not self.is_preview:
+                    self.state.save(error_type=cause, error_message=error_msg)
 
             events.emit("extensions:exited", self.id, cause)
 
@@ -370,7 +372,8 @@ class ExtensionController:
             exit_handler("Incompatible", str(err))
             return False
 
-        self.state.save(error_type="", error_message="")  # clear any previous error
+        if not self.is_preview:
+            self.state.save(error_type="", error_message="")  # clear any previous error
 
         ext_deps = ExtensionDependencies(self.id, self.source_path)
         extension_main = f"{self.source_path}/main.py"
