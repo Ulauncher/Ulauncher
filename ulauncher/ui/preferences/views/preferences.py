@@ -188,7 +188,7 @@ class PreferencesView(BaseView):
         # Auto resume
         auto_resume_switch = Gtk.Switch(active=self.settings.auto_resume)
         auto_resume_switch.connect("notify::active", self._on_auto_resume_toggled)
-        auto_resume_desc = "If you close Ulauncher with an unfinished query, restore it on the next session."
+        auto_resume_desc = "If you close Ulauncher without running the query, restore it on the next session."
         self._add_setting_row(general_box, "Auto-resume unfinished sessions", auto_resume_switch, auto_resume_desc)
 
         # Close on focus out
