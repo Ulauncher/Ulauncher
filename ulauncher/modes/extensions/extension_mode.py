@@ -12,7 +12,11 @@ from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.extensions import extension_registry
-from ulauncher.modes.extensions.extension_controller import ExtensionController, preview
+from ulauncher.modes.extensions.extension_controller import (
+    ExtensionController,
+    ExtensionControllerTrigger,
+    preview,
+)
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -20,6 +24,8 @@ from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
 logger = logging.getLogger(__name__)
 events = EventBus("extensions")
+
+LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giving up
 
 
 class ExtensionResponse(TypedDict, total=False):
@@ -41,6 +47,7 @@ class ExtensionMode(Mode):
     _active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
+    _loading_timer: scheduling.Context | None = None
     _request_id: int = 0
 
     def __init__(self) -> None:
@@ -66,6 +73,12 @@ class ExtensionMode(Mode):
             logger.debug("Active extension %s exited (%s), clearing pending callback", ext_id, cause)
             self._pending_callback = None
 
+    @events.on
+    def started(self, ext_id: str) -> None:
+        # start() runs in a worker thread, so re-evaluate the query on the main loop.
+        if self.active_ext and self.active_ext.id == ext_id:
+            scheduling.run_when_idle(lambda: events.emit("app:reload_query"))
+
     @property
     def active_ext(self) -> ExtensionController | None:
         return self._active_ext
@@ -77,44 +90,70 @@ class ExtensionMode(Mode):
             self._active_ext = ext
 
     def handle_query(self, query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+        self._clear_loading_timer()
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
             raise RuntimeError(msg)
 
-        if trigger_cache_entry := self._trigger_cache.get(query.keyword, None):
-            trigger_id, ext_id = trigger_cache_entry
-            if ext := extension_registry.get(ext_id):
-                self.active_ext = ext
-                event = {
-                    "type": EventType.INPUT_TRIGGER,
-                    "ext_id": ext.id,
-                    "args": [query.argument, trigger_id],
-                }
+        self._ensure_trigger_cache()
+        trigger_cache_entry = self._trigger_cache.get(query.keyword, None)
+        ext = extension_registry.get(trigger_cache_entry[1]) if trigger_cache_entry else None
+        if not trigger_cache_entry or not ext:
+            # Core only routes a keyword here when its own cache claims this mode owns it, so a miss
+            # means the two caches disagree (e.g. the extension was removed since core last loaded).
+            logger.warning("Extension query '%s' did not match any enabled extension", query)
+            callback([])
+            return
 
-                self.send_request(event, callback)
-                return
+        self.active_ext = ext
+        if not ext.is_running:
+            # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
+            # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
+            # re-runs the query once the extension is ready.
+            def loading_timed_out() -> None:
+                self._loading_timer = None
+                callback([])
 
-        msg = f"Query not valid for extension mode '{query}'"
-        raise RuntimeError(msg)
+            self._loading_timer = scheduling.timer(LOADING_TIMEOUT, loading_timed_out)
+            return
+
+        self.send_request(
+            {"type": EventType.INPUT_TRIGGER, "ext_id": ext.id, "args": [query.argument, trigger_cache_entry[0]]},
+            callback,
+        )
+
+    def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
+        for ext in extension_registry.iterate():
+            if not ext.is_enabled:
+                continue
+            for trigger_id, trigger in ext.triggers.items():
+                yield ext, trigger_id, trigger
+
+    def _ensure_trigger_cache(self) -> None:
+        if not self._trigger_cache:
+            for ext, trigger_id, trigger in self._iter_enabled_triggers():
+                if trigger.keyword:
+                    self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
+
+    def _clear_loading_timer(self) -> None:
+        if self._loading_timer:
+            self._loading_timer.cancel()
+            self._loading_timer = None
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
-        for ext in extension_registry.iterate():
-            if not ext.is_running:
-                continue
+        for ext, trigger_id, trigger in self._iter_enabled_triggers():
+            name = html.escape(trigger.name)
+            description = html.escape(trigger.description)
+            icon = ext.get_icon_value(trigger.icon)
 
-            for trigger_id, trigger in ext.triggers.items():
-                name = html.escape(trigger.name)
-                description = html.escape(trigger.description)
-                icon = ext.get_icon_value(trigger.icon)
-
-                if trigger.keyword:
-                    self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
-                    yield KeywordTrigger(name=name, description=description, icon=icon, keyword=trigger.keyword)
-                else:
-                    yield ExtensionLaunchTrigger(
-                        name=name, description=description, icon=icon, ext_id=ext.id, trigger_id=trigger_id
-                    )
+            if trigger.keyword:
+                self._trigger_cache[trigger.keyword] = (trigger_id, ext.id)
+                yield KeywordTrigger(name=name, description=description, icon=icon, keyword=trigger.keyword)
+            else:
+                yield ExtensionLaunchTrigger(
+                    name=name, description=description, icon=icon, ext_id=ext.id, trigger_id=trigger_id
+                )
 
     def get_placeholder_icon(self) -> str | None:
         if self.active_ext:

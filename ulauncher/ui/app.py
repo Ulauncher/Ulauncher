@@ -59,6 +59,11 @@ class UlauncherApp(Gtk.Application):
         if update_input and (main_window := self.windows.get("main")) and isinstance(main_window, UlauncherWindow):
             main_window.set_input(self.query)
 
+    @events.on
+    def reload_query(self) -> None:
+        if (main_window := self.windows.get("main")) and isinstance(main_window, UlauncherWindow):
+            main_window.reload_query()
+
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
         Gio.ActionMap.add_action_entries(

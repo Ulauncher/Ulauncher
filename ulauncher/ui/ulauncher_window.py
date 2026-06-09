@@ -421,6 +421,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.set_text(query_str)
         self.prompt_input.set_position(-1)
 
+    def reload_query(self) -> None:
+        self.core.set_query(self.query_str, emit_show_results)
+
     def show_results(self, results: Iterable[Result]) -> None:
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())

@@ -404,6 +404,7 @@ class ExtensionController:
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
+        events.emit("extensions:started", self.id)
         return self.is_running
 
     async def stop(self) -> None:
