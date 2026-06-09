@@ -10,8 +10,8 @@ _settings_file = f"{paths.CONFIG}/settings.json"
 
 class Settings(JsonConf):
     arrow_key_aliases = "hjkl"
+    auto_resume = False
     base_width = 750
-    clear_previous_query = True
     close_on_focus_out = True
     disable_desktop_filters = False
     enable_application_mode = True
@@ -36,6 +36,9 @@ class Settings(JsonConf):
             normalized = "show_tray_icon"
         elif normalized == "daemonless":
             normalized = "keep_alive"
+            value = not value
+        elif normalized == "clear_previous_query":
+            normalized = "auto_resume"
             value = not value
         super().__setitem__(normalized, value)
 

@@ -392,7 +392,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
-        if not save_query or self.settings.clear_previous_query:
+        if not save_query or not self.settings.auto_resume:
             events.emit("app:set_query", "", update_input=False)
         if self.settings.grab_mouse_pointer:
             self.toggle_grab_pointer_device(False)

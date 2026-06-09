@@ -185,11 +185,11 @@ class PreferencesView(BaseView):
         screen_desc = "Decide which monitor presents Ulauncher when you press the hotkey."
         self._add_setting_row(general_box, "Screen to show on", screen_combo, screen_desc)
 
-        # Start with blank query
-        clear_query_switch = Gtk.Switch(active=self.settings.clear_previous_query)
-        clear_query_switch.connect("notify::active", self._on_clear_query_toggled)
-        clear_desc = "Clear the previous search so each invocation starts from an empty input field."
-        self._add_setting_row(general_box, "Start each session with a blank query", clear_query_switch, clear_desc)
+        # Auto resume
+        auto_resume_switch = Gtk.Switch(active=self.settings.auto_resume)
+        auto_resume_switch.connect("notify::active", self._on_auto_resume_toggled)
+        auto_resume_desc = "If you close Ulauncher without running the query, restore it on the next session."
+        self._add_setting_row(general_box, "Auto-resume unfinished sessions", auto_resume_switch, auto_resume_desc)
 
         # Close on focus out
         close_focus_switch = Gtk.Switch(active=self.settings.close_on_focus_out)
@@ -315,8 +315,8 @@ class PreferencesView(BaseView):
         if screen:
             self.settings.save({"render_on_screen": screen})
 
-    def _on_clear_query_toggled(self, switch: Gtk.Switch, _: Any) -> None:
-        self.settings.save({"clear_previous_query": switch.get_active()})
+    def _on_auto_resume_toggled(self, switch: Gtk.Switch, _: Any) -> None:
+        self.settings.save({"auto_resume": switch.get_active()})
 
     def _on_close_focus_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         self.settings.save({"close_on_focus_out": switch.get_active()})
