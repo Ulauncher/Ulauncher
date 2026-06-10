@@ -70,10 +70,8 @@ class ExtensionsView(BaseView):
 
             self._load_extension_list()
 
-        # We need to reload extension state periodically to reflect changes
-        # - The initial runtime state is misleading/confusing "stopped" before they have started
-        # - If they are killed by task/oom killer
-        # - If they are installed or uninstalled by the CLI
+        # Reload periodically to reflect changes made outside this view, e.g. extensions installed
+        # or uninstalled via the CLI, or an extension entering an error state.
         reload_loop = scheduling.timer(REFRESH_INTERVAL, reload_extension_list, repeat=True)
 
     def _list_has_changes(self) -> bool:

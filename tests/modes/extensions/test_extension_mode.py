@@ -80,7 +80,7 @@ def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> N
 
     mode = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
-    ext = SimpleNamespace(id="test.ext", is_running=False)
+    ext = SimpleNamespace(id="test.ext", is_running=False, start=MagicMock())
     mocker.patch.object(extension_registry, "get", return_value=ext)
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()
@@ -89,6 +89,7 @@ def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> N
 
     callback.assert_not_called()
     timer.assert_called_once()
+    ext.start.assert_called_once()
     assert mode.active_ext is ext
 
 
@@ -97,7 +98,7 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
 
     mode = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
-    ext = SimpleNamespace(id="test.ext", is_running=False)
+    ext = SimpleNamespace(id="test.ext", is_running=False, start=MagicMock())
     mocker.patch.object(extension_registry, "get", return_value=ext)
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()

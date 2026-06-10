@@ -85,7 +85,6 @@ class ExtensionRuntime:
         self._subprocess.wait_async(None, self.handle_exit)
         self.read_stderr_line()
         self._msg_controller.listen(self.handle_message)
-        events.emit("extensions:invalidate_cache")
 
     def stop(self) -> None:
         """
@@ -164,5 +163,3 @@ class ExtensionRuntime:
                 error_msg = f'Extension "{self._ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
             self._exit_handler("Exited", error_msg)
-
-        events.emit("extensions:invalidate_cache")

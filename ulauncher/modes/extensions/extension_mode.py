@@ -51,19 +51,14 @@ class ExtensionMode(Mode):
     def __init__(self) -> None:
         self._trigger_cache = {}
         events.set_self(self)
-        scheduling.run_when_idle(self.start_extensions)
+        scheduling.run_when_idle(self._load_extensions)
 
-    def start_extensions(self) -> None:
-        for ext in extension_registry.load_all():
-            if ext.state.is_enabled:
-                ext.start()
+    def _load_extensions(self) -> None:
+        # Populate the registry so triggers are available. Extensions start on demand, not here.
+        extension_registry.load_all()
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
-
-    @events.on
-    def invalidate_cache(self) -> None:
-        self._trigger_cache.clear()
 
     @events.on
     def errored(self, ext_id: str) -> None:
@@ -108,12 +103,14 @@ class ExtensionMode(Mode):
 
         self.active_ext = ext
         if not ext.is_running:
-            # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
-            # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
-            # re-runs the query once the extension is ready. The wait ends with a failure message if
-            # the extension exits with an error, otherwise empty after LOADING_TIMEOUT.
+            # Start on demand and wait for it to come up (it may also already be transitioning, e.g.
+            # a reload or update). Returning without a result lets core show "Loading..." after
+            # PLACEHOLDER_DELAY, and `started` re-runs the query once the extension is ready. The
+            # wait ends with a failure message if the extension exits with an error, otherwise empty
+            # after LOADING_TIMEOUT.
             self._pending_callback = callback
             self._loading_timer = scheduling.timer(LOADING_TIMEOUT, self._finish_loading)
+            ext.start()
             return
 
         self.send_request(
@@ -259,6 +256,13 @@ class ExtensionMode(Mode):
         )
 
     @events.on
+    def stop_all(self) -> None:
+        """Stop all running extensions when the launcher window closes. Previews are kept running."""
+        for ext in extension_registry.iterate():
+            if ext.is_running and not ext.is_preview:
+                ext.stop()
+
+    @events.on
     def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
         if ext := extension_registry.get(ext_id):
             old_preferences = data.get("old_preferences", {})
@@ -287,8 +291,8 @@ class ExtensionMode(Mode):
             logger.error("No active extension to send event to")
             return
 
-        if not self.active_ext.is_running:
-            logger.warning("Cannot send event to inactive extension %s", self.active_ext.id)
+        if not self.active_ext.is_running and not self.active_ext.start():
+            logger.warning("Could not start extension %s to handle event", self.active_ext.id)
             return
 
         self._request_id += 1
@@ -378,24 +382,25 @@ class ExtensionMode(Mode):
         preview.set(ext_id, path, with_debugger)
 
         # Register a controller so a not-yet-installed extension's triggers become available; an
-        # installed one already has one (now launching from the preview path). Restart it so a
-        # background-running installed instance relaunches from the dev path.
-        extension_registry.get(ext_id) or extension_registry.load(ext_id, path)
+        # installed one already has one (now launching from the preview path). The extension itself
+        # starts on demand when its keyword is matched.
+        controller = extension_registry.get(ext_id) or extension_registry.load(ext_id, path)
 
-        # Guard the restart against a stop_preview that races in during the stop: only relaunch if
-        # this preview is still the active one, otherwise stop_preview owns restoring the extension.
-        def start_if_still_previewing() -> None:
-            if preview.ext_id == ext_id:
-                self.run_ext_batch_job([ext_id], ["start"])
+        # Stop a still-running installed instance so the next on-demand start launches from the dev path.
+        if controller and controller.is_running:
+            controller.stop()
 
-        self.run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
+        # With the debugger, start now so debugpy is listening for the IDE to attach before the first
+        # query, instead of the port only opening once the extension is triggered.
+        if with_debugger and controller and not controller.start():
+            logger.error("[preview] Could not start preview extension '%s' with the debugger", ext_id)
 
     @events.on
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
 
         # The CLI sends this on Ctrl+C even when preview_ext was never delivered (e.g. interrupted
-        # mid dependency-install), in which case there is no preview to stop or extension to restore.
+        # mid dependency-install), in which case there is no preview to stop.
         ext_id = preview.ext_id
         if not ext_id:
             logger.debug("[preview] Ignoring stop_preview; no preview active")
@@ -403,11 +408,8 @@ class ExtensionMode(Mode):
 
         logger.info("[preview] Stopping preview %s", ext_id)
         preview.clear()
-
-        def restore_original() -> None:
-            # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = extension_registry.load(ext_id)
-            if controller and controller.is_enabled:
-                self.run_ext_batch_job([ext_id], ["start"])
-
-        self.run_ext_batch_job([ext_id], ["stop"], callback=restore_original)
+        if controller := extension_registry.get(ext_id):
+            controller.stop()
+        # Reload from the installed path (an installed extension restarts on demand), or drop the
+        # controller if the extension was never installed.
+        extension_registry.load(ext_id)
