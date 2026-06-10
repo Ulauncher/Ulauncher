@@ -380,6 +380,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             events.emit("app:set_query", "", update_input=False)
         if self.settings.grab_mouse_pointer:
             self.toggle_grab_pointer_device(False)
+        events.emit("extensions:stop_all")
         super().close()
         self.destroy()
 

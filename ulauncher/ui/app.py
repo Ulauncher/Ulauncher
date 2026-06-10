@@ -131,7 +131,7 @@ class UlauncherApp(Gtk.Application):
             # Sync additional hold with user settings
             self.hold()
 
-            # Warm the modes so extension handlers register and enabled extensions start.
+            # Warm the modes so extension handlers register and the extension registry loads.
             # Skip if a window exists - it needs to control when this runs for startup performance reasons.
             def _warm_triggers() -> None:
                 if "main" not in self.windows:

@@ -12,7 +12,6 @@ from ulauncher.modes.extensions.extension_dependencies import ExtensionDependenc
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
-from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 
 if TYPE_CHECKING:
@@ -29,8 +28,6 @@ class ExtensionServiceListener(Protocol):
     def started(self, ext_id: str) -> None: ...
 
     def errored(self, ext_id: str) -> None: ...
-
-    def invalidate_cache(self) -> None: ...
 
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None: ...
 
@@ -54,16 +51,10 @@ class ExtensionService(ExtensionRegistry):
 
     def activate(self, listener: ExtensionServiceListener) -> None:
         """
-        Set the listener that lifecycle events report to, and start the enabled extensions.
+        Set the listener that lifecycle events report to.
         Called by ExtensionMode when the app loads its modes.
         """
         self.listener = listener
-        scheduling.run_when_idle(self._start_extensions)
-
-    def _start_extensions(self) -> None:
-        for ext in self.iterate():
-            if ext.state.is_enabled:
-                self.start_extension(ext)
 
     def _run_batch_job(
         self,
@@ -107,9 +98,6 @@ class ExtensionService(ExtensionRegistry):
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            if listener := self.listener:
-                listener.invalidate_cache()
-
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', record.id, error_msg, cause)
                 self.runtimes.pop(record.id, None)
@@ -166,15 +154,13 @@ class ExtensionService(ExtensionRegistry):
 
         # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
         # missing interpreter). Route these through exit_handler like a crash so the error is
-        # surfaced consistently and any queued start listeners get cleaned up, rather than
-        # raising out into callers.
+        # surfaced consistently, rather than raising out into callers.
         try:
             self.runtimes[record.id] = ExtensionRuntime(record.id, cmd, env, exit_handler, message_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
         if listener := self.listener:
-            listener.invalidate_cache()
             listener.started(record.id)
         return self.is_running(record)
 
@@ -234,44 +220,48 @@ class ExtensionService(ExtensionRegistry):
         )
 
     @events.on
+    def stop_all(self) -> None:
+        """Stop all running extensions when the launcher window closes. Previews are kept running."""
+        for ext in self.iterate():
+            if self.is_running(ext) and not ext.is_preview:
+                self.stop_extension(ext)
+
+    @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
         """Run an extension from a dev path WITHOUT installing it. Triggered from the CLI via D-Bus.
 
         While the preview is active, the record with this id launches from the dev path; its
-        dependencies are installed by the CLI before this is called.
+        dependencies are installed by the CLI before this is called. The extension itself starts on
+        demand when its keyword is matched.
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
         self.preview = PreviewExtensionRecord(ext_id, path, with_debugger=with_debugger)
 
-        # Guard the restart against a stop_preview that races in during the stop: only relaunch if
-        # this preview is still the active one, otherwise stop_preview owns restoring the extension.
-        def start_if_still_previewing() -> None:
-            if self.preview and self.preview.id == ext_id:
-                self._run_batch_job([ext_id], ["start"])
+        # Stop a still-running installed instance so the next on-demand start launches from the dev path.
+        if self.is_running(self.preview):
+            self.stop_extension(self.preview)
 
-        # Relaunch from the dev path, stopping any conflicting installed instances
-        self._run_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
+        # With the debugger, start now so debugpy is listening for the IDE to attach before the first
+        # query, instead of the port only opening once the extension is triggered.
+        if with_debugger and not self.start_extension(self.preview):
+            logger.error("[preview] Could not start preview extension '%s' with the debugger", ext_id)
 
     @events.on
     def stop_preview(self) -> None:
-        """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
+        """Stop the active preview. Triggered from the CLI via D-Bus.
+
+        The installed extension (if any) restarts on demand from its installed path.
+        """
         if not self.preview:
             # will happen if preview is interrupted before started
             logger.debug("[preview] Ignoring stop_preview; no preview active")
             return
 
-        ext_id = self.preview.id
-        logger.info("[preview] Stopping preview %s", ext_id)
-
-        def restore_original() -> None:
-            self.preview = None
-            # Reload from the installed path, or drop the record if the extension was never installed.
-            record = self.get(ext_id)
-            if record and record.is_enabled:
-                self._run_batch_job([ext_id], ["start"])
-
-        self._run_batch_job([ext_id], ["stop"], callback=restore_original)
+        logger.info("[preview] Stopping preview %s", self.preview.id)
+        if self.is_running(self.preview):
+            self.stop_extension(self.preview)
+        self.preview = None
 
 
 ext_service = ExtensionService()
