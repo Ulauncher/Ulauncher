@@ -352,7 +352,7 @@ class ExtensionController:
                 if not self.is_preview:
                     self.state.save(error_type=cause, error_message=error_msg)
 
-            events.emit("extensions:exited", self.id, cause)
+                events.emit("extensions:errored", self.id)
 
         try:
             self.manifest.validate()
@@ -404,6 +404,7 @@ class ExtensionController:
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
+        events.emit("extensions:started", self.id)
         return self.is_running
 
     async def stop(self) -> None:
