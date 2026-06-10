@@ -119,6 +119,48 @@ def test_handle_query__unknown_keyword_shows_empty(mocker: MockerFixture) -> Non
     callback.assert_called_once_with([])
 
 
+def test_errored__while_loading_shows_empty_immediately() -> None:
+    mode = _make_mode()
+    mode._active_ext = _make_active_ext("test.ext")
+    timer = MagicMock()
+    mode._loading_timer = timer
+    callback = MagicMock()
+    mode._pending_callback = callback
+
+    mode.errored("test.ext")
+
+    callback.assert_called_once_with([])
+    timer.cancel.assert_called_once()
+    assert mode._loading_timer is None
+
+
+def test_errored__while_not_loading_drops_pending_callback() -> None:
+    mode = _make_mode()
+    mode._active_ext = _make_active_ext("test.ext")
+    callback = MagicMock()
+    mode._pending_callback = callback
+
+    mode.errored("test.ext")
+
+    callback.assert_not_called()
+    assert mode._pending_callback is None
+
+
+def test_errored__ignores_other_extensions() -> None:
+    mode = _make_mode()
+    mode._active_ext = _make_active_ext("test.ext")
+    timer = MagicMock()
+    mode._loading_timer = timer
+    callback = MagicMock()
+    mode._pending_callback = callback
+
+    mode.errored("other.ext")
+
+    callback.assert_not_called()
+    timer.cancel.assert_not_called()
+    assert mode._loading_timer is timer
+
+
 def _make_active_ext(ext_id: str) -> ExtensionController:
     ext = object.__new__(ExtensionController)
     ext.id = ext_id

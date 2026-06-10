@@ -352,7 +352,7 @@ class ExtensionController:
                 if not self.is_preview:
                     self.state.save(error_type=cause, error_message=error_msg)
 
-            events.emit("extensions:exited", self.id, cause)
+                events.emit("extensions:errored", self.id)
 
         try:
             self.manifest.validate()

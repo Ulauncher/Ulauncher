@@ -68,9 +68,12 @@ class ExtensionMode(Mode):
         self._trigger_cache.clear()
 
     @events.on
-    def exited(self, ext_id: str, cause: str) -> None:
-        if self.active_ext and self.active_ext.id == ext_id:
-            logger.debug("Active extension %s exited (%s), clearing pending callback", ext_id, cause)
+    def errored(self, ext_id: str) -> None:
+        if not self.active_ext or self.active_ext.id != ext_id:
+            return
+        if self._loading_timer:
+            self._finish_loading()
+        else:
             self._pending_callback = None
 
     @events.on
@@ -109,12 +112,10 @@ class ExtensionMode(Mode):
         if not ext.is_running:
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
-            # re-runs the query once the extension is ready.
-            def loading_timed_out() -> None:
-                self._loading_timer = None
-                callback([])
-
-            self._loading_timer = scheduling.timer(LOADING_TIMEOUT, loading_timed_out)
+            # re-runs the query once the extension is ready. The wait ends early if the extension
+            # exits with an error, otherwise after LOADING_TIMEOUT.
+            self._pending_callback = callback
+            self._loading_timer = scheduling.timer(LOADING_TIMEOUT, self._finish_loading)
             return
 
         self.send_request(
@@ -139,6 +140,13 @@ class ExtensionMode(Mode):
         if self._loading_timer:
             self._loading_timer.cancel()
             self._loading_timer = None
+
+    def _finish_loading(self) -> None:
+        """Resolve a pending loading wait with empty results (no-op if not waiting)."""
+        self._clear_loading_timer()
+        callback, self._pending_callback = self._pending_callback, None
+        if callback:
+            callback([])
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
