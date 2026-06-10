@@ -81,8 +81,9 @@ class UnloadEvent(BaseEvent):
     """
     Is triggered when an extension is about to be unloaded (terminated).
 
-    The extension has 300ms to handle this event and shut down properly.
-    After that it will be terminated with SIGKILL
+    The extension is terminated immediately, so this event is best-effort:
+    on_unload is not guaranteed to run to completion. Do not rely on it for
+    critical cleanup.
     """
 
 
