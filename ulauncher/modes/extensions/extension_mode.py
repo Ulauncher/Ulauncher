@@ -72,7 +72,7 @@ class ExtensionMode(Mode):
         if not self.active_ext or self.active_ext.id != ext_id:
             return
         if self._loading_timer:
-            self._finish_loading()
+            self._finish_loading([self._loading_failed_result()])
         else:
             self._pending_callback = None
 
@@ -105,15 +105,15 @@ class ExtensionMode(Mode):
             # Core only routes a keyword here when its own cache claims this mode owns it, so a miss
             # means the two caches disagree (e.g. the extension was removed since core last loaded).
             logger.warning("Extension query '%s' did not match any enabled extension", query)
-            callback([])
+            callback([Result(name="Extension not available")])
             return
 
         self.active_ext = ext
         if not ext.is_running:
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
-            # re-runs the query once the extension is ready. The wait ends early if the extension
-            # exits with an error, otherwise after LOADING_TIMEOUT.
+            # re-runs the query once the extension is ready. The wait ends with a failure message if
+            # the extension exits with an error, otherwise empty after LOADING_TIMEOUT.
             self._pending_callback = callback
             self._loading_timer = scheduling.timer(LOADING_TIMEOUT, self._finish_loading)
             return
@@ -141,12 +141,21 @@ class ExtensionMode(Mode):
             self._loading_timer.cancel()
             self._loading_timer = None
 
-    def _finish_loading(self) -> None:
-        """Resolve a pending loading wait with empty results (no-op if not waiting)."""
+    def _finish_loading(self, results: list[Result] | None = None) -> None:
+        """Resolve a pending loading wait, defaulting to empty results (no-op if not waiting)."""
         self._clear_loading_timer()
         callback, self._pending_callback = self._pending_callback, None
         if callback:
-            callback([])
+            callback(results or [])
+
+    def _loading_failed_result(self) -> Result:
+        ext = self.active_ext
+        name = (ext.manifest.name if ext else "") or "Extension"
+        # A preview's error isn't persisted (it surfaces in the preview's own console), so the
+        # stored message is only meaningful for an installed extension that errored.
+        description = ext.state.error_message if ext and ext.has_error else ""
+        icon = ext.get_icon_value() if ext else None
+        return Result(name=f"{name} failed to start", description=description, icon=icon)
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()

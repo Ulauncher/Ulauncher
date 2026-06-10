@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
 from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.modes.extensions.extension_controller import events as controller_events
@@ -108,7 +109,7 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
     assert mode._loading_timer is None
 
 
-def test_handle_query__unknown_keyword_shows_empty(mocker: MockerFixture) -> None:
+def test_handle_query__unknown_keyword_shows_message(mocker: MockerFixture) -> None:
     mode = _make_mode()
     mocker.patch.object(extension_registry, "iterate", return_value=iter([]))
     mocker.patch.object(extension_registry, "get", return_value=None)
@@ -116,12 +117,16 @@ def test_handle_query__unknown_keyword_shows_empty(mocker: MockerFixture) -> Non
 
     mode.handle_query(Query("kw", "arg"), callback)
 
-    callback.assert_called_once_with([])
+    callback.assert_called_once()
+    (results,) = callback.call_args.args
+    assert [r.name for r in results] == ["Extension not available"]
 
 
-def test_errored__while_loading_shows_empty_immediately() -> None:
+def test_errored__while_loading_shows_failure(mocker: MockerFixture) -> None:
     mode = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
+    failure = Result(name="failed")
+    mocker.patch.object(mode, "_loading_failed_result", return_value=failure)
     timer = MagicMock()
     mode._loading_timer = timer
     callback = MagicMock()
@@ -129,7 +134,7 @@ def test_errored__while_loading_shows_empty_immediately() -> None:
 
     mode.errored("test.ext")
 
-    callback.assert_called_once_with([])
+    callback.assert_called_once_with([failure])
     timer.cancel.assert_called_once()
     assert mode._loading_timer is None
 
