@@ -16,7 +16,12 @@ jobs:
       - name: Set up virtual environment
         run: make venv
       - name: Generate release notes
-        run: .venv/bin/git-cliff --current > RELEASE_NOTES.md
+        # actions/checkout only adds safe.directory to a temporary git config, and the
+        # workspace mount is owned by the host runner user, so git-cliff (libgit2) errors
+        # with "repository path is not owned by current user" without this
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          .venv/bin/git-cliff --current > RELEASE_NOTES.md
       - name: Check
         run: make check
       - name: Build release
