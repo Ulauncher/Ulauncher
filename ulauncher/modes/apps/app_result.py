@@ -15,7 +15,7 @@ class AppResult(Result):
     searchable = True
     app_id = ""
     _executable = ""
-    actions = {"launch": {"name": "Launch application", "icon": "system-run"}}
+    actions = {"launch": {"name": "Launch application"}}
 
     def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
         super().__init__(
