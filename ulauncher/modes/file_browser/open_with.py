@@ -49,13 +49,14 @@ def get_open_with_results(path: str) -> list[Result]:
     return results
 
 
-def open_path_with_app(app_id: str, path: str) -> None:
+def open_path_with_app(app_id: str, path: str) -> bool:
     app_info = GioUnix.DesktopAppInfo.new(app_id)
     if not app_info:
         logger.error("Could not load app %s to open %s", app_id, path)
-        return
+        return False
     uri = Gio.File.new_for_path(path).get_uri()
     try:
-        app_info.launch_uris([uri])
+        return app_info.launch_uris([uri])
     except GLib.Error:
         logger.exception("Could not open %s with app %s", uri, app_id)
+        return False

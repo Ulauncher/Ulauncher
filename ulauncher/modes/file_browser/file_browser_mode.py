@@ -110,8 +110,10 @@ class FileBrowserMode(Mode):
         elif action_id == "open_with_app":
             from ulauncher.modes.file_browser.open_with import open_path_with_app
 
-            open_path_with_app(result.app_id, result.path)
-            callback(effects.close_window())
+            if open_path_with_app(result.app_id, result.path):
+                callback(effects.close_window())
+            else:
+                callback(effects.do_nothing())
         elif action_id == "open":
             callback(effects.open(result.path))
         elif action_id == "open_parent":
