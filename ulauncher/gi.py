@@ -151,6 +151,9 @@ class DesktopAppInfo:
     def get_icon(self) -> Gio.Icon | None:
         return self._app_info.get_icon()
 
+    def launch_uris(self, uris: list[str] | None = None) -> bool:
+        return self._app_info.launch_uris(uris, None)
+
     # Borked unbound methods that we have to call via the class to work consistently
     def get_boolean(self, name: str) -> bool:
         return DesktopAppInfo._raw.get_boolean(self._app_info, name)
