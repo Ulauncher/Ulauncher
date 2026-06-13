@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import logging
 import os
-from os.path import dirname, expandvars, isdir, join
+from os.path import dirname, expandvars, join
 from pathlib import Path
 from typing import Callable
 
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.file_browser.results import FileResult, FolderResult
+from ulauncher.modes.file_browser.results import FileResult
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.fold_user_path import fold_user_path
@@ -65,7 +65,7 @@ class FileBrowserMode(Mode):
                     file_names = self.list_files(str(path), sort_by_atime=True)
                     for name in self.filter_dot_files(file_names)[: self.LIMIT]:
                         file_path = join(closest_parent, name)
-                        results.append(FolderResult(file_path) if isdir(file_path) else FileResult(file_path))
+                        results.append(FileResult(file_path))
 
                 else:
                     file_names = self.list_files(closest_parent)
@@ -82,7 +82,7 @@ class FileBrowserMode(Mode):
                     ]
                     for name in filtered:
                         file_path = join(closest_parent, name)
-                        results.append(FolderResult(file_path) if isdir(file_path) else FileResult(file_path))
+                        results.append(FileResult(file_path))
 
         except (RuntimeError, OSError):
             results = []
