@@ -10,12 +10,14 @@ _Actions = Dict[str, Dict[Literal["name", "icon"], str]]
 
 _FILE_ACTIONS: _Actions = {
     "open": {"name": "Open file", "icon": "document-open"},
+    "open_with": {"name": "Open with...", "icon": "system-run"},
     "open_parent": {"name": "Open containing folder", "icon": "folder-open"},
     "copy_path": {"name": "Copy path", "icon": "edit-copy"},
 }
 _FOLDER_ACTIONS: _Actions = {
     "go_to": {"name": "Open", "icon": "folder-open"},
     "open": {"name": "Open in file manager", "icon": "system-file-manager"},
+    "open_with": {"name": "Open with...", "icon": "system-run"},
     "copy_path": {"name": "Copy path", "icon": "edit-copy"},
 }
 

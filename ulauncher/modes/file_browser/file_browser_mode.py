@@ -103,6 +103,17 @@ class FileBrowserMode(Mode):
     ) -> None:
         if action_id == "go_to":
             callback(effects.set_query(join(fold_user_path(result.path), "")))
+        elif action_id == "open_with":
+            from ulauncher.modes.file_browser.open_with import get_open_with_results
+
+            callback(get_open_with_results(result.path))
+        elif action_id == "open_with_app":
+            from ulauncher.modes.file_browser.open_with import open_path_with_app
+
+            if open_path_with_app(result.app_id, result.path):
+                callback(effects.close_window())
+            else:
+                callback(effects.do_nothing())
         elif action_id == "open":
             callback(effects.open(result.path))
         elif action_id == "open_parent":
