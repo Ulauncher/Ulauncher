@@ -17,8 +17,8 @@ SPECIAL_DIRS = {
 }
 
 
-def get_icon_from_path(path: str) -> str:
-    if Path(path).is_dir():
+def get_icon_from_path(path: str, is_dir: bool) -> str:
+    if is_dir:
         return SPECIAL_DIRS.get(path) or "folder"
 
     if mime := mimetypes.guess_type(Path(path).name)[0]:
