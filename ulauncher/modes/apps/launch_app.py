@@ -63,21 +63,18 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
             launch_context.unsetenv("GDK_BACKEND")
         app.launch_action(action_name, launch_context)
         return True
-    if not app_exec:
-        logger.error("Could not get Exec for app %s", app_id)
-        return False
-
     if action_name is None and (settings.raise_if_started or app.get_boolean("SingleMainWindow")):
-        app_wm_id = (app.get_string("StartupWMClass") or Path(app_exec).name).lower()
+        app_wm_id = (app.get_string("StartupWMClass") or (Path(app_exec).name if app_exec else app_id)).lower()
         if try_raise_app(app_wm_id):
             return True
 
+    # gapplication and gtk-launch read the desktop entry themselves, so they work without a resolved Exec
     if is_dbus:  # an action with DBus activation already returned above
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
         cmd = ["gapplication", "launch", app_id]
     elif is_terminal and not use_custom_terminal:
         cmd = ["gtk-launch", app_id]
-    else:
+    elif app_exec:
         shell_string = settings.terminal_command if use_custom_terminal else app_exec
         try:
             cmd = shlex.split(shell_string)
@@ -86,6 +83,9 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
         except ValueError:
             logger.exception("Could not parse command for app %s: %r", app_id, shell_string)
             return False
+    else:
+        logger.error("Could not get Exec for app %s", app_id)
+        return False
 
     logger.info("Run %s (%s) Exec %s", f"action {action_name}" if action_name else "application", app_id, cmd)
     launch_detached(cmd, app.get_string("Path"))
