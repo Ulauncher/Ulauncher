@@ -67,5 +67,7 @@ class TestResultWidget:
         widget = ResultWidget(res, 0, Query("wrap", None))
 
         # highlighting would split the name over multiple labels, which cannot wrap as one paragraph
-        assert len(widget.title_box.get_children()) == 1
-        assert cast("Gtk.Label", widget.title_box.get_children()[0]).get_text() == "wrapped name"
+        children = widget.title_box.get_children()
+        assert len(children) == 1
+        assert cast("Gtk.Label", children[0]).get_text() == "wrapped name"
+        assert not any("item-highlight" in c.get_style_context().list_classes() for c in children)
