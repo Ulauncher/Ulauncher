@@ -431,13 +431,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         clipping wrapped (Result.wrap) labels - request the real height instead."""
         if not self._has_wrapped_results or allocation.width <= 0:
             return  # nothing to fit, or an early allocation pass with no usable width yet
-        current = self.results_scroller.get_min_content_height()
+        current_height = self.results_scroller.get_min_content_height()
         max_height = self.results_scroller.get_property("max-content-height")
-        needed = box.get_preferred_height_for_width(allocation.width)[1]
+        needed_height = box.get_preferred_height_for_width(allocation.width)[1]
         if max_height > 0:
-            needed = min(needed, max_height)
-        if abs(needed - current) > 1:  # tolerance: a scrollbar can shift the width by ~1px
-            self.results_scroller.set_min_content_height(needed)
+            needed_height = min(needed_height, max_height)
+        if abs(needed_height - current_height) > 1:  # tolerance: a scrollbar can shift the width by ~1px
+            self.results_scroller.set_min_content_height(needed_height)
             # the in-progress allocation pass ignores the new request
             scheduling.run_when_idle(self.results_scroller.queue_resize)
 
