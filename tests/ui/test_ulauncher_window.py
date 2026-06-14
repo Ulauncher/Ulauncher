@@ -19,7 +19,7 @@ class TestUlauncherWindow:
             pytest.param(True, 500, 180, 180, 500, None, False, id="noop_when_height_is_unchanged"),
             pytest.param(True, 500, 180, 181, 500, None, False, id="tolerates_one_pixel_oscillation"),
             pytest.param(True, 0, 46, 180, None, None, False, id="skips_early_allocation_passes"),
-            pytest.param(False, 500, 180, 180, None, -1, False, id="restores_stock_sizing_without_wrapped_results"),
+            pytest.param(False, 500, 180, 180, None, None, False, id="noop_without_wrapped_results"),
         ],
     )
     def test_fit_results_height(

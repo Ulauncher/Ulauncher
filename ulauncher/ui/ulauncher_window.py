@@ -428,14 +428,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def _fit_results_height(self, box: Gtk.Box, allocation: Gdk.Rectangle) -> None:
         """GtkScrolledWindow measures its natural height without height-for-width,
-        clipping wrapped (Result.wrap) labels — request the real height instead."""
+        clipping wrapped (Result.wrap) labels - request the real height instead."""
+        if not self._has_wrapped_results or allocation.width <= 0:
+            return  # nothing to fit, or an early allocation pass with no usable width yet
         current = self.results_scroller.get_min_content_height()
-        if not self._has_wrapped_results:
-            if current != -1:
-                self.results_scroller.set_min_content_height(-1)  # restore stock sizing
-            return
-        if allocation.width <= 0:
-            return  # early allocation pass, no usable width yet
         max_height = self.results_scroller.get_property("max-content-height")
         needed = box.get_preferred_height_for_width(allocation.width)[1]
         if max_height > 0:
@@ -454,6 +450,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         result_list = list(results)[:limit]
         # stock sizing works for single-line results; only wrapped ones need _fit_results_height
         self._has_wrapped_results = any(result.wrap for result in result_list)
+        if not self._has_wrapped_results:
+            self.results_scroller.set_min_content_height(-1)  # restore stock sizing
 
         if result_list:
             from ulauncher.ui.result_widget import ResultWidget
