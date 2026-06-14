@@ -9,7 +9,7 @@ from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.apps.app_rankings import AppRankings
-from ulauncher.modes.apps.app_result import AppResult
+from ulauncher.modes.apps.app_result import ACTION_PREFIX, AppResult
 from ulauncher.modes.apps.launch_app import launch_app
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.settings import Settings
@@ -56,14 +56,17 @@ class AppMode(Mode):
         _query: Query,
         callback: Callable[[effects.EffectMessage | list[Result]], None],
     ) -> None:
-        if action_id == "launch":
+        if action_id == "launch" or action_id.startswith(ACTION_PREFIX):
             if not isinstance(result, AppResult):
                 logger.error("Expected AppResult but got %s", type(result).__name__)
                 callback(effects.do_nothing())
                 return
             AppRankings.load().bump(result.app_id)
-            if not launch_app(result.app_id):
-                logger.error("Could not launch app %s", result.app_id)
+            if action_id == "launch":
+                if not launch_app(result.app_id):
+                    logger.error("Could not launch app %s", result.app_id)
+            elif not launch_app(result.app_id, action_name=action_id[len(ACTION_PREFIX) :]):
+                logger.error("Could not run action %s of app %s", action_id, result.app_id)
             callback(effects.close_window())
             return
         logger.error("Unexpected action '%s' for App mode result '%s'", action_id, result)

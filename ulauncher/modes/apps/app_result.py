@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from os.path import basename
+from typing import Literal
 
 from ulauncher.gi import GioUnix
 from ulauncher.internals.result import Result
@@ -10,19 +11,25 @@ from ulauncher.modes.apps.app_rankings import AppRankings
 
 logger = logging.getLogger(__name__)
 
+ACTION_PREFIX = "action:"
+
 
 class AppResult(Result):
     searchable = True
     app_id = ""
     _executable = ""
-    actions = {"launch": {"name": "Launch application"}}
 
     def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
+        actions: dict[str, dict[Literal["name", "icon"], str]] = {"launch": {"name": "Launch application"}}
+        for action_name in app_info.list_actions():
+            if display_name := app_info.get_action_name(action_name):
+                actions[f"{ACTION_PREFIX}{action_name}"] = {"name": display_name}
         super().__init__(
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
             description=app_info.get_description() or app_info.get_generic_name() or "",
             keywords=app_info.get_keywords(),
+            actions=actions,
             app_id=app_info.get_id(),
             # TryExec is what we actually want (name of/path to exec), but it's often not specified
             # get_executable uses Exec, which is always specified, but it will return the actual executable.

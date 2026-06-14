@@ -176,6 +176,15 @@ class DesktopAppInfo:
     def get_nodisplay(self) -> bool:
         return DesktopAppInfo._raw.get_nodisplay(self._app_info)
 
+    def list_actions(self) -> list[str]:
+        return DesktopAppInfo._raw.list_actions(self._app_info)
+
+    def get_action_name(self, action_name: str) -> str:
+        return DesktopAppInfo._raw.get_action_name(self._app_info, action_name)
+
+    def launch_action(self, action_name: str, launch_context: Gio.AppLaunchContext | None = None) -> None:
+        DesktopAppInfo._raw.launch_action(self._app_info, action_name, launch_context)
+
 
 # ─── Deferred setup functions ──────────────────────────────────────────────────
 
