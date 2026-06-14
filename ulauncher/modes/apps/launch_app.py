@@ -72,15 +72,19 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
         if try_raise_app(app_wm_id):
             return True
 
-    if is_dbus:  # an action with DBus activation already returned above
-        # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
-        cmd = ["gapplication", "launch", app_id]
-    elif use_custom_terminal:
-        cmd = [*shlex.split(settings.terminal_command), app_exec]
-    elif is_terminal:  # a terminal action without a preferred terminal already returned above
-        cmd = ["gtk-launch", app_id]
-    else:
-        cmd = shlex.split(app_exec)
+    try:
+        if is_dbus:  # an action with DBus activation already returned above
+            # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
+            cmd = ["gapplication", "launch", app_id]
+        elif use_custom_terminal:
+            cmd = [*shlex.split(settings.terminal_command), app_exec]
+        elif is_terminal:  # a terminal action without a preferred terminal already returned above
+            cmd = ["gtk-launch", app_id]
+        else:
+            cmd = shlex.split(app_exec)
+    except ValueError:
+        logger.exception("Could not parse command for app %s: %r", app_id, app_exec)
+        return False
 
     logger.info("Run %s (%s) Exec %s", f"action {action_name}" if action_name else "application", app_id, cmd)
     launch_detached(cmd, app.get_string("Path"))
