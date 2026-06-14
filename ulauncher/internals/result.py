@@ -22,6 +22,7 @@ class Result(BaseDataClass):
     """
 
     compact = False  #: If True, the result will be displayed in a single line without a title
+    wrap = False  #: If True, name and description wrap over multiple lines instead of being ellipsized
     highlightable = False  #: If True, a substring matching the query will be highlighted
     searchable = False
     name = ""  #: The name of the result item
@@ -34,10 +35,11 @@ class Result(BaseDataClass):
     on_enter: effects.EffectMessage | list[Result] | None = None
     on_alt_enter: effects.EffectMessage | list[Result] | None = None
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         compact: bool | None = None,
+        wrap: bool | None = None,
         highlightable: bool | None = None,
         searchable: bool | None = None,
         name: str | None = None,
@@ -54,6 +56,8 @@ class Result(BaseDataClass):
         init_kwargs: dict[str, Any] = {}
         if compact is not None:
             init_kwargs["compact"] = compact
+        if wrap is not None:
+            init_kwargs["wrap"] = wrap
         if highlightable is not None:
             init_kwargs["highlightable"] = highlightable
         if searchable is not None:

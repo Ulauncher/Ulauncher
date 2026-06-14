@@ -88,12 +88,18 @@ class ResultWidget(Gtk.EventBox):
         item_container.set_property("margin-bottom", margin_y)
 
         if result.description and not result.compact:
-            descr_label = Gtk.Label(hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
+            descr_label = self._make_text_label()
             descr_label.get_style_context().add_class("item-descr")
             descr_label.get_style_context().add_class("item-text")
             descr_label.set_text(unescape(result.description))
             self.text_container.pack_start(descr_label, False, True, 0)
         self.highlight_name()
+
+    def _make_text_label(self, text: str = "") -> Gtk.Label:
+        if self.result.wrap:
+            return Gtk.Label(label=text, hexpand=True, xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR)
+        # max_width_chars=1 lets the label shrink below its natural size so ellipsizing kicks in
+        return Gtk.Label(label=text, hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
 
     def set_index(self, index: int) -> None:
         """
@@ -124,10 +130,13 @@ class ResultWidget(Gtk.EventBox):
             viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
 
     def highlight_name(self) -> None:
-        highlightable_input = self.result.get_highlightable_input(str(self.query))
-        if highlightable_input and (self.result.searchable or self.result.highlightable):
+        if self.result.wrap:
+            # highlighting splits the name into labels that cannot reflow as one paragraph
+            labels = [self._make_text_label(self.result.name)]
+        elif (highlightable_input := self.result.get_highlightable_input(str(self.query))) and (
+            self.result.searchable or self.result.highlightable
+        ):
             labels = []
-
             for label_text, is_highlight in highlight_text(highlightable_input, self.result.name):
                 ellipsize_min = ELLIPSIZE_MIN_LENGTH if not is_highlight else ELLIPSIZE_FORCE_AT_LENGTH
                 ellipsize = Pango.EllipsizeMode.MIDDLE if len(label_text) > ellipsize_min else Pango.EllipsizeMode.NONE
@@ -138,8 +147,10 @@ class ResultWidget(Gtk.EventBox):
         else:
             labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
+        # a wrapped label must fill the row so it has a width to reflow against
+        expand = self.result.wrap
         for label in labels:
-            self.title_box.pack_start(label, False, False, 0)
+            self.title_box.pack_start(label, expand, expand, 0)
 
     def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
         alt = bool(event and event.button != 1)  # right click
