@@ -1,84 +1,57 @@
+from __future__ import annotations
+
 from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import MagicMock
 
+import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.ui.ulauncher_window import UlauncherWindow
 
 
-def _make_window(max_content_height: int, current_min: int) -> SimpleNamespace:
-    scroller = MagicMock()
-    scroller.get_property.return_value = max_content_height
-    scroller.get_min_content_height.return_value = current_min
-    # GTK widgets cannot be built without a display; the method only touches the scroller
-    window = cast("Any", SimpleNamespace(results_scroller=scroller, _has_wrapped_results=True))
-    box = MagicMock()
-    return SimpleNamespace(window=window, scroller=scroller, box=box)
+class TestUlauncherWindow:
+    @pytest.mark.parametrize(
+        ("has_wrapped", "width", "current_min", "needed", "measured_width", "expected_min", "expects_resize"),
+        [
+            pytest.param(True, 500, 46, 180, 500, 180, True, id="requests_the_height_for_width"),
+            pytest.param(True, 500, 46, 2000, 500, 600, True, id="clamps_to_max_content_height"),
+            pytest.param(True, 500, 180, 180, 500, None, False, id="noop_when_height_is_unchanged"),
+            pytest.param(True, 500, 180, 181, 500, None, False, id="tolerates_one_pixel_oscillation"),
+            pytest.param(True, 0, 46, 180, None, None, False, id="skips_early_allocation_passes"),
+            pytest.param(False, 500, 180, 180, None, -1, False, id="restores_stock_sizing_without_wrapped_results"),
+        ],
+    )
+    def test_fit_results_height(
+        self,
+        mocker: MockerFixture,
+        has_wrapped: bool,
+        width: int,
+        current_min: int,
+        needed: int,
+        measured_width: int | None,
+        expected_min: int | None,
+        expects_resize: bool,
+    ) -> None:
+        run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
+        scroller = MagicMock()
+        scroller.get_property.return_value = 600  # max-content-height
+        scroller.get_min_content_height.return_value = current_min
+        box = MagicMock()
+        box.get_preferred_height_for_width.return_value = (needed, needed)
+        # GTK widgets cannot be built without a display; the method only touches the scroller
+        window = cast("Any", SimpleNamespace(results_scroller=scroller, _has_wrapped_results=has_wrapped))
 
+        UlauncherWindow._fit_results_height(window, box, cast("Any", SimpleNamespace(width=width)))
 
-def test_fit_results_height__requests_the_height_for_width(mocker: MockerFixture) -> None:
-    run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=46)
-    setup.box.get_preferred_height_for_width.return_value = (180, 180)
+        if measured_width is None:
+            box.get_preferred_height_for_width.assert_not_called()
+        else:
+            box.get_preferred_height_for_width.assert_called_once_with(measured_width)
 
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=500)))
+        if expected_min is None:
+            scroller.set_min_content_height.assert_not_called()
+        else:
+            scroller.set_min_content_height.assert_called_once_with(expected_min)
 
-    setup.box.get_preferred_height_for_width.assert_called_once_with(500)
-    setup.scroller.set_min_content_height.assert_called_once_with(180)
-    run_when_idle.assert_called_once()
-
-
-def test_fit_results_height__clamps_to_max_content_height(mocker: MockerFixture) -> None:
-    mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=46)
-    setup.box.get_preferred_height_for_width.return_value = (2000, 2000)
-
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=500)))
-
-    setup.scroller.set_min_content_height.assert_called_once_with(600)
-
-
-def test_fit_results_height__noop_when_height_is_unchanged(mocker: MockerFixture) -> None:
-    run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=180)
-    setup.box.get_preferred_height_for_width.return_value = (180, 180)
-
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=500)))
-
-    setup.scroller.set_min_content_height.assert_not_called()
-    run_when_idle.assert_not_called()  # no resize requeued: would loop on every allocation
-
-
-def test_fit_results_height__inactive_without_wrapped_results(mocker: MockerFixture) -> None:
-    run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=180)
-    setup.window._has_wrapped_results = False
-
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=500)))
-
-    # stock sizing is restored so a previous wrapped query cannot ratchet the height
-    setup.scroller.set_min_content_height.assert_called_once_with(-1)
-    setup.box.get_preferred_height_for_width.assert_not_called()
-    run_when_idle.assert_not_called()
-
-
-def test_fit_results_height__skips_early_allocation_passes(mocker: MockerFixture) -> None:
-    run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=46)
-
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=0)))
-
-    setup.scroller.set_min_content_height.assert_not_called()
-    run_when_idle.assert_not_called()
-
-
-def test_fit_results_height__tolerates_one_pixel_oscillation(mocker: MockerFixture) -> None:
-    run_when_idle = mocker.patch("ulauncher.ui.ulauncher_window.scheduling.run_when_idle")
-    setup = _make_window(max_content_height=600, current_min=180)
-    setup.box.get_preferred_height_for_width.return_value = (181, 181)
-
-    UlauncherWindow._fit_results_height(setup.window, setup.box, cast("Any", SimpleNamespace(width=500)))
-
-    setup.scroller.set_min_content_height.assert_not_called()
-    run_when_idle.assert_not_called()
+        assert run_when_idle.called is expects_resize
