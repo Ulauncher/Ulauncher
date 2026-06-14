@@ -132,12 +132,11 @@ class ResultWidget(Gtk.EventBox):
     def highlight_name(self) -> None:
         if self.result.wrap:
             # highlighting splits the name into labels that cannot reflow as one paragraph
-            self.title_box.pack_start(self._make_text_label(self.result.name), True, True, 0)
-            return
-        highlightable_input = self.result.get_highlightable_input(str(self.query))
-        if highlightable_input and (self.result.searchable or self.result.highlightable):
+            labels = [self._make_text_label(self.result.name)]
+        elif (highlightable_input := self.result.get_highlightable_input(str(self.query))) and (
+            self.result.searchable or self.result.highlightable
+        ):
             labels = []
-
             for label_text, is_highlight in highlight_text(highlightable_input, self.result.name):
                 ellipsize_min = ELLIPSIZE_MIN_LENGTH if not is_highlight else ELLIPSIZE_FORCE_AT_LENGTH
                 ellipsize = Pango.EllipsizeMode.MIDDLE if len(label_text) > ellipsize_min else Pango.EllipsizeMode.NONE
@@ -148,8 +147,10 @@ class ResultWidget(Gtk.EventBox):
         else:
             labels = [Gtk.Label(label=self.result.name, ellipsize=Pango.EllipsizeMode.MIDDLE)]
 
+        # a wrapped label must fill the row so it has a width to reflow against
+        expand = self.result.wrap
         for label in labels:
-            self.title_box.pack_start(label, False, False, 0)
+            self.title_box.pack_start(label, expand, expand, 0)
 
     def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
         alt = bool(event and event.button != 1)  # right click
