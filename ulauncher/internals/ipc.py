@@ -4,6 +4,11 @@ Both processes run the same Ulauncher code (the extension gets it via PYTHONPATH
 types are the single source of truth for the wire format on both ends. They follow the
 discriminated-union style of `ulauncher.internals.effects`: each message is a TypedDict tagged
 by its `type`, and the unions below let the type checker narrow on it.
+
+`args` fields are typed as fixed-length tuples so the type checker can verify their arity and
+the type at each position. They are consumed positionally by the receiver (see
+`api.extension.Extension.convert_to_baseevent`). On the wire they are JSON arrays, so a parsed
+message holds a list there, not a tuple.
 """
 
 from __future__ import annotations
@@ -19,17 +24,17 @@ if TYPE_CHECKING:
 
 class InputTriggerEvent(TypedDict):
     type: Literal["event:input_trigger"]
-    args: list[Any]  # [argument, trigger_id]
+    args: tuple[str | None, str]  # argument, trigger_id
 
 
 class LaunchTriggerEvent(TypedDict):
     type: Literal["event:launch_trigger"]
-    args: list[Any]  # [trigger_id]
+    args: tuple[str]  # trigger_id
 
 
 class ResultActivationEvent(TypedDict):
     type: Literal["event:result_activation"]
-    args: list[Any]  # [action_id, Result]
+    args: tuple[str, Result]  # action_id, result
 
 
 class LegacyActivateCustomEvent(TypedDict):
@@ -40,12 +45,12 @@ class LegacyActivateCustomEvent(TypedDict):
 
 class UpdatePreferencesEvent(TypedDict):
     type: Literal["event:update_preferences"]
-    args: list[Any]  # [id, new_value, old_value]
+    args: tuple[str, Any, Any]  # id, new_value, old_value
 
 
 class LegacyPreferencesLoadEvent(TypedDict):
     type: Literal["event:legacy_preferences_load"]
-    args: list[Any]  # [preferences]
+    args: tuple[dict[str, Any]]  # preferences
 
 
 class UnloadEvent(TypedDict):

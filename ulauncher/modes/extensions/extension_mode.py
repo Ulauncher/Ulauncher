@@ -114,7 +114,7 @@ class ExtensionMode(Mode):
 
         event: ipc.InputTriggerEvent = {
             "type": EventType.INPUT_TRIGGER,
-            "args": [query.argument, trigger_cache_entry[0]],
+            "args": (query.argument, trigger_cache_entry[0]),
         }
         self.send_request(event, callback)
 
@@ -188,14 +188,14 @@ class ExtensionMode(Mode):
             self.active_ext = extension_registry.get(result.ext_id)
             launch_event: ipc.LaunchTriggerEvent = {
                 "type": EventType.LAUNCH_TRIGGER,
-                "args": [result.trigger_id],
+                "args": (result.trigger_id,),
             }
             self.send_request(launch_event, callback)
             return
         else:
             activation_event: ipc.ResultActivationEvent = {
                 "type": EventType.RESULT_ACTIVATION,
-                "args": [action_id, result],
+                "args": (action_id, result),
             }
             self.send_request(activation_event, callback)
             return
@@ -276,7 +276,7 @@ class ExtensionMode(Mode):
                 if pref and new_value != old_value:
                     event_data: ipc.UpdatePreferencesEvent = {
                         "type": EventType.UPDATE_PREFERENCES,
-                        "args": [p_id, new_value, old_value],
+                        "args": (p_id, new_value, old_value),
                     }
                     ext.send_message(event_data)
 
