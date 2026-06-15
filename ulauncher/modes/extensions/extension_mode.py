@@ -119,7 +119,7 @@ class ExtensionMode(Mode):
             return
 
         self.send_request(
-            {"type": EventType.INPUT_TRIGGER, "ext_id": ext.id, "args": [query.argument, trigger_cache_entry[0]]},
+            {"type": EventType.INPUT_TRIGGER, "args": [query.argument, trigger_cache_entry[0]]},
             callback,
         )
 
@@ -190,11 +190,11 @@ class ExtensionMode(Mode):
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
+            self.active_ext = extension_registry.get(result.ext_id)
             self.send_request(
                 {
                     "type": EventType.LAUNCH_TRIGGER,
                     "args": [result.trigger_id],
-                    "ext_id": result.ext_id,
                 },
                 callback,
             )
@@ -283,15 +283,8 @@ class ExtensionMode(Mode):
 
         For one-off messages, use ext.send_message() directly instead.
         """
-        # If active_ext is not set (e.g., for launch triggers, without keywords),
-        # try to get it from the event's ext_id
         if not self.active_ext:
-            ext_id = event.get("ext_id")
-            if ext_id:
-                self.active_ext = extension_registry.get(ext_id)
-
-        if not self.active_ext:
-            logger.error("No active extension to send event to")
+            logger.error("No active extension to send request to")
             return
 
         if not self.active_ext.is_running:
