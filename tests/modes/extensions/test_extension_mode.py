@@ -71,7 +71,7 @@ def test_update_preferences__uses_emitted_old_preferences(mocker: MockerFixture)
     )
 
     ext.send_message.assert_called_once_with(
-        {"type": EventType.UPDATE_PREFERENCES, "args": ["city", "Berlin", "Stockholm"]}
+        {"type": EventType.UPDATE_PREFERENCES, "args": ("city", "Berlin", "Stockholm")}
     )
 
 
