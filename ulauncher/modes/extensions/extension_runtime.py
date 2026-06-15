@@ -9,7 +9,6 @@ from typing import Any, Callable, Literal
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
-from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
@@ -86,7 +85,6 @@ class ExtensionRuntime:
         self._subprocess.wait_async(None, self.handle_exit)
         self.read_stderr_line()
         self._msg_controller.listen(self.handle_message)
-        events.emit("extensions:invalidate_cache")
 
     def stop(self) -> None:
         """
@@ -100,8 +98,7 @@ class ExtensionRuntime:
         aborted_subprocesses.add(self._subprocess)
 
         self._msg_controller.close()
-        # wait for graceful shutdown before forcibly killing
-        scheduling.timer(0.5, self._kill)
+        self._kill()
 
     def _kill(self) -> None:
         if self._subprocess.get_identifier():
@@ -166,5 +163,3 @@ class ExtensionRuntime:
                 error_msg = f'Extension "{self._ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
             self._exit_handler("Exited", error_msg)
-
-        events.emit("extensions:invalidate_cache")

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import sys
 import tempfile
-from collections import defaultdict
 from datetime import datetime
 from os.path import isfile, join
 from pathlib import Path
@@ -63,7 +61,6 @@ class ExtensionState(JsonConf):
 
 logger = logging.getLogger(__name__)
 extension_runtimes: dict[str, ExtensionRuntime] = {}
-stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 
 events = EventBus()
 
@@ -96,12 +93,11 @@ preview = PreviewExtension()
 def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
     """Drive a callback-based Gio operation to completion synchronously on the calling thread.
 
-    Temporary bridge for step one of the asyncio/threading removal: extension_remote is now
-    callback-based, but ExtensionController is still async and runs in worker threads (ext_handlers)
-    or the CLI's asyncio loop. Gio.Subprocess callbacks dispatch on a GLib main context, not the
-    asyncio loop, and no GLib loop runs in those threads, so a plain asyncio.Future shim would
-    never resolve. Running a private GLib main loop (pushed as the thread-default context) drives
-    the operation to completion. Remove this when the controller becomes callback-native.
+    install/check_update run either in a worker thread (the preferences UI's ExtensionHandlers)
+    or on the CLI's main thread, neither of which runs a GLib main loop. Gio.Subprocess callbacks
+    dispatch on a GLib main context, so without a running loop they would never fire. A private
+    GLib main loop (pushed as the thread-default context) drives the operation to completion.
+    Remove this once these call paths run on the main GLib loop.
     """
     context = GLib.MainContext.new()
     context.push_thread_default()
@@ -159,12 +155,10 @@ class ExtensionController:
             self.state.update(defaults)
 
     @classmethod
-    async def install(
-        cls, url: str, commit_hash: str | None = None, warn_if_overwrite: bool = True
-    ) -> ExtensionController:
+    def install(cls, url: str, commit_hash: str | None = None, warn_if_overwrite: bool = True) -> ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
-        is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
+        is_new_install = not Path(remote.target_dir).exists()
         downloaded_hash, commit_timestamp = _run_gio_blocking(
             lambda on_success, on_error: remote.download(on_success, on_error, commit_hash, warn_if_overwrite)
         )
@@ -255,7 +249,7 @@ class ExtensionController:
             return expanded_path
         return icon_value
 
-    async def remove(self) -> None:
+    def remove(self) -> None:
         if not self.is_manageable:
             logger.warning(
                 "Extension %s is not manageable. Cannot remove it automatically. "
@@ -265,7 +259,7 @@ class ExtensionController:
             )
             return
 
-        await self.stop()
+        self.stop()
         rmtree(self.path)
         logger.info("Extension %s uninstalled successfully", self.id)
 
@@ -274,12 +268,12 @@ class ExtensionController:
 
         events.emit("extension_lifecycle:removed", self.id)
 
-    async def update(self) -> bool:
+    def update(self) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
         logger.debug("Checking for updates to %s", self.id)
-        has_update, commit_hash = await self.check_update()
+        has_update, commit_hash = self.check_update()
         was_running = self.is_running
 
         if not has_update:
@@ -300,8 +294,8 @@ class ExtensionController:
             copytree(ext_path, backup_dir, dirs_exist_ok=True)
 
             try:
-                await self.stop()
-                await self.install(self.state.url, commit_hash, warn_if_overwrite=False)
+                self.stop()
+                self.install(self.state.url, commit_hash, warn_if_overwrite=False)
             except (ext_exceptions.ExtensionError, ValueError):
                 logger.exception("Could not update extension '%s'.", self.id)
                 copytree(backup_dir, ext_path, dirs_exist_ok=True)
@@ -315,7 +309,7 @@ class ExtensionController:
 
         return True
 
-    async def check_update(self) -> tuple[bool, str]:
+    def check_update(self) -> tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """
@@ -323,11 +317,11 @@ class ExtensionController:
         has_update = self.state.commit_hash != commit_hash
         return has_update, commit_hash
 
-    async def toggle_enabled(self, enabled: bool) -> bool:
+    def toggle_enabled(self, enabled: bool) -> bool:
         self.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
             return self.start()
-        await self.stop()
+        self.stop()
         return False
 
     def start(self) -> bool:
@@ -339,12 +333,6 @@ class ExtensionController:
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = stopped_listeners.get(self.id, [])
-            for stop_listener in listeners:
-                stop_listener()
-
-            listeners.clear()
-
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
                 extension_runtimes.pop(self.id, None)
@@ -407,13 +395,9 @@ class ExtensionController:
         events.emit("extensions:started", self.id)
         return self.is_running
 
-    async def stop(self) -> None:
+    def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):
-            stopped_future: asyncio.Future[None] = asyncio.Future()
-            stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
-
-            await asyncio.wait_for(stopped_future, timeout=5.0)
 
     def send_message(self, message: dict[str, Any]) -> None:
         """

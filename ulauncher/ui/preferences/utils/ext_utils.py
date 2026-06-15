@@ -6,7 +6,7 @@ from typing import Literal
 
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 
-ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
+ExtStatus = Literal["on", "off", "error", "preview"]
 
 
 def fmt_pango_code_block(text: str) -> str:
@@ -34,8 +34,6 @@ def get_status_str(ext: ExtensionController) -> ExtStatus:
         return "error"
     if not ext.is_enabled:
         return "off"
-    if not ext.is_running:
-        return "stopped"
     if ext.is_preview:
         return "preview"
     return "on"

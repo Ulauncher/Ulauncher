@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
@@ -10,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def run(args: CLIArguments) -> int:
     if controller := get_ext_controller(args.input):
-        asyncio.run(controller.remove())
+        controller.remove()
         dbus_trigger_event("extensions:stop", [controller.id])
         return 0
 

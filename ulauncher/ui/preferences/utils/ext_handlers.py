@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 import threading
 from typing import Callable
@@ -98,8 +97,8 @@ class ExtensionHandlers:
 
         def install_async() -> None:
             try:
-                ext = asyncio.run(ExtensionController.install(url))
-                asyncio.run(ext.stop())
+                ext = ExtensionController.install(url)
+                ext.stop()
                 ext.start()
 
                 # Update UI in main thread
@@ -109,7 +108,7 @@ class ExtensionHandlers:
 
                 run_when_idle(update_ui)
 
-            except (ext_exceptions.ExtensionError, ValueError, asyncio.CancelledError) as error:
+            except (ext_exceptions.ExtensionError, ValueError) as error:
 
                 def show_error(error: Exception) -> None:
                     progress_dialog.destroy()
@@ -127,9 +126,9 @@ class ExtensionHandlers:
 
         def toggle_async() -> None:
             try:
-                asyncio.run(ext.toggle_enabled(state))
+                ext.toggle_enabled(state)
 
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
+            except (ext_exceptions.ExtensionError, OSError):
                 failed_action = "enable" if state else "disable"
                 error_msg = f"Failed to {failed_action} extension"
                 run_when_idle(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
@@ -152,7 +151,7 @@ class ExtensionHandlers:
 
             def remove_async() -> None:
                 try:
-                    asyncio.run(ext.remove())
+                    ext.remove()
 
                     def update_ui() -> None:
                         progress_dialog.destroy()
@@ -160,7 +159,7 @@ class ExtensionHandlers:
 
                     run_when_idle(update_ui)
 
-                except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
+                except (ext_exceptions.ExtensionError, OSError):
 
                     def show_error() -> None:
                         progress_dialog.destroy()
@@ -177,7 +176,7 @@ class ExtensionHandlers:
 
         def check_async() -> None:
             try:
-                has_update, commit_hash = asyncio.run(ext.check_update())
+                has_update, commit_hash = ext.check_update()
 
                 def update_ui() -> None:
                     if has_update:
@@ -190,7 +189,7 @@ class ExtensionHandlers:
 
                 run_when_idle(update_ui)
 
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
+            except (ext_exceptions.ExtensionError, OSError) as e:
                 callback()
                 run_when_idle(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
 
@@ -208,7 +207,7 @@ class ExtensionHandlers:
 
         def update_async() -> None:
             try:
-                asyncio.run(ext.update())
+                ext.update()
 
                 def update_ui() -> None:
                     callback()
@@ -220,7 +219,7 @@ class ExtensionHandlers:
 
                 run_when_idle(update_ui)
 
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
+            except (ext_exceptions.ExtensionError, OSError) as e:
                 callback()
 
                 def show_error(error: Exception) -> None:

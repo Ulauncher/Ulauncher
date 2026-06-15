@@ -36,11 +36,6 @@ class TestExtensionRuntime:
     def time(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.time")
 
-    @pytest.fixture
-    def mock_timer(self, mocker: MockerFixture) -> MagicMock:
-        """Mock the timer utility function used for scheduling delayed kills."""
-        return mocker.patch("ulauncher.modes.extensions.extension_runtime.scheduling.timer")
-
     def test_run__basic_execution__is_called(self, subprocess_launcher: MagicMock) -> None:
         extid = "mock.test_run__basic_execution__is_called"
 
@@ -113,8 +108,8 @@ class TestExtensionRuntime:
             "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
         )
 
-    def test_stop(self, mock_timer: MagicMock) -> None:
-        """Test that stop() closes the connection and schedules a kill timer."""
+    def test_stop(self) -> None:
+        """Test that stop() closes the connection and kills the process immediately."""
         extid = "mock.test_stop"
         exit_handler = Mock()
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"], None, exit_handler)
@@ -124,7 +119,7 @@ class TestExtensionRuntime:
         runtime.stop()
 
         runtime._msg_controller.close.assert_called_once()
-        mock_timer.assert_called_once_with(0.5, runtime._kill)
+        runtime._subprocess.send_signal.assert_called_once_with(signal.SIGKILL)
 
     def test_kill__sends_sigkill(self) -> None:
         """Test that _kill() sends SIGKILL if the process is still running."""
