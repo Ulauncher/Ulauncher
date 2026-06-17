@@ -173,7 +173,7 @@ class Extension:
     def _send_response(
         self,
         event: dict[str, Any],
-        effect_msg: effects.EffectMessage | None,
+        effect_msg: effects.EffectMessage | list[Result],
         input_request_id: int | None,
     ) -> bool:
         if input_request_id is not None and input_request_id != self._input_request_id:
