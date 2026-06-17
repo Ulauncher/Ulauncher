@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from ulauncher.gi import GLib
+
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec("P")
 
 
 class Context:
@@ -44,27 +49,37 @@ class Context:
         return keep_alive
 
 
-def timer(delay_sec: float, func: Callable[..., Any], *args: Any, repeat: bool = False, **kwargs: Any) -> Context:
+def timer(delay_sec: float, func: Callable[P, Any], *args: P.args, **kwargs: P.kwargs) -> Context:
     """
-    Runs func after delay_sec seconds, in the GLib main thread. Repeats every delay_sec if
-    repeat is True.
+    Runs func once after delay_sec seconds, in the GLib main thread.
 
     func is called with the provided positional and keyword arguments. For example:
         timer(0.5, myfunc, arg1, arg2, kw=val)
 
     Returns a Context with a .cancel() method.
     """
-    return Context(GLib.timeout_source_new(int(delay_sec * 1000)), func, repeat, args, kwargs)
+    return Context(GLib.timeout_source_new(int(delay_sec * 1000)), func, False, args, kwargs)
 
 
-def run_when_idle(func: Callable[..., Any], *args: Any, repeat: bool = False, **kwargs: Any) -> Context:
+def interval(delay_sec: float, func: Callable[P, Any], *args: P.args, **kwargs: P.kwargs) -> Context:
     """
-    Runs func when the GLib main loop is idle, in the GLib main thread. Repeats on every idle
-    iteration if repeat is True.
+    Runs func every delay_sec seconds, in the GLib main thread.
+
+    func is called with the provided positional and keyword arguments. For example:
+        interval(0.5, myfunc, arg1, arg2, kw=val)
+
+    Returns a Context with a .cancel() method.
+    """
+    return Context(GLib.timeout_source_new(int(delay_sec * 1000)), func, True, args, kwargs)
+
+
+def run_when_idle(func: Callable[P, Any], *args: P.args, **kwargs: P.kwargs) -> Context:
+    """
+    Runs func when the GLib main loop is idle, in the GLib main thread.
 
     func is called with the provided positional and keyword arguments. For example:
         run_when_idle(myfunc, arg1, arg2, kw=val)
 
     Returns a Context with a .cancel() method.
     """
-    return Context(GLib.idle_source_new(), func, repeat, args, kwargs)
+    return Context(GLib.idle_source_new(), func, False, args, kwargs)

@@ -111,7 +111,7 @@ class ExtensionHandlers:
 
             except (ext_exceptions.ExtensionError, ValueError, asyncio.CancelledError) as error:
 
-                def show_error(error: Exception) -> None:
+                def show_error(error: BaseException) -> None:
                     progress_dialog.destroy()
                     self._show_extension_operation_error(error, url, "install")
 
@@ -223,7 +223,7 @@ class ExtensionHandlers:
             except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
                 callback()
 
-                def show_error(error: Exception) -> None:
+                def show_error(error: BaseException) -> None:
                     url = ext.state.url
                     progress_dialog.destroy()
                     self._show_extension_operation_error(error, url, "update")
@@ -242,7 +242,7 @@ class ExtensionHandlers:
         if response == Gtk.ResponseType.YES:
             self.update_extension(ext, callback)
 
-    def _show_extension_operation_error(self, error: Exception, url: str, operation: str = "install") -> None:
+    def _show_extension_operation_error(self, error: BaseException, url: str, operation: str = "install") -> None:
         """Show detailed error dialog for extension operation failures"""
         error_type = type(error).__name__
         error_message = str(error)

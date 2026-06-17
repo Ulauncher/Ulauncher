@@ -74,7 +74,7 @@ class ExtensionsView(BaseView):
         # - The initial runtime state is misleading/confusing "stopped" before they have started
         # - If they are killed by task/oom killer
         # - If they are installed or uninstalled by the CLI
-        reload_loop = scheduling.timer(REFRESH_INTERVAL, reload_extension_list, repeat=True)
+        reload_loop = scheduling.interval(REFRESH_INTERVAL, reload_extension_list)
 
     def _list_has_changes(self) -> bool:
         extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
