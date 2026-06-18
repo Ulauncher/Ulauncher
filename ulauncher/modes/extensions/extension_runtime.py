@@ -9,6 +9,7 @@ from typing import Any, Callable, Literal
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
+from ulauncher.internals import ipc
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
@@ -112,7 +113,7 @@ class ExtensionRuntime:
     def read_stderr_line(self) -> None:
         self._error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr)
 
-    def send_message(self, message: dict[str, Any], request_id: int | None = None) -> None:
+    def send_message(self, message: ipc.Event, request_id: int | None = None) -> None:
         self._msg_controller.send([message, request_id])
         logger.debug("Sent message to %s: %s (request_id=%s)", self._ext_id, message, request_id)
 
