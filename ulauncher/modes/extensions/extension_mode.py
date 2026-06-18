@@ -303,12 +303,21 @@ class ExtensionMode(Mode):
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
+            if "request_id" not in message or "response" not in message:
+                logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
+                return
             self.handle_response(ext_id, message["request_id"], message["response"])
         elif message["name"] == "clipboard_store":
+            if "text" not in message:
+                logger.warning("Received malformed 'clipboard_store' message from %s: %s", ext_id, message)
+                return
             # Extension API: only copies; the launcher stays open and the extension is
             # responsible for any subsequent UI changes.
             events.emit("app:clipboard_store", message["text"])
         elif message["name"] == "notify":
+            if "body" not in message or "notification_id" not in message:
+                logger.warning("Received malformed 'notify' message from %s: %s", ext_id, message)
+                return
             ext = extension_registry.get(ext_id)
             if not ext:
                 logger.warning("Notification sent from an extension, '%s', which was not found", ext_id)
