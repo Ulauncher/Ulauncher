@@ -189,8 +189,11 @@ class Extension:
                 # Add the result_id to the dict representation so Ulauncher can send it back
                 result["__result_id__"] = result_id
 
-        event["effect"] = effect_msg
-        self._client.send("response", event)
+        response = {"effect": effect_msg, "request_id": event["request_id"]}
+        if "keep_app_open" in event:
+            # Only used for EventType.LEGACY_ACTIVATE_CUSTOM
+            response["keep_app_open"] = event["keep_app_open"]
+        self._client.send("response", response)
         return False
 
     def run(self) -> None:

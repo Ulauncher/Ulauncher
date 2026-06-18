@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal, TypedDict
+from typing import TYPE_CHECKING, Any, Callable, Iterator, Literal, TypedDict
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import effect_utils, effects
@@ -22,15 +22,18 @@ from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
 logger = logging.getLogger(__name__)
 events = EventBus("extensions")
 
 LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giving up
 
 
-class ExtensionResponse(TypedDict, total=False):
+class ExtensionResponse(TypedDict):
     request_id: int
-    keep_app_open: bool
+    keep_app_open: NotRequired[bool]
     effect: EffectMessage | list[dict[str, Any]]
 
 
