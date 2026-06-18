@@ -303,7 +303,12 @@ class ExtensionMode(Mode):
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
-            if "request_id" not in message or "response" not in message:
+            if (
+                "request_id" not in message
+                or "response" not in message
+                or not isinstance(message["response"], dict)
+                or "effect" not in message["response"]
+            ):
                 logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
                 return
             self.handle_response(ext_id, message["request_id"], message["response"])
