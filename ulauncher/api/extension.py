@@ -166,9 +166,10 @@ class Extension:
         # For extensions using yield to generate results, the method call will take no time, while
         # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
-        effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
-        # Schedule the response on the main thread to avoid races on shared state
-        scheduling.run_when_idle(self._send_response, event, effect_msg, input_request_id)
+        if "request_id" in event:
+            # Schedule the response on the main thread to avoid races on shared state
+            effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
+            scheduling.run_when_idle(self._send_response, event, effect_msg, input_request_id)
 
     def _send_response(
         self,
