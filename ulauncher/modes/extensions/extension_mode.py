@@ -4,11 +4,11 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import TYPE_CHECKING, Any, Callable, Iterator, Literal, TypedDict
+from typing import Any, Callable, Iterator, Literal, cast
 
 from ulauncher.api.shared.event import EventType
-from ulauncher.internals import effect_utils, effects
-from ulauncher.internals.effects import EffectMessage, EffectType
+from ulauncher.internals import effect_utils, effects, ipc
+from ulauncher.internals.effects import EffectMessage, EffectType, LegacyActivateCustom
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.extensions import extension_registry
@@ -22,18 +22,10 @@ from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
-
 logger = logging.getLogger(__name__)
 events = EventBus("extensions")
 
 LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giving up
-
-
-class ExtensionResponse(TypedDict):
-    keep_app_open: NotRequired[bool]
-    effect: EffectMessage | list[dict[str, Any]]
 
 
 class ExtensionLaunchTrigger(Result):
@@ -120,10 +112,11 @@ class ExtensionMode(Mode):
             self._loading_timer = scheduling.timer(LOADING_TIMEOUT, self._finish_loading)
             return
 
-        self.send_request(
-            {"type": EventType.INPUT_TRIGGER, "args": [query.argument, trigger_cache_entry[0]]},
-            callback,
-        )
+        event: ipc.InputTriggerEvent = {
+            "type": EventType.INPUT_TRIGGER,
+            "args": [query.argument, trigger_cache_entry[0]],
+        }
+        self.send_request(event, callback)
 
     def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
         for ext in extension_registry.iterate():
@@ -193,22 +186,28 @@ class ExtensionMode(Mode):
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             self.active_ext = extension_registry.get(result.ext_id)
-            self.send_request(
-                {
-                    "type": EventType.LAUNCH_TRIGGER,
-                    "args": [result.trigger_id],
-                },
-                callback,
-            )
+            launch_event: ipc.LaunchTriggerEvent = {
+                "type": EventType.LAUNCH_TRIGGER,
+                "args": [result.trigger_id],
+            }
+            self.send_request(launch_event, callback)
             return
         else:
-            event_type = EventType.RESULT_ACTIVATION
-            event_args = [action_id, result]
-            self.send_request({"type": event_type, "args": event_args}, callback)
+            activation_event: ipc.ResultActivationEvent = {
+                "type": EventType.RESULT_ACTIVATION,
+                "args": [action_id, result],
+            }
+            self.send_request(activation_event, callback)
             return
 
         if isinstance(effect_msg, dict) and effect_msg.get("type") == EffectType.LEGACY_ACTIVATE_CUSTOM:
-            self.send_request({**effect_msg, "type": EventType.LEGACY_ACTIVATE_CUSTOM}, callback)
+            custom = cast("LegacyActivateCustom", effect_msg)
+            custom_event: ipc.LegacyActivateCustomEvent = {
+                "type": EventType.LEGACY_ACTIVATE_CUSTOM,
+                "ref": custom["ref"],
+                "keep_app_open": custom["keep_app_open"],
+            }
+            self.send_request(custom_event, callback)
             return
 
         callback(effect_msg)
@@ -275,10 +274,13 @@ class ExtensionMode(Mode):
                 pref = ext.preferences.get(p_id)
                 old_value = old_preferences.get(p_id, pref.value if pref else None)
                 if pref and new_value != old_value:
-                    event_data = {"type": EventType.UPDATE_PREFERENCES, "args": [p_id, new_value, old_value]}
+                    event_data: ipc.UpdatePreferencesEvent = {
+                        "type": EventType.UPDATE_PREFERENCES,
+                        "args": [p_id, new_value, old_value],
+                    }
                     ext.send_message(event_data)
 
-    def send_request(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+    def send_request(self, event: ipc.Request, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         """
         Send an event to the extension, expecting a response (passed to the callback).
         A request_id is sent alongside the event, used to filter out stale responses.
@@ -333,7 +335,7 @@ class ExtensionMode(Mode):
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, name)
 
-    def handle_response(self, ext_id: str, request_id: int, response: ExtensionResponse) -> None:
+    def handle_response(self, ext_id: str, request_id: int, response: ipc.Response) -> None:
         if not self.active_ext:
             logger.error("No active extension to handle response")
             return

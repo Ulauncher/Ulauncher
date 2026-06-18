@@ -15,6 +15,7 @@ from typing import Any, Callable
 from ulauncher import cli, paths
 from ulauncher.data import BaseDataClass, JsonConf
 from ulauncher.gi import GLib
+from ulauncher.internals import ipc
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
@@ -415,7 +416,7 @@ class ExtensionController:
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
 
-    def send_message(self, message: dict[str, Any], request_id: int | None = None) -> None:
+    def send_message(self, message: ipc.Event, request_id: int | None = None) -> None:
         """
         Sends a JSON message to the extension if it is running.
         """

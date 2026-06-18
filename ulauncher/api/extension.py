@@ -13,7 +13,7 @@ from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.internals import effect_utils, effects
+from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
@@ -193,7 +193,7 @@ class Extension:
                 # Add the result_id to the dict representation so Ulauncher can send it back
                 result["__result_id__"] = result_id
 
-        response = {"effect": effect_msg}
+        response: ipc.Response = {"effect": effect_msg}
         if "keep_app_open" in event:
             # Only used for EventType.LEGACY_ACTIVATE_CUSTOM
             response["keep_app_open"] = event["keep_app_open"]
