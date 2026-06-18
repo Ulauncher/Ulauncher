@@ -32,7 +32,6 @@ LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giv
 
 
 class ExtensionResponse(TypedDict):
-    request_id: int
     keep_app_open: NotRequired[bool]
     effect: EffectMessage | list[dict[str, Any]]
 
@@ -282,7 +281,7 @@ class ExtensionMode(Mode):
     def send_request(self, event: dict[str, Any], callback: Callable[[EffectMessage | list[Result]], None]) -> None:
         """
         Send an event to the extension, expecting a response (passed to the callback).
-        The event is enriched with a request_id property, used to filter out stale responses.
+        A request_id is sent alongside the event, used to filter out stale responses.
 
         For one-off messages, use ext.send_message() directly instead.
         """
@@ -296,8 +295,7 @@ class ExtensionMode(Mode):
 
         self._request_id += 1
         self._pending_callback = callback
-        event["request_id"] = self._request_id
-        self.active_ext.send_message(event)
+        self.active_ext.send_message(event, self._request_id)
 
     @events.on
     def handle_message(self, ext_id: str, name: str, *args: Any) -> None:
@@ -306,7 +304,12 @@ class ExtensionMode(Mode):
             logger.warning("Received '%s' message without event payload from %s", name, ext_id)
             return
         if name == "response":
-            self.handle_response(ext_id, args[0])
+            try:
+                request_id, response = args
+            except ValueError:
+                logger.warning("response expects two arguments, got %s from %s", len(args), ext_id)
+            else:
+                self.handle_response(ext_id, request_id, response)
         elif name == "clipboard_store":
             # Extension API: only copies; the launcher stays open and the extension is
             # responsible for any subsequent UI changes.
@@ -330,14 +333,14 @@ class ExtensionMode(Mode):
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, name)
 
-    def handle_response(self, ext_id: str, response: ExtensionResponse) -> None:
+    def handle_response(self, ext_id: str, request_id: int, response: ExtensionResponse) -> None:
         if not self.active_ext:
             logger.error("No active extension to handle response")
             return
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
-        if not self._pending_callback or response["request_id"] != self._request_id:
+        if not self._pending_callback or request_id != self._request_id:
             logger.debug("Ignoring outdated extension response")
             return
 

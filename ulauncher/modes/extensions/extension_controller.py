@@ -415,9 +415,9 @@ class ExtensionController:
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
 
-    def send_message(self, message: dict[str, Any]) -> None:
+    def send_message(self, message: dict[str, Any], request_id: int | None = None) -> None:
         """
         Sends a JSON message to the extension if it is running.
         """
         if runtime := extension_runtimes.get(self.id):
-            runtime.send_message(message)
+            runtime.send_message(message, request_id)

@@ -109,22 +109,22 @@ class Extension:
 
         return None
 
-    def trigger_event(self, event: dict[str, Any]) -> None:
+    def trigger_event(self, event: dict[str, Any], request_id: int | None = None) -> None:
         """Trigger an event. If it's an input trigger it will be debounced"""
         if event.get("type") != EventType.INPUT_TRIGGER:
-            self._do_trigger_event(event)
+            self._do_trigger_event(event, request_id)
             return
 
         def trigger_debounced() -> None:
             self._input_debounce_timer = None
-            self._do_trigger_event(event)
+            self._do_trigger_event(event, request_id)
 
         if self._input_debounce_timer:
             self._input_debounce_timer.cancel()
 
         self._input_debounce_timer = scheduling.timer(self._input_debounce_delay, trigger_debounced)
 
-    def _do_trigger_event(self, event: dict[str, Any]) -> None:
+    def _do_trigger_event(self, event: dict[str, Any], request_id: int | None = None) -> None:
         base_event = self.convert_to_baseevent(event)
         if not base_event:
             self.logger.warning("Dropping unknown event: %s", event)
@@ -141,9 +141,9 @@ class Extension:
         # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
         if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
-            if "request_id" in event:
-                # Events with request_id need a response to be able to garbage collect their callbacks
-                self._send_response(event, effects.do_nothing(), input_request_id)
+            if request_id is not None:
+                # Requests need a response to be able to garbage collect their callbacks
+                self._send_response(request_id, event, effects.do_nothing(), input_request_id)
             return
 
         for listener, method_name in listeners:
@@ -154,10 +154,13 @@ class Extension:
             # Run in a separate thread to avoid blocking the message listener thread (client.py)
             # It's not possible to cancel threads without process isolation, so we run multiple simultaneous threads,
             # then discard the result for stale events
-            threading.Thread(target=self.run_event_listener, args=(event, method, args, input_request_id)).start()
+            threading.Thread(
+                target=self.run_event_listener, args=(request_id, event, method, args, input_request_id)
+            ).start()
 
     def run_event_listener(
         self,
+        request_id: int | None,
         event: dict[str, Any],
         method: Callable[..., effects.EffectMessageInput | None],
         args: tuple[Any],
@@ -166,13 +169,14 @@ class Extension:
         # For extensions using yield to generate results, the method call will take no time, while
         # the conversion step will actually be the slow part. So we need to check staleness after both.
         input_effect_msg = method(*args)
-        if "request_id" in event:
+        if request_id is not None:
             # Schedule the response on the main thread to avoid races on shared state
             effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
-            scheduling.run_when_idle(self._send_response, event, effect_msg, input_request_id)
+            scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
 
     def _send_response(
         self,
+        request_id: int,
         event: dict[str, Any],
         effect_msg: effects.EffectMessage | list[Result],
         input_request_id: int | None,
@@ -189,11 +193,11 @@ class Extension:
                 # Add the result_id to the dict representation so Ulauncher can send it back
                 result["__result_id__"] = result_id
 
-        response = {"effect": effect_msg, "request_id": event["request_id"]}
+        response = {"effect": effect_msg}
         if "keep_app_open" in event:
             # Only used for EventType.LEGACY_ACTIVATE_CUSTOM
             response["keep_app_open"] = event["keep_app_open"]
-        self._client.send("response", response)
+        self._client.send("response", request_id, response)
         return False
 
     def run(self) -> None:

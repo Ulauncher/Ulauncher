@@ -112,9 +112,9 @@ class ExtensionRuntime:
     def read_stderr_line(self) -> None:
         self._error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr)
 
-    def send_message(self, message: dict[str, Any]) -> None:
-        self._msg_controller.send(message)
-        logger.debug("Sent message to %s: %s", self._ext_id, message)
+    def send_message(self, message: dict[str, Any], request_id: int | None = None) -> None:
+        self._msg_controller.send([message, request_id])
+        logger.debug("Sent message to %s: %s (request_id=%s)", self._ext_id, message, request_id)
 
     def handle_message(self, arg_list: Any) -> None:
         if not isinstance(arg_list, list):

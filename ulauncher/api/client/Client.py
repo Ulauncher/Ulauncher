@@ -56,12 +56,17 @@ class Client:
         self.mainloop.run()
         logger.debug("GLib mainloop stopped")
 
-    def on_message(self, event: dict[str, Any]) -> None:
+    def on_message(self, message: list[Any]) -> None:
         """
         Parses message from Ulauncher and triggers extension event
         """
-        logger.debug("Incoming event: %s", event)
-        self.extension.trigger_event(event)
+        logger.debug("Incoming message: %s", message)
+        try:
+            event, request_id = message
+        except (TypeError, ValueError):
+            logger.warning("Ignoring malformed message: %s", message)
+            return
+        self.extension.trigger_event(event, request_id)
 
     def unload(self) -> None:
         # trigger unload event and release mainloop so that the process will exit after the event is handled

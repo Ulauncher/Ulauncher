@@ -27,8 +27,8 @@ class TestClient:
             return Client(extension)
 
     def test_on_message__trigger_event__is_called(self, client: Client, extension: MagicMock) -> None:
-        client.on_message({"hello": "world"})
-        extension.trigger_event.assert_called_with({"hello": "world"})
+        client.on_message([{"hello": "world"}, 42])
+        extension.trigger_event.assert_called_with({"hello": "world"}, 42)
 
     def test_unload(self, client: Client, extension: MagicMock) -> None:
         client.mainloop = MagicMock()
