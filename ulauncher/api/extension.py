@@ -197,7 +197,7 @@ class Extension:
         if "keep_app_open" in event:
             # Only used for EventType.LEGACY_ACTIVATE_CUSTOM
             response["keep_app_open"] = event["keep_app_open"]
-        self._client.send("response", request_id, response)
+        self._client.send({"name": "response", "request_id": request_id, "response": response})
         return False
 
     def run(self) -> None:
@@ -215,7 +215,7 @@ class Extension:
             msg = f'Clipboard text "{text}" is invalid. It must be a string'
             raise TypeError(msg)
 
-        self._client.send("clipboard_store", text)
+        self._client.send({"name": "clipboard_store", "text": text})
 
     def notify(self, body: str = "", notification_id: str | None = None) -> None:
         """
@@ -231,7 +231,7 @@ class Extension:
             msg = f'Notification ID "{notification_id}" is invalid. It must be a string or None'
             raise TypeError(msg)
 
-        self._client.send("notify", body, notification_id)
+        self._client.send({"name": "notify", "body": body, "notification_id": notification_id})
 
     def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result]:
         return []

@@ -117,14 +117,11 @@ class ExtensionRuntime:
         self._msg_controller.send([message, request_id])
         logger.debug("Sent message to %s: %s (request_id=%s)", self._ext_id, message, request_id)
 
-    def handle_message(self, arg_list: Any) -> None:
-        if not isinstance(arg_list, list):
-            logger.warning("Extension %s sent invalid message format: %s", self._ext_id, arg_list)
+    def handle_message(self, message: Any) -> None:
+        if not isinstance(message, dict) or "name" not in message:
+            logger.warning("Extension %s sent invalid message format: %s", self._ext_id, message)
             return
-        if not arg_list:
-            logger.warning("Extension %s sent empty message", self._ext_id)
-            return
-        events.emit("extensions:handle_message", self._ext_id, *arg_list)
+        events.emit("extensions:handle_message", self._ext_id, message)
 
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
         try:
