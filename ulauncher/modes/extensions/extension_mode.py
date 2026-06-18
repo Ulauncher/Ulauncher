@@ -337,11 +337,11 @@ class ExtensionMode(Mode):
         if self.active_ext.id != ext_id:
             logger.debug("Ignoring response from inactive extension %s", ext_id)
             return
-        if not self._pending_callback or response.get("request_id") != self._request_id:
+        if not self._pending_callback or response["request_id"] != self._request_id:
             logger.debug("Ignoring outdated extension response")
             return
 
-        raw_effect_msg = response.get("effect", effects.close_window())
+        raw_effect_msg = response["effect"]
         effect_msg: EffectMessage | list[Result]
 
         if isinstance(raw_effect_msg, list):
