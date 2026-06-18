@@ -13,7 +13,7 @@ _MAX_SCALAR_REPR = 120
 
 
 def _summarize_dict(a: dict[str, Any]) -> str:
-    fields = [f"{k}={a[k]!r}" for k in ("type", "request_id", "ext_id") if k in a]
+    fields = [f"{k}={a[k]!r}" for k in ("type", "ext_id") if k in a]
     fields.extend(f"{k}=[{len(v)} items]" for k, v in a.items() if isinstance(v, list))
     return "{" + ", ".join(fields) + "}"
 
