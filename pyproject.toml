@@ -139,6 +139,10 @@ select = [
   "YTT",      # flake8-2020
 ]
 
+[tool.ruff.lint.flake8-tidy-imports]
+# typing_extensions is a type-check-only dependency; keep it out of the runtime
+banned-module-level-imports = ["typing_extensions"]
+
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "gi.repository" = {msg = "Import GI modules from ulauncher.gi, not gi.repository directly."}
 "ulauncher.ui" = {msg = "Import ulauncher.ui only from ulauncher/cli/commands/app.py - it pulls in GTK and must not leak into extension or CLI runtime."}
