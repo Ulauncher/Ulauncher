@@ -252,8 +252,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Activate the selected result
         """
         if self._results_nav and (result := self._results_nav.get_active_result()):
-            if not alt:
-                self._results_nav.remember_result_for_query(str(self.core.query), result)
             self.core.activate_result(result, emit_show_results, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
@@ -463,7 +461,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.results.add(result_widget)
 
             self._results_nav = ItemNavigation(result_widgets)
-            self._results_nav.select_default(str(self.core.query))
+            self._results_nav.select_by_name(self.core.last_query_result_pick)
 
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)

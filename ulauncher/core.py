@@ -8,6 +8,7 @@ from weakref import WeakKeyDictionary
 
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.query import Query
+from ulauncher.internals.query_history import QueryHistory
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
@@ -47,6 +48,11 @@ class UlauncherCore:
     _mode_map: WeakKeyDictionary[Result, Mode] = WeakKeyDictionary()
     query: Query = Query(None, "")
     _placeholder_timer: scheduling.Context | None = None
+
+    @property
+    def last_query_result_pick(self) -> str | None:
+        """Name of the result the user last activated for the current query, if any."""
+        return QueryHistory.load().get(str(self.query))
 
     def load_triggers(self, force: bool = False) -> None:
         """Load or refresh triggers from modes that have changes."""
@@ -180,6 +186,9 @@ class UlauncherCore:
     def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
         action_id: str | None = None
 
+        if not alt:
+            self._remember_pick(result)
+
         if isinstance(result, KeywordTrigger):
             # activate keyword trigger
             effect_utils.handle(effects.set_query(f"{result.keyword} "))
@@ -230,6 +239,14 @@ class UlauncherCore:
                 effect_utils.handle(effect_msg)
 
         return _callback
+
+    def _remember_pick(self, result: Result) -> None:
+        """Record the activated result in query history so it preselects for the same query later."""
+        query_str = str(self.query)
+        if query_str and result.searchable:
+            history = QueryHistory.load()
+            history[query_str] = result.name
+            history.save()
 
     def _get_action_results(self, result: Result) -> Iterable[Result]:
         for action_id, action_data in result.actions.items():
