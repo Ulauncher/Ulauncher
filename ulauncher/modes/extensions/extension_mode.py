@@ -358,7 +358,11 @@ class ExtensionMode(Mode):
                 if not isinstance(result_dict, dict):
                     logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
                     continue
-                result = Result(**result_dict)
+                try:
+                    result = Result(**result_dict)
+                except (KeyError, TypeError, ValueError) as e:
+                    logger.warning("Skipping malformed result from extension %s at index %s: %s", ext_id, result_id, e)
+                    continue
                 result.icon = self.active_ext.get_icon_value(result_dict.get("icon"))
                 # The extension keys its result cache by list index, so carry that index back as the
                 # result_id when the result is activated (see api.extension.Extension).
