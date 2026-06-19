@@ -8,7 +8,7 @@ class TestShouldClose:
 
     def test_result_list_keeps_window_open(self) -> None:
         """Result list should should keep the window open."""
-        assert not effect_utils.should_close([])
+        assert not effect_utils.should_close(effects.render_results([]))
 
     def test_set_query_keeps_window_open(self) -> None:
         """SET_QUERY effect should keep the window open."""

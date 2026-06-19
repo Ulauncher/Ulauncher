@@ -32,8 +32,8 @@ class Result(BaseDataClass):
         ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
     )
     actions: dict[str, dict[Literal["name", "icon"], str]] = {}  #: dict of actions with display names and icons
-    on_enter: effects.EffectMessage | list[Result] | None = None
-    on_alt_enter: effects.EffectMessage | list[Result] | None = None
+    on_enter: effects.EffectMessage | None = None
+    on_alt_enter: effects.EffectMessage | None = None
 
     def __init__(  # noqa: PLR0913
         self,

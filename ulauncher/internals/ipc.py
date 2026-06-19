@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from ulauncher.internals.effects import EffectMessage
-    from ulauncher.internals.result import Result
 
 
 class InputTriggerEvent(TypedDict):
@@ -84,7 +83,7 @@ class Response(TypedDict):
     """
 
     keep_app_open: NotRequired[bool]
-    effect: EffectMessage | list[Result]
+    effect: EffectMessage
 
 
 class ResponseMessage(TypedDict):

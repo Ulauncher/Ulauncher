@@ -165,7 +165,7 @@ class CalcMode(Mode):
     def matches_query_str(self, query_str: str) -> bool:
         return _is_enabled(normalize_expr(query_str))
 
-    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         try:
             calc_result = str(eval_expr(query.argument or ""))
             result: Result = CalcResult(
@@ -177,14 +177,14 @@ class CalcMode(Mode):
             logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
             result = CalcErrorResult()
 
-        callback([result])
+        callback(effects.render_results([result]))
 
     def activate_result(
         self,
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[effects.EffectMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage], None],
     ) -> None:
         if action_id == "copy":
             if not isinstance(result, CalcResult):

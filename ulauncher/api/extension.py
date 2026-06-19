@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -97,7 +97,7 @@ class Extension:
         elif event_type == EventType.RESULT_ACTIVATION:
             # Restore actual Result instance from cache using the result_id
             action_id, result_id = args
-            if result_id and (result := self._result_cache.get(result_id)):
+            if (result := self._result_cache.get(result_id)) is not None:
                 args = [action_id, result]
             else:
                 err_msg = f"Result with id {result_id} not found"
@@ -177,20 +177,16 @@ class Extension:
         self,
         request_id: int,
         event: dict[str, Any],
-        effect_msg: effects.EffectMessage | list[Result],
+        effect_msg: effects.EffectMessage,
         input_request_id: int | None,
     ) -> bool:
         if input_request_id is not None and input_request_id != self._input_request_id:
             return False
 
-        # Cache Result objects before sending them, keyed by their Python object ID
-        if isinstance(effect_msg, list):
-            self._result_cache.clear()
-            for result in effect_msg:
-                result_id = id(result)
-                self._result_cache[result_id] = result
-                # Add the result_id to the dict representation so Ulauncher can send it back
-                result["__result_id__"] = result_id
+        # Cache the rendered results by list index so an activation can map its result_id back to the
+        # actual Result instance, without mutating the result objects the extension handed us.
+        if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
+            self._result_cache = dict(enumerate(cast("effects.RenderResults", effect_msg)["results"]))
 
         response: ipc.Response = {"effect": effect_msg}
         if "keep_app_open" in event:

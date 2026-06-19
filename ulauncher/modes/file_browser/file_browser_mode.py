@@ -48,12 +48,12 @@ class FileBrowserMode(Mode):
     def filter_dot_files(self, file_list: list[str]) -> list[str]:
         return [f for f in file_list if not f.startswith(".")]
 
-    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         results: list[Result] = []
         try:
             path_str = query.argument
             if not path_str:
-                callback([])
+                callback(effects.render_results([]))
                 return
             path = Path(expandvars(path_str.strip())).expanduser()
 
@@ -87,7 +87,7 @@ class FileBrowserMode(Mode):
         except (RuntimeError, OSError):
             results = []
 
-        callback(results)
+        callback(effects.render_results(results))
 
     def handle_backspace(self, query_str: str) -> Query | None:
         if "/" in query_str and len(query_str.strip().rstrip("/")) > 1:
@@ -99,14 +99,14 @@ class FileBrowserMode(Mode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[effects.EffectMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage], None],
     ) -> None:
         if action_id == "go_to":
             callback(effects.set_query(join(fold_user_path(result.path), "")))
         elif action_id == "open_with":
             from ulauncher.modes.file_browser.open_with import get_open_with_results
 
-            callback(get_open_with_results(result.path))
+            callback(effects.render_results(get_open_with_results(result.path)))
         elif action_id == "open_with_app":
             from ulauncher.modes.file_browser.open_with import open_path_with_app
 

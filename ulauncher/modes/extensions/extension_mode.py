@@ -40,7 +40,7 @@ class ExtensionMode(Mode):
 
     _active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
-    _pending_callback: Callable[[EffectMessage | list[Result]], None] | None = None
+    _pending_callback: Callable[[EffectMessage], None] | None = None
     _loading_timer: scheduling.Context | None = None
     _request_id: int = 0
 
@@ -86,7 +86,7 @@ class ExtensionMode(Mode):
             self._pending_callback = None
             self._active_ext = ext
 
-    def handle_query(self, query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[EffectMessage], None]) -> None:
         self._clear_loading_timer()
         if not query.keyword:
             msg = f"Extensions currently only support queries with a keyword ('{query}' given)"
@@ -99,7 +99,7 @@ class ExtensionMode(Mode):
             # Core only routes a keyword here when its own cache claims this mode owns it, so a miss
             # means the two caches disagree (e.g. the extension was removed since core last loaded).
             logger.warning("Extension query '%s' did not match any enabled extension", query)
-            callback([Result(name="Extension not available")])
+            callback(effects.render_results([Result(name="Extension not available")]))
             return
 
         self.active_ext = ext
@@ -141,7 +141,7 @@ class ExtensionMode(Mode):
         self._clear_loading_timer()
         callback, self._pending_callback = self._pending_callback, None
         if callback:
-            callback(results or [])
+            callback(effects.render_results(results or []))
 
     def _loading_failed_result(self) -> Result:
         ext = self.active_ext
@@ -177,9 +177,9 @@ class ExtensionMode(Mode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[EffectMessage | list[Result]], None],
+        callback: Callable[[EffectMessage], None],
     ) -> None:
-        effect_msg: EffectMessage | list[Result] = effects.close_window()
+        effect_msg: EffectMessage = effects.close_window()
         if action_id == "__legacy_on_enter__" and result.on_enter:
             effect_msg = result.on_enter
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
@@ -280,7 +280,7 @@ class ExtensionMode(Mode):
                     }
                     ext.send_message(event_data)
 
-    def send_request(self, event: ipc.Request, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+    def send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
         """
         Send an event to the extension, expecting a response (passed to the callback).
         A request_id is sent alongside the event, used to filter out stale responses.
@@ -308,6 +308,7 @@ class ExtensionMode(Mode):
                 or "response" not in message
                 or not isinstance(message["response"], dict)
                 or "effect" not in message["response"]
+                or not isinstance(message["response"]["effect"], dict)
             ):
                 logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
                 return
@@ -348,13 +349,24 @@ class ExtensionMode(Mode):
             return
 
         raw_effect_msg = response["effect"]
-        effect_msg: EffectMessage | list[Result]
+        effect_msg: EffectMessage
 
-        if isinstance(raw_effect_msg, list):
-            effect_msg = []
-            for result_dict in raw_effect_msg:
-                result = Result(**result_dict)
+        if raw_effect_msg.get("type") == EffectType.RENDER_RESULTS:
+            rendered: list[Result] = []
+            raw_results = raw_effect_msg.get("results")
+            for result_id, result_dict in enumerate(raw_results if isinstance(raw_results, list) else []):
+                if not isinstance(result_dict, dict):
+                    logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
+                    continue
+                try:
+                    result = Result(**result_dict)
+                except (KeyError, TypeError, ValueError) as e:
+                    logger.warning("Skipping malformed result from extension %s at index %s: %s", ext_id, result_id, e)
+                    continue
                 result.icon = self.active_ext.get_icon_value(result_dict.get("icon"))
+                # The extension keys its result cache by list index, so carry that index back as the
+                # result_id when the result is activated (see api.extension.Extension).
+                result["__result_id__"] = result_id
 
                 # Convert legacy actions to the new actions dictionary format
                 if not result.actions:
@@ -363,7 +375,8 @@ class ExtensionMode(Mode):
                     if "on_alt_enter" in result:
                         result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
 
-                effect_msg.append(result)
+                rendered.append(result)
+            effect_msg = effects.render_results(rendered)
 
         elif not response.get("keep_app_open", True):
             effect_utils.handle(raw_effect_msg, prevent_close=True)

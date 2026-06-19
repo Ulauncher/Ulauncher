@@ -45,14 +45,14 @@ class ShortcutMode(Mode):
 
         return None
 
-    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         shortcut = self._get_active_shortcut(query)
         if not shortcut:
             msg = "Query doesn't match any shortcut"
             raise RuntimeError(msg)
 
         result: Result = convert_to_result(shortcut, query)
-        callback([result])
+        callback(effects.render_results([result]))
 
     def get_fallback_results(self, query_str: str) -> list[results.ShortcutResult]:
         query = Query(None, query_str)
@@ -71,7 +71,7 @@ class ShortcutMode(Mode):
         action_id: str,
         result: Result,
         query: Query,
-        callback: Callable[[effects.EffectMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage], None],
     ) -> None:
         if action_id == "run_static":
             callback(run_shortcut(result.cmd))
