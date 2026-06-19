@@ -355,6 +355,9 @@ class ExtensionMode(Mode):
             rendered: list[Result] = []
             raw_results = raw_effect_msg.get("results")
             for result_id, result_dict in enumerate(raw_results if isinstance(raw_results, list) else []):
+                if not isinstance(result_dict, dict):
+                    logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
+                    continue
                 result = Result(**result_dict)
                 result.icon = self.active_ext.get_icon_value(result_dict.get("icon"))
                 # The extension keys its result cache by list index, so carry that index back as the
