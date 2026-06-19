@@ -4,12 +4,11 @@ import logging
 import os
 import sys
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from gi.repository import Gdk, Gtk
 
 from ulauncher import paths
-from ulauncher.core import UlauncherCore
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor
@@ -21,14 +20,11 @@ from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
+if TYPE_CHECKING:
+    from ulauncher.ui.app import UlauncherApp
+
 logger = logging.getLogger(__name__)
 events = EventBus()
-
-
-def emit_show_results(update: ResultsUpdate) -> None:
-    # Keep this callback outside the window class so async mode callbacks never
-    # retain a window instance through a bound method reference.
-    events.emit("app:show_results", update)
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -36,11 +32,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     is_dragging = False
     layer_shell_enabled = False
     settings: Settings
-    core: UlauncherCore
 
-    def __init__(self, core: UlauncherCore, **kwargs: Any) -> None:  # noqa: PLR0915
+    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
         logger.info("Opening Ulauncher window")
-        self.core = core
         self.settings = Settings.load(force=True)
         width_request = self.settings.base_width
         height_request = -1
@@ -199,8 +193,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # used when user turns off "start with blank query" setting
             self.prompt_input.select_region(0, -1)
         self.apply_styling()
-        self.core.load_triggers(force=True)
-        self.core.set_query(self.query_str, emit_show_results)
+        events.emit("app:window_ready")
 
     ######################################
     # GTK Signal Handlers
@@ -233,15 +226,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        events.emit("app:set_query", self.prompt_input.get_text(), update_input=False)
-        self.core.set_query(self.query_str, emit_show_results)
+        events.emit("app:query_changed", self.prompt_input.get_text())
 
     def activate_result(self, alt: bool) -> None:
         """
         Activate the selected result
         """
         if result := self.results_view.get_active_result():
-            self.core.activate_result(result, emit_show_results, alt)
+            events.emit("app:activate_result", result, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -274,7 +266,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             and not ctrl
             and not entry_widget.get_selection_bounds()
             and entry_widget.get_position() == len(self.query_str)
-            and self.core.handle_backspace(self.query_str)
+            and self.get_app().handle_backspace(self.query_str)
         ):
             return True
 
@@ -318,9 +310,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     # Helpers
     ######################################
 
+    def get_app(self) -> UlauncherApp:
+        return cast("UlauncherApp", self.get_application())
+
     @property
     def query_str(self) -> str:
-        return self.get_application().query  # type: ignore[no-any-return, union-attr]
+        return self.get_app().query
 
     def apply_css(self, widget: Gtk.Widget) -> None:
         if not self._css_provider:
@@ -408,9 +403,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def set_input(self, query_str: str) -> None:
         self.prompt_input.set_text(query_str)
         self.prompt_input.set_position(-1)
-
-    def reload_query(self) -> None:
-        self.core.set_query(self.query_str, emit_show_results)
 
     def show_results(self, update: ResultsUpdate) -> None:
         self.results_view.render(update)

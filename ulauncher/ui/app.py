@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import signal
-from typing import Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 from weakref import WeakValueDictionary
 
 import gi
@@ -18,6 +18,9 @@ from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
+
+if TYPE_CHECKING:
+    from ulauncher.internals.result import Result
 
 logger = logging.getLogger(__name__)
 events = EventBus("app")
@@ -60,9 +63,29 @@ class UlauncherApp(Gtk.Application):
             main_window.set_input(self.query)
 
     @events.on
+    def query_changed(self, query_str: str) -> None:
+        """Run the new query string through the core and render the results."""
+        self.query = query_str.lstrip()
+        self.core.set_query(self.query, self.show_results)
+
+    @events.on
+    def activate_result(self, result: Result, alt: bool) -> None:
+        self.core.activate_result(result, self.show_results, alt)
+
+    def handle_backspace(self, query_str: str) -> bool:
+        """Whether a mode consumed the backspace by rewriting the query (smart backspace)."""
+        return self.core.handle_backspace(query_str)
+
+    @events.on
+    def window_ready(self) -> None:
+        # The window decides when this runs, to control startup performance.
+        self.core.load_triggers(force=True)
+        self.core.set_query(self.query, self.show_results)
+
+    @events.on
     def reload_query(self) -> None:
-        if (main_window := self.windows.get("main")) and isinstance(main_window, UlauncherWindow):
-            main_window.reload_query()
+        if "main" in self.windows:
+            self.core.set_query(self.query, self.show_results)
 
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
@@ -170,7 +193,7 @@ class UlauncherApp(Gtk.Application):
             del self.windows["main"]
 
         if "main" not in self.windows:
-            main_window = UlauncherWindow(core=self.core, application=self)
+            main_window = UlauncherWindow(application=self)
             main_window.connect("destroy", self._on_window_destroyed, "main")
             self.windows["main"] = main_window
 
@@ -188,7 +211,6 @@ class UlauncherApp(Gtk.Application):
             # re-check windows in case the user re-opened it during the delay
             scheduling.timer(1, lambda: self.quit() if not self.windows else None)
 
-    @events.on
     def show_results(self, update: ResultsUpdate) -> None:
         """Render results in the launcher window if it is currently open."""
         if main_window := cast("UlauncherWindow | None", self.windows.get("main")):
