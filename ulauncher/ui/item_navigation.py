@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ulauncher.ui.query_history import QueryHistory
-
 if TYPE_CHECKING:
     from ulauncher.internals.result import Result
     from ulauncher.ui.result_widget import ResultWidget
@@ -26,19 +24,15 @@ class ItemNavigation:
             return self.result_widgets[self.index]
         return None
 
-    def get_default(self, query: str) -> int:
-        """
-        Get the index of the result that should be selected (0 by default)
-        """
-        previous_pick = QueryHistory.load().get(query)
-
+    def _get_index_by_name(self, name: str | None) -> int:
+        """Index of the first searchable result with this name, or 0 if none matches."""
         for index, widget in enumerate(self.result_widgets):
-            if widget.result.searchable and widget.result.name == previous_pick:
+            if widget.result.searchable and widget.result.name == name:
                 return index
         return 0
 
-    def select_default(self, query: str) -> None:
-        self.select(self.get_default(query))
+    def select_by_name(self, name: str | None) -> None:
+        self.select(self._get_index_by_name(name))
 
     def select(self, index: int) -> None:
         if not 0 < index < len(self.result_widgets):
@@ -61,10 +55,3 @@ class ItemNavigation:
         if self.selected_item:
             return self.selected_item.result
         return None
-
-    def remember_result_for_query(self, query: str, result: Result) -> None:
-        """Mark as activated in query history"""
-        if query and result.searchable:
-            query_history = QueryHistory.load()
-            query_history[query] = result.name
-            query_history.save()

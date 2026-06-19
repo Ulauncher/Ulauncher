@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from pytest_mock import MockerFixture
 
 from ulauncher.ui.item_navigation import ItemNavigation
-from ulauncher.ui.query_history import QueryHistory
 from ulauncher.ui.result_widget import ResultWidget
 
 
@@ -19,12 +16,6 @@ class TestItemNavigation:
     @pytest.fixture
     def nav(self, items: list[ResultWidget]) -> ItemNavigation:
         return ItemNavigation(items)
-
-    @pytest.fixture(autouse=True)
-    def query_history(self, mocker: MockerFixture) -> Any:
-        mock = MagicMock(spec=QueryHistory)
-        mock.get.return_value = None
-        return mocker.patch("ulauncher.ui.item_navigation.QueryHistory.load", return_value=mock)
 
     def test_select_is_called(self, nav: ItemNavigation, items: list[MagicMock]) -> None:
         nav.select(1)
