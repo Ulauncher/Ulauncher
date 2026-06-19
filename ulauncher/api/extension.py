@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, cast
+from typing import Any, Callable, Iterable
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -96,8 +96,7 @@ class Extension:
             args = [data]
         elif event_type == EventType.RESULT_ACTIVATION:
             # Restore actual Result instance from cache using the result_id
-            action_id, result_dict = cast("tuple[str, dict[str, Any]]", args)
-            result_id: int | None = result_dict.get("__result_id__")
+            action_id, result_id = args
             if result_id and (result := self._result_cache.get(result_id)):
                 args = [action_id, result]
             else:
