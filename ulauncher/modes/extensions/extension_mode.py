@@ -300,40 +300,41 @@ class ExtensionMode(Mode):
         self.active_ext.send_message(event, self._request_id)
 
     @events.on
-    def handle_message(self, ext_id: str, name: str, *args: Any) -> None:
-        logger.debug("Incoming %s message with arguments %s from %r", name, summarize_ipc_args(args), ext_id)
-        if not args:
-            logger.warning("Received '%s' message without event payload from %s", name, ext_id)
-            return
-        if name == "response":
-            try:
-                request_id, response = args
-            except ValueError:
-                logger.warning("response expects two arguments, got %s from %s", len(args), ext_id)
-            else:
-                self.handle_response(ext_id, request_id, response)
-        elif name == "clipboard_store":
+    def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
+        logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
+        if message["name"] == "response":
+            if (
+                "request_id" not in message
+                or "response" not in message
+                or not isinstance(message["response"], dict)
+                or "effect" not in message["response"]
+            ):
+                logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
+                return
+            self.handle_response(ext_id, message["request_id"], message["response"])
+        elif message["name"] == "clipboard_store":
+            if "text" not in message:
+                logger.warning("Received malformed 'clipboard_store' message from %s: %s", ext_id, message)
+                return
             # Extension API: only copies; the launcher stays open and the extension is
             # responsible for any subsequent UI changes.
-            events.emit("app:clipboard_store", args[0])
-        elif name == "notify":
+            events.emit("app:clipboard_store", message["text"])
+        elif message["name"] == "notify":
+            if "body" not in message or "notification_id" not in message:
+                logger.warning("Received malformed 'notify' message from %s: %s", ext_id, message)
+                return
             ext = extension_registry.get(ext_id)
             if not ext:
                 logger.warning("Notification sent from an extension, '%s', which was not found", ext_id)
                 return
-            try:
-                body, notification_id = args
-            except ValueError:
-                logger.warning("notify expects two arguments, got %s from %s", len(args), ext_id)
-            else:
-                events.emit(
-                    "app:show_notification",
-                    f"ext-{ext.id}-{notification_id}",
-                    f"Message from {ext.manifest.name} extension",
-                    body,
-                )
+            events.emit(
+                "app:show_notification",
+                f"ext-{ext.id}-{message['notification_id']}",
+                f"Message from {ext.manifest.name} extension",
+                message["body"],
+            )
         else:
-            logger.warning("Received unknown message from %s: %s", ext_id, name)
+            logger.warning("Received unknown message from %s: %s", ext_id, message)
 
     def handle_response(self, ext_id: str, request_id: int, response: ipc.Response) -> None:
         if not self.active_ext:

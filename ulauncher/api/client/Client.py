@@ -2,12 +2,15 @@ from __future__ import annotations  # noqa: N999
 
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING
 
 import ulauncher.api
 from ulauncher.api.shared.event import EventType
 from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize_ipc_args
+
+if TYPE_CHECKING:
+    from ulauncher.internals import ipc
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +59,7 @@ class Client:
         self.mainloop.run()
         logger.debug("GLib mainloop stopped")
 
-    def on_message(self, message: list[Any]) -> None:
+    def on_message(self, message: ipc.EventEnvelope) -> None:
         """
         Parses message from Ulauncher and triggers extension event
         """
@@ -74,7 +77,7 @@ class Client:
         if self.mainloop.is_running():
             self.mainloop.quit()
 
-    def send(self, name: str, *args: Any) -> None:
-        """Send a message with name and argument(s) to the app"""
-        logger.debug("Send %s message with arguments %s", name, summarize_ipc_args(args))
-        self.msg_controller.send([name, *args])
+    def send(self, message: ipc.ExtensionMessage) -> None:
+        """Send a message to the app"""
+        logger.debug("Send message %s", summarize_ipc_args([message]))
+        self.msg_controller.send(message)

@@ -13,7 +13,7 @@ message holds a list there, not a tuple.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -70,6 +70,11 @@ Notification = Union[UpdatePreferencesEvent, LegacyPreferencesLoadEvent, UnloadE
 
 Event = Union[Request, Notification]
 
+# Transport envelope wrapping an event Ulauncher sends to an extension, paired with the request_id
+# correlating its response (None for notifications, which expect no reply). Typed as a tuple for
+# fixed arity; on the wire it is a JSON array, so a parsed message holds a list here.
+EventEnvelope = Tuple[Dict[str, Any], Optional[int]]
+
 
 class Response(TypedDict):
     """A response an extension sends for a Request.
@@ -80,3 +85,24 @@ class Response(TypedDict):
 
     keep_app_open: NotRequired[bool]
     effect: EffectMessage | list[Result]
+
+
+class ResponseMessage(TypedDict):
+    name: Literal["response"]
+    request_id: int
+    response: Response
+
+
+class ClipboardStoreMessage(TypedDict):
+    name: Literal["clipboard_store"]
+    text: str
+
+
+class NotifyMessage(TypedDict):
+    name: Literal["notify"]
+    body: str
+    notification_id: str | None
+
+
+# Messages an extension sends to Ulauncher, tagged by `name` so the receiver narrows on it.
+ExtensionMessage = Union[ResponseMessage, ClipboardStoreMessage, NotifyMessage]
