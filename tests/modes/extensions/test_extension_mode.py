@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, PropertyMock
 from pytest_mock import MockerFixture
 
 from ulauncher.api.shared.event import EventType
+from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.extensions import extension_registry
@@ -105,7 +106,7 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
     mode.handle_query(Query("kw", "arg"), callback)
     timer.call_args.args[1]()  # fire the captured loading-timeout callback
 
-    callback.assert_called_once_with([])
+    callback.assert_called_once_with(effects.render_results([]))
     assert mode._loading_timer is None
 
 
@@ -118,8 +119,8 @@ def test_handle_query__unknown_keyword_shows_message(mocker: MockerFixture) -> N
     mode.handle_query(Query("kw", "arg"), callback)
 
     callback.assert_called_once()
-    (results,) = callback.call_args.args
-    assert [r.name for r in results] == ["Extension not available"]
+    (effect,) = callback.call_args.args
+    assert [r.name for r in effect["results"]] == ["Extension not available"]
 
 
 def test_errored__while_loading_shows_failure(mocker: MockerFixture) -> None:
@@ -134,7 +135,7 @@ def test_errored__while_loading_shows_failure(mocker: MockerFixture) -> None:
 
     mode.errored("test.ext")
 
-    callback.assert_called_once_with([failure])
+    callback.assert_called_once_with(effects.render_results([failure]))
     timer.cancel.assert_called_once()
     assert mode._loading_timer is None
 

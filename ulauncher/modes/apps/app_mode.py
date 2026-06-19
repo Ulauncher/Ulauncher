@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class AppMode(Mode):
-    def handle_query(self, _query: Query, callback: Callable[[effects.EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, _query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         # App mode contributes search triggers but does not handle direct query-mode execution.
-        callback([])
+        callback(effects.render_results([]))
 
     def get_triggers(self) -> Iterator[AppResult]:
         settings = Settings.load()
@@ -54,7 +54,7 @@ class AppMode(Mode):
         action_id: str,
         result: Result,
         _query: Query,
-        callback: Callable[[effects.EffectMessage | list[Result]], None],
+        callback: Callable[[effects.EffectMessage], None],
     ) -> None:
         if action_id == "launch" or action_id.startswith(ACTION_PREFIX):
             if not isinstance(result, AppResult):

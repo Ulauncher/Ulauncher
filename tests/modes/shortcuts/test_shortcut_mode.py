@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals.effects import EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.shortcuts.results import ShortcutResult, ShortcutStaticTrigger
@@ -16,7 +17,12 @@ from ulauncher.modes.shortcuts.shortcuts import Shortcut
 def get_results(mode: ShortcutMode, query: Query) -> list[Result]:
     """Helper to collect results from callback-based handle_query."""
     results: list[Result] = []
-    mode.handle_query(query, lambda msg: results.extend(msg) if isinstance(msg, list) else None)
+
+    def collect(msg: object) -> None:
+        if isinstance(msg, dict) and msg["type"] == EffectType.RENDER_RESULTS:
+            results.extend(msg["results"])
+
+    mode.handle_query(query, collect)
     return results
 
 

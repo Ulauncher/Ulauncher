@@ -9,6 +9,7 @@ from ulauncher.internals.effects import (
     EffectType,
     close_window,
     do_nothing,
+    render_results,
     set_query,
 )
 from ulauncher.utils.eventbus import EventBus
@@ -25,15 +26,13 @@ def is_valid(effect_msg: Any) -> bool:
     return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
 
 
-def should_close(effect_msg: EffectMessage | list[Result]) -> bool:
+def should_close(effect_msg: EffectMessage) -> bool:
     """Whether or not the effect should close the window."""
-    if isinstance(effect_msg, list):
-        return False
     if isinstance(effect_msg, dict):
-        if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY):
+        if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
             return False
         if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            effect_list = cast("list[EffectMessage | list[Result]]", effect_msg.get("data", []))
+            effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
             return all(map(should_close, effect_list))
     return True
 
@@ -59,12 +58,12 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         from ulauncher.modes.shortcuts.run_script import run_script
 
         run_script(*data)
+    elif event_type == EffectType.RENDER_RESULTS and isinstance(effect_msg.get("results"), list):
+        _events.emit("app:show_results", effect_msg.get("results"))
+
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-        for effect in cast("list[EffectMessage | list[Result]]", data):
-            if isinstance(effect, list):
-                _events.emit("app:show_results", effect)
-            else:
-                handle(effect, True)
+        for effect in cast("list[EffectMessage]", data):
+            handle(effect, True)
 
     elif not has_valid_type:
         _logger.warning("Unknown effect type: %s", event_type)
@@ -75,7 +74,7 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         _events.emit("app:close_launcher")
 
 
-def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMessage | list[Result]:
+def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMessage:
     """Normalize input format that supports boolean and string to represent effects and iterable lists for results"""
     if isinstance(input_data, bool) or input_data is None:
         return do_nothing() if input_data else close_window()
@@ -86,4 +85,4 @@ def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMe
             return cast("EffectMessage", input_data)  # TypedDict unions can't be narrowed by runtime checks
         err_msg = f"Invalid effect message dict: {input_data}"
         raise ValueError(err_msg)
-    return list(cast("Iterable[Result]", input_data))  # collect/flatten iterators to lists
+    return render_results(list(cast("Iterable[Result]", input_data)))  # collect/flatten iterators to lists

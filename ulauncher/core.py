@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 import logging
 from collections import defaultdict
-from typing import Callable, Iterable
+from typing import Callable, Iterable, cast
 from weakref import WeakKeyDictionary
 
 from ulauncher.internals import effect_utils, effects
@@ -212,7 +212,7 @@ class UlauncherCore:
 
     def _mode_callback(
         self, valid_mode: Mode | None, callback: Callable[[Iterable[Result]], None]
-    ) -> Callable[[effects.EffectMessage | list[Result]], None]:
+    ) -> Callable[[effects.EffectMessage], None]:
         """
         Callback to handle results and effects from modes.
 
@@ -220,14 +220,14 @@ class UlauncherCore:
         callback: The callback function to handle results and effects.
         """
 
-        def _callback(effect_msg: effects.EffectMessage | list[Result]) -> None:
+        def _callback(effect_msg: effects.EffectMessage) -> None:
             if valid_mode not in (self._mode, None):
                 return
 
-            if isinstance(effect_msg, dict):
+            if effect_msg.get("type") == effects.EffectType.RENDER_RESULTS:
+                self._show_results(cast("effects.RenderResults", effect_msg)["results"], callback)
+            else:
                 effect_utils.handle(effect_msg)
-            elif isinstance(effect_msg, list):
-                self._show_results(effect_msg, callback)
 
         return _callback
 

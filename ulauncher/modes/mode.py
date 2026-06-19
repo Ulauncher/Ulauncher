@@ -22,7 +22,7 @@ class Mode(ABC):
         return None
 
     @abstractmethod
-    def handle_query(self, _query: Query, callback: Callable[[EffectMessage | list[Result]], None]) -> None:
+    def handle_query(self, _query: Query, callback: Callable[[EffectMessage], None]) -> None:
         """
         Handle a query and provide the result list via callback.
         """
@@ -64,7 +64,7 @@ class Mode(ABC):
         action_id: str,
         result: Result,
         query: Query,
-        callback: Callable[[EffectMessage | list[Result]], None],
+        callback: Callable[[EffectMessage], None],
     ) -> None:
         """
         Called when a result is activated.

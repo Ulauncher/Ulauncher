@@ -11,6 +11,7 @@ class EffectType:
     DO_NOTHING: Final = "effect:do_nothing"
     CLOSE_WINDOW: Final = "effect:close_window"
     SET_QUERY: Final = "effect:set_query"
+    RENDER_RESULTS: Final = "effect:render_results"
     OPEN: Final = "effect:open"
     LEGACY_COPY: Final = "effect:legacy_copy"
     LEGACY_RUN_SCRIPT: Final = "effect:legacy_run_script"
@@ -29,6 +30,11 @@ class CloseWindow(TypedDict):
 class SetQuery(TypedDict):
     type: Literal["effect:set_query"]
     data: str
+
+
+class RenderResults(TypedDict):
+    type: Literal["effect:render_results"]
+    results: list[Result]
 
 
 class Open(TypedDict):
@@ -61,6 +67,7 @@ EffectMessage = Union[
     DoNothing,
     CloseWindow,
     SetQuery,
+    RenderResults,
     Open,
     LegacyCopy,
     LegacyRunScript,
@@ -85,6 +92,10 @@ def set_query(query: str) -> SetQuery:
         msg = f'Query argument "{query}" is invalid. It must be a string'
         raise TypeError(msg)
     return {"type": EffectType.SET_QUERY, "data": query}
+
+
+def render_results(results: list[Result]) -> RenderResults:
+    return {"type": EffectType.RENDER_RESULTS, "results": results}
 
 
 def open(item: str) -> Open:  # noqa: A001
