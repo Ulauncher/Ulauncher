@@ -28,12 +28,11 @@ def is_valid(effect_msg: Any) -> bool:
 
 def should_close(effect_msg: EffectMessage) -> bool:
     """Whether or not the effect should close the window."""
-    if isinstance(effect_msg, dict):
-        if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
-            return False
-        if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
-            return all(map(should_close, effect_list))
+    if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
+        return False
+    if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
+        effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
+        return all(map(should_close, effect_list))
     return True
 
 
