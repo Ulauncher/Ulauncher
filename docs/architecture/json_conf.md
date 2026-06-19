@@ -31,6 +31,7 @@ config.save()
 
 - **Inherits from BaseDataClass** - All dict-like features available
 - **Instance deduplication** - Multiple `load()` calls for the same path return the **same instance**
+- **Cached reads** - `load()` reads from disk only on the first call for a given path (and when `force=True`). Later calls return the cached instance with no disk access.
 - **Safe concurrent access** - Prevents concurrent modifications from overwriting each other
 - **Auto-save debouncing** - Saves are debounced to avoid excessive disk writes
 - **Automatic file creation** - Creates file with defaults if it doesn't exist
