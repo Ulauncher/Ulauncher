@@ -61,11 +61,8 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         _events.emit("app:show_results", effect_msg.get("results"))
 
     elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-        for effect in data:
-            if isinstance(effect, dict):
-                handle(cast("EffectMessage", effect), True)
-            else:
-                _logger.warning("Invalid nested effect in LEGACY_RUN_MANY: %s", effect)
+        for effect in cast("list[EffectMessage]", data):
+            handle(effect, True)
 
     elif not has_valid_type:
         _logger.warning("Unknown effect type: %s", event_type)
