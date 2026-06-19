@@ -195,7 +195,7 @@ class ExtensionMode(Mode):
         else:
             activation_event: ipc.ResultActivationEvent = {
                 "type": EventType.RESULT_ACTIVATION,
-                "args": (action_id, result),
+                "args": (action_id, result["__result_id__"]),
             }
             self.send_request(activation_event, callback)
             return

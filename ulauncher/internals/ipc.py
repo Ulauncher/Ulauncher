@@ -34,7 +34,7 @@ class LaunchTriggerEvent(TypedDict):
 
 class ResultActivationEvent(TypedDict):
     type: Literal["event:result_activation"]
-    args: tuple[str, Result]  # action_id, result
+    args: tuple[str, int]  # action_id, result_id
 
 
 class LegacyActivateCustomEvent(TypedDict):
