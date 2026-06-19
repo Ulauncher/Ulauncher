@@ -3,13 +3,14 @@ from __future__ import annotations
 import itertools
 import logging
 from collections import defaultdict
-from typing import Callable, Iterable, cast
+from typing import Callable, Iterable
 from weakref import WeakKeyDictionary
 
 from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.query_history import QueryHistory
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
+from ulauncher.internals.results_update import ResultsUpdate, results_update
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -20,6 +21,8 @@ _events = EventBus()
 logger = logging.getLogger(__name__)
 
 PLACEHOLDER_DELAY = 0.3  # delay in sec before Loading... is rendered
+
+ResultsCallback = Callable[[ResultsUpdate], None]
 
 
 @lru_cache(maxsize=None)
@@ -90,10 +93,12 @@ class UlauncherCore:
                             current_trigger.__class__.__name__,
                         )
 
-    def set_query(self, query_str: str, callback: Callable[[Iterable[Result]], None]) -> None:
+    def set_query(self, query_str: str, callback: ResultsCallback) -> None:
         """Set the query string and propagate the update to the modes."""
         if not query_str:
-            callback(self.get_home_results())
+            self._mode = None
+            self.query = Query(None, "")
+            self._show_results(self.get_home_results(), callback)
             return
 
         self._mode = None
@@ -136,11 +141,11 @@ class UlauncherCore:
                 self._mode_map[app_result] = app_mode
                 yield app_result
 
-    def _show_results(self, results: Iterable[Result], callback: Callable[[Iterable[Result]], None]) -> None:
+    def _show_results(self, results: Iterable[Result], callback: ResultsCallback) -> None:
         self._clear_placeholder_timer()
-        callback(results)
+        callback(results_update(list(results), self.query, self.last_query_result_pick))
 
-    def _show_placeholder(self, callback: Callable[[Iterable[Result]], None]) -> None:
+    def _show_placeholder(self, callback: ResultsCallback) -> None:
         placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
         self._show_results([placeholder], callback)
 
@@ -149,7 +154,7 @@ class UlauncherCore:
             self._placeholder_timer.cancel()
             self._placeholder_timer = None
 
-    def handle_change(self, callback: Callable[[Iterable[Result]], None]) -> None:
+    def handle_change(self, callback: ResultsCallback) -> None:
         self._clear_placeholder_timer()
 
         if self._mode:
@@ -183,7 +188,7 @@ class UlauncherCore:
                 return True
         return False
 
-    def activate_result(self, result: Result, callback: Callable[[Iterable[Result]], None], alt: bool = False) -> None:
+    def activate_result(self, result: Result, callback: ResultsCallback, alt: bool = False) -> None:
         action_id: str | None = None
 
         if not alt:
@@ -220,7 +225,7 @@ class UlauncherCore:
             return
 
     def _mode_callback(
-        self, valid_mode: Mode | None, callback: Callable[[Iterable[Result]], None]
+        self, valid_mode: Mode | None, callback: ResultsCallback
     ) -> Callable[[effects.EffectMessage], None]:
         """
         Callback to handle results and effects from modes.
@@ -234,8 +239,18 @@ class UlauncherCore:
                 return
 
             self._clear_placeholder_timer()
-            if effect_msg.get("type") == effects.EffectType.RENDER_RESULTS:
-                self._show_results(cast("effects.RenderResults", effect_msg)["results"], callback)
+            if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
+                self._show_results(effect_msg["results"], callback)
+            elif effect_msg["type"] == effects.EffectType.LEGACY_RUN_MANY:
+                # effect_utils.handle has no callback to render with, so route any nested render
+                # here and let it process the rest (preserving its close behavior).
+                for nested_effect in effect_msg["effects"]:
+                    if nested_effect["type"] == effects.EffectType.RENDER_RESULTS:
+                        self._show_results(nested_effect["results"], callback)
+                    else:
+                        effect_utils.handle(nested_effect, prevent_close=True)
+                if effect_utils.should_close(effect_msg):
+                    _events.emit("app:close_launcher")
             else:
                 effect_utils.handle(effect_msg)
 

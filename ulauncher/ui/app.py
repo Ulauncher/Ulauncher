@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import signal
-from typing import Any, Iterable, Literal, cast
+from typing import Any, Literal, cast
 from weakref import WeakValueDictionary
 
 import gi
@@ -13,7 +13,7 @@ import ulauncher
 from ulauncher import app_id, first_run
 from ulauncher.core import UlauncherCore
 from ulauncher.gi import Gio, GLib
-from ulauncher.internals.result import Result
+from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -189,10 +189,10 @@ class UlauncherApp(Gtk.Application):
             scheduling.timer(1, lambda: self.quit() if not self.windows else None)
 
     @events.on
-    def show_results(self, results: Iterable[Result]) -> None:
+    def show_results(self, update: ResultsUpdate) -> None:
         """Render results in the launcher window if it is currently open."""
         if main_window := cast("UlauncherWindow | None", self.windows.get("main")):
-            main_window.show_results(results)
+            main_window.show_results(update)
 
     @events.on
     def close_launcher(self) -> None:

@@ -4,13 +4,13 @@ import logging
 import os
 import sys
 import time
-from typing import Any, Iterable
+from typing import Any
 
 from gi.repository import Gdk, Gtk
 
 from ulauncher import paths
 from ulauncher.core import UlauncherCore
-from ulauncher.internals.result import Result
+from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor
 from ulauncher.ui.helpers.theme import Theme
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 events = EventBus()
 
 
-def emit_show_results(results: Iterable[Result]) -> None:
+def emit_show_results(update: ResultsUpdate) -> None:
     # Keep this callback outside the window class so async mode callbacks never
     # retain a window instance through a bound method reference.
-    events.emit("app:show_results", list(results))
+    events.emit("app:show_results", update)
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -439,13 +439,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # the in-progress allocation pass ignores the new request
             scheduling.run_when_idle(self.results_scroller.queue_resize)
 
-    def show_results(self, results: Iterable[Result]) -> None:
+    def show_results(self, update: ResultsUpdate) -> None:
         self._results_nav = None
         self.results.foreach(lambda w: w.destroy())
 
         jump_keys = self.settings.get_jump_keys()
         limit = len(jump_keys) or 25
-        result_list = list(results)[:limit]
+        result_list = update["results"][:limit]
         # stock sizing works for single-line results; only wrapped ones need _fit_results_height
         self._has_wrapped_results = any(result.wrap for result in result_list)
         if not self._has_wrapped_results:
@@ -456,12 +456,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
             result_widgets: list[ResultWidget] = []
             for index, result in enumerate(result_list):
-                result_widget = ResultWidget(result, index, self.core.query, jump_keys)
+                result_widget = ResultWidget(result, index, update["query"], jump_keys)
                 result_widgets.append(result_widget)
                 self.results.add(result_widget)
 
             self._results_nav = ItemNavigation(result_widgets)
-            self._results_nav.select_by_name(self.core.last_query_result_pick)
+            self._results_nav.select_by_name(update["selected_name"])
 
             self.results.set_margin_bottom(10)
             self.results.set_margin_top(3)
