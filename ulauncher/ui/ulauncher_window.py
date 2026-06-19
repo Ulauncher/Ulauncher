@@ -14,8 +14,8 @@ from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor
 from ulauncher.ui.helpers.theme import Theme
-from ulauncher.ui.item_navigation import ItemNavigation
 from ulauncher.ui.load_icon_surface import load_icon_surface
+from ulauncher.ui.results_view import ResultsView
 from ulauncher.utils import scheduling
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
 from ulauncher.utils.eventbus import EventBus
@@ -33,8 +33,6 @@ def emit_show_results(update: ResultsUpdate) -> None:
 
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
-    _has_wrapped_results = False
-    _results_nav: ItemNavigation | None = None
     is_dragging = False
     layer_shell_enabled = False
     settings: Settings
@@ -90,8 +88,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         #         │   └── prompt
         #         │       ├── prompt_input (.input)
         #         │       └── prefs_btn (.prefs-btn)
-        #         └── results_scroller
-        #             └── results (.result-box)
+        #         └── results_view (ScrolledWindow)
+        #             └── results box (.result-box)
         #                 └── ResultWidget (multiple)
 
         self.frame = Gtk.Box(valign=Gtk.Align.START)
@@ -133,18 +131,10 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt.pack_start(self.prompt_input, True, True, 0)
         self.prompt.pack_end(self.prefs_btn, False, False, 0)
 
-        self.results_scroller = Gtk.ScrolledWindow(
-            can_focus=True,
-            hscrollbar_policy=Gtk.PolicyType.NEVER,
-            propagate_natural_height=True,
-            shadow_type=Gtk.ShadowType.IN,
-        )
-        self.results = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.results.connect("size-allocate", self._fit_results_height)
-        self.results_scroller.add(self.results)
+        self.results_view = ResultsView(self.settings, self.apply_css)
 
         self.theme_root.pack_start(drag_listener, False, True, 0)
-        self.theme_root.pack_start(self.results_scroller, False, True, 0)
+        self.theme_root.pack_start(self.results_view, False, True, 0)
 
         self.frame.show_all()
 
@@ -196,7 +186,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.theme_root.get_style_context().add_class("app")
         self.prompt_input.get_style_context().add_class("input")
         self.prefs_btn.get_style_context().add_class("prefs-btn")
-        self.results.get_style_context().add_class("result-box")
         prefs_icon_surface = load_icon_surface(f"{paths.ASSETS}/icons/gear.svg", 16, self.get_scale_factor())
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
 
@@ -251,7 +240,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Activate the selected result
         """
-        if self._results_nav and (result := self._results_nav.get_active_result()):
+        if result := self.results_view.get_active_result():
             self.core.activate_result(result, emit_show_results, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
@@ -289,13 +278,13 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         ):
             return True
 
-        if self._results_nav:
+        if self.results_view.has_results:
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == up_alias):
-                self._results_nav.go_up()
+                self.results_view.go_up()
                 return True
 
             if keyname in ("Down", "Tab") or (ctrl and keyname == down_alias):
-                self._results_nav.go_down()
+                self.results_view.go_down()
                 return True
 
             if ctrl and keyname == left_alias:
@@ -373,7 +362,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
             prompt_height = self.prompt.get_allocated_height()
             max_height = monitor_size.height - prompt_height - pos_y * 2
-            self.results_scroller.set_property("max-content-height", max_height)
+            self.results_view.set_max_height(int(max_height))
 
             # Part II of the Gnome Wayland fix (see above in __init__)
             # Use margins to center the visible content within the full-screen window
@@ -400,8 +389,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.destroy()
 
     def select_result(self, index: int) -> None:
-        if self._results_nav:
-            self._results_nav.select(index)
+        self.results_view.select(index)
 
     def toggle_grab_pointer_device(self, grab: bool) -> None:
         if window := self.get_window():
@@ -424,52 +412,5 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def reload_query(self) -> None:
         self.core.set_query(self.query_str, emit_show_results)
 
-    def _fit_results_height(self, box: Gtk.Box, allocation: Gdk.Rectangle) -> None:
-        """GtkScrolledWindow measures its natural height without height-for-width,
-        clipping wrapped (Result.wrap) labels - request the real height instead."""
-        if not self._has_wrapped_results or allocation.width <= 0:
-            return  # nothing to fit, or an early allocation pass with no usable width yet
-        current_height = self.results_scroller.get_min_content_height()
-        max_height = self.results_scroller.get_property("max-content-height")
-        needed_height = box.get_preferred_height_for_width(allocation.width)[1]
-        if max_height > 0:
-            needed_height = min(needed_height, max_height)
-        if abs(needed_height - current_height) > 1:  # tolerance: a scrollbar can shift the width by ~1px
-            self.results_scroller.set_min_content_height(needed_height)
-            # the in-progress allocation pass ignores the new request
-            scheduling.run_when_idle(self.results_scroller.queue_resize)
-
     def show_results(self, update: ResultsUpdate) -> None:
-        self._results_nav = None
-        self.results.foreach(lambda w: w.destroy())
-
-        jump_keys = self.settings.get_jump_keys()
-        limit = len(jump_keys) or 25
-        result_list = update["results"][:limit]
-        # stock sizing works for single-line results; only wrapped ones need _fit_results_height
-        self._has_wrapped_results = any(result.wrap for result in result_list)
-        if not self._has_wrapped_results:
-            self.results_scroller.set_min_content_height(-1)  # restore stock sizing
-
-        if result_list:
-            from ulauncher.ui.result_widget import ResultWidget
-
-            result_widgets: list[ResultWidget] = []
-            for index, result in enumerate(result_list):
-                result_widget = ResultWidget(result, index, update["query"], jump_keys)
-                result_widgets.append(result_widget)
-                self.results.add(result_widget)
-
-            self._results_nav = ItemNavigation(result_widgets)
-            self._results_nav.select_by_name(update["selected_name"])
-
-            self.results.set_margin_bottom(10)
-            self.results.set_margin_top(3)
-            self.apply_css(self.results)
-            self.results_scroller.show_all()
-            logger.debug("Render %s results", len(result_widgets))
-        else:
-            # Hide the scroll container when there are no results since it normally takes up a
-            # minimum amount of space even if it is empty.
-            self.results_scroller.hide()
-            logger.debug("Hiding results container, no results found")
+        self.results_view.render(update)
