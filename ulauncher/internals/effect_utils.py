@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, Final, Iterable, cast
 
 from ulauncher.internals.effects import (
@@ -19,7 +18,6 @@ if TYPE_CHECKING:
 
 _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
 _events = EventBus()
-_logger = logging.getLogger(__name__)
 
 
 def is_valid(effect_msg: Any) -> bool:
@@ -30,46 +28,37 @@ def should_close(effect_msg: EffectMessage) -> bool:
     """Whether or not the effect should close the window."""
     if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
         return False
-    if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-        effect_list = cast("list[EffectMessage]", effect_msg.get("data", []))
-        return all(map(should_close, effect_list))
+    if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+        return all(map(should_close, effect_msg["data"]))
     return True
 
 
 def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     """Process effects by dispatching to appropriate handlers."""
-    event_type = effect_msg.get("type", "")
-    data = effect_msg.get("data")
-    has_valid_type = event_type in _VALID_EFFECT_TYPES
 
-    if event_type == EffectType.SET_QUERY and isinstance(data, str):
-        _events.emit("app:set_query", data)
+    if effect_msg["type"] == EffectType.SET_QUERY:
+        _events.emit("app:set_query", effect_msg["data"])
 
-    elif event_type == EffectType.OPEN and isinstance(data, str):
+    elif effect_msg["type"] == EffectType.OPEN:
         from ulauncher.utils.launch_detached import open_detached
 
-        open_detached(data)
+        open_detached(effect_msg["data"])
 
-    elif event_type == EffectType.LEGACY_COPY and isinstance(data, str):
-        _events.emit("app:copy_and_close", data)
+    elif effect_msg["type"] == EffectType.LEGACY_COPY:
+        _events.emit("app:copy_and_close", effect_msg["data"])
 
-    elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
+    elif effect_msg["type"] == EffectType.LEGACY_RUN_SCRIPT:
         from ulauncher.modes.shortcuts.run_script import run_script
 
-        run_script(*cast("list[str]", data))
-    elif event_type == EffectType.RENDER_RESULTS and isinstance(effect_msg.get("results"), list):
-        _events.emit("app:show_results", effect_msg.get("results"))
+        run_script(*effect_msg["data"])
+    elif effect_msg["type"] == EffectType.RENDER_RESULTS:
+        _events.emit("app:show_results", effect_msg["results"])
 
-    elif event_type == EffectType.LEGACY_RUN_MANY and isinstance(data, list):
-        for effect in cast("list[EffectMessage]", data):
+    elif effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+        for effect in effect_msg["data"]:
             handle(effect, True)
 
-    elif not has_valid_type:
-        _logger.warning("Unknown effect type: %s", event_type)
-    elif event_type not in (EffectType.DO_NOTHING, EffectType.CLOSE_WINDOW):
-        _logger.warning("Invalid data for effect type: %s, %s", event_type, data)
-
-    if has_valid_type and should_close(effect_msg) and not prevent_close:
+    if should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
 
 
