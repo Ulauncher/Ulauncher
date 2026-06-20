@@ -8,7 +8,7 @@ from typing import Any, Callable, Iterator, Literal, cast
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
-from ulauncher.internals.effects import EffectMessage, EffectType, LegacyActivateCustom
+from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.extensions import extension_registry
@@ -200,12 +200,11 @@ class ExtensionMode(Mode):
             self.send_request(activation_event, callback)
             return
 
-        if isinstance(effect_msg, dict) and effect_msg.get("type") == EffectType.LEGACY_ACTIVATE_CUSTOM:
-            custom = cast("LegacyActivateCustom", effect_msg)
+        if isinstance(effect_msg, dict) and effect_msg["type"] == EffectType.LEGACY_ACTIVATE_CUSTOM:
             custom_event: ipc.LegacyActivateCustomEvent = {
                 "type": EventType.LEGACY_ACTIVATE_CUSTOM,
-                "ref": custom["ref"],
-                "keep_app_open": custom["keep_app_open"],
+                "ref": effect_msg["ref"],
+                "keep_app_open": effect_msg["keep_app_open"],
             }
             self.send_request(custom_event, callback)
             return
