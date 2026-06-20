@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from ulauncher.utils.json_utils import json_load, json_save
 from ulauncher.utils.lru_cache import lru_cache
@@ -27,7 +27,7 @@ def _get_or_create_instance(cls: type[FileInstanceT], file_path: str) -> FileIns
     instance = cls()
     _instance_paths[id(instance)] = file_path
     _populate_from_file(instance, file_path)
-    return cast("FileInstanceT", instance)
+    return instance
 
 
 def _load_cached_file_instance(cls: type[FileInstanceT], path: str, *, force: bool = False) -> FileInstanceT:

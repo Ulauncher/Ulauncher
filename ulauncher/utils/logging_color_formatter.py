@@ -22,7 +22,7 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         # Great reference for terminal colors: https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
         symbol, level_color = self.formats.get(record.levelno, ("", 0))
-        prefix = f"{symbol}  {mkcolor(int(level_color), True)}{record.levelname}{mkcolor(0)}"
+        prefix = f"{symbol}  {mkcolor(level_color, True)}{record.levelname}{mkcolor(0)}"
         if record.name != "root":
             # Ensure the same name gets the same color every time
             random.seed(record.name)

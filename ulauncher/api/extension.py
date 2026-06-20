@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, cast
+from typing import Any, Callable, Iterable
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -186,7 +186,7 @@ class Extension:
         # Cache the rendered results by list index so an activation can map its result_id back to the
         # actual Result instance, without mutating the result objects the extension handed us.
         if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
-            self._result_cache = dict(enumerate(cast("effects.RenderResults", effect_msg)["results"]))
+            self._result_cache = dict(enumerate(effect_msg["results"]))
 
         response: ipc.Response = {"effect": effect_msg}
         if "keep_app_open" in event:

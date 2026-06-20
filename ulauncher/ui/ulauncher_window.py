@@ -44,7 +44,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         logger.info("Opening Ulauncher window")
         self.core = core
         self.settings = Settings.load(force=True)
-        width_request = int(self.settings.base_width)
+        width_request = self.settings.base_width
         height_request = -1
 
         if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):

@@ -167,7 +167,7 @@ class CalcMode(Mode):
 
     def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         try:
-            calc_result = str(eval_expr(query.argument or ""))
+            calc_result = eval_expr(query.argument or "")
             result: Result = CalcResult(
                 name=f"{Decimal(calc_result):n}",
                 description="Enter to copy to the clipboard",

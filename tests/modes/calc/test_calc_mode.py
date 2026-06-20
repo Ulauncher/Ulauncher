@@ -70,9 +70,9 @@ class TestCalcMode:
         assert abs(Decimal(eval_expr("e**2")) - Decimal(eval_expr("exp(2)"))) < Decimal("1e-10")
 
     def test_eval_expr_rounding(self) -> None:
-        assert str(eval_expr("3.300 + 7.1")) == "10.4"
-        assert str(eval_expr("5.5 + 3.50")) == "9"
-        assert str(eval_expr("10 / 3.0")) == "3.333333333333333"
+        assert eval_expr("3.300 + 7.1") == "10.4"
+        assert eval_expr("5.5 + 3.50") == "9"
+        assert eval_expr("10 / 3.0") == "3.333333333333333"
 
     def test_eval_expr_syntax_variation(self) -> None:
         assert eval_expr("5.5 * 10") == "55"
