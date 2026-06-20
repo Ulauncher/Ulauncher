@@ -11,14 +11,22 @@ class ResultsUpdate(TypedDict):
     """A self-contained snapshot of what the results view should render.
 
     Carries everything the view needs so it never has to read back into core state:
-    the results, the query they were produced for, and which result to preselect.
+    the results, the query they were produced for, which result to preselect, and
+    whether to replace the current list or append to it (for streamed batches).
     """
 
     results: list[Result]
     query: Query
     # Name of the result to preselect, or None to fall back to the first.
     selected_name: str | None
+    # True adds to the end of the current list, False replaces the whole list.
+    append: bool
 
 
-def results_update(results: list[Result], query: Query, selected_name: str | None = None) -> ResultsUpdate:
-    return {"results": results, "query": query, "selected_name": selected_name}
+def results_update(
+    results: list[Result],
+    query: Query,
+    selected_name: str | None = None,
+    append: bool = False,
+) -> ResultsUpdate:
+    return {"results": results, "query": query, "selected_name": selected_name, "append": append}

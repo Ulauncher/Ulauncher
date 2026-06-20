@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Final, Iterable, Literal, TypedDict, Union
 
 # if type checking import Result
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from ulauncher.internals.result import Result
 
 
@@ -35,6 +37,10 @@ class SetQuery(TypedDict):
 class RenderResults(TypedDict):
     type: Literal["effect:render_results"]
     results: list[Result]
+    # True adds to the end of the current list, False (default) replaces the whole list.
+    append: NotRequired[bool]
+    # False while more batches are still coming for the same query.
+    final: NotRequired[bool]
 
 
 class Open(TypedDict):
@@ -94,8 +100,8 @@ def set_query(query: str) -> SetQuery:
     return {"type": EffectType.SET_QUERY, "query": query}
 
 
-def render_results(results: list[Result]) -> RenderResults:
-    return {"type": EffectType.RENDER_RESULTS, "results": results}
+def render_results(results: list[Result], append: bool = False, final: bool = True) -> RenderResults:
+    return {"type": EffectType.RENDER_RESULTS, "results": results, "append": append, "final": final}
 
 
 def open(item: str) -> Open:  # noqa: A001

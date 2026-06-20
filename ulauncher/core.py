@@ -10,6 +10,7 @@ from ulauncher.internals import effect_utils, effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.query_history import QueryHistory
 from ulauncher.internals.result import ActionResult, KeywordTrigger, Result
+from ulauncher.internals.result_buffer import ResultBuffer
 from ulauncher.internals.results_update import ResultsUpdate, results_update
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
@@ -51,6 +52,9 @@ class UlauncherCore:
     _mode_map: WeakKeyDictionary[Result, Mode] = WeakKeyDictionary()
     query: Query = Query(None, "")
     _placeholder_timer: scheduling.Context | None = None
+
+    def __init__(self) -> None:
+        self._result_buffer = ResultBuffer()
 
     @property
     def last_query_result_pick(self) -> str | None:
@@ -98,6 +102,7 @@ class UlauncherCore:
         if not query_str:
             self._mode = None
             self.query = Query(None, "")
+            self._result_buffer.reset()
             self._show_results(self.get_home_results(), callback)
             return
 
@@ -142,6 +147,8 @@ class UlauncherCore:
                 yield app_result
 
     def _show_results(self, results: Iterable[Result], callback: ResultsCallback) -> None:
+        """Render a result list immediately, replacing the current one. For the non-streaming
+        paths (home, search, fallback, placeholder, action menu); does not touch stream state."""
         self._clear_placeholder_timer()
         callback(results_update(list(results), self.query, self.last_query_result_pick))
 
@@ -154,7 +161,12 @@ class UlauncherCore:
             self._placeholder_timer.cancel()
             self._placeholder_timer = None
 
+    def _emit_results(self, results: list[Result], append: bool, callback: ResultsCallback) -> None:
+        self._clear_placeholder_timer()
+        callback(results_update(results, self.query, self.last_query_result_pick, append))
+
     def handle_change(self, callback: ResultsCallback) -> None:
+        self._result_buffer.reset()
         self._clear_placeholder_timer()
 
         if self._mode:
@@ -189,6 +201,8 @@ class UlauncherCore:
         return False
 
     def activate_result(self, result: Result, callback: ResultsCallback, alt: bool = False) -> None:
+        # drop any pending buffer so it doesn't interfere with the activation results
+        self._result_buffer.reset()
         action_id: str | None = None
 
         if not alt:
@@ -240,7 +254,9 @@ class UlauncherCore:
 
             self._clear_placeholder_timer()
             if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
-                self._show_results(effect_msg["results"], callback)
+                self._result_buffer.enqueue(
+                    effect_msg, lambda results, append: self._emit_results(results, append, callback)
+                )
             elif effect_msg["type"] == effects.EffectType.LEGACY_RUN_MANY:
                 # effect_utils.handle has no callback to render with, so route any nested render
                 # here and let it process the rest (preserving its close behavior).
