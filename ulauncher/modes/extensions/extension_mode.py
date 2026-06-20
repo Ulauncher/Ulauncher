@@ -47,9 +47,9 @@ class ExtensionMode(Mode):
     def __init__(self) -> None:
         self._trigger_cache = {}
         events.set_self(self)
-        scheduling.run_when_idle(self.start_extensions)
+        scheduling.run_when_idle(self._start_extensions)
 
-    def start_extensions(self) -> None:
+    def _start_extensions(self) -> None:
         for ext in extension_registry.load_all():
             if ext.state.is_enabled:
                 ext.start()
@@ -116,7 +116,7 @@ class ExtensionMode(Mode):
             "type": EventType.INPUT_TRIGGER,
             "args": (query.argument, trigger_cache_entry[0]),
         }
-        self.send_request(event, callback)
+        self._send_request(event, callback)
 
     def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
         for ext in extension_registry.iterate():
@@ -190,14 +190,14 @@ class ExtensionMode(Mode):
                 "type": EventType.LAUNCH_TRIGGER,
                 "args": (result.trigger_id,),
             }
-            self.send_request(launch_event, callback)
+            self._send_request(launch_event, callback)
             return
         else:
             activation_event: ipc.ResultActivationEvent = {
                 "type": EventType.RESULT_ACTIVATION,
                 "args": (action_id, result["__result_id__"]),
             }
-            self.send_request(activation_event, callback)
+            self._send_request(activation_event, callback)
             return
 
         if isinstance(effect_msg, dict) and effect_msg["type"] == EffectType.LEGACY_ACTIVATE_CUSTOM:
@@ -206,12 +206,12 @@ class ExtensionMode(Mode):
                 "ref": effect_msg["ref"],
                 "keep_app_open": effect_msg["keep_app_open"],
             }
-            self.send_request(custom_event, callback)
+            self._send_request(custom_event, callback)
             return
 
         callback(effect_msg)
 
-    def run_ext_batch_job(
+    def _run_ext_batch_job(
         self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
     ) -> None:
         ext_controllers: list[ExtensionController] = []
@@ -247,7 +247,7 @@ class ExtensionMode(Mode):
 
         logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
 
-        self.run_ext_batch_job(
+        self._run_ext_batch_job(
             extension_ids,
             ["stop", "start"],
             callback=lambda: logger.info("%s extensions (re)loaded", len(extension_ids)),
@@ -261,7 +261,7 @@ class ExtensionMode(Mode):
 
         logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
 
-        self.run_ext_batch_job(
+        self._run_ext_batch_job(
             extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
         )
 
@@ -279,7 +279,7 @@ class ExtensionMode(Mode):
                     }
                     ext.send_message(event_data)
 
-    def send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
+    def _send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
         """
         Send an event to the extension, expecting a response (passed to the callback).
         A request_id is sent alongside the event, used to filter out stale responses.
@@ -315,7 +315,7 @@ class ExtensionMode(Mode):
                 return
             response = message["response"]
             response["effect"] = self._rehydrate_results(self.active_ext, response["effect"])
-            self.handle_response(response)
+            self._handle_response(response)
         elif message["name"] == "clipboard_store":
             if "text" not in message:
                 logger.warning("Received malformed 'clipboard_store' message from %s: %s", ext_id, message)
@@ -340,7 +340,7 @@ class ExtensionMode(Mode):
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, message)
 
-    def handle_response(self, response: ipc.Response) -> None:
+    def _handle_response(self, response: ipc.Response) -> None:
         if not self._pending_callback:
             logger.debug("Ignoring outdated extension response")
             return
@@ -417,9 +417,9 @@ class ExtensionMode(Mode):
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
         def start_if_still_previewing() -> None:
             if preview.ext_id == ext_id:
-                self.run_ext_batch_job([ext_id], ["start"])
+                self._run_ext_batch_job([ext_id], ["start"])
 
-        self.run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
+        self._run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
 
     @events.on
     def stop_preview(self) -> None:
@@ -439,6 +439,6 @@ class ExtensionMode(Mode):
             # Reload from the installed path, or drop the controller if the extension was never installed.
             controller = extension_registry.load(ext_id)
             if controller and controller.is_enabled:
-                self.run_ext_batch_job([ext_id], ["start"])
+                self._run_ext_batch_job([ext_id], ["start"])
 
-        self.run_ext_batch_job([ext_id], ["stop"], callback=restore_original)
+        self._run_ext_batch_job([ext_id], ["stop"], callback=restore_original)
