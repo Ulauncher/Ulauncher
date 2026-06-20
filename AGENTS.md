@@ -7,7 +7,8 @@ Critical Ulauncher-specific patterns and constraints.
 - **GTK main thread**: All GTK operations must run in the main thread. Use `GLib.idle_add()` to schedule work from other contexts.
 - **Callback-based async**: Use GLib callbacks, not Python async/await. Use `GLib.timeout_add()` or the `timer` utility for delayed execution.
 - **Lazy module loading**: Defer imports not needed for the initial window to keep startup fast.
-- **Exception avoidance**: Prefer defensive code (`dict.get()`, `hasattr()`) over try/except when possible. Never catch bare `Exception` unless the exception type cannot be known.
+- **Exception avoidance**: Prefer defensive code (`hasattr()`, guard clauses) over try/except when possible. Never catch bare `Exception` unless the exception type cannot be known.
+- **Dict access**: Index directly (`d["key"]`) when the key is guaranteed by a known type or invariant. It reads clearer and enables type narrowing. Use `d.get()` when a missing key is a legitimate, expected case with a sensible default.
 
 ## Code Quality
 
