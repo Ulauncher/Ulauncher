@@ -1,0 +1,15 @@
+{
+  "languages": {
+    "Python": {
+      "language_servers": ["pyrefly", "!basedpyright", "!pyright", "!pylsp", "!ty", "..."]
+    }
+  },
+  "lsp": {
+    "pyrefly": {
+      "binary": {
+        "path": ".venv/bin/pyrefly",
+        "arguments": ["lsp"]
+      }
+    }
+  }
+}
