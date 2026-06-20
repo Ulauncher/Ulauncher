@@ -15,4 +15,4 @@ def ActionList(effect_list: list[effects.EffectMessage]) -> effects.LegacyRunMan
 
     :param list effect_list: List of effect messages
     """
-    return {"type": effects.EffectType.LEGACY_RUN_MANY, "data": effect_list}
+    return {"type": effects.EffectType.LEGACY_RUN_MANY, "effects": effect_list}

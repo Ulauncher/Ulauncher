@@ -29,7 +29,7 @@ def should_close(effect_msg: EffectMessage) -> bool:
     if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
         return False
     if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
-        return all(map(should_close, effect_msg["data"]))
+        return all(map(should_close, effect_msg["effects"]))
     return True
 
 
@@ -37,25 +37,25 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     """Process effects by dispatching to appropriate handlers."""
 
     if effect_msg["type"] == EffectType.SET_QUERY:
-        _events.emit("app:set_query", effect_msg["data"])
+        _events.emit("app:set_query", effect_msg["query"])
 
     elif effect_msg["type"] == EffectType.OPEN:
         from ulauncher.utils.launch_detached import open_detached
 
-        open_detached(effect_msg["data"])
+        open_detached(effect_msg["path"])
 
     elif effect_msg["type"] == EffectType.LEGACY_COPY:
-        _events.emit("app:copy_and_close", effect_msg["data"])
+        _events.emit("app:copy_and_close", effect_msg["text"])
 
     elif effect_msg["type"] == EffectType.LEGACY_RUN_SCRIPT:
         from ulauncher.modes.shortcuts.run_script import run_script
 
-        run_script(*effect_msg["data"])
+        run_script(*effect_msg["args"])
     elif effect_msg["type"] == EffectType.RENDER_RESULTS:
         _events.emit("app:show_results", effect_msg["results"])
 
     elif effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
-        for effect in effect_msg["data"]:
+        for effect in effect_msg["effects"]:
             handle(effect, True)
 
     if should_close(effect_msg) and not prevent_close:

@@ -29,7 +29,7 @@ class CloseWindow(TypedDict):
 
 class SetQuery(TypedDict):
     type: Literal["effect:set_query"]
-    data: str
+    query: str
 
 
 class RenderResults(TypedDict):
@@ -39,22 +39,22 @@ class RenderResults(TypedDict):
 
 class Open(TypedDict):
     type: Literal["effect:open"]
-    data: str
+    path: str
 
 
 class LegacyCopy(TypedDict):
     type: Literal["effect:legacy_copy"]
-    data: str
+    text: str
 
 
 class LegacyRunScript(TypedDict):
     type: Literal["effect:legacy_run_script"]
-    data: list[str]
+    args: list[str]
 
 
 class LegacyRunMany(TypedDict):
     type: Literal["effect:legacy_run_many"]
-    data: list[EffectMessage]
+    effects: list[EffectMessage]
 
 
 class LegacyActivateCustom(TypedDict):
@@ -91,7 +91,7 @@ def set_query(query: str) -> SetQuery:
     if not isinstance(query, str):
         msg = f'Query argument "{query}" is invalid. It must be a string'
         raise TypeError(msg)
-    return {"type": EffectType.SET_QUERY, "data": query}
+    return {"type": EffectType.SET_QUERY, "query": query}
 
 
 def render_results(results: list[Result]) -> RenderResults:
@@ -105,4 +105,4 @@ def open(item: str) -> Open:  # noqa: A001
     if not item:
         msg = "Open argument cannot be empty"
         raise ValueError(msg)
-    return {"type": EffectType.OPEN, "data": item}
+    return {"type": EffectType.OPEN, "path": item}

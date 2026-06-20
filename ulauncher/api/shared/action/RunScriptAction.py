@@ -8,4 +8,4 @@ def RunScriptAction(script: str, arg: str = "") -> effects.LegacyRunScript:  # n
     if not script:
         msg = "Script argument cannot be empty"
         raise ValueError(msg)
-    return {"type": effects.EffectType.LEGACY_RUN_SCRIPT, "data": [script, arg]}
+    return {"type": effects.EffectType.LEGACY_RUN_SCRIPT, "args": [script, arg]}
