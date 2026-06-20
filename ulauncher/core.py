@@ -233,6 +233,7 @@ class UlauncherCore:
             if valid_mode not in (self._mode, None):
                 return
 
+            self._clear_placeholder_timer()
             if effect_msg.get("type") == effects.EffectType.RENDER_RESULTS:
                 self._show_results(cast("effects.RenderResults", effect_msg)["results"], callback)
             else:
