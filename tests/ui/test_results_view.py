@@ -7,7 +7,17 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.internals.query import Query
+from ulauncher.internals.result import Result
+from ulauncher.internals.results_update import ResultsUpdate, results_update
 from ulauncher.ui.results_view import ResultsView
+
+
+def _named_widget(name: str, *, searchable: bool = True) -> MagicMock:
+    widget = MagicMock()
+    widget.result.name = name
+    widget.result.searchable = searchable
+    return widget
 
 
 class TestResultsView:
@@ -112,3 +122,87 @@ class TestResultsViewNavigation:
         view.go_down()
         assert view.get_active_result() is None
         assert not view.has_results
+
+
+class TestResultsViewSelection:
+    """Selection logic used across streamed replace/append batches."""
+
+    @pytest.fixture
+    def view(self) -> ResultsView:
+        return ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()))
+
+    def test_select_marks_user_selected(self, view: ResultsView) -> None:
+        view._widgets = cast("Any", [_named_widget("a"), _named_widget("b")])
+        view.select(1)
+        assert view._index == 1
+        assert view._user_selected is True
+
+    def test_apply_selection_uses_default_name_without_marking_user_selected(self, view: ResultsView) -> None:
+        view._widgets = cast("Any", [_named_widget("a"), _named_widget("keep"), _named_widget("b")])
+        view._apply_selection("keep", None)
+        assert view._index == 1
+        assert view._user_selected is False
+
+    def test_apply_selection_preserves_user_pick(self, view: ResultsView) -> None:
+        view._widgets = cast("Any", [_named_widget("a"), _named_widget("keep"), _named_widget("b")])
+        view._user_selected = True
+        previous = cast("Any", MagicMock(name="prev"))
+        previous.name = "keep"
+        view._apply_selection(None, previous)
+        assert view._index == 1
+        assert view._user_selected
+
+    def test_apply_selection_falls_back_when_user_pick_gone(self, view: ResultsView) -> None:
+        view._widgets = cast("Any", [_named_widget("a"), _named_widget("b")])
+        view._user_selected = True
+        previous = cast("Any", MagicMock(name="prev"))
+        previous.name = "gone"
+        view._apply_selection("a", previous)
+        assert view._index == 0
+        assert not view._user_selected
+
+
+class TestResultsViewStreaming:
+    """End-to-end render of streamed replace/append batches (builds real result widgets)."""
+
+    @pytest.fixture(autouse=True)
+    def _no_scroll(self, mocker: MockerFixture) -> None:
+        mocker.patch("ulauncher.ui.result_widget.ResultWidget.scroll_to_focus")
+
+    @pytest.fixture
+    def view(self) -> ResultsView:
+        settings = MagicMock()
+        no_jump_keys: list[str] = []
+        settings.get_jump_keys.return_value = no_jump_keys
+        return ResultsView(settings, lambda *_: None)
+
+    @staticmethod
+    def _update(
+        names: list[str], query: str = "q", selected_name: str | None = None, append: bool = False
+    ) -> ResultsUpdate:
+        return results_update([Result(name=name) for name in names], Query(None, query), selected_name, append)
+
+    def test_replace_preserves_user_pick_within_same_query(self, view: ResultsView) -> None:
+        view.render(self._update(["a", "b", "c"]))
+        view.go_down()  # user picks "b"
+        # a later draft of the same query reorders the list; "b" is still present
+        view.render(self._update(["x", "a", "b", "c"]))
+        active = view.get_active_result()
+        assert active is not None
+        assert active.name == "b"
+
+    def test_append_grows_list_and_keeps_selection(self, view: ResultsView) -> None:
+        view.render(self._update(["a", "b"]))
+        view.go_down()  # "b"
+        view.render(self._update(["c", "d"], append=True))
+        assert len(view._widgets) == 4
+        active = view.get_active_result()
+        assert active is not None
+        assert active.name == "b"
+
+    def test_new_query_resets_user_selection(self, view: ResultsView) -> None:
+        view.render(self._update(["a", "b"], query="q1"))
+        view.go_down()
+        view.render(self._update(["a", "b"], query="q2"))
+        assert view._user_selected is False
+        assert view._index == 0
