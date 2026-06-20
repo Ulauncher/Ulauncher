@@ -349,44 +349,57 @@ class ExtensionMode(Mode):
             return
 
         raw_effect_msg = response["effect"]
+        self._convert_result_dicts(ext_id, self.active_ext, cast("dict[str, Any]", raw_effect_msg))
         effect_msg: EffectMessage
 
-        if raw_effect_msg.get("type") == EffectType.RENDER_RESULTS:
-            rendered: list[Result] = []
-            raw_results = raw_effect_msg.get("results")
-            for result_id, result_dict in enumerate(raw_results if isinstance(raw_results, list) else []):
-                if not isinstance(result_dict, dict):
-                    logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
-                    continue
-                try:
-                    result = Result(**result_dict)
-                except (KeyError, TypeError, ValueError) as e:
-                    logger.warning("Skipping malformed result from extension %s at index %s: %s", ext_id, result_id, e)
-                    continue
-                result.icon = self.active_ext.get_icon_value(result_dict.get("icon"))
-                # The extension keys its result cache by list index, so carry that index back as the
-                # result_id when the result is activated (see api.extension.Extension).
-                result["__result_id__"] = result_id
-
-                # Convert legacy actions to the new actions dictionary format
-                if not result.actions:
-                    if "on_enter" in result:
-                        result.actions["__legacy_on_enter__"] = {"name": "Main action"}
-                    if "on_alt_enter" in result:
-                        result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
-
-                rendered.append(result)
-            effect_msg = effects.render_results(rendered)
-
-        elif not response.get("keep_app_open", True):
+        if raw_effect_msg.get("type") != EffectType.RENDER_RESULTS and not response.get("keep_app_open", True):
             effect_utils.handle(raw_effect_msg, prevent_close=True)
             effect_msg = effects.close_window()
-
         else:
             effect_msg = raw_effect_msg
 
         self._pending_callback(effect_msg)
         self._pending_callback = None
+
+    def _convert_result_dicts(self, ext_id: str, active_ext: ExtensionController, effect_msg: dict[str, Any]) -> None:
+        """Replace the raw result dicts in a RENDER_RESULTS effect with Result objects, in place.
+
+        Recurses into LEGACY_RUN_MANY so results nested in a legacy ActionList are converted too.
+        """
+        if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
+            data = effect_msg.get("data")
+            for nested in data if isinstance(data, list) else []:
+                if isinstance(nested, dict):
+                    self._convert_result_dicts(ext_id, active_ext, nested)
+            return
+        if effect_msg.get("type") != EffectType.RENDER_RESULTS:
+            return
+
+        raw_results = effect_msg.get("results")
+        rendered: list[Result] = []
+        for result_id, result_dict in enumerate(raw_results if isinstance(raw_results, list) else []):
+            if not isinstance(result_dict, dict):
+                logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
+                continue
+            try:
+                result = Result(**result_dict)
+            except (KeyError, TypeError, ValueError) as e:
+                logger.warning("Skipping malformed result from extension %s at index %s: %s", ext_id, result_id, e)
+                continue
+            result.icon = active_ext.get_icon_value(result_dict.get("icon"))
+            # The extension keys its result cache by list index, so carry that index back as the
+            # result_id when the result is activated (see api.extension.Extension).
+            result["__result_id__"] = result_id
+
+            # Convert legacy actions to the new actions dictionary format
+            if not result.actions:
+                if result.on_enter:
+                    result.actions["__legacy_on_enter__"] = {"name": "Main action"}
+                if result.on_alt_enter:
+                    result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
+
+            rendered.append(result)
+        effect_msg["results"] = rendered
 
     @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
