@@ -302,16 +302,20 @@ class ExtensionMode(Mode):
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
-            if (
-                "request_id" not in message
-                or "response" not in message
-                or not isinstance(message["response"], dict)
-                or "effect" not in message["response"]
-                or not isinstance(message["response"]["effect"], dict)
+            if not self.active_ext:
+                logger.error("No active extension to handle response")
+                return
+            if type(message.get("request_id")) is not int or not effect_utils.is_effect_message(
+                message.get("response", {}).get("effect")
             ):
                 logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
                 return
-            self.handle_response(ext_id, message["request_id"], message["response"])
+            if self.active_ext.id != ext_id or not self._pending_callback or message["request_id"] != self._request_id:
+                logger.debug("Ignoring outdated extension response")
+                return
+            response = message["response"]
+            response["effect"] = self._rehydrate_results(self.active_ext, response["effect"])
+            self.handle_response(response)
         elif message["name"] == "clipboard_store":
             if "text" not in message:
                 logger.warning("Received malformed 'clipboard_store' message from %s: %s", ext_id, message)
@@ -336,18 +340,12 @@ class ExtensionMode(Mode):
         else:
             logger.warning("Received unknown message from %s: %s", ext_id, message)
 
-    def handle_response(self, ext_id: str, request_id: int, response: ipc.Response) -> None:
-        if not self.active_ext:
-            logger.error("No active extension to handle response")
-            return
-        if self.active_ext.id != ext_id:
-            logger.debug("Ignoring response from inactive extension %s", ext_id)
-            return
-        if not self._pending_callback or request_id != self._request_id:
+    def handle_response(self, response: ipc.Response) -> None:
+        if not self._pending_callback:
             logger.debug("Ignoring outdated extension response")
             return
 
-        effect_msg = self._rehydrate_results(self.active_ext, response["effect"])
+        effect_msg = response["effect"]
 
         if effect_msg["type"] != EffectType.RENDER_RESULTS and not response.get("keep_app_open", True):
             effect_utils.handle(effect_msg, prevent_close=True)
