@@ -25,13 +25,15 @@ class TestBootstrapFlags:
         monkeypatch.setattr(os.path, "exists", exists)
         importlib.reload(ulauncher)
 
-        assert ulauncher.first_run is True
-        assert ulauncher.first_v6_run is True
+        first_run = ulauncher.first_run
+        first_v6_run = ulauncher.first_v6_run
+        assert first_run is True
+        assert first_v6_run is True
 
         monkeypatch.setattr(os.path, "exists", lambda _path: True)
 
-        assert ulauncher.first_run is True
-        assert ulauncher.first_v6_run is True
+        assert ulauncher.first_run is first_run
+        assert ulauncher.first_v6_run is first_v6_run
 
     def test_first_run_flags_capture_config_and_state_independently(self, monkeypatch: pytest.MonkeyPatch) -> None:
         state_path = ulauncher.paths.STATE
