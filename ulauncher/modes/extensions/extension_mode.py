@@ -393,9 +393,9 @@ class ExtensionMode(Mode):
 
             # Convert legacy actions to the new actions dictionary format
             if not result.actions:
-                if "on_enter" in result:
+                if result.on_enter:
                     result.actions["__legacy_on_enter__"] = {"name": "Main action"}
-                if "on_alt_enter" in result:
+                if result.on_alt_enter:
                     result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
 
             rendered.append(result)
