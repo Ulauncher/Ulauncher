@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal, cast
+from typing import Any, Callable, Iterator, Literal
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
@@ -347,45 +347,43 @@ class ExtensionMode(Mode):
             logger.debug("Ignoring outdated extension response")
             return
 
-        raw_effect_msg = response["effect"]
-        self._convert_result_dicts(ext_id, self.active_ext, cast("dict[str, Any]", raw_effect_msg))
-        effect_msg: EffectMessage
+        effect_msg = self._rehydrate_results(self.active_ext, response["effect"])
 
-        if raw_effect_msg.get("type") != EffectType.RENDER_RESULTS and not response.get("keep_app_open", True):
-            effect_utils.handle(raw_effect_msg, prevent_close=True)
+        if effect_msg["type"] != EffectType.RENDER_RESULTS and not response.get("keep_app_open", True):
+            effect_utils.handle(effect_msg, prevent_close=True)
             effect_msg = effects.close_window()
-        else:
-            effect_msg = raw_effect_msg
 
         self._pending_callback(effect_msg)
         self._pending_callback = None
 
-    def _convert_result_dicts(self, ext_id: str, active_ext: ExtensionController, effect_msg: dict[str, Any]) -> None:
-        """Replace the raw result dicts in a RENDER_RESULTS effect with Result objects, in place.
+    def _rehydrate_results(self, ext: ExtensionController, effect_msg: EffectMessage) -> EffectMessage:
+        """Return the effect with raw result dicts in a RENDER_RESULTS effect replaced by Result objects.
 
-        Recurses into LEGACY_RUN_MANY so results nested in a legacy ActionList are converted too.
+        Reverses the dict-to-Result step that JSON serialization forced on the wire, resolving icons
+        against the sending extension. Mutates and returns the same effect object rather than copying,
+        since the caller has no use for the unrehydrated input.
+
+        Recurses into LEGACY_RUN_MANY so results nested in a legacy ActionList are rehydrated too.
         """
-        if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            nested_effects = effect_msg["effects"]
-            for nested in nested_effects if isinstance(nested_effects, list) else []:
-                if isinstance(nested, dict):
-                    self._convert_result_dicts(ext_id, active_ext, nested)
-            return
-        if effect_msg.get("type") != EffectType.RENDER_RESULTS:
-            return
+        if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+            for nested_effect in effect_msg["effects"]:
+                self._rehydrate_results(ext, nested_effect)
+            return effect_msg
+        if effect_msg["type"] != EffectType.RENDER_RESULTS:
+            return effect_msg
 
         raw_results = effect_msg.get("results")
         rendered: list[Result] = []
-        for result_id, result_dict in enumerate(raw_results if isinstance(raw_results, list) else []):
+        for result_id, result_dict in enumerate(raw_results):
             if not isinstance(result_dict, dict):
-                logger.warning("Skipping malformed result from extension %s at index %s", ext_id, result_id)
+                logger.warning("Skipping malformed result from extension %s at index %s", ext.id, result_id)
                 continue
             try:
                 result = Result(**result_dict)
             except (KeyError, TypeError, ValueError) as e:
-                logger.warning("Skipping malformed result from extension %s at index %s: %s", ext_id, result_id, e)
+                logger.warning("Skipping malformed result from extension %s at index %s: %s", ext.id, result_id, e)
                 continue
-            result.icon = active_ext.get_icon_value(result_dict.get("icon"))
+            result.icon = ext.get_icon_value(result_dict.get("icon"))
             # The extension keys its result cache by list index, so carry that index back as the
             # result_id when the result is activated (see api.extension.Extension).
             result["__result_id__"] = result_id
@@ -399,6 +397,7 @@ class ExtensionMode(Mode):
 
             rendered.append(result)
         effect_msg["results"] = rendered
+        return effect_msg
 
     @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
