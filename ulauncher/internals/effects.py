@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Final, Iterable, Literal, TypedDict, Union
 
 # if type checking import Result
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ class LegacyRunScript(TypedDict):
 
 class LegacyRunMany(TypedDict):
     type: Literal["effect:legacy_run_many"]
-    data: list[Any]  # list of other EffectMessages (can't be expressed with TypedDict)
+    data: list[EffectMessage]
 
 
 class LegacyActivateCustom(TypedDict):

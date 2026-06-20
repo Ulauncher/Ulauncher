@@ -56,7 +56,7 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     elif event_type == EffectType.LEGACY_RUN_SCRIPT and isinstance(data, list):
         from ulauncher.modes.shortcuts.run_script import run_script
 
-        run_script(*data)
+        run_script(*cast("list[str]", data))
     elif event_type == EffectType.RENDER_RESULTS and isinstance(effect_msg.get("results"), list):
         _events.emit("app:show_results", effect_msg.get("results"))
 
