@@ -14,14 +14,16 @@ from ulauncher.internals.effects import (
 from ulauncher.utils.eventbus import EventBus
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from ulauncher.internals.result import Result
 
 _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
 _events = EventBus()
 
 
-def is_valid(effect_msg: Any) -> bool:
-    return isinstance(effect_msg, dict) and effect_msg.get("type") in _VALID_EFFECT_TYPES
+def is_effect_message(value: Any) -> TypeGuard[EffectMessage]:
+    return isinstance(value, dict) and value.get("type") in _VALID_EFFECT_TYPES
 
 
 def should_close(effect_msg: EffectMessage) -> bool:
@@ -69,8 +71,8 @@ def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMe
     if isinstance(input_data, str):
         return set_query(input_data)
     if isinstance(input_data, dict):
-        if is_valid(input_data):
-            return cast("EffectMessage", input_data)  # TypedDict unions can't be narrowed by runtime checks
+        if is_effect_message(input_data):
+            return input_data
         err_msg = f"Invalid effect message dict: {input_data}"
         raise ValueError(err_msg)
     return render_results(list(cast("Iterable[Result]", input_data)))  # collect/flatten iterators to lists
