@@ -367,7 +367,8 @@ class ExtensionMode(Mode):
         Recurses into LEGACY_RUN_MANY so results nested in a legacy ActionList are converted too.
         """
         if effect_msg.get("type") == EffectType.LEGACY_RUN_MANY:
-            for nested in effect_msg.get("data") or []:
+            data = effect_msg.get("data")
+            for nested in data if isinstance(data, list) else []:
                 if isinstance(nested, dict):
                     self._convert_result_dicts(ext_id, active_ext, nested)
             return
