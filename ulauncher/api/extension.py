@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import contextlib
+import inspect
 import json
 import logging
 import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, cast
+from typing import Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -163,16 +164,55 @@ class Extension:
         request_id: int | None,
         event: dict[str, Any],
         method: Callable[..., effects.EffectMessageInput | None],
-        args: tuple[Any],
+        args: tuple[Any, ...],
         input_request_id: int | None = None,
     ) -> None:
-        # For extensions using yield to generate results, the method call will take no time, while
-        # the conversion step will actually be the slow part. So we need to check staleness after both.
-        input_effect_msg = method(*args)
-        if request_id is not None:
+        result = method(*args)
+        if request_id is None:
+            return
+
+        # A generator streams its results in batches: `yield result` appends one, `yield [results]`
+        # replaces the list. Anything else (a returned list, effect, bool, ...) is a single response.
+        if inspect.isgenerator(result):
+            self._stream_response(request_id, event, result, input_request_id)
+        else:
             # Schedule the response on the main thread to avoid races on shared state
-            effect_msg = effect_utils.convert_to_effect_message(input_effect_msg)
+            effect_msg = effect_utils.convert_to_effect_message(result)
             scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
+
+    def _stream_response(
+        self,
+        request_id: int,
+        event: dict[str, Any],
+        generator: Iterator[Result | list[Result]],
+        input_request_id: int | None,
+    ) -> None:
+        """Send one render batch per yielded item, then a final empty batch to close the stream.
+
+        A yielded single result appends, while a yielded list replaces the rendered list.
+
+        After the yield, an empty closing (final=True) batch is sent separately. If nothing was streamed,
+        it clears any prior results (append=False).
+
+        A superseding input stops the loop with no closing batch, since that input renders its own; an
+        exception raised mid-stream propagates and likewise sends none. Ulauncher keeps the request's
+        callback alive until a closing batch or the next input, so partial results stay on screen.
+        """
+
+        def emit(effect_msg: effects.RenderResults) -> None:
+            # Schedule the response on the main thread to avoid races on shared state
+            scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
+
+        emitted = False
+        for item in generator:
+            if input_request_id is not None and input_request_id != self._input_request_id:
+                return
+            append = not isinstance(item, list)
+            results = [item] if append else list(item)
+            emit(effects.render_results(results, append=append, final=False))
+            emitted = True
+
+        emit(effects.render_results([], append=emitted, final=True))
 
     def _send_response(
         self,
@@ -244,7 +284,9 @@ class Extension:
 
         self._client.send({"name": "notify", "body": body, "notification_id": notification_id})
 
-    def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result]:
+    def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result | list[Result]]:
+        # Return a list of results, or yield to stream them: `yield result` appends one,
+        # `yield [results]` replaces the list (see _stream_response).
         return []
 
     def on_launch(self, trigger_id: str) -> None:
