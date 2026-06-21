@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, call
 
 from pytest_mock import MockerFixture
 
@@ -196,3 +196,19 @@ def test_started__ignores_other_extensions(mocker: MockerFixture) -> None:
     mode.started("other.ext")
 
     run_when_idle.assert_not_called()
+
+
+def test_handle_response__streamed_batches_keep_callback_until_final() -> None:
+    mode = _make_mode()
+    callback = MagicMock()
+    mode._pending_callback = callback
+
+    non_final = effects.render_results([], append=True, final=False)
+    mode._handle_response({"effect": non_final})
+    assert mode._pending_callback is callback, "a non-final batch must keep the callback alive"
+
+    final = effects.render_results([], append=True, final=True)
+    mode._handle_response({"effect": final})
+    assert mode._pending_callback is None, "the final batch clears the callback"
+
+    assert callback.call_args_list == [call(non_final), call(final)]

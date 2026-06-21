@@ -352,7 +352,10 @@ class ExtensionMode(Mode):
             effect_msg = effects.close_window()
 
         self._pending_callback(effect_msg)
-        self._pending_callback = None
+        # A streamed render keeps the callback alive across batches; everything else is terminal.
+        is_streaming_batch = effect_msg["type"] == EffectType.RENDER_RESULTS and not effect_msg.get("final", True)
+        if not is_streaming_batch:
+            self._pending_callback = None
 
     def _rehydrate_results(self, ext: ExtensionController, effect_msg: EffectMessage) -> EffectMessage:
         """Return the effect with raw result dicts in a RENDER_RESULTS effect replaced by Result objects.
