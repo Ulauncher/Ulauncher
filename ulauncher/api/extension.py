@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, cast
 
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
@@ -48,6 +48,7 @@ class Extension:
         self._input_debounce_timer: scheduling.Context | None = None
         self._input_debounce_delay = float(os.getenv("ULAUNCHER_INPUT_DEBOUNCE", "0.05"))
         self._result_cache: dict[int, Result] = {}
+        self._cache_request_id: int | None = None
         signal.signal(signal.SIGTERM, lambda *_: self._client.unload())
         with contextlib.suppress(Exception):
             # TODO: #1741 - migration path to remove trigger keywords from preferences
@@ -183,10 +184,8 @@ class Extension:
         if input_request_id is not None and input_request_id != self._input_request_id:
             return False
 
-        # Cache the rendered results by list index so an activation can map its result_id back to the
-        # actual Result instance, without mutating the result objects the extension handed us.
         if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
-            self._result_cache = dict(enumerate(effect_msg["results"]))
+            self._assign_result_ids(request_id, effect_msg)
 
         response: ipc.Response = {"effect": effect_msg}
         if "keep_app_open" in event:
@@ -194,6 +193,23 @@ class Extension:
             response["keep_app_open"] = event["keep_app_open"]
         self._client.send({"name": "response", "request_id": request_id, "response": response})
         return False
+
+    def _assign_result_ids(self, request_id: int, effect_msg: effects.RenderResults) -> None:
+        """Give each result a stable id, cache it for activation lookup, and stamp the id onto a wire
+        copy without mutating the result the extension handed us. Ids stay unique for the whole
+        request; only a new request starts a fresh id space.
+        """
+        # A replace batch must not reuse ids: the previous batch can still be on screen (its paint is
+        # throttled downstream), so an activation of a visible result would resolve to a new one.
+        if request_id != self._cache_request_id:
+            self._result_cache = {}
+            self._cache_request_id = request_id
+        wire_results: list[Result] = []
+        for result in effect_msg["results"]:
+            result_id = len(self._result_cache)
+            self._result_cache[result_id] = result
+            wire_results.append(cast("Result", {**result, "__result_id__": result_id}))
+        effect_msg["results"] = wire_results
 
     def run(self) -> None:
         """

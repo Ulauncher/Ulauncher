@@ -372,19 +372,22 @@ class ExtensionMode(Mode):
 
         raw_results = effect_msg.get("results")
         rendered: list[Result] = []
-        for result_id, result_dict in enumerate(raw_results):
+        for index, result_dict in enumerate(raw_results):
             if not isinstance(result_dict, dict):
-                logger.warning("Skipping malformed result from extension %s at index %s", ext.id, result_id)
+                logger.warning("Skipping malformed result from extension %s at index %s", ext.id, index)
                 continue
+            # The extension stamps each result with its cache id; carry it through so activation can
+            # map back to the actual Result instance (see api.extension.Extension). A result without
+            # one never entered that cache, so this positional fallback only keeps activation from
+            # crashing; it cannot resolve to the original Result, and across a streamed request the
+            # batch-local index may even repeat.
+            result_dict.setdefault("__result_id__", index)
             try:
                 result = Result(**result_dict)
             except (KeyError, TypeError, ValueError) as e:
-                logger.warning("Skipping malformed result from extension %s at index %s: %s", ext.id, result_id, e)
+                logger.warning("Skipping malformed result from extension %s at index %s: %s", ext.id, index, e)
                 continue
             result.icon = ext.get_icon_value(result_dict.get("icon"))
-            # The extension keys its result cache by list index, so carry that index back as the
-            # result_id when the result is activated (see api.extension.Extension).
-            result["__result_id__"] = result_id
 
             # Convert legacy actions to the new actions dictionary format
             if not result.actions:
