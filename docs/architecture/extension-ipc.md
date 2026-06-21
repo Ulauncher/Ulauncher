@@ -56,3 +56,17 @@ Extensions run in **separate processes** as the same user as Ulauncher (not sand
 4. Extension handles action → may send new results back
 
 All communication is asynchronous using GLib's event loop.
+
+## Streaming Results
+
+A handler that returns a list sends a single response. A handler that *yields* streams its
+results as several `response` messages sharing one request id, each carrying an `append`
+flag and a `final` flag. The type of each yielded value sets the `append` flag:
+
+- `yield result` (a single Result) -> appends it to the current list (`append: true`)
+- `yield [results]` (a list) -> replaces the current list (`append: false`)
+
+Only a yielded list triggers the replace; a single result always appends.
+
+Only the last batch is flagged `final`; Ulauncher keeps the request's callback alive until then.
+Stale batches (a newer query has superseded this one) are dropped on both ends.
