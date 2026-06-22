@@ -65,8 +65,9 @@ class HotkeyDialog(Gtk.Dialog):
         self.hide()
 
     def on_key_press(self, _entry_widget: Gtk.Entry, event: Gdk.EventKey) -> None:
-        key_name = Gtk.accelerator_name(event.keyval, event.state)
-        label = Gtk.accelerator_get_label(event.keyval, event.state)
+        mods = event.state & Gtk.accelerator_get_default_mod_mask()
+        key_name = Gtk.accelerator_name(event.keyval, mods)
+        label = Gtk.accelerator_get_label(event.keyval, mods)
         breadcrumb = label.split("+")
 
         # treat Enter w/o modifiers as "submit"
