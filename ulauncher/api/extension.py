@@ -43,7 +43,7 @@ class Extension:
         )
         self.logger = logging.getLogger(self.ext_id)
 
-        self._listeners: dict[Any, list[tuple[object, str | None]]] = defaultdict(list)
+        self._listeners: dict[type[BaseEvent], list[tuple[EventListener | Extension, str | None]]] = defaultdict(list)
         self.preferences = {}
         self._input_request_id: int = 0
         self._input_debounce_timer: scheduling.Context | None = None
@@ -69,16 +69,14 @@ class Extension:
         if self.__class__.on_result_activation is not Extension.on_result_activation:
             self.subscribe(events[EventType.RESULT_ACTIVATION], "on_result_activation")
 
-    def subscribe(self, event_type: type[BaseEvent], listener: str | object) -> None:
+    def subscribe(self, event_type: type[BaseEvent], listener: str | EventListener) -> None:
         """
         Example: extension.subscribe(InputTriggerEvent, "on_input")
         """
-        method_name = None
         if isinstance(listener, str):
-            method_name = listener
-            listener = self
-
-        self._listeners[event_type].append((listener, method_name))
+            self._listeners[event_type].append((self, listener))
+        else:
+            self._listeners[event_type].append((listener, None))
 
     def convert_to_baseevent(self, event: ipc.Event) -> BaseEvent | None:
         event_constructor = events.get(event["type"])
