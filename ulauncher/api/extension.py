@@ -80,39 +80,41 @@ class Extension:
 
         self._listeners[event_type].append((listener, method_name))
 
-    def convert_to_baseevent(self, event: dict[str, Any]) -> BaseEvent | None:
-        event_type = event.get("type", "")
-        args = event.get("args", [])
-        event_constructor = events.get(event_type)
-        # If pre v3 extension has KeywordQueryEvent, convert input_trigger to KeywordQueryEvent instead
-        if event_type == EventType.INPUT_TRIGGER and self._listeners[KeywordQueryEvent]:
-            argument, trigger_id = args
-            return KeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
+    def convert_to_baseevent(self, event: ipc.Event) -> BaseEvent | None:
+        event_constructor = events.get(event["type"])
+        if not callable(event_constructor):
+            return None
 
-        if event_type == EventType.LEGACY_ACTIVATE_CUSTOM:
-            ref = event.get("ref", "")
+        if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
+            ref = event["ref"]
             data = custom_data_store.get(ref)
-            # Remove all entries except the one the user choose, because get_data can be called more than once
+            # Keep only the chosen entry, since get_data can be called more than once
             custom_data_store.clear()
             custom_data_store[ref] = data
-            args = [data]
-        elif event_type == EventType.RESULT_ACTIVATION:
+            return event_constructor([data])
+
+        if event["type"] == EventType.RESULT_ACTIVATION:
             # Restore actual Result instance from cache using the result_id
-            action_id, result_id = args
-            if (result := self._result_cache.get(result_id)) is not None:
-                args = [action_id, result]
-            else:
+            action_id, result_id = event["args"]
+            result = self._result_cache.get(result_id)
+            if result is None:
                 err_msg = f"Result with id {result_id} not found"
                 raise ValueError(err_msg)
+            return event_constructor([action_id, result])
 
-        if callable(event_constructor):
-            return event_constructor(args)
+        if event["type"] == EventType.UNLOAD:
+            return event_constructor([])
 
-        return None
+        # If pre v3 extension has KeywordQueryEvent, convert input_trigger to KeywordQueryEvent instead
+        if event["type"] == EventType.INPUT_TRIGGER and self._listeners[KeywordQueryEvent]:
+            argument, trigger_id = event["args"]
+            return KeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
 
-    def trigger_event(self, event: dict[str, Any], request_id: int | None = None) -> None:
+        return event_constructor(list(event["args"]))
+
+    def trigger_event(self, event: ipc.Event, request_id: int | None = None) -> None:
         """Trigger an event. If it's an input trigger it will be debounced"""
-        if event.get("type") != EventType.INPUT_TRIGGER:
+        if event["type"] != EventType.INPUT_TRIGGER:
             self._do_trigger_event(event, request_id)
             return
 
@@ -125,7 +127,7 @@ class Extension:
 
         self._input_debounce_timer = scheduling.timer(self._input_debounce_delay, trigger_debounced)
 
-    def _do_trigger_event(self, event: dict[str, Any], request_id: int | None = None) -> None:
+    def _do_trigger_event(self, event: ipc.Event, request_id: int | None = None) -> None:
         base_event = self.convert_to_baseevent(event)
         if not base_event:
             self.logger.warning("Dropping unknown event: %s", event)
@@ -135,7 +137,7 @@ class Extension:
         input_request_id: int | None = None
         listeners = self._listeners[event_type]
 
-        if event.get("type") == EventType.INPUT_TRIGGER:
+        if event["type"] == EventType.INPUT_TRIGGER:
             self._input_request_id += 1
             input_request_id = self._input_request_id
 
@@ -162,7 +164,7 @@ class Extension:
     def run_event_listener(
         self,
         request_id: int | None,
-        event: dict[str, Any],
+        event: ipc.Event,
         method: Callable[..., effects.EffectMessageInput | None],
         args: tuple[Any, ...],
         input_request_id: int | None = None,
@@ -183,7 +185,7 @@ class Extension:
     def _stream_response(
         self,
         request_id: int,
-        event: dict[str, Any],
+        event: ipc.Event,
         generator: Iterator[Result | list[Result]],
         input_request_id: int | None,
     ) -> None:
@@ -217,7 +219,7 @@ class Extension:
     def _send_response(
         self,
         request_id: int,
-        event: dict[str, Any],
+        event: ipc.Event,
         effect_msg: effects.EffectMessage,
         input_request_id: int | None,
     ) -> bool:
@@ -228,8 +230,7 @@ class Extension:
             self._assign_result_ids(request_id, effect_msg)
 
         response: ipc.Response = {"effect": effect_msg}
-        if "keep_app_open" in event:
-            # Only used for EventType.LEGACY_ACTIVATE_CUSTOM
+        if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
             response["keep_app_open"] = event["keep_app_open"]
         self._client.send({"name": "response", "request_id": request_id, "response": response})
         return False
@@ -257,7 +258,7 @@ class Extension:
         """
         self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
         # Trigger legacy preferences load event synthetically since the app no longer sends it
-        self._do_trigger_event({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": [self.preferences]})
+        self._do_trigger_event({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": (self.preferences,)})
         self._client.connect()
 
     def clipboard_store(self, text: str) -> None:

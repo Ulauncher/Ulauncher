@@ -13,7 +13,7 @@ message holds a list there, not a tuple.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -72,7 +72,7 @@ Event = Union[Request, Notification]
 # Transport envelope wrapping an event Ulauncher sends to an extension, paired with the request_id
 # correlating its response (None for notifications, which expect no reply). Typed as a tuple for
 # fixed arity; on the wire it is a JSON array, so a parsed message holds a list here.
-EventEnvelope = Tuple[Dict[str, Any], Optional[int]]
+EventEnvelope = Tuple[Event, Optional[int]]
 
 
 class Response(TypedDict):

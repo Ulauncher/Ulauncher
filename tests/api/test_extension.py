@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +11,11 @@ from pytest_mock import MockerFixture
 from ulauncher.api import extension as extension_module
 from ulauncher.api.extension import Extension
 from ulauncher.internals.result import Result
+
+if TYPE_CHECKING:
+    from ulauncher.internals import ipc
+
+_INPUT_EVENT: ipc.Event = {"type": "event:input_trigger", "args": ("", "t")}
 
 
 class TestExtension:
@@ -59,7 +64,7 @@ class TestStreamingResponses:
             yield Result(name="a")
             yield Result(name="b")
 
-        ext.run_event_listener(1, {}, gen, ())
+        ext.run_event_listener(1, _INPUT_EVENT, gen, ())
         assert _batches(ext) == [
             (True, False, ["a"], [0]),
             (True, False, ["b"], [1]),
@@ -71,7 +76,7 @@ class TestStreamingResponses:
             yield [Result(name="a")]
             yield [Result(name="a"), Result(name="b")]
 
-        ext.run_event_listener(1, {}, gen, ())
+        ext.run_event_listener(1, _INPUT_EVENT, gen, ())
         assert _batches(ext) == [
             (False, False, ["a"], [0]),
             (False, False, ["a", "b"], [1, 2]),
@@ -83,11 +88,11 @@ class TestStreamingResponses:
             return
             yield  # makes this a generator
 
-        ext.run_event_listener(1, {}, gen, ())
+        ext.run_event_listener(1, _INPUT_EVENT, gen, ())
         assert _batches(ext) == [(False, True, [], [])]
 
     def test_returned_list_is_a_single_final_response(self, ext: Extension) -> None:
-        ext.run_event_listener(1, {}, lambda: [Result(name="a")], ())
+        ext.run_event_listener(1, _INPUT_EVENT, lambda: [Result(name="a")], ())
         assert _batches(ext) == [(False, True, ["a"], [0])]
 
     def test_stale_generator_stops_without_sending(self, ext: Extension) -> None:
@@ -97,5 +102,5 @@ class TestStreamingResponses:
             yield Result(name="a")
             yield Result(name="b")
 
-        ext.run_event_listener(1, {}, gen, (), input_request_id=4)  # superseded by 5
+        ext.run_event_listener(1, _INPUT_EVENT, gen, (), input_request_id=4)  # superseded by 5
         assert _batches(ext) == []

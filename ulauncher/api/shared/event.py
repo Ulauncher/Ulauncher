@@ -128,7 +128,7 @@ class EventType:
     LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
 
 
-events = {
+events: dict[str, type[BaseEvent]] = {
     EventType.INPUT_TRIGGER: InputTriggerEvent,
     EventType.LAUNCH_TRIGGER: LaunchTriggerEvent,
     EventType.RESULT_ACTIVATION: ResultActivationEvent,
