@@ -5,7 +5,7 @@ import signal
 import socket
 from collections import deque
 from time import time
-from typing import Any, Callable, Literal
+from typing import Callable, Literal
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
@@ -117,7 +117,9 @@ class ExtensionRuntime:
         self._msg_controller.send([message, request_id])
         logger.debug("Sent message to %s: %s (request_id=%s)", self._ext_id, message, request_id)
 
-    def handle_message(self, message: Any) -> None:
+    def handle_message(self, message: object) -> None:
+        # message is a ipc.ExtensionMessage that has gone through the IPC json layer,
+        # converting Results to dicts. extensions:handle_message rehydrates it
         if not isinstance(message, dict) or "name" not in message:
             logger.warning("Extension %s sent invalid message format: %s", self._ext_id, message)
             return
