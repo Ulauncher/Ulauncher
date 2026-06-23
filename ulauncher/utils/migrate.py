@@ -10,7 +10,8 @@ from typing import Any, Callable
 from ulauncher import first_v6_run, paths
 
 _logger = logging.getLogger(__name__)
-CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache"), "ulauncher_cache")  # See issue#40
+# LEGACY_CACHE_PATH couldn't use $XDG_CACHE_HOME/ulauncher because of webkit, see issue#40
+LEGACY_CACHE_PATH = os.path.join(os.environ.get("XDG_CACHE_HOME", f"{paths.HOME}/.cache"), "ulauncher_cache")
 
 
 def _load_legacy(path: Path) -> Any | None:
@@ -166,7 +167,7 @@ def v5_to_v6_destructive() -> None:
     # Delete old unused files
     cleanup_list = [
         *Path(paths.CONFIG).parent.rglob("autostart/ulauncher.desktop"),
-        *Path(CACHE_PATH).rglob("*.db"),
+        *Path(LEGACY_CACHE_PATH).rglob("*.db"),
         *Path(paths.DATA).rglob("*.db"),
         *Path(paths.DATA).rglob("last.log"),
         Path(f"{paths.CONFIG}/extensions.json"),
@@ -177,9 +178,9 @@ def v5_to_v6_destructive() -> None:
         for file in cleanup_list:
             file.unlink()
 
-    if Path(CACHE_PATH).is_dir():
-        print(f"Removing deprecated cache directory '{CACHE_PATH}'")  # noqa: T201
-        rmtree(CACHE_PATH)
+    if Path(LEGACY_CACHE_PATH).is_dir():
+        print(f"Removing deprecated cache directory '{LEGACY_CACHE_PATH}'")  # noqa: T201
+        rmtree(LEGACY_CACHE_PATH)
 
     # Delete old preferences
     from ulauncher.data import JsonConf
