@@ -167,7 +167,6 @@ def v5_to_v6_destructive() -> None:
     # Delete old unused files
     cleanup_list = [
         *Path(paths.CONFIG).parent.rglob("autostart/ulauncher.desktop"),
-        *Path(LEGACY_CACHE_PATH).rglob("*.db"),
         *Path(paths.DATA).rglob("*.db"),
         *Path(paths.DATA).rglob("last.log"),
         Path(f"{paths.CONFIG}/extensions.json"),
@@ -178,9 +177,10 @@ def v5_to_v6_destructive() -> None:
         for file in cleanup_list:
             file.unlink()
 
-    if Path(LEGACY_CACHE_PATH).is_dir():
-        print(f"Removing deprecated cache directory '{LEGACY_CACHE_PATH}'")  # noqa: T201
-        rmtree(LEGACY_CACHE_PATH)
+    for cache_dir in [LEGACY_CACHE_PATH, f"{paths.CACHE}/WebKitCache", f"{paths.CACHE}/CacheStorage"]:
+        if Path(cache_dir).is_dir():
+            print(f"Removing deprecated cache directory '{cache_dir}'")  # noqa: T201
+            rmtree(cache_dir)
 
     # Delete old preferences
     from ulauncher.data import JsonConf
