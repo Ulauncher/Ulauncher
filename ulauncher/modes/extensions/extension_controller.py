@@ -143,55 +143,34 @@ class ExtensionController:
     id: str
     path: str
     state: ExtensionState
-    is_manageable: bool
     _state_path: Path
 
     def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
         self.path = path
-        self.is_manageable = extension_finder.is_manageable(path)
         _state_path = f"{paths.EXTENSIONS_STATE}/{self.id}.json"
         self._state_path = Path(_state_path)
         self.state = ExtensionState.load(_state_path)
+        self._seed_default_state()
 
-        if not self.state.id:
-            self.state.id = self.id
-            defaults = json_load(f"{path}/.default-state.json")
-            self.state.update(defaults)
+    def _seed_default_state(self) -> None:
+        """Seed a brand-new extension's state from its bundled .default-state.json. No-op once seeded,
+        or while the files are absent, so an install that downloads them later seeds afterward."""
+        if self.state.id or not Path(self.path).exists():
+            return
+        self.state.id = self.id
+        self.state.update(json_load(f"{self.path}/.default-state.json"))
 
     @classmethod
-    async def install(
-        cls, url: str, commit_hash: str | None = None, warn_if_overwrite: bool = True
-    ) -> ExtensionController:
+    async def install(cls, url: str, commit_hash: str | None = None) -> ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
-        if warn_if_overwrite and not is_new_install:
+        if not is_new_install:
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
-        downloaded_hash, commit_timestamp = _run_gio_blocking(
-            lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
-        )
-
-        try:
-            # install python dependencies from requirements.txt
-            deps = ExtensionDependencies(remote.ext_id, remote.target_dir)
-            _run_gio_blocking(deps.install)
-        except ext_exceptions.DependencyError:
-            # clean up broken install
-            rmtree(remote.target_dir)
-            raise
-
         controller = cls(remote.ext_id, remote.target_dir)
-        controller.state.save(
-            url=url,
-            browser_url=remote.browser_url or "",
-            commit_hash=downloaded_hash,
-            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-            updated_at=datetime.now().isoformat(),
-            error_type="",
-            error_message="",
-        )
+        await controller._install(remote, commit_hash, url=url)
         logger.info("Extension %s installed successfully", controller.id)
         if is_new_install:
             events.emit("extension_lifecycle:installed", controller)
@@ -223,6 +202,10 @@ class ExtensionController:
     @property
     def is_running(self) -> bool:
         return self.id in extension_runtimes
+
+    @property
+    def is_manageable(self) -> bool:
+        return extension_finder.is_manageable(self.path)
 
     @property
     def preferences(self) -> dict[str, ExtensionPreference]:
@@ -278,14 +261,54 @@ class ExtensionController:
 
         events.emit("extension_lifecycle:removed", self.id)
 
+    async def _install(self, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any) -> None:
+        """Download the new version over the extension's directory, stopping the running process first
+        and restoring the previous files if it fails, then record the new commit. A previously-running
+        extension is restarted afterwards on success or failure; a brand-new install was not running, so
+        the caller starts it instead.
+
+        `extra_state` is merged into the saved state (install records the source url; update adds nothing).
+        """
+        target_path = self.path
+        remote.target_dir = target_path
+        existed = Path(target_path).exists()  # noqa: ASYNC240
+        was_running = self.is_running
+        try:
+            with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
+                if existed:
+                    copytree(target_path, backup_dir, dirs_exist_ok=True)
+                await self.stop()
+                try:
+                    downloaded_hash, commit_timestamp = _run_gio_blocking(
+                        lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
+                    )
+                    _run_gio_blocking(ExtensionDependencies(remote.ext_id, target_path).install)
+                    self._seed_default_state()
+                    self.state.save(
+                        **extra_state,
+                        browser_url=remote.browser_url or "",
+                        commit_hash=downloaded_hash,
+                        commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+                        updated_at=datetime.now().isoformat(),
+                        error_type="",
+                        error_message="",
+                    )
+                except (ext_exceptions.ExtensionError, OSError):
+                    logger.exception("Could not install extension '%s'; restoring the previous version", self.id)
+                    rmtree(target_path, ignore_errors=True)
+                    if existed:
+                        copytree(backup_dir, target_path, dirs_exist_ok=True)
+                    raise
+        finally:
+            if was_running:
+                self.start()
+
     async def update(self) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
         logger.debug("Checking for updates to %s", self.id)
         has_update, commit_hash = await self.check_update()
-        was_running = self.is_running
-
         if not has_update:
             logger.info('Extension "%s" is already on the latest version', self.id)
             return False
@@ -297,26 +320,12 @@ class ExtensionController:
             commit_hash[:8],
         )
 
-        # Backup extension files. If update fails, restore from backup
-        with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
-            # use local variable, because self.path property will call locate() on a non-existing path
-            ext_path = self.path
-            copytree(ext_path, backup_dir, dirs_exist_ok=True)
-
-            try:
-                await self.stop()
-                await self.install(self.state.url, commit_hash, warn_if_overwrite=False)
-            except (ext_exceptions.ExtensionError, ValueError):
-                logger.exception("Could not update extension '%s'.", self.id)
-                copytree(backup_dir, ext_path, dirs_exist_ok=True)
-                if was_running:
-                    self.start()
-                raise
-
-        if was_running:
-            self.start()
+        try:
+            await self._install(ExtensionRemote(self.state.url), commit_hash)
+        except (ext_exceptions.ExtensionError, OSError):
+            logger.exception("Could not update extension '%s'", self.id)
+            raise
         logger.info("Successfully updated extension: %s", self.id)
-
         return True
 
     async def check_update(self) -> tuple[bool, str]:
