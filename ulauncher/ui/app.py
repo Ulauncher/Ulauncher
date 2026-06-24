@@ -287,7 +287,7 @@ class UlauncherApp(Gtk.Application):
             self.hold() if value else self.release()
             self.toggle_tray_icon(Settings.load().show_tray_icon)
 
-    def cleanup(self) -> None:
+    def _cleanup(self) -> None:
         # Staging dirs left behind when an install was interrupted before its own cleanup ran.
         from shutil import rmtree
 
@@ -295,5 +295,5 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
-        self.cleanup()
+        self._cleanup()
         super().quit()
