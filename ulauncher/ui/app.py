@@ -10,7 +10,7 @@ import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
-from ulauncher import app_id, first_run
+from ulauncher import app_id, first_run, paths
 from ulauncher.core import UlauncherCore
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.results_update import ResultsUpdate
@@ -287,6 +287,25 @@ class UlauncherApp(Gtk.Application):
             self.hold() if value else self.release()
             self.toggle_tray_icon(Settings.load().show_tray_icon)
 
+    def _cleanup(self) -> None:
+        import os
+        import time
+        from contextlib import suppress
+        from shutil import rmtree
+
+        # Prune staging entries, except recent entries (within 1h) since they could be ongoing installs via the cli
+        threshold = time.time() - 3600
+        with suppress(OSError):
+            for e in os.scandir(paths.EXTENSIONS_STAGING):
+                with suppress(OSError):
+                    if e.stat(follow_symlinks=False).st_mtime > threshold:
+                        continue
+                    if e.is_dir(follow_symlinks=False):
+                        rmtree(e.path, ignore_errors=True)
+                    else:
+                        os.unlink(e.path)
+
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
+        self._cleanup()
         super().quit()

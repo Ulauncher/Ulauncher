@@ -4,12 +4,11 @@ import asyncio
 import json
 import logging
 import sys
-import tempfile
 from collections import defaultdict
 from datetime import datetime
 from os.path import isfile, join
 from pathlib import Path
-from shutil import copytree, rmtree
+from shutil import move, rmtree
 from typing import Any, Callable
 
 from ulauncher import cli, paths
@@ -137,6 +136,37 @@ def _load_preferences(ext_id: str) -> JsonConf:
     return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
 
+def _swap_dir(new_dir: str, target: str) -> bool:
+    """Replace `target` with `new_dir`, rolling back to the original on failure. Returns whether it succeeded."""
+    previous = f"{new_dir}.bak"
+    # A stale .bak would be an existing dir, so move() nests target inside it instead of replacing.
+    rmtree(previous, ignore_errors=True)
+    backed_up = False
+    if Path(target).exists():
+        try:
+            move(target, previous)
+            backed_up = True
+        except OSError:
+            logger.exception("Could not back up the current version of %s; keeping it in place", target)
+            rmtree(new_dir, ignore_errors=True)
+            return False
+    try:
+        move(new_dir, target)
+    except OSError:
+        logger.exception("Could not swap extension into %s; keeping the previous version", target)
+        # A cross-device move can fail after partially creating target; clear it before restoring.
+        rmtree(target, ignore_errors=True)
+        if backed_up:
+            try:
+                move(previous, target)
+            except OSError:
+                logger.exception("Could not restore the previous version of %s; it remains at %s", target, previous)
+        rmtree(new_dir, ignore_errors=True)
+        return False
+    rmtree(previous, ignore_errors=True)
+    return True
+
+
 class ExtensionController:
     """Manages the lifecycle of an extension."""
 
@@ -262,44 +292,40 @@ class ExtensionController:
         events.emit("extension_lifecycle:removed", self.id)
 
     async def _install(self, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any) -> None:
-        """Download the new version over the extension's directory, stopping the running process first
-        and restoring the previous files if it fails, then record the new commit. A previously-running
-        extension is restarted afterwards on success or failure; a brand-new install was not running, so
-        the caller starts it instead.
+        """Install (atomically): download, stop, swap and restart (if previously running).
 
         `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
         target_path = self.path
-        remote.target_dir = target_path
-        existed = Path(target_path).exists()  # noqa: ASYNC240
+        # Fixed path per extension so failed installs don't accumulate.
+        # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
+        staging_dir = str(Path(paths.EXTENSIONS_STAGING) / self.id)
+        rmtree(staging_dir, ignore_errors=True)
+        Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
+        remote.target_dir = staging_dir
         was_running = self.is_running
         try:
-            with tempfile.TemporaryDirectory(prefix="ulauncher_ext_") as backup_dir:
-                if existed:
-                    copytree(target_path, backup_dir, dirs_exist_ok=True)
-                await self.stop()
-                try:
-                    downloaded_hash, commit_timestamp = _run_gio_blocking(
-                        lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
-                    )
-                    _run_gio_blocking(ExtensionDependencies(remote.ext_id, target_path).install)
-                    self._seed_default_state()
-                    self.state.save(
-                        **extra_state,
-                        browser_url=remote.browser_url or "",
-                        commit_hash=downloaded_hash,
-                        commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-                        updated_at=datetime.now().isoformat(),
-                        error_type="",
-                        error_message="",
-                    )
-                except (ext_exceptions.ExtensionError, OSError):
-                    logger.exception("Could not install extension '%s'; restoring the previous version", self.id)
-                    rmtree(target_path, ignore_errors=True)
-                    if existed:
-                        copytree(backup_dir, target_path, dirs_exist_ok=True)
-                    raise
+            downloaded_hash, commit_timestamp = _run_gio_blocking(
+                lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
+            )
+            _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
+            await self.stop()
+            if not _swap_dir(staging_dir, target_path):
+                msg = f"Failed to swap the staged extension into {target_path}"
+                raise OSError(msg)
+            ExtensionManifest.load(target_path, force=True)  # bust the path cache so the swapped-in files win
+            self._seed_default_state()
+            self.state.save(
+                **extra_state,
+                browser_url=remote.browser_url or "",
+                commit_hash=downloaded_hash,
+                commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
+                updated_at=datetime.now().isoformat(),
+                error_type="",
+                error_message="",
+            )
         finally:
+            rmtree(staging_dir, ignore_errors=True)
             if was_running:
                 self.start()
 
