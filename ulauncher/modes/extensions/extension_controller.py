@@ -166,8 +166,11 @@ class ExtensionController:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         is_new_install = not Path(remote.target_dir).exists()  # noqa: ASYNC240
+        if warn_if_overwrite and not is_new_install:
+            logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
+
         downloaded_hash, commit_timestamp = _run_gio_blocking(
-            lambda on_success, on_error: remote.download(on_success, on_error, commit_hash, warn_if_overwrite)
+            lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
         )
 
         try:

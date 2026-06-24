@@ -236,10 +236,9 @@ class ExtensionRemote(UrlParseResult):
         on_success: DownloadSuccess,
         on_error: OnError,
         commit_hash: str | None = None,
-        warn_if_overwrite: bool = False,
     ) -> None:
         def on_hash(resolved_hash: str) -> None:
-            self._download_with_hash(resolved_hash, warn_if_overwrite, on_success, on_error)
+            self._download_with_hash(resolved_hash, on_success, on_error)
 
         if commit_hash:
             on_hash(commit_hash)
@@ -247,12 +246,8 @@ class ExtensionRemote(UrlParseResult):
 
         self.get_compatible_hash(on_hash, on_error)
 
-    def _download_with_hash(
-        self, commit_hash: str, warn_if_overwrite: bool, on_success: DownloadSuccess, on_error: OnError
-    ) -> None:
+    def _download_with_hash(self, commit_hash: str, on_success: DownloadSuccess, on_error: OnError) -> None:
         output_dir_exists = isdir(self.target_dir)
-        if output_dir_exists and warn_if_overwrite:
-            logger.info('Extension with URL "%s" is already installed. Updating', self.url)
 
         if self.download_url_template:
             download_url = self.download_url_template.replace("[commit]", commit_hash)
