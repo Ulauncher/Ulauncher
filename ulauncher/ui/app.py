@@ -288,10 +288,22 @@ class UlauncherApp(Gtk.Application):
             self.toggle_tray_icon(Settings.load().show_tray_icon)
 
     def _cleanup(self) -> None:
-        # Staging dirs left behind when an install was interrupted before its own cleanup ran.
+        import os
+        import time
+        from contextlib import suppress
         from shutil import rmtree
 
-        rmtree(paths.EXTENSIONS_STAGING, ignore_errors=True)
+        # Prune staging entries, except recent entries (within 1h) since they could be ongoing installs via the cli
+        threshold = time.time() - 3600
+        with suppress(OSError):
+            for e in os.scandir(paths.EXTENSIONS_STAGING):
+                with suppress(OSError):
+                    if e.stat(follow_symlinks=False).st_mtime > threshold:
+                        continue
+                    if e.is_dir(follow_symlinks=False):
+                        rmtree(e.path, ignore_errors=True)
+                    else:
+                        os.unlink(e.path)
 
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
