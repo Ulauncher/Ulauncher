@@ -247,8 +247,6 @@ class ExtensionRemote(UrlParseResult):
         self.get_compatible_hash(on_hash, on_error)
 
     def _download_with_hash(self, commit_hash: str, on_success: DownloadSuccess, on_error: OnError) -> None:
-        output_dir_exists = isdir(self.target_dir)
-
         if self.download_url_template:
             download_url = self.download_url_template.replace("[commit]", commit_hash)
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_", delete=False) as tmp_file:
@@ -261,7 +259,7 @@ class ExtensionRemote(UrlParseResult):
             def on_downloaded(_path: str) -> None:
                 try:
                     try:
-                        result = self._extract_and_install(tmp_path, commit_hash, output_dir_exists)
+                        result = self._extract_and_install(tmp_path, commit_hash)
                     except ext_exceptions.ExtensionError as install_error:
                         on_error(install_error)
                         return
@@ -302,7 +300,7 @@ class ExtensionRemote(UrlParseResult):
 
         self._repo.checkout(self.target_dir, commit_hash, on_checked_out, on_error)
 
-    def _extract_and_install(self, tar_path: str, commit_hash: str, output_dir_exists: bool) -> tuple[str, float]:
+    def _extract_and_install(self, tar_path: str, commit_hash: str) -> tuple[str, float]:
         # All filesystem steps share the same failure semantics, so they live under one guard.
         # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
         # RemoteError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
@@ -322,7 +320,7 @@ class ExtensionRemote(UrlParseResult):
                         msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
                         raise ext_exceptions.CompatibilityError(msg)
                     logger.warning("Falling back on using API 2.0 version for %s.", self.url)
-                if output_dir_exists:
+                if isdir(self.target_dir):
                     rmtree(self.target_dir)
                 move(tmp_dir, self.target_dir)
             return commit_hash, getmtime(self.target_dir)
