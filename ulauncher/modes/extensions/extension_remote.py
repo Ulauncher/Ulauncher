@@ -238,12 +238,12 @@ class ExtensionRemote(UrlParseResult):
         commit_hash: str | None = None,
         warn_if_overwrite: bool = False,
     ) -> None:
-        if commit_hash:
-            self._download_with_hash(commit_hash, warn_if_overwrite, on_success, on_error)
-            return
-
         def on_hash(resolved_hash: str) -> None:
             self._download_with_hash(resolved_hash, warn_if_overwrite, on_success, on_error)
+
+        if commit_hash:
+            on_hash(commit_hash)
+            return
 
         self.get_compatible_hash(on_hash, on_error)
 
