@@ -16,6 +16,8 @@ CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME", f"{HOME}/.config"), "ula
 DATA = os.path.join(os.environ.get("XDG_DATA_HOME", f"{HOME}/.local/share"), "ulauncher")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME", f"{HOME}/.local/state"), "ulauncher")
 USER_EXTENSIONS = os.path.join(DATA, "extensions")
+# Sibling of the installed extensions so the post-install swap is a same-filesystem rename.
+EXTENSIONS_STAGING = os.path.join(USER_EXTENSIONS, ".staging")
 ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS, *[os.path.join(p, "ulauncher", "extensions") for p in XDG_DATA_DIRS]]
 EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 EXTENSIONS_STATE = os.path.join(STATE, "ext_state")

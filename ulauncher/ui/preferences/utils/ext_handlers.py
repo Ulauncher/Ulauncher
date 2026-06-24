@@ -108,7 +108,7 @@ class ExtensionHandlers:
 
                 run_when_idle(update_ui)
 
-            except (ext_exceptions.ExtensionError, ValueError, asyncio.CancelledError) as error:
+            except (ext_exceptions.ExtensionError, ValueError, OSError, asyncio.CancelledError) as error:
 
                 def show_error(error: BaseException) -> None:
                     progress_dialog.destroy()

@@ -10,7 +10,7 @@ import gi
 from gi.repository import Gdk, Gtk
 
 import ulauncher
-from ulauncher import app_id, first_run
+from ulauncher import app_id, first_run, paths
 from ulauncher.core import UlauncherCore
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.results_update import ResultsUpdate
@@ -287,6 +287,13 @@ class UlauncherApp(Gtk.Application):
             self.hold() if value else self.release()
             self.toggle_tray_icon(Settings.load().show_tray_icon)
 
+    def cleanup(self) -> None:
+        # Staging dirs left behind when an install was interrupted before its own cleanup ran.
+        from shutil import rmtree
+
+        rmtree(paths.EXTENSIONS_STAGING, ignore_errors=True)
+
     @events.on
     def quit(self) -> None:  # pyrefly: ignore[bad-override]
+        self.cleanup()
         super().quit()
