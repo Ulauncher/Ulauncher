@@ -202,8 +202,6 @@ class ExtensionController:
         controller = cls(remote.ext_id, remote.target_dir)
         await controller._install(remote, commit_hash, url=url)
         logger.info("Extension %s installed successfully", controller.id)
-        if is_new_install:
-            events.emit("extension_lifecycle:installed", controller)
         return controller
 
     @property

@@ -18,7 +18,7 @@ def get_ext_controller(input_arg: str) -> ExtensionController | None:
         parse_result = parse_extension_url(arg)
         arg = parse_result.ext_id
 
-    return extension_registry.load(arg)
+    return extension_registry.get(arg, include_preview=False)
 
 
 def normalize_ext_arg(path: str) -> str:

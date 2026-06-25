@@ -27,7 +27,7 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
 async def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
 
-    for controller in extension_registry.load_all():
+    for controller in extension_registry.iterate(include_preview=False):
         if not controller.is_manageable or not controller.state.url:
             continue
 
