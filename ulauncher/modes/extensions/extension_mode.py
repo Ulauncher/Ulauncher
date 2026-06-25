@@ -404,17 +404,13 @@ class ExtensionMode(Mode):
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
         preview.set(ext_id, path, with_debugger)
 
-        # Register a controller so a not-yet-installed extension's triggers become available; an
-        # installed one already has one (now launching from the preview path). Restart it so a
-        # background-running installed instance relaunches from the dev path.
-        extension_registry.get(ext_id) or extension_registry.load(ext_id, path)
-
         # Guard the restart against a stop_preview that races in during the stop: only relaunch if
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
         def start_if_still_previewing() -> None:
             if preview.ext_id == ext_id:
                 self._run_ext_batch_job([ext_id], ["start"])
 
+        # Relaunch from the dev path, stopping any conflicting installed instances
         self._run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
 
     @events.on

@@ -4,7 +4,7 @@ import logging
 from typing import Iterator
 
 from ulauncher.modes.extensions import extension_finder
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, preview
 from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("extension_lifecycle")
@@ -13,7 +13,15 @@ logger = logging.getLogger(__name__)
 _ext_controllers: dict[str, ExtensionController] = {}
 
 
+def _get_preview_controller() -> ExtensionController | None:
+    if preview.ext_id:
+        return ExtensionController(preview.ext_id, preview.path)
+    return None
+
+
 def get(ext_id: str) -> ExtensionController | None:
+    if ext_id == preview.ext_id and (preview_ext := _get_preview_controller()):
+        return preview_ext
     return _ext_controllers.get(ext_id)
 
 
@@ -31,7 +39,11 @@ def iterate() -> Iterator[ExtensionController]:
             return 2
         return 1  # running
 
-    yield from sorted(_ext_controllers.values(), key=sort_key)
+    controllers = dict(_ext_controllers)
+    if preview_controller := _get_preview_controller():
+        controllers[preview_controller.id] = preview_controller
+
+    yield from sorted(controllers.values(), key=sort_key)
 
 
 def load(ext_id: str, path: str | None = None) -> ExtensionController | None:
