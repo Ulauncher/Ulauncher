@@ -90,7 +90,7 @@ def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> N
 
     callback.assert_not_called()
     timer.assert_called_once()
-    assert mode.active_ext is ext
+    assert mode._active_ext is ext
 
 
 def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> None:
