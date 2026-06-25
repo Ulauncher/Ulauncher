@@ -63,7 +63,7 @@ class ExtensionMode(Mode):
 
     @events.on
     def errored(self, ext_id: str) -> None:
-        if not self.active_ext or self.active_ext.id != ext_id:
+        if not self._active_ext or self._active_ext.id != ext_id:
             return
         if self._loading_timer:
             self._finish_loading([self._loading_failed_result()])
@@ -73,18 +73,8 @@ class ExtensionMode(Mode):
     @events.on
     def started(self, ext_id: str) -> None:
         # start() runs in a worker thread, so re-evaluate the query on the main loop.
-        if self.active_ext and self.active_ext.id == ext_id:
+        if self._active_ext and self._active_ext.id == ext_id:
             scheduling.run_when_idle(lambda: events.emit("app:reload_query"))
-
-    @property
-    def active_ext(self) -> ExtensionController | None:
-        return self._active_ext
-
-    @active_ext.setter
-    def active_ext(self, ext: ExtensionController | None) -> None:
-        if ext is not self._active_ext:
-            self._pending_callback = None
-            self._active_ext = ext
 
     def handle_query(self, query: Query, callback: Callable[[EffectMessage], None]) -> None:
         self._clear_loading_timer()
@@ -102,7 +92,7 @@ class ExtensionMode(Mode):
             callback(effects.render_results([Result(name="Extension not available")]))
             return
 
-        self.active_ext = ext
+        self._active_ext = ext
         if not ext.is_running:
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
@@ -144,7 +134,7 @@ class ExtensionMode(Mode):
             callback(effects.render_results(results or []))
 
     def _loading_failed_result(self) -> Result:
-        ext = self.active_ext
+        ext = self._active_ext
         name = (ext.manifest.name if ext else "") or "Extension"
         # A preview's error isn't persisted (it surfaces in the preview's own console), so the
         # stored message is only meaningful for an installed extension that errored.
@@ -168,8 +158,8 @@ class ExtensionMode(Mode):
                 )
 
     def get_placeholder_icon(self) -> str | None:
-        if self.active_ext:
-            return self.active_ext.get_icon_value()
+        if self._active_ext:
+            return self._active_ext.get_icon_value()
         return None
 
     def activate_result(
@@ -185,7 +175,7 @@ class ExtensionMode(Mode):
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            self.active_ext = extension_registry.get(result.ext_id)
+            self._active_ext = extension_registry.get(result.ext_id)
             launch_event: ipc.LaunchTriggerEvent = {
                 "type": EventType.LAUNCH_TRIGGER,
                 "args": (result.trigger_id,),
@@ -286,23 +276,23 @@ class ExtensionMode(Mode):
 
         For one-off messages, use ext.send_message() directly instead.
         """
-        if not self.active_ext:
+        if not self._active_ext:
             logger.error("No active extension to send request to")
             return
 
-        if not self.active_ext.is_running:
-            logger.warning("Cannot send event to inactive extension %s", self.active_ext.id)
+        if not self._active_ext.is_running:
+            logger.warning("Cannot send event to inactive extension %s", self._active_ext.id)
             return
 
         self._request_id += 1
         self._pending_callback = callback
-        self.active_ext.send_message(event, self._request_id)
+        self._active_ext.send_message(event, self._request_id)
 
     @events.on
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
-            if not self.active_ext:
+            if not self._active_ext:
                 logger.error("No active extension to handle response")
                 return
             if type(message.get("request_id")) is not int or not effect_utils.is_effect_message(
@@ -310,11 +300,11 @@ class ExtensionMode(Mode):
             ):
                 logger.warning("Received malformed 'response' message from %s: %s", ext_id, message)
                 return
-            if self.active_ext.id != ext_id or not self._pending_callback or message["request_id"] != self._request_id:
+            if self._active_ext.id != ext_id or not self._pending_callback or message["request_id"] != self._request_id:
                 logger.debug("Ignoring outdated extension response")
                 return
             response = message["response"]
-            response["effect"] = self._rehydrate_results(self.active_ext, response["effect"])
+            response["effect"] = self._rehydrate_results(self._active_ext, response["effect"])
             self._handle_response(response)
         elif message["name"] == "clipboard_store":
             if "text" not in message:
