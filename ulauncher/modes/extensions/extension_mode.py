@@ -50,7 +50,7 @@ class ExtensionMode(Mode):
         scheduling.run_when_idle(self._start_extensions)
 
     def _start_extensions(self) -> None:
-        for ext in extension_registry.load_all():
+        for ext in extension_registry.iterate():
             if ext.state.is_enabled:
                 ext.start()
 
@@ -109,7 +109,7 @@ class ExtensionMode(Mode):
         self._send_request(event, callback)
 
     def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
-        for ext in extension_registry.iterate():
+        for ext in extension_registry.iterate(sort=True):
             if not ext.is_enabled:
                 continue
             for trigger_id, trigger in ext.triggers.items():
@@ -206,7 +206,7 @@ class ExtensionMode(Mode):
     ) -> None:
         ext_controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
-            if ext := extension_registry.get(ext_id) or extension_registry.load(ext_id):
+            if ext := extension_registry.get(ext_id):
                 ext_controllers.append(ext)  # noqa: PERF401
 
         # run the reload in a separate thread to avoid blocking the main thread
@@ -424,11 +424,14 @@ class ExtensionMode(Mode):
             return
 
         logger.info("[preview] Stopping preview %s", ext_id)
-        preview.clear()
 
         def restore_original() -> None:
+            # Clear the preview only after its process has stopped, so its exit handler still sees a
+            # preview (and won't persist a stop-time error onto the installed extension), and so the
+            # lookup below resolves the installed controller rather than the preview one.
+            preview.clear()
             # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = extension_registry.load(ext_id)
+            controller = extension_registry.get(ext_id)
             if controller and controller.is_enabled:
                 self._run_ext_batch_job([ext_id], ["start"])
 

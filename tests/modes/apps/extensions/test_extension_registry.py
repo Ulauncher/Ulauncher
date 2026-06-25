@@ -12,13 +12,15 @@ def test_iterate__orders_preview_running_then_rest(mocker: MockerFixture) -> Non
     stopped = SimpleNamespace(id="stopped", is_preview=False, is_enabled=True, is_running=False, has_error=False)
     errored = SimpleNamespace(id="errored", is_preview=False, is_enabled=True, is_running=False, has_error=True)
 
-    controllers = {
-        disabled.id: disabled,
-        stopped.id: stopped,
-        preview.id: preview,
-        errored.id: errored,
-        running.id: running,
-    }
-    mocker.patch.object(extension_registry, "_ext_controllers", controllers)
+    controllers = {c.id: c for c in (disabled, stopped, preview, errored, running)}
+    mocker.patch.object(extension_registry.preview, "ext_id", preview.id)
+    mocker.patch.object(
+        extension_registry.extension_finder,
+        "iterate",
+        return_value=[(c.id, f"/path/{c.id}") for c in controllers.values() if not c.is_preview],
+    )
+    mocker.patch.object(
+        extension_registry, "ExtensionController", side_effect=lambda ext_id, _path: controllers[ext_id]
+    )
 
-    assert list(extension_registry.iterate()) == [preview, running, stopped, errored, disabled]
+    assert list(extension_registry.iterate(sort=True)) == [preview, running, stopped, errored, disabled]

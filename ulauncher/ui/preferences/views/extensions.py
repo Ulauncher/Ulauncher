@@ -79,7 +79,7 @@ class ExtensionsView(BaseView):
     def _list_has_changes(self) -> bool:
         extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
 
-        for ext in extension_registry.iterate():
+        for ext in extension_registry.iterate(sort=True):
             extension_cache[ext.id] = (
                 ext.manifest.name,
                 ext_utils.get_status_str(ext),
