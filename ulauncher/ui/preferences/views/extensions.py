@@ -26,7 +26,7 @@ from ulauncher.utils import scheduling
 from ulauncher.utils.launch_detached import open_detached
 
 logger = logging.getLogger(__name__)
-REFRESH_INTERVAL = 0.25
+REFRESH_INTERVAL = 1
 
 
 class ExtensionsView(BaseView):
