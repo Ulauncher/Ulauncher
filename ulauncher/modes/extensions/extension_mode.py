@@ -421,10 +421,9 @@ class ExtensionMode(Mode):
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
 
-        # The CLI sends this on Ctrl+C even when preview_ext was never delivered (e.g. interrupted
-        # mid dependency-install), in which case there is no preview to stop or extension to restore.
         ext_id = preview.ext_id
         if not ext_id:
+            # will happen if preview is interrupted before started
             logger.debug("[preview] Ignoring stop_preview; no preview active")
             return
 
