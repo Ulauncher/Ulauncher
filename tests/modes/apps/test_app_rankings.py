@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ulauncher.modes.apps.app_rankings import AppRankings as _AppRankings
 
 
 class AppRankings(_AppRankings):
-    def save(self) -> bool:
+    def save(self, *_args: Any, **_kwargs: Any) -> bool:
         return False
 
 
