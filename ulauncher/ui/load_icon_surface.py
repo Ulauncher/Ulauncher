@@ -7,7 +7,7 @@ from ulauncher import paths
 from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
-    from cairo import ImageSurface  # pyrefly: ignore - this fails in our docker image for some reason
+    from cairo import ImageSurface  # type: ignore[missing-module-attribute] - fails in docker image for some reason
 
 
 logger = logging.getLogger(__name__)
