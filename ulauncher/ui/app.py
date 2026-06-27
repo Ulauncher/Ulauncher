@@ -38,7 +38,6 @@ class UlauncherApp(Gtk.Application):
     _persistent: bool = False
     # App-scoped query/mode controller, shared by every launcher window.
     core: UlauncherCore
-    # pyrefly: ignore[bad-assignment] https://github.com/facebook/pyrefly/issues/2227
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
@@ -306,6 +305,6 @@ class UlauncherApp(Gtk.Application):
                         os.unlink(e.path)
 
     @events.on
-    def quit(self) -> None:  # pyrefly: ignore[bad-override]
+    def quit(self) -> None:
         self._cleanup()
         super().quit()
