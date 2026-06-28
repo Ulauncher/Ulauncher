@@ -36,14 +36,12 @@ def iterate(sort: bool = False, include_preview: bool = True) -> Iterator[Extens
 
     def sort_key(controller: ExtensionController) -> int:
         if controller.is_preview:
-            return 0  # preview (first)
+            return 0
         if controller.has_error:
-            return 3
-        if not controller.is_enabled:
-            return 4
-        if not controller.is_running:
             return 2
-        return 1  # running
+        if not controller.is_enabled:
+            return 3
+        return 1
 
     yield from sorted(controllers.values(), key=sort_key)
 
