@@ -66,7 +66,8 @@ def _normalize_app_rankings(old_data: dict[str, int]) -> dict[str, float]:
 
 
 def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    from ulauncher.modes.extensions import extension_registry
+    from ulauncher.modes.extensions import extension_finder
+    from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 
     # Check if already migrated
     if sorted(user_prefs.keys()) == ["preferences", "triggers"]:
@@ -74,10 +75,11 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
 
     preferences: dict[str, Any] = {}
     triggers: dict[str, Any] = {}
-    controller = extension_registry.get(ext_id, include_preview=False)
+    path = extension_finder.locate(ext_id)
+    manifest = ExtensionManifest.load(path) if path else None
     for p_id, pref in user_prefs.items():
         try:
-            if controller and controller.manifest.triggers.get(p_id):
+            if manifest and manifest.triggers.get(p_id):
                 triggers[p_id] = {"keyword": pref}
             else:
                 preferences[p_id] = pref
