@@ -34,7 +34,7 @@ def get_status_str(ext: ExtensionController) -> ExtStatus:
         return "error"
     if not ext.is_enabled:
         return "off"
-    if not ext.is_running:
+    if not ext.owns_runtime:
         return "stopped"
     if ext.is_preview:
         return "preview"

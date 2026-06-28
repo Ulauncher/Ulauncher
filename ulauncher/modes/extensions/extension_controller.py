@@ -228,7 +228,8 @@ class ExtensionController:
         return not self.is_preview and bool(self.state.error_type)
 
     @property
-    def is_running(self) -> bool:
+    def owns_runtime(self) -> bool:
+        """Whether the extension is running and owned by the current runtime (always False outside of the app)."""
         return self.id in extension_runtimes
 
     @property
@@ -301,7 +302,7 @@ class ExtensionController:
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
         remote.target_dir = staging_dir
-        was_running = self.is_running
+        was_running = self.owns_runtime
         try:
             downloaded_hash, commit_timestamp = _run_gio_blocking(
                 lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
@@ -372,7 +373,7 @@ class ExtensionController:
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
-        if self.is_running:
+        if self.owns_runtime:
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
@@ -442,7 +443,7 @@ class ExtensionController:
             exit_handler("FailedToStart", str(err))
             return False
         events.emit("extensions:started", self.id)
-        return self.is_running
+        return self.owns_runtime
 
     async def stop(self) -> None:
         if runtime := extension_runtimes.pop(self.id, None):

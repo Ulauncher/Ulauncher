@@ -93,7 +93,7 @@ class ExtensionMode(Mode):
             return
 
         self._active_ext = ext
-        if not ext.is_running:
+        if not ext.owns_runtime:
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
             # re-runs the query once the extension is ready. The wait ends with a failure message if
@@ -280,7 +280,7 @@ class ExtensionMode(Mode):
             logger.error("No active extension to send request to")
             return
 
-        if not self._active_ext.is_running:
+        if not self._active_ext.owns_runtime:
             logger.warning("Cannot send event to inactive extension %s", self._active_ext.id)
             return
 
