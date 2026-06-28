@@ -302,7 +302,7 @@ class ExtensionController:
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
         remote.target_dir = staging_dir
-        was_running = self.owns_runtime
+        should_restart_after_swap = self.owns_runtime
         try:
             downloaded_hash, commit_timestamp = _run_gio_blocking(
                 lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
@@ -325,7 +325,7 @@ class ExtensionController:
             )
         finally:
             rmtree(staging_dir, ignore_errors=True)
-            if was_running:
+            if should_restart_after_swap:
                 self.start()
 
     async def update(self) -> bool:
