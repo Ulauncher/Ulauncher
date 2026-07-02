@@ -12,7 +12,7 @@ def test_iterate__orders_preview_enabled_error_disabled(mocker: MockerFixture) -
     disabled = SimpleNamespace(id="disabled", is_preview=False, is_enabled=False, has_error=False)
 
     controllers = {c.id: c for c in (disabled, errored, preview, enabled)}
-    mocker.patch.object(extension_registry.preview, "ext_id", preview.id)
+    mocker.patch.object(extension_registry.supervisor.preview, "ext_id", preview.id)
     mocker.patch.object(
         extension_registry.extension_finder,
         "iterate",
