@@ -203,7 +203,8 @@ class ExtensionController:
     @property
     def owns_runtime(self) -> bool:
         """Whether the extension is running and owned by the current runtime (always False outside of the app)."""
-        return self.id in supervisor.runtimes
+        # supervisor.is_owner check for making the behavior/contract explicit, but not actually needed
+        return supervisor.is_owner and self.id in supervisor.runtimes
 
     @property
     def is_manageable(self) -> bool:
@@ -346,6 +347,10 @@ class ExtensionController:
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
+        if not supervisor.is_owner:
+            msg = "Only the app process can start extensions. Ask it to via a D-Bus event ('extensions:reload')."
+            raise RuntimeError(msg)
+
         if self.owns_runtime:
             return True  # if already started, count as successful
 
@@ -419,6 +424,8 @@ class ExtensionController:
         return self.owns_runtime
 
     async def stop(self) -> None:
+        """Stops the extension process if this process owns one. Intentionally a no-op elsewhere
+        (the CLI): remote runtimes are stopped by sending D-Bus events to the app instead."""
         if runtime := supervisor.runtimes.pop(self.id, None):
             stopped_future: asyncio.Future[None] = asyncio.Future()
             supervisor.stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
@@ -430,5 +437,9 @@ class ExtensionController:
         """
         Sends a JSON message to the extension if it is running.
         """
+        if not supervisor.is_owner:
+            msg = "Only the app process can message extensions."
+            raise RuntimeError(msg)
+
         if runtime := supervisor.runtimes.get(self.id):
             runtime.send_message(message, request_id)

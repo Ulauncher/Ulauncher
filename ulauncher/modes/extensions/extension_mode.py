@@ -45,6 +45,7 @@ class ExtensionMode(Mode):
     _request_id: int = 0
 
     def __init__(self) -> None:
+        supervisor.claim_ownership()
         self._trigger_cache = {}
         events.set_self(self)
         scheduling.run_when_idle(self._start_extensions)
