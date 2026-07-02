@@ -32,19 +32,25 @@ class PreviewExtension:
 class ExtensionSupervisor:
     """Holds the extension processes owned by this process.
 
-    Only the app process ever owns extension processes. Other processes importing this module
-    (the CLI) see it empty: previews and running extensions live in the app, and the CLI asks
-    the app to reconcile via D-Bus events ("extensions:reload", "extensions:stop", ...).
+    Only the app process claims ownership and may spawn extension processes. Other processes
+    importing this module (the CLI) see it empty and unclaimed: previews and running extensions
+    live in the app, and the CLI asks the app to reconcile via D-Bus events
+    ("extensions:reload", "extensions:stop", ...).
     """
 
     runtimes: dict[str, ExtensionRuntime]
     stopped_listeners: dict[str, list[Callable[[], None]]]
     preview: PreviewExtension
+    is_owner: bool
 
     def __init__(self) -> None:
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self.preview = PreviewExtension()
+        self.is_owner = False
+
+    def claim_ownership(self) -> None:
+        self.is_owner = True
 
 
 supervisor = ExtensionSupervisor()
