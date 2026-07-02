@@ -15,8 +15,8 @@ from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     ExtensionControllerTrigger,
-    preview,
 )
+from ulauncher.modes.extensions.extension_supervisor import supervisor
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -402,12 +402,12 @@ class ExtensionMode(Mode):
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        preview.set(ext_id, path, with_debugger)
+        supervisor.preview.set(ext_id, path, with_debugger)
 
         # Guard the restart against a stop_preview that races in during the stop: only relaunch if
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
         def start_if_still_previewing() -> None:
-            if preview.ext_id == ext_id:
+            if supervisor.preview.ext_id == ext_id:
                 self._run_ext_batch_job([ext_id], ["start"])
 
         # Relaunch from the dev path, stopping any conflicting installed instances
@@ -417,7 +417,7 @@ class ExtensionMode(Mode):
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
 
-        ext_id = preview.ext_id
+        ext_id = supervisor.preview.ext_id
         if not ext_id:
             # will happen if preview is interrupted before started
             logger.debug("[preview] Ignoring stop_preview; no preview active")
@@ -429,7 +429,7 @@ class ExtensionMode(Mode):
             # Clear the preview only after its process has stopped, so its exit handler still sees a
             # preview (and won't persist a stop-time error onto the installed extension), and so the
             # lookup below resolves the installed controller rather than the preview one.
-            preview.clear()
+            supervisor.preview.clear()
             # Reload from the installed path, or drop the controller if the extension was never installed.
             controller = extension_registry.get(ext_id)
             if controller and controller.is_enabled:

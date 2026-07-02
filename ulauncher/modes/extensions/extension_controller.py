@@ -4,7 +4,6 @@ import asyncio
 import json
 import logging
 import sys
-from collections import defaultdict
 from datetime import datetime
 from os.path import isfile, join
 from pathlib import Path
@@ -23,6 +22,7 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.modes.extensions.extension_supervisor import supervisor
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
 
@@ -62,35 +62,8 @@ class ExtensionState(JsonConf):
 
 
 logger = logging.getLogger(__name__)
-extension_runtimes: dict[str, ExtensionRuntime] = {}
-stopped_listeners: dict[str, list[Callable[[], None]]] = defaultdict(list)
 
 events = EventBus()
-
-
-class PreviewExtension:
-    """The single extension currently being previewed from a dev path via the CLI, if any.
-
-    Only one runs at a time (the debugger binds a fixed port). While active, the controller whose id
-    matches launches from `path` (with `with_debugger`) instead of its installed location.
-    """
-
-    ext_id: str | None = None
-    path: str = ""
-    with_debugger: bool = False
-
-    def set(self, ext_id: str, path: str, with_debugger: bool) -> None:
-        self.ext_id = ext_id
-        self.path = path
-        self.with_debugger = with_debugger
-
-    def clear(self) -> None:
-        self.ext_id = None
-        self.path = ""
-        self.with_debugger = False
-
-
-preview = PreviewExtension()
 
 
 def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
@@ -206,13 +179,13 @@ class ExtensionController:
 
     @property
     def is_preview(self) -> bool:
-        return preview.ext_id == self.id
+        return supervisor.preview.ext_id == self.id
 
     @property
     def source_path(self) -> str:
         """Where to load and launch the extension from: the dev path while it is being previewed,
         otherwise `self.path`."""
-        return preview.path if self.is_preview else self.path
+        return supervisor.preview.path if self.is_preview else self.path
 
     @property
     def manifest(self) -> ExtensionManifest:
@@ -230,7 +203,7 @@ class ExtensionController:
     @property
     def owns_runtime(self) -> bool:
         """Whether the extension is running and owned by the current runtime (always False outside of the app)."""
-        return self.id in extension_runtimes
+        return self.id in supervisor.runtimes
 
     @property
     def is_manageable(self) -> bool:
@@ -377,7 +350,7 @@ class ExtensionController:
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = stopped_listeners.get(self.id, [])
+            listeners = supervisor.stopped_listeners.get(self.id, [])
             for stop_listener in listeners:
                 stop_listener()
 
@@ -385,7 +358,7 @@ class ExtensionController:
 
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
-                extension_runtimes.pop(self.id, None)
+                supervisor.runtimes.pop(self.id, None)
                 # A failing preview must not disable the installed extension by persisting its error.
                 if not self.is_preview:
                     self.state.save(error_type=cause, error_message=error_msg)
@@ -410,7 +383,7 @@ class ExtensionController:
         cmd = [sys.executable, extension_main]
 
         # Preview extensions can opt into the remote debugger
-        if self.is_preview and preview.with_debugger:
+        if self.is_preview and supervisor.preview.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",
@@ -438,7 +411,7 @@ class ExtensionController:
         # surfaced consistently and any queued start listeners get cleaned up, rather than
         # raising out into callers.
         try:
-            extension_runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
+            supervisor.runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
@@ -446,9 +419,9 @@ class ExtensionController:
         return self.owns_runtime
 
     async def stop(self) -> None:
-        if runtime := extension_runtimes.pop(self.id, None):
+        if runtime := supervisor.runtimes.pop(self.id, None):
             stopped_future: asyncio.Future[None] = asyncio.Future()
-            stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
+            supervisor.stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
@@ -457,5 +430,5 @@ class ExtensionController:
         """
         Sends a JSON message to the extension if it is running.
         """
-        if runtime := extension_runtimes.get(self.id):
+        if runtime := supervisor.runtimes.get(self.id):
             runtime.send_message(message, request_id)
