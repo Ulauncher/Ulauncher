@@ -7,7 +7,7 @@ build
 git-cliff >= 2.13, < 3
 lefthook == 2.*
 pygobject-stubs==2.12.0
-pyrefly >= 1.1.1
+pyrefly >= 1.2.0.dev1 # pre-release fixes Zed integration
 pytest
 pytest-mock
 ruff >= 0.15.17, < 0.16.0
