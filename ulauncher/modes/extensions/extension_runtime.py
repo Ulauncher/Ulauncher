@@ -14,6 +14,9 @@ from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
+DEBUGPY_HOST = "127.0.0.1"
+DEBUGPY_PORT = 5678
+
 ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
 ]

@@ -9,10 +9,10 @@ from ulauncher import app_id, paths
 from ulauncher.cli import CLIArguments
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
-from ulauncher.modes.extensions.extension_controller import DEBUGPY_HOST, DEBUGPY_PORT
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_remote import parse_extension_url
+from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT
 from ulauncher.utils import scheduling
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
 

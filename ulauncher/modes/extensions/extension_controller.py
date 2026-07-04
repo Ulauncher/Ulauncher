@@ -21,13 +21,10 @@ from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifestPreference,
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
-from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
+from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.modes.extensions.extension_supervisor import supervisor
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
-
-DEBUGPY_HOST = "127.0.0.1"
-DEBUGPY_PORT = 5678
 
 
 class ExtensionPreference(ExtensionManifestPreference):
