@@ -389,12 +389,12 @@ class ExtensionMode(Mode):
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        supervisor.preview.set(ext_id, path, with_debugger)
+        supervisor.set_preview(ext_id, path, with_debugger)
 
         # Guard the restart against a stop_preview that races in during the stop: only relaunch if
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
         def start_if_still_previewing() -> None:
-            if supervisor.preview.ext_id == ext_id:
+            if supervisor.get_preview(ext_id):
                 self._run_ext_batch_job([ext_id], ["start"])
 
         # Relaunch from the dev path, stopping any conflicting installed instances
@@ -404,22 +404,22 @@ class ExtensionMode(Mode):
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
 
-        ext_id = supervisor.preview.ext_id
-        if not ext_id:
+        preview_ext = supervisor.get_preview()
+        if not preview_ext:
             # will happen if preview is interrupted before started
             logger.debug("[preview] Ignoring stop_preview; no preview active")
             return
 
-        logger.info("[preview] Stopping preview %s", ext_id)
+        logger.info("[preview] Stopping preview %s", preview_ext.id)
 
         def restore_original() -> None:
-            # Clear the preview only after its process has stopped, so its exit handler still sees a
+            # Drop the preview only after its process has stopped, so its exit handler still sees a
             # preview (and won't persist a stop-time error onto the installed extension), and so the
             # lookup below resolves the installed controller rather than the preview one.
-            supervisor.preview.clear()
+            supervisor.clear_preview()
             # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = extension_registry.get(ext_id)
+            controller = extension_registry.get(preview_ext.id)
             if controller and controller.is_enabled:
-                self._run_ext_batch_job([ext_id], ["start"])
+                self._run_ext_batch_job([preview_ext.id], ["start"])
 
-        self._run_ext_batch_job([ext_id], ["stop"], callback=restore_original)
+        self._run_ext_batch_job([preview_ext.id], ["stop"], callback=restore_original)

@@ -9,19 +9,11 @@ from ulauncher.modes.extensions.extension_supervisor import supervisor
 from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("extension_lifecycle")
-
 logger = logging.getLogger(__name__)
 
 
-def _get_preview_controller() -> ExtensionController | None:
-    preview = supervisor.preview
-    if preview.ext_id:
-        return ExtensionController(preview.ext_id, preview.path)
-    return None
-
-
 def get(ext_id: str, include_preview: bool = True) -> ExtensionController | None:
-    if include_preview and ext_id == supervisor.preview.ext_id and (preview_ext := _get_preview_controller()):
+    if include_preview and (preview_ext := supervisor.get_preview(ext_id)):
         return preview_ext
     path = extension_finder.locate(ext_id)
     return ExtensionController(ext_id, path) if path else None
@@ -29,8 +21,8 @@ def get(ext_id: str, include_preview: bool = True) -> ExtensionController | None
 
 def iterate(sort: bool = False, include_preview: bool = True) -> Iterator[ExtensionController]:
     controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
-    if include_preview and (preview_controller := _get_preview_controller()):
-        controllers[preview_controller.id] = preview_controller
+    if include_preview and (preview_ext := supervisor.get_preview()):
+        controllers[preview_ext.id] = preview_ext
 
     if not sort:
         yield from controllers.values()
