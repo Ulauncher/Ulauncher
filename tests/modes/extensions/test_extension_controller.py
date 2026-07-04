@@ -8,13 +8,13 @@ from ulauncher.api.shared.event import EventType
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     PreviewExtensionController,
-    supervisor,
+    ext_service,
 )
 
 
 @pytest.fixture(autouse=True)
-def unclaimed_supervisor(mocker: MockerFixture) -> None:
-    mocker.patch.object(supervisor, "is_owner", False)
+def unclaimed_service(mocker: MockerFixture) -> None:
+    mocker.patch.object(ext_service, "is_owner", False)
 
 
 def test_start__raises_when_process_does_not_own_extension_runtimes() -> None:

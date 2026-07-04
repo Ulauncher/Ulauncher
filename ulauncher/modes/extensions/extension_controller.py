@@ -22,7 +22,7 @@ from ulauncher.modes.extensions.extension_manifest import (
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
-from ulauncher.modes.extensions.extension_supervisor import supervisor
+from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
 
@@ -176,13 +176,13 @@ class ExtensionController:
 
     @property
     def is_preview(self) -> bool:
-        return supervisor.get_preview(self.id) is not None
+        return ext_service.get_preview(self.id) is not None
 
     @property
     def source_path(self) -> str:
         """Where to load and launch the extension from: the dev path while it is being previewed,
         otherwise `self.path`."""
-        return preview.path if (preview := supervisor.get_preview(self.id)) else self.path
+        return preview.path if (preview := ext_service.get_preview(self.id)) else self.path
 
     @property
     def manifest(self) -> ExtensionManifest:
@@ -200,8 +200,8 @@ class ExtensionController:
     @property
     def owns_runtime(self) -> bool:
         """Whether the extension is running and owned by the current runtime (always False outside of the app)."""
-        # supervisor.is_owner check for making the behavior/contract explicit, but not actually needed
-        return supervisor.is_owner and self.id in supervisor.runtimes
+        # service.is_owner check for making the behavior/contract explicit, but not actually needed
+        return ext_service.is_owner and self.id in ext_service.runtimes
 
     @property
     def is_manageable(self) -> bool:
@@ -363,7 +363,7 @@ class ExtensionController:
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
-        if not supervisor.is_owner:
+        if not ext_service.is_owner:
             msg = "Only the app process can start extensions. Ask it to via a D-Bus event ('extensions:reload')."
             raise RuntimeError(msg)
 
@@ -371,7 +371,7 @@ class ExtensionController:
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = supervisor.stopped_listeners.get(self.id, [])
+            listeners = ext_service.stopped_listeners.get(self.id, [])
             for stop_listener in listeners:
                 stop_listener()
 
@@ -379,7 +379,7 @@ class ExtensionController:
 
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
-                supervisor.runtimes.pop(self.id, None)
+                ext_service.runtimes.pop(self.id, None)
                 # A failing preview must not disable the installed extension by persisting its error.
                 if not self.is_preview:
                     self.state.save(error_type=cause, error_message=error_msg)
@@ -404,7 +404,7 @@ class ExtensionController:
         cmd = [sys.executable, extension_main]
 
         # Preview extensions can opt into the remote debugger
-        if (preview_ext := supervisor.get_preview(self.id)) and preview_ext.with_debugger:
+        if (preview_ext := ext_service.get_preview(self.id)) and preview_ext.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",
@@ -432,7 +432,7 @@ class ExtensionController:
         # surfaced consistently and any queued start listeners get cleaned up, rather than
         # raising out into callers.
         try:
-            supervisor.runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
+            ext_service.runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
@@ -442,9 +442,9 @@ class ExtensionController:
     async def stop(self) -> None:
         """Stops the extension process if this process owns one. Intentionally a no-op elsewhere
         (the CLI): remote runtimes are stopped by sending D-Bus events to the app instead."""
-        if runtime := supervisor.runtimes.pop(self.id, None):
+        if runtime := ext_service.runtimes.pop(self.id, None):
             stopped_future: asyncio.Future[None] = asyncio.Future()
-            supervisor.stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
+            ext_service.stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
@@ -453,11 +453,11 @@ class ExtensionController:
         """
         Sends a JSON message to the extension if it is running.
         """
-        if not supervisor.is_owner:
+        if not ext_service.is_owner:
             msg = "Only the app process can message extensions."
             raise RuntimeError(msg)
 
-        if runtime := supervisor.runtimes.get(self.id):
+        if runtime := ext_service.runtimes.get(self.id):
             runtime.send_message(message, request_id)
 
 

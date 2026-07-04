@@ -5,7 +5,7 @@ from typing import Iterator
 
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_supervisor import supervisor
+from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("extension_lifecycle")
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def get(ext_id: str, include_preview: bool = True) -> ExtensionController | None:
-    if include_preview and (preview_ext := supervisor.get_preview(ext_id)):
+    if include_preview and (preview_ext := ext_service.get_preview(ext_id)):
         return preview_ext
     path = extension_finder.locate(ext_id)
     return ExtensionController(ext_id, path) if path else None
@@ -21,7 +21,7 @@ def get(ext_id: str, include_preview: bool = True) -> ExtensionController | None
 
 def iterate(sort: bool = False, include_preview: bool = True) -> Iterator[ExtensionController]:
     controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
-    if include_preview and (preview_ext := supervisor.get_preview()):
+    if include_preview and (preview_ext := ext_service.get_preview()):
         controllers[preview_ext.id] = preview_ext
 
     if not sort:
