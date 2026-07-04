@@ -4,7 +4,7 @@ import asyncio
 import html
 import logging
 from threading import Thread
-from typing import Any, Callable, Iterator, Literal
+from typing import Callable, Iterator, Literal
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
@@ -255,20 +255,6 @@ class ExtensionMode(Mode):
         self._run_ext_batch_job(
             extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
         )
-
-    @events.on
-    def update_preferences(self, ext_id: str, data: dict[str, Any]) -> None:
-        if ext := extension_registry.get(ext_id):
-            old_preferences = data.get("old_preferences", {})
-            for p_id, new_value in data.get("preferences", {}).items():
-                pref = ext.preferences.get(p_id)
-                old_value = old_preferences.get(p_id, pref.value if pref else None)
-                if pref and new_value != old_value:
-                    event_data: ipc.UpdatePreferencesEvent = {
-                        "type": EventType.UPDATE_PREFERENCES,
-                        "args": (p_id, new_value, old_value),
-                    }
-                    ext.send_message(event_data)
 
     def _send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
         """

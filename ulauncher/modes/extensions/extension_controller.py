@@ -230,10 +230,21 @@ class ExtensionController:
         return triggers
 
     def save_user_preferences(self, data: Any) -> None:
+        from ulauncher.api.shared.event import EventType
+
         old_preferences = {p_id: pref.value for p_id, pref in self.preferences.items()}
         user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
-        events.emit("extensions:update_preferences", self.id, {**data, "old_preferences": old_preferences})
+        if not self.owns_runtime:
+            return
+        for p_id, new_value in data.get("preferences", {}).items():
+            # Only notify about values changing for preferences declared in the manifest
+            if p_id in old_preferences and new_value != old_preferences[p_id]:
+                event_data: ipc.UpdatePreferencesEvent = {
+                    "type": EventType.UPDATE_PREFERENCES,
+                    "args": (p_id, new_value, old_preferences[p_id]),
+                }
+                self.send_message(event_data)
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
