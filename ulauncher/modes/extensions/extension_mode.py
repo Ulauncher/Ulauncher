@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 import html
 import logging
-from threading import Thread
-from typing import Callable, Iterator, Literal
+from typing import Callable, Iterator
 
 from ulauncher.api.shared.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
@@ -16,14 +14,14 @@ from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     ExtensionControllerTrigger,
 )
-from ulauncher.modes.extensions.extension_supervisor import supervisor
+from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
 logger = logging.getLogger(__name__)
-events = EventBus("extensions")
+events = EventBus("extensions", skip_if_not_bound=True)
 
 LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giving up
 
@@ -45,15 +43,9 @@ class ExtensionMode(Mode):
     _request_id: int = 0
 
     def __init__(self) -> None:
-        supervisor.claim_ownership()
+        ext_service.activate()
         self._trigger_cache = {}
         events.set_self(self)
-        scheduling.run_when_idle(self._start_extensions)
-
-    def _start_extensions(self) -> None:
-        for ext in extension_registry.iterate():
-            if ext.state.is_enabled:
-                ext.start()
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
@@ -202,60 +194,6 @@ class ExtensionMode(Mode):
 
         callback(effect_msg)
 
-    def _run_ext_batch_job(
-        self, extension_ids: list[str], jobs: list[Literal["start", "stop"]], callback: Callable[[], None] | None = None
-    ) -> None:
-        ext_controllers: list[ExtensionController] = []
-        for ext_id in extension_ids:
-            if ext := extension_registry.get(ext_id):
-                ext_controllers.append(ext)  # noqa: PERF401
-
-        # run the reload in a separate thread to avoid blocking the main thread
-        async def run_batch_async() -> None:
-            for job in jobs:
-                if job == "start":
-                    for controller in ext_controllers:
-                        if controller.is_enabled:
-                            controller.start()
-                elif job == "stop":
-                    await asyncio.gather(*[c.stop() for c in ext_controllers])
-
-        def run_batch() -> None:
-            asyncio.run(run_batch_async())
-            if callback:
-                callback()
-
-        Thread(target=run_batch).start()
-
-    @events.on
-    def reload(
-        self,
-        extension_ids: list[str] | None = None,
-    ) -> None:
-        if not extension_ids:
-            logger.warning("Reload message received without any extension IDs. No extensions will be restarted.")
-            return
-
-        logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
-
-        self._run_ext_batch_job(
-            extension_ids,
-            ["stop", "start"],
-            callback=lambda: logger.info("%s extensions (re)loaded", len(extension_ids)),
-        )
-
-    @events.on
-    def stop(self, extension_ids: list[str] | None = None) -> None:
-        if not extension_ids:
-            logger.warning("Stop message received without any extension IDs. No extensions will be stopped.")
-            return
-
-        logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
-
-        self._run_ext_batch_job(
-            extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
-        )
-
     def _send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
         """
         Send an event to the extension, expecting a response (passed to the callback).
@@ -379,47 +317,3 @@ class ExtensionMode(Mode):
             rendered.append(result)
         effect_msg["results"] = rendered
         return effect_msg
-
-    @events.on
-    def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
-        """Run an extension from a dev path WITHOUT installing it. Triggered from the CLI via D-Bus.
-
-        While the preview is active, the controller with this id launches from the dev path; its
-        dependencies are installed by the CLI before this is called.
-        """
-
-        logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        supervisor.set_preview(ext_id, path, with_debugger)
-
-        # Guard the restart against a stop_preview that races in during the stop: only relaunch if
-        # this preview is still the active one, otherwise stop_preview owns restoring the extension.
-        def start_if_still_previewing() -> None:
-            if supervisor.get_preview(ext_id):
-                self._run_ext_batch_job([ext_id], ["start"])
-
-        # Relaunch from the dev path, stopping any conflicting installed instances
-        self._run_ext_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
-
-    @events.on
-    def stop_preview(self) -> None:
-        """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
-
-        preview_ext = supervisor.get_preview()
-        if not preview_ext:
-            # will happen if preview is interrupted before started
-            logger.debug("[preview] Ignoring stop_preview; no preview active")
-            return
-
-        logger.info("[preview] Stopping preview %s", preview_ext.id)
-
-        def restore_original() -> None:
-            # Drop the preview only after its process has stopped, so its exit handler still sees a
-            # preview (and won't persist a stop-time error onto the installed extension), and so the
-            # lookup below resolves the installed controller rather than the preview one.
-            supervisor.clear_preview()
-            # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = extension_registry.get(preview_ext.id)
-            if controller and controller.is_enabled:
-                self._run_ext_batch_job([preview_ext.id], ["start"])
-
-        self._run_ext_batch_job([preview_ext.id], ["stop"], callback=restore_original)
