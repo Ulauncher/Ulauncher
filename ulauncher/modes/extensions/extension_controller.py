@@ -176,13 +176,13 @@ class ExtensionController:
 
     @property
     def is_preview(self) -> bool:
-        return supervisor.preview.ext_id == self.id
+        return supervisor.get_preview(self.id) is not None
 
     @property
     def source_path(self) -> str:
         """Where to load and launch the extension from: the dev path while it is being previewed,
         otherwise `self.path`."""
-        return supervisor.preview.path if self.is_preview else self.path
+        return preview.path if (preview := supervisor.get_preview(self.id)) else self.path
 
     @property
     def manifest(self) -> ExtensionManifest:
@@ -396,7 +396,7 @@ class ExtensionController:
         cmd = [sys.executable, extension_main]
 
         # Preview extensions can opt into the remote debugger
-        if self.is_preview and supervisor.preview.with_debugger:
+        if (preview_ext := supervisor.get_preview(self.id)) and preview_ext.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",
@@ -451,3 +451,17 @@ class ExtensionController:
 
         if runtime := supervisor.runtimes.get(self.id):
             runtime.send_message(message, request_id)
+
+
+class PreviewExtensionController(ExtensionController):
+    """An extension being previewed from a dev path via the CLI.
+
+    Only one runs at a time (the debugger binds a fixed port). This controller launches from the dev
+    `path` (with `with_debugger`) instead of the extension's installed location.
+    """
+
+    with_debugger = False
+
+    def __init__(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
+        super().__init__(ext_id, path)
+        self.with_debugger = with_debugger
