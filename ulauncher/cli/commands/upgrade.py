@@ -32,7 +32,7 @@ async def _upgrade_all_extensions() -> list[str]:
             continue
 
         try:
-            updated = await controller.update()
+            updated = await get_ext_registry().update(controller)
             if updated:
                 updated_extensions.append(controller.id)
         except ext_exceptions.UrlError:
@@ -45,7 +45,7 @@ async def _upgrade_all_extensions() -> list[str]:
 
 def upgrade_one(controller: ExtensionController) -> bool:
     try:
-        updated = asyncio.run(controller.update())
+        updated = asyncio.run(get_ext_registry().update(controller))
     except ext_exceptions.UrlError:
         _log_url_error(controller.id, controller.state.url, fatal=True)
         return False

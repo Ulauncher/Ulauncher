@@ -2,10 +2,9 @@ import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_controller, normalize_ext_arg
+from ulauncher.cli.commands import get_ext_controller, get_ext_registry, normalize_ext_arg
 from ulauncher.cli.commands.upgrade import upgrade_one
 from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.utils.dbus import dbus_trigger_event
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ def run(args: CLIArguments) -> int:
 
     url = normalize_ext_arg(args.input)
     try:
-        controller = asyncio.run(ExtensionController.install(url))
+        controller = asyncio.run(get_ext_registry().install(url))
         dbus_trigger_event("extensions:reload", [controller.id])
     except (ValueError, ext_exceptions.UrlError):  # error already logged
         return 1
