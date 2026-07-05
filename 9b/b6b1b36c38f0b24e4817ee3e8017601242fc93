@@ -1,0 +1,21 @@
+ulauncher/modes/extensions/extension_record.py
+  s_c86a00b5db10f4::t_4e7f79040cba91 157-161
+tests/modes/extensions/test_extension_record.py
+  s_c86a00b5db10f4::t_ea664f61b08293 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9bb6b1b36c38f0b24e4817ee3e8017601242fc93",
+  "prompts": {},
+  "sessions": {
+    "s_c86a00b5db10f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb8e1647-d7ee-4944-94b3-ce87fca6d2b4",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
