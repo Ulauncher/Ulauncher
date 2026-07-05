@@ -12,6 +12,7 @@ from ulauncher import cli, paths
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
@@ -37,12 +38,12 @@ class ExtensionServiceListener(Protocol):
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None: ...
 
 
-class ExtensionService:
-    """Owns the extension processes and handles the extension lifecycle intents.
+class ExtensionService(ExtensionRegistry):
+    """The app's ExtensionRegistry: also owns the extension processes and handles lifecycle intents.
 
-    Extensions only run in the app process, so only app code uses the service to start, stop and
-    message them. The CLI does its disk work with plain controllers and asks the app to reconcile
-    the processes via D-Bus events ("extensions:reload", "extensions:stop", ...).
+    Extensions only run in the app process, so only app code uses the service. The CLI does its
+    disk work with a plain ExtensionRegistry and asks the app to reconcile the processes via
+    D-Bus events ("extensions:reload", "extensions:stop", ...).
     """
 
     runtimes: dict[str, ExtensionRuntime]
@@ -51,10 +52,14 @@ class ExtensionService:
     listener: ExtensionServiceListener | None
 
     def __init__(self) -> None:
+        super().__init__()
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self._preview = None
         self.listener = None
+
+    def _get_preview_controller(self) -> PreviewExtensionController | None:
+        return self._preview
 
     def activate(self, listener: ExtensionServiceListener) -> None:
         """Bind the lifecycle event handlers and start the enabled extensions.
@@ -78,10 +83,7 @@ class ExtensionService:
         self._preview = None
 
     def _start_extensions(self) -> None:
-        # Imported here to break the import cycle (extension_registry -> extension_controller -> here)
-        from ulauncher.modes.extensions import extension_registry
-
-        for ext in extension_registry.iterate():
+        for ext in self.iterate():
             if ext.state.is_enabled:
                 self.start_extension(ext)
 
@@ -91,11 +93,9 @@ class ExtensionService:
         jobs: list[Literal["start", "stop"]],
         callback: Callable[[], None] | None = None,
     ) -> None:
-        from ulauncher.modes.extensions import extension_registry
-
         controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
-            if ext := extension_registry.get(ext_id):
+            if ext := self.get(ext_id):
                 controllers.append(ext)  # noqa: PERF401
 
         # run the reload in a separate thread to avoid blocking the main thread
@@ -294,8 +294,6 @@ class ExtensionService:
     @events.on
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
-        from ulauncher.modes.extensions import extension_registry
-
         preview_ext = self.get_preview()
         if not preview_ext:
             # will happen if preview is interrupted before started
@@ -307,7 +305,7 @@ class ExtensionService:
         def restore_original() -> None:
             self.clear_preview()
             # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = extension_registry.get(preview_ext.id)
+            controller = self.get(preview_ext.id)
             if controller and controller.is_enabled:
                 self._run_batch_job([preview_ext.id], ["start"])
 

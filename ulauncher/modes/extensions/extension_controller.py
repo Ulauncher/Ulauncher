@@ -17,7 +17,6 @@ from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifestPreference,
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
-from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
 
@@ -171,12 +170,16 @@ class ExtensionController:
 
     @property
     def is_preview(self) -> bool:
+        from ulauncher.modes.extensions.extension_service import ext_service
+
         return ext_service.get_preview(self.id) is not None
 
     @property
     def source_path(self) -> str:
         """Where to load and launch the extension from: the dev path while it is being previewed,
         otherwise `self.path`."""
+        from ulauncher.modes.extensions.extension_service import ext_service
+
         return preview.path if (preview := ext_service.get_preview(self.id)) else self.path
 
     @property
@@ -231,6 +234,8 @@ class ExtensionController:
         return icon_value
 
     async def remove(self) -> None:
+        from ulauncher.modes.extensions.extension_service import ext_service
+
         if not self.is_manageable:
             logger.warning(
                 "Extension %s is not manageable. Cannot remove it automatically. "
@@ -254,6 +259,8 @@ class ExtensionController:
 
         `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
+        from ulauncher.modes.extensions.extension_service import ext_service
+
         target_path = self.path
         # Fixed path per extension so failed installs don't accumulate.
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).

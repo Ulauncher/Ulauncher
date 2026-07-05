@@ -9,7 +9,6 @@ from pytest_mock import MockerFixture
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 
 if TYPE_CHECKING:
@@ -24,13 +23,25 @@ def _make_mode() -> ExtensionMode:
     return mode
 
 
+def _mock_service(mocker: MockerFixture) -> MagicMock:
+    from ulauncher.modes.extensions.extension_service import ext_service
+
+    mocked = MagicMock()
+    mocker.patch.object(ext_service, "get", mocked.get)
+    mocker.patch.object(ext_service, "iterate", mocked.iterate)
+    mocker.patch.object(ext_service, "is_running", mocked.is_running)
+    return mocked
+
+
 def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> None:
     from ulauncher.modes.extensions import extension_mode
 
     mode = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
     ext = SimpleNamespace(id="test.ext")
-    mocker.patch.object(extension_registry, "get", return_value=ext)
+    mocked_service = _mock_service(mocker)
+    mocked_service.get.return_value = ext
+    mocked_service.is_running.return_value = False
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()
 
@@ -47,7 +58,9 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
     mode = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
     ext = SimpleNamespace(id="test.ext")
-    mocker.patch.object(extension_registry, "get", return_value=ext)
+    mocked_service = _mock_service(mocker)
+    mocked_service.get.return_value = ext
+    mocked_service.is_running.return_value = False
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()
 
@@ -60,8 +73,9 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
 
 def test_handle_query__unknown_keyword_shows_message(mocker: MockerFixture) -> None:
     mode = _make_mode()
-    mocker.patch.object(extension_registry, "iterate", return_value=iter([]))
-    mocker.patch.object(extension_registry, "get", return_value=None)
+    mocked_service = _mock_service(mocker)
+    mocked_service.iterate.return_value = iter([])
+    mocked_service.get.return_value = None
     callback = MagicMock()
 
     mode.handle_query(Query("kw", "arg"), callback)

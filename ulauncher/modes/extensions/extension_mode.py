@@ -9,7 +9,6 @@ from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
-from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     ExtensionControllerTrigger,
@@ -76,7 +75,7 @@ class ExtensionMode(Mode):
 
         self._ensure_trigger_cache()
         trigger_cache_entry = self._trigger_cache.get(query.keyword, None)
-        ext = extension_registry.get(trigger_cache_entry[1]) if trigger_cache_entry else None
+        ext = ext_service.get(trigger_cache_entry[1]) if trigger_cache_entry else None
         if not trigger_cache_entry or not ext:
             # Core only routes a keyword here when its own cache claims this mode owns it, so a miss
             # means the two caches disagree (e.g. the extension was removed since core last loaded).
@@ -101,7 +100,7 @@ class ExtensionMode(Mode):
         self._send_request(event, callback)
 
     def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
-        for ext in extension_registry.iterate(sort=True):
+        for ext in ext_service.iterate(sort=True):
             if not ext.is_enabled:
                 continue
             for trigger_id, trigger in ext.triggers.items():
@@ -167,7 +166,7 @@ class ExtensionMode(Mode):
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            self._active_ext = extension_registry.get(result.ext_id)
+            self._active_ext = ext_service.get(result.ext_id)
             launch_event: ipc.LaunchTriggerEvent = {
                 "type": EventType.LAUNCH_TRIGGER,
                 "args": (result.trigger_id,),
@@ -240,7 +239,7 @@ class ExtensionMode(Mode):
             if "body" not in message or "notification_id" not in message:
                 logger.warning("Received malformed 'notify' message from %s: %s", ext_id, message)
                 return
-            ext = extension_registry.get(ext_id)
+            ext = ext_service.get(ext_id)
             if not ext:
                 logger.warning("Notification sent from an extension, '%s', which was not found", ext_id)
                 return
