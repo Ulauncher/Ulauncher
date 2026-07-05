@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions
+from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
@@ -19,7 +20,6 @@ from ulauncher.utils.eventbus import EventBus
 
 if TYPE_CHECKING:
     from ulauncher.internals import ipc
-    from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
 
 logger = logging.getLogger(__name__)
 events = EventBus("extensions", skip_if_not_bound=True)
@@ -48,18 +48,13 @@ class ExtensionService(ExtensionRegistry):
 
     runtimes: dict[str, ExtensionRuntime]
     stopped_listeners: dict[str, list[Callable[[], None]]]
-    _preview: PreviewExtensionController | None
     listener: ExtensionServiceListener | None
 
     def __init__(self) -> None:
         super().__init__()
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
-        self._preview = None
         self.listener = None
-
-    def _get_preview_controller(self) -> PreviewExtensionController | None:
-        return self._preview
 
     def activate(self, listener: ExtensionServiceListener) -> None:
         """Bind the lifecycle event handlers and start the enabled extensions.
@@ -67,20 +62,6 @@ class ExtensionService(ExtensionRegistry):
         events.set_self(self)
         self.listener = listener
         scheduling.run_when_idle(self._start_extensions)
-
-    def get_preview(self, ext_id: str | None = None) -> PreviewExtensionController | None:
-        """The active preview, or None. When `ext_id` is given, return it only if it targets that extension."""
-        if self._preview and (ext_id is None or self._preview.id == ext_id):
-            return self._preview
-        return None
-
-    def set_preview(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
-        from ulauncher.modes.extensions.extension_controller import PreviewExtensionController
-
-        self._preview = PreviewExtensionController(ext_id=ext_id, path=path, with_debugger=with_debugger)
-
-    def clear_preview(self) -> None:
-        self._preview = None
 
     def _start_extensions(self) -> None:
         for ext in self.iterate():
@@ -170,12 +151,11 @@ class ExtensionService(ExtensionRegistry):
         if not controller.is_preview:
             controller.state.save(error_type="", error_message="")  # clear any previous error
 
-        ext_deps = ExtensionDependencies(controller.id, controller.source_path)
-        extension_main = f"{controller.source_path}/main.py"
+        ext_deps = ExtensionDependencies(controller.id, controller.path)
+        extension_main = f"{controller.path}/main.py"
         cmd = [sys.executable, extension_main]
 
-        # Preview extensions can opt into the remote debugger
-        if (preview_ext := self.get_preview(controller.id)) and preview_ext.with_debugger:
+        if isinstance(controller, PreviewExtensionController) and controller.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",
@@ -280,12 +260,12 @@ class ExtensionService(ExtensionRegistry):
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        self.set_preview(ext_id, path, with_debugger)
+        self.preview = PreviewExtensionController(ext_id, path, with_debugger=with_debugger)
 
         # Guard the restart against a stop_preview that races in during the stop: only relaunch if
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
         def start_if_still_previewing() -> None:
-            if self.get_preview(ext_id):
+            if self.preview and self.preview.id == ext_id:
                 self._run_batch_job([ext_id], ["start"])
 
         # Relaunch from the dev path, stopping any conflicting installed instances
@@ -294,22 +274,22 @@ class ExtensionService(ExtensionRegistry):
     @events.on
     def stop_preview(self) -> None:
         """Stop the active preview and restore the installed extension. Triggered from the CLI via D-Bus"""
-        preview_ext = self.get_preview()
-        if not preview_ext:
+        if not self.preview:
             # will happen if preview is interrupted before started
             logger.debug("[preview] Ignoring stop_preview; no preview active")
             return
 
-        logger.info("[preview] Stopping preview %s", preview_ext.id)
+        ext_id = self.preview.id
+        logger.info("[preview] Stopping preview %s", ext_id)
 
         def restore_original() -> None:
-            self.clear_preview()
+            self.preview = None
             # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = self.get(preview_ext.id)
+            controller = self.get(ext_id)
             if controller and controller.is_enabled:
-                self._run_batch_job([preview_ext.id], ["start"])
+                self._run_batch_job([ext_id], ["start"])
 
-        self._run_batch_job([preview_ext.id], ["stop"], callback=restore_original)
+        self._run_batch_job([ext_id], ["stop"], callback=restore_original)
 
 
 ext_service = ExtensionService()
