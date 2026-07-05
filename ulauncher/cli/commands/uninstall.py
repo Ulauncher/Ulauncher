@@ -10,7 +10,11 @@ logger = logging.getLogger(__name__)
 
 def run(args: CLIArguments) -> int:
     if record := get_ext_record(args.input):
-        asyncio.run(get_ext_registry().uninstall(record))
+        try:
+            asyncio.run(get_ext_registry().uninstall(record))
+        except OSError:
+            logger.error("Could not uninstall %s", record.id)  # noqa: TRY400 - traceback is noise here
+            return 1
         dbus_trigger_event("extensions:stop", [record.id])
         return 0
 
