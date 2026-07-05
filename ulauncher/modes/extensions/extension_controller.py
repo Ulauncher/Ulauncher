@@ -284,13 +284,15 @@ class ExtensionController:
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
         remote.target_dir = staging_dir
-        should_restart_after_swap = self.owns_runtime
+        # keep preview extensions alive (they run from the dev paths, unaffected by installs)
+        should_restart = self.owns_runtime and not self.is_preview
         try:
             downloaded_hash, commit_timestamp = _run_gio_blocking(
                 lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
-            await self.stop()
+            if should_restart:
+                await self.stop()
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)
@@ -307,7 +309,7 @@ class ExtensionController:
             )
         finally:
             rmtree(staging_dir, ignore_errors=True)
-            if should_restart_after_swap:
+            if should_restart:
                 self.start()
 
     async def update(self) -> bool:
