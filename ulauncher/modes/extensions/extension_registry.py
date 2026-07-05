@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from shutil import move, rmtree
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Protocol
 
 from ulauncher import paths
 from ulauncher.gi import GLib
@@ -86,6 +86,27 @@ def _swap_dir(new_dir: str, target: str) -> bool:
     return True
 
 
+class ExtensionLifecycle(Protocol):
+    """The running-process operations install/uninstall need. Only the ExtensionService
+    (app runtime) runs extension, so ExtensionRegistry should no-op (_NoLifecycle)."""
+
+    def is_running(self, record: ExtensionRecord) -> bool: ...
+
+    def start_extension(self, record: ExtensionRecord) -> bool: ...
+
+    async def stop_extension(self, record: ExtensionRecord) -> None: ...
+
+
+class _NoLifecycle:
+    def is_running(self, _record: ExtensionRecord) -> bool:
+        return False
+
+    def start_extension(self, _record: ExtensionRecord) -> bool:
+        return False
+
+    async def stop_extension(self, _record: ExtensionRecord) -> None: ...
+
+
 class ExtensionRegistry:
     """Finds installed extensions, hands out records for them, and runs the remote
     operations (install, update, uninstall).
@@ -98,14 +119,8 @@ class ExtensionRegistry:
     # Previews only exist in the app process; ExtensionService sets this (see preview_ext).
     preview: PreviewExtensionRecord | None = None
 
-    def is_running(self, _record: ExtensionRecord) -> bool:
-        return False
-
-    def start_extension(self, _record: ExtensionRecord) -> bool:
-        return False
-
-    async def stop_extension(self, record: ExtensionRecord) -> None:
-        """No-op in the CLI; ExtensionService stops the running process."""
+    def __init__(self, lifecycle: ExtensionLifecycle | None = None) -> None:
+        self._lifecycle = lifecycle or _NoLifecycle()
 
     def get(self, ext_id: str) -> ExtensionRecord | None:
         if self.preview and self.preview.id == ext_id:
@@ -146,7 +161,7 @@ class ExtensionRegistry:
 
     async def uninstall(self, record: ExtensionRecord) -> None:
         if record.is_manageable:
-            await self.stop_extension(record)
+            await self._lifecycle.stop_extension(record)
         if not record.remove():
             return
         # A still-locatable extension after removal is a non-manageable copy (e.g. distro-packaged).
@@ -221,9 +236,9 @@ class ExtensionRegistry:
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
 
-            was_running = self.is_running(record)
+            was_running = self._lifecycle.is_running(record)
             if _should_restart():
-                await self.stop_extension(record)
+                await self._lifecycle.stop_extension(record)
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)
@@ -233,4 +248,4 @@ class ExtensionRegistry:
         finally:
             rmtree(staging_dir, ignore_errors=True)
             if _should_restart():
-                self.start_extension(record)
+                self._lifecycle.start_extension(record)
