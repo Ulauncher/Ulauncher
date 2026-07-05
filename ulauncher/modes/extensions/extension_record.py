@@ -79,7 +79,9 @@ class ExtensionRecord:
         if self.state.id or not Path(self.path).exists():
             return
         self.state.id = self.id
-        self.state.update(json_load(f"{self.path}/.default-state.json"))
+        defaults = json_load(f"{self.path}/.default-state.json")
+        if isinstance(defaults, dict):
+            self.state.update(defaults)
 
     @property
     def manifest(self) -> ExtensionManifest:
