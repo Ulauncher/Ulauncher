@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 
 def run(args: CLIArguments) -> int:
     if record := get_ext_record(args.input):
+        if not record.is_manageable:
+            logger.error("Extension %s is externally managed and can not be uninstalled (%s)", record.id, record.path)
+            return 1
         try:
             asyncio.run(get_ext_registry().uninstall(record))
         except OSError:

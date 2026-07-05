@@ -48,6 +48,9 @@ async def _upgrade_all_extensions() -> list[str]:
 
 
 def upgrade_one(record: ExtensionRecord) -> bool:
+    if not record.is_manageable:
+        logger.error("Extension %s is externally managed and can not be upgraded (%s)", record.id, record.path)
+        return False
     try:
         updated = asyncio.run(get_ext_registry().update(record))
     except ext_exceptions.UrlError:
