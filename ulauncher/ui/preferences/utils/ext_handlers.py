@@ -99,7 +99,7 @@ class ExtensionHandlers:
 
         def install_async() -> None:
             try:
-                ext = asyncio.run(ExtensionController.install(url))
+                ext = asyncio.run(ext_service.install(url))
                 ext_service.start_extension(ext)
 
                 # Update UI in main thread
@@ -152,7 +152,7 @@ class ExtensionHandlers:
 
             def remove_async() -> None:
                 try:
-                    asyncio.run(ext.remove())
+                    asyncio.run(ext_service.uninstall(ext))
 
                     def update_ui() -> None:
                         progress_dialog.destroy()
@@ -177,7 +177,7 @@ class ExtensionHandlers:
 
         def check_async() -> None:
             try:
-                has_update, commit_hash = asyncio.run(ext.check_update())
+                has_update, commit_hash = asyncio.run(ext_service.check_update(ext))
 
                 def update_ui() -> None:
                     if has_update:
@@ -208,7 +208,7 @@ class ExtensionHandlers:
 
         def update_async() -> None:
             try:
-                asyncio.run(ext.update())
+                asyncio.run(ext_service.update(ext))
 
                 def update_ui() -> None:
                     callback()
