@@ -40,6 +40,9 @@ async def _upgrade_all_extensions() -> list[str]:
             _log_url_error(record.id, record.state.url, fatal=False)
         except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
             logger.warning("Network error: Could not upgrade %s", record.id)
+        except (ext_exceptions.ExtensionError, OSError):
+            # update() already logged the details; keep the batch going for the other extensions
+            logger.warning("Could not upgrade %s", record.id)
 
     return updated_extensions
 
@@ -52,6 +55,9 @@ def upgrade_one(record: ExtensionRecord) -> bool:
         return False
     except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
         logger.error("Network error: Could not upgrade %s", record.id)  # noqa: TRY400 - traceback is noise here
+        return False
+    except (ext_exceptions.ExtensionError, OSError):
+        logger.error("Could not upgrade %s", record.id)  # noqa: TRY400 - already logged in update()
         return False
     if updated:
         dbus_trigger_event("extensions:reload", [record.id])

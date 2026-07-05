@@ -26,4 +26,7 @@ def run(args: CLIArguments) -> int:
     except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
         logger.error("Network error: Could not install %s", args.input)  # noqa: TRY400 - traceback is noise here
         return 1
+    except (ext_exceptions.ExtensionError, OSError) as e:
+        logger.error("Could not install %s: %s", args.input, e)  # noqa: TRY400 - traceback is noise here
+        return 1
     return 0
