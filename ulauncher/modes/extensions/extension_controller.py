@@ -284,13 +284,14 @@ class ExtensionController:
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
         remote.target_dir = staging_dir
-        # keep preview extensions alive (they run from the dev paths, unaffected by installs)
-        should_restart = self.owns_runtime and not self.is_preview
+        should_restart = False
         try:
             downloaded_hash, commit_timestamp = _run_gio_blocking(
                 lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
+            # preview extensions need not and should not be restarted (they run from the dev paths)
+            should_restart = self.owns_runtime and not self.is_preview
             if should_restart:
                 await self.stop()
             if not _swap_dir(staging_dir, target_path):
