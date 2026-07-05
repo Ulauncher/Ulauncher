@@ -21,7 +21,7 @@ class ExtensionPreference(ExtensionManifestPreference):
     value: str | int | bool | None = None
 
 
-class ExtensionControllerTrigger(BaseDataClass):
+class ExtensionRecordTrigger(BaseDataClass):
     name = ""
     description = ""
     default_keyword = ""
@@ -55,7 +55,7 @@ def _load_preferences(ext_id: str) -> JsonConf:
     return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
 
-class ExtensionController:
+class ExtensionRecord:
     """Represents an installed extension: its files, state and preferences."""
 
     id: str
@@ -110,11 +110,11 @@ class ExtensionController:
         return prefs
 
     @property
-    def triggers(self) -> dict[str, ExtensionControllerTrigger]:
+    def triggers(self) -> dict[str, ExtensionRecordTrigger]:
         user_prefs_json = _load_preferences(self.id)
         triggers = {}
         for t_id, manifest_trigger in self.manifest.triggers.items():
-            trigger = ExtensionControllerTrigger(manifest_trigger)
+            trigger = ExtensionRecordTrigger(manifest_trigger)
             trigger.keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.default_keyword)
             triggers[t_id] = trigger
 
@@ -168,7 +168,7 @@ class ExtensionController:
         )
 
 
-class PreviewExtensionController(ExtensionController):
+class PreviewExtensionRecord(ExtensionRecord):
     """An extension being previewed from a dev path via the CLI; `path` is the dev path.
 
     Only one runs at a time (the debugger binds a fixed port). While active, it replaces the

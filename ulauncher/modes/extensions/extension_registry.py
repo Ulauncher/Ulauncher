@@ -8,8 +8,8 @@ from typing import Any, Callable, Iterator
 from ulauncher import paths
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
-from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 
 logger = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ def _swap_dir(new_dir: str, target: str) -> bool:
 
 
 class ExtensionRegistry:
-    """Finds installed extensions, hands out controllers for them, and runs the remote
+    """Finds installed extensions, hands out records for them, and runs the remote
     operations (install, update, uninstall).
 
     Instantiated exactly once per runtime. The CLI creates a plain instance. The app instead uses
@@ -96,115 +96,115 @@ class ExtensionRegistry:
     """
 
     # Previews only exist in the app process; ExtensionService sets this (see preview_ext).
-    preview: PreviewExtensionController | None = None
+    preview: PreviewExtensionRecord | None = None
 
-    def is_running(self, _controller: ExtensionController) -> bool:
+    def is_running(self, _record: ExtensionRecord) -> bool:
         return False
 
-    def start_extension(self, _controller: ExtensionController) -> bool:
+    def start_extension(self, _record: ExtensionRecord) -> bool:
         return False
 
-    async def stop_extension(self, controller: ExtensionController) -> None:
+    async def stop_extension(self, record: ExtensionRecord) -> None:
         """No-op in the CLI; ExtensionService stops the running process."""
 
-    def get(self, ext_id: str) -> ExtensionController | None:
+    def get(self, ext_id: str) -> ExtensionRecord | None:
         if self.preview and self.preview.id == ext_id:
             return self.preview
         path = extension_finder.locate(ext_id)
-        return ExtensionController(ext_id, path) if path else None
+        return ExtensionRecord(ext_id, path) if path else None
 
-    def iterate(self, sort: bool = False) -> Iterator[ExtensionController]:
-        controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
+    def iterate(self, sort: bool = False) -> Iterator[ExtensionRecord]:
+        records = {ext_id: ExtensionRecord(ext_id, path) for ext_id, path in extension_finder.iterate()}
         if self.preview:
-            controllers[self.preview.id] = self.preview
+            records[self.preview.id] = self.preview
 
         if not sort:
-            yield from controllers.values()
+            yield from records.values()
             return
 
-        def sort_key(controller: ExtensionController) -> int:
-            if controller.is_preview:
+        def sort_key(record: ExtensionRecord) -> int:
+            if record.is_preview:
                 return 0
-            if controller.has_error:
+            if record.has_error:
                 return 2
-            if not controller.is_enabled:
+            if not record.is_enabled:
                 return 3
             return 1
 
-        yield from sorted(controllers.values(), key=sort_key)
+        yield from sorted(records.values(), key=sort_key)
 
-    async def install(self, url: str, commit_hash: str | None = None) -> ExtensionController:
+    async def install(self, url: str, commit_hash: str | None = None) -> ExtensionRecord:
         logger.info("Installing extension: %s", url)
         remote = ExtensionRemote(url)
         if Path(remote.target_dir).exists():  # noqa: ASYNC240
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
-        controller = ExtensionController(remote.ext_id, remote.target_dir)
-        await self._install_from_remote(controller, remote, commit_hash, url=url)
-        logger.info("Extension %s installed successfully", controller.id)
-        return controller
+        record = ExtensionRecord(remote.ext_id, remote.target_dir)
+        await self._install_from_remote(record, remote, commit_hash, url=url)
+        logger.info("Extension %s installed successfully", record.id)
+        return record
 
-    async def uninstall(self, controller: ExtensionController) -> None:
-        if controller.is_manageable:
-            await self.stop_extension(controller)
-        if not controller.remove():
+    async def uninstall(self, record: ExtensionRecord) -> None:
+        if record.is_manageable:
+            await self.stop_extension(record)
+        if not record.remove():
             return
         # A still-locatable extension after removal is a non-manageable copy (e.g. distro-packaged).
         # Disable it rather than let it silently take over the removed extension's id.
-        fallback_path = extension_finder.locate(controller.id)
+        fallback_path = extension_finder.locate(record.id)
         if fallback_path:
-            fallback_controller = ExtensionController(controller.id, fallback_path)
+            fallback_record = ExtensionRecord(record.id, fallback_path)
             # TODO: Try to avoid accessing state attribute
-            fallback_controller.state.save(is_enabled=False)
+            fallback_record.state.save(is_enabled=False)
             logger.info(
                 "Non-manageable extension with the same id exists in '%s'. It was kept disabled.",
                 fallback_path,
             )
 
-    async def update(self, controller: ExtensionController) -> bool:
+    async def update(self, record: ExtensionRecord) -> bool:
         """
         :returns: False if already up-to-date, True if was updated
         """
-        logger.debug("Checking for updates to %s", controller.id)
-        has_update, commit_hash = await self.check_update(controller)
+        logger.debug("Checking for updates to %s", record.id)
+        has_update, commit_hash = await self.check_update(record)
         if not has_update:
-            logger.info('Extension "%s" is already on the latest version', controller.id)
+            logger.info('Extension "%s" is already on the latest version', record.id)
             return False
 
         logger.info(
             'Updating extension "%s" from commit %s to %s',
-            controller.id,
-            controller.state.commit_hash[:8],
+            record.id,
+            record.state.commit_hash[:8],
             commit_hash[:8],
         )
 
         try:
-            await self._install_from_remote(controller, ExtensionRemote(controller.state.url), commit_hash)
+            await self._install_from_remote(record, ExtensionRemote(record.state.url), commit_hash)
         except (ext_exceptions.ExtensionError, OSError):
-            logger.exception("Could not update extension '%s'", controller.id)
+            logger.exception("Could not update extension '%s'", record.id)
             raise
-        logger.info("Successfully updated extension: %s", controller.id)
+        logger.info("Successfully updated extension: %s", record.id)
         return True
 
-    async def check_update(self, controller: ExtensionController) -> tuple[bool, str]:
+    async def check_update(self, record: ExtensionRecord) -> tuple[bool, str]:
         """
         Returns tuple with commit info about a new version
         """
-        commit_hash = _run_gio_blocking(ExtensionRemote(controller.state.url).get_compatible_hash)
-        has_update = controller.state.commit_hash != commit_hash
+        commit_hash = _run_gio_blocking(ExtensionRemote(record.state.url).get_compatible_hash)
+        has_update = record.state.commit_hash != commit_hash
         return has_update, commit_hash
 
     async def _install_from_remote(
-        self, controller: ExtensionController, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any
+        self, record: ExtensionRecord, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any
     ) -> None:
         """Install (atomically): download, stop, swap and restart (if previously running).
 
         `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
-        target_path = controller.path
+        target_path = record.path
         # Fixed path per extension so failed installs don't accumulate.
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
-        staging_dir = str(Path(paths.EXTENSIONS_STAGING) / controller.id)
+        staging_dir = str(Path(paths.EXTENSIONS_STAGING) / record.id)
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
         remote.target_dir = staging_dir
@@ -212,7 +212,7 @@ class ExtensionRegistry:
 
         def _should_restart() -> bool:
             # a preview extension need not and should not be restarted (runs from dev path)
-            is_previewed = self.preview is not None and self.preview.id == controller.id
+            is_previewed = self.preview is not None and self.preview.id == record.id
             return was_running and not is_previewed
 
         try:
@@ -221,16 +221,16 @@ class ExtensionRegistry:
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
 
-            was_running = self.is_running(controller)
+            was_running = self.is_running(record)
             if _should_restart():
-                await self.stop_extension(controller)
+                await self.stop_extension(record)
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)
-            controller.save_installed_state(
+            record.save_installed_state(
                 downloaded_hash, commit_timestamp, **extra_state, browser_url=remote.browser_url or ""
             )
         finally:
             rmtree(staging_dir, ignore_errors=True)
             if _should_restart():
-                self.start_extension(controller)
+                self.start_extension(record)
