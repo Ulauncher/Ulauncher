@@ -8,7 +8,7 @@ from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 
 
 def test_iterate__orders_preview_enabled_error_disabled(mocker: MockerFixture) -> None:
-    preview = SimpleNamespace(id="preview", is_preview=True, is_enabled=True, has_error=False)
+    preview: Any = SimpleNamespace(id="preview", is_preview=True, is_enabled=True, has_error=False)
     enabled = SimpleNamespace(id="enabled", is_preview=False, is_enabled=True, has_error=False)
     errored = SimpleNamespace(id="errored", is_preview=False, is_enabled=True, has_error=True)
     disabled = SimpleNamespace(id="disabled", is_preview=False, is_enabled=False, has_error=False)
@@ -26,10 +26,7 @@ def test_iterate__orders_preview_enabled_error_disabled(mocker: MockerFixture) -
         side_effect=lambda ext_id, _path: controllers[ext_id],
     )
 
-    class PreviewingRegistry(ExtensionRegistry):
-        def _get_preview_controller(self) -> Any:
-            return preview
-
-    registry = PreviewingRegistry()
+    registry = ExtensionRegistry()
+    registry.preview = preview
 
     assert list(registry.iterate(sort=True)) == [preview, enabled, errored, disabled]

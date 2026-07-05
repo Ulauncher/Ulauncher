@@ -8,7 +8,7 @@ from typing import Any, Callable, Iterator
 from ulauncher import paths
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
 
@@ -95,9 +95,8 @@ class ExtensionRegistry:
     owns the running extension processes.
     """
 
-    def _get_preview_controller(self) -> ExtensionController | None:
-        """Previews only exist in the app process (see ExtensionService)."""
-        return None
+    # Previews only exist in the app process; ExtensionService sets this (see preview_ext).
+    preview: PreviewExtensionController | None = None
 
     def is_running(self, _controller: ExtensionController) -> bool:
         return False
@@ -109,16 +108,15 @@ class ExtensionRegistry:
         """No-op in the CLI; ExtensionService stops the running process."""
 
     def get(self, ext_id: str) -> ExtensionController | None:
-        preview_ext = self._get_preview_controller()
-        if preview_ext and preview_ext.id == ext_id:
-            return preview_ext
+        if self.preview and self.preview.id == ext_id:
+            return self.preview
         path = extension_finder.locate(ext_id)
         return ExtensionController(ext_id, path) if path else None
 
     def iterate(self, sort: bool = False) -> Iterator[ExtensionController]:
         controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
-        if preview_controller := self._get_preview_controller():
-            controllers[preview_controller.id] = preview_controller
+        if self.preview:
+            controllers[self.preview.id] = self.preview
 
         if not sort:
             yield from controllers.values()
@@ -214,8 +212,7 @@ class ExtensionRegistry:
 
         def _should_restart() -> bool:
             # a preview extension need not and should not be restarted (runs from dev path)
-            preview = self._get_preview_controller()
-            is_previewed = preview is not None and preview.id == controller.id
+            is_previewed = self.preview is not None and self.preview.id == controller.id
             return was_running and not is_previewed
 
         try:

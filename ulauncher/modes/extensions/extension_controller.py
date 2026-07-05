@@ -63,6 +63,8 @@ class ExtensionController:
     state: ExtensionState
     _state_path: Path
 
+    is_preview = False
+
     def __init__(self, ext_id: str, path: str) -> None:
         self.id = ext_id
         self.path = path
@@ -80,22 +82,8 @@ class ExtensionController:
         self.state.update(json_load(f"{self.path}/.default-state.json"))
 
     @property
-    def is_preview(self) -> bool:
-        from ulauncher.modes.extensions.extension_service import ext_service
-
-        return ext_service.get_preview(self.id) is not None
-
-    @property
-    def source_path(self) -> str:
-        """Where to load and launch the extension from: the dev path while it is being previewed,
-        otherwise `self.path`."""
-        from ulauncher.modes.extensions.extension_service import ext_service
-
-        return preview.path if (preview := ext_service.get_preview(self.id)) else self.path
-
-    @property
     def manifest(self) -> ExtensionManifest:
-        return ExtensionManifest.load(self.source_path)
+        return ExtensionManifest.load(self.path)
 
     @property
     def is_enabled(self) -> bool:
@@ -139,7 +127,7 @@ class ExtensionController:
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
-        expanded_path = join(self.source_path, icon_value)
+        expanded_path = join(self.path, icon_value)
         if isfile(expanded_path):
             return expanded_path
         return icon_value
@@ -181,12 +169,13 @@ class ExtensionController:
 
 
 class PreviewExtensionController(ExtensionController):
-    """An extension being previewed from a dev path via the CLI.
+    """An extension being previewed from a dev path via the CLI; `path` is the dev path.
 
-    Only one runs at a time (the debugger binds a fixed port). This controller launches from the dev
-    `path` (with `with_debugger`) instead of the extension's installed location.
+    Only one runs at a time (the debugger binds a fixed port). While active, it replaces the
+    installed extension with the same id in the registry, so that id launches from the dev path.
     """
 
+    is_preview = True
     with_debugger = False
 
     def __init__(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
