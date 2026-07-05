@@ -5,7 +5,11 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.api.shared.event import EventType
-from ulauncher.modes.extensions.extension_controller import ExtensionController, supervisor
+from ulauncher.modes.extensions.extension_controller import (
+    ExtensionController,
+    PreviewExtensionController,
+    supervisor,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -23,6 +27,12 @@ def test_send_message__raises_when_process_does_not_own_extension_runtimes() -> 
     controller = ExtensionController("test.guard", "/nonexistent")
     with pytest.raises(RuntimeError):
         controller.send_message({"type": "event:unload"})
+
+
+def test_preview_is_never_manageable_even_inside_user_extensions_dir(mocker: MockerFixture) -> None:
+    mocker.patch("ulauncher.modes.extensions.extension_controller.extension_finder.is_manageable", return_value=True)
+    preview = PreviewExtensionController("test.preview", "/nonexistent")
+    assert preview.is_manageable is False
 
 
 def test_save_user_preferences__saves_and_sends_changed_values(mocker: MockerFixture) -> None:

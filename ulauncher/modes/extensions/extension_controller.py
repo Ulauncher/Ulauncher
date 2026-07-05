@@ -473,3 +473,8 @@ class PreviewExtensionController(ExtensionController):
     def __init__(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
         super().__init__(ext_id, path)
         self.with_debugger = with_debugger
+
+    @property
+    def is_manageable(self) -> bool:
+        """Never manageable, so remove/update cannot delete or replace the dev checkout."""
+        return False
