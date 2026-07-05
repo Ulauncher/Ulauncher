@@ -6,7 +6,7 @@ import logging
 import sys
 from collections import defaultdict
 from threading import Thread
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
@@ -24,6 +24,19 @@ logger = logging.getLogger(__name__)
 events = EventBus("extensions", skip_if_not_bound=True)
 
 
+class ExtensionServiceListener(Protocol):
+    """What the service reports back about the extensions it runs. Implemented by ExtensionMode,
+    which registers itself via ExtensionService.activate."""
+
+    def started(self, ext_id: str) -> None: ...
+
+    def errored(self, ext_id: str) -> None: ...
+
+    def invalidate_cache(self) -> None: ...
+
+    def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None: ...
+
+
 class ExtensionService:
     """Owns the extension processes and handles the extension lifecycle intents.
 
@@ -35,16 +48,19 @@ class ExtensionService:
     runtimes: dict[str, ExtensionRuntime]
     stopped_listeners: dict[str, list[Callable[[], None]]]
     _preview: PreviewExtensionController | None
+    listener: ExtensionServiceListener | None
 
     def __init__(self) -> None:
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self._preview = None
+        self.listener = None
 
-    def activate(self) -> None:
+    def activate(self, listener: ExtensionServiceListener) -> None:
         """Bind the lifecycle event handlers and start the enabled extensions.
         Called by ExtensionMode when the app loads its modes."""
         events.set_self(self)
+        self.listener = listener
         scheduling.run_when_idle(self._start_extensions)
 
     def get_preview(self, ext_id: str | None = None) -> PreviewExtensionController | None:
@@ -124,6 +140,9 @@ class ExtensionService:
 
             listeners.clear()
 
+            if listener := self.listener:
+                listener.invalidate_cache()
+
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', controller.id, error_msg, cause)
                 self.runtimes.pop(controller.id, None)
@@ -131,7 +150,12 @@ class ExtensionService:
                 if not controller.is_preview:
                     controller.state.save(error_type=cause, error_message=error_msg)
 
-                events.emit("extensions:errored", controller.id)
+                if listener := self.listener:
+                    listener.errored(controller.id)
+
+        def message_handler(message: ipc.ExtensionMessage) -> None:
+            if listener := self.listener:
+                listener.handle_message(controller.id, message)
 
         try:
             controller.manifest.validate()
@@ -179,11 +203,13 @@ class ExtensionService:
         # surfaced consistently and any queued start listeners get cleaned up, rather than
         # raising out into callers.
         try:
-            self.runtimes[controller.id] = ExtensionRuntime(controller.id, cmd, env, exit_handler)
+            self.runtimes[controller.id] = ExtensionRuntime(controller.id, cmd, env, exit_handler, message_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
-        events.emit("extensions:started", controller.id)
+        if listener := self.listener:
+            listener.invalidate_cache()
+            listener.started(controller.id)
         return self.is_running(controller)
 
     async def stop_extension(self, controller: ExtensionController) -> None:

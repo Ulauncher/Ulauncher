@@ -10,12 +10,6 @@ from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime, abort
 
 class TestExtensionRuntime:
     @pytest.fixture(autouse=True)
-    def events_emit(self, mocker: MockerFixture) -> MagicMock:
-        """Keep runtime events off the global bus, where listeners registered by other test
-        modules (e.g. ExtensionMode's) would receive them."""
-        return mocker.patch("ulauncher.modes.extensions.extension_runtime.events.emit")
-
-    @pytest.fixture(autouse=True)
     def subprocess_launcher(self, mocker: MockerFixture) -> MagicMock:
         return mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.SubprocessLauncher")
 

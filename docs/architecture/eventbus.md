@@ -29,7 +29,7 @@ def something_happened(data):
 ## Current Namespaces
 
 - `"app"` - The UlauncherApp class
-- `"extensions"` - The ExtensionMode class
+- `"extensions"` - The ExtensionService class (lifecycle intents, mostly triggered over D-Bus by the CLI)
 - `"extension_lifecycle"` - The extension_registry module
 
 Namespaces are not implemented with strict ownership/isolation. To avoid conflicts and/or confusion, make sure not to reuse the same namespace across different listeners.

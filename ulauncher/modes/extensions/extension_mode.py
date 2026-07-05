@@ -21,7 +21,7 @@ from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
 
 logger = logging.getLogger(__name__)
-events = EventBus("extensions", skip_if_not_bound=True)
+events = EventBus()
 
 LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giving up
 
@@ -34,7 +34,10 @@ class ExtensionLaunchTrigger(Result):
 
 
 class ExtensionMode(Mode):
-    """Mode that handles extension triggers and communication with extensions."""
+    """Mode that handles extension triggers and communication with extensions.
+
+    Acts as the service's ExtensionServiceListener: the service calls started, errored,
+    invalidate_cache and handle_message directly."""
 
     _active_ext: ExtensionController | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
@@ -43,18 +46,15 @@ class ExtensionMode(Mode):
     _request_id: int = 0
 
     def __init__(self) -> None:
-        ext_service.activate()
         self._trigger_cache = {}
-        events.set_self(self)
+        ext_service.activate(self)
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
 
-    @events.on
     def invalidate_cache(self) -> None:
         self._trigger_cache.clear()
 
-    @events.on
     def errored(self, ext_id: str) -> None:
         if not self._active_ext or self._active_ext.id != ext_id:
             return
@@ -63,7 +63,6 @@ class ExtensionMode(Mode):
         else:
             self._pending_callback = None
 
-    @events.on
     def started(self, ext_id: str) -> None:
         # start() runs in a worker thread, so re-evaluate the query on the main loop.
         if self._active_ext and self._active_ext.id == ext_id:
@@ -213,7 +212,6 @@ class ExtensionMode(Mode):
         self._pending_callback = callback
         ext_service.send_message(self._active_ext, event, self._request_id)
 
-    @events.on
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
