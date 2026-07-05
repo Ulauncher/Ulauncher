@@ -154,6 +154,8 @@ class ExtensionRecord:
 
         if self._state_path.is_file():
             self._state_path.unlink()
+        # The JsonConf cache keeps state instance alive - clearing it ensures the old data won't resurface
+        self.state.clear()
         return True
 
     def save_installed_state(self, commit_hash: str, commit_timestamp: float, **extra_state: Any) -> None:
