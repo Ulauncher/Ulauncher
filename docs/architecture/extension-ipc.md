@@ -21,7 +21,8 @@ Extensions run in **separate processes** as the same user as Ulauncher (not sand
 **Ulauncher side:**
 
 - `ExtensionRuntime` (`modes/extensions/extension_runtime.py`) - Manages extension process lifecycle
-- `ExtensionController` (`modes/extensions/extension_controller.py`) - Coordinates extension behavior
+- `ExtensionRecord` (`modes/extensions/extension_record.py`) - A process-agnostic handle on an installed extension's files, state and preferences
+- `ExtensionService` (`modes/extensions/extension_service.py`) - Owns the running extensions and starts, stops and messages their processes (app process only), taking an `ExtensionRecord`
 - `SocketMsgController` (`utils/socket_msg_controller.py`) - JSON message protocol handler
 
 **Extension side:**

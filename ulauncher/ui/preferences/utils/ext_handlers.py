@@ -9,7 +9,7 @@ from gi.repository import Gtk
 
 from ulauncher import paths
 from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
 from ulauncher.utils.scheduling import run_when_idle
@@ -57,7 +57,7 @@ class ExtensionHandlers:
         dialog.show_all()
         return dialog
 
-    def add_extension(self, callback: Callable[[ExtensionController], None]) -> None:
+    def add_extension(self, callback: Callable[[ExtensionRecord], None]) -> None:
         """Handle add extension button click"""
         dialog = Gtk.Dialog(title="Add Extension", transient_for=get_window_for_widget(self.widget), modal=True)
         dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
@@ -90,7 +90,7 @@ class ExtensionHandlers:
         if response == Gtk.ResponseType.OK and url:
             self.install_extension(url, callback)
 
-    def install_extension(self, url: str, callback: Callable[[ExtensionController], None]) -> None:
+    def install_extension(self, url: str, callback: Callable[[ExtensionRecord], None]) -> None:
         """Install extension from URL"""
         progress_dialog = self._show_progress_dialog(
             "Installing extension...", "Please wait while the extension is being installed."
@@ -122,7 +122,7 @@ class ExtensionHandlers:
         thread.daemon = True
         thread.start()
 
-    def toggle_extension(self, state: bool, ext: ExtensionController) -> None:
+    def toggle_extension(self, state: bool, ext: ExtensionRecord) -> None:
         """Handle extension enable/disable toggle"""
 
         def toggle_async() -> None:
@@ -138,7 +138,7 @@ class ExtensionHandlers:
         thread.daemon = True
         thread.start()
 
-    def remove_extension(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
+    def remove_extension(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Handle extension removal"""
         text = f'Remove extension "{ext.manifest.name}"?'
         secondary_text = "This action cannot be undone."
@@ -172,7 +172,7 @@ class ExtensionHandlers:
             thread.daemon = True
             thread.start()
 
-    def check_updates(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
+    def check_updates(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Handle checking for extension updates"""
 
         def check_async() -> None:
@@ -198,7 +198,7 @@ class ExtensionHandlers:
         thread.daemon = True
         thread.start()
 
-    def update_extension(self, ext: ExtensionController, callback: Callable[[], None]) -> None:
+    def update_extension(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Update the extension"""
         # Create progress dialog with spinner
         progress_dialog = self._show_progress_dialog(
@@ -234,7 +234,7 @@ class ExtensionHandlers:
         thread.daemon = True
         thread.start()
 
-    def _show_update_dialog(self, ext: ExtensionController, commit_hash: str, callback: Callable[[], None]) -> None:
+    def _show_update_dialog(self, ext: ExtensionRecord, commit_hash: str, callback: Callable[[], None]) -> None:
         """Show dialog when update is available"""
         text = f"Update available for '{ext.manifest.name}'"
         secondary_text = f"New version: {commit_hash[:7]}\n\nDo you want to update now?"

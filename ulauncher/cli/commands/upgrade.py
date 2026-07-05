@@ -4,9 +4,9 @@ import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_controller, get_ext_registry
+from ulauncher.cli.commands import get_ext_record, get_ext_registry
 from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.utils.dbus import dbus_trigger_event
 
 logger = logging.getLogger(__name__)
@@ -26,41 +26,42 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
 
 async def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
+    registry = get_ext_registry()
 
-    for controller in get_ext_registry().iterate():
-        if not controller.is_manageable or not controller.state.url:
+    for record in registry.iterate():
+        if not record.is_manageable or not record.state.url:
             continue
 
         try:
-            updated = await get_ext_registry().update(controller)
+            updated = await registry.update(record)
             if updated:
-                updated_extensions.append(controller.id)
+                updated_extensions.append(record.id)
         except ext_exceptions.UrlError:
-            _log_url_error(controller.id, controller.state.url, fatal=False)
+            _log_url_error(record.id, record.state.url, fatal=False)
         except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
-            logger.warning("Network error: Could not upgrade %s", controller.id)
+            logger.warning("Network error: Could not upgrade %s", record.id)
 
     return updated_extensions
 
 
-def upgrade_one(controller: ExtensionController) -> bool:
+def upgrade_one(record: ExtensionRecord) -> bool:
     try:
-        updated = asyncio.run(get_ext_registry().update(controller))
+        updated = asyncio.run(get_ext_registry().update(record))
     except ext_exceptions.UrlError:
-        _log_url_error(controller.id, controller.state.url, fatal=True)
+        _log_url_error(record.id, record.state.url, fatal=True)
         return False
     except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
-        logger.error("Network error: Could not upgrade %s", controller.id)  # noqa: TRY400 - traceback is noise here
+        logger.error("Network error: Could not upgrade %s", record.id)  # noqa: TRY400 - traceback is noise here
         return False
     if updated:
-        dbus_trigger_event("extensions:reload", [controller.id])
+        dbus_trigger_event("extensions:reload", [record.id])
     return True
 
 
 def run(args: CLIArguments) -> int:
     if args.input:
-        if controller := get_ext_controller(args.input):
-            return 0 if upgrade_one(controller) else 1
+        if record := get_ext_record(args.input):
+            return 0 if upgrade_one(record) else 1
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return 1
 

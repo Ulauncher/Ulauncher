@@ -5,9 +5,9 @@ from typing import Any
 
 from gi.repository import Gtk, Pango
 
-from ulauncher.modes.extensions.extension_controller import (
-    ExtensionController,
+from ulauncher.modes.extensions.extension_record import (
     ExtensionPreference,
+    ExtensionRecord,
 )
 from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.ui.load_icon_surface import load_icon_surface
@@ -31,7 +31,7 @@ REFRESH_INTERVAL = 1
 
 class ExtensionsView(BaseView):
     extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
-    active_ext: ExtensionController | None = None
+    active_ext: ExtensionRecord | None = None
     keyword_inputs: dict[str, Gtk.Entry] = {}
     pref_widgets: dict[str, Gtk.CheckButton | Gtk.SpinButton | Gtk.Entry | Gtk.ComboBoxText | TextArea] = {}
     save_button: Gtk.Button | None = None
@@ -168,7 +168,7 @@ class ExtensionsView(BaseView):
 
         self.layout.set_content(placeholder_box)
 
-    def _show_extension_details(self, ext: ExtensionController) -> None:
+    def _show_extension_details(self, ext: ExtensionRecord) -> None:
         """Show details for selected extension"""
         self.save_button = None
 
@@ -196,7 +196,7 @@ class ExtensionsView(BaseView):
 
         self.layout.set_content(container)
 
-    def _create_extension_header(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_extension_header(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the extension header with icon, name, and action buttons"""
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
 
@@ -225,7 +225,7 @@ class ExtensionsView(BaseView):
 
         return header_box
 
-    def _create_name_toggle_column(self, ext: ExtensionController) -> tuple[Gtk.Box, Gtk.Box | None]:
+    def _create_name_toggle_column(self, ext: ExtensionRecord) -> tuple[Gtk.Box, Gtk.Box | None]:
         """Create the name column content"""
         name_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         name_label = styled(Gtk.Label(label=ext.manifest.name, halign=Gtk.Align.START), "title")
@@ -253,7 +253,7 @@ class ExtensionsView(BaseView):
 
         return name_box, secondary_info_box if secondary_info_box.get_children() else None
 
-    def _create_extension_status_info(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_extension_status_info(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create a centered row with status information"""
         container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, halign=Gtk.Align.CENTER, spacing=0)
 
@@ -296,7 +296,7 @@ class ExtensionsView(BaseView):
 
         return container
 
-    def _create_header_buttons(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_header_buttons(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the header action buttons (Toggle, Save, Check Updates, Remove)"""
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10, valign=Gtk.Align.CENTER)
 
@@ -332,7 +332,7 @@ class ExtensionsView(BaseView):
 
         return button_box
 
-    def _create_installation_instructions_section(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_installation_instructions_section(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the installation instructions section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -360,7 +360,7 @@ class ExtensionsView(BaseView):
 
         return container
 
-    def _create_triggers_section(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_triggers_section(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the triggers/keywords section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -399,7 +399,7 @@ class ExtensionsView(BaseView):
 
         return container
 
-    def _create_preferences_section(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_preferences_section(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the preferences section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -508,7 +508,7 @@ class ExtensionsView(BaseView):
         self.pref_widgets[pref_id] = textview
         return scroll_container
 
-    def _create_error_section(self, ext: ExtensionController) -> Gtk.Box:
+    def _create_error_section(self, ext: ExtensionRecord) -> Gtk.Box:
         """Create the error display section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
@@ -541,7 +541,7 @@ class ExtensionsView(BaseView):
             self.save_button.set_sensitive(True)
 
     def _on_add_extension(self, _widget: Gtk.Widget) -> None:
-        def after_add_extension(ext: ExtensionController) -> None:
+        def after_add_extension(ext: ExtensionRecord) -> None:
             self.active_ext = ext
             self._load_extension_list()
             self._show_extension_details(ext)
@@ -549,15 +549,15 @@ class ExtensionsView(BaseView):
         self.layout.select_item(None)
         self.handlers.add_extension(after_add_extension)
 
-    def _on_toggle_extension(self, _switch: Gtk.Switch, state: bool, ext: ExtensionController) -> None:
+    def _on_toggle_extension(self, _switch: Gtk.Switch, state: bool, ext: ExtensionRecord) -> None:
         self.handlers.toggle_extension(state, ext)
 
-    def _on_check_updates(self, button: Gtk.Button, ext: ExtensionController) -> None:
+    def _on_check_updates(self, button: Gtk.Button, ext: ExtensionRecord) -> None:
         stop_spinner_button_animation = start_spinner_button_animation(button)
 
         self.handlers.check_updates(ext, stop_spinner_button_animation)
 
-    def on_remove_extension(self, _button: Gtk.Button, ext: ExtensionController) -> None:
+    def on_remove_extension(self, _button: Gtk.Button, ext: ExtensionRecord) -> None:
         def after_remove_extension() -> None:
             self.active_ext = None
             self._load_extension_list()

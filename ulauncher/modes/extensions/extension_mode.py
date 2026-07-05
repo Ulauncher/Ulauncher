@@ -9,9 +9,9 @@ from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
-from ulauncher.modes.extensions.extension_controller import (
-    ExtensionController,
-    ExtensionControllerTrigger,
+from ulauncher.modes.extensions.extension_record import (
+    ExtensionRecord,
+    ExtensionRecordTrigger,
 )
 from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.modes.mode import Mode
@@ -38,7 +38,7 @@ class ExtensionMode(Mode):
     Acts as the service's ExtensionServiceListener: the service calls started, errored,
     invalidate_cache and handle_message directly."""
 
-    _active_ext: ExtensionController | None = None
+    _active_ext: ExtensionRecord | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage], None] | None = None
     _loading_timer: scheduling.Context | None = None
@@ -99,7 +99,7 @@ class ExtensionMode(Mode):
         }
         self._send_request(event, callback)
 
-    def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionController, str, ExtensionControllerTrigger]]:
+    def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionRecord, str, ExtensionRecordTrigger]]:
         for ext in ext_service.iterate(sort=True):
             if not ext.is_enabled:
                 continue
@@ -269,7 +269,7 @@ class ExtensionMode(Mode):
         if not is_streaming_batch:
             self._pending_callback = None
 
-    def _rehydrate_results(self, ext: ExtensionController, effect_msg: EffectMessage) -> EffectMessage:
+    def _rehydrate_results(self, ext: ExtensionRecord, effect_msg: EffectMessage) -> EffectMessage:
         """Return the effect with raw result dicts in a RENDER_RESULTS effect replaced by Result objects.
 
         Reverses the dict-to-Result step that JSON serialization forced on the wire, resolving icons

@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.utils import scheduling
@@ -74,20 +74,20 @@ class ExtensionService(ExtensionRegistry):
         jobs: list[Literal["start", "stop"]],
         callback: Callable[[], None] | None = None,
     ) -> None:
-        controllers: list[ExtensionController] = []
+        records: list[ExtensionRecord] = []
         for ext_id in extension_ids:
             if ext := self.get(ext_id):
-                controllers.append(ext)  # noqa: PERF401
+                records.append(ext)  # noqa: PERF401
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    for controller in controllers:
-                        if controller.is_enabled:
-                            self.start_extension(controller)
+                    for record in records:
+                        if record.is_enabled:
+                            self.start_extension(record)
                 elif job == "stop":
-                    await asyncio.gather(*[self.stop_extension(controller) for controller in controllers])
+                    await asyncio.gather(*[self.stop_extension(record) for record in records])
 
         def run_batch() -> None:
             asyncio.run(run_batch_async())
@@ -96,26 +96,26 @@ class ExtensionService(ExtensionRegistry):
 
         Thread(target=run_batch).start()
 
-    def is_running(self, controller: ExtensionController) -> bool:
-        return controller.id in self.runtimes
+    def is_running(self, record: ExtensionRecord) -> bool:
+        return record.id in self.runtimes
 
-    async def toggle_enabled(self, controller: ExtensionController, enabled: bool) -> bool:
-        controller.state.save(is_enabled=enabled, error_type="", error_message="")
+    async def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
+        record.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
-            return self.start_extension(controller)
-        await self.stop_extension(controller)
+            return self.start_extension(record)
+        await self.stop_extension(record)
         return False
 
-    def start_extension(self, controller: ExtensionController) -> bool:
+    def start_extension(self, record: ExtensionRecord) -> bool:
         """
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
-        if self.is_running(controller):
+        if self.is_running(record):
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = self.stopped_listeners.get(controller.id, [])
+            listeners = self.stopped_listeners.get(record.id, [])
             for stop_listener in listeners:
                 stop_listener()
 
@@ -125,22 +125,22 @@ class ExtensionService(ExtensionRegistry):
                 listener.invalidate_cache()
 
             if cause != "Stopped":
-                logger.error('Extension "%s" exited with an error: %s (%s)', controller.id, error_msg, cause)
-                self.runtimes.pop(controller.id, None)
+                logger.error('Extension "%s" exited with an error: %s (%s)', record.id, error_msg, cause)
+                self.runtimes.pop(record.id, None)
                 # A failing preview must not disable the installed extension by persisting its error.
-                if not controller.is_preview:
-                    controller.state.save(error_type=cause, error_message=error_msg)
+                if not record.is_preview:
+                    record.state.save(error_type=cause, error_message=error_msg)
 
                 if listener := self.listener:
-                    listener.errored(controller.id)
+                    listener.errored(record.id)
 
         def message_handler(message: ipc.ExtensionMessage) -> None:
             if listener := self.listener:
-                listener.handle_message(controller.id, message)
+                listener.handle_message(record.id, message)
 
         try:
-            controller.manifest.validate()
-            controller.manifest.check_compatibility(verbose=True)
+            record.manifest.validate()
+            record.manifest.check_compatibility(verbose=True)
         except ext_exceptions.ManifestError as err:
             exit_handler("Invalid", str(err))
             return False
@@ -148,14 +148,14 @@ class ExtensionService(ExtensionRegistry):
             exit_handler("Incompatible", str(err))
             return False
 
-        if not controller.is_preview:
-            controller.state.save(error_type="", error_message="")  # clear any previous error
+        if not record.is_preview:
+            record.state.save(error_type="", error_message="")  # clear any previous error
 
-        ext_deps = ExtensionDependencies(controller.id, controller.path)
-        extension_main = f"{controller.path}/main.py"
+        ext_deps = ExtensionDependencies(record.id, record.path)
+        extension_main = f"{record.path}/main.py"
         cmd = [sys.executable, extension_main]
 
-        if isinstance(controller, PreviewExtensionController) and controller.with_debugger:
+        if isinstance(record, PreviewExtensionRecord) and record.with_debugger:
             cmd = [
                 sys.executable,
                 "-m",
@@ -166,16 +166,16 @@ class ExtensionService(ExtensionRegistry):
                 extension_main,
             ]
 
-        prefs = {p_id: pref.value for p_id, pref in controller.preferences.items()}
-        triggers = {t_id: t.default_keyword for t_id, t in controller.manifest.triggers.items() if t.default_keyword}
+        prefs = {p_id: pref.value for p_id, pref in record.preferences.items()}
+        triggers = {t_id: t.default_keyword for t_id, t in record.manifest.triggers.items() if t.default_keyword}
         # backwards compatible v2 preferences format (with keywords added back)
         v2_prefs = {**triggers, **prefs}
         env = {
             "VERBOSE": str(int(cli.get_args().verbose)),
             "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
             "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
-            "ULAUNCHER_EXTENSION_ID": controller.id,
-            "ULAUNCHER_INPUT_DEBOUNCE": str(controller.manifest.input_debounce),
+            "ULAUNCHER_EXTENSION_ID": record.id,
+            "ULAUNCHER_INPUT_DEBOUNCE": str(record.manifest.input_debounce),
         }
 
         # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
@@ -183,36 +183,36 @@ class ExtensionService(ExtensionRegistry):
         # surfaced consistently and any queued start listeners get cleaned up, rather than
         # raising out into callers.
         try:
-            self.runtimes[controller.id] = ExtensionRuntime(controller.id, cmd, env, exit_handler, message_handler)
+            self.runtimes[record.id] = ExtensionRuntime(record.id, cmd, env, exit_handler, message_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
         if listener := self.listener:
             listener.invalidate_cache()
-            listener.started(controller.id)
-        return self.is_running(controller)
+            listener.started(record.id)
+        return self.is_running(record)
 
-    async def stop_extension(self, controller: ExtensionController) -> None:
+    async def stop_extension(self, record: ExtensionRecord) -> None:
         """Stops the extension process if it is running."""
-        if runtime := self.runtimes.pop(controller.id, None):
+        if runtime := self.runtimes.pop(record.id, None):
             stopped_future: asyncio.Future[None] = asyncio.Future()
-            self.stopped_listeners[controller.id].append(lambda: stopped_future.set_result(None))
+            self.stopped_listeners[record.id].append(lambda: stopped_future.set_result(None))
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
 
-    def send_message(self, controller: ExtensionController, message: ipc.Event, request_id: int | None = None) -> None:
+    def send_message(self, record: ExtensionRecord, message: ipc.Event, request_id: int | None = None) -> None:
         """
         Sends a JSON message to the extension if it is running.
         """
-        if runtime := self.runtimes.get(controller.id):
+        if runtime := self.runtimes.get(record.id):
             runtime.send_message(message, request_id)
 
-    def save_user_preferences(self, controller: ExtensionController, data: Any) -> None:
+    def save_user_preferences(self, record: ExtensionRecord, data: Any) -> None:
         from ulauncher.api.shared.event import EventType
 
-        old_preferences = {p_id: pref.value for p_id, pref in controller.preferences.items()}
-        controller.persist_preferences(data)
+        old_preferences = {p_id: pref.value for p_id, pref in record.preferences.items()}
+        record.persist_preferences(data)
         for p_id, new_value in data.get("preferences", {}).items():
             # Only notify about values changing for preferences declared in the manifest
             if p_id in old_preferences and new_value != old_preferences[p_id]:
@@ -220,7 +220,7 @@ class ExtensionService(ExtensionRegistry):
                     "type": EventType.UPDATE_PREFERENCES,
                     "args": (p_id, new_value, old_preferences[p_id]),
                 }
-                self.send_message(controller, event_data)
+                self.send_message(record, event_data)
 
     @events.on
     def reload(
@@ -255,12 +255,12 @@ class ExtensionService(ExtensionRegistry):
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
         """Run an extension from a dev path WITHOUT installing it. Triggered from the CLI via D-Bus.
 
-        While the preview is active, the controller with this id launches from the dev path; its
+        While the preview is active, the record with this id launches from the dev path; its
         dependencies are installed by the CLI before this is called.
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        self.preview = PreviewExtensionController(ext_id, path, with_debugger=with_debugger)
+        self.preview = PreviewExtensionRecord(ext_id, path, with_debugger=with_debugger)
 
         # Guard the restart against a stop_preview that races in during the stop: only relaunch if
         # this preview is still the active one, otherwise stop_preview owns restoring the extension.
@@ -284,9 +284,9 @@ class ExtensionService(ExtensionRegistry):
 
         def restore_original() -> None:
             self.preview = None
-            # Reload from the installed path, or drop the controller if the extension was never installed.
-            controller = self.get(ext_id)
-            if controller and controller.is_enabled:
+            # Reload from the installed path, or drop the record if the extension was never installed.
+            record = self.get(ext_id)
+            if record and record.is_enabled:
                 self._run_batch_job([ext_id], ["start"])
 
         self._run_batch_job([ext_id], ["stop"], callback=restore_original)

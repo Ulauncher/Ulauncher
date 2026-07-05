@@ -4,7 +4,7 @@ import html
 import re
 from typing import Literal
 
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.modes.extensions.extension_service import ext_service
 
 ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
@@ -30,7 +30,7 @@ def autofmt_pango_code_block(text: str) -> str:
     return _CODE_TAG_RE.sub(repl, text)
 
 
-def get_status_str(ext: ExtensionController) -> ExtStatus:
+def get_status_str(ext: ExtensionRecord) -> ExtStatus:
     if ext.has_error:
         return "error"
     if not ext.is_enabled:
@@ -42,7 +42,7 @@ def get_status_str(ext: ExtensionController) -> ExtStatus:
     return "on"
 
 
-def get_error_message(error_type: str, error_message: str, ext: ExtensionController) -> str:
+def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord) -> str:
     """Generate appropriate error message based on error type"""
     ext_url = ext.state.url
 

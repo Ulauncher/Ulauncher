@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
-    from ulauncher.modes.extensions.extension_controller import ExtensionController
+    from ulauncher.modes.extensions.extension_record import ExtensionRecord
     from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 
 
@@ -18,8 +18,8 @@ def get_ext_registry() -> ExtensionRegistry:
     return ExtensionRegistry()
 
 
-def get_ext_controller(input_arg: str) -> ExtensionController | None:
-    """Parses the input argument and returns an ExtensionController instance if it's installed, otherwise None."""
+def get_ext_record(input_arg: str) -> ExtensionRecord | None:
+    """Parses the input argument and returns an ExtensionRecord instance if it's installed, otherwise None."""
     from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
     arg = normalize_ext_arg(input_arg)

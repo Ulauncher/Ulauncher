@@ -94,7 +94,7 @@ def v5_to_v6() -> None:
     from functools import partial
     from types import ModuleType
 
-    from ulauncher.modes.extensions.extension_controller import ExtensionState
+    from ulauncher.modes.extensions.extension_record import ExtensionState
     from ulauncher.utils.json_utils import json_load
     from ulauncher.utils.systemd_controller import SystemdController
 

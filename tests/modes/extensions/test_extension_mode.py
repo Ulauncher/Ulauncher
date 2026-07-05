@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_record import ExtensionRecord
 
 if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_mode import ExtensionMode
@@ -129,8 +129,8 @@ def test_errored__ignores_other_extensions() -> None:
     assert mode._loading_timer is timer
 
 
-def _make_active_ext(ext_id: str) -> ExtensionController:
-    ext = object.__new__(ExtensionController)
+def _make_active_ext(ext_id: str) -> ExtensionRecord:
+    ext = object.__new__(ExtensionRecord)
     ext.id = ext_id
     return ext
 
