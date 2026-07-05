@@ -5,13 +5,12 @@ import signal
 import socket
 from collections import deque
 from time import time
-from typing import Callable, Literal
+from typing import Callable, Literal, cast
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals import ipc
 from ulauncher.utils import scheduling
-from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 DEBUGPY_HOST = "127.0.0.1"
@@ -21,8 +20,8 @@ ExtensionExitCause = Literal[
     "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
 ]
 ExitHandlerCallback = Callable[[ExtensionExitCause, str], None]
+MessageHandlerCallback = Callable[[ipc.ExtensionMessage], None]
 logger = logging.getLogger(__name__)
-events = EventBus()
 
 
 aborted_subprocesses: WeakSet[Gio.Subprocess] = WeakSet()
@@ -37,6 +36,7 @@ class ExtensionRuntime:
     _error_stream: Gio.DataInputStream
     _recent_errors: deque[str]
     _exit_handler: ExitHandlerCallback | None
+    _message_handler: MessageHandlerCallback | None
 
     def __init__(
         self,
@@ -44,9 +44,11 @@ class ExtensionRuntime:
         cmd: list[str],
         env: dict[str, str] | None = None,
         exit_handler: ExitHandlerCallback | None = None,
+        message_handler: MessageHandlerCallback | None = None,
     ) -> None:
         self._ext_id = ext_id
         self._exit_handler = exit_handler
+        self._message_handler = message_handler
         self._recent_errors = deque(maxlen=1)
         self._start_time = time()
 
@@ -90,7 +92,6 @@ class ExtensionRuntime:
         self._subprocess.wait_async(None, self.handle_exit)
         self.read_stderr_line()
         self._msg_controller.listen(self.handle_message)
-        events.emit("extensions:invalidate_cache")
 
     def stop(self) -> None:
         """
@@ -122,11 +123,12 @@ class ExtensionRuntime:
 
     def handle_message(self, message: object) -> None:
         # message is a ipc.ExtensionMessage that has gone through the IPC json layer,
-        # converting Results to dicts. extensions:handle_message rehydrates it
+        # converting Results to dicts. ExtensionMode.handle_message rehydrates it
         if not isinstance(message, dict) or "name" not in message:
             logger.warning("Extension %s sent invalid message format: %s", self._ext_id, message)
             return
-        events.emit("extensions:handle_message", self._ext_id, message)
+        if self._message_handler:
+            self._message_handler(cast("ipc.ExtensionMessage", message))
 
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
         try:
@@ -169,5 +171,3 @@ class ExtensionRuntime:
                 error_msg = f'Extension "{self._ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
             self._exit_handler("Exited", error_msg)
-
-        events.emit("extensions:invalidate_cache")

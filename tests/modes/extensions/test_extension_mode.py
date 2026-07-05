@@ -17,8 +17,6 @@ if TYPE_CHECKING:
 
 
 def _make_mode() -> ExtensionMode:
-    # Imported lazily so collection doesn't register ExtensionMode's event listeners globally,
-    # which would otherwise fire (unbound) when other test modules emit extension events.
     from ulauncher.modes.extensions import extension_mode
 
     mode = object.__new__(extension_mode.ExtensionMode)
