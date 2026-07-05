@@ -103,7 +103,7 @@ let
         --replace-fail gapplication ${glib}/bin/gapplication
 
       substituteInPlace \
-          ulauncher/modes/extensions/extension_controller.py \
+          ulauncher/modes/extensions/extension_service.py \
         --replace-fail 'paths.APPLICATION,' '":".join(sys.path),'
 
       substituteInPlace \

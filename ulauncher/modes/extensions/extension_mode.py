@@ -86,7 +86,7 @@ class ExtensionMode(Mode):
             return
 
         self._active_ext = ext
-        if not ext.owns_runtime:
+        if not ext_service.is_running(ext):
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
             # re-runs the query once the extension is ready. The wait ends with a failure message if
@@ -199,19 +199,19 @@ class ExtensionMode(Mode):
         Send an event to the extension, expecting a response (passed to the callback).
         A request_id is sent alongside the event, used to filter out stale responses.
 
-        For one-off messages, use ext.send_message() directly instead.
+        For one-off messages, use service.send_message() directly instead.
         """
         if not self._active_ext:
             logger.error("No active extension to send request to")
             return
 
-        if not self._active_ext.owns_runtime:
+        if not ext_service.is_running(self._active_ext):
             logger.warning("Cannot send event to inactive extension %s", self._active_ext.id)
             return
 
         self._request_id += 1
         self._pending_callback = callback
-        self._active_ext.send_message(event, self._request_id)
+        ext_service.send_message(self._active_ext, event, self._request_id)
 
     @events.on
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:

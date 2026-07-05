@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
-import sys
 from datetime import datetime
 from os.path import isfile, join
 from pathlib import Path
 from shutil import move, rmtree
 from typing import Any, Callable
 
-from ulauncher import cli, paths
+from ulauncher import paths
 from ulauncher.data import BaseDataClass, JsonConf
 from ulauncher.gi import GLib
-from ulauncher.internals import ipc
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import (
@@ -21,7 +17,6 @@ from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifestPreference,
 )
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
-from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.json_utils import json_load
@@ -198,12 +193,6 @@ class ExtensionController:
         return not self.is_preview and bool(self.state.error_type)
 
     @property
-    def owns_runtime(self) -> bool:
-        """Whether the extension is running and owned by the current runtime (always False outside of the app)."""
-        # service.is_owner check for making the behavior/contract explicit, but not actually needed
-        return ext_service.is_owner and self.id in ext_service.runtimes
-
-    @property
     def is_manageable(self) -> bool:
         return extension_finder.is_manageable(self.path)
 
@@ -229,22 +218,10 @@ class ExtensionController:
 
         return triggers
 
-    def save_user_preferences(self, data: Any) -> None:
-        from ulauncher.api.shared.event import EventType
-
-        old_preferences = {p_id: pref.value for p_id, pref in self.preferences.items()}
+    def persist_preferences(self, data: Any) -> None:
+        """Write the preferences to disk."""
         user_prefs_json = _load_preferences(self.id)
         user_prefs_json.save(data)
-        if not self.owns_runtime:
-            return
-        for p_id, new_value in data.get("preferences", {}).items():
-            # Only notify about values changing for preferences declared in the manifest
-            if p_id in old_preferences and new_value != old_preferences[p_id]:
-                event_data: ipc.UpdatePreferencesEvent = {
-                    "type": EventType.UPDATE_PREFERENCES,
-                    "args": (p_id, new_value, old_preferences[p_id]),
-                }
-                self.send_message(event_data)
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.manifest.icon
@@ -263,7 +240,7 @@ class ExtensionController:
             )
             return
 
-        await self.stop()
+        await ext_service.stop_extension(self)
         rmtree(self.path)
         logger.info("Extension %s uninstalled successfully", self.id)
 
@@ -296,9 +273,9 @@ class ExtensionController:
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
 
-            was_running = self.owns_runtime
+            was_running = ext_service.is_running(self)
             if _should_restart():
-                await self.stop()
+                await ext_service.stop_extension(self)
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)
@@ -316,7 +293,7 @@ class ExtensionController:
         finally:
             rmtree(staging_dir, ignore_errors=True)
             if _should_restart():
-                self.start()
+                ext_service.start_extension(self)
 
     async def update(self) -> bool:
         """
@@ -350,115 +327,6 @@ class ExtensionController:
         commit_hash = _run_gio_blocking(ExtensionRemote(self.state.url).get_compatible_hash)
         has_update = self.state.commit_hash != commit_hash
         return has_update, commit_hash
-
-    async def toggle_enabled(self, enabled: bool) -> bool:
-        self.state.save(is_enabled=enabled, error_type="", error_message="")
-        if enabled:
-            return self.start()
-        await self.stop()
-        return False
-
-    def start(self) -> bool:
-        """
-        Starts the extension in a subprocess
-        Returns True if the extension was already running or successfully started, False otherwise.
-        """
-        if not ext_service.is_owner:
-            msg = "Only the app process can start extensions. Ask it to via a D-Bus event ('extensions:reload')."
-            raise RuntimeError(msg)
-
-        if self.owns_runtime:
-            return True  # if already started, count as successful
-
-        def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = ext_service.stopped_listeners.get(self.id, [])
-            for stop_listener in listeners:
-                stop_listener()
-
-            listeners.clear()
-
-            if cause != "Stopped":
-                logger.error('Extension "%s" exited with an error: %s (%s)', self.id, error_msg, cause)
-                ext_service.runtimes.pop(self.id, None)
-                # A failing preview must not disable the installed extension by persisting its error.
-                if not self.is_preview:
-                    self.state.save(error_type=cause, error_message=error_msg)
-
-                events.emit("extensions:errored", self.id)
-
-        try:
-            self.manifest.validate()
-            self.manifest.check_compatibility(verbose=True)
-        except ext_exceptions.ManifestError as err:
-            exit_handler("Invalid", str(err))
-            return False
-        except ext_exceptions.CompatibilityError as err:
-            exit_handler("Incompatible", str(err))
-            return False
-
-        if not self.is_preview:
-            self.state.save(error_type="", error_message="")  # clear any previous error
-
-        ext_deps = ExtensionDependencies(self.id, self.source_path)
-        extension_main = f"{self.source_path}/main.py"
-        cmd = [sys.executable, extension_main]
-
-        # Preview extensions can opt into the remote debugger
-        if (preview_ext := ext_service.get_preview(self.id)) and preview_ext.with_debugger:
-            cmd = [
-                sys.executable,
-                "-m",
-                "debugpy",
-                "--listen",
-                f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
-                "--wait-for-client",
-                extension_main,
-            ]
-
-        prefs = {p_id: pref.value for p_id, pref in self.preferences.items()}
-        triggers = {t_id: t.default_keyword for t_id, t in self.manifest.triggers.items() if t.default_keyword}
-        # backwards compatible v2 preferences format (with keywords added back)
-        v2_prefs = {**triggers, **prefs}
-        env = {
-            "VERBOSE": str(int(cli.get_args().verbose)),
-            "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
-            "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
-            "ULAUNCHER_EXTENSION_ID": self.id,
-            "ULAUNCHER_INPUT_DEBOUNCE": str(self.manifest.input_debounce),
-        }
-
-        # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
-        # missing interpreter). Route these through exit_handler like a crash so the error is
-        # surfaced consistently and any queued start listeners get cleaned up, rather than
-        # raising out into callers.
-        try:
-            ext_service.runtimes[self.id] = ExtensionRuntime(self.id, cmd, env, exit_handler)
-        except (OSError, GLib.Error) as err:
-            exit_handler("FailedToStart", str(err))
-            return False
-        events.emit("extensions:started", self.id)
-        return self.owns_runtime
-
-    async def stop(self) -> None:
-        """Stops the extension process if this process owns one. Intentionally a no-op elsewhere
-        (the CLI): remote runtimes are stopped by sending D-Bus events to the app instead."""
-        if runtime := ext_service.runtimes.pop(self.id, None):
-            stopped_future: asyncio.Future[None] = asyncio.Future()
-            ext_service.stopped_listeners[self.id].append(lambda: stopped_future.set_result(None))
-            runtime.stop()
-
-            await asyncio.wait_for(stopped_future, timeout=5.0)
-
-    def send_message(self, message: ipc.Event, request_id: int | None = None) -> None:
-        """
-        Sends a JSON message to the extension if it is running.
-        """
-        if not ext_service.is_owner:
-            msg = "Only the app process can message extensions."
-            raise RuntimeError(msg)
-
-        if runtime := ext_service.runtimes.get(self.id):
-            runtime.send_message(message, request_id)
 
 
 class PreviewExtensionController(ExtensionController):

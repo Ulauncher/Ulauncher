@@ -1,17 +1,24 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+import sys
 from collections import defaultdict
 from threading import Thread
-from typing import TYPE_CHECKING, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
+from ulauncher import cli, paths
+from ulauncher.gi import GLib
+from ulauncher.modes.extensions import ext_exceptions
+from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 
 if TYPE_CHECKING:
+    from ulauncher.internals import ipc
     from ulauncher.modes.extensions.extension_controller import ExtensionController, PreviewExtensionController
-    from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime
 
 logger = logging.getLogger(__name__)
 events = EventBus("extensions", skip_if_not_bound=True)
@@ -20,27 +27,23 @@ events = EventBus("extensions", skip_if_not_bound=True)
 class ExtensionService:
     """Owns the extension processes and handles the extension lifecycle intents.
 
-    Only the app process activates the service and may spawn extension processes. Other processes
-    importing this module (the CLI) see it empty and unclaimed: previews and running extensions
-    live in the app, and the CLI asks the app to reconcile via D-Bus events
-    ("extensions:reload", "extensions:stop", ...).
+    Extensions only run in the app process, so only app code uses the service to start, stop and
+    message them. The CLI does its disk work with plain controllers and asks the app to reconcile
+    the processes via D-Bus events ("extensions:reload", "extensions:stop", ...).
     """
 
     runtimes: dict[str, ExtensionRuntime]
     stopped_listeners: dict[str, list[Callable[[], None]]]
     _preview: PreviewExtensionController | None
-    is_owner: bool
 
     def __init__(self) -> None:
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self._preview = None
-        self.is_owner = False
 
     def activate(self) -> None:
-        """Claim extension process ownership, bind the lifecycle event handlers and start the
-        enabled extensions. Called by ExtensionMode when the app loads its modes."""
-        self.is_owner = True
+        """Bind the lifecycle event handlers and start the enabled extensions.
+        Called by ExtensionMode when the app loads its modes."""
         events.set_self(self)
         scheduling.run_when_idle(self._start_extensions)
 
@@ -64,7 +67,7 @@ class ExtensionService:
 
         for ext in extension_registry.iterate():
             if ext.state.is_enabled:
-                ext.start()
+                self.start_extension(ext)
 
     def _run_batch_job(
         self,
@@ -74,20 +77,20 @@ class ExtensionService:
     ) -> None:
         from ulauncher.modes.extensions import extension_registry
 
-        ext_controllers: list[ExtensionController] = []
+        controllers: list[ExtensionController] = []
         for ext_id in extension_ids:
             if ext := extension_registry.get(ext_id):
-                ext_controllers.append(ext)  # noqa: PERF401
+                controllers.append(ext)  # noqa: PERF401
 
         # run the reload in a separate thread to avoid blocking the main thread
         async def run_batch_async() -> None:
             for job in jobs:
                 if job == "start":
-                    for controller in ext_controllers:
+                    for controller in controllers:
                         if controller.is_enabled:
-                            controller.start()
+                            self.start_extension(controller)
                 elif job == "stop":
-                    await asyncio.gather(*[c.stop() for c in ext_controllers])
+                    await asyncio.gather(*[self.stop_extension(controller) for controller in controllers])
 
         def run_batch() -> None:
             asyncio.run(run_batch_async())
@@ -95,6 +98,123 @@ class ExtensionService:
                 callback()
 
         Thread(target=run_batch).start()
+
+    def is_running(self, controller: ExtensionController) -> bool:
+        return controller.id in self.runtimes
+
+    async def toggle_enabled(self, controller: ExtensionController, enabled: bool) -> bool:
+        controller.state.save(is_enabled=enabled, error_type="", error_message="")
+        if enabled:
+            return self.start_extension(controller)
+        await self.stop_extension(controller)
+        return False
+
+    def start_extension(self, controller: ExtensionController) -> bool:
+        """
+        Starts the extension in a subprocess
+        Returns True if the extension was already running or successfully started, False otherwise.
+        """
+        if self.is_running(controller):
+            return True  # if already started, count as successful
+
+        def exit_handler(cause: str, error_msg: str) -> None:
+            listeners = self.stopped_listeners.get(controller.id, [])
+            for stop_listener in listeners:
+                stop_listener()
+
+            listeners.clear()
+
+            if cause != "Stopped":
+                logger.error('Extension "%s" exited with an error: %s (%s)', controller.id, error_msg, cause)
+                self.runtimes.pop(controller.id, None)
+                # A failing preview must not disable the installed extension by persisting its error.
+                if not controller.is_preview:
+                    controller.state.save(error_type=cause, error_message=error_msg)
+
+                events.emit("extensions:errored", controller.id)
+
+        try:
+            controller.manifest.validate()
+            controller.manifest.check_compatibility(verbose=True)
+        except ext_exceptions.ManifestError as err:
+            exit_handler("Invalid", str(err))
+            return False
+        except ext_exceptions.CompatibilityError as err:
+            exit_handler("Incompatible", str(err))
+            return False
+
+        if not controller.is_preview:
+            controller.state.save(error_type="", error_message="")  # clear any previous error
+
+        ext_deps = ExtensionDependencies(controller.id, controller.source_path)
+        extension_main = f"{controller.source_path}/main.py"
+        cmd = [sys.executable, extension_main]
+
+        # Preview extensions can opt into the remote debugger
+        if (preview_ext := self.get_preview(controller.id)) and preview_ext.with_debugger:
+            cmd = [
+                sys.executable,
+                "-m",
+                "debugpy",
+                "--listen",
+                f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
+                "--wait-for-client",
+                extension_main,
+            ]
+
+        prefs = {p_id: pref.value for p_id, pref in controller.preferences.items()}
+        triggers = {t_id: t.default_keyword for t_id, t in controller.manifest.triggers.items() if t.default_keyword}
+        # backwards compatible v2 preferences format (with keywords added back)
+        v2_prefs = {**triggers, **prefs}
+        env = {
+            "VERBOSE": str(int(cli.get_args().verbose)),
+            "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
+            "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+            "ULAUNCHER_EXTENSION_ID": controller.id,
+            "ULAUNCHER_INPUT_DEBOUNCE": str(controller.manifest.input_debounce),
+        }
+
+        # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
+        # missing interpreter). Route these through exit_handler like a crash so the error is
+        # surfaced consistently and any queued start listeners get cleaned up, rather than
+        # raising out into callers.
+        try:
+            self.runtimes[controller.id] = ExtensionRuntime(controller.id, cmd, env, exit_handler)
+        except (OSError, GLib.Error) as err:
+            exit_handler("FailedToStart", str(err))
+            return False
+        events.emit("extensions:started", controller.id)
+        return self.is_running(controller)
+
+    async def stop_extension(self, controller: ExtensionController) -> None:
+        """Stops the extension process if it is running."""
+        if runtime := self.runtimes.pop(controller.id, None):
+            stopped_future: asyncio.Future[None] = asyncio.Future()
+            self.stopped_listeners[controller.id].append(lambda: stopped_future.set_result(None))
+            runtime.stop()
+
+            await asyncio.wait_for(stopped_future, timeout=5.0)
+
+    def send_message(self, controller: ExtensionController, message: ipc.Event, request_id: int | None = None) -> None:
+        """
+        Sends a JSON message to the extension if it is running.
+        """
+        if runtime := self.runtimes.get(controller.id):
+            runtime.send_message(message, request_id)
+
+    def save_user_preferences(self, controller: ExtensionController, data: Any) -> None:
+        from ulauncher.api.shared.event import EventType
+
+        old_preferences = {p_id: pref.value for p_id, pref in controller.preferences.items()}
+        controller.persist_preferences(data)
+        for p_id, new_value in data.get("preferences", {}).items():
+            # Only notify about values changing for preferences declared in the manifest
+            if p_id in old_preferences and new_value != old_preferences[p_id]:
+                event_data: ipc.UpdatePreferencesEvent = {
+                    "type": EventType.UPDATE_PREFERENCES,
+                    "args": (p_id, new_value, old_preferences[p_id]),
+                }
+                self.send_message(controller, event_data)
 
     @events.on
     def reload(

@@ -5,6 +5,7 @@ import re
 from typing import Literal
 
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_service import ext_service
 
 ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
 
@@ -34,7 +35,7 @@ def get_status_str(ext: ExtensionController) -> ExtStatus:
         return "error"
     if not ext.is_enabled:
         return "off"
-    if not ext.owns_runtime:
+    if not ext_service.is_running(ext):
         return "stopped"
     if ext.is_preview:
         return "preview"

@@ -10,6 +10,7 @@ from gi.repository import Gtk
 from ulauncher import paths
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
+from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
 from ulauncher.utils.scheduling import run_when_idle
 
@@ -99,7 +100,7 @@ class ExtensionHandlers:
         def install_async() -> None:
             try:
                 ext = asyncio.run(ExtensionController.install(url))
-                ext.start()
+                ext_service.start_extension(ext)
 
                 # Update UI in main thread
                 def update_ui() -> None:
@@ -126,7 +127,7 @@ class ExtensionHandlers:
 
         def toggle_async() -> None:
             try:
-                asyncio.run(ext.toggle_enabled(state))
+                asyncio.run(ext_service.toggle_enabled(ext, state))
 
             except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
                 failed_action = "enable" if state else "disable"
