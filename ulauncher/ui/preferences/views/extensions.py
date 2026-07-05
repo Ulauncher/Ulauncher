@@ -5,7 +5,6 @@ from typing import Any
 
 from gi.repository import Gtk, Pango
 
-from ulauncher.modes.extensions import extension_registry
 from ulauncher.modes.extensions.extension_controller import (
     ExtensionController,
     ExtensionPreference,
@@ -80,7 +79,7 @@ class ExtensionsView(BaseView):
     def _list_has_changes(self) -> bool:
         extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
 
-        for ext in extension_registry.iterate(sort=True):
+        for ext in ext_service.iterate(sort=True):
             extension_cache[ext.id] = (
                 ext.manifest.name,
                 ext_utils.get_status_str(ext),
@@ -131,7 +130,7 @@ class ExtensionsView(BaseView):
 
     def _on_extension_item_activated(self, item: SidebarItem) -> None:
         """Handle extension selection in sidebar"""
-        if ext := extension_registry.get(item.id):
+        if ext := ext_service.get(item.id):
             self.active_ext = ext
             self._show_extension_details(ext)
         else:

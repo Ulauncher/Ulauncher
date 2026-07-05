@@ -5,39 +5,49 @@ from typing import Iterator
 
 from ulauncher.modes.extensions import extension_finder
 from ulauncher.modes.extensions.extension_controller import ExtensionController
-from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("extension_lifecycle")
 logger = logging.getLogger(__name__)
 
 
-def get(ext_id: str, include_preview: bool = True) -> ExtensionController | None:
-    if include_preview and (preview_ext := ext_service.get_preview(ext_id)):
-        return preview_ext
-    path = extension_finder.locate(ext_id)
-    return ExtensionController(ext_id, path) if path else None
+class ExtensionRegistry:
+    """Finds installed extensions and hands out controllers for them.
 
+    Instantiated exactly once per runtime. The CLI creates a plain instance. The app instead uses
+    ExtensionService, a subclass that also resolves the previewed extension from its dev path.
+    """
 
-def iterate(sort: bool = False, include_preview: bool = True) -> Iterator[ExtensionController]:
-    controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
-    if include_preview and (preview_ext := ext_service.get_preview()):
-        controllers[preview_ext.id] = preview_ext
+    def _get_preview_controller(self) -> ExtensionController | None:
+        """Previews only exist in the app process (see ExtensionService)."""
+        return None
 
-    if not sort:
-        yield from controllers.values()
-        return
+    def get(self, ext_id: str) -> ExtensionController | None:
+        preview_ext = self._get_preview_controller()
+        if preview_ext and preview_ext.id == ext_id:
+            return preview_ext
+        path = extension_finder.locate(ext_id)
+        return ExtensionController(ext_id, path) if path else None
 
-    def sort_key(controller: ExtensionController) -> int:
-        if controller.is_preview:
-            return 0
-        if controller.has_error:
-            return 2
-        if not controller.is_enabled:
-            return 3
-        return 1
+    def iterate(self, sort: bool = False) -> Iterator[ExtensionController]:
+        controllers = {ext_id: ExtensionController(ext_id, path) for ext_id, path in extension_finder.iterate()}
+        if preview_controller := self._get_preview_controller():
+            controllers[preview_controller.id] = preview_controller
 
-    yield from sorted(controllers.values(), key=sort_key)
+        if not sort:
+            yield from controllers.values()
+            return
+
+        def sort_key(controller: ExtensionController) -> int:
+            if controller.is_preview:
+                return 0
+            if controller.has_error:
+                return 2
+            if not controller.is_enabled:
+                return 3
+            return 1
+
+        yield from sorted(controllers.values(), key=sort_key)
 
 
 @events.on

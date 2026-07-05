@@ -4,8 +4,8 @@ import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_controller
-from ulauncher.modes.extensions import ext_exceptions, extension_registry
+from ulauncher.cli.commands import get_ext_controller, get_ext_registry
+from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_controller import ExtensionController
 from ulauncher.utils.dbus import dbus_trigger_event
 
@@ -27,7 +27,7 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
 async def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
 
-    for controller in extension_registry.iterate(include_preview=False):
+    for controller in get_ext_registry().iterate():
         if not controller.is_manageable or not controller.state.url:
             continue
 
