@@ -51,7 +51,7 @@ class ExtensionService(ExtensionRegistry):
     listener: ExtensionServiceListener | None
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(lifecycle=self)
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self.listener = None
