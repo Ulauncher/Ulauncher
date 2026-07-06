@@ -1,0 +1,19 @@
+ulauncher/cli/commands/install.py
+  s_c86a00b5db10f4::t_4f880d15fc092e 5,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "881af2cf14402208247e1ff728e40192080fbb60",
+  "prompts": {},
+  "sessions": {
+    "s_c86a00b5db10f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb8e1647-d7ee-4944-94b3-ce87fca6d2b4",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
