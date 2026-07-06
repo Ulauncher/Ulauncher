@@ -212,7 +212,10 @@ class ExtensionMode(Mode):
         ext_service.send_message(self._active_ext, event, self._request_id)
 
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
-        logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
+        effect = message.get("response", {}).get("effect") if message["name"] == "response" else None
+        if not (isinstance(effect, dict) and effect.get("type") == EffectType.RENDER_RESULTS):
+            # Don't log render results (streams will otherwise log each individual result)
+            logger.debug("Incoming message %s from %r", summarize_ipc_args([message]), ext_id)
         if message["name"] == "response":
             if not self._active_ext:
                 logger.error("No active extension to handle response")

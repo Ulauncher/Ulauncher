@@ -77,7 +77,8 @@ class Client:
         if self.mainloop.is_running():
             self.mainloop.quit()
 
-    def send(self, message: ipc.ExtensionMessage) -> None:
+    def send(self, message: ipc.ExtensionMessage, log: bool = True) -> None:
         """Send a message to the app"""
-        logger.debug("Send message %s", summarize_ipc_args([message]))
+        if log:
+            logger.debug("Send message %s", summarize_ipc_args([message]))
         self.msg_controller.send(message)

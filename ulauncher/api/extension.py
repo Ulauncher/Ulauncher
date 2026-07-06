@@ -201,18 +201,21 @@ class Extension:
 
         def emit(effect_msg: effects.RenderResults) -> None:
             # Schedule the response on the main thread to avoid races on shared state
-            scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
+            scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id, log=False)
 
-        emitted = False
+        self.logger.debug("Streaming results for request %s", request_id)
+        batches = 0
         for item in generator:
             if input_request_id is not None and input_request_id != self._input_request_id:
+                self.logger.debug("Streaming for request %s superseded after %s batch(es)", request_id, batches)
                 return
             append = not isinstance(item, list)
             results = [item] if append else list(item)
             emit(effects.render_results(results, append=append, final=False))
-            emitted = True
+            batches += 1
 
-        emit(effects.render_results([], append=emitted, final=True))
+        emit(effects.render_results([], append=bool(batches), final=True))
+        self.logger.debug("Finished streaming %s result batch(es) for request %s", batches, request_id)
 
     def _send_response(
         self,
@@ -220,6 +223,7 @@ class Extension:
         event: ipc.Event,
         effect_msg: effects.EffectMessage,
         input_request_id: int | None,
+        log: bool = True,
     ) -> bool:
         if input_request_id is not None and input_request_id != self._input_request_id:
             return False
@@ -230,7 +234,7 @@ class Extension:
         response: ipc.Response = {"effect": effect_msg}
         if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
             response["keep_app_open"] = event["keep_app_open"]
-        self._client.send({"name": "response", "request_id": request_id, "response": response})
+        self._client.send({"name": "response", "request_id": request_id, "response": response}, log=log)
         return False
 
     def _assign_result_ids(self, request_id: int, effect_msg: effects.RenderResults) -> None:

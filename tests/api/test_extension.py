@@ -55,7 +55,7 @@ class TestStreamingResponses:
         mocker.patch("ulauncher.api.extension.Client")
         mocker.patch("ulauncher.api.extension.signal.signal")
         # run scheduled responses synchronously so we can assert on them inline
-        mocker.patch.object(extension_module.scheduling, "run_when_idle", side_effect=lambda fn, *a: fn(*a))
+        mocker.patch.object(extension_module.scheduling, "run_when_idle", side_effect=lambda fn, *a, **kw: fn(*a, **kw))
         with patch.dict(os.environ, {"ULAUNCHER_EXTENSION_ID": "com.example.test"}):
             return Extension()
 
