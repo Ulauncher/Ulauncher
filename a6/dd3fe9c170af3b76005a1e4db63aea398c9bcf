@@ -1,0 +1,27 @@
+ulauncher/cli/commands/uninstall.py
+  s_c86a00b5db10f4::t_57e59d3d91bba0 13-15
+ulauncher/cli/commands/upgrade.py
+  s_c86a00b5db10f4::t_82b846e2a36623 51-53
+tests/cli/test_commands.py
+  s_c86a00b5db10f4::t_444a584e4879a3 1-30
+ulauncher/modes/extensions/extension_record.py
+  s_c86a00b5db10f4::t_4e7f79040cba91 157-161
+tests/modes/extensions/test_extension_record.py
+  s_c86a00b5db10f4::t_ea664f61b08293 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a6dd3fe9c170af3b76005a1e4db63aea398c9bcf",
+  "prompts": {},
+  "sessions": {
+    "s_c86a00b5db10f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb8e1647-d7ee-4944-94b3-ce87fca6d2b4",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
