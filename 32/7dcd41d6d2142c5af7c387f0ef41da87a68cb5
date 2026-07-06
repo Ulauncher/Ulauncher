@@ -1,0 +1,19 @@
+makefile
+  s_d6b340a12a4aa7::t_1f6ce923af1926 69-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "327dcd41d6d2142c5af7c387f0ef41da87a68cb5",
+  "prompts": {},
+  "sessions": {
+    "s_d6b340a12a4aa7": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "044fb9f5-5c8d-4e56-b3f5-33afde746dac",
+        "model": "auto"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
