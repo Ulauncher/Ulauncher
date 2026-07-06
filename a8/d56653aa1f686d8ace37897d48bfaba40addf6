@@ -1,0 +1,26 @@
+ulauncher/modes/extensions/extension_service.py
+  s_b6d2eb138e5bec::t_7b00cf727b192f 6
+  s_b6d2eb138e5bec::t_5bf7a097b88305 39-41
+ulauncher/modes/extensions/extension_registry.py
+  s_b6d2eb138e5bec::t_30927fc5c8e793 213-216
+ulauncher/cli/commands/upgrade.py
+  s_b6d2eb138e5bec::t_1649701979d711 53
+ulauncher/cli/commands/install.py
+  s_b6d2eb138e5bec::t_4e311826166298 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a8d56653aa1f686d8ace37897d48bfaba40addf6",
+  "prompts": {},
+  "sessions": {
+    "s_b6d2eb138e5bec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "16e17100-6491-4ddc-a2b9-557950a71cdc",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}

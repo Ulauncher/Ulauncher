@@ -1,0 +1,19 @@
+ulauncher/modes/extensions/extension_service.py
+  s_b6d2eb138e5bec::t_30bcf3d46d60f8 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6ffc5db877cdef65935d5551647b0f3a9426c679",
+  "prompts": {},
+  "sessions": {
+    "s_b6d2eb138e5bec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "16e17100-6491-4ddc-a2b9-557950a71cdc",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
