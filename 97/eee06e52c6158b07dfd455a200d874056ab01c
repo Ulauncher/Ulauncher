@@ -1,0 +1,21 @@
+ulauncher/utils/migrate.py
+  s_3b5fe4ab469a62::t_982102ca9d660c 93-98
+  s_3b5fe4ab469a62::t_06acb9706bc202 170-171
+  s_3b5fe4ab469a62::t_2f47cbfb5f9e4d 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "97eee06e52c6158b07dfd455a200d874056ab01c",
+  "prompts": {},
+  "sessions": {
+    "s_3b5fe4ab469a62": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d0adb036-ba78-4a38-ad91-52bba0b62129",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
