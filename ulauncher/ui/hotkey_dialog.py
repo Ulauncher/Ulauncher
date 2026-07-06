@@ -11,16 +11,6 @@ footer_notice = "Be aware that keyboard shortcuts may be reserved by, or conflic
 
 RESPONSES = SimpleNamespace(OK=-5, CLOSE=-7)
 
-MODIFIERS = (
-    "Alt_L",
-    "Alt_R",
-    "Shift_L",
-    "Shift_R",
-    "Control_L",
-    "Control_R",
-    "Super_L",
-)
-
 
 class HotkeyDialog(Gtk.Dialog):
     _hotkey = ""
@@ -67,8 +57,6 @@ class HotkeyDialog(Gtk.Dialog):
     def on_key_press(self, _entry_widget: Gtk.Entry, event: Gdk.EventKey) -> None:
         mods = event.state & Gtk.accelerator_get_default_mod_mask()
         key_name = Gtk.accelerator_name(event.keyval, mods)
-        label = Gtk.accelerator_get_label(event.keyval, mods)
-        breadcrumb = label.split("+")
 
         # treat Enter w/o modifiers as "submit"
         if self._hotkey and key_name == "Return":
@@ -77,8 +65,8 @@ class HotkeyDialog(Gtk.Dialog):
         if self._hotkey and key_name == "BackSpace":
             self.set_hotkey()
 
-        # Must have at least one modifier (meaning two parts) and the last part must not be one
-        if len(breadcrumb) > 1 and breadcrumb[-1] not in MODIFIERS:
+        if mods:
+            # Require at least one modifier
             self.set_hotkey(key_name)
 
     def run(self, *args: Any, **kwargs: Any) -> str:
