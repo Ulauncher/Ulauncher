@@ -1,0 +1,19 @@
+scripts/pre-commit
+  s_3fe1d4a9de4c57::t_d8241e4ac1be3b 25-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e38917357b99136cffc038e067114689fb163dd1",
+  "prompts": {},
+  "sessions": {
+    "s_3fe1d4a9de4c57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a77b5bb-98df-4e3a-8aea-9f0b56b28236",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
