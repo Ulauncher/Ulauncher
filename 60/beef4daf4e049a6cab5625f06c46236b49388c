@@ -1,0 +1,23 @@
+ulauncher/api/shared/event.py
+  s_52e8939b6bae8f::t_b97b1033c1639f 84-86
+ulauncher/modes/extensions/extension_runtime.py
+  s_52e8939b6bae8f::t_e61a3c3e447cd5 107
+tests/modes/extensions/test_extension_runtime.py
+  s_52e8939b6bae8f::t_ea4080d8cec88e 111-112,122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "60beef4daf4e049a6cab5625f06c46236b49388c",
+  "prompts": {},
+  "sessions": {
+    "s_52e8939b6bae8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "305fbff0-d9fa-4b92-9d29-4ac4f6dcc97c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
