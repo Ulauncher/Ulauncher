@@ -99,7 +99,6 @@ class ExtensionHandlers:
         def install_async() -> None:
             try:
                 ext = ext_service.install(url)
-                ext_service.start_extension(ext)
 
                 # Update UI in main thread
                 def update_ui() -> None:

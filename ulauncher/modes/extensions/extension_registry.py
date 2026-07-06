@@ -210,7 +210,10 @@ class ExtensionRegistry:
     def _install_from_remote(
         self, record: ExtensionRecord, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any
     ) -> None:
-        """Install (atomically): download, stop, swap and restart (if previously running).
+        """Install (atomically): download, then swap into place.
+
+        A running instance is left alone: it keeps serving from the code it already loaded until the
+        launcher window next closes and stops it, after which the next query starts the new version.
 
         `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
@@ -221,12 +224,6 @@ class ExtensionRegistry:
         rmtree(staging_dir, ignore_errors=True)
         Path(staging_dir).mkdir(parents=True)
         remote.target_dir = staging_dir
-        was_running = False
-
-        def _should_restart() -> bool:
-            # a preview extension need not and should not be restarted (runs from dev path)
-            is_previewed = self.preview is not None and self.preview.id == record.id
-            return was_running and not is_previewed
 
         try:
             downloaded_hash, commit_timestamp = _run_gio_blocking(
@@ -234,9 +231,6 @@ class ExtensionRegistry:
             )
             _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
 
-            was_running = self._lifecycle.is_running(record)
-            if _should_restart():
-                self._lifecycle.stop_extension(record)
             if not _swap_dir(staging_dir, target_path):
                 msg = f"Failed to swap the staged extension into {target_path}"
                 raise OSError(msg)
@@ -245,5 +239,3 @@ class ExtensionRegistry:
             )
         finally:
             rmtree(staging_dir, ignore_errors=True)
-            if _should_restart():
-                self._lifecycle.start_extension(record)

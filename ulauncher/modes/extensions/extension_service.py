@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
@@ -36,8 +36,9 @@ class ExtensionService(ExtensionRegistry):
     """The app's ExtensionRegistry: also owns the extension processes and handles lifecycle intents.
 
     Extensions only run in the app process, so only app code uses the service. The CLI does its
-    disk work with a plain ExtensionRegistry and asks the app to reconcile the processes via
-    D-Bus events ("extensions:reload", "extensions:stop", ...).
+    disk work with a plain ExtensionRegistry; extensions start on demand when queried and stop
+    when the launcher window closes, so a CLI install/upgrade needs no process reconciliation
+    (only the preview flow reaches the app, via "extensions:preview_ext"/"extensions:stop_preview").
     """
 
     runtimes: dict[str, ExtensionRuntime]
@@ -56,38 +57,11 @@ class ExtensionService(ExtensionRegistry):
         """
         self.listener = listener
 
-    def _run_batch_job(
-        self,
-        extension_ids: list[str],
-        jobs: list[Literal["start", "stop"]],
-        callback: Callable[[], None] | None = None,
-    ) -> None:
-        records: list[ExtensionRecord] = []
-        for ext_id in extension_ids:
-            if ext := self.get(ext_id):
-                records.append(ext)  # noqa: PERF401
-
-        for job in jobs:
-            if job == "start":
-                for record in records:
-                    if record.is_enabled:
-                        self.start_extension(record)
-            elif job == "stop":
-                for record in records:
-                    self.stop_extension(record)
-
-        if callback:
-            callback()
-
     def is_running(self, record: ExtensionRecord) -> bool:
         return record.id in self.runtimes
 
-    def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
+    def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> None:
         record.state.save(is_enabled=enabled, error_type="", error_message="")
-        if enabled:
-            return self.start_extension(record)
-        self.stop_extension(record)
-        return False
 
     def start_extension(self, record: ExtensionRecord) -> bool:
         """
@@ -189,35 +163,6 @@ class ExtensionService(ExtensionRegistry):
                     "args": (p_id, new_value, old_preferences[p_id]),
                 }
                 self.send_message(record, event_data)
-
-    @events.on
-    def reload(
-        self,
-        extension_ids: list[str] | None = None,
-    ) -> None:
-        if not extension_ids:
-            logger.warning("Reload message received without any extension IDs. No extensions will be restarted.")
-            return
-
-        logger.info("Reloading extension(s): %s", ", ".join(extension_ids))
-
-        self._run_batch_job(
-            extension_ids,
-            ["stop", "start"],
-            callback=lambda: logger.info("%s extensions (re)loaded", len(extension_ids)),
-        )
-
-    @events.on
-    def stop(self, extension_ids: list[str] | None = None) -> None:
-        if not extension_ids:
-            logger.warning("Stop message received without any extension IDs. No extensions will be stopped.")
-            return
-
-        logger.info("Stopping extension(s): %s", ", ".join(extension_ids))
-
-        self._run_batch_job(
-            extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
-        )
 
     @events.on
     def stop_all(self) -> None:

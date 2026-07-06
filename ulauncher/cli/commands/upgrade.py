@@ -6,7 +6,6 @@ from ulauncher.cli import CLIArguments
 from ulauncher.cli.commands import get_ext_record, get_ext_registry
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
-from ulauncher.utils.dbus import dbus_trigger_event
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ def upgrade_one(record: ExtensionRecord) -> bool:
         logger.error("Extension %s is externally managed and can not be upgraded (%s)", record.id, record.path)
         return False
     try:
-        updated = get_ext_registry().update(record)
+        get_ext_registry().update(record)
     except ext_exceptions.UrlError:
         _log_url_error(record.id, record.state.url, fatal=True)
         return False
@@ -61,8 +60,6 @@ def upgrade_one(record: ExtensionRecord) -> bool:
     except (ext_exceptions.ExtensionError, OSError):
         logger.error("Could not upgrade %s", record.id)  # noqa: TRY400 - already logged in update()
         return False
-    if updated:
-        dbus_trigger_event("extensions:reload", [record.id])
     return True
 
 
@@ -74,8 +71,5 @@ def run(args: CLIArguments) -> int:
         return 1
 
     updated_extensions = _upgrade_all_extensions()
-    if updated_extensions:
-        dbus_trigger_event("extensions:reload", updated_extensions)
-
     logger.info("\n%s extensions updated", len(updated_extensions))
     return 0
