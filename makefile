@@ -66,7 +66,8 @@ venv:
 	# Keep a copy of the requirements used for this environment so make targets can
 	# tell when the local venv needs to be refreshed.
 	cp requirements.txt "$(VENV_REQUIREMENTS_SNAPSHOT)"
-	.venv/bin/lefthook install
+	# ignore failures (can happen on older git versions)
+	.venv/bin/lefthook install || true
 	echo -e "$(BOLD)[✓] Virtual environment set up$(RESET)"
 
 # Run ulauncher from source
