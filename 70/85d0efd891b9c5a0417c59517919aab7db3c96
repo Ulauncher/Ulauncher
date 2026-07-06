@@ -1,0 +1,20 @@
+ulauncher/ui/hotkey_dialog.py
+  s_861e86e0ef73f9::t_f133bc494143f1 68
+  s_861e86e0ef73f9::t_674ea4a48d2e7e 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7085d0efd891b9c5a0417c59517919aab7db3c96",
+  "prompts": {},
+  "sessions": {
+    "s_861e86e0ef73f9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2f2eb5c-58d7-499b-aec1-81aa4ae4fd18",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
