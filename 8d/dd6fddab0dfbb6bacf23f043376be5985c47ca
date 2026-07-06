@@ -1,0 +1,37 @@
+ulauncher/ui/preferences/views/extensions.py
+  s_52e8939b6bae8f::t_062ddc5df8f1d9 73-74
+ulauncher/ui/ulauncher_window.py
+  s_52e8939b6bae8f::t_827208f088a436 383
+ulauncher/ui/app.py
+  s_52e8939b6bae8f::t_c504c61716871e 134
+tests/modes/extensions/test_extension_mode.py
+  s_52e8939b6bae8f::t_94b9479b0da910 53
+  s_52e8939b6bae8f::t_e20f06f5556b3e 33
+ulauncher/modes/extensions/extension_service.py
+  s_52e8939b6bae8f::t_074b4d55a1a9e7 155
+  s_52e8939b6bae8f::t_451f29f938ff46 221-226,232-233,239-241,243-246,250-253,259-262
+  s_52e8939b6bae8f::t_218c798ae51752 52
+  s_52e8939b6bae8f::t_85af3eb4865764 220
+ulauncher/modes/extensions/extension_mode.py
+  s_52e8939b6bae8f::t_16f84ef9220fbb 205-206
+  s_52e8939b6bae8f::t_8047af034c348d 38-39
+  s_52e8939b6bae8f::t_2c0a6d3ec77021 85-89,92
+ulauncher/ui/preferences/utils/ext_utils.py
+  s_52e8939b6bae8f::t_eebf4a62012a97 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8ddd6fddab0dfbb6bacf23f043376be5985c47ca",
+  "prompts": {},
+  "sessions": {
+    "s_52e8939b6bae8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "305fbff0-d9fa-4b92-9d29-4ac4f6dcc97c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}

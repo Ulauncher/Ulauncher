@@ -1,0 +1,48 @@
+ulauncher/cli/commands/install.py
+  s_52e8939b6bae8f::t_867650e9e1e349 15
+ulauncher/cli/commands/uninstall.py
+  s_52e8939b6bae8f::t_20384bc88344d1 16
+ulauncher/cli/commands/upgrade.py
+  s_52e8939b6bae8f::t_ba4a6a0f47ff81 54
+  s_52e8939b6bae8f::t_031bb82227d0c2 26,35
+  s_52e8939b6bae8f::t_171c1804ac6b23 76
+ulauncher/modes/extensions/extension_registry.py
+  s_52e8939b6bae8f::t_625ad35988e139 21-25
+  s_52e8939b6bae8f::t_c8c853bd81f343 195
+  s_52e8939b6bae8f::t_da1dd2ffb541e2 95,105
+  s_52e8939b6bae8f::t_9dbeae7c14c2c5 149,152,156,160,162
+  s_52e8939b6bae8f::t_59734578241ec3 177,182
+  s_52e8939b6bae8f::t_d9f53851cd965a 210
+  s_52e8939b6bae8f::t_fc660e0d8618cf 222
+  s_52e8939b6bae8f::t_fe49155d1aa873 239
+  s_52e8939b6bae8f::t_8894ce2489a1e6 202
+ulauncher/modes/extensions/extension_service.py
+  s_52e8939b6bae8f::t_10a2db8e48ba5a 92,96
+  s_52e8939b6bae8f::t_5ae065bf6b5ddb 77-84,86-87
+  s_52e8939b6bae8f::t_1d6a1796b65cb8 179
+ulauncher/ui/preferences/utils/ext_handlers.py
+  s_52e8939b6bae8f::t_c5403bde413262 111
+  s_52e8939b6bae8f::t_3a3d707d98c708 210
+  s_52e8939b6bae8f::t_d59925ba8575d3 222
+  s_52e8939b6bae8f::t_a73cfda1563cb2 192
+  s_52e8939b6bae8f::t_9a76ff658af56f 129,131
+  s_52e8939b6bae8f::t_9487cade15ccf3 154,162
+  s_52e8939b6bae8f::t_222d6fbcf1a7cf 101
+  s_52e8939b6bae8f::t_708276f3f8bb67 179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2ec495c750fd527f74cf302adc1fde9a6e5c3d1d",
+  "prompts": {},
+  "sessions": {
+    "s_52e8939b6bae8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "305fbff0-d9fa-4b92-9d29-4ac4f6dcc97c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
