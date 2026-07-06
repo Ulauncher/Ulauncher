@@ -222,15 +222,6 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        # It's technically possible to trigger this GAction before the app has started,
-        # in which case we would have to start all the modes + extensions just for the preferences
-        # or it would be broken in several ways (runtime status, start, install, preferences event)
-        # and the cli would send dbus messages to the preferences (would break `ulauncher preview`)
-        if not self._persistent and not self.windows:
-            logger.error("You have to start Ulauncher before you can open preferences.")
-            self.quit()
-            return
-
         # Register prefs in self.windows before closing main, so the main destroy handler
         # sees a remaining window and doesn't quit the app on non-persistent setups.
         from ulauncher.ui.preferences.preferences_window import PreferencesWindow
