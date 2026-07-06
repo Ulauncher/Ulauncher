@@ -55,11 +55,13 @@ class ExtensionService(ExtensionRegistry):
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self.listener = None
+        events.set_self(self)
 
     def activate(self, listener: ExtensionServiceListener) -> None:
-        """Bind the lifecycle event handlers and start the enabled extensions.
-        Called by ExtensionMode when the app loads its modes."""
-        events.set_self(self)
+        """
+        Set the listener that lifecycle events report to, and start the enabled extensions.
+        Called by ExtensionMode when the app loads its modes.
+        """
         self.listener = listener
         scheduling.run_when_idle(self._start_extensions)
 
