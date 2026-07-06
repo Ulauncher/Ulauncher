@@ -1,0 +1,19 @@
+makefile
+  s_96cc2126588758::t_dfe9818248b57d 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c1dfd8bd303c34ba3c311855e8b98b117b62d012",
+  "prompts": {},
+  "sessions": {
+    "s_96cc2126588758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6b6034fd-24c6-4200-bc46-5b5cde971fc2",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
