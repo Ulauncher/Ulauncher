@@ -1,0 +1,27 @@
+makefile
+  s_3fe1d4a9de4c57::t_bc1a7a0752b777 37
+  s_3fe1d4a9de4c57::t_aba1b27a0e2831 71-75
+CONTRIBUTING.md
+  s_3fe1d4a9de4c57::t_8f174a58d4b71a 55
+  s_3fe1d4a9de4c57::t_24b41bd121a2ee 87-90
+scripts/pre-commit
+  s_3fe1d4a9de4c57::t_5ba2400cea46cf 1-40
+.githooks.config
+  s_3fe1d4a9de4c57::t_1f5e6a27dd36b0 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d84f016cc440f07dbcb7f98535b78e080f4bfe28",
+  "prompts": {},
+  "sessions": {
+    "s_3fe1d4a9de4c57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a77b5bb-98df-4e3a-8aea-9f0b56b28236",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
