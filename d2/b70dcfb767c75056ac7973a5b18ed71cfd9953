@@ -1,0 +1,43 @@
+ulauncher/ui/preferences/utils/ext_handlers.py
+  s_d45666b0a8f065::t_0ad276bbc60685 177
+ulauncher/modes/extensions/extension_registry.py
+  s_d45666b0a8f065::t_7b34dc42156909 14,15
+ulauncher/cli/commands/upgrade.py
+  s_d45666b0a8f065::t_80e24fe9aa13b1 26-27,66
+ulauncher/ui/ruff.toml
+  s_d45666b0a8f065::t_af5c71deb8bc7a 5
+pyproject.toml
+  s_d45666b0a8f065::t_ec1d2f924f3067 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d2b70dcfb767c75056ac7973a5b18ed71cfd9953",
+  "prompts": {},
+  "sessions": {
+    "s_c86a00b5db10f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb8e1647-d7ee-4944-94b3-ce87fca6d2b4",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    },
+    "s_d45666b0a8f065": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71f1d0bc-b2a0-40a9-b0c5-965c400a13bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    },
+    "s_dc2225e4031f46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6f2192c-76cc-4587-b030-7055ccb3d2c3",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
