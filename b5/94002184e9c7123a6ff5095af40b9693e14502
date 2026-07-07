@@ -1,0 +1,55 @@
+ulauncher/modes/extensions/extension_service.py
+  s_d45666b0a8f065::t_2ccdb08842bb71 251-253
+  s_d45666b0a8f065::t_31736cb4af648c 144,151,153,158,162
+  s_d45666b0a8f065::t_516983420e95e2 327,331-332,334-335
+  s_d45666b0a8f065::t_7a198bee501744 266
+  s_d45666b0a8f065::t_c98de80308ee1f 6-7,14-21,28,33-36,51-68,75-85,92,105-106,111-139,141-143,145-150,152,154-157,159-161,164-169,171-174,176-218,225-226,229-236,238-239,241,243,254-265,310,313,320,322-326,328,330,333,337-341,346-348,374-375,379-381,387-388,399,401-404,416-418
+  s_d45666b0a8f065::t_8b7af352601a6d 163
+ulauncher/ui/preferences/utils/ext_handlers.py
+  s_d45666b0a8f065::t_0ad276bbc60685 142-145,147-153,155
+  s_d45666b0a8f065::t_f058ea23ea747e 18-22
+  s_d45666b0a8f065::t_7b47117cd5c394 101,104-105,107-109,111,115
+  s_d45666b0a8f065::t_39e7b132855525 129-131,133-135,137
+  s_d45666b0a8f065::t_9fdc9e7d284d2f 165-168,170-173,175
+  s_d45666b0a8f065::t_a39b0f651b15c1 102-103
+ulauncher/modes/extensions/extension_remote.py
+  s_d45666b0a8f065::t_c0dde02ad702fe 308-309
+ulauncher/cli/commands/uninstall.py
+  s_d45666b0a8f065::t_7cb6227cf01262 4,15
+  s_d45666b0a8f065::t_7ef728e6974a5b 17
+ulauncher/cli/commands/__init__.py
+  s_d45666b0a8f065::t_afa06d9c079a54 5,7,15-50
+  s_d45666b0a8f065::t_e3fd4b44f2f9d0 51-52
+ulauncher/modes/extensions/extension_mode.py
+  s_d45666b0a8f065::t_d73f0a60c8f482 66-67
+ulauncher/modes/extensions/extension_registry.py
+  s_d45666b0a8f065::t_8789b1e862ac1a 114
+  s_d45666b0a8f065::t_7b34dc42156909 13,17-20,60,64-66,76-79,116-121,126-152,154-167,169-172,175-177,179-188,190-193,195-198,200-212,224-228,231,233-238,239-250,251-255,260,263-266
+  s_d45666b0a8f065::t_e7f5a12c58e340 256-259,261-262
+  s_d45666b0a8f065::t_bd48498a6b9fdd 214-215
+  s_d45666b0a8f065::t_c53ea311443b68 55-58
+ulauncher/utils/subprocess_utils.py
+  s_d45666b0a8f065::t_0b2a435d05b7d5 24
+ulauncher/cli/commands/upgrade.py
+  s_d45666b0a8f065::t_80e24fe9aa13b1 6,26,28-32,34,39,57,79
+tests/utils/test_subprocess_utils.py
+  s_d45666b0a8f065::t_51ab8e94385593 70
+ulauncher/cli/commands/install.py
+  s_d45666b0a8f065::t_bf41ec315e0aad 4,14,16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b594002184e9c7123a6ff5095af40b9693e14502",
+  "prompts": {},
+  "sessions": {
+    "s_d45666b0a8f065": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71f1d0bc-b2a0-40a9-b0c5-965c400a13bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}

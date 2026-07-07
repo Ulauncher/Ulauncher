@@ -1,0 +1,50 @@
+ulauncher/ui/preferences/utils/ext_handlers.py
+  s_d45666b0a8f065::t_f058ea23ea747e 18-22
+  s_d45666b0a8f065::t_39e7b132855525 128-130,132-134,136
+  s_d45666b0a8f065::t_7b47117cd5c394 101-104,106-108,110,114
+  s_d45666b0a8f065::t_0ad276bbc60685 141-144,146-152,154
+  s_d45666b0a8f065::t_9fdc9e7d284d2f 164-167,169-172,174
+tests/utils/test_subprocess_utils.py
+  s_d45666b0a8f065::t_51ab8e94385593 70
+ulauncher/cli/commands/__init__.py
+  s_d45666b0a8f065::t_afa06d9c079a54 5,7,15-50
+  s_d45666b0a8f065::t_e3fd4b44f2f9d0 51-52
+ulauncher/modes/extensions/extension_registry.py
+  s_d45666b0a8f065::t_7b34dc42156909 13,17-20,62,72-74,84-87,124-129,134-160,162-175,177-180,183-185,187-196,198-201,203-206,208-220,231-235,238,240-276
+  s_d45666b0a8f065::t_8789b1e862ac1a 122
+ulauncher/modes/extensions/extension_remote.py
+  s_d45666b0a8f065::t_c0dde02ad702fe 308-309
+ulauncher/cli/commands/install.py
+  s_d45666b0a8f065::t_bf41ec315e0aad 4,14,16
+ulauncher/modes/extensions/extension_mode.py
+  s_d45666b0a8f065::t_d73f0a60c8f482 66-67
+ulauncher/utils/subprocess_utils.py
+  s_d45666b0a8f065::t_0b2a435d05b7d5 24
+ulauncher/cli/commands/upgrade.py
+  s_d45666b0a8f065::t_80e24fe9aa13b1 6,26,28-32,34,39,57,79
+ulauncher/modes/extensions/extension_service.py
+  s_d45666b0a8f065::t_7a198bee501744 151
+  s_d45666b0a8f065::t_516983420e95e2 210-217,219-224
+  s_d45666b0a8f065::t_eb81b1aced1e07 48,55
+  s_d45666b0a8f065::t_31736cb4af648c 84-110,115,119
+  s_d45666b0a8f065::t_2ccdb08842bb71 131,143-150
+ulauncher/cli/commands/uninstall.py
+  s_d45666b0a8f065::t_7cb6227cf01262 4,15
+  s_d45666b0a8f065::t_7ef728e6974a5b 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e6a1409144b8a5d621bdae83affcdd4aa8b5a252",
+  "prompts": {},
+  "sessions": {
+    "s_d45666b0a8f065": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71f1d0bc-b2a0-40a9-b0c5-965c400a13bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
