@@ -241,6 +241,8 @@ class ExtensionHandlers:
         response = self.dialog_launcher.show_question(text, secondary_text)
         if response == Gtk.ResponseType.YES:
             self.update_extension(ext, callback)
+        else:
+            callback()
 
     def _show_extension_operation_error(self, error: BaseException, url: str, operation: str = "install") -> None:
         """Show detailed error dialog for extension operation failures"""
