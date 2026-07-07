@@ -1,0 +1,19 @@
+EXTENSION_LIFECYCLE_PLAN.md
+  s_d45666b0a8f065::t_8789b1e862ac1a 138,152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3a98716636eece789380cb821df3e5678f248adb",
+  "prompts": {},
+  "sessions": {
+    "s_d45666b0a8f065": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71f1d0bc-b2a0-40a9-b0c5-965c400a13bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
