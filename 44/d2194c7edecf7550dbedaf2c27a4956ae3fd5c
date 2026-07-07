@@ -1,0 +1,19 @@
+ulauncher/ui/preferences/utils/ext_handlers.py
+  s_c2a86b884c4ffb::t_3d445f38ac2f68 244-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "44d2194c7edecf7550dbedaf2c27a4956ae3fd5c",
+  "prompts": {},
+  "sessions": {
+    "s_c2a86b884c4ffb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d842a0ac-f395-46a9-99ec-4d04f5721edf",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
