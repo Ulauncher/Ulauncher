@@ -10,7 +10,6 @@ from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals import ipc
-from ulauncher.utils import scheduling
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 DEBUGPY_HOST = "127.0.0.1"
@@ -105,8 +104,7 @@ class ExtensionRuntime:
         aborted_subprocesses.add(self._subprocess)
 
         self._msg_controller.close()
-        # wait for graceful shutdown before forcibly killing
-        scheduling.timer(0.5, self._kill)
+        self._kill()
 
     def _kill(self) -> None:
         if self._subprocess.get_identifier():

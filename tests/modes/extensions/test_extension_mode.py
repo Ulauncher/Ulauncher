@@ -30,6 +30,7 @@ def _mock_service(mocker: MockerFixture) -> MagicMock:
     mocker.patch.object(ext_service, "get", mocked.get)
     mocker.patch.object(ext_service, "iterate", mocked.iterate)
     mocker.patch.object(ext_service, "is_running", mocked.is_running)
+    mocker.patch.object(ext_service, "start_extension", mocked.start_extension)
     return mocked
 
 
@@ -49,6 +50,7 @@ def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> N
 
     callback.assert_not_called()
     timer.assert_called_once()
+    mocked_service.start_extension.assert_called_once()
     assert mode._active_ext is ext
 
 

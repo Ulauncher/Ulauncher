@@ -35,8 +35,8 @@ class ExtensionLaunchTrigger(Result):
 class ExtensionMode(Mode):
     """Mode that handles extension triggers and communication with extensions.
 
-    Acts as the service's ExtensionServiceListener: the service calls started, errored,
-    invalidate_cache and handle_message directly."""
+    Acts as the service's ExtensionServiceListener: the service calls started, errored
+    and handle_message directly."""
 
     _active_ext: ExtensionRecord | None = None
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
@@ -50,9 +50,6 @@ class ExtensionMode(Mode):
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
-
-    def invalidate_cache(self) -> None:
-        self._trigger_cache.clear()
 
     def errored(self, ext_id: str) -> None:
         if not self._active_ext or self._active_ext.id != ext_id:
@@ -85,12 +82,14 @@ class ExtensionMode(Mode):
 
         self._active_ext = ext
         if not ext_service.is_running(ext):
-            # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
-            # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
-            # re-runs the query once the extension is ready. The wait ends with a failure message if
-            # the extension exits with an error, otherwise empty after LOADING_TIMEOUT.
+            # Start on demand and wait for it to come up (it may also already be transitioning, e.g.
+            # a reload or update). Returning without a result lets core show "Loading..." after
+            # PLACEHOLDER_DELAY, and `started` re-runs the query once the extension is ready. The
+            # wait ends with a failure message if the extension exits with an error, otherwise empty
+            # after LOADING_TIMEOUT.
             self._pending_callback = callback
             self._loading_timer = scheduling.timer(LOADING_TIMEOUT, self._finish_loading)
+            ext_service.start_extension(ext)
             return
 
         event: ipc.InputTriggerEvent = {
@@ -203,8 +202,8 @@ class ExtensionMode(Mode):
             logger.error("No active extension to send request to")
             return
 
-        if not ext_service.is_running(self._active_ext):
-            logger.warning("Cannot send event to inactive extension %s", self._active_ext.id)
+        if not ext_service.is_running(self._active_ext) and not ext_service.start_extension(self._active_ext):
+            logger.warning("Could not start extension %s to handle event", self._active_ext.id)
             return
 
         self._request_id += 1

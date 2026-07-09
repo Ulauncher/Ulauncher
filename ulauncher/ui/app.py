@@ -131,7 +131,7 @@ class UlauncherApp(Gtk.Application):
             # Sync additional hold with user settings
             self.hold()
 
-            # Warm the modes so extension handlers register and enabled extensions start.
+            # Warm the modes so extension handlers register and the extension registry loads.
             # Skip if a window exists - it needs to control when this runs for startup performance reasons.
             def _warm_triggers() -> None:
                 if "main" not in self.windows:
@@ -222,15 +222,6 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def show_preferences(self, page: str | None = None) -> None:
-        # It's technically possible to trigger this GAction before the app has started,
-        # in which case we would have to start all the modes + extensions just for the preferences
-        # or it would be broken in several ways (runtime status, start, install, preferences event)
-        # and the cli would send dbus messages to the preferences (would break `ulauncher preview`)
-        if not self._persistent and not self.windows:
-            logger.error("You have to start Ulauncher before you can open preferences.")
-            self.quit()
-            return
-
         # Register prefs in self.windows before closing main, so the main destroy handler
         # sees a remaining window and doesn't quit the app on non-persistent setups.
         from ulauncher.ui.preferences.preferences_window import PreferencesWindow

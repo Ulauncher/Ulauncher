@@ -5,9 +5,8 @@ import re
 from typing import Literal
 
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
-from ulauncher.modes.extensions.extension_service import ext_service
 
-ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
+ExtStatus = Literal["on", "off", "error", "preview"]
 
 
 def fmt_pango_code_block(text: str) -> str:
@@ -35,8 +34,6 @@ def get_status_str(ext: ExtensionRecord) -> ExtStatus:
         return "error"
     if not ext.is_enabled:
         return "off"
-    if not ext_service.is_running(ext):
-        return "stopped"
     if ext.is_preview:
         return "preview"
     return "on"
