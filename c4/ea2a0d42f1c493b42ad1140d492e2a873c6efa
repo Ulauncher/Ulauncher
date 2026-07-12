@@ -1,0 +1,19 @@
+ulauncher/api/_logging.py
+  s_f22861f6ad02d3::t_9e1d3f2087317b 20-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "c4ea2a0d42f1c493b42ad1140d492e2a873c6efa",
+  "prompts": {},
+  "sessions": {
+    "s_f22861f6ad02d3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26f2d9e1-c9a3-4a71-957b-c635ff5e36d5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
