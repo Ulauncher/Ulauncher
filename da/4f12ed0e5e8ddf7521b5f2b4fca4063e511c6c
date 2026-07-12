@@ -1,0 +1,19 @@
+ulauncher/internals/effect_utils.py
+  s_26daf2b2ff5e29::t_30e23324d61a7b 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "da4f12ed0e5e8ddf7521b5f2b4fca4063e511c6c",
+  "prompts": {},
+  "sessions": {
+    "s_26daf2b2ff5e29": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0501610e-ddaa-431e-afcc-d978168a1264",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
