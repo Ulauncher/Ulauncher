@@ -1,0 +1,19 @@
+ulauncher/api/extension.py
+  s_01b12509c3fa29::t_c3c30ca6ac818c 144-148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "8d0a543dbf3ba455a0021d34b8cd12947991915d",
+  "prompts": {},
+  "sessions": {
+    "s_01b12509c3fa29": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b9f544e-1d55-4620-acb6-4d605c907f43",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
