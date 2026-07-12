@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import logging
 import os
 import warnings
+from typing import TextIO
+
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
 class ApiDeprecationWarning(DeprecationWarning):
@@ -11,10 +15,36 @@ class ApiDeprecationWarning(DeprecationWarning):
 # Set by the app only for v3 extensions. v2 extensions already get a compatibility-mode warning,
 # and standalone runs (unset) stay quiet.
 _enabled = os.getenv("ULAUNCHER_API_DEPRECATION_WARNINGS") == "1"
+_ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
+_log_handler = logging.StreamHandler()
+_log_handler.setFormatter(ColoredFormatter())
+_logger = logging.getLogger(_ext_id)
+_logger.addHandler(_log_handler)
+
+
+def _install_logging_showwarning() -> None:
+    default_showwarning = warnings.showwarning
+
+    def showwarning(
+        message: Warning | str,
+        category: type[Warning],
+        filename: str,
+        lineno: int,
+        file: TextIO | None = None,
+        line: str | None = None,
+    ) -> None:
+        if issubclass(category, ApiDeprecationWarning):
+            _logger.warning("%s (%s:%s)", message, filename, lineno)
+            return
+        default_showwarning(message, category, filename, lineno, file, line)
+
+    warnings.showwarning = showwarning
+
 
 if _enabled:
     # "once" dedups by message, and also enables DeprecationWarning outside __main__
     warnings.filterwarnings("once", category=ApiDeprecationWarning)
+    _install_logging_showwarning()
 
 
 def warn_legacy_import(module: str) -> None:
