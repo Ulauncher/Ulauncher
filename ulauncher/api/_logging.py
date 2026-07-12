@@ -17,6 +17,9 @@ def get_extension_logger() -> logging.Logger:
 
     logger = logging.getLogger(log_name)
 
+    # Own handler below, so don't also forward records to the root logger's handler
+    logger.propagate = False
+
     # Only add handler if not already present (avoid duplicates on re-import)
     if not logger.handlers:
         handler = logging.StreamHandler()
