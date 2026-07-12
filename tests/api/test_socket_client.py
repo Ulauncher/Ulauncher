@@ -5,15 +5,15 @@ from unittest.mock import MagicMock, create_autospec, patch
 import pytest
 from pytest_mock import MockerFixture
 
-from ulauncher.api.client.Client import Client
 from ulauncher.api.extension import Extension
 from ulauncher.api.shared.event import EventType
+from ulauncher.api.socket_client import Client
 
 
 class TestClient:
     @pytest.fixture(autouse=True)
     def message_socket(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.api.client.Client.SocketMsgController")
+        return mocker.patch("ulauncher.api.socket_client.SocketMsgController")
 
     @pytest.fixture
     def extension(self) -> Extension:

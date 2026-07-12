@@ -10,10 +10,10 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterable, Iterator, cast
 
-from ulauncher.api.client.Client import Client
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
@@ -152,7 +152,7 @@ class Extension:
             # We can use method_name to determine if listener was added the old way or the new class method way
             # Pass the event args if method_name isn't None, otherwise event and self for backwards compatibility
             args = tuple(base_event.args) if method_name else (base_event, self)
-            # Run in a separate thread to avoid blocking the message listener thread (client.py)
+            # Run in a separate thread to avoid blocking the message listener thread (socket_client.py)
             # It's not possible to cancel threads without process isolation, so we run multiple simultaneous threads,
             # then discard the result for stale events
             threading.Thread(
