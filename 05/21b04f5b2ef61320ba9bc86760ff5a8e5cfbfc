@@ -1,0 +1,24 @@
+ulauncher/api/extension.py
+  s_7ade756c171df7::t_ca7a5b9683f6b5 40,45
+  s_7ade756c171df7::t_d3d27a9410ae79 14,41,46-47
+ulauncher/api/_logging.py
+  s_7ade756c171df7::t_c9d4ff6eba87a4 1-41
+ulauncher/api/_deprecation.py
+  s_7ade756c171df7::t_3280be47839fed 8,18-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "0521b04f5b2ef61320ba9bc86760ff5a8e5cfbfc",
+  "prompts": {},
+  "sessions": {
+    "s_7ade756c171df7": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "805ea006-79f0-4911-a1b8-1098cff6213a",
+        "model": "auto"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
