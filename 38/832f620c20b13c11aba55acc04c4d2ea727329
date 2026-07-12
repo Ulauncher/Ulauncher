@@ -1,0 +1,22 @@
+ulauncher/api/shared/action/ExtensionCustomAction.py
+  s_59881548e31dbb::t_7aa17300c4a82c 12-13
+  s_59881548e31dbb::t_66eed77fad3fbe 14-15,22,24-25
+ulauncher/api/extension.py
+  s_59881548e31dbb::t_b8efa452b194d9 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "38832f620c20b13c11aba55acc04c4d2ea727329",
+  "prompts": {},
+  "sessions": {
+    "s_59881548e31dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1523afaa-5137-4d89-8896-98b4ce710bf0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
