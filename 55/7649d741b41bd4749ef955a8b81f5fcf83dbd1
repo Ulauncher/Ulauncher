@@ -1,0 +1,20 @@
+ulauncher/api/_deprecation.py
+  s_5c4473df9ea772::t_6cf17ca69e2d67 3,8-10
+  s_5c4473df9ea772::t_b189e6bd1507c0 11-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "557649d741b41bd4749ef955a8b81f5fcf83dbd1",
+  "prompts": {},
+  "sessions": {
+    "s_5c4473df9ea772": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db42e22-a775-4395-8f65-b25e57da4ca7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
