@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import logging
 import os
 import warnings
 from typing import TextIO
 
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
+from ulauncher.api._logging import get_extension_logger
 
 
 class ApiDeprecationWarning(DeprecationWarning):
@@ -15,11 +14,7 @@ class ApiDeprecationWarning(DeprecationWarning):
 # Set by the app only for v3 extensions. v2 extensions already get a compatibility-mode warning,
 # and standalone runs (unset) stay quiet.
 _enabled = os.getenv("ULAUNCHER_API_DEPRECATION_WARNINGS") == "1"
-_ext_id = os.getenv("ULAUNCHER_EXTENSION_ID")
-_log_handler = logging.StreamHandler()
-_log_handler.setFormatter(ColoredFormatter())
-_logger = logging.getLogger(_ext_id)
-_logger.addHandler(_log_handler)
+_logger = get_extension_logger()
 
 
 def _install_logging_showwarning() -> None:

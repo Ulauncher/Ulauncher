@@ -11,12 +11,12 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api._deprecation import warn_legacy_api
+from ulauncher.api._logging import get_extension_logger
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 if TYPE_CHECKING:
     from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
@@ -37,13 +37,13 @@ class Extension:
             err_msg = "ULAUNCHER_EXTENSION_ID env variable not set"
             raise RuntimeError(err_msg)
         self._client = Client(self)
-        log_handler = logging.StreamHandler()
-        log_handler.setFormatter(ColoredFormatter())
+
+        # Set up logging level for the root logger
         logging.basicConfig(
             level=logging.DEBUG if os.getenv("VERBOSE") == "1" else logging.WARNING,
-            handlers=[log_handler],
         )
-        self.logger = logging.getLogger(self.ext_id)
+
+        self.logger = get_extension_logger()
 
         self._listeners: dict[type[BaseEvent], list[tuple[LegacyEventListener | Extension, str | None]]] = defaultdict(
             list
