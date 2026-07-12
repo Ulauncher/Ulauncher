@@ -91,11 +91,7 @@ class Extension:
             # lazily here to avoid loading the legacy module (and its deprecation warning) otherwise.
             from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
 
-            ref = event["ref"]
-            data = legacy_custom_data_store.get(ref)
-            # Keep only the chosen entry, since get_data can be called more than once
-            legacy_custom_data_store.clear()
-            legacy_custom_data_store[ref] = data
+            data = legacy_custom_data_store.get(event["ref"])
             return event_constructor([data])
 
         if event["type"] == EventType.RESULT_ACTIVATION:
@@ -145,6 +141,16 @@ class Extension:
         if event["type"] == EventType.INPUT_TRIGGER:
             self._input_request_id += 1
             input_request_id = self._input_request_id
+
+        # A new render replaces the old result list, so drop its custom-action data (dropping it on
+        # activation instead would lose sibling actions still on screen under keep_app_open).
+        if (
+            event["type"] in (EventType.INPUT_TRIGGER, EventType.LAUNCH_TRIGGER)
+            and self._listeners[events[EventType.LEGACY_ACTIVATE_CUSTOM]]
+        ):
+            from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
+
+            legacy_custom_data_store.clear()
 
         # Keep preferences in sync before dispatching, so a user on_preferences_update handler reading
         # self.preferences sees the new value. Dispatch runs listeners in threads with no ordering guarantee.
