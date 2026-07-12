@@ -16,9 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class Client:
-    extension: ulauncher.api.Extension
-    msg_controller: SocketMsgController
-    mainloop: GLib.MainLoop
     """
     Manages the extension's communication with Ulauncher.
 
@@ -33,6 +30,10 @@ class Client:
     → (OS) Unix socket (pair) connection
     → Ulauncher ExtensionRuntime (parent runtime)
     """
+
+    extension: ulauncher.api.Extension
+    msg_controller: SocketMsgController
+    mainloop: GLib.MainLoop
 
     def __init__(self, extension: ulauncher.api.Extension) -> None:
         fd_str = os.environ.get("SOCKETPAIR_FD")
