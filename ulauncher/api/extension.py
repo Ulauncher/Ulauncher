@@ -8,16 +8,17 @@ import os
 import signal
 import threading
 from collections import defaultdict
-from typing import Any, Callable, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
-from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
+
+if TYPE_CHECKING:
+    from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
 
 
 class Extension:
@@ -86,6 +87,10 @@ class Extension:
             return None
 
         if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
+            # Only reachable if the extension used the legacy ExtensionCustomAction, so import its store
+            # lazily here to avoid loading the legacy module (and its deprecation warning) otherwise.
+            from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
+
             ref = event["ref"]
             data = legacy_custom_data_store.get(ref)
             # Keep only the chosen entry, since get_data can be called more than once
