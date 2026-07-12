@@ -1,0 +1,23 @@
+tests/api/test_extension.py
+  s_c57fc52195ca8d::t_8531d323061ef9 52-59,61-62
+ulauncher/internals/effect_utils.py
+  s_c57fc52195ca8d::t_09787e43c49490 38-46
+ulauncher/api/extension.py
+  s_c57fc52195ca8d::t_f77213857fb327 207-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "469e17defb79e22e9286920e3e02a60a01224088",
+  "prompts": {},
+  "sessions": {
+    "s_c57fc52195ca8d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5420124a-9af0-4742-b1ad-9cf810e2d852",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
