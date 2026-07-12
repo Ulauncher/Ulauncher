@@ -28,7 +28,7 @@ class InputTriggerEvent(BaseEvent):
 
 
 # TODO: Add deprecation warning
-class KeywordQueryEvent(BaseEvent):
+class LegacyKeywordQueryEvent(BaseEvent):
     """
     Deprecated older variant of InputTriggerEvent
     """
@@ -52,7 +52,7 @@ class KeywordQueryEvent(BaseEvent):
         return self.query.argument or ""
 
 
-class ItemEnterEvent(BaseEvent):
+class LegacyItemEnterEvent(BaseEvent):
     """
     Handler for legacy effect `ExtensionCustomAction`.
     The data object passed to the effect will be available using :meth:`get_data`
@@ -100,7 +100,7 @@ class PreferencesUpdateEvent(BaseEvent):
         self.id, self.new_value, self.old_value = args
 
 
-class PreferencesEvent(BaseEvent):
+class LegacyPreferencesEvent(BaseEvent):
     """
     Is triggered on start
 
@@ -112,10 +112,6 @@ class PreferencesEvent(BaseEvent):
     def __init__(self, args: list[ExtensionPreferences]) -> None:
         super().__init__(args)
         self.preferences = args[0]
-
-
-# Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
-SystemExitEvent = UnloadEvent
 
 
 class EventType:
@@ -134,6 +130,6 @@ events: dict[str, type[BaseEvent]] = {
     EventType.RESULT_ACTIVATION: ResultActivationEvent,
     EventType.UPDATE_PREFERENCES: PreferencesUpdateEvent,
     EventType.UNLOAD: UnloadEvent,
-    EventType.LEGACY_ACTIVATE_CUSTOM: ItemEnterEvent,
-    EventType.LEGACY_PREFERENCES_LOAD: PreferencesEvent,
+    EventType.LEGACY_ACTIVATE_CUSTOM: LegacyItemEnterEvent,
+    EventType.LEGACY_PREFERENCES_LOAD: LegacyPreferencesEvent,
 }

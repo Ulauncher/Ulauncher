@@ -1,20 +1,27 @@
-# Legacy import path. Real definitions live in ulauncher.api.event.
+# Legacy import path. Definitions live in ulauncher.api.event.
 from ulauncher.api.event import (
     BaseEvent,
     EventType,
     ExtensionPreferences,
     ExtensionPreferenceValue,
     InputTriggerEvent,
-    ItemEnterEvent,
-    KeywordQueryEvent,
     LaunchTriggerEvent,
-    PreferencesEvent,
     PreferencesUpdateEvent,
     ResultActivationEvent,
-    SystemExitEvent,
     UnloadEvent,
-    events,
 )
+from ulauncher.api.event import (
+    LegacyItemEnterEvent as ItemEnterEvent,
+)
+from ulauncher.api.event import (
+    LegacyKeywordQueryEvent as KeywordQueryEvent,
+)
+from ulauncher.api.event import (
+    LegacyPreferencesEvent as PreferencesEvent,
+)
+
+# Alias of UnloadEvent for backward compatibility. In v6, please use UnloadEvent (or extension.on_unload) instead
+SystemExitEvent = UnloadEvent
 
 __all__ = [
     "BaseEvent",
@@ -30,5 +37,4 @@ __all__ = [
     "ResultActivationEvent",
     "SystemExitEvent",
     "UnloadEvent",
-    "events",
 ]

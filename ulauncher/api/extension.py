@@ -11,7 +11,7 @@ from collections import defaultdict
 from typing import Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
-from ulauncher.api.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
+from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
@@ -105,10 +105,10 @@ class Extension:
         if event["type"] == EventType.UNLOAD:
             return event_constructor([])
 
-        # If pre v3 extension has KeywordQueryEvent, convert input_trigger to KeywordQueryEvent instead
-        if event["type"] == EventType.INPUT_TRIGGER and self._listeners[KeywordQueryEvent]:
+        # If pre v3 extension has LegacyKeywordQueryEvent, convert input_trigger to LegacyKeywordQueryEvent instead
+        if event["type"] == EventType.INPUT_TRIGGER and self._listeners[LegacyKeywordQueryEvent]:
             argument, trigger_id = event["args"]
-            return KeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
+            return LegacyKeywordQueryEvent(f"{self.preferences[trigger_id]} {argument}")
 
         return event_constructor(list(event["args"]))
 
@@ -141,8 +141,8 @@ class Extension:
             self._input_request_id += 1
             input_request_id = self._input_request_id
 
-        # Ignore deprecated/useless PreferencesEvent event and optional UnloadEvent
-        if not listeners and event_type.__name__ not in ["PreferencesEvent", "UnloadEvent"]:
+        # Ignore deprecated/useless LegacyPreferencesEvent and optional UnloadEvent
+        if not listeners and event_type.__name__ not in ["LegacyPreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
             if request_id is not None:
                 # Requests need a response to be able to garbage collect their callbacks
