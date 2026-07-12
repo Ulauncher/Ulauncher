@@ -204,6 +204,13 @@ class Extension:
         else:
             # Schedule the response on the main thread to avoid races on shared state
             effect_msg = effect_utils.convert_to_effect_message(result)
+            if event["type"] == EventType.INPUT_TRIGGER and not effect_utils.is_valid_input_effect(effect_msg):
+                self.logger.warning(
+                    "Invalid effect %s from input handler. Supported types are: results, `effect.do_nothing()`,"
+                    "legacy `DoNothingAction()` or a legacy `ActionList()` which doesn't close the window",
+                    effect_msg["type"],
+                )
+                effect_msg = effects.do_nothing()
             scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
 
     def _stream_response(
