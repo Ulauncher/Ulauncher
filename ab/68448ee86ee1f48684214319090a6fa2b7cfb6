@@ -1,0 +1,35 @@
+ulauncher/api/shared/event.py
+  s_2d807fdd5984cf::t_b07fbfbc3df1fa 1-34
+ulauncher/api/extension.py
+  s_2d807fdd5984cf::t_a548d3afd6ce07 14
+ulauncher/api/socket_client.py
+  s_2d807fdd5984cf::t_765efa0ecba152 8
+tests/api/test_socket_client.py
+  s_2d807fdd5984cf::t_99d942ce1b88c3 8
+ulauncher/modes/extensions/extension_service.py
+  s_2d807fdd5984cf::t_70591ffa08969e 214
+tests/modes/extensions/test_extension_service.py
+  s_2d807fdd5984cf::t_4c142cc60f04af 6
+ulauncher/api/client/EventListener.py
+  s_2d807fdd5984cf::t_074fca2cb13c06 6
+ulauncher/modes/extensions/extension_mode.py
+  s_2d807fdd5984cf::t_79788009da194f 7
+ulauncher/api/event.py
+  s_2d807fdd5984cf::t_5151a6406aa594 1-139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "ab68448ee86ee1f48684214319090a6fa2b7cfb6",
+  "prompts": {},
+  "sessions": {
+    "s_2d807fdd5984cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c67a9181-6d7b-4221-a49e-fe6c2ac487d5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
