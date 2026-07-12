@@ -10,7 +10,7 @@ import threading
 from collections import defaultdict
 from typing import Any, Callable, Iterable, Iterator, cast
 
-from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
 from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
@@ -43,7 +43,9 @@ class Extension:
         )
         self.logger = logging.getLogger(self.ext_id)
 
-        self._listeners: dict[type[BaseEvent], list[tuple[EventListener | Extension, str | None]]] = defaultdict(list)
+        self._listeners: dict[type[BaseEvent], list[tuple[LegacyEventListener | Extension, str | None]]] = defaultdict(
+            list
+        )
         self.preferences = {}
         self._input_request_id: int = 0
         self._input_debounce_timer: scheduling.Context | None = None
@@ -69,7 +71,7 @@ class Extension:
         if self.__class__.on_result_activation is not Extension.on_result_activation:
             self.subscribe(events[EventType.RESULT_ACTIVATION], "on_result_activation")
 
-    def subscribe(self, event_type: type[BaseEvent], listener: str | EventListener) -> None:
+    def subscribe(self, event_type: type[BaseEvent], listener: str | LegacyEventListener) -> None:
         """
         Example: extension.subscribe(InputTriggerEvent, "on_input")
         """
@@ -314,6 +316,6 @@ class Extension:
         pass
 
 
-class PreferencesUpdateEventListener(EventListener):
+class PreferencesUpdateEventListener(LegacyEventListener):
     def on_event(self, event: PreferencesUpdateEvent, extension: Extension) -> None:  # type: ignore[override]
         extension.preferences[event.id] = event.new_value
