@@ -141,6 +141,11 @@ class Extension:
             self._input_request_id += 1
             input_request_id = self._input_request_id
 
+        # Keep preferences in sync before dispatching, so a user on_preferences_update handler reading
+        # self.preferences sees the new value. Dispatch runs listeners in threads with no ordering guarantee.
+        if isinstance(base_event, PreferencesUpdateEvent):
+            self.preferences[base_event.id] = base_event.new_value
+
         # Ignore deprecated/useless LegacyPreferencesEvent and optional UnloadEvent
         if not listeners and event_type.__name__ not in ["LegacyPreferencesEvent", "UnloadEvent"]:
             self.logger.debug("No listener for event %s", event_type.__name__)
@@ -260,7 +265,6 @@ class Extension:
         """
         Subscribes to events and connects to Ulauncher socket server
         """
-        self.subscribe(events[EventType.UPDATE_PREFERENCES], PreferencesUpdateEventListener())
         # Trigger legacy preferences load event synthetically since the app no longer sends it
         self._do_trigger_event({"type": EventType.LEGACY_PREFERENCES_LOAD, "args": (self.preferences,)})
         self._client.connect()
@@ -314,8 +318,3 @@ class Extension:
 
     def on_unload(self) -> None:
         pass
-
-
-class PreferencesUpdateEventListener(LegacyEventListener):
-    def on_event(self, event: PreferencesUpdateEvent, extension: Extension) -> None:  # type: ignore[override]
-        extension.preferences[event.id] = event.new_value
