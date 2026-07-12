@@ -35,6 +35,18 @@ def should_close(effect_msg: EffectMessage) -> bool:
     return True
 
 
+def is_valid_input_effect(effect_msg: EffectMessage) -> bool:
+    """Whether the effect is a valid input query response (non-interruptive)"""
+    if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+        effects = effect_msg.get("effects")
+        return isinstance(effects, list) and all(
+            is_effect_message(effect) and is_valid_input_effect(effect) for effect in effects
+        )
+    if effect_msg["type"] == EffectType.RENDER_RESULTS:
+        return isinstance(effect_msg.get("results"), list)
+    return effect_msg["type"] == EffectType.DO_NOTHING
+
+
 def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
     """Process effects by dispatching to appropriate handlers."""
 
