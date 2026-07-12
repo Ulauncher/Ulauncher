@@ -1,0 +1,26 @@
+ulauncher/internals/effect_utils.py
+  s_c57fc52195ca8d::t_09787e43c49490 38-46
+tests/api/test_extension.py
+  s_c57fc52195ca8d::t_3422ff4b189399 109-127
+  s_c57fc52195ca8d::t_798e68a322c938 13
+  s_c57fc52195ca8d::t_8531d323061ef9 53-60,62-63
+ulauncher/api/extension.py
+  s_c57fc52195ca8d::t_de4d0596309c2a 214-215
+  s_c57fc52195ca8d::t_f77213857fb327 207-213,216-221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "4a6b4e8f9517e601f04623dde5eb5355ce5bc9bd",
+  "prompts": {},
+  "sessions": {
+    "s_c57fc52195ca8d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5420124a-9af0-4742-b1ad-9cf810e2d852",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
