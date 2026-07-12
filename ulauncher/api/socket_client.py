@@ -5,7 +5,7 @@ import os
 from typing import TYPE_CHECKING
 
 import ulauncher.api
-from ulauncher.api.shared.event import EventType
+from ulauncher.api.event import EventType
 from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize_ipc_args
 

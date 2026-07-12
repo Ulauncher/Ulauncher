@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, create_autospec, patch
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.api.event import EventType
 from ulauncher.api.extension import Extension
-from ulauncher.api.shared.event import EventType
 from ulauncher.api.socket_client import Client
 
 

@@ -4,7 +4,7 @@ import html
 import logging
 from typing import Callable, Iterator
 
-from ulauncher.api.shared.event import EventType
+from ulauncher.api.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query

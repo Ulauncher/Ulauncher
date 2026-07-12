@@ -3,8 +3,8 @@ from __future__ import annotations  # noqa: N999
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ulauncher.api.event import BaseEvent
     from ulauncher.api.extension import Extension
-    from ulauncher.api.shared.event import BaseEvent
     from ulauncher.internals import effects
 
 

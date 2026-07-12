@@ -211,7 +211,7 @@ class ExtensionService(ExtensionRegistry):
             runtime.send_message(message, request_id)
 
     def save_user_preferences(self, record: ExtensionRecord, data: Any) -> None:
-        from ulauncher.api.shared.event import EventType
+        from ulauncher.api.event import EventType
 
         old_preferences = {p_id: pref.value for p_id, pref in record.preferences.items()}
         record.persist_preferences(data)

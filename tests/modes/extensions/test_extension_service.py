@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, PropertyMock
 
 from pytest_mock import MockerFixture
 
-from ulauncher.api.shared.event import EventType
+from ulauncher.api.event import EventType
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_service import ExtensionService
 

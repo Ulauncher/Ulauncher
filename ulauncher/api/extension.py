@@ -11,8 +11,8 @@ from collections import defaultdict
 from typing import Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
+from ulauncher.api.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
-from ulauncher.api.shared.event import BaseEvent, EventType, KeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
