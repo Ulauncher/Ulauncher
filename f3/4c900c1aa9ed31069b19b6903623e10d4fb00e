@@ -1,0 +1,24 @@
+ulauncher/api/extension.py
+  s_2d807fdd5984cf::t_13bae5248d8704 16
+  s_2d807fdd5984cf::t_a5982e8d66bc8b 155
+ulauncher/api/socket_client.py
+  s_2d807fdd5984cf::t_b213e3e2b62c8e 1
+tests/api/test_socket_client.py
+  s_2d807fdd5984cf::t_13bae5248d8704 10,16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "f34c900c1aa9ed31069b19b6903623e10d4fb00e",
+  "prompts": {},
+  "sessions": {
+    "s_2d807fdd5984cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c67a9181-6d7b-4221-a49e-fe6c2ac487d5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
