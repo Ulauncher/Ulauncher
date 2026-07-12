@@ -2,10 +2,7 @@ from __future__ import annotations
 
 
 class Query:
-    """
-    argument should be None if there is no space after the keyword.
-    If there is only a space after, argument should be an empty string
-    """
+    """argument is None when nothing follows the keyword, or "" when only a space follows."""
 
     keyword: str | None
     argument: str | None
@@ -22,17 +19,5 @@ class Query:
 
     @property
     def is_active(self) -> bool:
-        """
-        If the query has an argument that is not None it counts as active
-        If the query has a keyword and a space after the keyword, it counts as active because
-        then the argument is an empty string
-        """
+        # A trailing space after the keyword sets argument to "", which still counts as active.
         return self.argument is not None
-
-    def get_keyword(self) -> str | None:
-        # TODO: Add deprecation warning
-        return self.keyword
-
-    def get_argument(self, default: str | None = None) -> str | None:
-        # TODO: Add deprecation warning
-        return self.argument or default

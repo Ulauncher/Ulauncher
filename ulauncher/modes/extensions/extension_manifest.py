@@ -142,6 +142,10 @@ class ExtensionManifest(JsonConf):
                 return "option cannot be empty for select type"
         return None
 
+    def supports_current_api(self) -> bool:
+        """False for pre-v3 extensions that only run in v2 compatibility mode."""
+        return satisfies(api_version, self.api_version)
+
     def check_compatibility(self, verbose: bool = False) -> None:
         """
         Ensure the extension is compatible with the Ulauncher API (or raise error)

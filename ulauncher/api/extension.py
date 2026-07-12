@@ -10,12 +10,13 @@ import threading
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
+from ulauncher.api._deprecation import warn_legacy_api
+from ulauncher.api._logging import get_extension_logger
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
 from ulauncher.utils import scheduling
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 if TYPE_CHECKING:
     from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
@@ -36,13 +37,13 @@ class Extension:
             err_msg = "ULAUNCHER_EXTENSION_ID env variable not set"
             raise RuntimeError(err_msg)
         self._client = Client(self)
-        log_handler = logging.StreamHandler()
-        log_handler.setFormatter(ColoredFormatter())
+
+        # Set up logging level for the root logger
         logging.basicConfig(
             level=logging.DEBUG if os.getenv("VERBOSE") == "1" else logging.WARNING,
-            handlers=[log_handler],
         )
-        self.logger = logging.getLogger(self.ext_id)
+
+        self.logger = get_extension_logger()
 
         self._listeners: dict[type[BaseEvent], list[tuple[LegacyEventListener | Extension, str | None]]] = defaultdict(
             list
@@ -60,22 +61,29 @@ class Extension:
 
         # subscribe with methods if user has added their own
         if self.__class__.on_input is not Extension.on_input:
-            self.subscribe(events[EventType.INPUT_TRIGGER], "on_input")
+            self._subscribe(events[EventType.INPUT_TRIGGER], "on_input")
         if self.__class__.on_launch is not Extension.on_launch:
-            self.subscribe(events[EventType.LAUNCH_TRIGGER], "on_launch")
+            self._subscribe(events[EventType.LAUNCH_TRIGGER], "on_launch")
         if self.__class__.on_item_enter is not Extension.on_item_enter:
-            self.subscribe(events[EventType.LEGACY_ACTIVATE_CUSTOM], "on_item_enter")
+            self._subscribe(events[EventType.LEGACY_ACTIVATE_CUSTOM], "on_item_enter")
         if self.__class__.on_unload is not Extension.on_unload:
-            self.subscribe(events[EventType.UNLOAD], "on_unload")
+            self._subscribe(events[EventType.UNLOAD], "on_unload")
         if self.__class__.on_preferences_update is not Extension.on_preferences_update:
-            self.subscribe(events[EventType.UPDATE_PREFERENCES], "on_preferences_update")
+            self._subscribe(events[EventType.UPDATE_PREFERENCES], "on_preferences_update")
         if self.__class__.on_result_activation is not Extension.on_result_activation:
-            self.subscribe(events[EventType.RESULT_ACTIVATION], "on_result_activation")
+            self._subscribe(events[EventType.RESULT_ACTIVATION], "on_result_activation")
 
-    def subscribe(self, event_type: type[BaseEvent], listener: str | LegacyEventListener) -> None:
+    def subscribe(self, event_type: type[BaseEvent], listener: LegacyEventListener) -> None:
         """
-        Example: extension.subscribe(InputTriggerEvent, "on_input")
+        Example: extension.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         """
+        warn_legacy_api(
+            "Extension.subscribe",
+            "Define handler methods like `on_input` on your `Extension` subclass instead.",
+        )
+        self._subscribe(event_type, listener)
+
+    def _subscribe(self, event_type: type[BaseEvent], listener: str | LegacyEventListener) -> None:
         if isinstance(listener, str):
             self._listeners[event_type].append((self, listener))
         else:
