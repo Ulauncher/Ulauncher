@@ -42,7 +42,9 @@ def is_valid_input_effect(effect_msg: EffectMessage) -> bool:
         return isinstance(effects, list) and all(
             is_effect_message(effect) and is_valid_input_effect(effect) for effect in effects
         )
-    return effect_msg["type"] in (EffectType.RENDER_RESULTS, EffectType.DO_NOTHING)
+    if effect_msg["type"] == EffectType.RENDER_RESULTS:
+        return isinstance(effect_msg.get("results"), list)
+    return effect_msg["type"] == EffectType.DO_NOTHING
 
 
 def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
