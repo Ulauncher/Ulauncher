@@ -1,0 +1,73 @@
+ulauncher/api/shared/action/RunScriptAction.py
+  s_4c30be950e3542::t_7c4da790b9d03a 1-2,6
+ulauncher/modes/extensions/extension_manifest.py
+  s_4c30be950e3542::t_e91d8c5d3dc114 145-148
+ulauncher/api/shared/action/ActionList.py
+  s_4c30be950e3542::t_5def5aad213383 3,9,13-14,18
+  s_4c30be950e3542::t_a803a51cffb3fd 15-17
+ulauncher/api/shared/item/ExtensionSmallResultItem.py
+  s_4c30be950e3542::t_ced468ac1600f9 1-4,9-12
+ulauncher/api/shared/action/CopyToClipboardAction.py
+  s_4c30be950e3542::t_37fef803b8917b 1-2,6
+ulauncher/modes/extensions/extension_service.py
+  s_4c30be950e3542::t_c37772d81824f4 182
+  s_4c30be950e3542::t_6c3d4170a7ca61 181
+ulauncher/api/client/__init__.py
+  s_4c30be950e3542::t_12e6894b878da3 1-3
+ulauncher/api/shared/query.py
+  s_4c30be950e3542::t_86236fab984679 1-4,7-16
+ulauncher/api/extension.py
+  s_4c30be950e3542::t_0b80ad14d8b87b 13
+  s_4c30be950e3542::t_36834c1ca310f5 64,66,68,70,72,74
+  s_4c30be950e3542::t_6242502b8d2ece 76,78,80-86
+ulauncher/api/shared/__init__.py
+  s_4c30be950e3542::t_38269918ae68b3 1-3
+ulauncher/internals/query.py
+  s_4c30be950e3542::t_0efd999ba2e0c3 5,22
+ulauncher/api/event.py
+  s_4c30be950e3542::t_697118262bbd80 37-39,43
+  s_4c30be950e3542::t_aca6de16b4c0ce 3,5-6
+ulauncher/api/client/Extension.py
+  s_4c30be950e3542::t_e317a8c9d7af61 1-2,5-10
+ulauncher/api/shared/action/SetUserQueryAction.py
+  s_4c30be950e3542::t_83320a295536f5 1-2,5-9
+ulauncher/api/shared/item/ExtensionResultItem.py
+  s_4c30be950e3542::t_68d510134d77f0 3-5,10-13
+ulauncher/api/client/EventListener.py
+  s_4c30be950e3542::t_eba3f8a5a396af 19-21
+  s_4c30be950e3542::t_b3e574ce968f74 5-6,18
+  s_4c30be950e3542::t_77a226d1866e88 22
+ulauncher/api/_deprecation.py
+  s_4c30be950e3542::t_53e215fc9fade3 1-10,13-15,17-33
+  s_4c30be950e3542::t_8bd3b4698104a5 11-12
+  s_4c30be950e3542::t_28ea294bf25f87 34
+  s_4c30be950e3542::t_7669c7ce1899f4 16
+ulauncher/api/shared/action/OpenAction.py
+  s_4c30be950e3542::t_ea11eb94312d88 1-2,5-9
+ulauncher/api/shared/action/RenderResultListAction.py
+  s_4c30be950e3542::t_df83041238ac26 1-9,12-16
+ulauncher/api/shared/action/DoNothingAction.py
+  s_4c30be950e3542::t_94be790dd2bec9 1-2,5-9
+ulauncher/api/shared/action/OpenUrlAction.py
+  s_4c30be950e3542::t_3dc65265609dee 1-2,5-9
+ulauncher/api/shared/action/ExtensionCustomAction.py
+  s_4c30be950e3542::t_48b81245706306 5,18-21
+ulauncher/api/shared/action/HideWindowAction.py
+  s_4c30be950e3542::t_cfc033a163072e 1-2,5-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "56f2996d7b4bad388831a99b32f0e62ccd6b89cd",
+  "prompts": {},
+  "sessions": {
+    "s_4c30be950e3542": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b411518-d9fb-4df5-8ab1-59b55ee27ed5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
