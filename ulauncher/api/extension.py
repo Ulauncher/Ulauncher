@@ -12,7 +12,7 @@ from typing import Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api.client.EventListener import EventListener as LegacyEventListener
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
-from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store
+from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.result import Result
@@ -87,10 +87,10 @@ class Extension:
 
         if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
             ref = event["ref"]
-            data = custom_data_store.get(ref)
+            data = legacy_custom_data_store.get(ref)
             # Keep only the chosen entry, since get_data can be called more than once
-            custom_data_store.clear()
-            custom_data_store[ref] = data
+            legacy_custom_data_store.clear()
+            legacy_custom_data_store[ref] = data
             return event_constructor([data])
 
         if event["type"] == EventType.RESULT_ACTIVATION:
