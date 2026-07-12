@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Final, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, Union
 
-from ulauncher.internals.query import Query
+if TYPE_CHECKING:
+    from ulauncher.api.shared.query import Query
 
 ExtensionPreferenceValue = Union[str, int, bool]
 ExtensionPreferences = Dict[str, ExtensionPreferenceValue]
@@ -27,17 +28,19 @@ class InputTriggerEvent(BaseEvent):
     """
 
 
-# TODO: Add deprecation warning
 class LegacyKeywordQueryEvent(BaseEvent):
     """
     Deprecated older variant of InputTriggerEvent
     """
 
     def __init__(self, query_str: str) -> None:
+        # Imported lazily so the always-loaded core doesn't pull in a legacy module for v3 extensions.
+        from ulauncher.api.shared.query import Query
+
         argument: str | None = None
         components = query_str.split(" ", 1)
         if len(components) > 1:
-            # argument will be an empty string if there is only a space after the keyword (see is_active property)
+            # "" when there is only a space after the keyword (see is_active).
             argument = components[1]
         self.query = Query(components[0], argument)
         super().__init__([self.query])

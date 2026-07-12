@@ -178,6 +178,8 @@ class ExtensionService(ExtensionRegistry):
             "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             "ULAUNCHER_EXTENSION_ID": record.id,
             "ULAUNCHER_INPUT_DEBOUNCE": str(record.manifest.input_debounce),
+            # v2 extensions already get a compatibility-mode warning, so only warn v3 ones.
+            "ULAUNCHER_API_DEPRECATION_WARNINGS": "1" if record.manifest.supports_current_api() else "0",
         }
 
         # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
