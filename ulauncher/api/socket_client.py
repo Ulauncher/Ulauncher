@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import logging
 import os
 from typing import TYPE_CHECKING
 
 import ulauncher.api
+from ulauncher.api._logging import get_extension_logger
 from ulauncher.api.event import EventType
 from ulauncher.gi import GLib
 from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize_ipc_args
@@ -12,7 +12,7 @@ from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize
 if TYPE_CHECKING:
     from ulauncher.internals import ipc
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger()
 
 
 class Client:
