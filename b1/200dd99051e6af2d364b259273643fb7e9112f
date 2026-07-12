@@ -1,0 +1,19 @@
+ulauncher/api/socket_client.py
+  s_f4617e52d0d072::t_cd4eab7e07fab5 67,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "b1200dd99051e6af2d364b259273643fb7e9112f",
+  "prompts": {},
+  "sessions": {
+    "s_f4617e52d0d072": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0fac7235-414a-4555-b54b-cd66729db709",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
