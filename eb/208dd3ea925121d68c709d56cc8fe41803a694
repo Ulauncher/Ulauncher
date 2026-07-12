@@ -1,0 +1,21 @@
+ulauncher/api/extension.py
+  s_59881548e31dbb::t_b8efa452b194d9 94
+  s_59881548e31dbb::t_749d7ac328fbd0 145-148,153-156
+  s_59881548e31dbb::t_4607f5bc36cb06 149-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "eb208dd3ea925121d68c709d56cc8fe41803a694",
+  "prompts": {},
+  "sessions": {
+    "s_59881548e31dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1523afaa-5137-4d89-8896-98b4ce710bf0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
