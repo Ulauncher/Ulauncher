@@ -64,11 +64,11 @@ class Client:
         """
         Parses message from Ulauncher and triggers extension event
         """
-        logger.debug("Incoming message: %s", message)
+        logger.debug("Incoming message: %s", summarize_ipc_args([message]))
         try:
             event, request_id = message
         except (TypeError, ValueError):
-            logger.warning("Ignoring malformed message: %s", message)
+            logger.warning("Ignoring malformed message: %s", summarize_ipc_args([message]))
             return
         self.extension.trigger_event(event, request_id)
 
