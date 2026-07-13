@@ -1,0 +1,19 @@
+ulauncher/api/__init__.py
+  s_3961519d526ee4::t_6eb1c564de699f 1-2,5,10-21,14,17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "36863199a35b615d5b9902737eb562c10058ed8b",
+  "prompts": {},
+  "sessions": {
+    "s_3961519d526ee4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a0693d46-b6a6-423e-8e19-b07440937364",
+        "model": "unknown"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}

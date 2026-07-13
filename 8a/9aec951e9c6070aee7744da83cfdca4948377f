@@ -1,0 +1,19 @@
+ulauncher/internals/effects.py
+  s_3961519d526ee4::t_5a6d9a08835a24 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "8a9aec951e9c6070aee7744da83cfdca4948377f",
+  "prompts": {},
+  "sessions": {
+    "s_3961519d526ee4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a0693d46-b6a6-423e-8e19-b07440937364",
+        "model": "unknown"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
