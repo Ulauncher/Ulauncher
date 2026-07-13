@@ -1,0 +1,26 @@
+ulauncher/api/extension.py
+  s_0635c6021f824a::t_1f042b0b7f3e95 206-209
+  s_0635c6021f824a::t_e10d9871163bf6 325
+  s_0635c6021f824a::t_e3986d61b37373 193
+  s_0635c6021f824a::t_fecd70bbb9c77a 11
+ulauncher/internals/effects.py
+  s_0635c6021f824a::t_296890ff48ba0d 84-89
+ulauncher/api/_utils.py
+  s_0635c6021f824a::t_df967178e0b98b 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "866f213cdcf37aa9ff998dcffc1fcf8c8189002a",
+  "prompts": {},
+  "sessions": {
+    "s_0635c6021f824a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e8fcfa8-9daf-47bc-91f9-a3be4ddf9d35",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Albin Larsson <515120+friday@users.noreply.github.com>"
+    }
+  }
+}
