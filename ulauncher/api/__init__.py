@@ -11,10 +11,10 @@ class Result(_Result):
     def __setitem__(self, key: str, value: Any) -> None:
         if key in ["on_enter", "on_alt_enter"] and value is not None:
             from ulauncher.api._deprecation import warn_legacy_api
-            from ulauncher.internals import effect_utils
+            from ulauncher.api._utils import convert_to_effect_message
 
             warn_legacy_api(key, "Use the `actions` parameter instead.")
-            value = effect_utils.convert_to_effect_message(value)
+            value = convert_to_effect_message(value)
 
         super().__setitem__(key, value)
 
