@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, cast
+from typing import TYPE_CHECKING, cast
 
 from ulauncher.api._logging import get_extension_logger
 from ulauncher.internals import effect_utils, effects
@@ -13,6 +13,8 @@ _logger = get_extension_logger()
 
 def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | str | None) -> effects.EffectMessage:
     """Normalize input format that supports boolean and string to represent effects and iterable lists for results"""
+    from ulauncher.internals.result import Result
+
     if input_data is None:
         return effects.close_window()
 
@@ -37,4 +39,8 @@ def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | st
         err_msg = f"Invalid effect message dict: {input_data}"
         raise ValueError(err_msg)
 
-    return effects.render_results(list(cast("Iterable[Result]", input_data)))  # collect/flatten iterators to lists
+    results = list(input_data)
+    if not all(isinstance(result, Result) for result in results):
+        err_msg = "A returned result list must be flat and contain no other types"
+        raise ValueError(err_msg)
+    return effects.render_results(cast("list[Result]", results))
