@@ -1,7 +1,7 @@
 from typing import Any  # noqa: N999
 
+from ulauncher.api import Result
 from ulauncher.api._deprecation import warn_legacy_api
-from ulauncher.internals.result import Result
 
 
 class ExtensionSmallResultItem(Result):

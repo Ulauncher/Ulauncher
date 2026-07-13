@@ -2,8 +2,8 @@ from __future__ import annotations  # noqa: N999
 
 from typing import Any
 
+from ulauncher.api import Result
 from ulauncher.api._deprecation import warn_legacy_api
-from ulauncher.internals.result import Result
 
 
 class ExtensionResultItem(Result):

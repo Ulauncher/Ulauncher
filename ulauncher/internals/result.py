@@ -80,14 +80,6 @@ class Result(BaseDataClass):
         init_kwargs.update(kwargs)
         super().__init__(**init_kwargs)
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        if key in ["on_enter", "on_alt_enter"] and value is not None:
-            from ulauncher.internals import effect_utils
-
-            value = effect_utils.convert_to_effect_message(value)
-
-        super().__setitem__(key, value)
-
     def get_highlightable_input(self, query_str: str) -> str:
         return query_str
 
