@@ -1,0 +1,27 @@
+ulauncher/api/extension.py
+  s_0635c6021f824a::t_1f042b0b7f3e95 206-209
+  s_0635c6021f824a::t_14cbeec67ea321 193
+  s_0635c6021f824a::t_fecd70bbb9c77a 11
+  s_0635c6021f824a::t_eb21877d9ab7af 325
+ulauncher/internals/effects.py
+  s_0635c6021f824a::t_296890ff48ba0d 84-86
+  s_0635c6021f824a::t_72f805bf3aacc1 87-90
+ulauncher/api/_utils.py
+  s_0635c6021f824a::t_df967178e0b98b 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "aa87af2e1b21098e5899d45f43ccf7b0ef5cb666",
+  "prompts": {},
+  "sessions": {
+    "s_0635c6021f824a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e8fcfa8-9daf-47bc-91f9-a3be4ddf9d35",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
