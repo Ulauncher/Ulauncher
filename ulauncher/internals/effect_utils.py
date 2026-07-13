@@ -1,22 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, Iterable, cast
+from typing import TYPE_CHECKING, Any, Final
 
 from ulauncher.internals.effects import (
     EffectMessage,
-    EffectMessageInput,
     EffectType,
-    close_window,
-    do_nothing,
-    render_results,
-    set_query,
 )
 from ulauncher.utils.eventbus import EventBus
 
 if TYPE_CHECKING:
     from typing_extensions import TypeGuard
-
-    from ulauncher.internals.result import Result
 
 _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
 _events = EventBus()
@@ -74,17 +67,3 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
 
     if should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
-
-
-def convert_to_effect_message(input_data: EffectMessageInput | None) -> EffectMessage:
-    """Normalize input format that supports boolean and string to represent effects and iterable lists for results"""
-    if isinstance(input_data, bool) or input_data is None:
-        return do_nothing() if input_data else close_window()
-    if isinstance(input_data, str):
-        return set_query(input_data)
-    if isinstance(input_data, dict):
-        if is_effect_message(input_data):
-            return input_data
-        err_msg = f"Invalid effect message dict: {input_data}"
-        raise ValueError(err_msg)
-    return render_results(list(cast("Iterable[Result]", input_data)))  # collect/flatten iterators to lists

@@ -84,7 +84,7 @@ EffectMessage = Union[
 # Input format that we will convert to an EffectMessage. A plain iterable of Results becomes one
 # render; a generator may also yield list[Result] batches to stream replace drafts (see
 # api.extension.Extension._stream_response).
-EffectMessageInput = Union[EffectMessage, bool, str, Iterable[Union["Result", "list[Result]"]]]
+EffectMessageInput = Union[EffectMessage, Iterable[Union["Result", "list[Result]"]]]
 
 
 def do_nothing() -> DoNothing:

@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api._deprecation import warn_legacy_api
 from ulauncher.api._logging import get_extension_logger
+from ulauncher.api._utils import convert_to_effect_message
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
@@ -203,7 +204,7 @@ class Extension:
             self._stream_response(request_id, event, result, input_request_id)
         else:
             # Schedule the response on the main thread to avoid races on shared state
-            effect_msg = effect_utils.convert_to_effect_message(result)
+            effect_msg = convert_to_effect_message(result)
             if event["type"] == EventType.INPUT_TRIGGER and not effect_utils.is_valid_input_effect(effect_msg):
                 self.logger.warning(
                     "Invalid effect %s from input handler. Supported types are: results, `effect.do_nothing()`,"
