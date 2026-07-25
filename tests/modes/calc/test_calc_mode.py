@@ -80,6 +80,8 @@ class TestCalcMode:
         assert mode.matches_query_str("sqrt(s")
         assert mode.matches_query_str("(co")
         assert mode.matches_query_str("-s")
+        assert mode.matches_query_str("5*st")
+        assert mode.matches_query_str("5*ah")
 
         # Names can only follow an operator or bracket, so app names starting with a number are unaffected
         assert not mode.matches_query_str("0ad")
@@ -104,6 +106,20 @@ class TestCalcMode:
         assert get_completions("5*sqrt") == (("sqrt", "5*sqrt("),)
         assert get_completions("0ad") == ()
         assert get_completions("5*zz") == ()
+
+    def test_get_completions__fuzzy(self) -> None:
+        # The partial name matches as a subsequence
+        assert get_completions("5*st") == (("sqrt", "5*sqrt("),)
+        assert get_completions("5*ah") == (("acosh", "5*acosh("), ("asinh", "5*asinh("), ("atanh", "5*atanh("))
+        # Prefix matches come before the rest
+        assert get_completions("5*as") == (
+            ("asin", "5*asin("),
+            ("asinh", "5*asinh("),
+            ("acos", "5*acos("),
+            ("acosh", "5*acosh("),
+        )
+        # The first character still has to match, so unrelated app names are unaffected
+        assert get_completions("5*qt") == ()
 
     def test_all_completions_have_descriptions(self) -> None:
         assert set(descriptions) == {*functions, *constants}

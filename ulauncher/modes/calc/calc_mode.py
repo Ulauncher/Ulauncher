@@ -104,10 +104,19 @@ def normalize_expr(expr: str) -> str:
     return expr  # noqa: RET504
 
 
+def _matches_name(partial: str, name: str) -> bool:
+    # Anchoring on the first character keeps "5*a" from listing every name containing an "a"
+    if not name.startswith(partial[0]):
+        return False
+    remaining = iter(name)
+    return all(char in remaining for char in partial)
+
+
 @lru_cache(maxsize=1000)
 def get_completions(query_str: str) -> tuple[tuple[str, str], ...]:
     """
     Queries ending with a partial name, like "5*sq", complete to full queries like "5*sqrt(".
+    The partial name matches as a subsequence, so "5*st" also completes to "5*sqrt(".
     Returns pairs of the function or constant name and the completed query.
     """
     query_str = query_str.rstrip()
@@ -118,7 +127,10 @@ def get_completions(query_str: str) -> tuple[tuple[str, str], ...]:
     # Substituting a number for the partial name tells us whether the rest is math
     if not _is_enabled(normalize_expr(f"{head}1")):
         return ()
-    names = sorted(name for name in (*functions, *constants) if name.startswith(partial))
+    names = sorted(
+        (name for name in (*functions, *constants) if _matches_name(partial, name)),
+        key=lambda name: (not name.startswith(partial), name),
+    )
     completions = ((name, f"{head}{name}(" if name in functions else f"{head}{name}") for name in names)
     return tuple((name, completion) for name, completion in completions if completion != query_str)
 
