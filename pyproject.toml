@@ -34,6 +34,7 @@ preset = "strict"
 [tool.pyrefly.errors]
 bad-param-name-override = false
 missing-override-decorator = false
+implicit-any-lambda = false
 
 [tool.mypy]
 python_version = "3.8"
