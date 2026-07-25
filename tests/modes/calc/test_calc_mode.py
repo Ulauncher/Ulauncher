@@ -126,3 +126,19 @@ class TestCalcMode:
                 result = get_results(mode, query)[0]
                 # CalcErrorResult have no actions, so they never reach activate_result
                 assert isinstance(result, CalcErrorResult)
+
+    def test_handle_query__unevaluable_expr(self, mode: CalcMode, caplog: pytest.LogCaptureFixture) -> None:
+        bad_queries = [
+            "1/0",
+            "1%0",
+            "2**100000",
+            "sqrt(-1)",
+            "ln(0)",
+            "acos(2)",
+            "gamma(-1)",
+        ]
+
+        with caplog.at_level("CRITICAL"):
+            for query_str in bad_queries:
+                result = get_results(mode, Query(None, query_str))[0]
+                assert isinstance(result, CalcErrorResult)
