@@ -173,7 +173,9 @@ class CalcMode(Mode):
                 description="Enter to copy to the clipboard",
                 result=calc_result,
             )
-        except (SyntaxError, TypeError, IndexError):
+        # ArithmeticError covers the decimal exceptions (division by zero, overflow, sqrt of a negative number),
+        # ValueError the math module domain errors
+        except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError):
             logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
             result = CalcErrorResult()
 
