@@ -12,6 +12,12 @@ class CalcResult(Result):
     actions = {"copy": {"name": "Copy to clipboard", "icon": "edit-copy"}}
 
 
+class CalcCompletionResult(Result):
+    icon = calc_icon
+    completion = ""
+    actions = {"complete": {"name": "Complete expression", "icon": "go-next"}}
+
+
 class CalcErrorResult(Result):
     name = "Error!"
     description = "Invalid expression"

@@ -11,7 +11,7 @@ from typing import Callable
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.calc.calc_result import CalcErrorResult, CalcResult
+from ulauncher.modes.calc.calc_result import CalcCompletionResult, CalcErrorResult, CalcResult
 from ulauncher.modes.mode import Mode
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.lru_cache import lru_cache
@@ -54,7 +54,39 @@ functions: dict[str, Callable[..., float | Decimal]] = {
 }
 
 constants = {"pi": Decimal(math.pi), "e": Decimal(math.e)}
+
+descriptions = {
+    "sqrt": "Square root",
+    "exp": "Exponential (e to the power of x)",
+    "ln": "Natural logarithm",
+    "log10": "Base-10 logarithm",
+    "sin": "Sine (radians)",
+    "cos": "Cosine (radians)",
+    "tan": "Tangent (radians)",
+    "asin": "Arc sine (radians)",
+    "acos": "Arc cosine (radians)",
+    "atan": "Arc tangent (radians)",
+    "sinh": "Hyperbolic sine",
+    "cosh": "Hyperbolic cosine",
+    "tanh": "Hyperbolic tangent",
+    "asinh": "Inverse hyperbolic sine",
+    "acosh": "Inverse hyperbolic cosine",
+    "atanh": "Inverse hyperbolic tangent",
+    "erf": "Error function",
+    "erfc": "Complementary error function",
+    "gamma": "Gamma function",
+    "lgamma": "Natural logarithm of the gamma function",
+    "pi": "Pi (3.14159...)",
+    "e": "Euler's number (2.71828...)",
+}
+
 logger = logging.getLogger(__name__)
+
+_trailing_operator_re = re.compile(r"\s*[.+\-*/%]\*?\s*$")
+# Only known function names, so an app search like "5*foo(" isn't reduced to the math prefix "5"
+_incomplete_call_re = re.compile(rf"\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])(?:{'|'.join(functions)}))?\(\s*$")
+# A name is only completable where an operand can start, so it must follow an operator or a bracket
+_partial_name_re = re.compile(r"^(?P<head>.*[-+*/%^(]\s*)(?P<partial>[a-zA-Z_]\w*)$")
 
 
 # Show a friendlier output for incomplete queries, instead of "Invalid"
@@ -64,10 +96,44 @@ def normalize_expr(expr: str) -> str:
     # ^ means xor in Python. ** is the Python notation for pow
     expr = expr.replace("^", "**")
     # Strip trailing operator
-    expr = re.sub(r"\s*[\.\+\-\*/%\(]\*?\s*$", "", expr)
+    expr = _trailing_operator_re.sub("", expr)
+    # Strip calls that have no argument yet, so "5*sqrt(" evaluates as "5"
+    while (stripped := _incomplete_call_re.sub("", expr)) != expr:
+        expr = stripped
     # Complete unfinished brackets
     expr = expr + ")" * (expr.count("(") - expr.count(")"))
     return expr  # noqa: RET504
+
+
+def _matches_name(partial: str, name: str) -> bool:
+    # Anchoring on the first character keeps "5*a" from listing every name containing an "a"
+    if not name.startswith(partial[0]):
+        return False
+    remaining = iter(name)
+    return all(char in remaining for char in partial)
+
+
+@lru_cache(maxsize=1000)
+def get_completions(query_str: str) -> tuple[tuple[str, str], ...]:
+    """
+    Queries ending with a partial name, like "5*sq", complete to full queries like "5*sqrt(".
+    The partial name matches as a subsequence, so "5*st" also completes to "5*sqrt(".
+    Returns pairs of the function or constant name and the completed query.
+    """
+    query_str = query_str.rstrip()
+    match = _partial_name_re.match(query_str)
+    if not match:
+        return ()
+    head, partial = match["head"], match["partial"]
+    # Substituting a number for the partial name tells us whether the rest is math
+    if not _is_enabled(normalize_expr(f"{head}1")):
+        return ()
+    names = sorted(
+        (name for name in (*functions, *constants) if _matches_name(partial, name)),
+        key=lambda name: (not name.startswith(partial), name),
+    )
+    completions = ((name, f"{head}{name}(" if name in functions else f"{head}{name}") for name in names)
+    return tuple((name, completion) for name, completion in completions if completion != query_str)
 
 
 def eval_expr(expr: str) -> str:
@@ -161,25 +227,38 @@ def _eval(node: ast.expr) -> int | float | Decimal:
     raise TypeError(node)
 
 
+def _evaluate(query_str: str) -> Result:
+    try:
+        calc_result = eval_expr(query_str)
+        return CalcResult(
+            name=f"{Decimal(calc_result):n}",
+            description="Enter to copy to the clipboard",
+            result=calc_result,
+        )
+    # ArithmeticError covers the decimal exceptions (division by zero, overflow, sqrt of a negative number),
+    # ValueError the math module domain errors
+    except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError):
+        logger.warning("Calc mode error triggered while handling query: '%s'", query_str)
+        return CalcErrorResult()
+
+
 class CalcMode(Mode):
     def matches_query_str(self, query_str: str) -> bool:
-        return _is_enabled(normalize_expr(query_str))
+        return bool(get_completions(query_str)) or _is_enabled(normalize_expr(query_str))
 
     def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
-        try:
-            calc_result = eval_expr(query.argument or "")
-            result: Result = CalcResult(
-                name=f"{Decimal(calc_result):n}",
-                description="Enter to copy to the clipboard",
-                result=calc_result,
-            )
-        # ArithmeticError covers the decimal exceptions (division by zero, overflow, sqrt of a negative number),
-        # ValueError the math module domain errors
-        except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError):
-            logger.warning("Calc mode error triggered while handling query: '%s'", query.argument)
-            result = CalcErrorResult()
+        query_str = query.argument or ""
+        completions = get_completions(query_str)
+        results: list[Result] = []
+        # An incomplete name has no value to show, but a complete one like "5*e" has both
+        if not completions or _is_enabled(normalize_expr(query_str)):
+            results.append(_evaluate(query_str))
+        results.extend(
+            CalcCompletionResult(name=completion, description=descriptions[math_name], completion=completion)
+            for math_name, completion in completions
+        )
 
-        callback(effects.render_results([result]))
+        callback(effects.render_results(results))
 
     def activate_result(
         self,
@@ -195,6 +274,12 @@ class CalcMode(Mode):
                 return
             _events.emit("app:copy_and_close", result.result)
             callback(effects.close_window())
+        elif action_id == "complete":
+            if not isinstance(result, CalcCompletionResult):
+                logger.error("Unexpected result type for calc complete action: %s", type(result).__name__)
+                callback(effects.do_nothing())
+                return
+            callback(effects.set_query(result.completion))
         else:
             logger.error("Unexpected action '%s' for Calc mode result '%s'", action_id, result)
             callback(effects.do_nothing())
