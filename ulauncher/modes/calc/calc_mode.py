@@ -83,7 +83,8 @@ descriptions = {
 logger = logging.getLogger(__name__)
 
 _trailing_operator_re = re.compile(r"\s*[.+\-*/%]\*?\s*$")
-_incomplete_call_re = re.compile(r"\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])[a-zA-Z_]\w*)?\(\s*$")
+# Only known function names, so an app search like "5*foo(" isn't reduced to the math prefix "5"
+_incomplete_call_re = re.compile(rf"\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])(?:{'|'.join(functions)}))?\(\s*$")
 # A name is only completable where an operand can start, so it must follow an operator or a bracket
 _partial_name_re = re.compile(r"^(?P<head>.*[-+*/%^(]\s*)(?P<partial>[a-zA-Z_]\w*)$")
 

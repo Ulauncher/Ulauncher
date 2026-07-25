@@ -92,6 +92,11 @@ class TestCalcMode:
         assert not mode.matches_query_str("5*zz")
         assert not mode.matches_query_str("5*sqx")
         assert not mode.matches_query_str("sq")
+
+        # Only known functions are stripped, so an unknown call isn't reduced to its math prefix
+        assert not mode.matches_query_str("5*foo(")
+        assert not mode.matches_query_str("7-zip(")
+        assert not mode.matches_query_str("5*mysin(")
         assert not mode.matches_query_str("co")
 
     def test_get_completions(self) -> None:
