@@ -7,7 +7,17 @@ import os
 import sys
 from pathlib import Path
 
+from ulauncher.internals import log_wire
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
+
+
+def get_extension_handler() -> logging.Handler:
+    """The handler every logger in the extension process writes through."""
+    handler = logging.StreamHandler()
+    # Ulauncher imports this module too, where nothing parses the wire format back
+    in_extension_process = bool(os.getenv("SOCKETPAIR_FD"))
+    handler.setFormatter(log_wire.WireFormatter() if in_extension_process else ColoredFormatter())
+    return handler
 
 
 def get_extension_logger() -> logging.Logger:
@@ -22,8 +32,6 @@ def get_extension_logger() -> logging.Logger:
 
     # Only add handler if not already present (avoid duplicates on re-import)
     if not logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setFormatter(ColoredFormatter())
-        logger.addHandler(handler)
+        logger.addHandler(get_extension_handler())
 
     return logger

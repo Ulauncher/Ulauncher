@@ -33,7 +33,8 @@ def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
         from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
         stream_handler.setFormatter(ColoredFormatter())
-        log_format = "%(asctime)s | %(levelname)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
+        # Extensions log through here too, under their extension id
+        log_format = "%(asctime)s | %(levelname)s | %(name)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
         handlers.append(logging.FileHandler(paths.LOG_FILE, mode="w+"))
 
     stream_handler.setLevel(log_level)

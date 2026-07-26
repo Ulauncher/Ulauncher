@@ -19,16 +19,26 @@ class ColoredFormatter(logging.Formatter):
         logging.CRITICAL: ("⚠️", 31),  # red
     }
 
+    def __init__(self) -> None:
+        # Varying parts are injected as record fields, so this is built once, not per record
+        super().__init__("%(asctime)s %(color_prefix)s %(message)s %(color_suffix)s")
+        self._name_colors: dict[str, int] = {}
+
+    def _name_color(self, name: str) -> int:
+        if name not in self._name_colors:
+            # Own generator, so the same name keeps its color without reseeding the shared one
+            self._name_colors[name] = random.Random(name).randint(32, 37)
+        return self._name_colors[name]
+
     def format(self, record: logging.LogRecord) -> str:
         # Great reference for terminal colors: https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
         symbol, level_color = self.formats.get(record.levelno, ("", 0))
         prefix = f"{symbol}  {mkcolor(level_color, True)}{record.levelname}{mkcolor(0)}"
         if record.name != "root":
-            # Ensure the same name gets the same color every time
-            random.seed(record.name)
-            name_color = random.randint(32, 37)
             name = record.name[len("ulauncher.") :] if record.name.startswith("ulauncher.") else record.name
-            prefix += f"{mkcolor(name_color, True)} {name}{mkcolor(0)}:"
-        suffix = f"{mkcolor(2)}{record.funcName}:{record.lineno}{mkcolor(0)}"  # 2 means faded
-        formatter = logging.Formatter(f"%(asctime)s {prefix} %(message)s {suffix}")
-        return formatter.format(record)
+            prefix += f"{mkcolor(self._name_color(record.name), True)} {name}{mkcolor(0)}:"
+        # Raw extension output has no source location, only a stream name
+        location = f"{record.funcName}:{record.lineno}" if record.lineno else record.funcName
+        record.__dict__["color_prefix"] = prefix
+        record.__dict__["color_suffix"] = f"{mkcolor(2)}{location}{mkcolor(0)}"  # 2 means faded
+        return super().format(record)

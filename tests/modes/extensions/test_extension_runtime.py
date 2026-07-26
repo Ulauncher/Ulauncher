@@ -1,10 +1,13 @@
+import logging
 import signal
 from typing import Any
 from unittest.mock import MagicMock, Mock
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockerFixture
 
+from ulauncher.internals import log_wire
 from ulauncher.modes.extensions.extension_runtime import ExtensionRuntime, aborted_subprocesses
 
 
@@ -15,7 +18,9 @@ class TestExtensionRuntime:
 
     @pytest.fixture(autouse=True)
     def data_input_stream(self, mocker: MockerFixture) -> MagicMock:
-        return mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.DataInputStream")
+        stream_class = mocker.patch("ulauncher.modes.extensions.extension_runtime.Gio.DataInputStream")
+        stream_class.new.side_effect = lambda _pipe: Mock()
+        return stream_class
 
     @pytest.fixture(autouse=True)
     def message_socket(self, mocker: MockerFixture) -> MagicMock:
@@ -48,7 +53,9 @@ class TestExtensionRuntime:
 
         subprocess_launcher.new.assert_called_once()
         runtime._subprocess.wait_async.assert_called_once()
-        runtime._error_stream.read_line_async.assert_called_once()
+        assert set(runtime._output_streams) == {"stdout", "stderr"}
+        for stream in runtime._output_streams.values():
+            stream.read_line_async.assert_called_once()
 
     def test_read_stderr_line(self) -> None:
         test_output1 = "Test Output 1"
@@ -57,20 +64,65 @@ class TestExtensionRuntime:
         mock_read_line_finish_utf8 = Mock()
 
         runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
-        runtime._error_stream.read_line_finish_utf8 = mock_read_line_finish_utf8
+        stream = runtime._output_streams["stderr"]
+        stream.read_line_finish_utf8 = mock_read_line_finish_utf8
+        reads_after_launch = stream.read_line_async.call_count
 
         mock_read_line_finish_utf8.return_value = (test_output1, len(test_output1))
-        runtime.handle_stderr(runtime._error_stream, Mock())
+        runtime.handle_output(stream, Mock(), "stderr")
         # Confirm the output is stored in recent_errors and read_line_async is called for the next
         # line.
         assert runtime._recent_errors[0] == test_output1
-        assert runtime._error_stream.read_line_async.call_count == 2
+        assert stream.read_line_async.call_count == reads_after_launch + 1
 
         mock_read_line_finish_utf8.return_value = (test_output2, len(test_output2))
-        runtime.handle_stderr(runtime._error_stream, Mock())
+        runtime.handle_output(stream, Mock(), "stderr")
         # The latest line should replace the previous line
         assert runtime._recent_errors[0] == test_output2
-        assert runtime._error_stream.read_line_async.call_count == 3
+        assert stream.read_line_async.call_count == reads_after_launch + 2
+
+    def test_read_stdout_line__is_not_treated_as_an_error(self) -> None:
+        extid = "mock.test_read_stdout_line__is_not_treated_as_an_error"
+
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+        stream = runtime._output_streams["stdout"]
+        stream.read_line_finish_utf8 = Mock(return_value=("printed to stdout", 17))
+
+        runtime.handle_output(stream, Mock(), "stdout")
+
+        assert not runtime._recent_errors
+
+    def test_handle_output__blank_line__keeps_reading(self) -> None:
+        extid = "mock.test_handle_output__blank_line__keeps_reading"
+        mock_read_line_finish_utf8 = Mock()
+
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+        stream = runtime._output_streams["stderr"]
+        stream.read_line_finish_utf8 = mock_read_line_finish_utf8
+        reads_after_launch = stream.read_line_async.call_count
+
+        mock_read_line_finish_utf8.return_value = ("", 0)
+        runtime.handle_output(stream, Mock(), "stderr")
+        assert not runtime._recent_errors
+        assert stream.read_line_async.call_count == reads_after_launch + 1
+
+        mock_read_line_finish_utf8.return_value = (None, 0)  # end of stream
+        runtime.handle_output(stream, Mock(), "stderr")
+        assert stream.read_line_async.call_count == reads_after_launch + 1
+
+    def test_emit_output__wire_encoded__restores_the_extensions_record(self, caplog: LogCaptureFixture) -> None:
+        extid = "mock.test_emit_output"
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+        line = log_wire.WireFormatter().format(
+            logging.LogRecord(extid, logging.WARNING, "/ext/main.py", 42, "line one\nline two", None, None, func="run")
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            message = runtime.emit_output(line, "stderr")
+
+        assert message == "line one\nline two"
+        record = caplog.records[-1]
+        assert (record.name, record.levelno, record.funcName, record.lineno) == (extid, logging.WARNING, "run", 42)
 
     def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"
