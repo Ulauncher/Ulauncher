@@ -337,17 +337,16 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     browser_url: str | None = None
     download_url_template: str | None = None
     input_url_is_ssl = False
-    input_url = input_url.strip()
-    remote_url = input_url.lower()
+    remote_url = input_url = input_url.strip()
     # Convert SSH endpoint to URL
     # This might not be a real supported URL for the remote host, but we still need this step to proceed
-    if remote_url.startswith("git@"):
+    if remote_url[:4].lower() == "git@":
         input_url_is_ssl = True
         remote_url = "https://" + remote_url[4:].replace(":", "/")
 
     url_parts = urlparse(remote_url)
     path = url_parts.path[1:]
-    host = url_parts.netloc
+    host = url_parts.netloc.lower()
     remote_url = f"https://{host}/{path}"
 
     if not path:
@@ -381,7 +380,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
         msg = f"Invalid URL: {input_url}"
         raise ValueError(msg)
 
-    ext_id = ".".join(([*reversed(host.split("."))] if host else []) + path.split("/"))
+    ext_id = ".".join(([*reversed(host.split("."))] if host else []) + path.lower().split("/"))
 
     return UrlParseResult(
         ext_id=ext_id,
