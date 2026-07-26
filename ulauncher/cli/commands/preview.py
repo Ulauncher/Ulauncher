@@ -152,7 +152,8 @@ def run(args: CLIArguments) -> int:
 
     # The dependency install is callback-based and must finish before the app launches the extension,
     # so the CLI drives it (and Ctrl+C) on its own GLib loop.
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, on_interrupt)
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig, on_interrupt)
     scheduling.run_when_idle(begin)
     loop.run()
     return exit_code
