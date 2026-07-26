@@ -149,6 +149,7 @@ banned-module-level-imports = ["typing_extensions"]
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "gi.repository" = {msg = "Import GI modules from ulauncher.gi, not gi.repository directly."}
 "ulauncher.ui" = {msg = "Import ulauncher.ui only from ulauncher/cli/commands/start.py - it pulls in GTK and must not leak into extension or CLI runtime."}
+"ulauncher.api" = {msg = "ulauncher.api is the extension process API. Importing it into the app runs its module-level setup there. Shared types belong in ulauncher.internals."}
 "functools.lru_cache" = {msg = "Use ulauncher.utils.lru_cache instead to preserve parameter types."}
 "functools.cache" = {msg = "Use ulauncher.utils.lru_cache instead to preserve parameter types."}
 "functools.cached_property" = {msg = "cached_property erases property types. If you need to use this, create a typed wrapper similar to ulauncher.utils.lru_cache"}
@@ -163,6 +164,7 @@ banned-module-level-imports = ["typing_extensions"]
 "ulauncher/gi.py" = ["TID251"]           # This IS the canonical gi import module
 "ulauncher/utils/lru_cache.py" = ["TID251"]  # This IS the lru_cache wrapper
 "tests/ui/**/*.py" = ["TID251"]          # UI tests need to import from ulauncher.ui
+"tests/api/**/*.py" = ["TID251"]         # API tests need to import from ulauncher.api
 
 [tool.pytest.ini_options]
 log_cli = true
