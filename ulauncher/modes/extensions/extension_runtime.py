@@ -132,15 +132,22 @@ class ExtensionRuntime:
 
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
         try:
-            # append output to recent_errors
             output, _ = error_stream.read_line_finish_utf8(result)
-            if output:
-                print(output, f" 🔌 from {self._ext_id}")  # noqa: T201
-                self._recent_errors.append(output)
-                self.read_stderr_line()
         except GLib.Error:
             logger.exception("Failed to read stderr line for %s", self._ext_id)
             return
+
+        # Only None means the stream ended. A blank line reads as "", and must not end the loop,
+        # or the rest of the extension's stderr is lost. It is not an error, so it isn't recorded
+        # either - _recent_errors holds one line, which a blank would evict.
+        if output is None:
+            return
+
+        if output:
+            print(output, f" 🔌 from {self._ext_id}")  # noqa: T201
+            self._recent_errors.append(output)
+
+        self.read_stderr_line()
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
         self._msg_controller.close()
