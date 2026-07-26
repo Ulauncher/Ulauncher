@@ -14,7 +14,6 @@ class ApiDeprecationWarning(DeprecationWarning):
 # Set by the app only for v3 extensions. v2 extensions already get a compatibility-mode warning,
 # and standalone runs (unset) stay quiet.
 _enabled = os.getenv("ULAUNCHER_API_DEPRECATION_WARNINGS") == "1"
-_logger = get_extension_logger()
 
 
 def _install_logging_showwarning() -> None:
@@ -29,7 +28,7 @@ def _install_logging_showwarning() -> None:
         line: str | None = None,
     ) -> None:
         if issubclass(category, ApiDeprecationWarning):
-            _logger.warning("%s (%s:%s)", message, filename, lineno)
+            get_extension_logger().warning("%s (%s:%s)", message, filename, lineno)
             return
         default_showwarning(message, category, filename, lineno, file, line)
 

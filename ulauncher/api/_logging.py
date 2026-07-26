@@ -4,18 +4,13 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
-from pathlib import Path
 
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 
 def get_extension_logger() -> logging.Logger:
     """Get or create a logger for the extension."""
-    # The env var id is always set, but fallback anyway on the dirname
-    log_name = os.getenv("ULAUNCHER_EXTENSION_ID") or Path(sys.argv[0]).resolve().parent.name
-
-    logger = logging.getLogger(log_name)
+    logger = logging.getLogger(os.environ["ULAUNCHER_EXTENSION_ID"])
 
     # Own handler below, so don't also forward records to the root logger's handler
     logger.propagate = False

@@ -23,7 +23,7 @@ class TestClient:
 
     @pytest.fixture
     def client(self, extension: Any) -> Client:
-        with patch.dict(os.environ, {"SOCKETPAIR_FD": "5"}):
+        with patch.dict(os.environ, {"SOCKETPAIR_FD": "5", "ULAUNCHER_EXTENSION_ID": "com.example.test-extension"}):
             return Client(extension)
 
     def test_on_message__trigger_event__is_called(self, client: Client, extension: MagicMock) -> None:

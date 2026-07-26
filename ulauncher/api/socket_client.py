@@ -12,8 +12,6 @@ from ulauncher.utils.socket_msg_controller import SocketMsgController, summarize
 if TYPE_CHECKING:
     from ulauncher.internals import ipc
 
-logger = get_extension_logger()
-
 
 class Client:
     """
@@ -47,6 +45,7 @@ class Client:
             raise RuntimeError(err_msg) from exc
 
         self.extension = extension
+        self.logger = get_extension_logger()
         self.mainloop = GLib.MainLoop()
         self.msg_controller = SocketMsgController(file_descriptor, on_close=self.unload)
 
@@ -56,19 +55,19 @@ class Client:
         """
         self.msg_controller.listen(self.on_message)
 
-        logger.debug("Starting GLib mainloop")
+        self.logger.debug("Starting GLib mainloop")
         self.mainloop.run()
-        logger.debug("GLib mainloop stopped")
+        self.logger.debug("GLib mainloop stopped")
 
     def on_message(self, message: ipc.EventEnvelope) -> None:
         """
         Parses message from Ulauncher and triggers extension event
         """
-        logger.debug("Incoming message: %s", summarize_ipc_args([message]))
+        self.logger.debug("Incoming message: %s", summarize_ipc_args([message]))
         try:
             event, request_id = message
         except (TypeError, ValueError):
-            logger.warning("Ignoring malformed message: %s", summarize_ipc_args([message]))
+            self.logger.warning("Ignoring malformed message: %s", summarize_ipc_args([message]))
             return
         self.extension.trigger_event(event, request_id)
 
@@ -81,5 +80,5 @@ class Client:
     def send(self, message: ipc.ExtensionMessage, log: bool = True) -> None:
         """Send a message to the app"""
         if log:
-            logger.debug("Send message %s", summarize_ipc_args([message]))
+            self.logger.debug("Send message %s", summarize_ipc_args([message]))
         self.msg_controller.send(message)

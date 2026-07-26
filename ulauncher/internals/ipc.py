@@ -13,12 +13,24 @@ message holds a list there, not a tuple.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Tuple, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from ulauncher.internals.effects import EffectMessage
+
+
+class EventType:
+    """The `type` tags below, as constants. Literal types can't reference these, so they repeat."""
+
+    INPUT_TRIGGER: Final = "event:input_trigger"
+    LAUNCH_TRIGGER: Final = "event:launch_trigger"
+    RESULT_ACTIVATION: Final = "event:result_activation"
+    UPDATE_PREFERENCES: Final = "event:update_preferences"
+    UNLOAD: Final = "event:unload"
+    LEGACY_ACTIVATE_CUSTOM: Final = "event:legacy_activate_custom"
+    LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
 
 
 class InputTriggerEvent(TypedDict):

@@ -4,9 +4,9 @@ import html
 import logging
 from typing import Callable, Iterator
 
-from ulauncher.api.event import EventType
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.effects import EffectMessage, EffectType
+from ulauncher.internals.ipc import EventType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import KeywordTrigger, Result
 from ulauncher.modes.extensions.extension_record import (

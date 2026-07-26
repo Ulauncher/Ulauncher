@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Final, Union
+from typing import TYPE_CHECKING, Any, Dict, Union
+
+from ulauncher.internals.ipc import EventType  # re-exported as public extension API
 
 if TYPE_CHECKING:
     from ulauncher.api.shared.query import Query
@@ -115,16 +117,6 @@ class LegacyPreferencesEvent(BaseEvent):
     def __init__(self, args: list[ExtensionPreferences]) -> None:
         super().__init__(args)
         self.preferences = args[0]
-
-
-class EventType:
-    INPUT_TRIGGER: Final = "event:input_trigger"
-    LAUNCH_TRIGGER: Final = "event:launch_trigger"
-    RESULT_ACTIVATION: Final = "event:result_activation"
-    UPDATE_PREFERENCES: Final = "event:update_preferences"
-    UNLOAD: Final = "event:unload"
-    LEGACY_ACTIVATE_CUSTOM: Final = "event:legacy_activate_custom"
-    LEGACY_PREFERENCES_LOAD: Final = "event:legacy_preferences_load"
 
 
 events: dict[str, type[BaseEvent]] = {

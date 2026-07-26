@@ -8,8 +8,6 @@ from ulauncher.internals import effect_utils, effects
 if TYPE_CHECKING:
     from ulauncher.internals.result import Result
 
-_logger = get_extension_logger()
-
 
 def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | str | None) -> effects.EffectMessage:
     """Normalize input format that supports boolean and string to represent effects and iterable lists for results"""
@@ -20,7 +18,7 @@ def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | st
 
     if isinstance(input_data, bool):
         substitute = effects.do_nothing if input_data else effects.close_window
-        _logger.warning(
+        get_extension_logger().warning(
             "Returning %r from extension handlers is deprecated. Use effects.%s() instead.",
             input_data,
             substitute.__name__,
@@ -28,7 +26,7 @@ def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | st
         return substitute()
 
     if isinstance(input_data, str):
-        _logger.warning(
+        get_extension_logger().warning(
             "Returning a string from extension handlers is deprecated. Use effects.set_query(<query>) instead."
         )
         return effects.set_query(input_data)
