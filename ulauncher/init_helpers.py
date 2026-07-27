@@ -35,7 +35,7 @@ def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
         stream_handler.setFormatter(ColoredFormatter())
         # Extensions log through here too, under their extension id
         log_format = "%(asctime)s | %(levelname)s | %(name)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
-        handlers.append(logging.FileHandler(paths.LOG_FILE, mode="w+"))
+        handlers.append(logging.FileHandler(paths.LOG_FILE, mode="w+", encoding="utf-8"))
 
     stream_handler.setLevel(log_level)
     handlers.append(stream_handler)
