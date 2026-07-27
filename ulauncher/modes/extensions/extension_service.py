@@ -176,7 +176,8 @@ class ExtensionService(ExtensionRegistry):
         # backwards compatible v2 preferences format (with keywords added back)
         v2_prefs = {**triggers, **prefs}
         env = {
-            "VERBOSE": str(int(cli.get_args().verbose)),
+            # Assume previews should always run verbose (works until we add a log-level flag)
+            "VERBOSE": str(int(cli.get_args().verbose or record.is_preview)),
             "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
             "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
             "ULAUNCHER_EXTENSION_ID": record.id,
