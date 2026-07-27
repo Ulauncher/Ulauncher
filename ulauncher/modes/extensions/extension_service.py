@@ -92,9 +92,12 @@ class ExtensionService(ExtensionRegistry):
                     await asyncio.gather(*[self.stop_extension(record) for record in records])
 
         def run_batch() -> None:
-            asyncio.run(run_batch_async())
-            if callback:
-                callback()
+            try:
+                asyncio.run(run_batch_async())
+            finally:
+                # callback must run unconditionally (owns the follow-up work)
+                if callback:
+                    callback()
 
         Thread(target=run_batch).start()
 
@@ -218,6 +221,8 @@ class ExtensionService(ExtensionRegistry):
 
             try:
                 await asyncio.wait_for(stopped_future, timeout=5.0)
+            except asyncio.TimeoutError:
+                logger.warning('Timed out waiting for extension "%s" to exit', record.id)
             finally:
                 if on_stopped in listeners:
                     listeners.remove(on_stopped)
