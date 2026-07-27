@@ -11,7 +11,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api._deprecation import warn_legacy_api
-from ulauncher.api._logging import get_extension_logger
+from ulauncher.api._logging import get_extension_handler, get_extension_logger
 from ulauncher.api._utils import convert_to_effect_message
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
@@ -39,9 +39,12 @@ class Extension:
             raise RuntimeError(err_msg)
         self._client = Client(self)
 
-        # Set up logging level for the root logger
+        # Root gets the same handler, so `logging.getLogger(__name__)` matches `self.logger`.
+        # Forced, since basicConfig is a no-op if an import configured the root logger first.
         logging.basicConfig(
             level=logging.DEBUG if os.getenv("VERBOSE") == "1" else logging.WARNING,
+            handlers=[get_extension_handler()],
+            force=True,
         )
 
         self.logger = get_extension_logger()
