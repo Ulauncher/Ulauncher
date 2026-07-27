@@ -143,6 +143,10 @@ class ExtensionService(ExtensionRegistry):
                 if listener := self.listener:
                     listener.errored(record.id)
 
+                # Nothing asked the preview to stop, but it is over, so it still needs the teardown
+                if self.preview is record:
+                    self.stop_preview()
+
         def message_handler(message: ipc.ExtensionMessage) -> None:
             if listener := self.listener:
                 listener.handle_message(record.id, message)
