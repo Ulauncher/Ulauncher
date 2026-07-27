@@ -32,7 +32,9 @@ def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
     if use_app_logging:
         from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
-        stream_handler.setFormatter(ColoredFormatter())
+        # typeshed types for sys.stderr are lying. It's None if the process has no stderr
+        stream = stream_handler.stream
+        stream_handler.setFormatter(ColoredFormatter(color=stream is not None and stream.isatty()))
         # Extensions log through here too, under their extension id
         log_format = "%(asctime)s | %(levelname)s | %(name)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
         handlers.append(logging.FileHandler(paths.LOG_FILE, mode="w+", encoding="utf-8"))

@@ -29,19 +29,23 @@ class ColoredFormatter(logging.Formatter):
         logging.CRITICAL: ("⚠️", 31),  # red
     }
 
-    def __init__(self) -> None:
+    def __init__(self, color: bool = True) -> None:
         # The parts that vary per record are injected as record fields below, so this is built once
         super().__init__("%(asctime)s %(color_prefix)s %(message)s %(color_suffix)s")
+        self._color = color
+
+    def _mkcolor(self, color: int, bold: bool = False) -> str:
+        return mkcolor(color, bold) if self._color else ""
 
     def format(self, record: logging.LogRecord) -> str:
         # Great reference for terminal colors: https://chrisyeh96.github.io/2020/03/28/terminal-colors.html
         symbol, level_color = self.formats.get(record.levelno, ("", 0))
-        prefix = f"{symbol}  {mkcolor(level_color, True)}{record.levelname}{mkcolor(0)}"
+        prefix = f"{symbol}  {self._mkcolor(level_color, True)}{record.levelname}{self._mkcolor(0)}"
         if record.name != "root":
             name = record.name[len("ulauncher.") :] if record.name.startswith("ulauncher.") else record.name
-            prefix += f"{mkcolor(_name_color(record.name), True)} {name}{mkcolor(0)}:"
+            prefix += f"{self._mkcolor(_name_color(record.name), True)} {name}{self._mkcolor(0)}:"
         # Raw extension output has no source location, only a stream name
         location = f"{record.funcName}:{record.lineno}" if record.lineno else record.funcName
         record.__dict__["color_prefix"] = prefix
-        record.__dict__["color_suffix"] = f"{mkcolor(2)}{location}{mkcolor(0)}"  # 2 is faded
+        record.__dict__["color_suffix"] = f"{self._mkcolor(2)}{location}{self._mkcolor(0)}"  # 2 is faded
         return super().format(record)
