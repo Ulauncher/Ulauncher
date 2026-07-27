@@ -8,7 +8,7 @@ from typing import get_args as get_literal_args
 
 from ulauncher import version
 from ulauncher.data import BaseDataClass
-from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs
+from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs, use_color
 from ulauncher.utils.lru_cache import lru_cache
 
 CommandName = Literal["show", "toggle", "start", "extensions", "install", "uninstall", "upgrade", "preview"]
@@ -255,7 +255,7 @@ def run_command(args: CLIArguments) -> int:
 
 
 def _emit_warning(msg: str) -> None:
-    if sys.stderr.isatty():
+    if use_color(sys.stderr):
         msg = f"\033[33m{msg}\033[0m"
     sys.stderr.write(f"{msg}\n")
 

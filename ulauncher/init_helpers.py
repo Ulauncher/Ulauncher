@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 from ulauncher import paths
+
+if TYPE_CHECKING:
+    from typing import IO
 
 
 def ensure_runtime_dirs() -> None:
@@ -21,6 +25,16 @@ def ensure_runtime_dirs() -> None:
         os.makedirs(path, exist_ok=True)
 
 
+def use_color(stream: IO[str] | None) -> bool:
+    """Apply the https://no-color.org convention, letting NO_COLOR win over FORCE_COLOR."""
+    if os.environ.get("NO_COLOR"):
+        return False
+    if os.environ.get("FORCE_COLOR", "0") != "0":
+        return True
+    # typeshed types for sys.stderr are lying. It's None if the process has no stderr
+    return stream is not None and stream.isatty()
+
+
 def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
     import logging
 
@@ -32,9 +46,7 @@ def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
     if use_app_logging:
         from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
-        # typeshed types for sys.stderr are lying. It's None if the process has no stderr
-        stream = stream_handler.stream
-        stream_handler.setFormatter(ColoredFormatter(color=stream is not None and stream.isatty()))
+        stream_handler.setFormatter(ColoredFormatter(color=use_color(stream_handler.stream)))
         # Extensions log through here too, under their extension id
         log_format = "%(asctime)s | %(levelname)s | %(name)s | %(message)s | %(module)s.%(funcName)s():%(lineno)s"
         handlers.append(logging.FileHandler(paths.LOG_FILE, mode="w+", encoding="utf-8"))
