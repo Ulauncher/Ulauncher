@@ -114,7 +114,6 @@ class ResultsView(Gtk.ScrolledWindow):
             self._apply_selection(update["selected_name"], None)
         self._apply_css(self._box)
         self.show_all()
-        logger.debug("Append %s results (%s total)", len(new_results), len(self._widgets))
 
     def _add_widgets(self, results: list[Result], query: Query, start_index: int) -> None:
         from ulauncher.ui.result_widget import ResultWidget
