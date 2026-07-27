@@ -40,6 +40,8 @@ class ColoredFormatter(logging.Formatter):
         if record.name != "root":
             name = record.name[len("ulauncher.") :] if record.name.startswith("ulauncher.") else record.name
             prefix += f"{mkcolor(_name_color(record.name), True)} {name}{mkcolor(0)}:"
+        # Raw extension output has no source location, only a stream name
+        location = f"{record.funcName}:{record.lineno}" if record.lineno else record.funcName
         record.__dict__["color_prefix"] = prefix
-        record.__dict__["color_suffix"] = f"{mkcolor(2)}{record.funcName}:{record.lineno}{mkcolor(0)}"  # 2 is faded
+        record.__dict__["color_suffix"] = f"{mkcolor(2)}{location}{mkcolor(0)}"  # 2 is faded
         return super().format(record)

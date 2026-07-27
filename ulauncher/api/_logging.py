@@ -5,7 +5,14 @@ from __future__ import annotations
 import logging
 import os
 
-from ulauncher.utils.logging_color_formatter import ColoredFormatter
+from ulauncher.internals import log_wire
+
+
+def get_extension_handler() -> logging.Handler:
+    """The handler every logger in the extension process writes through. Ulauncher formats the output."""
+    handler = logging.StreamHandler()
+    handler.setFormatter(log_wire.WireFormatter())
+    return handler
 
 
 def get_extension_logger() -> logging.Logger:
@@ -17,8 +24,6 @@ def get_extension_logger() -> logging.Logger:
 
     # Only add handler if not already present (avoid duplicates on re-import)
     if not logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setFormatter(ColoredFormatter())
-        logger.addHandler(handler)
+        logger.addHandler(get_extension_handler())
 
     return logger

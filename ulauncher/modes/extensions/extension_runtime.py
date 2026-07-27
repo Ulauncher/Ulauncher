@@ -9,7 +9,7 @@ from typing import Callable, Literal, cast
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
-from ulauncher.internals import ipc
+from ulauncher.internals import ipc, log_wire
 from ulauncher.utils import scheduling
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
@@ -33,7 +33,7 @@ class ExtensionRuntime:
     _start_time: float
     _msg_controller: SocketMsgController
     _parent_socket: socket.socket | None = None
-    _error_stream: Gio.DataInputStream
+    _output_streams: dict[str, Gio.DataInputStream]
     _recent_errors: deque[str]
     _exit_handler: ExitHandlerCallback | None
     _message_handler: MessageHandlerCallback | None
@@ -53,11 +53,13 @@ class ExtensionRuntime:
         self._start_time = time()
 
         extension_env: dict[str, str] = env.copy() if env else {}
-        launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDERR_PIPE)
+        launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE)
 
         for env_name, env_value in extension_env.items():
             launcher.setenv(env_name, env_value, True)
         launcher.setenv("ULAUNCHER_EXTENSION_ID", ext_id, True)
+        # Python block-buffers stdout when it isn't a terminal, holding back `print` output
+        launcher.setenv("PYTHONUNBUFFERED", "1", True)
 
         def socket_cleanup() -> None:
             if self._parent_socket:
@@ -82,15 +84,20 @@ class ExtensionRuntime:
             socket_cleanup()
             raise
 
-        error_input_stream = self._subprocess.get_stderr_pipe()
-        if not error_input_stream:
-            err_msg = "Subprocess must be created with Gio.SubprocessFlags.STDERR_PIPE"
+        out_pipe = self._subprocess.get_stdout_pipe()
+        err_pipe = self._subprocess.get_stderr_pipe()
+        if not out_pipe or not err_pipe:
+            err_msg = "Subprocess must be created with Gio.SubprocessFlags.STDOUT_PIPE and STDERR_PIPE"
             raise AssertionError(err_msg)
-        self._error_stream = Gio.DataInputStream.new(error_input_stream)
+        self._output_streams = {
+            "stdout": Gio.DataInputStream.new(out_pipe),
+            "stderr": Gio.DataInputStream.new(err_pipe),
+        }
 
         logger.debug("Launched %s using Gio.Subprocess", self._ext_id)
         self._subprocess.wait_async(None, self.handle_exit)
-        self.read_stderr_line()
+        for name in self._output_streams:
+            self.read_output_line(name)
         self._msg_controller.listen(self.handle_message)
 
     def stop(self) -> None:
@@ -114,8 +121,11 @@ class ExtensionRuntime:
             # The process may exit between this check and the signal; Gio delivers it race-free.
             self._subprocess.send_signal(signal.SIGKILL)
 
-    def read_stderr_line(self) -> None:
-        self._error_stream.read_line_async(GLib.PRIORITY_DEFAULT, None, self.handle_stderr)
+    def read_output_line(self, stream_name: str) -> None:
+        stream = self._output_streams[stream_name]
+        stream.read_line_async(
+            GLib.PRIORITY_DEFAULT, None, lambda source, result: self.handle_output(source, result, stream_name)
+        )
 
     def send_message(self, message: ipc.Event, request_id: int | None = None) -> None:
         self._msg_controller.send([message, request_id])
@@ -130,30 +140,39 @@ class ExtensionRuntime:
         if self._message_handler:
             self._message_handler(cast("ipc.ExtensionMessage", message))
 
-    def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
+    def handle_output(self, stream: Gio.DataInputStream, result: Gio.AsyncResult, stream_name: str) -> None:
         try:
-            output, _ = error_stream.read_line_finish_utf8(result)
+            output, _ = stream.read_line_finish_utf8(result)
         except GLib.Error as error:
             # A decode error only fails its own line, so keep reading. Any other error means the
             # stream is broken, and re-reading it would fail the same way.
             if error.matches(GLib.convert_error_quark(), GLib.ConvertError.ILLEGAL_SEQUENCE):
-                logger.warning("Skipping undecodable stderr line for %s", self._ext_id)
-                self.read_stderr_line()
+                logger.warning("Skipping undecodable %s line for %s", stream_name, self._ext_id)
+                self.read_output_line(stream_name)
                 return
-            logger.exception("Failed to read stderr line for %s", self._ext_id)
+            logger.exception("Failed to read %s line for %s", stream_name, self._ext_id)
             return
 
-        # Only None means the stream ended. A blank line reads as "", and must not end the loop,
-        # or the rest of the extension's stderr is lost. It is not an error, so it isn't recorded
-        # either - _recent_errors holds one line, which a blank would evict.
+        # Only None ends the stream. A blank line reads as "" and must keep the loop going, but
+        # isn't emitted - _recent_errors holds one line, which a blank would evict.
         if output is None:
             return
 
         if output:
-            print(output, f" 🔌 from {self._ext_id}")  # noqa: T201
-            self._recent_errors.append(output)
+            message = self.emit_output(output, stream_name)
+            if message and stream_name == "stderr":
+                self._recent_errors.append(message)
+        self.read_output_line(stream_name)
 
-        self.read_stderr_line()
+    def emit_output(self, output: str, stream_name: str) -> str:
+        """Re-emit what the extension wrote through Ulauncher's handlers. Returns the message."""
+        record = log_wire.parse(output, self._ext_id)
+        if not record:
+            # Unformatted stderr is a traceback or warning, and has to clear the app's WARNING level
+            level = logging.WARNING if stream_name == "stderr" else logging.INFO
+            record = logging.LogRecord(self._ext_id, level, "", 0, output, None, None, func=stream_name)
+        logging.getLogger(record.name).handle(record)
+        return record.getMessage()
 
     def handle_exit(self, _subprocess: Gio.Subprocess, _result: Gio.AsyncResult) -> None:
         self._msg_controller.close()
