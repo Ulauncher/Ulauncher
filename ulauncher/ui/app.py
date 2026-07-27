@@ -301,6 +301,10 @@ class UlauncherApp(Gtk.Application):
         from contextlib import suppress
         from shutil import rmtree
 
+        from ulauncher.modes.extensions.extension_service import ext_service
+
+        ext_service.detach_preview_log()
+
         # Prune staging entries, except recent entries (within 1h) since they could be ongoing installs via the cli
         threshold = time.time() - 3600
         with suppress(OSError):

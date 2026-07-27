@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import logging
+import os
 import signal
 import subprocess
 from pathlib import Path
+from typing import IO, Callable
 
 from ulauncher import app_id, paths
 from ulauncher.cli import CLIArguments
-from ulauncher.gi import GLib
+from ulauncher.gi import Gio, GLib
+from ulauncher.init_helpers import use_color
+from ulauncher.internals import log_wire
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
@@ -15,6 +19,7 @@ from ulauncher.modes.extensions.extension_remote import parse_extension_url
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT
 from ulauncher.utils import scheduling
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
+from ulauncher.utils.logging_color_formatter import ColoredFormatter
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +90,76 @@ def _resolve_ext_id(path: Path) -> str | None:
         return None
 
 
+class PreviewLogTail:
+    """Prints the previewed extension's log records, which the app mirrors to a file in wire format.
+
+    Formatting them here is what makes them colored and keeps a traceback in one piece. The app
+    removes the file when the preview has fully stopped, and only then is on_end called.
+    """
+
+    POLL_INTERVAL_SEC = 0.1
+
+    def __init__(self, on_end: Callable[[], None]) -> None:
+        self._on_end = on_end
+        self._file: IO[str] | None = None
+        self._partial = ""
+        self._handler = logging.StreamHandler()
+        self._handler.setFormatter(ColoredFormatter(color=use_color(self._handler.stream)))
+        self._poller: scheduling.Context | None = None
+        self._app_watch: int | None = None
+
+    @property
+    def is_tailing(self) -> bool:
+        return self._file is not None
+
+    def start(self) -> None:
+        Path(paths.PREVIEW_LOG_FILE).unlink(missing_ok=True)
+        self._poller = scheduling.interval(self.POLL_INTERVAL_SEC, self._read)
+        self._app_watch = Gio.bus_watch_name(
+            Gio.BusType.SESSION, app_id, Gio.BusNameWatcherFlags.NONE, None, self._on_app_vanished
+        )
+
+    def _read(self) -> None:
+        if not self._file:
+            try:
+                self._file = Path(paths.PREVIEW_LOG_FILE).open(encoding="utf-8")  # noqa: SIM115
+            except OSError:
+                return
+
+        # No links left means the app is done with the file. Checked before the read, so nothing
+        # can be appended in between, and on the fd, so a file recreated at the path isn't ours.
+        ended = not os.fstat(self._file.fileno()).st_nlink
+
+        # Anything past the last newline is held back, because a record can be read mid-write
+        self._partial += self._file.read()
+        completed, _, self._partial = self._partial.rpartition("\n")
+        for line in completed.splitlines():
+            if record := log_wire.parse(line):
+                self._handler.handle(record)
+
+        if ended:
+            self._end()
+
+    def _on_app_vanished(self, _connection: Gio.DBusConnection, _name: str) -> None:
+        # Removing the file is how the app signals the end, but a crashed or killed app can't.
+        # Neither can one that died before creating it, leaving nothing to observe at all.
+        self._read()
+        self._end()
+
+    def _end(self) -> None:
+        if not self._poller:
+            return
+        self._poller.cancel()
+        self._poller = None
+        if self._app_watch is not None:
+            Gio.bus_unwatch_name(self._app_watch)
+            self._app_watch = None
+        if self._file:
+            self._file.close()
+            self._file = None
+        self._on_end()
+
+
 def run(args: CLIArguments) -> int:
     """
     Run an extension in preview mode (without installing it).
@@ -112,12 +187,14 @@ def run(args: CLIArguments) -> int:
     logger.info("Extension ID: %s", ext_id)
 
     loop = GLib.MainLoop()
+    log_tail = PreviewLogTail(on_end=loop.quit)
     exit_code = 0
 
     def start_preview() -> None:
+        log_tail.start()
         dbus_trigger_event("extensions:preview_ext", ext_id, str(path), args.with_debugger)
         logger.info(
-            "Previewing extension '%s'.\nSee its output along with Ulauncher's in %s",
+            "Previewing extension '%s'. Its output is shown below, and in %s along with Ulauncher's.",
             ext_id,
             paths.LOG_FILE,
         )
@@ -144,9 +221,18 @@ def run(args: CLIArguments) -> int:
         else:
             start_preview()
 
+    stop_requested = False
+
     def on_interrupt() -> bool:
-        logger.info("Stopping '%s'...", ext_id)
-        dbus_trigger_event("extensions:stop_preview")
+        nonlocal stop_requested
+        if not stop_requested:
+            stop_requested = True
+            logger.info("Stopping '%s'...", ext_id)
+            dbus_trigger_event("extensions:stop_preview")
+            if log_tail.is_tailing:
+                logger.info("Press Ctrl+C again to stop waiting for its remaining output.")
+                # Keep handler registered, so a second Ctrl+C is ours to handle (would otherwise kill mid-output)
+                return True
         loop.quit()
         return False
 

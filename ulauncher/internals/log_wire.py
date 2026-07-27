@@ -30,17 +30,17 @@ class WireFormatter(logging.Formatter):
         )
 
 
-def parse(line: str, ext_id: str) -> logging.LogRecord | None:
-    """Rebuild the record an extension logged, or None if the line didn't come from its handler."""
+def parse(line: str) -> logging.LogRecord | None:
+    """Rebuild the record the sender logged, or None if the line didn't come from its handler.
+
+    The name is the sender's own. Namespacing it is left to the reader."""
     try:
         fields = json.loads(line)
         name = fields["name"]
         if not isinstance(name, str):
             return None
-        # Sub-loggers of the extension's own logger are already namespaced
-        namespaced = name == ext_id or name.startswith(f"{ext_id}.")
         return logging.LogRecord(
-            name=name if namespaced else f"{ext_id}.{name}",
+            name=name,
             level=int(fields["levelno"]),
             pathname=fields["pathname"],
             lineno=int(fields["lineno"]),
