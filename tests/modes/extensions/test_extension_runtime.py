@@ -106,6 +106,30 @@ class TestExtensionRuntime:
         record = caplog.records[-1]
         assert (record.name, record.levelno, record.funcName, record.lineno) == (extid, logging.WARNING, "run", 42)
 
+    def test_emit_output__extensions_own_logger__is_nested_under_the_ext_id(self, caplog: LogCaptureFixture) -> None:
+        extid = "mock.test_emit_output_nested"
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+        line = log_wire.WireFormatter().format(
+            logging.LogRecord("__main__", logging.INFO, "/ext/main.py", 1, "hi", None, None, func="run")
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            runtime.emit_output(line, "stdout")
+
+        assert caplog.records[-1].name == f"{extid}.__main__"
+
+    def test_emit_output__extensions_sub_logger__keeps_its_name(self, caplog: LogCaptureFixture) -> None:
+        extid = "mock.test_emit_output_sub_logger"
+        runtime: Any = ExtensionRuntime(extid, ["mock/path/to/ext"])
+        line = log_wire.WireFormatter().format(
+            logging.LogRecord(f"{extid}.sub", logging.INFO, "/ext/main.py", 1, "hi", None, None, func="run")
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            runtime.emit_output(line, "stdout")
+
+        assert caplog.records[-1].name == f"{extid}.sub"
+
     def test_handle_exit__signaled(self) -> None:
         extid = "mock.test_handle_exit__signaled"
         exit_handler = Mock()

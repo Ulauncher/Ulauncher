@@ -166,8 +166,12 @@ class ExtensionRuntime:
 
     def emit_output(self, output: str, stream_name: str) -> str:
         """Re-emit what the extension wrote through Ulauncher's handlers. Returns the message."""
-        record = log_wire.parse(output, self._ext_id)
-        if not record:
+        record = log_wire.parse(output)
+        if record:
+            # Sub-loggers of the extension's own logger are already namespaced
+            if not (record.name == self._ext_id or record.name.startswith(f"{self._ext_id}.")):
+                record.name = f"{self._ext_id}.{record.name}"
+        else:
             # Unformatted stderr is a traceback or warning, and has to clear the app's WARNING level
             level = logging.WARNING if stream_name == "stderr" else logging.INFO
             record = logging.LogRecord(self._ext_id, level, "", 0, output, None, None, func=stream_name)

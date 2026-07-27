@@ -5,11 +5,13 @@ import json
 import logging
 import sys
 from collections import defaultdict
+from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
+from ulauncher.internals import log_wire
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
@@ -49,12 +51,14 @@ class ExtensionService(ExtensionRegistry):
     runtimes: dict[str, ExtensionRuntime]
     stopped_listeners: dict[str, list[Callable[[], None]]]
     listener: ExtensionServiceListener | None
+    _preview_log: tuple[str, logging.Handler] | None
 
     def __init__(self) -> None:
         super().__init__(lifecycle=self)
         self.runtimes = {}
         self.stopped_listeners = defaultdict(list)
         self.listener = None
+        self._preview_log = None
         events.set_self(self)
 
     def activate(self, listener: ExtensionServiceListener) -> None:
@@ -278,6 +282,30 @@ class ExtensionService(ExtensionRegistry):
             extension_ids, ["stop"], callback=lambda: logger.info("%s extensions stopped", len(extension_ids))
         )
 
+    def _attach_preview_log(self, ext_id: str) -> None:
+        """Mirror the previewed extension's records to a file for the CLI that started it to tail.
+
+        In the extensions' wire format, so the CLI restores the records and applies its own colors,
+        rather than parsing them back out of a formatted line.
+        """
+        self.detach_preview_log()
+        handler = logging.FileHandler(paths.PREVIEW_LOG_FILE, mode="w", encoding="utf-8")
+        handler.setFormatter(log_wire.WireFormatter())
+        # Catches the sub-loggers too, since records propagate up from "<ext_id>.<name>"
+        logging.getLogger(ext_id).addHandler(handler)
+        self._preview_log = (ext_id, handler)
+
+    def detach_preview_log(self) -> None:
+        """Also called on app shutdown, so a CLI tailing the log isn't left waiting for an end that
+        can no longer come."""
+        if self._preview_log:
+            ext_id, handler = self._preview_log
+            logging.getLogger(ext_id).removeHandler(handler)
+            handler.close()
+            # Load-bearing: dropping the file is what tells the CLI that the preview is over
+            Path(paths.PREVIEW_LOG_FILE).unlink(missing_ok=True)
+            self._preview_log = None
+
     @events.on
     def preview_ext(self, ext_id: str, path: str, with_debugger: bool = False) -> None:
         """Run an extension from a dev path WITHOUT installing it. Triggered from the CLI via D-Bus.
@@ -293,6 +321,7 @@ class ExtensionService(ExtensionRegistry):
         # Only relaunch if the current preview is still active
         def start_if_still_previewing() -> None:
             if self.preview is preview:
+                self._attach_preview_log(ext_id)
                 self._run_batch_job([ext_id], ["start"])
 
         def start_on_main_thread() -> None:
@@ -317,8 +346,9 @@ class ExtensionService(ExtensionRegistry):
         def restore_original() -> None:
             if self.preview is preview:
                 self.preview = None
+                self.detach_preview_log()
             elif self.preview and self.preview.id == ext_id:
-                # Another preview started for this extension during the stop
+                # Another preview started for this extension during the stop, and owns the log now
                 return
             # Reload from the installed path, or drop the record if the extension was never installed.
             record = self.get(ext_id)
