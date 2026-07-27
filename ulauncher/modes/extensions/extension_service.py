@@ -287,16 +287,20 @@ class ExtensionService(ExtensionRegistry):
         """
 
         logger.info("[preview] Previewing ext_id=%s path=%s debugger=%s", ext_id, path, with_debugger)
-        self.preview = PreviewExtensionRecord(ext_id, path, with_debugger=with_debugger)
+        preview = PreviewExtensionRecord(ext_id, path, with_debugger=with_debugger)
+        self.preview = preview
 
-        # Guard the restart against a stop_preview that races in during the stop: only relaunch if
-        # this preview is still the active one, otherwise stop_preview owns restoring the extension.
+        # Only relaunch if the current preview is still active
         def start_if_still_previewing() -> None:
-            if self.preview and self.preview.id == ext_id:
+            if self.preview is preview:
                 self._run_batch_job([ext_id], ["start"])
 
+        def start_on_main_thread() -> None:
+            # The batch job calls back from a worker thread. Previews are set on the main thread
+            scheduling.run_when_idle(start_if_still_previewing)
+
         # Relaunch from the dev path, stopping any conflicting installed instances
-        self._run_batch_job([ext_id], ["stop"], callback=start_if_still_previewing)
+        self._run_batch_job([ext_id], ["stop"], callback=start_on_main_thread)
 
     @events.on
     def stop_preview(self) -> None:
@@ -306,17 +310,26 @@ class ExtensionService(ExtensionRegistry):
             logger.debug("[preview] Ignoring stop_preview; no preview active")
             return
 
-        ext_id = self.preview.id
+        preview = self.preview
+        ext_id = preview.id
         logger.info("[preview] Stopping preview %s", ext_id)
 
         def restore_original() -> None:
-            self.preview = None
+            if self.preview is preview:
+                self.preview = None
+            elif self.preview and self.preview.id == ext_id:
+                # Another preview started for this extension during the stop
+                return
             # Reload from the installed path, or drop the record if the extension was never installed.
             record = self.get(ext_id)
             if record and record.is_enabled:
                 self._run_batch_job([ext_id], ["start"])
 
-        self._run_batch_job([ext_id], ["stop"], callback=restore_original)
+        def restore_on_main_thread() -> None:
+            # The batch job calls back from a worker thread. Previews are set on the main thread
+            scheduling.run_when_idle(restore_original)
+
+        self._run_batch_job([ext_id], ["stop"], callback=restore_on_main_thread)
 
 
 ext_service = ExtensionService()
