@@ -202,15 +202,25 @@ class ExtensionService(ExtensionRegistry):
             loop = asyncio.get_running_loop()
             stopped_future: asyncio.Future[None] = loop.create_future()
 
+            def resolve() -> None:
+                if not stopped_future.done():
+                    stopped_future.set_result(None)
+
             # The listener fires on the GTK main thread. A plain set_result there would not wake
             # this loop, making every stop take the full timeout below.
             def on_stopped() -> None:
-                loop.call_soon_threadsafe(stopped_future.set_result, None)
+                if not loop.is_closed():
+                    loop.call_soon_threadsafe(resolve)
 
-            self.stopped_listeners[record.id].append(on_stopped)
+            listeners = self.stopped_listeners[record.id]
+            listeners.append(on_stopped)
             runtime.stop()
 
-            await asyncio.wait_for(stopped_future, timeout=5.0)
+            try:
+                await asyncio.wait_for(stopped_future, timeout=5.0)
+            finally:
+                if on_stopped in listeners:
+                    listeners.remove(on_stopped)
 
     def send_message(self, record: ExtensionRecord, message: ipc.Event, request_id: int | None = None) -> None:
         """
