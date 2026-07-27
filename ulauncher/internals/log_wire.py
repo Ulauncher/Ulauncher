@@ -36,8 +36,11 @@ def parse(line: str) -> logging.LogRecord | None:
     The name is the sender's own. Namespacing it is left to the reader."""
     try:
         fields = json.loads(line)
+        name = fields["name"]
+        if not isinstance(name, str):
+            return None
         return logging.LogRecord(
-            name=fields["name"],
+            name=name,
             level=int(fields["levelno"]),
             pathname=fields["pathname"],
             lineno=int(fields["lineno"]),

@@ -28,3 +28,4 @@ def test_round_trip__preserves_the_record() -> None:
 def test_parse__plain_output__is_not_a_record() -> None:
     assert log_wire.parse("just a print") is None
     assert log_wire.parse('{"name": "my.ext"}') is None
+    assert log_wire.parse(_wire("my.ext", "hi").replace('"my.ext"', "null")) is None
