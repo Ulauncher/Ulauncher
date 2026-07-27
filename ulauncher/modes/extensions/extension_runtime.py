@@ -133,7 +133,13 @@ class ExtensionRuntime:
     def handle_stderr(self, error_stream: Gio.DataInputStream, result: Gio.AsyncResult) -> None:
         try:
             output, _ = error_stream.read_line_finish_utf8(result)
-        except GLib.Error:
+        except GLib.Error as error:
+            # A decode error only fails its own line, so keep reading. Any other error means the
+            # stream is broken, and re-reading it would fail the same way.
+            if error.matches(GLib.convert_error_quark(), GLib.ConvertError.ILLEGAL_SEQUENCE):
+                logger.warning("Skipping undecodable stderr line for %s", self._ext_id)
+                self.read_stderr_line()
+                return
             logger.exception("Failed to read stderr line for %s", self._ext_id)
             return
 
