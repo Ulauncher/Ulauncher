@@ -199,8 +199,15 @@ class ExtensionService(ExtensionRegistry):
     async def stop_extension(self, record: ExtensionRecord) -> None:
         """Stops the extension process if it is running."""
         if runtime := self.runtimes.pop(record.id, None):
-            stopped_future: asyncio.Future[None] = asyncio.Future()
-            self.stopped_listeners[record.id].append(lambda: stopped_future.set_result(None))
+            loop = asyncio.get_running_loop()
+            stopped_future: asyncio.Future[None] = loop.create_future()
+
+            # The listener fires on the GTK main thread. A plain set_result there would not wake
+            # this loop, making every stop take the full timeout below.
+            def on_stopped() -> None:
+                loop.call_soon_threadsafe(stopped_future.set_result, None)
+
+            self.stopped_listeners[record.id].append(on_stopped)
             runtime.stop()
 
             await asyncio.wait_for(stopped_future, timeout=5.0)
