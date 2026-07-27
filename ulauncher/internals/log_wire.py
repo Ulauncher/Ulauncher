@@ -35,8 +35,12 @@ def parse(line: str, ext_id: str) -> logging.LogRecord | None:
     try:
         fields = json.loads(line)
         name = fields["name"]
+        if not isinstance(name, str):
+            return None
+        # Sub-loggers of the extension's own logger are already namespaced
+        namespaced = name == ext_id or name.startswith(f"{ext_id}.")
         return logging.LogRecord(
-            name=name if name == ext_id else f"{ext_id}.{name}",
+            name=name if namespaced else f"{ext_id}.{name}",
             level=int(fields["levelno"]),
             pathname=fields["pathname"],
             lineno=int(fields["lineno"]),
