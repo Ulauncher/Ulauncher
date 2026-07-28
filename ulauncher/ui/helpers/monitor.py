@@ -16,14 +16,16 @@ def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
         return None
 
     if use_mouse_position:
+        # GdkX11.X11Display.get_default() resolves to the inherited Gdk.Display.get_default(),
+        # so on Wayland it returns the Wayland display, where the pointer position reads (0, 0)
         if (
-            (x11_display := GdkX11.X11Display.get_default())
-            and (seat := x11_display.get_default_seat())
+            isinstance(display, GdkX11.X11Display)
+            and (seat := display.get_default_seat())
             and (pointer := seat.get_pointer())
         ):
             (_, x, y) = pointer.get_position()
             return display.get_monitor_at_point(x, y)
-        logger.info("Could not get monitor with X11. Defaulting to first or primary monitor")
+        logger.debug("Could not get mouse position (requires X11). Defaulting to primary or first monitor")
 
     return display.get_primary_monitor() or display.get_monitor(0)
 
