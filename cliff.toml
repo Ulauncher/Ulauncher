@@ -1,12 +1,12 @@
 [changelog]
 body = """
 {% set ext_scope = "<!-- 9 -->extensions" %}{% set changes = commits | filter(attribute="merge_commit", value=false) %}{% set ext_changes = changes | filter(attribute="scope", value=ext_scope) %}{% set has_app_changes = changes | length > ext_changes | length %}
-{% if has_app_changes %}## What's Changed
+{% if has_app_changes %}## App Changes
 {% for group, group_commits in changes | group_by(attribute="group") %}{% set group_ext = group_commits | filter(attribute="scope", value=ext_scope) %}{% if group_commits | length > group_ext | length %}
 ### {{ group | striptags | trim }}
 {% for scope, scope_commits in group_commits | group_by(attribute="scope") %}{% if scope != ext_scope %}{% set scope_name = scope | striptags | trim %}{% for commit in scope_commits %}- {% if scope_name %}**{{ scope_name | upper_first }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}{% if commit.breaking_description and commit.breaking_description != commit.message %}
   > {{ commit.breaking_description | upper_first }}{% endif %}
-{% endfor %}{% endif %}{% endfor %}{% endif %}{% endfor %}{% elif ext_changes | length == 0 %}## What's Changed
+{% endfor %}{% endif %}{% endfor %}{% endif %}{% endfor %}{% elif ext_changes | length == 0 %}## App Changes
 
 - No user-facing changes were captured for this release.
 {% endif %}{% if ext_changes | length > 0 %}{% if has_app_changes %}
