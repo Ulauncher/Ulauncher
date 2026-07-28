@@ -11,7 +11,7 @@ from gi.repository import Gdk, Gtk
 from ulauncher import paths
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
-from ulauncher.ui.helpers.monitor import get_monitor
+from ulauncher.ui.helpers.monitor import get_monitor, get_monitor_geometries
 from ulauncher.ui.helpers.theme import Theme
 from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.results_view import ResultsView
@@ -39,12 +39,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         width_request = self.settings.base_width
         height_request = -1
 
-        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (monitor_size := self.get_monitor_size()):
-            # Use the full width of the monitor for the window, and center the visible window
-            # needed because Gnome Wayland assumes you want to positions new windows next to
-            # the topmost window if any, instead of centering it.
-            width_request = monitor_size.width
-            height_request = monitor_size.height
+        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (layout_size := self.get_layout_size()):
+            # Give the window the size of a monitor, so the visible content can be positioned
+            # within it using margins. Needed because Gnome Wayland gives no control over where
+            # the window goes, it only centers it on the monitor Mutter picks.
+            width_request = layout_size.width
+            height_request = layout_size.height
 
         super().__init__(
             decorated=False,
@@ -344,19 +344,32 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if visual:
             self.set_visual(visual)
 
-    def get_monitor_size(self) -> Gdk.Rectangle | None:
+    def get_layout_size(self) -> Gdk.Rectangle | None:
+        """The monitor size to lay the window out for"""
+        # Mutter decides which monitor the window opens on and Wayland doesn't tell us which one
+        # it picked, so use the smallest monitor to ensure the window fits on all of them. A window
+        # taller than the monitor gets its top edge clamped to the work area, which would shift the
+        # content down relative to the monitor.
+        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
+            if not (geometries := get_monitor_geometries()):
+                return None
+            layout_size = Gdk.Rectangle()
+            layout_size.width = min(geometry.width for geometry in geometries)
+            layout_size.height = min(geometry.height for geometry in geometries)
+            return layout_size
+
         if monitor := get_monitor(self.settings.render_on_screen != "default-monitor"):
             return monitor.get_geometry()
         return None
 
     def position_window(self) -> None:
-        if monitor_size := self.get_monitor_size():
+        if layout_size := self.get_layout_size():
             window_width = self.settings.base_width
-            pos_x = (monitor_size.width - window_width) / 2
-            pos_y = monitor_size.height * 0.1
+            pos_x = (layout_size.width - window_width) / 2
+            pos_y = layout_size.height * 0.1
 
             prompt_height = self.prompt.get_allocated_height()
-            max_height = monitor_size.height - prompt_height - pos_y * 2
+            max_height = layout_size.height - prompt_height - pos_y * 2
             self.results_view.set_max_height(int(max_height))
 
             # Part II of the Gnome Wayland fix (see above in __init__)
@@ -372,7 +385,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             elif self.layer_shell_enabled:
                 layer_shell.set_vertical_position(self, pos_y)
             else:
-                self.move(int(pos_x + monitor_size.x), int(pos_y + monitor_size.y))
+                self.move(int(pos_x + layout_size.x), int(pos_y + layout_size.y))
 
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")

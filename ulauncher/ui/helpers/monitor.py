@@ -30,6 +30,14 @@ def get_monitor(use_mouse_position: bool = False) -> Gdk.Monitor | None:
     return display.get_primary_monitor() or display.get_monitor(0)
 
 
+def get_monitor_geometries() -> list[Gdk.Rectangle]:
+    display = Gdk.Display.get_default()
+    if not display:
+        logger.warning("Could not get default display")
+        return []
+    return [monitor.get_geometry() for i in range(display.get_n_monitors()) if (monitor := display.get_monitor(i))]
+
+
 def get_text_scaling_factor() -> float:
     # GTK seems to already compensate for monitor scaling, so this just returns font scaling
     # GTK doesn't seem to allow different scaling factors on different displays
