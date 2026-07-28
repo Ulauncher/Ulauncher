@@ -1,17 +1,23 @@
 [changelog]
 body = """
-{% if commits | length != 0 %}
-## What's Changed{% for group, commits in commits | filter(attribute="merge_commit", value=false) | group_by(attribute="group") %}
-
+{% set ext_scope = "<!-- 9 -->extensions" %}{% set changes = commits | filter(attribute="merge_commit", value=false) %}{% set ext_changes = changes | filter(attribute="scope", value=ext_scope) %}{% set has_app_changes = changes | length > ext_changes | length %}
+{% if has_app_changes %}## What's Changed
+{% for group, group_commits in changes | group_by(attribute="group") %}{% set group_ext = group_commits | filter(attribute="scope", value=ext_scope) %}{% if group_commits | length > group_ext | length %}
 ### {{ group | striptags | trim }}
-{% for commit in commits %}* {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}{% if commit.breaking_description and commit.breaking_description != commit.message %}
+{% for scope, scope_commits in group_commits | group_by(attribute="scope") %}{% if scope != ext_scope %}{% set scope_name = scope | striptags | trim %}{% for commit in scope_commits %}- {% if scope_name %}**{{ scope_name | upper_first }}:** {% endif %}{{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}{% if commit.breaking_description and commit.breaking_description != commit.message %}
   > {{ commit.breaking_description | upper_first }}{% endif %}
-{% endfor %}{% endfor %}
-{% else %}
-## What's Changed
+{% endfor %}{% endif %}{% endfor %}{% endif %}{% endfor %}{% elif ext_changes | length == 0 %}## What's Changed
 
-* No user-facing changes were captured for this release.
-{% endif %}
+- No user-facing changes were captured for this release.
+{% endif %}{% if ext_changes | length > 0 %}{% if has_app_changes %}
+---
+
+{% endif %}## Extension Changes
+{% for group, group_commits in ext_changes | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in group_commits %}- {{ commit.message | replace_regex(from="( +\\(#\\d+\\))+$", to="") | upper_first }}{% if commit.links | length > 0 %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% else %} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Ulauncher/Ulauncher/commit/{{ commit.id }})){% endif %}{% if commit.breaking_description and commit.breaking_description != commit.message %}
+  > {{ commit.breaking_description | upper_first }}{% endif %}
+{% endfor %}{% endfor %}{% endif %}
 """
 trim = false
 
@@ -23,6 +29,45 @@ sort_commits = "oldest"
 tag_pattern = "v[0-9].*"
 link_parsers = [
     { pattern = "#(\\d+)", href = "https://github.com/Ulauncher/Ulauncher/pull/$1" },
+]
+# Scopes have been written many ways over the years ("ext", "ext-mode", "extension",
+# "ext runner", ...). These rewrite the scope to the one name it should be listed under,
+# and prefix it with <!-- N --> so git-cliff orders the entries by how exposed the change
+# is to a normal user, rather than alphabetically:
+# 0 = unscoped (no bold prefix to sort by)
+# 1 = the surface everyone sees
+# 2 = modes
+# 3 = preferences
+# 4 = the terminal commands, which many users never run
+# 5 = anything with no rule below
+# 6 = plumbing users only notice when it breaks
+# 9 = extensions, which the template moves to its own "Extension Changes" section
+# because it dwarfs every other scope.
+# Within a tier git-cliff sorts by byte order, so acronyms kept uppercase for display
+# ("UI", "CLI", "D-Bus") sort ahead of the lowercase names.
+# striptags in the template strips the prefix before rendering.
+# The last two rules match anything not already handled, so they must stay last.
+commit_preprocessors = [
+    { pattern = '(?i)^(\w+)\([^)]*ext[^)]*\)', replace = "${1}(<!-- 9 -->extensions)" },
+    { pattern = '(?i)^(\w+)\(ui\)', replace = "${1}(<!-- 1 -->UI)" },
+    { pattern = '(?i)^(\w+)\(window\)', replace = "${1}(<!-- 1 -->window)" },
+    { pattern = '(?i)^(\w+)\(hotkey\)', replace = "${1}(<!-- 1 -->hotkey)" },
+    { pattern = '(?i)^(\w+)\((tray([-_ ]?icon)?|appindicator)\)', replace = "${1}(<!-- 1 -->tray icon)" },
+    { pattern = '(?i)^(\w+)\(themes?\)', replace = "${1}(<!-- 1 -->themes)" },
+    { pattern = '(?i)^(\w+)\(layer[-_ ]?shell\)', replace = "${1}(<!-- 1 -->layer shell)" },
+    { pattern = '(?i)^(\w+)\(calc[^)]*\)', replace = "${1}(<!-- 2 -->calculator)" },
+    { pattern = '(?i)^(\w+)\((apps|app[-_ ]?(result|history)s?)\)', replace = "${1}(<!-- 2 -->apps)" },
+    { pattern = '(?i)^(\w+)\(file[-_ ]?(browser|mode)\)', replace = "${1}(<!-- 2 -->file browser)" },
+    { pattern = '(?i)^(\w+)\(shortcuts?([-_ ]?mode)?\)', replace = "${1}(<!-- 2 -->shortcuts)" },
+    { pattern = '(?i)^(\w+)\([^)]*pref[^)]*\)', replace = "${1}(<!-- 3 -->preferences)" },
+    { pattern = '(?i)^(\w+)\(cli\)', replace = "${1}(<!-- 4 -->CLI)" },
+    { pattern = '(?i)^(\w+)\(dbus\)', replace = "${1}(<!-- 6 -->D-Bus)" },
+    { pattern = '(?i)^(\w+)\((logs?|logging)\)', replace = "${1}(<!-- 6 -->logging)" },
+    { pattern = '(?i)^(\w+)\(migrat(e|ion)\)', replace = "${1}(<!-- 6 -->migration)" },
+    { pattern = '(?i)^(\w+)\(deb(ian)?\)', replace = "${1}(<!-- 6 -->packaging)" },
+    { pattern = '(?i)^(\w+)\(systemd\)', replace = "${1}(<!-- 6 -->systemd)" },
+    { pattern = '^(\w+)\(([^)<]+)\)', replace = "${1}(<!-- 5 -->${2})" },
+    { pattern = '^(\w+)(!?):', replace = "${1}(<!-- 0 -->)${2}:" },
 ]
 # Group names carry <!-- N --> prefixes so git-cliff sorts them correctly;
 # striptags in the template strips these before rendering.
