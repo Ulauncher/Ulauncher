@@ -30,14 +30,17 @@ REFRESH_INTERVAL = 1
 
 
 class ExtensionsView(BaseView):
-    extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]] = {}
+    extension_cache: dict[str, tuple[str, ext_utils.ExtStatus, str | None]]
     active_ext: ExtensionRecord | None = None
-    keyword_inputs: dict[str, Gtk.Entry] = {}
-    pref_widgets: dict[str, Gtk.CheckButton | Gtk.SpinButton | Gtk.Entry | Gtk.ComboBoxText | TextArea] = {}
+    keyword_inputs: dict[str, Gtk.Entry]
+    pref_widgets: dict[str, Gtk.CheckButton | Gtk.SpinButton | Gtk.Entry | Gtk.ComboBoxText | TextArea]
     save_button: Gtk.Button | None = None
 
     def __init__(self) -> None:
         super().__init__(orientation=Gtk.Orientation.VERTICAL, hexpand=True, halign=Gtk.Align.FILL)
+        self.extension_cache = {}
+        self.keyword_inputs = {}
+        self.pref_widgets = {}
 
         # Initialize extension handlers (pass self so it can call get_toplevel() when needed)
         self.handlers = ExtensionHandlers(self)

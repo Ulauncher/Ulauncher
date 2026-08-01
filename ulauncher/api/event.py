@@ -12,7 +12,7 @@ ExtensionPreferences = Dict[str, ExtensionPreferenceValue]
 
 
 class BaseEvent:
-    args: list[Any] = []
+    args: list[Any]
 
     def __init__(self, args: list[Any]) -> None:
         self.args = args

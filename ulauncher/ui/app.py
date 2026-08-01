@@ -38,7 +38,7 @@ class UlauncherApp(Gtk.Application):
     _persistent: bool = False
     # App-scoped query/mode controller, shared by every launcher window.
     core: UlauncherCore
-    windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow] = WeakValueDictionary()
+    windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow]
     _tray_icon: ulauncher.ui.helpers.tray_icon.TrayIcon | None = None  # pyrefly: ignore[implicit-import]
 
     @staticmethod
@@ -52,6 +52,7 @@ class UlauncherApp(Gtk.Application):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.update(application_id=app_id)
         super().__init__(*args, **kwargs)
+        self.windows = WeakValueDictionary()
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
