@@ -37,10 +37,11 @@ def get_app_mode() -> Mode:
 def get_modes() -> list[Mode]:
     from ulauncher.modes.calc.calc_mode import CalcMode
     from ulauncher.modes.extensions.extension_mode import ExtensionMode
+    from ulauncher.modes.extensions.extension_service import ext_service
     from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
     from ulauncher.modes.shortcuts.shortcut_mode import ShortcutMode
 
-    return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(), get_app_mode()]
+    return [FileBrowserMode(), CalcMode(), ShortcutMode(), ExtensionMode(ext_service), get_app_mode()]
 
 
 class UlauncherCore:

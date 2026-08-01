@@ -15,33 +15,21 @@ if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_mode import ExtensionMode
 
 
-def _make_mode() -> ExtensionMode:
+def _make_mode() -> tuple[ExtensionMode, MagicMock]:
     from ulauncher.modes.extensions import extension_mode
 
-    mode = object.__new__(extension_mode.ExtensionMode)
-    mode._trigger_cache = {}
-    return mode
-
-
-def _mock_service(mocker: MockerFixture) -> MagicMock:
-    from ulauncher.modes.extensions.extension_service import ext_service
-
-    mocked = MagicMock()
-    mocker.patch.object(ext_service, "get", mocked.get)
-    mocker.patch.object(ext_service, "iterate", mocked.iterate)
-    mocker.patch.object(ext_service, "is_running", mocked.is_running)
-    return mocked
+    service = MagicMock()
+    return extension_mode.ExtensionMode(service), service
 
 
 def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> None:
     from ulauncher.modes.extensions import extension_mode
 
-    mode = _make_mode()
+    mode, service = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
     ext = SimpleNamespace(id="test.ext")
-    mocked_service = _mock_service(mocker)
-    mocked_service.get.return_value = ext
-    mocked_service.is_running.return_value = False
+    service.get.return_value = ext
+    service.is_running.return_value = False
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()
 
@@ -55,12 +43,11 @@ def test_handle_query__transitioning_extension_waits(mocker: MockerFixture) -> N
 def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> None:
     from ulauncher.modes.extensions import extension_mode
 
-    mode = _make_mode()
+    mode, service = _make_mode()
     mode._trigger_cache = {"kw": ("trigger1", "test.ext")}
     ext = SimpleNamespace(id="test.ext")
-    mocked_service = _mock_service(mocker)
-    mocked_service.get.return_value = ext
-    mocked_service.is_running.return_value = False
+    service.get.return_value = ext
+    service.is_running.return_value = False
     timer = mocker.patch.object(extension_mode.scheduling, "timer", return_value=MagicMock())
     callback = MagicMock()
 
@@ -71,11 +58,10 @@ def test_handle_query__loading_timeout_shows_empty(mocker: MockerFixture) -> Non
     assert mode._loading_timer is None
 
 
-def test_handle_query__unknown_keyword_shows_message(mocker: MockerFixture) -> None:
-    mode = _make_mode()
-    mocked_service = _mock_service(mocker)
-    mocked_service.iterate.return_value = iter([])
-    mocked_service.get.return_value = None
+def test_handle_query__unknown_keyword_shows_message() -> None:
+    mode, service = _make_mode()
+    service.iterate.return_value = iter([])
+    service.get.return_value = None
     callback = MagicMock()
 
     mode.handle_query(Query("kw", "arg"), callback)
@@ -86,7 +72,7 @@ def test_handle_query__unknown_keyword_shows_message(mocker: MockerFixture) -> N
 
 
 def test_errored__while_loading_shows_failure(mocker: MockerFixture) -> None:
-    mode = _make_mode()
+    mode, _service = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
     failure = Result(name="failed")
     mocker.patch.object(mode, "_loading_failed_result", return_value=failure)
@@ -103,7 +89,7 @@ def test_errored__while_loading_shows_failure(mocker: MockerFixture) -> None:
 
 
 def test_errored__while_not_loading_drops_pending_callback() -> None:
-    mode = _make_mode()
+    mode, _service = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
     callback = MagicMock()
     mode._pending_callback = callback
@@ -115,7 +101,7 @@ def test_errored__while_not_loading_drops_pending_callback() -> None:
 
 
 def test_errored__ignores_other_extensions() -> None:
-    mode = _make_mode()
+    mode, _service = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
     timer = MagicMock()
     mode._loading_timer = timer
@@ -138,7 +124,7 @@ def _make_active_ext(ext_id: str) -> ExtensionRecord:
 def test_started__reruns_query_for_active_extension(mocker: MockerFixture) -> None:
     from ulauncher.modes.extensions import extension_mode
 
-    mode = _make_mode()
+    mode, _service = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
     mocker.patch.object(extension_mode.scheduling, "run_when_idle", side_effect=lambda func: func())
     emit = mocker.patch.object(extension_mode.events, "emit")
@@ -151,7 +137,7 @@ def test_started__reruns_query_for_active_extension(mocker: MockerFixture) -> No
 def test_started__ignores_other_extensions(mocker: MockerFixture) -> None:
     from ulauncher.modes.extensions import extension_mode
 
-    mode = _make_mode()
+    mode, _service = _make_mode()
     mode._active_ext = _make_active_ext("test.ext")
     run_when_idle = mocker.patch.object(extension_mode.scheduling, "run_when_idle")
 
@@ -161,7 +147,7 @@ def test_started__ignores_other_extensions(mocker: MockerFixture) -> None:
 
 
 def test_handle_response__streamed_batches_keep_callback_until_final() -> None:
-    mode = _make_mode()
+    mode, _service = _make_mode()
     callback = MagicMock()
     mode._pending_callback = callback
 

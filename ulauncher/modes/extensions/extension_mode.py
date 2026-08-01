@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import html
 import logging
-from typing import Callable, Iterator
+from typing import TYPE_CHECKING, Callable, Iterator
 
 from ulauncher.internals import effect_utils, effects, ipc
 from ulauncher.internals.effects import EffectMessage, EffectType
@@ -13,11 +13,13 @@ from ulauncher.modes.extensions.extension_record import (
     ExtensionRecord,
     ExtensionRecordTrigger,
 )
-from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.modes.mode import Mode
 from ulauncher.utils import scheduling
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.socket_msg_controller import summarize_ipc_args
+
+if TYPE_CHECKING:
+    from ulauncher.modes.extensions.extension_service import ExtensionService
 
 logger = logging.getLogger(__name__)
 events = EventBus()
@@ -39,14 +41,16 @@ class ExtensionMode(Mode):
     invalidate_cache and handle_message directly."""
 
     _active_ext: ExtensionRecord | None = None
+    _service: ExtensionService
     _trigger_cache: dict[str, tuple[str, str]]  # keyword: (trigger_id, ext_id)
     _pending_callback: Callable[[EffectMessage], None] | None = None
     _loading_timer: scheduling.Context | None = None
     _request_id: int = 0
 
-    def __init__(self) -> None:
+    def __init__(self, service: ExtensionService) -> None:
         self._trigger_cache = {}
-        ext_service.activate(self)
+        self._service = service
+        service.activate(self)
 
     def has_trigger_changes(self) -> bool:
         return not self._trigger_cache
@@ -75,7 +79,7 @@ class ExtensionMode(Mode):
 
         self._ensure_trigger_cache()
         trigger_cache_entry = self._trigger_cache.get(query.keyword, None)
-        ext = ext_service.get(trigger_cache_entry[1]) if trigger_cache_entry else None
+        ext = self._service.get(trigger_cache_entry[1]) if trigger_cache_entry else None
         if not trigger_cache_entry or not ext:
             # Core only routes a keyword here when its own cache claims this mode owns it, so a miss
             # means the two caches disagree (e.g. the extension was removed since core last loaded).
@@ -84,7 +88,7 @@ class ExtensionMode(Mode):
             return
 
         self._active_ext = ext
-        if not ext_service.is_running(ext):
+        if not self._service.is_running(ext):
             # Transitioning (restart/preview/update/startup): wait for it to come up. Returning
             # without a result lets core show "Loading..." after PLACEHOLDER_DELAY, and `started`
             # re-runs the query once the extension is ready. The wait ends with a failure message if
@@ -100,7 +104,7 @@ class ExtensionMode(Mode):
         self._send_request(event, callback)
 
     def _iter_enabled_triggers(self) -> Iterator[tuple[ExtensionRecord, str, ExtensionRecordTrigger]]:
-        for ext in ext_service.iterate(sort=True):
+        for ext in self._service.iterate(sort=True):
             if not ext.is_enabled:
                 continue
             for trigger_id, trigger in ext.triggers.items():
@@ -166,7 +170,7 @@ class ExtensionMode(Mode):
         elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
             effect_msg = result.on_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
-            self._active_ext = ext_service.get(result.ext_id)
+            self._active_ext = self._service.get(result.ext_id)
             launch_event: ipc.LaunchTriggerEvent = {
                 "type": EventType.LAUNCH_TRIGGER,
                 "args": (result.trigger_id,),
@@ -203,13 +207,13 @@ class ExtensionMode(Mode):
             logger.error("No active extension to send request to")
             return
 
-        if not ext_service.is_running(self._active_ext):
+        if not self._service.is_running(self._active_ext):
             logger.warning("Cannot send event to inactive extension %s", self._active_ext.id)
             return
 
         self._request_id += 1
         self._pending_callback = callback
-        ext_service.send_message(self._active_ext, event, self._request_id)
+        self._service.send_message(self._active_ext, event, self._request_id)
 
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None:
         effect = message.get("response", {}).get("effect") if message["name"] == "response" else None
@@ -242,7 +246,7 @@ class ExtensionMode(Mode):
             if "body" not in message or "notification_id" not in message:
                 logger.warning("Received malformed 'notify' message from %s: %s", ext_id, message)
                 return
-            ext = ext_service.get(ext_id)
+            ext = self._service.get(ext_id)
             if not ext:
                 logger.warning("Notification sent from an extension, '%s', which was not found", ext_id)
                 return
