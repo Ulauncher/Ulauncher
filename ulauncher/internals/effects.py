@@ -69,17 +69,18 @@ class LegacyActivateCustom(TypedDict):
     keep_app_open: bool
 
 
-EffectMessage = Union[
+NonRenderEffectMessage = Union[
     DoNothing,
     CloseWindow,
     SetQuery,
-    RenderResults,
     Open,
     LegacyCopy,
     LegacyRunScript,
     LegacyRunMany,
     LegacyActivateCustom,
 ]
+
+EffectMessage = Union[NonRenderEffectMessage, RenderResults]
 
 # Input format that we will convert to an EffectMessage. A plain iterable of Results becomes one
 # render; a generator may also yield list[Result] batches to stream replace drafts (see

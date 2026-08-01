@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Final
 from ulauncher.internals.effects import (
     EffectMessage,
     EffectType,
+    NonRenderEffectMessage,
 )
 from ulauncher.utils.eventbus import EventBus
 
@@ -40,8 +41,8 @@ def is_valid_input_effect(effect_msg: EffectMessage) -> bool:
     return effect_msg["type"] == EffectType.DO_NOTHING
 
 
-def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
-    """Process effects by dispatching to appropriate handlers."""
+def handle(effect_msg: NonRenderEffectMessage, prevent_close: bool = False) -> None:
+    """Process non-rendering effects by dispatching to appropriate handlers."""
 
     if effect_msg["type"] == EffectType.SET_QUERY:
         _events.emit("app:set_query", effect_msg["query"])
@@ -58,12 +59,11 @@ def handle(effect_msg: EffectMessage, prevent_close: bool = False) -> None:
         from ulauncher.modes.shortcuts.run_script import run_script
 
         run_script(*effect_msg["args"])
-    elif effect_msg["type"] == EffectType.RENDER_RESULTS:
-        _events.emit("app:show_results", effect_msg["results"])
 
     elif effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
         for effect in effect_msg["effects"]:
-            handle(effect, True)
+            if effect["type"] != EffectType.RENDER_RESULTS:
+                handle(effect, True)
 
     if should_close(effect_msg) and not prevent_close:
         _events.emit("app:close_launcher")
