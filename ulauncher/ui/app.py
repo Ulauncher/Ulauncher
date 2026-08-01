@@ -62,13 +62,11 @@ class UlauncherApp(Gtk.Application):
         if update_input and (main_window := self.windows.get("main")) and isinstance(main_window, UlauncherWindow):
             main_window.set_input(self.query)
 
-    @events.on
     def query_changed(self, query_str: str) -> None:
         """Run the new query string through the core and render the results."""
         self.query = query_str.lstrip()
         self.core.set_query(self.query, self.show_results)
 
-    @events.on
     def activate_result(self, result: Result, alt: bool) -> None:
         self.core.activate_result(result, self.show_results, alt)
 
@@ -76,7 +74,6 @@ class UlauncherApp(Gtk.Application):
         """Whether a mode consumed the backspace by rewriting the query (smart backspace)."""
         return self.core.handle_backspace(query_str)
 
-    @events.on
     def window_ready(self) -> None:
         # The window decides when this runs, to control startup performance.
         self.core.load_triggers(force=True)

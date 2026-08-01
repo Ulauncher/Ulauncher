@@ -17,14 +17,12 @@ from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.results_view import ResultsView
 from ulauncher.utils import scheduling
 from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
-from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
 if TYPE_CHECKING:
     from ulauncher.ui.app import UlauncherApp
 
 logger = logging.getLogger(__name__)
-events = EventBus()
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -139,7 +137,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt_input.connect("changed", lambda *_: self.on_input_changed())
         self.prompt_input.connect("key-press-event", self.on_input_key_press)
         self.connect("draw", self.on_initial_draw)
-        self.prefs_btn.connect("clicked", lambda *_: events.emit("app:show_preferences"))
+        self.prefs_btn.connect("clicked", lambda *_: self.get_app().show_preferences())
 
         # Try setting a transparent background
         screen = self.get_screen()
@@ -188,12 +186,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.set_opacity(1)
 
     def deferred_init(self) -> None:
+        if not self.get_application():
+            # Runs from an idle callback, so the window may already be closed.
+            return
         if self.query_str:
             # select all text in the input field.
             # used when user turns off "start with blank query" setting
             self.prompt_input.select_region(0, -1)
         self.apply_styling()
-        events.emit("app:window_ready")
+        self.get_app().window_ready()
 
     ######################################
     # GTK Signal Handlers
@@ -226,14 +227,14 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         """
         Triggered by user input
         """
-        events.emit("app:query_changed", self.prompt_input.get_text())
+        self.get_app().query_changed(self.prompt_input.get_text())
 
     def activate_result(self, alt: bool) -> None:
         """
         Activate the selected result
         """
         if result := self.results_view.get_active_result():
-            events.emit("app:activate_result", result, alt)
+            self.get_app().activate_result(result, alt)
 
     def on_input_key_press(self, entry_widget: Gtk.Entry, event: Gdk.EventKey) -> bool:  # noqa: PLR0911
         """
@@ -258,7 +259,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return True
 
         if ctrl and keyname == "comma":
-            events.emit("app:show_preferences")
+            self.get_app().show_preferences()
             return True
 
         if (
@@ -390,7 +391,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def close(self, save_query: bool = False) -> None:
         logger.info("Closing Ulauncher window")
         if not save_query or not self.settings.auto_resume:
-            events.emit("app:set_query", "", update_input=False)
+            self.get_app().set_query("", update_input=False)
         if self.settings.grab_mouse_pointer:
             self.toggle_grab_pointer_device(False)
         super().close()
