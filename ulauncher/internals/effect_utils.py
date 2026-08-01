@@ -61,6 +61,9 @@ def handle(effect_msg: NonRenderEffectMessage, prevent_close: bool = False) -> N
         run_script(*effect_msg["args"])
 
     elif effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+        # Only the deprecated ActionList produces this, and nested renders are dropped because the
+        # callers that can render intercept run_many first. Goes away with the v2 extension API,
+        # so leave it separate from the current effect paths instead of unifying the two.
         for effect in effect_msg["effects"]:
             if effect["type"] != EffectType.RENDER_RESULTS:
                 handle(effect, True)
