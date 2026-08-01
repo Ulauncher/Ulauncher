@@ -47,14 +47,17 @@ class UlauncherCore:
     """Core application logic to handle the query events and delegate them to the modes."""
 
     _mode: Mode | None = None
-    _keyword_cache: defaultdict[Mode, dict[str, Result]] = defaultdict(dict)
-    _trigger_cache: defaultdict[Mode, list[Result]] = defaultdict(list)
-    _mode_map: WeakKeyDictionary[Result, Mode] = WeakKeyDictionary()
+    _keyword_cache: defaultdict[Mode, dict[str, Result]]
+    _trigger_cache: defaultdict[Mode, list[Result]]
+    _mode_map: WeakKeyDictionary[Result, Mode]
     query: Query = Query(None, "")
     _placeholder_timer: scheduling.Context | None = None
 
     def __init__(self) -> None:
         self._result_buffer = ResultBuffer()
+        self._keyword_cache = defaultdict(dict)
+        self._trigger_cache = defaultdict(list)
+        self._mode_map = WeakKeyDictionary()
 
     @property
     def last_query_result_pick(self) -> str | None:
