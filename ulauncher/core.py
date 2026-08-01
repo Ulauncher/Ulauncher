@@ -103,7 +103,7 @@ class UlauncherCore:
             self._mode = None
             self.query = Query(None, "")
             self._result_buffer.reset()
-            self._show_results(self.get_home_results(), callback)
+            self._render_results(self.get_home_results(), callback, append=False)
             return
 
         self._mode = None
@@ -146,24 +146,19 @@ class UlauncherCore:
                 self._mode_map[app_result] = app_mode
                 yield app_result
 
-    def _show_results(self, results: Iterable[Result], callback: ResultsCallback) -> None:
-        """Render a result list immediately, replacing the current one. For the non-streaming
-        paths (home, search, fallback, placeholder, action menu); does not touch stream state."""
+    def _render_results(self, results: Iterable[Result], callback: ResultsCallback, append: bool) -> None:
+        """Hand a result list to the view. Stream state is owned by ResultBuffer and untouched here."""
         self._clear_placeholder_timer()
-        callback(results_update(list(results), self.query, self.last_query_result_pick))
+        callback(results_update(list(results), self.query, self.last_query_result_pick, append))
 
     def _show_placeholder(self, callback: ResultsCallback) -> None:
         placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
-        self._show_results([placeholder], callback)
+        self._render_results([placeholder], callback, append=False)
 
     def _clear_placeholder_timer(self) -> None:
         if self._placeholder_timer:
             self._placeholder_timer.cancel()
             self._placeholder_timer = None
-
-    def _emit_results(self, results: list[Result], append: bool, callback: ResultsCallback) -> None:
-        self._clear_placeholder_timer()
-        callback(results_update(results, self.query, self.last_query_result_pick, append))
 
     def handle_change(self, callback: ResultsCallback) -> None:
         self._result_buffer.reset()
@@ -189,7 +184,7 @@ class UlauncherCore:
                     self._mode_map[fallback_result] = mode
 
         result_objects = [res if isinstance(res, Result) else Result(**res) for res in results]
-        self._show_results(result_objects, callback)
+        self._render_results(result_objects, callback, append=False)
 
     def handle_backspace(self, query_str: str) -> bool:
         if self._mode:
@@ -215,7 +210,7 @@ class UlauncherCore:
 
         if alt and result.actions and not isinstance(result, ActionResult):
             # alt activation: show action result list (unless it's already showing)
-            self._show_results(self._get_action_results(result), callback)
+            self._render_results(self._get_action_results(result), callback, append=False)
             return
 
         if isinstance(result, ActionResult) and result.parent_result and result.action_id:
@@ -255,14 +250,14 @@ class UlauncherCore:
             self._clear_placeholder_timer()
             if effect_msg["type"] == effects.EffectType.RENDER_RESULTS:
                 self._result_buffer.enqueue(
-                    effect_msg, lambda results, append: self._emit_results(results, append, callback)
+                    effect_msg, lambda results, append: self._render_results(results, callback, append)
                 )
             elif effect_msg["type"] == effects.EffectType.LEGACY_RUN_MANY:
                 # effect_utils.handle has no callback to render with, so route any nested render
                 # here and let it process the rest (preserving its close behavior).
                 for nested_effect in effect_msg["effects"]:
                     if nested_effect["type"] == effects.EffectType.RENDER_RESULTS:
-                        self._show_results(nested_effect["results"], callback)
+                        self._render_results(nested_effect["results"], callback, append=False)
                     else:
                         effect_utils.handle(nested_effect, prevent_close=True)
                 if effect_utils.should_close(effect_msg):
