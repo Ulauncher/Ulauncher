@@ -134,7 +134,7 @@ class ExtensionMode(Mode):
         # A preview's error isn't persisted (it surfaces in the preview's own console), so the
         # stored message is only meaningful for an installed extension that errored.
         description = ext.state.error_message if ext and ext.has_error else ""
-        icon = ext.get_icon_value() if ext else None
+        icon = (ext.get_icon_value() if ext else None) or ""
         return Result(name=f"{name} failed to start", description=description, icon=icon)
 
     def get_triggers(self) -> Iterator[Result]:
@@ -165,10 +165,10 @@ class ExtensionMode(Mode):
         callback: Callable[[EffectMessage], None],
     ) -> None:
         effect_msg: EffectMessage = effects.close_window()
-        if action_id == "__legacy_on_enter__" and result.on_enter:
-            effect_msg = result.on_enter
-        elif action_id == "__legacy_on_alt_enter__" and result.on_alt_enter:
-            effect_msg = result.on_alt_enter
+        if action_id == "__legacy_on_enter__" and (legacy_enter := result.get("on_enter")):
+            effect_msg = legacy_enter
+        elif action_id == "__legacy_on_alt_enter__" and (legacy_alt_enter := result.get("on_alt_enter")):
+            effect_msg = legacy_alt_enter
         elif action_id == "__launch__" and isinstance(result, ExtensionLaunchTrigger):
             self._active_ext = self._service.get(result.ext_id)
             launch_event: ipc.LaunchTriggerEvent = {
@@ -313,9 +313,9 @@ class ExtensionMode(Mode):
 
             # Convert legacy actions to the new actions dictionary format
             if not result.actions:
-                if result.on_enter:
+                if result.get("on_enter"):
                     result.actions["__legacy_on_enter__"] = {"name": "Main action"}
-                if result.on_alt_enter:
+                if result.get("on_alt_enter"):
                     result.actions["__legacy_on_alt_enter__"] = {"name": "Secondary action"}
 
             rendered.append(result)

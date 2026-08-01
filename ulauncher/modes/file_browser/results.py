@@ -30,11 +30,11 @@ class FileResult(Result):
     def __init__(self, path: str) -> None:
         is_dir = isdir(path)
         super().__init__(
-            path=path,
             name=basename(path),
             icon=get_icon_from_path(path, is_dir),
             actions=_FOLDER_ACTIONS if is_dir else _FILE_ACTIONS,
         )
+        self.path = path
 
     def get_highlightable_input(self, query_str: str) -> str:
         return basename(query_str)

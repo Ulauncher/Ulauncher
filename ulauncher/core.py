@@ -156,7 +156,7 @@ class UlauncherCore:
         callback(results_update(list(results), self.query, self.last_query_result_pick, append))
 
     def _show_placeholder(self, callback: ResultsCallback) -> None:
-        placeholder = Result(name="Loading...", icon=self._mode.get_placeholder_icon() if self._mode else None)
+        placeholder = Result(name="Loading...", icon=(self._mode.get_placeholder_icon() if self._mode else None) or "")
         self._render_results([placeholder], callback, append=False)
 
     def _clear_placeholder_timer(self) -> None:

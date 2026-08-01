@@ -17,6 +17,7 @@ ACTION_PREFIX = "action:"
 class AppResult(Result):
     searchable: bool = True
     app_id: str = ""
+    keywords: list[str] = []
     _executable: str = ""
 
     def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
@@ -28,14 +29,14 @@ class AppResult(Result):
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
             description=app_info.get_description() or app_info.get_generic_name() or "",
-            keywords=app_info.get_keywords() or [],
             actions=actions,
-            app_id=app_info.get_id(),
-            # TryExec is what we actually want (name of/path to exec), but it's often not specified
-            # get_executable uses Exec, which is always specified, but it will return the actual executable.
-            # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
-            _executable=basename(app_info.get_string("TryExec") or app_info.get_executable() or ""),
         )
+        self.keywords = app_info.get_keywords() or []
+        self.app_id = app_info.get_id() or ""
+        # TryExec is what we actually want (name of/path to exec), but it's often not specified
+        # get_executable uses Exec, which is always specified, but it will return the actual executable.
+        # Sometimes the actual executable is not the app to start, but a wrappers like "env" or "sh -c"
+        self._executable = basename(app_info.get_string("TryExec") or app_info.get_executable() or "")
 
     @staticmethod
     def from_id(app_id: str) -> AppResult | None:
