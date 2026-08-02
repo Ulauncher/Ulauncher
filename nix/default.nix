@@ -33,8 +33,18 @@
 }:
 let
   pname = "ulauncher";
-  version = "v6";
 
+  # nixpkgs' pythonMetadataCheckHook compares this to the built dist-info metadata.
+  # Therefore the version string is extracted from _version.py.
+  versionFile = builtins.readFile ../ulauncher/_version.py;
+  versionMatch =
+    builtins.match ''
+      .*version = "([0-9]+\.[0-9]+\..*)".*
+    '' versionFile;
+  version =
+    if versionMatch == null then
+      throw "Failed to parse version"
+    else builtins.elemAt versionMatch 0;
   src.python = ../.;
 
   packages.tests.python = pp: (with pp; [
