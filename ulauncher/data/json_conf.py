@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
 from ulauncher.data.base_data_class import BaseDataClass
@@ -19,6 +19,13 @@ class JsonConf(BaseDataClass):
 
     File paths are stored in an external reference object, which is not part of the data.
     """
+
+    if TYPE_CHECKING:
+        # Declaring __init__ opts this class out of the PEP 681 field synthesis, which would otherwise
+        # reject the arbitrary keys it holds. It is only a signature, so it stays out of the runtime and
+        # BaseDataClass.__init__ keeps handling construction. Subclasses that declare fields don't
+        # override __init__, so they still get the synthesis.
+        def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
     @classmethod
     def load(cls: type[T], path: str, *, force: bool = False) -> T:

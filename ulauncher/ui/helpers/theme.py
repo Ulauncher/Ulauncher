@@ -46,7 +46,8 @@ def get_themes() -> dict[str, Theme]:
         data = json.loads(manifest_path.read_text())
         if data.get("extend_theme", "") is None:
             del data["extend_theme"]
-        all_themes.append(LegacyTheme(data, base_path=str(manifest_path.parent)))
+        data["base_path"] = str(manifest_path.parent)
+        all_themes.append(LegacyTheme(**data))
 
     for theme in all_themes:
         try:
@@ -68,8 +69,8 @@ def get_themes() -> dict[str, Theme]:
 
 
 class Theme(JsonConf):
-    name = ""
-    base_path = ""  # Runtime value, should not be stored
+    name: str = ""
+    base_path: str = ""  # Runtime value, should not be stored
 
     def get_css_path(self) -> Path:
         return Path(self.base_path, f"{self.name}.css")
@@ -109,8 +110,8 @@ class Theme(JsonConf):
 
 
 class LegacyTheme(Theme):
-    css_file = ""
-    extend_theme = ""
+    css_file: str = ""
+    extend_theme: str = ""
     matched_text_hl_colors: dict[str, str] = {}
 
     def get_css_path(self) -> Path:

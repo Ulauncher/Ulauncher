@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from ulauncher.utils.lru_cache import lru_cache
+
+if TYPE_CHECKING:
+    from typing_extensions import dataclass_transform
+else:
+    # Type-check-only decorator (PEP 681). typing_extensions must stay out of the runtime,
+    # and typing.dataclass_transform needs py3.11, so at runtime this is a no-op.
+    _T = TypeVar("_T")
+
+    def dataclass_transform(**_kwargs: Any) -> Callable[[_T], _T]:
+        return lambda cls: cls
 
 
 @lru_cache(maxsize=None)
@@ -23,6 +33,7 @@ def _apply_class_defaults(instance: BaseDataClass) -> None:
     instance.update(deepcopy(_class_defaults(type(instance))))
 
 
+@dataclass_transform(kw_only_default=True, eq_default=False)
 class BaseDataClass(dict):  # type: ignore [type-arg]
     """
     BaseDataClass
@@ -34,13 +45,15 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
     * Unlike dataclasses, new props (set at runtime, but undeclared in the class) become part of the data.
     * Implemented using the AttrDict pattern, but it avoids self.__dict__ = self
 
+    * Annotated props become constructor keywords for type checkers (PEP 681), so annotate every field.
+
     # Example use:
     class Person(BaseDataClass):
-        # All props you declare need a default value (not None)
-        first_name = ""
-        last_name = ""
-        age = 0
-        metadata = {}  # Note: This will be cloned when you create a new instance, so you can ignore linter warnings
+        # All props you declare need an annotation and a default value (not None)
+        first_name: str = ""
+        last_name: str = ""
+        age: int = 0
+        metadata: dict[str, str] = {}  # Cloned per instance, so you can ignore linter warnings
 
         def full_name(self):
             return self.first_name + " " + self.last_name

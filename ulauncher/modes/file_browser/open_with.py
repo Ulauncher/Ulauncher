@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class OpenWithAppResult(Result):
-    compact = True
-    path = ""
-    app_id = ""
+    compact: bool = True
+    path: str = ""
+    app_id: str = ""
     actions = {"open_with_app": {"name": "Open with this application", "icon": "system-run"}}
 
 

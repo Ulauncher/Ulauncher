@@ -15,9 +15,9 @@ ACTION_PREFIX = "action:"
 
 
 class AppResult(Result):
-    searchable = True
-    app_id = ""
-    _executable = ""
+    searchable: bool = True
+    app_id: str = ""
+    _executable: str = ""
 
     def __init__(self, app_info: GioUnix.DesktopAppInfo) -> None:
         actions: dict[str, dict[Literal["name", "icon"], str]] = {"launch": {"name": "Launch application"}}

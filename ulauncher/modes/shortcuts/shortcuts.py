@@ -9,7 +9,7 @@ from ulauncher import paths
 from ulauncher.data import BaseDataClass, JsonKeyValueConf
 from ulauncher.utils.fold_user_path import fold_user_path
 
-INITIAL_SHORTCUTS = [
+INITIAL_SHORTCUTS: list[dict[str, Any]] = [
     {
         "id": "googlesearch",
         "keyword": "g",
@@ -38,14 +38,14 @@ INITIAL_SHORTCUTS = [
 
 
 class Shortcut(BaseDataClass):
-    name = ""
-    keyword = ""
-    cmd = ""
-    icon = ""
-    is_default_search = False
-    run_without_argument = False  # Only used in ShortcutTrigger (not Result)
-    added = 0
-    id = ""
+    name: str = ""
+    keyword: str = ""
+    cmd: str = ""
+    icon: str = ""
+    is_default_search: bool = False
+    run_without_argument: bool = False  # Only used in ShortcutTrigger (not Result)
+    added: int = 0
+    id: str = ""
 
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key == "added" and isinstance(value, float):

@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class ExtensionManifestPreference(BaseDataClass):
-    name = ""
-    type = ""
-    description = ""
+    name: str = ""
+    type: str = ""
+    description: str = ""
     options: list[dict[str, Any]] = []
     default_value: str | int | bool = ""
     max: int | None = None
@@ -22,10 +22,10 @@ class ExtensionManifestPreference(BaseDataClass):
 
 
 class ExtensionManifestTrigger(BaseDataClass):
-    name = ""
-    description = ""
-    default_keyword = ""
-    icon = ""
+    name: str = ""
+    description: str = ""
+    default_keyword: str = ""
+    icon: str = ""
 
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         # Backwards compatibility: rename "keyword" to "default_keyword"
@@ -35,12 +35,12 @@ class ExtensionManifestTrigger(BaseDataClass):
 
 
 class ExtensionManifest(JsonConf):
-    api_version = ""
-    authors = ""
-    name = ""
-    icon = ""
-    instructions = ""
-    input_debounce = 0.05
+    api_version: str = ""
+    authors: str = ""
+    name: str = ""
+    icon: str = ""
+    instructions: str = ""
+    input_debounce: float = 0.05
     triggers: dict[str, ExtensionManifestTrigger] = {}
     preferences: dict[str, ExtensionManifestPreference] = {}
 
@@ -59,18 +59,19 @@ class ExtensionManifest(JsonConf):
                 return
         # Convert triggers dicts to ExtensionManifestTrigger instances
         elif key == "triggers" and isinstance(value, dict):
-            value = {t_id: ExtensionManifestTrigger(trigger) for t_id, trigger in value.items()}
+            value = {t_id: ExtensionManifestTrigger(**trigger) for t_id, trigger in value.items()}
         # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
         elif key == "preferences":
             if isinstance(value, dict):
-                value = {p_id: ExtensionManifestPreference(pref) for p_id, pref in value.items()}
+                value = {p_id: ExtensionManifestPreference(**pref) for p_id, pref in value.items()}
             elif isinstance(value, list):  # APIv2 backwards compatibility
                 prefs = {}
                 for p in value:
                     if isinstance(p, dict):
                         p_id = p.get("id")
                         if isinstance(p_id, str):
-                            pref = ExtensionManifestPreference(p, id=None)
+                            # The id becomes the dict key, so it is not carried on the preference
+                            pref = ExtensionManifestPreference(**{k: v for k, v in p.items() if k != "id"})
                             if pref.type != "keyword":
                                 prefs[p_id] = pref
                             else:

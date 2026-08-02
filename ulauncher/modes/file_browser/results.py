@@ -23,9 +23,9 @@ _FOLDER_ACTIONS: _Actions = {
 
 
 class FileResult(Result):
-    compact = True
-    highlightable = True
-    path = ""
+    compact: bool = True
+    highlightable: bool = True
+    path: str = ""
 
     def __init__(self, path: str) -> None:
         is_dir = isdir(path)

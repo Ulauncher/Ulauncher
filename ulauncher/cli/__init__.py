@@ -16,11 +16,11 @@ CommandGroupName = Literal["App", "Extension"]
 
 
 class CLIArguments(BaseDataClass):
-    verbose = False
-    input = ""
-    path = ""
+    verbose: bool = False
+    input: str = ""
+    path: str = ""
     query: str | None = None
-    with_debugger = False
+    with_debugger: bool = False
     command: CommandName = "show"
 
 
