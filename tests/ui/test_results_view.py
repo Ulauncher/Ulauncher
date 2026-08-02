@@ -80,7 +80,7 @@ class TestResultsViewNavigation:
 
     @pytest.fixture
     def view(self, items: list[MagicMock]) -> ResultsView:
-        view = ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()))
+        view = ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()), cast("Any", MagicMock()))
         view._widgets = cast("Any", items)
         return view
 
@@ -116,7 +116,7 @@ class TestResultsViewNavigation:
         items[0].select.assert_called_once_with()
 
     def test_navigation_on_empty_is_noop(self) -> None:
-        view = ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()))
+        view = ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()), cast("Any", MagicMock()))
         view.select(2)
         view.go_up()
         view.go_down()
@@ -129,7 +129,7 @@ class TestResultsViewSelection:
 
     @pytest.fixture
     def view(self) -> ResultsView:
-        return ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()))
+        return ResultsView(cast("Any", MagicMock()), cast("Any", MagicMock()), cast("Any", MagicMock()))
 
     def test_select_marks_user_selected(self, view: ResultsView) -> None:
         view._widgets = cast("Any", [_named_widget("a"), _named_widget("b")])
@@ -174,7 +174,7 @@ class TestResultsViewStreaming:
         settings = MagicMock()
         no_jump_keys: list[str] = []
         settings.get_jump_keys.return_value = no_jump_keys
-        return ResultsView(settings, lambda *_: None)
+        return ResultsView(settings, lambda *_: None, lambda *_: None)
 
     @staticmethod
     def _update(

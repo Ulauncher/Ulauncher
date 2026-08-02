@@ -25,7 +25,12 @@ class ResultsView(Gtk.ScrolledWindow):
     _user_selected = False  # True once the user actively moved the selection (keyboard/mouse)
     _query = ""
 
-    def __init__(self, settings: Settings, apply_css: Callable[[Gtk.Widget], None]) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        apply_css: Callable[[Gtk.Widget], None],
+        activate_result: Callable[[bool], None],
+    ) -> None:
         super().__init__(
             can_focus=True,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
@@ -34,6 +39,7 @@ class ResultsView(Gtk.ScrolledWindow):
         )
         self._settings = settings
         self._apply_css = apply_css
+        self._activate_result = activate_result
         self._widgets: list[ResultWidget] = []
         self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self._box.get_style_context().add_class("result-box")
@@ -120,9 +126,15 @@ class ResultsView(Gtk.ScrolledWindow):
 
         jump_keys = self._settings.get_jump_keys()
         for offset, result in enumerate(results):
-            widget = ResultWidget(result, start_index + offset, query, jump_keys)
+            widget = ResultWidget(
+                result, start_index + offset, query, self.select, self._select_and_activate, jump_keys
+            )
             self._widgets.append(widget)
             self._box.add(widget)
+
+    def _select_and_activate(self, index: int, alt: bool) -> None:
+        self.select(index)
+        self._activate_result(alt)
 
     def _apply_selection(self, selected_name: str | None, previous_pick: Result | None) -> None:
         # Keep the user's pick across a streaming replace if it is still present.

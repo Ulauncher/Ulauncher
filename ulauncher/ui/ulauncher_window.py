@@ -123,7 +123,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prompt.pack_start(self.prompt_input, True, True, 0)
         self.prompt.pack_end(self.prefs_btn, False, False, 0)
 
-        self.results_view = ResultsView(self.settings, self.apply_css)
+        self.results_view = ResultsView(self.settings, self.apply_css, self.activate_result)
 
         self.theme_root.pack_start(drag_listener, False, True, 0)
         self.theme_root.pack_start(self.results_view, False, True, 0)
@@ -292,7 +292,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.activate_result(alt)
                 return True
             if alt and event.string in jump_keys:
-                self.select_result(jump_keys.index(event.string))
+                self.results_view.select(jump_keys.index(event.string))
                 return True
         return False
 
@@ -396,9 +396,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.toggle_grab_pointer_device(False)
         super().close()
         self.destroy()
-
-    def select_result(self, index: int) -> None:
-        self.results_view.select(index)
 
     def toggle_grab_pointer_device(self, grab: bool) -> None:
         if window := self.get_window():

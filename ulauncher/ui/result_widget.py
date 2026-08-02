@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from html import unescape
+from typing import Callable
 
 from gi.repository import Gdk, Gtk, Pango
 
@@ -28,9 +29,19 @@ class ResultWidget(Gtk.EventBox):
     title_box: Gtk.Box
     text_container: Gtk.Box
 
-    def __init__(self, result: Result, index: int, query: Query, jump_keys: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        result: Result,
+        index: int,
+        query: Query,
+        on_select: Callable[[int], None],
+        on_activate: Callable[[int, bool], None],
+        jump_keys: list[str] | None = None,
+    ) -> None:
         self.result = result
         self.query = query
+        self._on_select = on_select
+        self._on_activate = on_activate
         self.jump_keys = jump_keys if jump_keys is not None else Settings.load().get_jump_keys()
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
@@ -154,11 +165,9 @@ class ResultWidget(Gtk.EventBox):
 
     def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
         alt = bool(event and event.button != 1)  # right click
-        window = self.get_toplevel()
-        window.select_result(self.index)  # type: ignore[attr-defined]
-        window.activate_result(alt)  # type: ignore[attr-defined]
+        self._on_activate(self.index, alt)
 
     def on_mouse_hover(self, _widget: Gtk.Widget, event: Gdk.EventCrossing) -> None:
         # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
         if event.time:
-            self.get_toplevel().select_result(self.index)  # type: ignore[attr-defined]
+            self._on_select(self.index)
