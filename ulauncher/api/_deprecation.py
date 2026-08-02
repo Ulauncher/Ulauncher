@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import TextIO
+from typing import Any, TextIO
 
 from ulauncher.api._logging import get_extension_logger
 
@@ -52,7 +52,34 @@ def warn_legacy_import(module: str) -> None:
     )
 
 
-def warn_legacy_api(name: str, hint: str) -> None:
+def warn_legacy_api(name: str, hint: str, stacklevel: int = 3) -> None:
     if not _enabled:
         return
-    warnings.warn(f"`{name}` is deprecated (Ulauncher extension API v2). {hint}", ApiDeprecationWarning, stacklevel=3)
+    warnings.warn(
+        f"`{name}` is deprecated (Ulauncher extension API v2). {hint}", ApiDeprecationWarning, stacklevel=stacklevel
+    )
+
+
+# The v2 result classes took these four positionally, in this order.
+_LEGACY_POSITIONAL_FIELDS = ("name", "description", "keyword", "icon")
+
+
+def merge_legacy_positional_args(name: str, args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Map positionally passed v2 result arguments onto their field names."""
+    if not args:
+        return kwargs
+    if len(args) > len(_LEGACY_POSITIONAL_FIELDS):
+        # A 5th arg used to be `include_in_results`, which no longer exists. Binding it to a later
+        # field would silently change meaning, so reject it instead.
+        msg = f"{name} takes at most {len(_LEGACY_POSITIONAL_FIELDS)} positional arguments ({len(args)} given)"
+        raise TypeError(msg)
+    warn_legacy_api(
+        f"{name}({', '.join(_LEGACY_POSITIONAL_FIELDS)})",
+        "Pass these fields by name instead, e.g. `Result(name=...)`.",
+        stacklevel=4,  # this helper sits between the caller's __init__ and warn_legacy_api
+    )
+    positional = dict(zip(_LEGACY_POSITIONAL_FIELDS, args))
+    for field in positional.keys() & kwargs.keys():
+        msg = f"{name} got multiple values for argument '{field}'"
+        raise TypeError(msg)
+    return {**positional, **kwargs}
