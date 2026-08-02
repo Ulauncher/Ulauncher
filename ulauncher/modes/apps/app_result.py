@@ -28,7 +28,7 @@ class AppResult(Result):
             name=app_info.get_display_name(),
             icon=app_info.get_string("Icon") or "",
             description=app_info.get_description() or app_info.get_generic_name() or "",
-            keywords=app_info.get_keywords(),
+            keywords=app_info.get_keywords() or [],
             actions=actions,
             app_id=app_info.get_id(),
             # TryExec is what we actually want (name of/path to exec), but it's often not specified

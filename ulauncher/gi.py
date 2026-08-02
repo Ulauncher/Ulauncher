@@ -167,7 +167,10 @@ class DesktopAppInfo:
     def get_filename(self) -> str | None:
         return DesktopAppInfo._raw.get_filename(self._app_info)
 
-    def get_keywords(self) -> list[str]:
+    def get_keywords(self) -> list[str] | None:
+        # Overrides the type stubs, which incorrectly claim the return type is not nullable.
+        # The introspection data marks it nullable, and PyGObject's own override is a pass-through
+        # that doesn't normalize None away.
         return DesktopAppInfo._raw.get_keywords(self._app_info)
 
     def get_show_in(self) -> bool:
