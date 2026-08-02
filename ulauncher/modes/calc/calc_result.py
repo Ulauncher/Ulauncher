@@ -7,18 +7,18 @@ calc_icon = f"{paths.ASSETS}/icons/calculator.png"
 
 
 class CalcResult(Result):
-    icon = calc_icon
-    result = ""
+    icon: str = calc_icon
+    result: str = ""
     actions = {"copy": {"name": "Copy to clipboard", "icon": "edit-copy"}}
 
 
 class CalcCompletionResult(Result):
-    icon = calc_icon
-    completion = ""
+    icon: str = calc_icon
+    completion: str = ""
     actions = {"complete": {"name": "Complete expression", "icon": "go-next"}}
 
 
 class CalcErrorResult(Result):
-    name = "Error!"
-    description = "Invalid expression"
-    icon = calc_icon
+    name: str = "Error!"
+    description: str = "Invalid expression"
+    icon: str = calc_icon

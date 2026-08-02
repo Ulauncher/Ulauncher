@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from ulauncher.modes.shortcuts.shortcuts import Shortcut
 
@@ -17,6 +18,8 @@ class TestShortcut:
         assert shortcut.icon == "~/icons/custom.png"
 
     def test_converts_legacy_float_timestamp(self) -> None:
-        shortcut = Shortcut(added=123.5)
+        # Shortcut.__setitem__ coerces this to int, so the declared field type is narrower than the input.
+        legacy: dict[str, Any] = {"added": 123.5}
+        shortcut = Shortcut(**legacy)
 
         assert shortcut.added == 123

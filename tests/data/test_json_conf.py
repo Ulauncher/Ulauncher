@@ -88,14 +88,14 @@ class TestJsonConf:
 
     def test_inheritance(self, tmp_path: Path) -> None:
         class ClassWDefault(JsonConf):
-            b = 1
-            a = 2
+            b: int = 1
+            a: int = 2
 
             def sum(self) -> int:
                 return self.a + self.b
 
         class SubclassWDefault(ClassWDefault):
-            c = 3
+            c: int = 3
 
         assert ClassWDefault().b == 1
         assert ClassWDefault(b=2).b == 2
@@ -124,7 +124,8 @@ class TestJsonConf:
             def __setitem__(self, key: str, value: Any) -> None:
                 super().__setitem__("_" + key, value)
 
-        data = UnderscorePrefix({"one": 1})
+        initial: dict[str, Any] = {"one": 1}
+        data = UnderscorePrefix(**initial)
         data.update({"two": 2})
         data.three = 3
         data["four"] = 4

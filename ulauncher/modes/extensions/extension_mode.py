@@ -28,9 +28,9 @@ LOADING_TIMEOUT = 10  # seconds to wait for a transitioning extension before giv
 
 
 class ExtensionLaunchTrigger(Result):
-    searchable = True
-    ext_id = ""
-    trigger_id = ""
+    searchable: bool = True
+    ext_id: str = ""
+    trigger_id: str = ""
     actions = {"__launch__": {"name": "Launch"}}
 
 

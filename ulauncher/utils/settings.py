@@ -9,25 +9,25 @@ _settings_file = f"{paths.CONFIG}/settings.json"
 
 
 class Settings(JsonConf):
-    arrow_key_aliases = "hjkl"
-    auto_resume = False
-    base_width = 750
-    close_on_focus_out = True
-    disable_desktop_filters = False
-    enable_application_mode = True
-    grab_mouse_pointer = False
-    hotkey_show_app = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
-    jump_keys = "1234567890abcdefghijklmnopqrstuvwxyz"
-    keep_alive = True
-    layer_shell = True
-    max_recent_apps = 0
-    raise_if_started = False
-    render_on_screen = "mouse-pointer-monitor"
-    show_tray_icon = True
-    terminal_command = ""
-    theme_name = "light"
-    tray_icon_name = "ulauncher-indicator-symbolic"
-    window_shadow = 5
+    arrow_key_aliases: str = "hjkl"
+    auto_resume: bool = False
+    base_width: int = 750
+    close_on_focus_out: bool = True
+    disable_desktop_filters: bool = False
+    enable_application_mode: bool = True
+    grab_mouse_pointer: bool = False
+    hotkey_show_app: str = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
+    jump_keys: str = "1234567890abcdefghijklmnopqrstuvwxyz"
+    keep_alive: bool = True
+    layer_shell: bool = True
+    max_recent_apps: int = 0
+    raise_if_started: bool = False
+    render_on_screen: str = "mouse-pointer-monitor"
+    show_tray_icon: bool = True
+    terminal_command: str = ""
+    theme_name: str = "light"
+    tray_icon_name: str = "ulauncher-indicator-symbolic"
+    window_shadow: int = 5
 
     # Convert dash to underscore
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]

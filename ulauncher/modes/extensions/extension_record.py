@@ -22,23 +22,23 @@ class ExtensionPreference(ExtensionManifestPreference):
 
 
 class ExtensionRecordTrigger(BaseDataClass):
-    name = ""
-    description = ""
-    default_keyword = ""
-    icon = ""
-    keyword = ""
+    name: str = ""
+    description: str = ""
+    default_keyword: str = ""
+    icon: str = ""
+    keyword: str = ""
 
 
 class ExtensionState(JsonConf):
-    id = ""
-    url = ""
-    browser_url = ""
-    updated_at = ""
-    commit_hash = ""
-    commit_time = ""
-    is_enabled = True
-    error_message = ""
-    error_type = ""
+    id: str = ""
+    url: str = ""
+    browser_url: str = ""
+    updated_at: str = ""
+    commit_hash: str = ""
+    commit_time: str = ""
+    is_enabled: bool = True
+    error_message: str = ""
+    error_type: str = ""
 
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key == "last_commit":
@@ -116,7 +116,7 @@ class ExtensionRecord:
         user_prefs_json = _load_preferences(self.id)
         triggers = {}
         for t_id, manifest_trigger in self.manifest.triggers.items():
-            trigger = ExtensionRecordTrigger(manifest_trigger)
+            trigger = ExtensionRecordTrigger(**manifest_trigger)
             trigger.keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.default_keyword)
             triggers[t_id] = trigger
 

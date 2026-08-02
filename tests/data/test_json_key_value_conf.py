@@ -44,7 +44,7 @@ class TestJsonKeyValueConf:
         json_file = str(tmp_path / "jsonkvconf.json")
 
         class Record(JsonConf):
-            value = ""
+            value: str = ""
 
         class Store(JsonKeyValueConf[str, Record]):
             pass
@@ -71,7 +71,7 @@ class TestJsonKeyValueConf:
 
     def test_accepts_existing_value_instances(self) -> None:
         class Record(JsonConf):
-            value = ""
+            value: str = ""
 
         class Store(JsonKeyValueConf[str, Record]):
             pass
@@ -83,7 +83,7 @@ class TestJsonKeyValueConf:
 
     def test_infers_runtime_coercion_from_generic_value_type(self) -> None:
         class Record(JsonConf):
-            value = ""
+            value: str = ""
 
         class Store(JsonKeyValueConf[str, Record]):
             pass

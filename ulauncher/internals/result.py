@@ -21,16 +21,15 @@ class Result(BaseDataClass):
                          (legacy: please use `actions` instead).
     """
 
-    compact = False  #: If True, the result will be displayed in a single line without a title
-    wrap = False  #: If True, name and description wrap over multiple lines instead of being ellipsized
-    highlightable = False  #: If True, a substring matching the query will be highlighted
-    searchable = False
-    name = ""  #: The name of the result item
-    description = ""  #: The description of the result item. Used only if `compact` is False
-    keyword = ""
-    icon = (
-        ""  #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
-    )
+    compact: bool = False  #: If True, the result will be displayed in a single line without a title
+    wrap: bool = False  #: If True, name and description wrap over multiple lines instead of being ellipsized
+    highlightable: bool = False  #: If True, a substring matching the query will be highlighted
+    searchable: bool = False
+    name: str = ""  #: The name of the result item
+    description: str = ""  #: The description of the result item. Used only if `compact` is False
+    keyword: str = ""
+    #: An icon path relative to the extension root. If not set, the default icon of the extension will be used
+    icon: str = ""
     actions: dict[str, dict[Literal["name", "icon"], str]] = {}  #: dict of actions with display names and icons
     on_enter: effects.EffectMessage | None = None
     on_alt_enter: effects.EffectMessage | None = None
@@ -100,9 +99,9 @@ class ActionResult(Result):
     Used internally when a Result has multiple actions defined.
     """
 
-    action_id = ""  # The action ID from the parent result's actions dict
+    action_id: str = ""  # The action ID from the parent result's actions dict
     parent_result: Result | None = None  # Reference to the parent result
 
 
 class KeywordTrigger(Result):
-    searchable = True
+    searchable: bool = True
