@@ -17,6 +17,10 @@ for path in mock_xdg_dirs.values():
 
 os.environ.update(mock_xdg_dirs, ULAUNCHER_SYSTEM_DATA_DIR=f"{os.path.dirname(__file__)}/data")
 
+# color output depends on these, so tests would be sensitive to the caller's environment
+os.environ.pop("NO_COLOR", None)
+os.environ.pop("FORCE_COLOR", None)
+
 # prevent leaking pytest arguments to ulaunchers arg parser
 # this way is not recommended, but it works and avoids needing tons of fixtures
 # https://stackoverflow.com/q/18668947/633921
