@@ -11,7 +11,6 @@ from ulauncher.internals.result import Result
 from ulauncher.ui.helpers.monitor import get_text_scaling_factor
 from ulauncher.ui.helpers.text_highlighter import highlight_text
 from ulauncher.ui.load_icon_surface import load_icon_surface
-from ulauncher.utils.settings import Settings
 
 ELLIPSIZE_MIN_LENGTH = 6
 ELLIPSIZE_FORCE_AT_LENGTH = 20
@@ -36,13 +35,13 @@ class ResultWidget(Gtk.EventBox):
         query: Query,
         on_select: Callable[[int], None],
         on_activate: Callable[[int, bool], None],
-        jump_keys: list[str] | None = None,
+        jump_keys: list[str],
     ) -> None:
         self.result = result
         self.query = query
         self._on_select = on_select
         self._on_activate = on_activate
-        self.jump_keys = jump_keys if jump_keys is not None else Settings.load().get_jump_keys()
+        self.jump_keys = jump_keys
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
         inner_margin_x = int(12.0 * text_scaling_factor)

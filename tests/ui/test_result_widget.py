@@ -8,6 +8,8 @@ from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.ui.result_widget import ResultWidget
 
+JUMP_KEYS = ["1", "2", "3", "4", "5"]
+
 
 def noop(*_args: object) -> None:
     pass
@@ -19,14 +21,14 @@ class TestResultWidget:
         return mocker.patch("ulauncher.ui.result_widget.ResultWidget.scroll_to_focus")
 
     def test_descr(self) -> None:
-        assert len(ResultWidget(Result(), 0, Query("", None), noop, noop).text_container.get_children()) == 1
+        assert len(ResultWidget(Result(), 0, Query("", None), noop, noop, JUMP_KEYS).text_container.get_children()) == 1
         res = Result(description="descr")
-        assert len(ResultWidget(res, 0, Query("", None), noop, noop).text_container.get_children()) == 2
+        assert len(ResultWidget(res, 0, Query("", None), noop, noop, JUMP_KEYS).text_container.get_children()) == 2
         res = Result(description="descr", compact=True)
-        assert len(ResultWidget(res, 0, Query("", None), noop, noop).text_container.get_children()) == 1
+        assert len(ResultWidget(res, 0, Query("", None), noop, noop, JUMP_KEYS).text_container.get_children()) == 1
 
     def test_select(self) -> None:
-        result_wgt = ResultWidget(Result(), 0, Query("query", None), noop, noop)
+        result_wgt = ResultWidget(Result(), 0, Query("query", None), noop, noop, JUMP_KEYS)
         style = result_wgt.item_box.get_style_context()
         assert "selected" not in style.list_classes()
         result_wgt.select()
@@ -35,7 +37,7 @@ class TestResultWidget:
         assert "selected" not in style.list_classes()
 
     def test_shortcut(self) -> None:
-        result_wgt = ResultWidget(Result(), 0, Query("query", None), noop, noop)
+        result_wgt = ResultWidget(Result(), 0, Query("query", None), noop, noop, JUMP_KEYS)
         assert result_wgt.shortcut_label.get_text() == "Alt+1"
         result_wgt.set_index(2)
         assert result_wgt.shortcut_label.get_text() == "Alt+3"
@@ -44,7 +46,7 @@ class TestResultWidget:
         from gi.repository import Gtk, Pango
 
         res = Result(name="long name", description="long descr", wrap=True)
-        widget = ResultWidget(res, 0, Query("", None), noop, noop)
+        widget = ResultWidget(res, 0, Query("", None), noop, noop, JUMP_KEYS)
 
         name_label = cast("Gtk.Label", widget.title_box.get_children()[0])
         descr_label = cast("Gtk.Label", widget.text_container.get_children()[1])
@@ -56,7 +58,7 @@ class TestResultWidget:
         from gi.repository import Gtk, Pango
 
         res = Result(name="long name", description="long descr")
-        widget = ResultWidget(res, 0, Query("", None), noop, noop)
+        widget = ResultWidget(res, 0, Query("", None), noop, noop, JUMP_KEYS)
 
         name_label = cast("Gtk.Label", widget.title_box.get_children()[0])
         descr_label = cast("Gtk.Label", widget.text_container.get_children()[1])
@@ -68,7 +70,7 @@ class TestResultWidget:
         from gi.repository import Gtk
 
         res = Result(name="wrapped name", wrap=True, highlightable=True)
-        widget = ResultWidget(res, 0, Query("wrap", None), noop, noop)
+        widget = ResultWidget(res, 0, Query("wrap", None), noop, noop, JUMP_KEYS)
 
         # highlighting would split the name over multiple labels, which cannot wrap as one paragraph
         children = widget.title_box.get_children()
