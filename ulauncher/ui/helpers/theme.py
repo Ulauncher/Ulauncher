@@ -46,7 +46,8 @@ def get_themes() -> dict[str, Theme]:
         data = json.loads(manifest_path.read_text())
         if data.get("extend_theme", "") is None:
             del data["extend_theme"]
-        all_themes.append(LegacyTheme(**data, base_path=str(manifest_path.parent)))
+        data["base_path"] = str(manifest_path.parent)
+        all_themes.append(LegacyTheme(**data))
 
     for theme in all_themes:
         try:
