@@ -69,9 +69,6 @@ class Mode(ABC):
         """
         Called when a result is activated.
 
-        :param action_id: The ID of the action to perform, or empty string for the default action
-        :param result: The result that was activated
-        :param query: The current query
-        :param callback: Callback to return the action or new results
+        :param callback: Callback to return the effect or new results
         """
         ...
