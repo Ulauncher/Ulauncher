@@ -81,7 +81,12 @@ class ExtensionRecord:
         self.state.id = self.id
         defaults = json_load(f"{self.path}/.default-state.json")
         if isinstance(defaults, dict):
-            self.state.update(defaults)
+            # The file ships with the extension, so a key ExtensionState refuses would otherwise
+            # raise here, where every caller only wants a record for the extension.
+            accepted = {key: value for key, value in defaults.items() if ExtensionState.accepts_key(key)}
+            if ignored := defaults.keys() - accepted.keys():
+                logger.warning("Ignoring invalid default state %s of extension %s", sorted(ignored), self.id)
+            self.state.update(accepted)
 
     @property
     def manifest(self) -> ExtensionManifest:
