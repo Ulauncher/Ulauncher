@@ -5,7 +5,7 @@ from datetime import datetime
 from os.path import isfile, join
 from pathlib import Path
 from shutil import rmtree
-from typing import Any
+from typing import Any, Literal, Union
 
 from ulauncher import paths
 from ulauncher.data import BaseDataClass, JsonConf
@@ -29,6 +29,17 @@ class ExtensionRecordTrigger(BaseDataClass):
     keyword: str = ""
 
 
+ExtensionErrorType = Literal[
+    "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
+]
+ExtensionExitCause = Union[ExtensionErrorType, Literal["Stopped"]]
+
+
+class ExtensionErrorData(BaseDataClass):
+    type: ExtensionErrorType
+    message: str | None = None
+
+
 class ExtensionState(JsonConf):
     id: str = ""
     url: str = ""
@@ -37,14 +48,18 @@ class ExtensionState(JsonConf):
     commit_hash: str = ""
     commit_time: str = ""
     is_enabled: bool = True
-    error_message: str = ""
-    error_type: str = ""
+    error: ExtensionErrorData | None = None
 
     def __setitem__(self, key: str, value: Any) -> None:  # type: ignore[override]
         if key == "last_commit":
             key = "commit_hash"
         elif key == "last_commit_time":
             key = "commit_time"
+        elif key == "error" and isinstance(value, dict):
+            value = ExtensionErrorData(**value) if value.get("type") else None
+        elif key in ("error_type", "error_message"):
+            # Drop legacy error keys
+            return
         super().__setitem__(key, value)
 
 
@@ -88,6 +103,16 @@ class ExtensionRecord:
                 logger.warning("Ignoring invalid default state %s of extension %s", sorted(ignored), self.id)
             self.state.update(accepted)
 
+    def get_error(self) -> ExtensionErrorData | None:
+        # A preview must not surface the installed extension's persisted error; it reports as a preview.
+        if self.state.error and not self.is_preview:
+            return self.state.error
+        return None
+
+    @property
+    def has_error(self) -> bool:
+        return bool(self.get_error())
+
     @property
     def manifest(self) -> ExtensionManifest:
         return ExtensionManifest.load(self.path)
@@ -105,11 +130,6 @@ class ExtensionRecord:
     @property
     def is_enabled(self) -> bool:
         return self.is_preview or (self.state.is_enabled and not self.has_error)
-
-    @property
-    def has_error(self) -> bool:
-        # A preview must not surface the installed extension's persisted error; it reports as a preview.
-        return not self.is_preview and bool(self.state.error_type)
 
     @property
     def is_manageable(self) -> bool:
@@ -182,8 +202,7 @@ class ExtensionRecord:
             commit_hash=commit_hash,
             commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
             updated_at=datetime.now().isoformat(),
-            error_type="",
-            error_message="",
+            error=None,
         )
 
 

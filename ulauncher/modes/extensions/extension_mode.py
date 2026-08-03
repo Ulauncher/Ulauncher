@@ -131,12 +131,13 @@ class ExtensionMode(Mode):
 
     def _loading_failed_result(self) -> Result:
         ext = self._active_ext
-        name = (ext.manifest.name if ext else "") or "Extension"
-        # A preview's error isn't persisted (it surfaces in the preview's own console), so the
-        # stored message is only meaningful for an installed extension that errored.
-        description = ext.state.error_message if ext and ext.has_error else ""
-        icon = (ext.get_icon_value() if ext else None) or ""
-        return Result(name=f"{name} failed to start", description=description, icon=icon)
+        if not ext:
+            return Result(name="Extension failed to start")
+
+        error = ext.get_error()
+        name = ext.manifest.name or "Extension"
+        error_msg = error.message if error else None
+        return Result(name=f"{name} failed to start", description=error_msg or "", icon=ext.get_icon_value())
 
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()

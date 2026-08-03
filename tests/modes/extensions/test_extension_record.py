@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ulauncher.modes.extensions.extension_record import ExtensionRecord
+from ulauncher.modes.extensions.extension_record import ExtensionErrorData, ExtensionRecord
 
 
 def test_seed_default_state__applies_the_bundled_defaults(tmp_path: Path) -> None:
@@ -25,11 +25,11 @@ def test_seed_default_state__ignores_keys_the_state_rejects(tmp_path: Path) -> N
 def test_reload_state__resets_to_the_defaults_when_the_file_is_gone(tmp_path: Path) -> None:
     (tmp_path / ".default-state.json").write_text(json.dumps({"url": "https://example.com"}))
     record = ExtensionRecord("test_record_reloads_deleted_state", str(tmp_path))
-    record.state.save(is_enabled=False, error_type="Terminated")
+    record.state.save(is_enabled=False, error=ExtensionErrorData(type="Terminated"))
     record._state_path.unlink()
 
     record.reload_state()
 
     assert record.state.is_enabled is True
-    assert record.state.error_type == ""
+    assert record.state.error is None
     assert record.state.url == "https://example.com"

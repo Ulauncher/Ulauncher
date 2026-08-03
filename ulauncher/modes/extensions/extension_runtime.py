@@ -5,20 +5,18 @@ import signal
 import socket
 from collections import deque
 from time import time
-from typing import Callable, Literal, cast
+from typing import Callable, cast
 from weakref import WeakSet
 
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals import ipc, log_wire
+from ulauncher.modes.extensions.extension_record import ExtensionExitCause
 from ulauncher.utils import scheduling
 from ulauncher.utils.socket_msg_controller import SocketMsgController
 
 DEBUGPY_HOST = "127.0.0.1"
 DEBUGPY_PORT = 5678
 
-ExtensionExitCause = Literal[
-    "Stopped", "Terminated", "Exited", "MissingModule", "MissingInternals", "Incompatible", "Invalid", "FailedToStart"
-]
 ExitHandlerCallback = Callable[[ExtensionExitCause, str], None]
 MessageHandlerCallback = Callable[[ipc.ExtensionMessage], None]
 logger = logging.getLogger(__name__)

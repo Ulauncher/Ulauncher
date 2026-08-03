@@ -515,10 +515,10 @@ class ExtensionsView(BaseView):
         """Create the error display section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        if ext.has_error:
+        if error := ext.get_error():
             error_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin=10)
             # Create appropriate error message based on type
-            message_text = ext_utils.get_error_message(ext.state.error_type, ext.state.error_message, ext)
+            message_text = ext_utils.get_error_message(error, ext.state.url)
 
             # Create warning-style container
             warning_frame = styled(Gtk.Box(), "ext-error-box")

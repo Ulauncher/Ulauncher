@@ -4,7 +4,7 @@ import html
 import re
 from typing import Literal
 
-from ulauncher.modes.extensions.extension_record import ExtensionRecord
+from ulauncher.modes.extensions.extension_record import ExtensionErrorData, ExtensionRecord
 from ulauncher.modes.extensions.extension_service import ext_service
 
 ExtStatus = Literal["on", "off", "error", "stopped", "preview"]
@@ -42,9 +42,9 @@ def get_status_str(ext: ExtensionRecord) -> ExtStatus:
     return "on"
 
 
-def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord) -> str:
+def get_error_message(error: ExtensionErrorData, ext_url: str) -> str:
     """Generate appropriate error message based on error type"""
-    ext_url = ext.state.url
+    error_message = error.message or ""
 
     static_messages = {
         "Invalid": (
@@ -57,10 +57,10 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord)
             f"system rather than the extension itself.\n\n<small>Details: {error_message}</small>"
         ),
     }
-    if error_type in static_messages:
-        return static_messages[error_type]
+    if error.type in static_messages:
+        return static_messages[error.type]
 
-    if error_type == "Terminated":
+    if error.type == "Terminated":
         message = (
             "The extension crashed. Ensure that you read and followed the instructions on the "
             "extension repository page, and check the error log and report the error otherwise."
@@ -69,7 +69,7 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord)
             message += f'\n\n<small>Repository: <a href="{ext_url}">{ext_url}</a></small>'
         return message
 
-    if error_type == "MissingInternals":
+    if error.type == "MissingInternals":
         return (
             "The extension is trying to import internal Ulauncher application methods which are not "
             "part of the extension API. This is not supported and it can break the extension any time "
@@ -77,7 +77,7 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord)
             "extension developer."
         )
 
-    if error_type == "MissingModule":
+    if error.type == "MissingModule":
         module_name = error_message
         message = (
             f"The extension crashed because it could not import module <b>{module_name}</b>.\n\n"
@@ -92,8 +92,8 @@ def get_error_message(error_type: str, error_message: str, ext: ExtensionRecord)
             )
         return message
 
-    message = error_message or f"Unknown error type: {error_type}"
-    if ext_url and error_type != "MissingModule":
+    message = error_message or f"Unknown error type: {error.type}"
+    if ext_url and error.type != "MissingModule":
         message += "\n\n<small>You can let the author know about this problem by creating an issue: "
         message += f'<a href="{ext_url}/issues">{ext_url}/issues</a></small>'
     return message

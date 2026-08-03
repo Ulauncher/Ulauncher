@@ -12,7 +12,12 @@ from ulauncher.gi import GLib
 from ulauncher.internals import log_wire
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
-from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
+from ulauncher.modes.extensions.extension_record import (
+    ExtensionErrorData,
+    ExtensionExitCause,
+    ExtensionRecord,
+    PreviewExtensionRecord,
+)
 from ulauncher.modes.extensions.extension_registry import (
     Done,
     ExtensionRegistry,
@@ -202,7 +207,7 @@ class ExtensionService(ExtensionRegistry):
         self._enqueue_job(ext_id, lambda release: self._stop(ext_id, release))
 
     def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> None:
-        record.state.save(is_enabled=enabled, error_type="", error_message="")
+        record.state.save(is_enabled=enabled, error=None)
         self._reconcile(record.id)
 
     def install(self, url: str, on_success: InstallSuccess, on_error: OnError, commit_hash: str | None = None) -> None:
@@ -282,14 +287,14 @@ class ExtensionService(ExtensionRegistry):
             return
 
         if not record.is_preview:
-            record.state.save(error_type="", error_message="")  # clear any previous error
+            record.state.save(error=None)
 
         if state.job_active or state.pending_stop is not None:
             # A job or in-flight stop reconciles on release, which starts the extension now
             # that the error is cleared.
             return
 
-        def exit_handler(cause: str, error_msg: str) -> None:
+        def exit_handler(cause: ExtensionExitCause, error_msg: str) -> None:
             errored = cause != "Stopped"
 
             if errored:
@@ -298,7 +303,7 @@ class ExtensionService(ExtensionRegistry):
                 state.record = None
                 # A failing preview must not disable the installed extension by persisting its error.
                 if not record.is_preview:
-                    record.state.save(error_type=cause, error_message=error_msg)
+                    record.state.save(error=ExtensionErrorData(type=cause, message=error_msg))
 
                 # Tear down the dead preview before the drain below. The drain can reconcile,
                 # and a reconcile that still saw the overlay would respawn it.

@@ -17,6 +17,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.modes.extensions import extension_registry, extension_service
+from ulauncher.modes.extensions.extension_record import ExtensionErrorData
 from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
 from ulauncher.modes.extensions.extension_service import ExtensionService
 
@@ -37,8 +38,7 @@ class FakeManifest:
 
 class FakeState:
     is_enabled = True
-    error_type = ""
-    error_message = ""
+    error: ExtensionErrorData | None = None
 
     def save(self, **kwargs: Any) -> None:
         for key, value in kwargs.items():
@@ -61,7 +61,7 @@ class FakeRecord:
 
     @property
     def has_error(self) -> bool:
-        return not self.is_preview and bool(self.state.error_type)
+        return not self.is_preview and self.state.error is not None
 
     def reload_state(self) -> None:
         pass
@@ -188,7 +188,7 @@ def test_update_then_uninstall_runs_in_order_and_does_not_resurrect(harness: Har
     # the swap lands before the removal, and the final reconcile finds no record:
     # nothing respawns and no error state is written
     assert harness.log == ["spawn:ext", "update-start:ext", "update-swap:ext", "uninstall-remove:ext"]
-    assert record.state.error_type == ""
+    assert record.state.error is None
 
 
 def test_update_queued_behind_uninstall_is_dropped(harness: Harness) -> None:
@@ -276,7 +276,8 @@ def test_crash_does_not_restart(harness: Harness) -> None:
 
     runtime.exit("Exited", "boom")
 
-    assert record.state.error_type == "Exited"
+    assert record.state.error
+    assert record.state.error.type == "Exited"
     assert len(harness.spawned) == 1
     assert not harness.service.is_running(record)
 
