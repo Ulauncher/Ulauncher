@@ -115,6 +115,38 @@ class ExtensionService(ExtensionRegistry):
         await self.stop_extension(record)
         return False
 
+    def _build_launch_args(self, record: ExtensionRecord) -> tuple[list[str], dict[str, str]]:
+        ext_deps = ExtensionDependencies(record.id, record.path)
+        extension_main = f"{record.path}/main.py"
+        cmd = [sys.executable, extension_main]
+
+        if isinstance(record, PreviewExtensionRecord) and record.with_debugger:
+            cmd = [
+                sys.executable,
+                "-m",
+                "debugpy",
+                "--listen",
+                f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
+                "--wait-for-client",
+                extension_main,
+            ]
+
+        prefs = {p_id: pref.value for p_id, pref in record.preferences.items()}
+        triggers = {t_id: t.default_keyword for t_id, t in record.manifest.triggers.items() if t.default_keyword}
+        # backwards compatible v2 preferences format (with keywords added back)
+        v2_prefs = {**triggers, **prefs}
+        env = {
+            # Assume previews should always run verbose (works until we add a log-level flag)
+            "VERBOSE": str(int(cli.get_args().verbose or record.is_preview)),
+            "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
+            "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
+            "ULAUNCHER_EXTENSION_ID": record.id,
+            "ULAUNCHER_INPUT_DEBOUNCE": str(record.manifest.input_debounce),
+            # v2 extensions already get a compatibility-mode warning, so only warn v3 ones.
+            "ULAUNCHER_API_DEPRECATION_WARNINGS": "1" if record.manifest.supports_current_api() else "0",
+        }
+        return cmd, env
+
     def start_extension(self, record: ExtensionRecord) -> bool:
         """
         Starts the extension in a subprocess
@@ -164,35 +196,7 @@ class ExtensionService(ExtensionRegistry):
         if not record.is_preview:
             record.state.save(error_type="", error_message="")  # clear any previous error
 
-        ext_deps = ExtensionDependencies(record.id, record.path)
-        extension_main = f"{record.path}/main.py"
-        cmd = [sys.executable, extension_main]
-
-        if isinstance(record, PreviewExtensionRecord) and record.with_debugger:
-            cmd = [
-                sys.executable,
-                "-m",
-                "debugpy",
-                "--listen",
-                f"{DEBUGPY_HOST}:{DEBUGPY_PORT}",
-                "--wait-for-client",
-                extension_main,
-            ]
-
-        prefs = {p_id: pref.value for p_id, pref in record.preferences.items()}
-        triggers = {t_id: t.default_keyword for t_id, t in record.manifest.triggers.items() if t.default_keyword}
-        # backwards compatible v2 preferences format (with keywords added back)
-        v2_prefs = {**triggers, **prefs}
-        env = {
-            # Assume previews should always run verbose (works until we add a log-level flag)
-            "VERBOSE": str(int(cli.get_args().verbose or record.is_preview)),
-            "PYTHONPATH": ":".join(x for x in [paths.APPLICATION, ext_deps.get_dependencies_path()] if x),
-            "EXTENSION_PREFERENCES": json.dumps(v2_prefs, separators=(",", ":")),
-            "ULAUNCHER_EXTENSION_ID": record.id,
-            "ULAUNCHER_INPUT_DEBOUNCE": str(record.manifest.input_debounce),
-            # v2 extensions already get a compatibility-mode warning, so only warn v3 ones.
-            "ULAUNCHER_API_DEPRECATION_WARNINGS": "1" if record.manifest.supports_current_api() else "0",
-        }
+        cmd, env = self._build_launch_args(record)
 
         # socketpair/spawnv can fail for host-environment reasons (fd exhaustion, fork limits,
         # missing interpreter). Route these through exit_handler like a crash so the error is
