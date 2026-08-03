@@ -92,6 +92,16 @@ class ExtensionRecord:
     def manifest(self) -> ExtensionManifest:
         return ExtensionManifest.load(self.path)
 
+    def reload_state(self) -> None:
+        """Pick up state another process wrote. The CLI disables a non-manageable copy that shadows
+        an uninstalled extension, and the app's cached state would otherwise still say enabled."""
+        if self._state_path.is_file():
+            self.state = ExtensionState.load(str(self._state_path), force=True)
+        else:
+            # No file means no state, not "unchanged", so a stale is_enabled or error can't linger.
+            self.state.clear()
+        self._seed_default_state()
+
     @property
     def is_enabled(self) -> bool:
         return self.is_preview or (self.state.is_enabled and not self.has_error)

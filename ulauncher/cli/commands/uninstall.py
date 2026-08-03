@@ -18,7 +18,7 @@ def run(args: CLIArguments) -> int:
         except OSError:
             logger.error("Could not uninstall %s", record.id)  # noqa: TRY400 - traceback is noise here
             return 1
-        dbus_trigger_event("extensions:stop", [record.id])
+        dbus_trigger_event("extensions:reload", [record.id])
         return 0
 
     logger.error("Error: Argument '%s' does not match any installed extension", args.input)
