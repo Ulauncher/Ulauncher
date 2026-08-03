@@ -288,22 +288,21 @@ class ExtensionHandlers:
                     f"You can also install extensions manually by adding them to {paths.USER_EXTENSIONS}."
                 )
         elif isinstance(error, ext_exceptions.DependencyError):
-            if operation == "update":
-                primary_text = "Dependency Update Failed"
-                secondary_text = (
-                    f"Failed to update extension dependencies:\n\n{error_message}\n\n"
-                    "If nothing seems clearly wrong on your end, consider contacting the extension "
-                    "author and let them know about this problem."
-                )
-            else:
-                primary_text = "Dependency Installation Failed"
-                secondary_text = (
-                    f"Failed to install extension dependencies:\n\n{error_message}\n\n"
-                    "If nothing seems clearly wrong on your end, consider contacting the extension "
-                    "author and let them know about this problem."
-                )
+            updating = operation == "update"
+            primary_text = f"Dependency {'Update' if updating else 'Installation'} Failed"
+            secondary_text = (
+                f"Failed to {'update' if updating else 'install'} extension dependencies:\n\n{error_message}\n\n"
+                "If nothing seems clearly wrong on your end, consider contacting the extension "
+                "author and let them know about this problem."
+            )
             if repo_url:
                 secondary_text += f"\n\nYou can report this issue at: {repo_url}/issues"
+        elif isinstance(error, ext_exceptions.ExtensionError):
+            # Last of the extension errors, since every case above subclasses it. These are
+            # explained failures, so the message stands on its own and asking for a bug report
+            # would be wrong. Only a non-extension error is genuinely unexpected.
+            primary_text = f"{operation.title()} Failed"
+            secondary_text = error_message
         else:
             primary_text = f"{operation.title()} Failed"
             secondary_text = (
