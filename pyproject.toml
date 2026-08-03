@@ -147,6 +147,7 @@ select = [
 banned-module-level-imports = ["typing_extensions"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
+"asyncio" = {msg = "To handle async operations, use Gio or Glib async methods that run in the background. See ulauncher.utils.subprocess_utils."}
 "gi.repository" = {msg = "Import GI modules from ulauncher.gi, not gi.repository directly."}
 "ulauncher.ui" = {msg = "Import ulauncher.ui only from ulauncher/cli/commands/start.py - it pulls in GTK and must not leak into extension or CLI runtime."}
 "ulauncher.api" = {msg = "ulauncher.api is the extension process API. Importing it into the app runs its module-level setup there. Shared types belong in ulauncher.internals."}
