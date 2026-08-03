@@ -96,15 +96,20 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
     def __setattr__(self, key: str, value: Any) -> None:
         self[key] = value
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        if hasattr(self.__class__, key):
-            if key.startswith("__"):
-                msg = f'Invalid property "{key}". Must not override class property.'
-                raise KeyError(msg)
+    @classmethod
+    def accepts_key(cls, key: str) -> bool:
+        """Whether key can be stored without shadowing a class member.
 
-            if callable(getattr(self.__class__, key)):
-                msg = f'Invalid property "{key}". Must not override class method.'
-                raise KeyError(msg)
+        Setting a rejected key raises, so filter untrusted data (file contents) through this.
+        """
+        if not hasattr(cls, key):
+            return True
+        return not key.startswith("__") and not callable(getattr(cls, key))
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if not self.accepts_key(key):
+            msg = f'Invalid property "{key}". Must not override a class member.'
+            raise KeyError(msg)
 
         super().__setitem__(key, value)
 
