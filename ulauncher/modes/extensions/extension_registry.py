@@ -20,6 +20,15 @@ CheckUpdateSuccess = Callable[[bool, str], None]
 Done = Callable[[], None]
 
 
+def resolve_remote(url: str, on_error: OnError) -> ExtensionRemote | None:
+    """Parse url into a remote, or report the UrlError to on_error and return None."""
+    try:
+        return ExtensionRemote(url)
+    except ext_exceptions.UrlError as error:
+        on_error(error)
+        return None
+
+
 def _swap_dir(new_dir: str, target: str) -> bool:
     """Replace `target` with `new_dir`, rolling back to the original on failure. Returns whether it succeeded."""
     previous = f"{new_dir}.bak"
@@ -52,23 +61,15 @@ def _swap_dir(new_dir: str, target: str) -> bool:
 
 
 class ExtensionLifecycle(Protocol):
-    """The running-process operations install/uninstall need. Only the ExtensionService
-    (app runtime) runs extension, so ExtensionRegistry should no-op (_NoLifecycle)."""
-
-    def is_running(self, record: ExtensionRecord) -> bool: ...
-
-    def start_extension(self, record: ExtensionRecord) -> bool: ...
+    """The running-process operation the disk operations need: stopping before touching the
+    extension's directory. Only the ExtensionService (app runtime) runs extensions, so the
+    plain ExtensionRegistry no-ops (_NoLifecycle). Restarting is not part of the protocol:
+    the service reconciles the process after the job wrapping the operation completes."""
 
     def stop_extension(self, record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None: ...
 
 
 class _NoLifecycle:
-    def is_running(self, _record: ExtensionRecord) -> bool:
-        return False
-
-    def start_extension(self, _record: ExtensionRecord) -> bool:
-        return False
-
     def stop_extension(self, _record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None:
         if on_stopped:
             on_stopped()
@@ -127,10 +128,8 @@ class ExtensionRegistry:
 
     def install(self, url: str, on_success: InstallSuccess, on_error: OnError, commit_hash: str | None = None) -> None:
         logger.info("Installing extension: %s", url)
-        try:
-            remote = ExtensionRemote(url)
-        except ext_exceptions.UrlError as error:
-            on_error(error)
+        remote = resolve_remote(url, on_error)
+        if remote is None:
             return
         if Path(remote.target_dir).exists():
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
@@ -194,10 +193,8 @@ class ExtensionRegistry:
                 logger.error("Could not update extension '%s'", record.id, exc_info=error)
                 on_error(error)
 
-            try:
-                remote = ExtensionRemote(record.state.url)
-            except ext_exceptions.UrlError as error:
-                fail(error)
+            remote = resolve_remote(record.state.url, fail)
+            if remote is None:
                 return
             self._install_from_remote(record, remote, commit_hash, done, fail)
 
@@ -205,10 +202,8 @@ class ExtensionRegistry:
 
     def check_update(self, record: ExtensionRecord, on_success: CheckUpdateSuccess, on_error: OnError) -> None:
         """Reports whether a new compatible version exists, and its commit hash."""
-        try:
-            remote = ExtensionRemote(record.state.url)
-        except ext_exceptions.UrlError as error:
-            on_error(error)
+        remote = resolve_remote(record.state.url, on_error)
+        if remote is None:
             return
 
         def on_hash(commit_hash: str) -> None:
@@ -225,7 +220,8 @@ class ExtensionRegistry:
         on_error: OnError,
         **extra_state: Any,
     ) -> None:
-        """Install (atomically): download, stop, swap and restart (if previously running).
+        """Install (atomically): download, stop and swap. Restarting is the caller's concern
+        (in the app, the service reconciles once the job wrapping this operation releases).
 
         `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
@@ -249,10 +245,6 @@ class ExtensionRegistry:
             downloaded_hash, commit_timestamp = download_result
 
             def on_deps_installed(_stdout: str) -> None:
-                # a preview extension need not and should not be restarted (runs from dev path)
-                is_previewed = self.preview is not None and self.preview.id == record.id
-                should_restart = self._lifecycle.is_running(record) and not is_previewed
-
                 def swap_and_finish() -> None:
                     error: Exception | None = None
                     if _swap_dir(staging_dir, target_path):
@@ -267,17 +259,12 @@ class ExtensionRegistry:
                     else:
                         error = OSError(f"Failed to swap the staged extension into {target_path}")
                     rmtree(staging_dir, ignore_errors=True)
-                    if should_restart:
-                        self._lifecycle.start_extension(record)
                     if error:
                         on_error(error)
                     else:
                         on_done()
 
-                if should_restart:
-                    self._lifecycle.stop_extension(record, swap_and_finish)
-                else:
-                    swap_and_finish()
+                self._lifecycle.stop_extension(record, swap_and_finish)
 
             ExtensionDependencies(remote.ext_id, staging_dir).install(on_deps_installed, fail)
 

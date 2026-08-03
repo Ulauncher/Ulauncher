@@ -67,7 +67,8 @@ class ExtensionMode(Mode):
             self._pending_callback = None
 
     def started(self, ext_id: str) -> None:
-        # start() runs in a worker thread, so re-evaluate the query on the main loop.
+        # Defer: a start can fire from inside another lifecycle callback, and re-running the
+        # query re-enters this mode.
         if self._active_ext and self._active_ext.id == ext_id:
             scheduling.run_when_idle(lambda: events.emit("app:reload_query"))
 

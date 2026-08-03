@@ -99,7 +99,8 @@ class ExtensionHandlers:
         progress_dialog.show()
 
         def on_installed(ext: ExtensionRecord) -> None:
-            ext_service.start_extension(ext)
+            # no explicit start: the service reconciles after the install job and starts the
+            # extension (fresh installs are enabled by default)
             progress_dialog.destroy()
             callback(ext)
 
