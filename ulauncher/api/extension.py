@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import signal
-import threading
+import threading  # noqa: TID251 - handler code is third-party, synchronous and not cancellable
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
