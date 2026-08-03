@@ -195,7 +195,9 @@ class ExtensionHandlers:
         error_message = str(error)
 
         # Extract repository URL for issue links (remove .git suffix if present)
-        repo_url = url.rstrip(".git") if url.startswith("http") else None
+        repo_url = url if url.startswith("http") else None
+        if repo_url and repo_url.endswith(".git"):
+            repo_url = repo_url[:-4]
 
         # Determine primary and secondary text based on error type
         if isinstance(error, ext_exceptions.UrlError):
