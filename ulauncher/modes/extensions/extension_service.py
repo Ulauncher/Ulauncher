@@ -38,6 +38,18 @@ class ExtensionServiceListener(Protocol):
     def handle_message(self, ext_id: str, message: ipc.ExtensionMessage) -> None: ...
 
 
+class _ExtensionProcessState:
+    """Per-extension bookkeeping for the process.
+    Only ExtensionService touches it, always on the GLib main loop."""
+
+    runtime: ExtensionRuntime | None
+    pending_stop: list[Callable[[], None]] | None  # None: no stop in flight; else callbacks to fire on exit
+
+    def __init__(self) -> None:
+        self.runtime = None
+        self.pending_stop = None
+
+
 class ExtensionService(ExtensionRegistry):
     """The app's ExtensionRegistry: also owns the extension processes and handles lifecycle intents.
 
@@ -46,17 +58,12 @@ class ExtensionService(ExtensionRegistry):
     D-Bus events ("extensions:reload", "extensions:stop", ...).
     """
 
-    runtimes: dict[str, ExtensionRuntime]
-    stopping: set[str]
-    stopped_listeners: dict[str, list[Callable[[], None]]]
     listener: ExtensionServiceListener | None
     _preview_log: tuple[str, logging.Handler] | None
 
     def __init__(self) -> None:
         super().__init__(lifecycle=self)
-        self.runtimes = {}
-        self.stopping = set()
-        self.stopped_listeners = defaultdict(list)
+        self._ext_states: defaultdict[str, _ExtensionProcessState] = defaultdict(_ExtensionProcessState)
         self.listener = None
         self._preview_log = None
         events.set_self(self)
@@ -114,7 +121,8 @@ class ExtensionService(ExtensionRegistry):
         run_job(0)
 
     def is_running(self, record: ExtensionRecord) -> bool:
-        return record.id in self.runtimes
+        state = self._ext_states.get(record.id)
+        return state is not None and state.runtime is not None
 
     def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
         record.state.save(is_enabled=enabled, error_type="", error_message="")
@@ -160,15 +168,14 @@ class ExtensionService(ExtensionRegistry):
         Starts the extension in a subprocess
         Returns True if the extension was already running or successfully started, False otherwise.
         """
-        if self.is_running(record):
+        state = self._ext_states[record.id]
+        if state.runtime:
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            self.stopping.discard(record.id)
-
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', record.id, error_msg, cause)
-                self.runtimes.pop(record.id, None)
+                state.runtime = None
                 # A failing preview must not disable the installed extension by persisting its error.
                 if not record.is_preview:
                     record.state.save(error_type=cause, error_message=error_msg)
@@ -183,11 +190,12 @@ class ExtensionService(ExtensionRegistry):
             if listener := self.listener:
                 listener.invalidate_cache()
 
-            # Drain last, and pop the list first: a listener may start a new runtime for this id
-            # (which the error path above must not clobber) or queue a new stop (which must wait
-            # for the next exit, not fire in this drain).
-            for stop_listener in self.stopped_listeners.pop(record.id, []):
-                stop_listener()
+            # Drain into a fresh list: a callback may start a new runtime for this id or queue a
+            # new stop, neither of which belongs to this exit.
+            callbacks = state.pending_stop or []
+            state.pending_stop = None
+            for on_stopped in callbacks:
+                on_stopped()
 
         def message_handler(message: ipc.ExtensionMessage) -> None:
             if listener := self.listener:
@@ -213,7 +221,7 @@ class ExtensionService(ExtensionRegistry):
         # surfaced consistently and any queued start listeners get cleaned up, rather than
         # raising out into callers.
         try:
-            self.runtimes[record.id] = ExtensionRuntime(record.id, cmd, env, exit_handler, message_handler)
+            state.runtime = ExtensionRuntime(record.id, cmd, env, exit_handler, message_handler)
         except (OSError, GLib.Error) as err:
             exit_handler("FailedToStart", str(err))
             return False
@@ -225,16 +233,17 @@ class ExtensionService(ExtensionRegistry):
     def stop_extension(self, record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None:
         """Stop the extension process if it is running. Does not block: on_stopped fires once the
         process has actually exited, or immediately if it is not running."""
-        ext_id = record.id
-        if runtime := self.runtimes.pop(ext_id, None):
-            self.stopping.add(ext_id)
+        state = self._ext_states[record.id]
+        if runtime := state.runtime:
+            state.runtime = None
+            state.pending_stop = []
             if on_stopped:
-                self.stopped_listeners[ext_id].append(on_stopped)
+                state.pending_stop.append(on_stopped)
             runtime.stop()
-        elif ext_id in self.stopping:
+        elif state.pending_stop is not None:
             # a stop is already in flight; report on the same exit
             if on_stopped:
-                self.stopped_listeners[ext_id].append(on_stopped)
+                state.pending_stop.append(on_stopped)
         elif on_stopped:
             on_stopped()
 
@@ -242,8 +251,9 @@ class ExtensionService(ExtensionRegistry):
         """
         Sends a JSON message to the extension if it is running.
         """
-        if runtime := self.runtimes.get(record.id):
-            runtime.send_message(message, request_id)
+        state = self._ext_states.get(record.id)
+        if state and state.runtime:
+            state.runtime.send_message(message, request_id)
 
     def save_user_preferences(self, record: ExtensionRecord, data: Any) -> None:
         from ulauncher.internals.ipc import EventType
