@@ -14,8 +14,11 @@ _instance_paths: dict[int, str] = {}
 def _populate_from_file(instance: Any, file_path: str) -> None:
     data = json_load(file_path)
     if isinstance(data, dict):
+        # Parse into a throwaway first, so data the class rejects raises before the cached
+        # instance (which every holder of it shares) is cleared and left half-populated.
+        parsed = type(instance)(data)
         instance.clear()
-        instance.update(data)
+        instance.update(parsed)
     elif data is None:
         logger.warning("File not found or unreadable: %s — keeping cached data", file_path)
     else:

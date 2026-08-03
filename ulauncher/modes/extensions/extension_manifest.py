@@ -11,6 +11,10 @@ from ulauncher.utils.version import satisfies
 logger = logging.getLogger(__name__)
 
 
+def _expected_object(key: str, value: Any) -> str:
+    return f'Invalid "{key}" in extension manifest: expected an object, got {type(value).__name__}'
+
+
 class ExtensionManifestPreference(BaseDataClass):
     name: str = ""
     type: str = ""
@@ -58,13 +62,17 @@ class ExtensionManifest(JsonConf):
             if value <= 0:
                 return
         # Convert triggers dicts to ExtensionManifestTrigger instances
-        elif key == "triggers" and isinstance(value, dict):
+        elif key == "triggers":
+            if not isinstance(value, dict):
+                raise TypeError(_expected_object(key, value))
             value = {t_id: ExtensionManifestTrigger(**trigger) for t_id, trigger in value.items()}
         # Convert preferences dicts to manifest preference instances (or trigger it's an old shortcuts)
         elif key == "preferences":
             if isinstance(value, dict):
                 value = {p_id: ExtensionManifestPreference(**pref) for p_id, pref in value.items()}
-            elif isinstance(value, list):  # APIv2 backwards compatibility
+            elif not isinstance(value, list):
+                raise TypeError(_expected_object(key, value))
+            else:  # APIv2 backwards compatibility
                 prefs = {}
                 for p in value:
                     if isinstance(p, dict):
@@ -169,4 +177,10 @@ class ExtensionManifest(JsonConf):
     def load(cls, path: str, *, force: bool = False) -> ExtensionManifest:
         if not path.endswith("/manifest.json"):
             path = f"{path}/manifest.json"
-        return super().load(path, force=force)
+        try:
+            return super().load(path, force=force)
+        except (KeyError, TypeError, ValueError) as error:
+            # The file is third-party content, so bad data is a manifest error, not a bug. Parsing
+            # it is where that gets decided: callers handle ManifestError, not raw parse errors.
+            msg = f"Could not parse the extension manifest {path}: {error}"
+            raise ext_exceptions.ManifestError(msg) from error

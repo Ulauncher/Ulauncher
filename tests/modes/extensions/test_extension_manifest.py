@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -190,3 +192,43 @@ class TestExtensionManifest:
         asdf = em.preferences.get("asdf")
         assert asdf
         assert asdf.name == "ghjk"
+
+
+class TestExtensionManifestLoad:
+    def write(self, dir_path: Path, **overrides: Any) -> None:
+        (dir_path / "manifest.json").write_text(json.dumps({**valid_manifest, **overrides}))
+
+    @pytest.mark.parametrize(
+        "overrides",
+        [
+            pytest.param({"validate": 1}, id="key shadowing a class member"),
+            pytest.param({"options": {"query_debounce": "abc"}}, id="non-numeric query_debounce"),
+            pytest.param({"triggers": {"t": [1, 2]}}, id="trigger that is not a mapping"),
+            pytest.param({"preferences": {"p": 5}}, id="preference that is not a mapping"),
+            pytest.param({"triggers": "abc"}, id="triggers that is not an object"),
+            pytest.param({"preferences": "abc"}, id="preferences that is neither an object nor a list"),
+        ],
+    )
+    def test_load__unparsable_manifest__raises_manifest_error(self, tmp_path: Path, overrides: dict[str, Any]) -> None:
+        self.write(tmp_path, **overrides)
+        with pytest.raises(ext_exceptions.ManifestError):
+            ExtensionManifest.load(str(tmp_path))
+
+    def test_load__unparsable_manifest__keeps_the_last_parsed_one(self, tmp_path: Path) -> None:
+        self.write(tmp_path)
+        assert ExtensionManifest.load(str(tmp_path)).name == "Timer"
+
+        self.write(tmp_path, name="Evil", validate=1)
+        with pytest.raises(ext_exceptions.ManifestError):
+            ExtensionManifest.load(str(tmp_path), force=True)
+
+        # the instance is shared by everything that loaded this path, so a rejected reload
+        # must not leave it half-populated
+        assert ExtensionManifest.load(str(tmp_path)).name == "Timer"
+
+    def test_load__legacy_keys__are_converted(self, tmp_path: Path) -> None:
+        self.write(tmp_path, options={"query_debounce": 0.5})
+        manifest = ExtensionManifest.load(str(tmp_path))
+        assert manifest.get("options") is None
+        assert manifest.input_debounce == 0.5
+        assert manifest.triggers["keyword"].default_keyword == "ti"
