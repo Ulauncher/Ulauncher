@@ -125,6 +125,12 @@ class ExtensionRegistry:
     def get(self, ext_id: str) -> ExtensionRecord | None:
         if self.preview and self.preview.id == ext_id:
             return self.preview
+        return self.get_installed(ext_id)
+
+    def get_installed(self, ext_id: str) -> ExtensionRecord | None:
+        """Resolve ext_id's on-disk record, ignoring any active preview overlay for it. Operations
+        that touch the installed files (update, uninstall) must use this: the preview record's
+        path points at a dev checkout, not the directory those operations are allowed to touch."""
         path = extension_finder.locate(ext_id)
         return ExtensionRecord(ext_id, path) if path else None
 
