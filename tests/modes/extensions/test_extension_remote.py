@@ -192,6 +192,21 @@ class TestDownload:
         assert result is None
         assert isinstance(error, ext_exceptions.RemoteError)
 
+    @patch("ulauncher.modes.extensions.extension_remote.which", return_value="/usr/bin/git")
+    @patch("ulauncher.modes.extensions.extension_remote.os.makedirs")
+    @patch("ulauncher.modes.extensions.extension_remote.run_command")
+    def test_out_of_range_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
+        # The repo picks this number. No date can hold it, so save_installed_state would raise
+        # after the new files were already swapped in.
+        def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
+            on_success("99999999999999" if "show" in cmd else "")
+
+        mock_run.side_effect = side_effect
+        remote = ExtensionRemote("https://example.com/user/repo")
+        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        assert result is None
+        assert isinstance(error, ext_exceptions.RemoteError)
+
     @patch("ulauncher.modes.extensions.extension_remote.untar", side_effect=OSError("disk full"))
     @patch("ulauncher.modes.extensions.extension_remote.download_file")
     def test_install_oserror_maps_to_remote_error(self, mock_download: MagicMock, *_: Any) -> None:

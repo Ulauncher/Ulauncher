@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+from datetime import datetime
 from os.path import basename, getmtime, isdir
 from shutil import move, rmtree, which
 from tarfile import TarError
@@ -290,7 +291,9 @@ class ExtensionRemote(UrlParseResult):
                 return
             try:
                 commit_timestamp = float(stdout.strip())
-            except ValueError:
+                # Rejected here, not when the record formats it as a date after the swap
+                datetime.fromtimestamp(commit_timestamp)
+            except (ValueError, OverflowError, OSError):
                 on_error(ext_exceptions.RemoteError(f"Failed to parse commit timestamp for {commit_hash}"))
                 return
             on_success((commit_hash, commit_timestamp))
