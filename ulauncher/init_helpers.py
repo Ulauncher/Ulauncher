@@ -54,7 +54,6 @@ def configure_logging(*, verbose: bool, use_app_logging: bool) -> None:
     stream_handler.setLevel(log_level)
     handlers.append(stream_handler)
 
-    logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.root.handlers = []
     logging.basicConfig(
         level=logging.DEBUG,
