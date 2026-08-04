@@ -86,7 +86,7 @@ class ExtensionManifest(JsonConf):
                                 self.triggers[p_id] = ExtensionManifestTrigger(
                                     name=pref.name,
                                     description=pref.description,
-                                    default_keyword=pref.default_value,
+                                    default_keyword=str(pref.default_value),
                                     icon=pref.get("icon", ""),
                                 )
                 value = prefs
