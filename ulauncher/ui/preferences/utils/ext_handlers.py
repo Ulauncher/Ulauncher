@@ -194,11 +194,6 @@ class ExtensionHandlers:
         error_type = type(error).__name__
         error_message = str(error)
 
-        # Extract repository URL for issue links (remove .git suffix if present)
-        repo_url = url if url.startswith("http") else None
-        if repo_url and repo_url.endswith(".git"):
-            repo_url = repo_url[:-4]
-
         # Determine primary and secondary text based on error type
         if isinstance(error, ext_exceptions.UrlError):
             primary_text = "Invalid Extension URL"
@@ -242,8 +237,6 @@ class ExtensionHandlers:
                 "If nothing seems clearly wrong on your end, consider contacting the extension "
                 "author and let them know about this problem."
             )
-            if repo_url:
-                secondary_text += f"\n\nYou can report this issue at: {repo_url}/issues"
         elif isinstance(error, ext_exceptions.ExtensionError):
             # Last of the extension errors, since every case above subclasses it. These are
             # explained failures, so the message stands on its own and asking for a bug report
@@ -258,10 +251,8 @@ class ExtensionHandlers:
                 "https://github.com/Ulauncher/Ulauncher/issues\n\n"
                 f"Technical details:\n{error_type}: {error_message}"
             )
-            if repo_url:
-                secondary_text += (
-                    f"\n\nYou can also let the extension author know about this problem at: {repo_url}/issues"
-                )
+            if url.startswith("http"):
+                secondary_text += f"\n\nYou can also let the extension author know about this problem at: {url}"
 
         # Create and show error dialog
         self.dialog_launcher.show_error(primary_text, secondary_text)

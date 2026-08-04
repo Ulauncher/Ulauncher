@@ -87,13 +87,13 @@ def get_error_message(error: ExtensionErrorData, browser_url: str) -> str:
         )
         if browser_url:
             message += (
-                f"\n\n<small>If that doesn't help, report the issue: "
-                f'<a href="{browser_url}/issues">{browser_url}/issues</a></small>'
+                f"\n\n<small>If that doesn't help, report this to the author via their repository: "
+                f'<a href="{browser_url}">{browser_url}</a></small>'
             )
         return message
 
     message = error_message or f"Unknown error type: {error.type}"
-    if browser_url and error.type != "MissingModule":
-        message += "\n\n<small>You can let the author know about this problem by creating an issue: "
-        message += f'<a href="{browser_url}/issues">{browser_url}/issues</a></small>'
+    if browser_url:
+        message += "\n\n<small>You can report this to the author via their repository: "
+        message += f'<a href="{browser_url}">{browser_url}</a></small>'
     return message
