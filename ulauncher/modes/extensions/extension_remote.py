@@ -149,15 +149,15 @@ class ExtensionRemote(UrlParseResult):
     target_dir: str
 
     def __init__(self, url: str) -> None:
-        super().__init__()
+        stripped_url = url.strip()
         try:
-            self.url = url.strip()
-            self.update(parse_extension_url(self.url))
+            super().__init__(**parse_extension_url(stripped_url))
         except (ValueError, OSError) as e:
             logger.warning("Invalid URL: %s", url)
             msg = f"Invalid URL: {url}"
             raise ext_exceptions.UrlError(msg) from e
 
+        self.url = stripped_url
         self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._repo = _BareRepo(f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git", self.remote_url, self.url)
 
