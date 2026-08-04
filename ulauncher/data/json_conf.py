@@ -27,6 +27,9 @@ class JsonConf(BaseDataClass):
         # override __init__, so they still get the synthesis.
         def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
+        # Opts back in to clear. Safe here because file data is partial, so every prop needs a default.
+        def clear(self) -> None: ...
+
     @classmethod
     def load(cls: type[T], path: str, *, force: bool = False) -> T:
         return _load_cached_file_instance(cls, path, force=force)
