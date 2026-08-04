@@ -49,16 +49,16 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
 
     # Example use:
     class Person(BaseDataClass):
-        # All props you declare need an annotation and a default value (not None)
-        first_name: str = ""
-        last_name: str = ""
-        age: int = 0
+        # All props you declare need a type annotation.
+        first_name: str  # Required (no default)
+        last_name: str | None = None  # Optional with a default
+        age: int | None = None
         metadata: dict[str, str] = {}  # Cloned per instance, so you can ignore linter warnings
 
         def full_name(self):
-            return self.first_name + " " + self.last_name
+            return f"{self.first_name} {self.last_name}" if self.last_name else self.first_name
 
-    print(Person(first_name=John, last_name="Wayne").full_name()) # John Wayne
+    print(Person(first_name="John", last_name="Wayne").full_name()) # John Wayne
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
