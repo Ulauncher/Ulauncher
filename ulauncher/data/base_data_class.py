@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, TypeVar
 
 from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
-    from typing_extensions import dataclass_transform
+    from typing_extensions import dataclass_transform, deprecated
 else:
     # Type-check-only decorator (PEP 681). typing_extensions must stay out of the runtime,
     # and typing.dataclass_transform needs py3.11, so at runtime this is a no-op.
@@ -34,7 +34,7 @@ def _apply_class_defaults(instance: BaseDataClass) -> None:
 
 
 @dataclass_transform(kw_only_default=True, eq_default=False)
-class BaseDataClass(dict):  # type: ignore [type-arg]
+class BaseDataClass(Dict[str, Any]):
     """
     BaseDataClass
 
@@ -46,6 +46,7 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
     * Implemented using the AttrDict pattern, but it avoids self.__dict__ = self
 
     * Annotated props become constructor keywords for type checkers (PEP 681), so annotate every field.
+    * Removing a declared prop is a type-check-only error. Nothing enforces it at runtime.
 
     # Example use:
     class Person(BaseDataClass):
@@ -69,8 +70,8 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
     def clear(self) -> None:
         """Reset to class defaults, removing any runtime-added keys.
 
-        Overrides dict.clear so that declared fields are always present after a clear,
-        preserving the type contract of subclasses that declare non-optional fields.
+        Props declared without a default stay absent, which is why type checkers reject this call.
+        Subclasses whose props all have defaults re-declare it to opt back in.
         """
         super().clear()
         _apply_class_defaults(self)
@@ -85,7 +86,8 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
         return dir(type(self)) + list(self.keys())
 
     def __delattr__(self, key: str) -> None:
-        del self[key]
+        # Subscript form, so a subclass __delitem__ still runs.
+        del self[key]  # type: ignore[deprecated]
 
     def __getattribute__(self, key: str) -> Any:
         try:
@@ -117,3 +119,22 @@ class BaseDataClass(dict):  # type: ignore [type-arg]
     def update(self, *args: Any, **kwargs: Any) -> None:
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
+
+    if TYPE_CHECKING:
+        # Signatures only, so the runtime keeps the inherited behavior. Must come after the real
+        # definitions to be the ones type checkers see.
+
+        @deprecated("Removes a declared prop. Build a new instance instead.")
+        def __delitem__(self, key: str) -> None: ...
+
+        @deprecated("Removes a declared prop. Build a new instance instead.")
+        def __delattr__(self, key: str) -> None: ...
+
+        @deprecated("Removes a declared prop. Use `get` if you only need to read it.")
+        def pop(self, *args: Any, **kwargs: Any) -> Any: ...
+
+        @deprecated("Removes a declared prop. Build a new instance instead.")
+        def popitem(self) -> tuple[str, Any]: ...
+
+        @deprecated("Drops props declared without a default. Build a new instance instead.")
+        def clear(self) -> None: ...
