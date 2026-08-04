@@ -20,8 +20,6 @@ def run_command(cmd: list[str], on_success: OnSuccess, on_error: OnError, *, cwd
     try:
         proc = launcher.spawnv(cmd)
     except GLib.Error as error:
-        # Report synchronously, not via GLib.idle_add: idle_add posts to the global default
-        # context, which _run_gio_blocking's private thread-default loop never iterates -> hangs.
         on_error(error)
         return
 

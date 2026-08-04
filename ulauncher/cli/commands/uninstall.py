@@ -1,8 +1,7 @@
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_record, get_ext_registry
+from ulauncher.cli.commands import get_ext_record, get_ext_registry, run_blocking
 from ulauncher.utils.dbus import dbus_trigger_event
 
 logger = logging.getLogger(__name__)
@@ -13,8 +12,9 @@ def run(args: CLIArguments) -> int:
         if not record.is_manageable:
             logger.error("Extension %s is externally managed and can not be uninstalled (%s)", record.id, record.path)
             return 1
+        registry = get_ext_registry()
         try:
-            asyncio.run(get_ext_registry().uninstall(record))
+            run_blocking(lambda done, fail: registry.uninstall(record, lambda: done(None), fail))
         except OSError:
             logger.error("Could not uninstall %s", record.id)  # noqa: TRY400 - traceback is noise here
             return 1

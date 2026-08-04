@@ -66,8 +66,8 @@ def test_run_command_spawn_failure() -> None:
 
 
 def test_run_command_spawn_failure_does_not_hang_private_loop() -> None:
-    """A spawn error must reach a caller driving run_command under a private thread-default loop,
-    as _run_gio_blocking does; GLib.idle_add would post to the default context it never iterates."""
+    """A spawn error must reach a caller driving run_command under a private thread-default loop.
+    GLib.idle_add would post to the default context, which such a loop never iterates."""
     context = GLib.MainContext.new()
     context.push_thread_default()
     box: dict[str, Any] = {}

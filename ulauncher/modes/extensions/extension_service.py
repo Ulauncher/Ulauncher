@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import sys
 from collections import defaultdict
 from pathlib import Path
-from threading import Thread
 from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol
 
 from ulauncher import cli, paths
@@ -49,6 +47,7 @@ class ExtensionService(ExtensionRegistry):
     """
 
     runtimes: dict[str, ExtensionRuntime]
+    stopping: set[str]
     stopped_listeners: dict[str, list[Callable[[], None]]]
     listener: ExtensionServiceListener | None
     _preview_log: tuple[str, logging.Handler] | None
@@ -56,6 +55,7 @@ class ExtensionService(ExtensionRegistry):
     def __init__(self) -> None:
         super().__init__(lifecycle=self)
         self.runtimes = {}
+        self.stopping = set()
         self.stopped_listeners = defaultdict(list)
         self.listener = None
         self._preview_log = None
@@ -85,34 +85,42 @@ class ExtensionService(ExtensionRegistry):
             if ext := self.get(ext_id):
                 records.append(ext)  # noqa: PERF401
 
-        # run the reload in a separate thread to avoid blocking the main thread
-        async def run_batch_async() -> None:
-            for job in jobs:
-                if job == "start":
-                    for record in records:
-                        if record.is_enabled:
-                            self.start_extension(record)
-                elif job == "stop":
-                    await asyncio.gather(*[self.stop_extension(record) for record in records])
-
-        def run_batch() -> None:
-            try:
-                asyncio.run(run_batch_async())
-            finally:
-                # callback must run unconditionally (owns the follow-up work)
+        def run_job(index: int) -> None:
+            if index == len(jobs):
                 if callback:
                     callback()
+                return
+            if jobs[index] == "start":
+                for record in records:
+                    if record.is_enabled:
+                        self.start_extension(record)
+                run_job(index + 1)
+                return
 
-        Thread(target=run_batch).start()
+            pending = len(records)
+            if not pending:
+                run_job(index + 1)
+                return
+
+            def one_stopped() -> None:
+                nonlocal pending
+                pending -= 1
+                if not pending:
+                    run_job(index + 1)
+
+            for record in records:
+                self.stop_extension(record, one_stopped)
+
+        run_job(0)
 
     def is_running(self, record: ExtensionRecord) -> bool:
         return record.id in self.runtimes
 
-    async def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
+    def toggle_enabled(self, record: ExtensionRecord, enabled: bool) -> bool:
         record.state.save(is_enabled=enabled, error_type="", error_message="")
         if enabled:
             return self.start_extension(record)
-        await self.stop_extension(record)
+        self.stop_extension(record)
         return False
 
     def _build_launch_args(self, record: ExtensionRecord) -> tuple[list[str], dict[str, str]]:
@@ -156,14 +164,7 @@ class ExtensionService(ExtensionRegistry):
             return True  # if already started, count as successful
 
         def exit_handler(cause: str, error_msg: str) -> None:
-            listeners = self.stopped_listeners.get(record.id, [])
-            for stop_listener in listeners:
-                stop_listener()
-
-            listeners.clear()
-
-            if listener := self.listener:
-                listener.invalidate_cache()
+            self.stopping.discard(record.id)
 
             if cause != "Stopped":
                 logger.error('Extension "%s" exited with an error: %s (%s)', record.id, error_msg, cause)
@@ -178,6 +179,15 @@ class ExtensionService(ExtensionRegistry):
                 # Nothing asked the preview to stop, but it is over, so it still needs the teardown
                 if self.preview is record:
                     self.stop_preview()
+
+            if listener := self.listener:
+                listener.invalidate_cache()
+
+            # Drain last, and pop the list first: a listener may start a new runtime for this id
+            # (which the error path above must not clobber) or queue a new stop (which must wait
+            # for the next exit, not fire in this drain).
+            for stop_listener in self.stopped_listeners.pop(record.id, []):
+                stop_listener()
 
         def message_handler(message: ipc.ExtensionMessage) -> None:
             if listener := self.listener:
@@ -212,33 +222,21 @@ class ExtensionService(ExtensionRegistry):
             listener.started(record.id)
         return self.is_running(record)
 
-    async def stop_extension(self, record: ExtensionRecord) -> None:
-        """Stops the extension process if it is running."""
-        if runtime := self.runtimes.pop(record.id, None):
-            loop = asyncio.get_running_loop()
-            stopped_future: asyncio.Future[None] = loop.create_future()
-
-            def resolve() -> None:
-                if not stopped_future.done():
-                    stopped_future.set_result(None)
-
-            # The listener fires on the GTK main thread. A plain set_result there would not wake
-            # this loop, making every stop take the full timeout below.
-            def on_stopped() -> None:
-                if not loop.is_closed():
-                    loop.call_soon_threadsafe(resolve)
-
-            listeners = self.stopped_listeners[record.id]
-            listeners.append(on_stopped)
+    def stop_extension(self, record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None:
+        """Stop the extension process if it is running. Does not block: on_stopped fires once the
+        process has actually exited, or immediately if it is not running."""
+        ext_id = record.id
+        if runtime := self.runtimes.pop(ext_id, None):
+            self.stopping.add(ext_id)
+            if on_stopped:
+                self.stopped_listeners[ext_id].append(on_stopped)
             runtime.stop()
-
-            try:
-                await asyncio.wait_for(stopped_future, timeout=5.0)
-            except asyncio.TimeoutError:
-                logger.warning('Timed out waiting for extension "%s" to exit', record.id)
-            finally:
-                if on_stopped in listeners:
-                    listeners.remove(on_stopped)
+        elif ext_id in self.stopping:
+            # a stop is already in flight; report on the same exit
+            if on_stopped:
+                self.stopped_listeners[ext_id].append(on_stopped)
+        elif on_stopped:
+            on_stopped()
 
     def send_message(self, record: ExtensionRecord, message: ipc.Event, request_id: int | None = None) -> None:
         """
