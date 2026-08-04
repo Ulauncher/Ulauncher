@@ -518,7 +518,7 @@ class ExtensionsView(BaseView):
         if error := ext.get_error():
             error_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin=10)
             # Create appropriate error message based on type
-            message_text = ext_utils.get_error_message(error, ext.state.url)
+            message_text = ext_utils.get_error_message(error, ext.state.browser_url)
 
             # Create warning-style container
             warning_frame = styled(Gtk.Box(), "ext-error-box")
