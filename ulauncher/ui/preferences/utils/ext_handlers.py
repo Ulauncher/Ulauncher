@@ -208,15 +208,19 @@ class ExtensionHandlers:
 
         def update_async() -> None:
             try:
-                asyncio.run(ext_service.update(ext))
+                updated = asyncio.run(ext_service.update(ext))
 
                 def update_ui() -> None:
                     callback()
                     progress_dialog.destroy()
-                    # Show success message
-                    self.dialog_launcher.show(
-                        "Extension updated successfully", f"{ext.manifest.name} has been updated."
-                    )
+                    if updated:
+                        self.dialog_launcher.show(
+                            "Extension updated successfully", f"{ext.manifest.name} has been updated."
+                        )
+                    else:
+                        self.dialog_launcher.show(
+                            f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                        )
 
                 run_when_idle(update_ui)
 
