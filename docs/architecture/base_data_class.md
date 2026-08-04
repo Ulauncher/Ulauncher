@@ -43,9 +43,51 @@ unannotated field still works, but type checkers reject passing it.
 `JsonConf` declares its own `__init__` to opt out, since it holds arbitrary keys.
 Its subclasses get the checked signature again.
 
+## Declared props can't be dropped
+
+A prop declared without a default is required by the generated `__init__`, so
+removing it later leaves the instance contradicting its own type. The dict
+methods that can do that are marked deprecated for type checkers:
+
+```python
+data.pop("name")   # error
+data.popitem()     # error
+data.clear()       # error
+del data["name"]   # error
+```
+
+None of this is enforced at runtime.
+
+`JsonConf` re-declares `clear` to opt back in. File data is partial, so every
+prop of a file-backed class needs a default, which is exactly what `clear`
+restores.
+
+### Gaps
+
+Writes are not covered, only removals:
+
+```python
+del data.name              # not reported
+data["count"] = "5"        # not reported
+data.update({"count": 5})  # not reported
+```
+
+No type checker routes the `del` statement through `__delattr__`, so the marker
+on it never fires.
+
+The other two would need per-key value types, which nothing outside `TypedDict`
+synthesizes. A class can be parametrised by a hand-written companion `TypedDict`
+to get them checked, but that means declaring every prop twice, in two places
+that drift apart. Attribute access stays fully checked either way, so prefer
+`data.count = 5` over the dict API when the key is known.
+
+The `# error` labels above are what pyrefly reports. Other checkers may be weaker
+(as of writing this, this includes ty and Pyright).
+
 ## Key Features
 
-- **Inherits from dict** - Works with all dict methods (`get()`, `items()`, etc.)
+- **Inherits from dict** - All the read methods work (`get()`, `items()`, etc.).
+  The ones that drop props are rejected, see above.
 - **Deep-copied defaults** - Mutable defaults (lists, dicts) are copied per instance
 - **Keyword arguments only** - Type checkers require keywords for annotated fields
 - **Runtime properties** - New properties can be added after instantiation
