@@ -6,53 +6,18 @@ from shutil import move, rmtree
 from typing import Any, Callable, Iterator, Protocol
 
 from ulauncher import paths
-from ulauncher.gi import GLib
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
+from ulauncher.utils.subprocess_utils import OnError
 
 logger = logging.getLogger(__name__)
 
-
-def _run_gio_blocking(start: Callable[[Callable[[Any], None], Callable[[Exception], None]], None]) -> Any:
-    """Drive a callback-based Gio operation to completion synchronously on the calling thread.
-
-    Temporary bridge for step one of the asyncio/threading removal: extension_remote is now
-    callback-based, but the registry's install/update flows are still async and run in worker
-    threads (ext_handlers) or the CLI's asyncio loop. Gio.Subprocess callbacks dispatch on a GLib
-    main context, not the asyncio loop, and no GLib loop runs in those threads, so a plain
-    asyncio.Future shim would never resolve. Running a private GLib main loop (pushed as the
-    thread-default context) drives the operation to completion. Remove this when the registry
-    becomes callback-native.
-    """
-    context = GLib.MainContext.new()
-    context.push_thread_default()
-    box: dict[str, Any] = {}
-    completed = False
-    try:
-        loop = GLib.MainLoop.new(context, False)
-
-        def finish(result: Any = None, error: Exception | None = None) -> None:
-            nonlocal completed
-            box["result"], box["error"] = result, error
-            completed = True
-            loop.quit()
-
-        start(finish, lambda error: finish(error=error))
-        # done() can fire synchronously during start() (e.g. an immediate validation failure
-        # that calls back without spawning a subprocess). Then loop.quit() already ran before
-        # loop.run(), which GLib does not treat as a pending quit, so running the loop would
-        # block forever. Only enter the loop while the callback is still pending.
-        if not completed:
-            loop.run()
-    finally:
-        # Always restore the thread-default context, even if start() raises synchronously
-        # (a synchronous raise propagates to the caller, matching the pre-conversion behavior).
-        context.pop_thread_default()
-    if box.get("error"):
-        raise box["error"]
-    return box.get("result")
+InstallSuccess = Callable[[ExtensionRecord], None]
+UpdateSuccess = Callable[[bool], None]
+CheckUpdateSuccess = Callable[[bool, str], None]
+Done = Callable[[], None]
 
 
 def _swap_dir(new_dir: str, target: str) -> bool:
@@ -94,7 +59,7 @@ class ExtensionLifecycle(Protocol):
 
     def start_extension(self, record: ExtensionRecord) -> bool: ...
 
-    async def stop_extension(self, record: ExtensionRecord) -> None: ...
+    def stop_extension(self, record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None: ...
 
 
 class _NoLifecycle:
@@ -104,7 +69,9 @@ class _NoLifecycle:
     def start_extension(self, _record: ExtensionRecord) -> bool:
         return False
 
-    async def stop_extension(self, _record: ExtensionRecord) -> None: ...
+    def stop_extension(self, _record: ExtensionRecord, on_stopped: Callable[[], None] | None = None) -> None:
+        if on_stopped:
+            on_stopped()
 
 
 class ExtensionRegistry:
@@ -114,6 +81,10 @@ class ExtensionRegistry:
     Instantiated exactly once per runtime. The CLI creates a plain instance. The app instead uses
     ExtensionService, a subclass that also resolves the previewed extension from its dev path and
     owns the running extension processes.
+
+    The remote operations report back through callbacks (Gio dispatches them on the caller's
+    thread-default GLib main context). Errors go to on_error, including ones detected
+    synchronously, so callers have a single error path.
     """
 
     # Previews only exist in the app process; ExtensionService sets this (see preview_ext).
@@ -154,69 +125,105 @@ class ExtensionRegistry:
 
         yield from sorted(records.values(), key=sort_key)
 
-    async def install(self, url: str, commit_hash: str | None = None) -> ExtensionRecord:
+    def install(self, url: str, on_success: InstallSuccess, on_error: OnError, commit_hash: str | None = None) -> None:
         logger.info("Installing extension: %s", url)
-        remote = ExtensionRemote(url)
-        if Path(remote.target_dir).exists():  # noqa: ASYNC240
+        try:
+            remote = ExtensionRemote(url)
+        except ext_exceptions.UrlError as error:
+            on_error(error)
+            return
+        if Path(remote.target_dir).exists():
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
         record = ExtensionRecord(remote.ext_id, remote.target_dir)
-        await self._install_from_remote(record, remote, commit_hash, url=url)
-        logger.info("Extension %s installed successfully", record.id)
-        return record
 
-    async def uninstall(self, record: ExtensionRecord) -> None:
+        def done() -> None:
+            logger.info("Extension %s installed successfully", record.id)
+            on_success(record)
+
+        self._install_from_remote(record, remote, commit_hash, done, on_error, url=url)
+
+    def uninstall(self, record: ExtensionRecord, on_done: Done, on_error: OnError) -> None:
+        def remove_files() -> None:
+            try:
+                removed = record.remove()
+            except OSError as error:
+                on_error(error)
+                return
+            if removed:
+                # A still-locatable extension after removal is a non-manageable copy (e.g. distro-packaged).
+                # Disable it rather than let it silently take over the removed extension's id.
+                fallback_path = extension_finder.locate(record.id)
+                if fallback_path:
+                    fallback_record = ExtensionRecord(record.id, fallback_path)
+                    # TODO: Try to avoid accessing state attribute
+                    fallback_record.state.save(is_enabled=False)
+                    logger.info(
+                        "Non-manageable extension with the same id exists in '%s'. It was kept disabled.",
+                        fallback_path,
+                    )
+            on_done()
+
         if record.is_manageable:
-            await self._lifecycle.stop_extension(record)
-        if not record.remove():
-            return
-        # A still-locatable extension after removal is a non-manageable copy (e.g. distro-packaged).
-        # Disable it rather than let it silently take over the removed extension's id.
-        fallback_path = extension_finder.locate(record.id)
-        if fallback_path:
-            fallback_record = ExtensionRecord(record.id, fallback_path)
-            # TODO: Try to avoid accessing state attribute
-            fallback_record.state.save(is_enabled=False)
+            self._lifecycle.stop_extension(record, remove_files)
+        else:
+            remove_files()
+
+    def update(self, record: ExtensionRecord, on_success: UpdateSuccess, on_error: OnError) -> None:
+        """Reports True to on_success if the extension was updated, False if it was already up-to-date."""
+        logger.debug("Checking for updates to %s", record.id)
+
+        def on_checked(has_update: bool, commit_hash: str) -> None:
+            if not has_update:
+                logger.info('Extension "%s" is already on the latest version', record.id)
+                on_success(False)
+                return
+
             logger.info(
-                "Non-manageable extension with the same id exists in '%s'. It was kept disabled.",
-                fallback_path,
+                'Updating extension "%s" from commit %s to %s',
+                record.id,
+                record.state.commit_hash[:8],
+                commit_hash[:8],
             )
 
-    async def update(self, record: ExtensionRecord) -> bool:
-        """
-        :returns: False if already up-to-date, True if was updated
-        """
-        logger.debug("Checking for updates to %s", record.id)
-        has_update, commit_hash = await self.check_update(record)
-        if not has_update:
-            logger.info('Extension "%s" is already on the latest version', record.id)
-            return False
+            def done() -> None:
+                logger.info("Successfully updated extension: %s", record.id)
+                on_success(True)
 
-        logger.info(
-            'Updating extension "%s" from commit %s to %s',
-            record.id,
-            record.state.commit_hash[:8],
-            commit_hash[:8],
-        )
+            def fail(error: Exception) -> None:
+                logger.error("Could not update extension '%s'", record.id, exc_info=error)
+                on_error(error)
 
+            try:
+                remote = ExtensionRemote(record.state.url)
+            except ext_exceptions.UrlError as error:
+                fail(error)
+                return
+            self._install_from_remote(record, remote, commit_hash, done, fail)
+
+        self.check_update(record, on_checked, on_error)
+
+    def check_update(self, record: ExtensionRecord, on_success: CheckUpdateSuccess, on_error: OnError) -> None:
+        """Reports whether a new compatible version exists, and its commit hash."""
         try:
-            await self._install_from_remote(record, ExtensionRemote(record.state.url), commit_hash)
-        except (ext_exceptions.ExtensionError, OSError):
-            logger.exception("Could not update extension '%s'", record.id)
-            raise
-        logger.info("Successfully updated extension: %s", record.id)
-        return True
+            remote = ExtensionRemote(record.state.url)
+        except ext_exceptions.UrlError as error:
+            on_error(error)
+            return
 
-    async def check_update(self, record: ExtensionRecord) -> tuple[bool, str]:
-        """
-        Returns tuple with commit info about a new version
-        """
-        commit_hash = _run_gio_blocking(ExtensionRemote(record.state.url).get_compatible_hash)
-        has_update = record.state.commit_hash != commit_hash
-        return has_update, commit_hash
+        def on_hash(commit_hash: str) -> None:
+            on_success(record.state.commit_hash != commit_hash, commit_hash)
 
-    async def _install_from_remote(
-        self, record: ExtensionRecord, remote: ExtensionRemote, commit_hash: str | None, **extra_state: Any
+        remote.get_compatible_hash(on_hash, on_error)
+
+    def _install_from_remote(
+        self,
+        record: ExtensionRecord,
+        remote: ExtensionRemote,
+        commit_hash: str | None,
+        on_done: Done,
+        on_error: OnError,
+        **extra_state: Any,
     ) -> None:
         """Install (atomically): download, stop, swap and restart (if previously running).
 
@@ -227,31 +234,51 @@ class ExtensionRegistry:
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
         staging_dir = str(Path(paths.EXTENSIONS_STAGING) / record.id)
         rmtree(staging_dir, ignore_errors=True)
-        Path(staging_dir).mkdir(parents=True)  # noqa: ASYNC240
-        remote.target_dir = staging_dir
-        was_running = False
-
-        def _should_restart() -> bool:
-            # a preview extension need not and should not be restarted (runs from dev path)
-            is_previewed = self.preview is not None and self.preview.id == record.id
-            return was_running and not is_previewed
-
         try:
-            downloaded_hash, commit_timestamp = _run_gio_blocking(
-                lambda on_success, on_error: remote.download(on_success, on_error, commit_hash)
-            )
-            _run_gio_blocking(ExtensionDependencies(remote.ext_id, staging_dir).install)
+            Path(staging_dir).mkdir(parents=True)
+        except OSError as error:
+            on_error(error)
+            return
+        remote.target_dir = staging_dir
 
-            was_running = self._lifecycle.is_running(record)
-            if _should_restart():
-                await self._lifecycle.stop_extension(record)
-            if not _swap_dir(staging_dir, target_path):
-                msg = f"Failed to swap the staged extension into {target_path}"
-                raise OSError(msg)
-            record.save_installed_state(
-                downloaded_hash, commit_timestamp, **extra_state, browser_url=remote.browser_url or ""
-            )
-        finally:
+        def fail(error: Exception) -> None:
             rmtree(staging_dir, ignore_errors=True)
-            if _should_restart():
-                self._lifecycle.start_extension(record)
+            on_error(error)
+
+        def on_downloaded(download_result: tuple[str, float]) -> None:
+            downloaded_hash, commit_timestamp = download_result
+
+            def on_deps_installed(_stdout: str) -> None:
+                # a preview extension need not and should not be restarted (runs from dev path)
+                is_previewed = self.preview is not None and self.preview.id == record.id
+                should_restart = self._lifecycle.is_running(record) and not is_previewed
+
+                def swap_and_finish() -> None:
+                    error: Exception | None = None
+                    if _swap_dir(staging_dir, target_path):
+                        try:
+                            record.save_installed_state(
+                                downloaded_hash, commit_timestamp, **extra_state, browser_url=remote.browser_url or ""
+                            )
+                        # Reloading the manifest can reject the swapped-in files. This runs in a
+                        # Gio callback, so an escape would report neither done nor error.
+                        except (OSError, ext_exceptions.ExtensionError) as save_error:
+                            error = save_error
+                    else:
+                        error = OSError(f"Failed to swap the staged extension into {target_path}")
+                    rmtree(staging_dir, ignore_errors=True)
+                    if should_restart:
+                        self._lifecycle.start_extension(record)
+                    if error:
+                        on_error(error)
+                    else:
+                        on_done()
+
+                if should_restart:
+                    self._lifecycle.stop_extension(record, swap_and_finish)
+                else:
+                    swap_and_finish()
+
+            ExtensionDependencies(remote.ext_id, staging_dir).install(on_deps_installed, fail)
+
+        remote.download(on_downloaded, fail, commit_hash)

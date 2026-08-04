@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_record, get_ext_registry
+from ulauncher.cli.commands import get_ext_record, get_ext_registry, run_blocking
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.utils.dbus import dbus_trigger_event
@@ -24,17 +23,20 @@ def _log_url_error(ext_id: str, url: str, *, fatal: bool) -> None:
         log("Could not upgrade %s: invalid URL '%s'", ext_id, url)
 
 
-async def _upgrade_all_extensions() -> list[str]:
-    updated_extensions: list[str] = []
+def _update_blocking(record: ExtensionRecord) -> bool:
     registry = get_ext_registry()
+    return run_blocking(lambda done, fail: registry.update(record, done, fail))
 
-    for record in registry.iterate():
+
+def _upgrade_all_extensions() -> list[str]:
+    updated_extensions: list[str] = []
+
+    for record in get_ext_registry().iterate():
         if not record.is_manageable or not record.state.url:
             continue
 
         try:
-            updated = await registry.update(record)
-            if updated:
+            if _update_blocking(record):
                 updated_extensions.append(record.id)
         except ext_exceptions.UrlError:
             _log_url_error(record.id, record.state.url, fatal=False)
@@ -52,7 +54,7 @@ def upgrade_one(record: ExtensionRecord) -> bool:
         logger.error("Extension %s is externally managed and can not be upgraded (%s)", record.id, record.path)
         return False
     try:
-        updated = asyncio.run(get_ext_registry().update(record))
+        updated = _update_blocking(record)
     except ext_exceptions.UrlError:
         _log_url_error(record.id, record.state.url, fatal=True)
         return False
@@ -74,7 +76,7 @@ def run(args: CLIArguments) -> int:
         logger.error("Error: Argument '%s' does not match any installed extension", args.input)
         return 1
 
-    updated_extensions = asyncio.run(_upgrade_all_extensions())
+    updated_extensions = _upgrade_all_extensions()
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
 

@@ -308,7 +308,8 @@ class ExtensionRemote(UrlParseResult):
         # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
         # RemoteError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
         # This must not let a raw OSError escape: it runs inside a Gio callback, where an uncaught
-        # exception would be swallowed and hang _run_gio_blocking instead of reaching the caller.
+        # exception would be swallowed and hang a blocking caller (see cli.commands.run_blocking)
+        # instead of reaching it.
         try:
             with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
                 untar(tar_path, tmp_root_dir)

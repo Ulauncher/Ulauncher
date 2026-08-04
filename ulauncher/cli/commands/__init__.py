@@ -2,13 +2,51 @@ from __future__ import annotations
 
 import contextlib
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, TypeVar
 
 from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_record import ExtensionRecord
     from ulauncher.modes.extensions.extension_registry import ExtensionRegistry
+    from ulauncher.utils.subprocess_utils import OnError
+
+T = TypeVar("T")
+
+
+def run_blocking(start: Callable[[Callable[[T], None], OnError], None]) -> T:
+    """Run a main loop until start's operation reports back, then return its value or raise its error."""
+    from ulauncher.gi import GLib
+
+    loop = GLib.MainLoop()
+    result: list[T] = []
+    error: Exception | None = None
+    completed = False
+
+    def on_success(value: T) -> None:
+        nonlocal completed
+        if completed:
+            return
+        result.append(value)
+        completed = True
+        loop.quit()
+
+    def on_error(err: Exception) -> None:
+        nonlocal error, completed
+        if completed:
+            return
+        error = err
+        completed = True
+        loop.quit()
+
+    start(on_success, on_error)
+    # start() can report back before the loop runs, and GLib does not treat that quit() as
+    # pending, so entering the loop afterwards would hang.
+    if not completed:
+        loop.run()
+    if error:
+        raise error
+    return result[0]
 
 
 @lru_cache

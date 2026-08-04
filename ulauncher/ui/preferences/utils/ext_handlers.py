@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import asyncio
 import logging
-import threading
 from typing import Callable
 
 from gi.repository import Gtk
@@ -12,13 +10,16 @@ from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.modes.extensions.extension_service import ext_service
 from ulauncher.ui.preferences.views import DialogLauncher, get_window_for_widget, styled
-from ulauncher.utils.scheduling import run_when_idle
 
 logger = logging.getLogger(__name__)
 
 
 class ExtensionHandlers:
-    """Handles extension operations like install, remove, toggle, update, etc."""
+    """Handles extension operations like install, remove, toggle, update, etc.
+
+    The service operations report back through callbacks on the GLib main loop, so the
+    handlers update the dialogs directly in them. The main loop stays free during the
+    network work (it runs in Gio subprocesses), which keeps the progress dialogs spinning."""
 
     def __init__(self, widget: Gtk.Widget) -> None:
         self.widget = widget
@@ -97,46 +98,20 @@ class ExtensionHandlers:
         )
         progress_dialog.show()
 
-        def install_async() -> None:
-            try:
-                ext = asyncio.run(ext_service.install(url))
-                ext_service.start_extension(ext)
+        def on_installed(ext: ExtensionRecord) -> None:
+            ext_service.start_extension(ext)
+            progress_dialog.destroy()
+            callback(ext)
 
-                # Update UI in main thread
-                def update_ui() -> None:
-                    progress_dialog.destroy()
-                    callback(ext)
+        def on_error(error: Exception) -> None:
+            progress_dialog.destroy()
+            self._show_extension_operation_error(error, url, "install")
 
-                run_when_idle(update_ui)
-
-            except (ext_exceptions.ExtensionError, ValueError, OSError, asyncio.CancelledError) as error:
-
-                def show_error(error: BaseException) -> None:
-                    progress_dialog.destroy()
-                    self._show_extension_operation_error(error, url, "install")
-
-                run_when_idle(show_error, error)
-
-        # Run installation in background thread
-        thread = threading.Thread(target=install_async)
-        thread.daemon = True
-        thread.start()
+        ext_service.install(url, on_installed, on_error)
 
     def toggle_extension(self, state: bool, ext: ExtensionRecord) -> None:
         """Handle extension enable/disable toggle"""
-
-        def toggle_async() -> None:
-            try:
-                asyncio.run(ext_service.toggle_enabled(ext, state))
-
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
-                failed_action = "enable" if state else "disable"
-                error_msg = f"Failed to {failed_action} extension"
-                run_when_idle(self.dialog_launcher.show_error, error_msg, "Toggle operation failed")
-
-        thread = threading.Thread(target=toggle_async)
-        thread.daemon = True
-        thread.start()
+        ext_service.toggle_enabled(ext, state)
 
     def remove_extension(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Handle extension removal"""
@@ -150,53 +125,33 @@ class ExtensionHandlers:
             )
             progress_dialog.show()
 
-            def remove_async() -> None:
-                try:
-                    asyncio.run(ext_service.uninstall(ext))
+            def on_removed() -> None:
+                progress_dialog.destroy()
+                callback()
 
-                    def update_ui() -> None:
-                        progress_dialog.destroy()
-                        callback()
+            def on_error(error: Exception) -> None:
+                progress_dialog.destroy()
+                self._show_extension_operation_error(error, ext.state.url, "remove")
 
-                    run_when_idle(update_ui)
-
-                except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as error:
-
-                    def show_error(error: BaseException) -> None:
-                        progress_dialog.destroy()
-                        self._show_extension_operation_error(error, ext.state.url, "remove")
-
-                    run_when_idle(show_error, error)
-
-            thread = threading.Thread(target=remove_async)
-            thread.daemon = True
-            thread.start()
+            ext_service.uninstall(ext, on_removed, on_error)
 
     def check_updates(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Handle checking for extension updates"""
 
-        def check_async() -> None:
-            try:
-                has_update, commit_hash = asyncio.run(ext_service.check_update(ext))
-
-                def update_ui() -> None:
-                    if has_update:
-                        self._show_update_dialog(ext, commit_hash, callback)
-                    else:
-                        callback()
-                        self.dialog_launcher.show(
-                            f"No updates available for {ext.manifest.name}", "The extension is up to date."
-                        )
-
-                run_when_idle(update_ui)
-
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
+        def on_checked(has_update: bool, commit_hash: str) -> None:
+            if has_update:
+                self._show_update_dialog(ext, commit_hash, callback)
+            else:
                 callback()
-                run_when_idle(self.dialog_launcher.show_error, "Failed to check for updates", f"Error: {e!s}")
+                self.dialog_launcher.show(
+                    f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                )
 
-        thread = threading.Thread(target=check_async)
-        thread.daemon = True
-        thread.start()
+        def on_error(error: Exception) -> None:
+            callback()
+            self.dialog_launcher.show_error("Failed to check for updates", f"Error: {error!s}")
+
+        ext_service.check_update(ext, on_checked, on_error)
 
     def update_extension(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Update the extension"""
@@ -206,37 +161,22 @@ class ExtensionHandlers:
         )
         progress_dialog.show()
 
-        def update_async() -> None:
-            try:
-                updated = asyncio.run(ext_service.update(ext))
+        def on_updated(updated: bool) -> None:
+            callback()
+            progress_dialog.destroy()
+            if updated:
+                self.dialog_launcher.show("Extension updated successfully", f"{ext.manifest.name} has been updated.")
+            else:
+                self.dialog_launcher.show(
+                    f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                )
 
-                def update_ui() -> None:
-                    callback()
-                    progress_dialog.destroy()
-                    if updated:
-                        self.dialog_launcher.show(
-                            "Extension updated successfully", f"{ext.manifest.name} has been updated."
-                        )
-                    else:
-                        self.dialog_launcher.show(
-                            f"No updates available for {ext.manifest.name}", "The extension is up to date."
-                        )
+        def on_error(error: Exception) -> None:
+            callback()
+            progress_dialog.destroy()
+            self._show_extension_operation_error(error, ext.state.url, "update")
 
-                run_when_idle(update_ui)
-
-            except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as e:
-                callback()
-
-                def show_error(error: BaseException) -> None:
-                    url = ext.state.url
-                    progress_dialog.destroy()
-                    self._show_extension_operation_error(error, url, "update")
-
-                run_when_idle(show_error, e)
-
-        thread = threading.Thread(target=update_async)
-        thread.daemon = True
-        thread.start()
+        ext_service.update(ext, on_updated, on_error)
 
     def _show_update_dialog(self, ext: ExtensionRecord, commit_hash: str, callback: Callable[[], None]) -> None:
         """Show dialog when update is available"""
