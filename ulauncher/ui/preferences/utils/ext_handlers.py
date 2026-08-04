@@ -160,13 +160,13 @@ class ExtensionHandlers:
 
                     run_when_idle(update_ui)
 
-                except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError):
+                except (ext_exceptions.ExtensionError, OSError, asyncio.CancelledError) as error:
 
-                    def show_error() -> None:
+                    def show_error(error: BaseException) -> None:
                         progress_dialog.destroy()
-                        self.dialog_launcher.show_error("Failed to remove extension", "Remove operation failed")
+                        self._show_extension_operation_error(error, ext.state.url, "remove")
 
-                    run_when_idle(show_error)
+                    run_when_idle(show_error, error)
 
             thread = threading.Thread(target=remove_async)
             thread.daemon = True
