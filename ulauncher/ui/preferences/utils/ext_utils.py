@@ -42,7 +42,20 @@ def get_status_str(ext: ExtensionRecord) -> ExtStatus:
     return "on"
 
 
-def get_error_message(error: ExtensionErrorData, browser_url: str) -> str:
+def _anchor(text: str, url: str) -> str:
+    escaped = html.escape(url)
+    return f'{text}: <a href="{escaped}">{escaped}</a>'
+
+
+def _report_link(website_url: str, issues_url: str) -> str:
+    if issues_url:
+        return _anchor("report the issue", issues_url)
+    if website_url:
+        return _anchor("report this to the author via their repository", website_url)
+    return ""
+
+
+def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: str) -> str:
     """Generate appropriate error message based on error type"""
     error_message = error.message or ""
 
@@ -65,8 +78,8 @@ def get_error_message(error: ExtensionErrorData, browser_url: str) -> str:
             "The extension crashed. Ensure that you read and followed the instructions on the "
             "extension repository page, and check the error log and report the error otherwise."
         )
-        if browser_url:
-            message += f'\n\n<small>Repository: <a href="{browser_url}">{browser_url}</a></small>'
+        if report_link := _report_link(website_url, issues_url):
+            message += f"\n\n<small>You can {report_link}</small>"
         return message
 
     if error.type == "MissingInternals":
@@ -85,15 +98,11 @@ def get_error_message(error: ExtensionErrorData, browser_url: str) -> str:
             f"{fmt_pango_code_block(f'pip3 install {module_name} --user')}\n\n"
             f"Then restart Ulauncher."
         )
-        if browser_url:
-            message += (
-                f"\n\n<small>If that doesn't help, report this to the author via their repository: "
-                f'<a href="{browser_url}">{browser_url}</a></small>'
-            )
+        if report_link := _report_link(website_url, issues_url):
+            message += f"\n\n<small>If that doesn't help, {report_link}</small>"
         return message
 
     message = error_message or f"Unknown error type: {error.type}"
-    if browser_url:
-        message += "\n\n<small>You can report this to the author via their repository: "
-        message += f'<a href="{browser_url}">{browser_url}</a></small>'
+    if report_link := _report_link(website_url, issues_url):
+        message += f"\n\n<small>You can {report_link}</small>"
     return message

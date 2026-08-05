@@ -84,7 +84,7 @@ class ExtensionsView(BaseView):
 
         for ext in ext_service.iterate(sort=True):
             extension_cache[ext.id] = (
-                ext.manifest.name,
+                ext.display_manifest.name,
                 ext_utils.get_status_str(ext),
                 ext.get_icon_value(),
             )
@@ -231,15 +231,15 @@ class ExtensionsView(BaseView):
     def _create_name_toggle_column(self, ext: ExtensionRecord) -> tuple[Gtk.Box, Gtk.Box | None]:
         """Create the name column content"""
         name_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        name_label = styled(Gtk.Label(label=ext.manifest.name, halign=Gtk.Align.START), "title")
+        name_label = styled(Gtk.Label(label=ext.display_manifest.name, halign=Gtk.Align.START), "title")
         name_box.pack_start(name_label, False, False, 0)
 
         # Create a vertical box for authors and updated date
         secondary_info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0, valign=Gtk.Align.END)
 
-        if ext.manifest.authors:
+        if ext.display_manifest.authors:
             authors_label = styled(
-                Gtk.Label(label=f"by {ext.manifest.authors}", halign=Gtk.Align.START), "caption", "dim-label"
+                Gtk.Label(label=f"by {ext.display_manifest.authors}", halign=Gtk.Align.START), "caption", "dim-label"
             )
             secondary_info_box.pack_start(authors_label, False, False, 0)
 
@@ -264,15 +264,21 @@ class ExtensionsView(BaseView):
         parts: list[Gtk.Widget] = []
 
         # Repository URL (if available)
-        if ext.state.browser_url and ext.state.browser_url.startswith("http"):
-            display_url = ext.state.browser_url.replace("https://", "").replace("http://", "")
-            repo_link = Gtk.LinkButton.new_with_label(ext.state.browser_url, display_url)
+        if website_url := ext.website_url:
+            display_url = website_url.replace("https://", "").replace("http://", "")
+            repo_link = Gtk.LinkButton.new_with_label(website_url, display_url)
             repo_link.set_halign(Gtk.Align.CENTER)
             # Enable ellipsis on the internal label to handle long URLs
             label = repo_link.get_child()
             if isinstance(label, Gtk.Label):
                 label.set_ellipsize(Pango.EllipsizeMode.END)
             parts.append(repo_link)
+
+        # Labelled rather than spelled out, so it doesn't crowd the repository URL
+        if issues_url := ext.issues_url:
+            issues_link = Gtk.LinkButton.new_with_label(issues_url, "issue tracker")
+            issues_link.set_halign(Gtk.Align.CENTER)
+            parts.append(issues_link)
 
         # Installation status
         status_text = "user installed" if ext.is_manageable else "externally managed"
@@ -322,7 +328,7 @@ class ExtensionsView(BaseView):
         button_box.pack_start(self.save_button, False, False, 0)
 
         # Check Updates button
-        if ext.is_manageable and ext.state.url:
+        if ext.is_manageable and ext.update_url:
             update_button = Gtk.Button(label="Check Updates")
             update_button.connect("clicked", self._on_check_updates, ext)
             button_box.pack_start(update_button, False, False, 0)
@@ -339,7 +345,7 @@ class ExtensionsView(BaseView):
         """Create the installation instructions section"""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        if ext.manifest.instructions and ext.manifest.instructions.strip():
+        if ext.display_manifest.instructions and ext.display_manifest.instructions.strip():
             instructions_container = styled(
                 Gtk.Box(orientation=Gtk.Orientation.VERTICAL), "ext-installation-instructions"
             )
@@ -349,7 +355,7 @@ class ExtensionsView(BaseView):
 
             # Instructions content with HTML rendering
             instructions_label = Gtk.Label(
-                label=ext_utils.autofmt_pango_code_block(ext.manifest.instructions),
+                label=ext_utils.autofmt_pango_code_block(ext.display_manifest.instructions),
                 use_markup=True,
                 selectable=True,
                 margin=10,
@@ -518,7 +524,7 @@ class ExtensionsView(BaseView):
         if error := ext.get_error():
             error_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin=10)
             # Create appropriate error message based on type
-            message_text = ext_utils.get_error_message(error, ext.state.browser_url)
+            message_text = ext_utils.get_error_message(error, ext.website_url, ext.issues_url)
 
             # Create warning-style container
             warning_frame = styled(Gtk.Box(), "ext-error-box")

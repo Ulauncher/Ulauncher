@@ -10,7 +10,7 @@ def run(_: CLIArguments) -> int:
     extensions = list(get_ext_registry().iterate(sort=True))
     for ext in extensions:
         disabled_label = " [DISABLED]" if not ext.is_enabled else ""
-        logger.info("- %s (%s)%s", ext.manifest.name, ext.id, disabled_label)
+        logger.info("- %s (%s)%s", ext.display_manifest.name, ext.id, disabled_label)
     if not extensions:
         logger.info("No extensions installed.")
 
