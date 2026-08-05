@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from urllib.parse import urlparse
 
 from ulauncher import api_version
 from ulauncher.data import BaseDataClass, JsonConf
@@ -15,6 +16,17 @@ def _expected_object(key: str, value: Any) -> str:
     return f'Invalid "{key}" in extension manifest: expected an object, got {type(value).__name__}'
 
 
+def is_http_url(url: Any) -> bool:
+    if not isinstance(url, str):
+        return False
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        # Manifests are third-party data, and urlparse raises on a malformed host like "http://[::1"
+        return False
+    return parts.scheme in ("http", "https") and bool(parts.hostname)
+
+
 class ExtensionManifestPreference(BaseDataClass):
     name: str = ""
     type: str = ""
@@ -23,6 +35,14 @@ class ExtensionManifestPreference(BaseDataClass):
     default_value: str | int | bool = ""
     max: int | None = None
     min: int | None = None
+
+
+class ExtensionManifestUrls(BaseDataClass):
+    """Author-declared locations. `remote` is where updates are fetched from, the rest is displayed."""
+
+    remote: str | None = None
+    website: str | None = None
+    issues: str | None = None
 
 
 class ExtensionManifestTrigger(BaseDataClass):
@@ -45,6 +65,7 @@ class ExtensionManifest(JsonConf):
     icon: str = ""
     instructions: str = ""
     input_debounce: float = 0.05
+    urls: ExtensionManifestUrls = ExtensionManifestUrls()
     triggers: dict[str, ExtensionManifestTrigger] = {}
     preferences: dict[str, ExtensionManifestPreference] = {}
 
@@ -61,6 +82,12 @@ class ExtensionManifest(JsonConf):
             value = isinstance(value, dict) and float(value.get("query_debounce", -1))
             if value <= 0:
                 return
+        # Dropped rather than rejected: the key was free for any use before it was declared here
+        elif key == "urls":
+            if not isinstance(value, dict):
+                logger.warning("%s. Ignoring it.", _expected_object(key, value))
+                return
+            value = ExtensionManifestUrls(**value)
         # Convert triggers dicts to ExtensionManifestTrigger instances
         elif key == "triggers":
             if not isinstance(value, dict):
@@ -100,6 +127,11 @@ class ExtensionManifest(JsonConf):
         if missing_fields := [f for f in required_fields if not self.get(f)]:
             err_msg = f'Extension manifest is missing required field(s): "{", ".join(missing_fields)}"'
             raise ext_exceptions.ManifestError(err_msg)
+
+        # Not an error: this only runs on activation, so every consumer re-checks the scheme anyway
+        for name, url in self.urls.items():
+            if url and not is_http_url(url):
+                logger.warning('Ignoring "urls.%s" of extension %s: not a http(s) URL: %s', name, self.name, url)
 
         for t_id, t in self.triggers.items():
             if not t.name:

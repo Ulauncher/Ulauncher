@@ -116,7 +116,7 @@ class ExtensionHandlers:
 
     def remove_extension(self, ext: ExtensionRecord, callback: Callable[[], None]) -> None:
         """Handle extension removal"""
-        text = f'Remove extension "{ext.manifest.name}"?'
+        text = f'Remove extension "{ext.display_manifest.name}"?'
         secondary_text = "This action cannot be undone."
         response = self.dialog_launcher.show_question(text, secondary_text)
 
@@ -145,7 +145,7 @@ class ExtensionHandlers:
             else:
                 callback()
                 self.dialog_launcher.show(
-                    f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                    f"No updates available for {ext.display_manifest.name}", "The extension is up to date."
                 )
 
         def on_error(error: Exception) -> None:
@@ -166,22 +166,24 @@ class ExtensionHandlers:
             callback()
             progress_dialog.destroy()
             if updated:
-                self.dialog_launcher.show("Extension updated successfully", f"{ext.manifest.name} has been updated.")
+                self.dialog_launcher.show(
+                    "Extension updated successfully", f"{ext.display_manifest.name} has been updated."
+                )
             else:
                 self.dialog_launcher.show(
-                    f"No updates available for {ext.manifest.name}", "The extension is up to date."
+                    f"No updates available for {ext.display_manifest.name}", "The extension is up to date."
                 )
 
         def on_error(error: Exception) -> None:
             callback()
             progress_dialog.destroy()
-            self._show_extension_operation_error(error, ext.state.url, "update")
+            self._show_extension_operation_error(error, ext.issues_url or ext.website_url, "update")
 
         ext_service.update(ext, on_updated, on_error)
 
     def _show_update_dialog(self, ext: ExtensionRecord, commit_hash: str, callback: Callable[[], None]) -> None:
         """Show dialog when update is available"""
-        text = f"Update available for '{ext.manifest.name}'"
+        text = f"Update available for '{ext.display_manifest.name}'"
         secondary_text = f"New version: {commit_hash[:7]}\n\nDo you want to update now?"
         response = self.dialog_launcher.show_question(text, secondary_text)
         if response == Gtk.ResponseType.YES:

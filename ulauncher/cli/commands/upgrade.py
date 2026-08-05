@@ -32,14 +32,14 @@ def _upgrade_all_extensions() -> list[str]:
     updated_extensions: list[str] = []
 
     for record in get_ext_registry().iterate():
-        if not record.is_manageable or not record.state.url:
+        if not record.is_manageable or not record.update_url:
             continue
 
         try:
             if _update_blocking(record):
                 updated_extensions.append(record.id)
         except ext_exceptions.UrlError:
-            _log_url_error(record.id, record.state.url, fatal=False)
+            _log_url_error(record.id, record.update_url, fatal=False)
         except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
             logger.warning("Network error: Could not upgrade %s", record.id)
         except (ext_exceptions.ExtensionError, OSError):
@@ -56,7 +56,7 @@ def upgrade_one(record: ExtensionRecord) -> bool:
     try:
         updated = _update_blocking(record)
     except ext_exceptions.UrlError:
-        _log_url_error(record.id, record.state.url, fatal=True)
+        _log_url_error(record.id, record.update_url, fatal=True)
         return False
     except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
         logger.error("Network error: Could not upgrade %s", record.id)  # noqa: TRY400 - traceback is noise here

@@ -155,6 +155,39 @@ class TestExtensionManifest:
         with pytest.raises(ext_exceptions.ManifestError):
             manifest.validate()
 
+    def test_urls__given__is_parsed(self) -> None:
+        manifest = manifest_with(urls={"remote": "https://host.tld/u/r.git", "issues": "https://host.tld/u/r/issues"})
+        assert manifest.urls.remote == "https://host.tld/u/r.git"
+        assert manifest.urls.issues == "https://host.tld/u/r/issues"
+        assert manifest.urls.website is None
+
+    def test_urls__not_an_object__is_ignored(self) -> None:
+        # The key was undeclared until this field existed, so an extension may already use it for anything
+        manifest = manifest_with(urls="https://host.tld/u/r")
+        assert manifest.urls.website is None
+        manifest.validate()
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "javascript:alert(1)",
+            "file:///home/user/repo",
+            ["https://host.tld/u/r"],
+            "http://[::1",
+            "https://",
+        ],
+    )
+    def test_validate__urls_not_http__warns_without_raising(self, url: Any, caplog: pytest.LogCaptureFixture) -> None:
+        manifest = manifest_with(urls={"website": url})
+        manifest.validate()
+        assert "urls.website" in caplog.text
+
+    def test_validate__urls_undeclared_key__is_reported_too(self, caplog: pytest.LogCaptureFixture) -> None:
+        # BaseDataClass keeps keys it does not declare, so they must not skip the scheme check
+        manifest = manifest_with(urls={"docs": "javascript:alert(1)"})
+        manifest.validate()
+        assert "urls.docs" in caplog.text
+
     def test_check_compatibility__manifest_version_0__exception_raised(self) -> None:
         manifest = ExtensionManifest(name="Test", api_version="0")
         with pytest.raises(ext_exceptions.CompatibilityError):
@@ -165,12 +198,12 @@ class TestExtensionManifest:
         manifest.check_compatibility()
 
     def test_defaults_not_included_in_stringify(self) -> None:
-        # Ensure defaults don't leak
-        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05}'
+        # Ensure defaults don't leak. "urls" survives empty because the blacklist drops values before recursing.
+        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05, "urls": {}}'
         # __setitem__ converts the raw dict into ExtensionManifestPreference instances.
         raw: dict[str, Any] = {"preferences": {"ns": {"k": "v"}}}
         manifest = ExtensionManifest(**raw)
-        assert json_stringify(manifest) == '{"input_debounce": 0.05, "preferences": {"ns": {"k": "v"}}}'
+        assert json_stringify(manifest) == '{"input_debounce": 0.05, "urls": {}, "preferences": {"ns": {"k": "v"}}}'
 
     def test_manifest_backwards_compatibility(self) -> None:
         # Legacy key names, renamed by ExtensionManifest.__setitem__ rather than declared as fields.

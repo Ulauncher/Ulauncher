@@ -9,10 +9,11 @@ from typing import Any, Literal, Union
 
 from ulauncher import paths
 from ulauncher.data import BaseDataClass, JsonConf
-from ulauncher.modes.extensions import extension_finder
+from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifest,
     ExtensionManifestPreference,
+    is_http_url,
 )
 from ulauncher.utils.json_utils import json_load
 
@@ -70,6 +71,10 @@ def _load_preferences(ext_id: str) -> JsonConf:
     return JsonConf.load(f"{paths.EXTENSIONS_CONFIG}/{ext_id}.json")
 
 
+def _http_url(url: str | None) -> str:
+    return url if url and is_http_url(url) else ""
+
+
 class ExtensionRecord:
     """Represents an installed extension: its files, state and preferences."""
 
@@ -117,6 +122,32 @@ class ExtensionRecord:
     def manifest(self) -> ExtensionManifest:
         return ExtensionManifest.load(self.path)
 
+    @property
+    def display_manifest(self) -> ExtensionManifest:
+        """A placeholder manifest instead of an error when the file cannot be read, so a broken
+        extension still renders. Use `manifest` where the failure has to surface, such as validation."""
+        try:
+            return self.manifest
+        except ext_exceptions.ManifestError:
+            return ExtensionManifest(name=self.id)
+
+    @property
+    def website_url(self) -> str:
+        return _http_url(self.display_manifest.urls.website) or _http_url(self.state.browser_url)
+
+    @property
+    def issues_url(self) -> str:
+        return _http_url(self.display_manifest.urls.issues)
+
+    @property
+    def update_url(self) -> str:
+        """Resolved per update instead of persisted, so the manifest stays the only place it lives.
+
+        A broken or non-http declaration falls back to the installed-from url, because a broken
+        manifest is often the reason for updating. ExtensionManifest.validate reports the bad url.
+        """
+        return _http_url(self.display_manifest.urls.remote) or self.state.url
+
     def reload_state(self) -> None:
         """Pick up state another process wrote. The CLI disables a non-manageable copy that shadows
         an uninstalled extension, and the app's cached state would otherwise still say enabled."""
@@ -139,7 +170,7 @@ class ExtensionRecord:
     def preferences(self) -> dict[str, ExtensionPreference]:
         prefs_json = _load_preferences(self.id)
         prefs = {}
-        for p_id, manifest_pref in self.manifest.preferences.items():
+        for p_id, manifest_pref in self.display_manifest.preferences.items():
             # copy to avoid mutating
             pref = ExtensionPreference(**manifest_pref)
             pref.value = prefs_json.get("preferences", {}).get(p_id, manifest_pref.default_value)
@@ -150,7 +181,7 @@ class ExtensionRecord:
     def triggers(self) -> dict[str, ExtensionRecordTrigger]:
         user_prefs_json = _load_preferences(self.id)
         triggers = {}
-        for t_id, manifest_trigger in self.manifest.triggers.items():
+        for t_id, manifest_trigger in self.display_manifest.triggers.items():
             trigger = ExtensionRecordTrigger(**manifest_trigger)
             trigger.keyword = user_prefs_json.get("triggers", {}).get(t_id, {}).get("keyword", trigger.default_keyword)
             triggers[t_id] = trigger
@@ -163,7 +194,7 @@ class ExtensionRecord:
         user_prefs_json.save(data)
 
     def get_icon_value(self, icon: str | None = None) -> str:
-        icon_value = icon or self.manifest.icon
+        icon_value = icon or self.display_manifest.icon
         expanded_path = join(self.path, icon_value)
         if isfile(expanded_path):
             return expanded_path

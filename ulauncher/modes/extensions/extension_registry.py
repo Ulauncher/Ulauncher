@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from shutil import move, rmtree
-from typing import Any, Callable, Iterator, Protocol
+from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
@@ -140,7 +140,7 @@ class ExtensionRegistry:
             logger.info("Extension %s installed successfully", record.id)
             on_success(record)
 
-        self._install_from_remote(record, remote, commit_hash, done, on_error, url=url)
+        self._install_from_remote(record, remote, commit_hash, done, on_error)
 
     def uninstall(self, record: ExtensionRecord, on_done: Done, on_error: OnError) -> None:
         def remove_files() -> None:
@@ -193,7 +193,11 @@ class ExtensionRegistry:
                 logger.error("Could not update extension '%s'", record.id, exc_info=error)
                 on_error(error)
 
-            remote = resolve_remote(record.state.url, fail)
+            update_url = record.update_url
+            if update_url != record.state.url:
+                logger.info("Extension %s is updated from %s, which its manifest declares", record.id, update_url)
+
+            remote = resolve_remote(update_url, fail)
             if remote is None:
                 return
             self._install_from_remote(record, remote, commit_hash, done, fail)
@@ -202,7 +206,7 @@ class ExtensionRegistry:
 
     def check_update(self, record: ExtensionRecord, on_success: CheckUpdateSuccess, on_error: OnError) -> None:
         """Reports whether a new compatible version exists, and its commit hash."""
-        remote = resolve_remote(record.state.url, on_error)
+        remote = resolve_remote(record.update_url, on_error)
         if remote is None:
             return
 
@@ -218,12 +222,9 @@ class ExtensionRegistry:
         commit_hash: str | None,
         on_done: Done,
         on_error: OnError,
-        **extra_state: Any,
     ) -> None:
         """Install (atomically): download, stop and swap. Restarting is the caller's concern
         (in the app, the service reconciles once the job wrapping this operation releases).
-
-        `extra_state` is merged into the saved state (install records the source url; update adds nothing).
         """
         target_path = record.path
         # Fixed path per extension so failed installs don't accumulate.
@@ -249,8 +250,10 @@ class ExtensionRegistry:
                     error: Exception | None = None
                     if _swap_dir(staging_dir, target_path):
                         try:
+                            # Saved together, so an update to a declared remote can't leave the
+                            # state pointing half at the previous host
                             record.save_installed_state(
-                                downloaded_hash, commit_timestamp, **extra_state, browser_url=remote.browser_url or ""
+                                downloaded_hash, commit_timestamp, url=remote.url, browser_url=remote.browser_url or ""
                             )
                         # Reloading the manifest can reject the swapped-in files. This runs in a
                         # Gio callback, so an escape would report neither done nor error.
@@ -266,6 +269,6 @@ class ExtensionRegistry:
 
                 self._lifecycle.stop_extension(record, swap_and_finish)
 
-            ExtensionDependencies(remote.ext_id, staging_dir).install(on_deps_installed, fail)
+            ExtensionDependencies(record.id, staging_dir).install(on_deps_installed, fail)
 
         remote.download(on_downloaded, fail, commit_hash)

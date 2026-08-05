@@ -135,7 +135,7 @@ class ExtensionMode(Mode):
             return Result(name="Extension failed to start")
 
         error = ext.get_error()
-        name = ext.manifest.name or "Extension"
+        name = ext.display_manifest.name or "Extension"
         error_msg = error.message if error else None
         return Result(name=f"{name} failed to start", description=error_msg or "", icon=ext.get_icon_value())
 
@@ -255,7 +255,7 @@ class ExtensionMode(Mode):
             events.emit(
                 "app:show_notification",
                 f"ext-{ext.id}-{message['notification_id']}",
-                f"Message from {ext.manifest.name} extension",
+                f"Message from {ext.display_manifest.name} extension",
                 message["body"],
             )
         else:
