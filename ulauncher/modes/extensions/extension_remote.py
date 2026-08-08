@@ -138,8 +138,8 @@ class _BareRepo:
 
 
 class UrlParseResult(BaseDataClass):
-    ext_id: str = ""
-    remote_url: str = ""
+    ext_id: str
+    remote_url: str
     browser_url: str | None = None
     download_url_template: str | None = None
 
