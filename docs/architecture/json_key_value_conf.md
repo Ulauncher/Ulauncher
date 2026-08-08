@@ -30,7 +30,8 @@ store.save()
 
 ## Key Features
 
-- **Value coercion** — raw values (dicts, primitives) are passed through the value type's constructor on `__setitem__`. Already-correct instances are stored as-is.
-- **`None`-as-delete** — assigning `None` to a key removes it instead of storing `None`.
+- **Value coercion** - raw values (dicts, primitives) are passed through the value type's constructor on `__setitem__`. Already-correct instances are stored as-is.
+- **`None`-as-delete** - assigning `None` to a key removes it instead of storing `None`.
 - **Sync-on-reload** - when a read actually happens (the first `load()` for a path, or any `load(..., force=True)`), all keys are replaced with the file contents and keys absent from the file are dropped from the in-memory instance. Cached `load()` calls don't re-read, so they don't resync. (`JsonConf` merges on read instead - absent keys are left untouched.)
-- **Instance deduplication** — same cache behaviour as `JsonConf`: multiple `load()` calls for the same path and class return the same instance.
+- **Instance deduplication** - same cache behaviour as `JsonConf`: multiple `load()` calls for the same path and class return the same instance.
+- **Value fields need defaults** - a `JsonConf` value type must default every field, same as [`JsonConf`](json_conf.md#field-defaults). Coercion and sync feed it partial data.

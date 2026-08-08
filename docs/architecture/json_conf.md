@@ -36,6 +36,10 @@ config.save()
 - **Auto-save debouncing** - Saves are debounced to avoid excessive disk writes
 - **Automatic file creation** - Creates file with defaults if it doesn't exist
 
+## Field defaults
+
+Every field needs a default, so required fields are off-limits: file data is partial, so a missing key falls back to a default, and `clear()` restores them. This reverses the in-memory `BaseDataClass` rule. Prefer a falsy default over `None`, since the data is untrusted (see [choosing a field's default](base_data_class.md#choosing-a-fields-default)).
+
 ## Why Instance Deduplication Matters
 
 Without deduplication:

@@ -43,6 +43,14 @@ unannotated field still works, but type checkers reject passing it.
 `JsonConf` declares its own `__init__` to opt out, since it holds arbitrary keys.
 Its subclasses get the checked signature again.
 
+## Choosing a field's default
+
+Except for `JsonConf`, `BaseDataClass` subclasses live in-memory only and may use
+required fields or default to None. But avoid using None as the default when dealing
+with untrusted data (json or user input) or primitive types. None is great as a
+fallback for a strict `Literal["a", "b", "c"]` type but adds nothing but confusion
+to a string that can be empty and must be falsy checked anyway.
+
 ## Declared props can't be dropped
 
 A prop declared without a default is required by the generated `__init__`, so
