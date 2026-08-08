@@ -33,8 +33,8 @@ class CLICommandArgument(BaseDataClass):
 
 
 class CLICommand(BaseDataClass):
-    summary: str = ""  # one-line, shown in the master `ulauncher --help` listing
-    description: str = ""  # longer sentence, shown at the top of `ulauncher <cmd> --help`
+    summary: str  # one-line, shown in the master `ulauncher --help` listing
+    description: str  # longer sentence, shown at the top of `ulauncher <cmd> --help`
     group: CommandGroupName
     aliases: tuple[str, ...] = ()
     arguments: tuple[CLICommandArgument, ...] = ()
