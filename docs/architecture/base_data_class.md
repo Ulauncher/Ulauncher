@@ -46,7 +46,9 @@ Its subclasses get the checked signature again.
 ## Choosing a field's default
 
 Except for `JsonConf`, `BaseDataClass` subclasses live in-memory only and may use
-required fields or default to None. But avoid using None as the default when dealing
+required fields.
+
+They may also default to None. But avoid using None as the default when dealing
 with untrusted data (json or user input) or primitive types. None is great as a
 fallback for a strict `Literal["a", "b", "c"]` type but adds nothing but confusion
 to a string that can be empty and must be falsy checked anyway.
