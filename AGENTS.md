@@ -7,7 +7,7 @@ Critical Ulauncher-specific patterns and constraints.
 - **GTK main thread**: All GTK operations must run in the main thread. Use `scheduling.run_when_idle` to schedule work from other contexts.
 - **Callback-based async**: Use GLib callbacks, not Python async/await. Use `scheduling.timer` for delayed execution or `scheduling.interval` if they need to repeat.
 - **Lazy module loading**: Defer imports not needed for the initial window to keep startup fast.
-- **Exception avoidance**: Prefer defensive code (`hasattr()`, guard clauses) over try/except when possible. Never catch bare `Exception` unless the exception type cannot be known.
+- **Exception handling**: Prefer guard clauses (`hasattr()`, `is_file()`) over try/except when the check is cheap. Name a specific type only where you act on it differently, and catch it where that decision belongs - enumerating types you don't act on breaks as soon as a callee changes. Otherwise catch `Exception` and log it with `logger.exception`, which keeps the traceback and passes the linter. A bare `except:` stays banned: it also swallows `KeyboardInterrupt` and `SystemExit`, which `Exception` leaves alone.
 - **Dict access**: Index directly (`d["key"]`) when the key is guaranteed by a known type or invariant. It reads clearer and enables type narrowing. Use `d.get()` when a missing key is a legitimate, expected case with a sensible default.
 - **Atomic writes**: A killed process must not lose user data or leave the app broken. Persist JSON with `json_save` (or `JsonConf`/`JsonKeyValueConf`) rather than `Path.write_text` - it renames a temp file over the target. `extension_registry._swap_dir` does the same for directories. Exempt: logs, throwaway temp files, and staging writes that end in a rename.
 
