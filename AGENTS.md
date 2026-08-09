@@ -9,6 +9,7 @@ Critical Ulauncher-specific patterns and constraints.
 - **Lazy module loading**: Defer imports not needed for the initial window to keep startup fast.
 - **Exception avoidance**: Prefer defensive code (`hasattr()`, guard clauses) over try/except when possible. Never catch bare `Exception` unless the exception type cannot be known.
 - **Dict access**: Index directly (`d["key"]`) when the key is guaranteed by a known type or invariant. It reads clearer and enables type narrowing. Use `d.get()` when a missing key is a legitimate, expected case with a sensible default.
+- **Atomic writes**: A killed process must not lose user data or leave the app broken. Persist JSON with `json_save` (or `JsonConf`/`JsonKeyValueConf`) rather than `Path.write_text` - it renames a temp file over the target. `extension_registry._swap_dir` does the same for directories. Exempt: logs, throwaway temp files, and staging writes that end in a rename.
 
 ## Code Quality
 
