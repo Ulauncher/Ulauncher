@@ -353,7 +353,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
         remote_url = "https://" + remote_url[4:].replace(":", "/")
 
     url_parts = urlparse(remote_url)
-    path = url_parts.path[1:]
+    path = url_parts.path.lstrip("/")
     host = url_parts.netloc.lower()
     remote_url = f"https://{host}/{path}"
 
@@ -365,6 +365,7 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
         if not isdir(url_parts.path):
             msg = f"Invalid path: {input_url}"
             raise ValueError(msg)
+        path = os.path.abspath(url_parts.path).lstrip("/")
         browser_url = remote_url = f"file:///{path}"
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
