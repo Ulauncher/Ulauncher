@@ -24,19 +24,29 @@ def _filter_recursive(data: Any, blacklist: Iterable[Any]) -> Any:
     return data
 
 
-def json_load(path: str | Path) -> Any:
+def json_load_dict(path: str | Path) -> dict[str, Any]:
+    """The JSON object the file holds, or an empty dict if it holds none.
+
+    An unreadable file still raises: that is not the same as having no data, and only the caller
+    knows whether to reset what it already has.
+    """
     file_path = Path(path).resolve()
-    if file_path.is_file():
-        try:
-            data = file_path.read_text()
-            if data.strip():
-                return json.loads(data, object_hook=sanitize_json)
-        except ValueError:
-            backup_path = f"{file_path}.{datetime.now().isoformat()}.backup"
-            logger.exception('Error opening JSON file "%s"', file_path)
-            logger.warning('Moving invalid JSON file to "%s"', backup_path)
-            shutil.move(str(file_path), backup_path)
-    return {}  # pyrefly: ignore[implicit-any]
+    try:
+        content = file_path.read_text().strip()
+        # An empty file means an empty object, not a parse error that would get the file moved aside
+        data = json.loads(content or "{}", object_hook=sanitize_json)
+    except FileNotFoundError:
+        return {}
+    except ValueError:
+        backup_path = f"{file_path}.{datetime.now().isoformat()}.backup"
+        logger.exception('Error opening JSON file "%s"', file_path)
+        logger.warning('Moving invalid JSON file to "%s"', backup_path)
+        shutil.move(str(file_path), backup_path)
+        return {}
+    if not isinstance(data, dict):
+        logger.warning('Expected a JSON object in "%s", got %s - file ignored', file_path, type(data).__name__)
+        return {}
+    return data
 
 
 def json_stringify(

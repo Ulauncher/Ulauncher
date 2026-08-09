@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_utils import json_load_dict, json_save
 
 
 class TestJsonSave:
@@ -17,7 +17,7 @@ class TestJsonSave:
         assert json_save({"a": 2}, json_file)
 
         assert json_file.stat().st_mode & 0o777 == 0o600
-        assert json_load(json_file) == {"a": 2}
+        assert json_load_dict(json_file) == {"a": 2}
 
     def test_leaves_no_temp_file_behind(self, tmp_path: Path) -> None:
         json_file = tmp_path / "conf.json"
@@ -37,5 +37,5 @@ class TestJsonSave:
         monkeypatch.setattr(os, "replace", fail)
         assert not json_save({"a": 2}, json_file)
 
-        assert json_load(json_file) == {"a": 1}
+        assert json_load_dict(json_file) == {"a": 1}
         assert [f.name for f in tmp_path.iterdir()] == ["conf.json"]

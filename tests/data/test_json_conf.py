@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from ulauncher.data import JsonConf
-from ulauncher.utils.json_utils import json_load, json_save, json_stringify
+from ulauncher.utils.json_utils import json_load_dict, json_save, json_stringify
 
 
 class TestJsonConf:
@@ -51,17 +51,17 @@ class TestJsonConf:
         jc = JsonConf.load(json_file)
         jc.asdf = "xyz"
         jc.save()
-        assert json_load(json_file).get("asdf") == "xyz"
+        assert json_load_dict(json_file) == {"asdf": "xyz"}
 
         jc.update(asdf="zyx")
         jc.save()
-        assert json_load(json_file).get("asdf") == "zyx"
+        assert json_load_dict(json_file) == {"asdf": "zyx"}
 
         jc.save(asdf="yxz")
-        assert json_load(json_file).get("asdf") == "yxz"
+        assert json_load_dict(json_file) == {"asdf": "yxz"}
 
         jc.save({"asdf": "xzy"})
-        assert json_load(json_file).get("asdf") == "xzy"
+        assert json_load_dict(json_file) == {"asdf": "xzy"}
 
     def test_save_external(self, tmp_path: Path) -> None:
         """Test saving to external paths"""
@@ -70,15 +70,14 @@ class TestJsonConf:
 
         jc_static = JsonConf(abc=123)
         json_save(jc_static, file_path)
-        assert json_load(file_path).get("abc") == 123
+        assert json_load_dict(file_path) == {"abc": 123}
 
         jc = JsonConf.load(json_file)
         jc.save()
         jc.bcd = 234
         json_save(jc, file_path)
-        assert json_load(file_path).get("abc") is None
-        assert json_load(file_path).get("bcd") == 234
-        assert json_load(json_file).get("bcd") is None
+        assert json_load_dict(file_path) == {"bcd": 234}
+        assert json_load_dict(json_file) == {}
 
     def test_cannot_override_method(self) -> None:
         jc = JsonConf()
@@ -108,7 +107,7 @@ class TestJsonConf:
         json_ko_file = str(tmp_path / "jsonconf-key-order.json")
         inst = ClassWDefault.load(json_ko_file)
         inst.save()
-        assert list(json_load(json_ko_file).keys()) == ["a", "b"]
+        assert list(json_load_dict(json_ko_file)) == ["a", "b"]
 
     def test_constructor_is_cloned(self) -> None:
         class ClassWDict(JsonConf):

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from ulauncher import first_v6_run, paths
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_utils import json_load_dict, json_save
 
 _logger = logging.getLogger(__name__)
 # LEGACY_CACHE_PATH couldn't use $XDG_CACHE_HOME/ulauncher because of webkit, see issue#40
@@ -89,7 +89,7 @@ def v5_to_v6() -> None:
     from ulauncher.modes.extensions.extension_record import ExtensionState
     from ulauncher.utils.systemd_controller import SystemdController
 
-    extension_db: dict[str, Any] = json_load(f"{paths.CONFIG}/extensions.json")
+    extension_db = json_load_dict(f"{paths.CONFIG}/extensions.json")
     for legacy_state in extension_db.values():
         ext_id = legacy_state["id"]
         state = ExtensionState.load(f"{paths.EXTENSIONS_STATE}/{ext_id}.json")
@@ -101,7 +101,7 @@ def v5_to_v6() -> None:
     # Migrate JSON to JSON first, assuming these are newer
     for file in ext_prefs.rglob("*.json"):
         try:
-            data = json_load(str(file))
+            data = json_load_dict(str(file))
             # Skip files already in the v6 shape to avoid re-logging and rewriting on every startup
             if sorted(data.keys()) == ["preferences", "triggers"]:
                 continue

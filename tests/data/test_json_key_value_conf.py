@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 import pytest
 
 from ulauncher.data import JsonConf, JsonKeyValueConf
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_utils import json_load_dict, json_save
 
 
 class TestJsonKeyValueConf:
@@ -19,13 +19,13 @@ class TestJsonKeyValueConf:
         store = Store.load(json_file)
         store["asdf"] = "xyz"
         store.save()
-        assert json_load(json_file).get("asdf") == "xyz"
+        assert json_load_dict(json_file) == {"asdf": "xyz"}
 
         store.save({"asdf": "zyx"})
-        assert json_load(json_file).get("asdf") == "zyx"
+        assert json_load_dict(json_file) == {"asdf": "zyx"}
 
         store.save(asdf="yxz")
-        assert json_load(json_file).get("asdf") == "yxz"
+        assert json_load_dict(json_file) == {"asdf": "yxz"}
 
     def test_save_preserves_insertion_order(self, tmp_path: Path) -> None:
         json_file = tmp_path / "jsonkvconf.json"
@@ -55,7 +55,7 @@ class TestJsonKeyValueConf:
         assert store["one"].value == "1"
 
         store.save()
-        assert json_load(json_file) == {"one": {"value": "1"}}
+        assert json_load_dict(json_file) == {"one": {"value": "1"}}
 
     def test_none_value_deletes_key(self) -> None:
         class Store(JsonKeyValueConf[str, str]):

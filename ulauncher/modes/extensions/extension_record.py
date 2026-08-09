@@ -15,7 +15,7 @@ from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifestPreference,
     is_http_url,
 )
-from ulauncher.utils.json_utils import json_load
+from ulauncher.utils.json_utils import json_load_dict
 
 
 class ExtensionPreference(ExtensionManifestPreference):
@@ -99,14 +99,13 @@ class ExtensionRecord:
         if self.state.id or not Path(self.path).exists():
             return
         self.state.id = self.id
-        defaults = json_load(f"{self.path}/.default-state.json")
-        if isinstance(defaults, dict):
-            # The file ships with the extension, so a key ExtensionState refuses would otherwise
-            # raise here, where every caller only wants a record for the extension.
-            accepted = {key: value for key, value in defaults.items() if ExtensionState.accepts_key(key)}
-            if ignored := defaults.keys() - accepted.keys():
-                logger.warning("Ignoring invalid default state %s of extension %s", sorted(ignored), self.id)
-            self.state.update(accepted)
+        defaults = json_load_dict(f"{self.path}/.default-state.json")
+        # The file ships with the extension, so a key ExtensionState refuses would otherwise
+        # raise here, where every caller only wants a record for the extension.
+        accepted = {key: value for key, value in defaults.items() if ExtensionState.accepts_key(key)}
+        if ignored := defaults.keys() - accepted.keys():
+            logger.warning("Ignoring invalid default state %s of extension %s", sorted(ignored), self.id)
+        self.state.update(accepted)
 
     def get_error(self) -> ExtensionErrorData | None:
         # A preview must not surface the installed extension's persisted error; it reports as a preview.

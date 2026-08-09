@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any, TypeVar
 
-from ulauncher.utils.json_utils import json_load, json_save
+from ulauncher.utils.json_utils import json_load_dict, json_save
 from ulauncher.utils.lru_cache import lru_cache
 
 logger = logging.getLogger(__name__)
@@ -15,12 +15,11 @@ _EMPTY_VALUES: tuple[Any, ...] = ([], {}, None, "")
 
 
 def _populate_from_file(instance: Any, file_path: str) -> None:
-    data = json_load(file_path)
-    if data is None:
-        logger.warning("File not found or unreadable: %s - keeping cached data", file_path)
-        return
-    if not isinstance(data, dict):
-        logger.warning("Expected a JSON object in %s, got %s - file ignored", file_path, type(data).__name__)
+    try:
+        data = json_load_dict(file_path)
+    # Resetting to defaults would be worse than staying stale, and a save would then persist that
+    except OSError:
+        logger.exception("Could not read %s - keeping the cached data", file_path)
         return
     # Parse into a throwaway first, so data the class rejects raises before the cached
     # instance (which every holder of it shares) is cleared and left half-populated.
