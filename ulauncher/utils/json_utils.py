@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -45,6 +46,22 @@ def json_stringify(
     return json.dumps(filtered_data, indent=indent, sort_keys=sort_keys)
 
 
+def _atomic_write_text(file_path: Path, content: str) -> None:
+    """Write to a temp file and rename, so readers never observe a partially written file."""
+    # Sibling of the target so the rename stays on the same filesystem, and per-pid so that the app
+    # and the cli never share a temp file.
+    tmp_path = file_path.with_name(f".{file_path.name}.{os.getpid()}.tmp")
+    try:
+        tmp_path.write_text(content)
+        if file_path.exists():
+            # Replacing the target drops its mode along with its contents
+            tmp_path.chmod(file_path.stat().st_mode & 0o777)
+        os.replace(tmp_path, file_path)
+    except OSError:
+        tmp_path.unlink(missing_ok=True)
+        raise
+
+
 def json_save(
     data: Any,
     path: str | Path,
@@ -57,9 +74,8 @@ def json_save(
         try:
             # Ensure parent dir first
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(
-                json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
-            )
+            stringified_data = json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
+            _atomic_write_text(file_path, stringified_data)
         except OSError:
             logger.exception('Could not write to JSON file "%s"', file_path)
         else:
