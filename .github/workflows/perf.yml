@@ -26,7 +26,7 @@ permissions:
 jobs:
   compare:
     runs-on: ubuntu-latest
-    container: ulauncher/build-image:6.6
+    container: ulauncher/build-image:6.7
     steps:
       - uses: actions/checkout@v5
         with:

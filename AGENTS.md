@@ -17,7 +17,7 @@ Critical Ulauncher-specific patterns and constraints.
 
 **Complexity**: Prefer straightforward and simple solutions, without architectural changes. But suggest alternatives if the code adds technical debt that can be improved by making it more modular, reusable, or easier to read or maintain.
 
-**Testing & Linting**: Target Python 3.8+ with 3.10 type hints. Run `make check-all` for all linting and tests running inside both the user environment and the docker test image which uses Python 3.8. If you can't use docker, just run `make check`. Run `make format` to fix any formatting errors.
+**Testing & Linting**: Target Python 3.8+ with 3.10 type hints. Run `make check-all` for all linting and tests running inside both the user environment and the docker test image (Ubuntu 22.04 with a Python 3.8 venv). If you can't use docker, just run `make check`. Run `make format` to fix any formatting errors.
 
 ## Architecture
 
