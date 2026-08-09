@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from ulauncher import first_v6_run, paths
+from ulauncher.utils.json_utils import json_load, json_save
 
 _logger = logging.getLogger(__name__)
 # LEGACY_CACHE_PATH couldn't use $XDG_CACHE_HOME/ulauncher because of webkit, see issue#40
@@ -29,11 +30,11 @@ def _load_legacy(path: Path) -> Any | None:
 
 def _store_json(path: str, data: Any) -> bool:
     try:
-        Path(path).write_text(json.dumps(data, indent=2))
-    except (OSError, TypeError, ValueError) as e:
+        return json_save(data, path)
+    # Unpickled legacy data can hold values json can't serialize
+    except (TypeError, ValueError) as e:
         _logger.warning('Could not store JSON file "%s": %s', path, e)
         return False
-    return True
 
 
 def _migrate_file(
@@ -95,7 +96,6 @@ def v5_to_v6() -> None:
     from types import ModuleType
 
     from ulauncher.modes.extensions.extension_record import ExtensionState
-    from ulauncher.utils.json_utils import json_load
     from ulauncher.utils.systemd_controller import SystemdController
 
     extension_db: dict[str, Any] = json_load(f"{paths.CONFIG}/extensions.json")
