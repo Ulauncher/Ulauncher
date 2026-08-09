@@ -13,16 +13,17 @@ _instance_paths: dict[int, str] = {}
 
 def _populate_from_file(instance: Any, file_path: str) -> None:
     data = json_load(file_path)
-    if isinstance(data, dict):
-        # Parse into a throwaway first, so data the class rejects raises before the cached
-        # instance (which every holder of it shares) is cleared and left half-populated.
-        parsed = type(instance)(data)
-        instance.clear()
-        instance.update(parsed)
-    elif data is None:
-        logger.warning("File not found or unreadable: %s — keeping cached data", file_path)
-    else:
-        logger.warning("Expected a JSON object in %s, got %s — file ignored", file_path, type(data).__name__)
+    if data is None:
+        logger.warning("File not found or unreadable: %s - keeping cached data", file_path)
+        return
+    if not isinstance(data, dict):
+        logger.warning("Expected a JSON object in %s, got %s - file ignored", file_path, type(data).__name__)
+        return
+    # Parse into a throwaway first, so data the class rejects raises before the cached
+    # instance (which every holder of it shares) is cleared and left half-populated.
+    parsed = type(instance)(data)
+    instance.clear()
+    instance.update(parsed)
 
 
 @lru_cache(maxsize=None)
