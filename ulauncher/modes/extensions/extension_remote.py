@@ -146,7 +146,6 @@ class UrlParseResult(BaseDataClass):
 
 class ExtensionRemote(UrlParseResult):
     url: str
-    target_dir: str
 
     def __init__(self, url: str) -> None:
         stripped_url = url.strip()
@@ -158,7 +157,6 @@ class ExtensionRemote(UrlParseResult):
             raise ext_exceptions.UrlError(msg) from e
 
         self.url = stripped_url
-        self.target_dir = f"{paths.USER_EXTENSIONS}/{self.ext_id}"
         self._repo = _BareRepo(f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git", self.remote_url, self.url)
 
     def _network_error(self) -> ext_exceptions.NetworkError:
@@ -234,12 +232,15 @@ class ExtensionRemote(UrlParseResult):
 
     def download(
         self,
+        target_dir: str,
         on_success: DownloadSuccess,
         on_error: OnError,
         commit_hash: str | None = None,
     ) -> None:
+        """Populate target_dir with the extension. It is replaced wholesale, so pass a staging dir."""
+
         def on_hash(resolved_hash: str) -> None:
-            self._download_with_hash(resolved_hash, on_success, on_error)
+            self._download_with_hash(target_dir, resolved_hash, on_success, on_error)
 
         if commit_hash:
             on_hash(commit_hash)
@@ -247,7 +248,9 @@ class ExtensionRemote(UrlParseResult):
 
         self.get_compatible_hash(on_hash, on_error)
 
-    def _download_with_hash(self, commit_hash: str, on_success: DownloadSuccess, on_error: OnError) -> None:
+    def _download_with_hash(
+        self, target_dir: str, commit_hash: str, on_success: DownloadSuccess, on_error: OnError
+    ) -> None:
         if self.download_url_template:
             download_url = self.download_url_template.replace("[commit]", commit_hash)
             with NamedTemporaryFile(suffix=".tar.gz", prefix="ulauncher_dl_", delete=False) as tmp_file:
@@ -260,7 +263,7 @@ class ExtensionRemote(UrlParseResult):
             def on_downloaded(_path: str) -> None:
                 try:
                     try:
-                        result = self._extract_and_install(tmp_path, commit_hash)
+                        result = self._extract_and_install(target_dir, tmp_path, commit_hash)
                     except ext_exceptions.ExtensionError as install_error:
                         on_error(install_error)
                         return
@@ -280,9 +283,9 @@ class ExtensionRemote(UrlParseResult):
             return
 
         try:
-            os.makedirs(self.target_dir, exist_ok=True)
+            os.makedirs(target_dir, exist_ok=True)
         except OSError as e:
-            on_error(ext_exceptions.RemoteError(f"Failed to create extension directory {self.target_dir}: {e}"))
+            on_error(ext_exceptions.RemoteError(f"Failed to create extension directory {target_dir}: {e}"))
             return
 
         def on_timestamp(stdout: str) -> None:
@@ -301,9 +304,9 @@ class ExtensionRemote(UrlParseResult):
         def on_checked_out() -> None:
             self._repo.get_commit_timestamp(commit_hash, on_timestamp, on_error)
 
-        self._repo.checkout(self.target_dir, commit_hash, on_checked_out, on_error)
+        self._repo.checkout(target_dir, commit_hash, on_checked_out, on_error)
 
-    def _extract_and_install(self, tar_path: str, commit_hash: str) -> tuple[str, float]:
+    def _extract_and_install(self, target_dir: str, tar_path: str, commit_hash: str) -> tuple[str, float]:
         # All filesystem steps share the same failure semantics, so they live under one guard.
         # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
         # RemoteError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
@@ -324,10 +327,11 @@ class ExtensionRemote(UrlParseResult):
                         msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
                         raise ext_exceptions.CompatibilityError(msg)
                     logger.warning("Falling back on using API 2.0 version for %s.", self.url)
-                if isdir(self.target_dir):
-                    rmtree(self.target_dir)
-                move(tmp_dir, self.target_dir)
-            return commit_hash, getmtime(self.target_dir)
+                # move() would nest tmp_dir inside an existing target instead of replacing it
+                if isdir(target_dir):
+                    rmtree(target_dir)
+                move(tmp_dir, target_dir)
+            return commit_hash, getmtime(target_dir)
         except (TarError, OSError) as e:
             msg = f"Failed to install extension from {tar_path}: {e}"
             raise ext_exceptions.RemoteError(msg) from e

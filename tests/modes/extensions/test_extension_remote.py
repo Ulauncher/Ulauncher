@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
@@ -152,9 +153,19 @@ class TestGetCompatibleHash:
         assert isinstance(error, ext_exceptions.NetworkError)
 
 
+def _download(remote: ExtensionRemote, target_dir: str) -> tuple[Any, Exception | None]:
+    return _call(lambda on_success, on_error: remote.download(target_dir, on_success, on_error, commit_hash="abc123"))
+
+
 class TestDownload:
+    target_dir: str
+
+    @pytest.fixture(autouse=True)
+    def _staging_dir(self, tmp_path: Path) -> None:
+        # download() replaces the target wholesale, so it must never be pointed at a real install
+        self.target_dir = str(tmp_path / "staging")
+
     @patch("ulauncher.modes.extensions.extension_remote.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.extensions.extension_remote.os.makedirs")
     @patch("ulauncher.modes.extensions.extension_remote.run_command")
     def test_git_checkout_path_returns_hash_and_timestamp(self, mock_run: MagicMock, *_: Any) -> None:
         def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
@@ -163,7 +174,7 @@ class TestDownload:
         mock_run.side_effect = side_effect
         # example.com has no download_url_template, so download() takes the git checkout path
         remote = ExtensionRemote("https://example.com/user/repo")
-        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        result, error = _download(remote, self.target_dir)
         assert error is None
         assert result == ("abc123", 1700000000.0)
 
@@ -174,12 +185,11 @@ class TestDownload:
 
         mock_download.side_effect = side_effect
         remote = ExtensionRemote("https://github.com/user/repo")
-        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        result, error = _download(remote, self.target_dir)
         assert result is None
         assert isinstance(error, ext_exceptions.RemoteError)
 
     @patch("ulauncher.modes.extensions.extension_remote.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.extensions.extension_remote.os.makedirs")
     @patch("ulauncher.modes.extensions.extension_remote.run_command")
     def test_unparsable_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
         # A raw ValueError from float() would otherwise escape the Gio callback and hang the bridge.
@@ -188,12 +198,11 @@ class TestDownload:
 
         mock_run.side_effect = side_effect
         remote = ExtensionRemote("https://example.com/user/repo")
-        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        result, error = _download(remote, self.target_dir)
         assert result is None
         assert isinstance(error, ext_exceptions.RemoteError)
 
     @patch("ulauncher.modes.extensions.extension_remote.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.extensions.extension_remote.os.makedirs")
     @patch("ulauncher.modes.extensions.extension_remote.run_command")
     def test_out_of_range_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
         # The repo picks this number. No date can hold it, so save_installed_state would raise
@@ -203,7 +212,7 @@ class TestDownload:
 
         mock_run.side_effect = side_effect
         remote = ExtensionRemote("https://example.com/user/repo")
-        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        result, error = _download(remote, self.target_dir)
         assert result is None
         assert isinstance(error, ext_exceptions.RemoteError)
 
@@ -216,6 +225,6 @@ class TestDownload:
 
         mock_download.side_effect = side_effect
         remote = ExtensionRemote("https://github.com/user/repo")
-        result, error = _call(lambda on_success, on_error: remote.download(on_success, on_error, commit_hash="abc123"))
+        result, error = _download(remote, self.target_dir)
         assert result is None
         assert isinstance(error, ext_exceptions.RemoteError)

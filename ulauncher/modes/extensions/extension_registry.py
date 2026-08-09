@@ -131,10 +131,11 @@ class ExtensionRegistry:
         remote = resolve_remote(url, on_error)
         if remote is None:
             return
-        if Path(remote.target_dir).exists():
+        target_dir = f"{paths.USER_EXTENSIONS}/{remote.ext_id}"
+        if Path(target_dir).exists():
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
-        record = ExtensionRecord(remote.ext_id, remote.target_dir)
+        record = ExtensionRecord(remote.ext_id, target_dir)
 
         def done() -> None:
             logger.info("Extension %s installed successfully", record.id)
@@ -226,7 +227,7 @@ class ExtensionRegistry:
         """Install (atomically): download, stop and swap. Restarting is the caller's concern
         (in the app, the service reconciles once the job wrapping this operation releases).
         """
-        target_path = record.path
+        target_dir = record.path
         # Fixed path per extension so failed installs don't accumulate.
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
         staging_dir = str(Path(paths.EXTENSIONS_STAGING) / record.id)
@@ -236,7 +237,6 @@ class ExtensionRegistry:
         except OSError as error:
             on_error(error)
             return
-        remote.target_dir = staging_dir
 
         def fail(error: Exception) -> None:
             rmtree(staging_dir, ignore_errors=True)
@@ -248,7 +248,7 @@ class ExtensionRegistry:
             def on_deps_installed(_stdout: str) -> None:
                 def swap_and_finish() -> None:
                     error: Exception | None = None
-                    if _swap_dir(staging_dir, target_path):
+                    if _swap_dir(staging_dir, target_dir):
                         try:
                             # Saved together, so an update to a declared remote can't leave the
                             # state pointing half at the previous host
@@ -260,7 +260,7 @@ class ExtensionRegistry:
                         except (OSError, ext_exceptions.ExtensionError) as save_error:
                             error = save_error
                     else:
-                        error = OSError(f"Failed to swap the staged extension into {target_path}")
+                        error = OSError(f"Failed to swap the staged extension into {target_dir}")
                     rmtree(staging_dir, ignore_errors=True)
                     if error:
                         on_error(error)
@@ -271,4 +271,4 @@ class ExtensionRegistry:
 
             ExtensionDependencies(record.id, staging_dir).install(on_deps_installed, fail)
 
-        remote.download(on_downloaded, fail, commit_hash)
+        remote.download(staging_dir, on_downloaded, fail, commit_hash)
