@@ -41,8 +41,8 @@ class TestJsonConf:
         assert json_stringify(JsonConf(a=1, c=3, b=2), sort_keys=True) == '{"a": 1, "b": 2, "c": 3}'
         assert json_stringify(JsonConf(a=1, b=2), indent=4) == '{\n    "a": 1,\n    "b": 2\n}'
         conf = JsonConf(a=None, b=[], c={}, d=1)
-        assert json_stringify(conf) == '{"d": 1}'
-        assert json_stringify(conf, value_blacklist=[]) == '{"a": null, "b": [], "c": {}, "d": 1}'
+        assert json_stringify(conf) == '{"a": null, "b": [], "c": {}, "d": 1}'
+        assert json_stringify(conf, value_blacklist=[[], {}, None, ""]) == '{"d": 1}'
 
     def test_save(self, tmp_path: Path) -> None:
         """Test that save() writes the correct data using json_save"""

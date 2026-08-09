@@ -199,11 +199,15 @@ class TestExtensionManifest:
 
     def test_defaults_not_included_in_stringify(self) -> None:
         # Ensure defaults don't leak. "urls" survives empty because the blacklist drops values before recursing.
-        assert json_stringify(ExtensionManifest()) == '{"input_debounce": 0.05, "urls": {}}'
+        blacklist: list[Any] = [[], {}, None, ""]
+        assert json_stringify(ExtensionManifest(), value_blacklist=blacklist) == '{"input_debounce": 0.05, "urls": {}}'
         # __setitem__ converts the raw dict into ExtensionManifestPreference instances.
         raw: dict[str, Any] = {"preferences": {"ns": {"k": "v"}}}
         manifest = ExtensionManifest(**raw)
-        assert json_stringify(manifest) == '{"input_debounce": 0.05, "urls": {}, "preferences": {"ns": {"k": "v"}}}'
+        assert (
+            json_stringify(manifest, value_blacklist=blacklist)
+            == '{"input_debounce": 0.05, "urls": {}, "preferences": {"ns": {"k": "v"}}}'
+        )
 
     def test_manifest_backwards_compatibility(self) -> None:
         # Legacy key names, renamed by ExtensionManifest.__setitem__ rather than declared as fields.

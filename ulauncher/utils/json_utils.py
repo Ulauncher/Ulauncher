@@ -5,7 +5,7 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ def sanitize_json(d: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None}
 
 
-def _filter_recursive(data: Any, blacklist: list[Any]) -> Any:
+def _filter_recursive(data: Any, blacklist: Iterable[Any]) -> Any:
     if isinstance(data, dict):
         return {k: _filter_recursive(v, blacklist) for k, v in data.items() if v not in blacklist}
     if isinstance(data, list):
@@ -39,13 +39,9 @@ def json_load(path: str | Path) -> Any:
 
 
 def json_stringify(
-    data: Any, indent: int | str | None = None, sort_keys: bool = False, value_blacklist: list[Any] | None = None
+    data: Any, indent: int | str | None = None, sort_keys: bool = False, value_blacklist: Iterable[Any] | None = None
 ) -> str:
-    # When serializing to JSON, filter out common empty default values like None, empty list or dict
-    # These are default values when initializing the objects, but they are not actual data
-    if value_blacklist is None:
-        value_blacklist = [[], {}, None, ""]
-    filtered_data = _filter_recursive(data, value_blacklist)
+    filtered_data = data if value_blacklist is None else _filter_recursive(data, value_blacklist)
     return json.dumps(filtered_data, indent=indent, sort_keys=sort_keys)
 
 
@@ -54,11 +50,9 @@ def json_save(
     path: str | Path,
     indent: int | str | None = 2,
     sort_keys: bool = False,
-    value_blacklist: list[Any] | None = None,
+    value_blacklist: Iterable[Any] | None = None,
 ) -> bool:
     """Save self to file path"""
-    # When serializing to JSON, filter out common empty default values like None, empty list or dict
-    # These are default values when initializing the objects, but they are not actual data
     if file_path := Path(path).resolve():
         try:
             # Ensure parent dir first

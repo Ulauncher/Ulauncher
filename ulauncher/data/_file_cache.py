@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 FileInstanceT = TypeVar("FileInstanceT")
 _instance_paths: dict[int, str] = {}
 
+# Values considered "unset" defaults rather than actual data, so they're omitted from the saved file.
+_EMPTY_VALUES: tuple[Any, ...] = ([], {}, None, "")
+
 
 def _populate_from_file(instance: Any, file_path: str) -> None:
     data = json_load(file_path)
@@ -47,4 +50,4 @@ def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool =
         logger.error("Could not resolve file path for instance %s", instance.__class__.__name__)
         return False
 
-    return json_save(data, file_path, sort_keys=sort_keys)
+    return json_save(data, file_path, sort_keys=sort_keys, value_blacklist=_EMPTY_VALUES)
