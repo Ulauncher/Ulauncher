@@ -29,7 +29,7 @@ def _load_legacy(path: Path) -> Any | None:
 
 def _store_json(path: str, data: Any) -> bool:
     try:
-        Path(path).write_text(json.dumps(data, indent=4))
+        Path(path).write_text(json.dumps(data, indent=2))
     except (OSError, TypeError, ValueError) as e:
         _logger.warning('Could not store JSON file "%s": %s', path, e)
         return False
