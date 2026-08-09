@@ -69,15 +69,15 @@ def json_save(
     sort_keys: bool = False,
     value_blacklist: Iterable[Any] | None = None,
 ) -> bool:
-    """Save self to file path"""
-    if file_path := Path(path).resolve():
-        try:
-            # Ensure parent dir first
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            stringified_data = json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
-            _atomic_write_text(file_path, stringified_data)
-        except OSError:
-            logger.exception('Could not write to JSON file "%s"', file_path)
-        else:
-            return True
-    return False
+    """Save data to file path as JSON. Returns whether it was written, logging any failure."""
+    file_path = Path(path).resolve()
+    try:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        stringified_data = json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
+        _atomic_write_text(file_path, stringified_data)
+    # Serializing raises TypeError or ValueError depending on what the data holds, and writing
+    # raises OSError. Callers only act on the bool, so treat every failure the same.
+    except Exception:
+        logger.exception('Could not write to JSON file "%s"', file_path)
+        return False
+    return True

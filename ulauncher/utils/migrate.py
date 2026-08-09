@@ -28,15 +28,6 @@ def _load_legacy(path: Path) -> Any | None:
     return None
 
 
-def _store_json(path: str, data: Any) -> bool:
-    try:
-        return json_save(data, path)
-    # Unpickled legacy data can hold values json can't serialize
-    except (TypeError, ValueError) as e:
-        _logger.warning('Could not store JSON file "%s": %s', path, e)
-        return False
-
-
 def _migrate_file(
     from_path: str, to_path: str, transform: Callable[[Any], Any] | None = None, overwrite: bool = False
 ) -> None:
@@ -46,7 +37,7 @@ def _migrate_file(
             _logger.info("Migrating %s to %s", from_path, to_path)
             if callable(transform):
                 data = transform(data)
-            _store_json(to_path, data)
+            json_save(data, to_path)
 
 
 def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
