@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable
@@ -11,6 +12,8 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
     R = TypeVar("R")
+
+logger = logging.getLogger(__name__)
 
 _listeners: dict[str, set[Callable[..., Any]]] = defaultdict(set)
 
@@ -45,5 +48,9 @@ class EventBus:
         return listener
 
     def emit(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+        # Exception barrier: a raising listener must not break the emitter or the other listeners
         for listener in _listeners[event_name]:
-            listener(*args, **kwargs)
+            try:
+                listener(*args, **kwargs)
+            except Exception:
+                logger.exception("Unhandled error in listener for event %s", event_name)
