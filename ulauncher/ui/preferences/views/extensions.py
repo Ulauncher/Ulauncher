@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import Any
 
 from gi.repository import Gtk, Pango
@@ -246,7 +247,8 @@ class ExtensionsView(BaseView):
         # Add updated date (commit time)
         if ext.state.commit_time:
             try:
-                updated_date = ext.state.commit_time[:10]
+                # astimezone() reads pre-6.0 records too - those were stored naive in local time
+                updated_date = datetime.fromisoformat(ext.state.commit_time).astimezone().strftime("%Y-%m-%d")
                 updated_row = styled(
                     Gtk.Label(label=f"updated on {updated_date}", halign=Gtk.Align.START), "caption", "dim-label"
                 )

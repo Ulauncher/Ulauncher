@@ -26,4 +26,4 @@ def untar(archive_path: str, output_path: str, overwrite: bool = True, strip: in
             # Change member paths to strip N levels, like untar --strip-components=N
             member.name = member.name.split("/", strip)[-1]
 
-        archive.extractall(output_path)
+        archive.extractall(output_path)  # noqa: S202

@@ -18,7 +18,7 @@ def _name_color(name: str) -> int:
     """Ensure the same name gets the same color every time."""
     # Own generator, because seeding the shared one would make every other caller's draw depend
     # on the last name logged. Cached because seeding costs more than formatting the whole record.
-    return random.Random(name).randint(32, 37)
+    return random.Random(name).randint(32, 37)  # noqa: S311
 
 
 class ColoredFormatter(logging.Formatter):

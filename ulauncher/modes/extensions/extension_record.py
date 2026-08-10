@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from os.path import isfile, join
 from pathlib import Path
 from shutil import rmtree
@@ -230,8 +230,8 @@ class ExtensionRecord:
         self.state.save(
             **extra_state,
             commit_hash=commit_hash,
-            commit_time=datetime.fromtimestamp(commit_timestamp).isoformat(),
-            updated_at=datetime.now().isoformat(),
+            commit_time=datetime.fromtimestamp(commit_timestamp, timezone.utc).isoformat(),
+            updated_at=datetime.now(timezone.utc).isoformat(),
             error=None,
         )
 

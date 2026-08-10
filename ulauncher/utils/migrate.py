@@ -20,7 +20,7 @@ def _load_legacy(path: Path) -> Any | None:
 
     try:
         if path.suffix == ".db":
-            return pickle.loads(path.read_bytes())
+            return pickle.loads(path.read_bytes())  # noqa: S301 - user's own v5 cache
         if path.suffix == ".json":
             return json.loads(path.read_text())
     except (OSError, pickle.PickleError, EOFError, AttributeError, ImportError, ValueError) as e:

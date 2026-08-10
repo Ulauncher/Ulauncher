@@ -72,11 +72,11 @@ target-version = "py38"
 pylint = { max-args = 10}
 flake8-pytest-style = {fixture-parentheses = false}
 ignore = [
-  "A003",     # Allow using same names as python internals for class methods that doesn't shadow global scope
   "ANN401",   # Using Any as an argument type annotation
   "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors.
   "PLC0415",  # Allow imports outside of top-level for performance reasons
-  "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
+  "RUF012",   # BaseDataClass deep-copies its class-level defaults into every instance, so they aren't shared state
+  "S603","S606","S607", # Subprocess rules that only apply with untrusted input.
   "TC001", "TC002", "TC003", # Performance best practice that does nothing for our use
   "TD002", "TD003" # Allow TODOs and FIXMEs without author and link
 ]
@@ -91,9 +91,10 @@ select = [
   "B",        # flake8-bugbear
   "BLE",      # flake8-blind-except
   "C4",       # flake8-comprehensions
+  # "C90",    # mccabe complexity (we already have PLR0911-PLR0915, and mccabe works poorly with our GLib callback style)
   # "COM",    # flake8-commas (we use ruff format instead)
   # "CPY",    # flake8-copyright (enforces copyright headers in python files)
-  # "DTZ",    # flake8-datetimez (too focused on enforcing time zone argument, which we don't need)
+  "DTZ",      # flake8-datetimez
   # "D",      # pydocstyle (validates, formats and enforces docstrings)
   # "DOC",    # pydoclint (enabling this will show a warning because all the rules require preview)
   "E",        # pycodestyle errors
@@ -120,12 +121,12 @@ select = [
   "PL",       # pylint (same as PLC+PLE+PLR+PLW)
   "PT",       # flake8-pytest-style
   # "PTH",    # flake8-use-pathlib (pathlib isn't better for simple use cases)
+  "PTH210",   # Only non-opinionated and helpful exception to this rule ^
   "PYI",      # flake8-pyi
   "RET",      # flake8-return
   "RSE",      # flake8-raise
-  "RUF",      # Ruff-specific rules
-  # "S",      # flake8-bandit (assumes you are writing a web server and that all params you use with subshells etc are untrusted input)
-  "S101",     # flake8-bandit: Disable runtime asserts
+  "RUF",      # ruff-specific rules
+  "S",        # flake8-bandit (web server focused, with a small set of rules that are useful for Ulauncher, like exception handling)
   "SLF",      # flake8-self
   "SLOT",     # flake8-slots
   "SIM",      # flake8-simplify
@@ -160,6 +161,7 @@ banned-module-level-imports = ["typing_extensions"]
   "PLR2004",    # Allow direct comparison with integers (magic-value)
   "SLF001",     # Allow accessing private members (obj._hello)
   "S101",       # Allow asserts in tests
+  "S108",       # /tmp paths in tests are opaque strings for assertions, not files we write
   "T201",       # Allow print statements
 ]
 "ulauncher/gi.py" = ["TID251"]           # This IS the canonical gi import module
