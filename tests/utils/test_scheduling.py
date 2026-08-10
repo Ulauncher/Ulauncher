@@ -49,6 +49,17 @@ class TestContext:
         assert schedule._trigger() is False
         assert schedule.source is None
 
+    def test_trigger_logs_and_contains_func_errors(self, caplog: pytest.LogCaptureFixture) -> None:
+        schedule = scheduling.Context(Mock(), Mock(side_effect=RuntimeError("boom")), repeat=False, args=(), kwargs={})
+        assert schedule._trigger() is False
+        assert schedule.source is None
+        assert "Unhandled error in scheduled call" in caplog.text
+
+    def test_trigger_keeps_repeating_schedule_alive_when_func_raises(self) -> None:
+        schedule = scheduling.Context(Mock(), Mock(side_effect=RuntimeError("boom")), repeat=True, args=(), kwargs={})
+        assert schedule._trigger() is True
+        assert schedule.source is not None
+
     def test_trigger_does_not_run_func_after_cancel(self) -> None:
         func = Mock()
         schedule = scheduling.Context(Mock(), func, repeat=True, args=(), kwargs={})

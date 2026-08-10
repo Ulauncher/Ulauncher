@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Callable
 
 from ulauncher.gi import GLib
@@ -8,6 +9,8 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     P = ParamSpec("P")
+
+logger = logging.getLogger(__name__)
 
 
 class Context:
@@ -39,13 +42,15 @@ class Context:
     def _trigger(self, *_args: Any) -> bool:
         if not self.source:
             return False
-        keep_alive = False
+        # Exception barrier: raising into GLib would dump the traceback to stderr, bypassing our
+        # logging, and kill a repeating schedule. Contain it here so an interval survives a bad run.
         try:
             self._func(*self._args, **self._kwargs)
-            keep_alive = self._repeat and self.source is not None
-        finally:
-            if not keep_alive:
-                self.source = None
+        except Exception:
+            logger.exception("Unhandled error in scheduled call to %s", getattr(self._func, "__qualname__", self._func))
+        keep_alive = self._repeat and self.source is not None
+        if not keep_alive:
+            self.source = None
         return keep_alive
 
 
