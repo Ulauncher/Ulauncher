@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from gi.repository import Gdk, GdkX11  # type: ignore[missing-module-attribute] - fails in docker image for some reason
+from gi.repository import Gdk, GdkX11  # type: ignore[missing-module-attribute]
 
 from ulauncher.gi import Gio
 

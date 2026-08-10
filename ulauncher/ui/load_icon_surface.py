@@ -7,7 +7,7 @@ from ulauncher import paths
 from ulauncher.utils.lru_cache import lru_cache
 
 if TYPE_CHECKING:
-    from cairo import ImageSurface  # type: ignore[missing-module-attribute] - fails in docker image for some reason
+    from cairo import ImageSurface
 
 
 logger = logging.getLogger(__name__)
