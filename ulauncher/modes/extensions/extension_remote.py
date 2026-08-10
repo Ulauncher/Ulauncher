@@ -348,7 +348,10 @@ def parse_extension_url(input_url: str) -> Fallible[UrlParseResult, str]:
         input_url_is_ssl = True
         remote_url = "https://" + remote_url[4:].replace(":", "/")
 
-    url_parts = urlparse(remote_url)
+    try:
+        url_parts = urlparse(remote_url)
+    except ValueError:
+        return Err(f"Invalid URL: {input_url}")
     path = url_parts.path.lstrip("/")
     host = url_parts.netloc.lower()
     remote_url = f"https://{host}/{path}"

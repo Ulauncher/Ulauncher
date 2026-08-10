@@ -97,6 +97,11 @@ class TestParseExtensionUrl:
         assert isinstance(result, Err)
         assert "Invalid URL" in result.error
 
+    def test_unparsable_url_returns_error(self) -> None:
+        result = parse_extension_url("https://[foo")
+        assert isinstance(result, Err)
+        assert "Invalid URL" in result.error
+
     def test_known_host_without_repo_returns_error(self) -> None:
         for url in ("https://github.com/owner", "https://gitlab.com/owner/", "git@codeberg.org:owner"):
             result = parse_extension_url(url)
