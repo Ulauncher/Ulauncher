@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, ClassVar, Iterator
 
 import pytest
 from pytest_mock import MockerFixture
@@ -23,7 +23,7 @@ from ulauncher.modes.extensions.extension_service import ExtensionService
 
 
 class FakeManifest:
-    triggers: dict[str, Any] = {}
+    triggers: ClassVar[dict[str, Any]] = {}
     input_debounce = 0.05
 
     def validate(self) -> None:

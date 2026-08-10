@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
+from typing import ClassVar
 
 from ulauncher.utils.lru_cache import lru_cache
 
@@ -21,7 +22,7 @@ def _name_color(name: str) -> int:
 
 
 class ColoredFormatter(logging.Formatter):
-    formats = {
+    formats: ClassVar[dict[int, tuple[str, int]]] = {
         logging.DEBUG: ("ℹ️", 34),  # blue # noqa: RUF001
         logging.INFO: ("ℹ️", 37),  # white # noqa: RUF001
         logging.WARNING: ("⚠️", 33),  # yellow
