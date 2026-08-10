@@ -97,6 +97,12 @@ class TestParseExtensionUrl:
         assert isinstance(result, Err)
         assert "Invalid URL" in result.error
 
+    def test_known_host_without_repo_returns_error(self) -> None:
+        for url in ("https://github.com/owner", "https://gitlab.com/owner/", "git@codeberg.org:owner"):
+            result = parse_extension_url(url)
+            assert isinstance(result, Err)
+            assert "Invalid URL" in result.error
+
     def test_no_host_no_file_protocol_returns_error(self) -> None:
         # This creates a URL with no host but protocol is https
         result = parse_extension_url("https:///user/repo")

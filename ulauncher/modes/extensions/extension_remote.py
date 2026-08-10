@@ -364,7 +364,10 @@ def parse_extension_url(input_url: str) -> Fallible[UrlParseResult, str]:
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
         # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
-        user, repo, *_ = path.split("/", 2)
+        user, _, rest = path.partition("/")
+        repo = rest.split("/", 1)[0]
+        if not user or not repo:
+            return Err(f"Invalid URL: {input_url}")
         if repo.endswith(".git"):
             repo = repo[:-4]
         path = f"{user}/{repo}"
