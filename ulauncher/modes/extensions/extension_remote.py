@@ -15,7 +15,7 @@ from ulauncher import (
     api_version,
     paths,
 )
-from ulauncher.data import BaseDataClass
+from ulauncher.data import BaseDataClass, Err, Fallible, Ok
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.subprocess_utils import OnError, OnSuccess, download_file, run_command
@@ -149,12 +149,11 @@ class ExtensionRemote(UrlParseResult):
 
     def __init__(self, url: str) -> None:
         stripped_url = url.strip()
-        try:
-            super().__init__(**parse_extension_url(stripped_url))
-        except (ValueError, OSError) as e:
-            logger.warning("Invalid URL: %s", url)
-            msg = f"Invalid URL: {url}"
-            raise ext_exceptions.UrlError(msg) from e
+        parsed = parse_extension_url(stripped_url)
+        if isinstance(parsed, Err):
+            logger.warning(parsed.error)
+            raise ext_exceptions.UrlError(parsed.error)
+        super().__init__(**parsed.value)
 
         self.url = stripped_url
         self._repo = _BareRepo(f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git", self.remote_url, self.url)
@@ -337,11 +336,8 @@ class ExtensionRemote(UrlParseResult):
             raise ext_exceptions.RemoteError(msg) from e
 
 
-def parse_extension_url(input_url: str) -> UrlParseResult:
-    """
-    Parses the extension URL and returns a dictionary.
-    Raises AssertionError if the URL is invalid.
-    """
+def parse_extension_url(input_url: str) -> Fallible[UrlParseResult, str]:
+    """Parse the extension URL into its derived ids and urls, or an error message if it is invalid."""
     browser_url: str | None = None
     download_url_template: str | None = None
     input_url_is_ssl = False
@@ -358,13 +354,11 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
     remote_url = f"https://{host}/{path}"
 
     if not path:
-        msg = f"Invalid URL: {input_url}"
-        raise ValueError(msg)
+        return Err(f"Invalid URL: {input_url}")
 
     if url_parts.scheme in ("", "file"):
         if not isdir(url_parts.path):
-            msg = f"Invalid path: {input_url}"
-            raise ValueError(msg)
+            return Err(f"Invalid path: {input_url}")
         path = os.path.abspath(url_parts.path).lstrip("/")
         browser_url = remote_url = f"file:///{path}"
 
@@ -386,14 +380,15 @@ def parse_extension_url(input_url: str) -> UrlParseResult:
         logger.warning("Can not safely derive HTTPS URL from SSL URL input '%s', Assuming: '%s'", input_url, remote_url)
 
     if not remote_url.startswith("file://") and not host:
-        msg = f"Invalid URL: {input_url}"
-        raise ValueError(msg)
+        return Err(f"Invalid URL: {input_url}")
 
     ext_id = ".".join(([*reversed(host.split("."))] if host else []) + path.lower().split("/"))
 
-    return UrlParseResult(
-        ext_id=ext_id,
-        remote_url=remote_url,
-        browser_url=browser_url,
-        download_url_template=download_url_template,
+    return Ok(
+        UrlParseResult(
+            ext_id=ext_id,
+            remote_url=remote_url,
+            browser_url=browser_url,
+            download_url_template=download_url_template,
+        )
     )
