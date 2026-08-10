@@ -12,8 +12,9 @@ DEB_DISTRO = $(shell eval lsb_release -sc)
 DEB_PACKAGER_NAME := "" # Will default to the user full name if empty
 DEB_PACKAGER_EMAIL := ulauncher.app@gmail.com
 VENV_REQUIREMENTS_SNAPSHOT := .venv/.requirements.txt
-# ?= so the docker image can point the venv at its Python 3.8
-PYTHON_BIN ?= $(shell command -v python3)
+# Python bin path, needed to build the venv (allows PYTHON_BIN override for container)
+# must be the full system path, or it will resolve to the venv python bin and make it symlink to itself
+BASE_PYTHON := $(shell command -v $(or $(PYTHON_BIN),python3))
 export PATH := $(ROOT_DIR).venv/bin:$(PATH)
 
 # cli font vars
@@ -62,7 +63,7 @@ venv:
 	  fi
 	fi
 	echo -e "$(BOLD)[+] Setting up virtual environment...$(RESET)"
-	$(PYTHON_BIN) -m venv --clear --system-site-packages .venv
+	$(BASE_PYTHON) -m venv --clear --system-site-packages .venv
 	PYGOBJECT_STUB_CONFIG=Gtk3,Gdk3,Soup2 .venv/bin/python -m pip install --ignore-installed --no-warn-conflicts --upgrade $(if $(QUIET),-q) -r requirements.txt
 	# Keep a copy of the requirements used for this environment so make targets can
 	# tell when the local venv needs to be refreshed.
