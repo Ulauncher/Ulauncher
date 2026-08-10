@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from ulauncher.data._file_cache import _load_cached_file_instance, _save_cached_file_instance
 from ulauncher.data.base_data_class import BaseDataClass
 
-T = TypeVar("T", bound="JsonConf")
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class JsonConf(BaseDataClass):
@@ -31,7 +32,7 @@ class JsonConf(BaseDataClass):
         def clear(self) -> None: ...
 
     @classmethod
-    def load(cls: type[T], path: str, *, force: bool = False) -> T:
+    def load(cls, path: str, *, force: bool = False) -> Self:
         return _load_cached_file_instance(cls, path, force=force)
 
     def save(self, *args: Any, **kwargs: Any) -> bool:

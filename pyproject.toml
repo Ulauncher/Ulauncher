@@ -76,7 +76,6 @@ ignore = [
   "ANN401",   # Using Any as an argument type annotation
   "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors.
   "PLC0415",  # Allow imports outside of top-level for performance reasons
-  "PYI019",   # Don't want to require typing_extensions and/or py 3.11
   "RUF012",   # Mostly false positives because we're deep cloning class vars when creating instances in our custom data class
   "TC001", "TC002", "TC003", # Performance best practice that does nothing for our use
   "TD002", "TD003" # Allow TODOs and FIXMEs without author and link
