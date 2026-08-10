@@ -36,11 +36,24 @@ bad-param-name-override = false
 missing-override-decorator = false
 implicit-any-lambda = false
 
-[tool.pylint.MASTER]
-ignore-patterns="ulauncher,docs,data,scripts,tests"
-
+# Pylint is not checked in CI or included in `make check` due to being slow.
+# Run occasional manual audit with `make pylint`
 [tool.pylint."MESSAGES CONTROL"]
-disable="all"
+disable = "all"
+# Enables and documents that gap where the other linters cannot yet detect any real runtime error.
+enable = [
+  "access-member-before-definition",  # E0203: reads self.x on a path that runs before it is assigned
+  "arguments-out-of-order",           # W1114: args passed in the wrong order, invisible when types match
+  "assignment-from-no-return",        # E1111: assigns the result of a function that returns nothing
+  "bad-except-order",                 # E0701: a broad except before a narrow one leaves the narrow one dead
+  "comparison-with-callable",         # W0143: compares a method directly with a value, instead of calling it
+  "logging-format-truncated",         # E1201: format string ends mid specifier, so the record is dropped
+  "logging-unsupported-format",       # E1200: invalid conversion character, so the record is dropped
+  "no-method-argument",               # E0211: method declared without self
+  "super-init-not-called",            # W0231: base __init__ never runs, so its attributes are missing
+  "unbalanced-dict-unpacking",        # W0644: unpacks a dict into the wrong number of names
+  "undefined-loop-variable",          # W0631: uses a loop variable after the loop, unbound if it never ran
+]
 
 [tool.typos.default]
 extend-ignore-re = [
@@ -58,6 +71,10 @@ target-version = "py38"
 [tool.ruff.lint]
 pylint = { max-args = 10}
 flake8-pytest-style = {fixture-parentheses = false}
+# Only the preview rules named explicitly in `select` are enabled, not every preview rule
+# belonging to a selected rule-set.
+preview = true
+explicit-preview-rules = true
 ignore = [
   "ANN401",   # Using Any as an argument type annotation
   "PERF203",  # Useless rule. Python 3.11 introduced "zero-cost" exception handling and there is no alternative if you want to continue iterating yet ignore errors.
@@ -76,6 +93,7 @@ select = [
   "ARG",      # flake8-unused-arguments
   "ASYNC",    # flake8-async
   "B",        # flake8-bugbear
+  "B909",     # Mutating a collection while iterating it (preview) ^
   "BLE",      # flake8-blind-except
   "C4",       # flake8-comprehensions
   # "C90",    # mccabe complexity (we already have PLR0911-PLR0915, and mccabe works poorly with our GLib callback style)
@@ -106,6 +124,7 @@ select = [
   "PGH",      # pygrep-hooks
   "PIE",      # flake8-pie
   "PL",       # pylint (same as PLC+PLE+PLR+PLW)
+  "PLE1141",  # Unpacking a dict in iteration without .items() (preview) ^
   "PT",       # flake8-pytest-style
   # "PTH",    # flake8-use-pathlib (pathlib isn't better for simple use cases)
   "PTH210",   # Only non-opinionated and helpful exception to this rule ^

@@ -26,7 +26,7 @@ class JsonConf(BaseDataClass):
         # reject the arbitrary keys it holds. It is only a signature, so it stays out of the runtime and
         # BaseDataClass.__init__ keeps handling construction. Subclasses that declare fields don't
         # override __init__, so they still get the synthesis.
-        def __init__(self, *args: Any, **kwargs: Any) -> None: ...
+        def __init__(self, *args: Any, **kwargs: Any) -> None: ...  # pylint: disable=super-init-not-called
 
         # Opts back in to clear. Safe here because file data is partial, so every prop needs a default.
         def clear(self) -> None: ...

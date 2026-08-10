@@ -132,7 +132,7 @@ run-container:
 
 #=Lint/test Commands
 
-.PHONY: check lint format check-container check-all pyrefly ruff rumdl typos pytest perf perf-compare
+.PHONY: check lint format check-container check-all pyrefly ruff rumdl typos pytest perf perf-compare pylint
 
 # Run all linters
 lint: venv typos ruff pyrefly rumdl
@@ -152,6 +152,10 @@ check-all: check
 # Lint with pyrefly (type checker)
 pyrefly: venv
 	@pyrefly check
+
+# Lint with pylint (slow)
+pylint: venv
+	@pylint ulauncher
 
 # Lint with ruff
 ruff: venv

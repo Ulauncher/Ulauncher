@@ -7,6 +7,7 @@ build
 git-cliff >= 2.13, < 3
 lefthook == 2.*
 pygobject-stubs==2.12.0
+pylint
 pyrefly >= 1.2.0
 pytest
 pytest-mock
