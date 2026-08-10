@@ -36,19 +36,6 @@ bad-param-name-override = false
 missing-override-decorator = false
 implicit-any-lambda = false
 
-[tool.mypy]
-python_version = "3.8"
-strict = true
-disable_error_code = "import-untyped,call-arg,unused-ignore"
-implicit_reexport = true
-disallow_untyped_calls = false
-incremental = false  # Incremental is broken: https://github.com/python/mypy/issues/18473
-ignore_missing_imports = false
-
-[[tool.mypy.overrides]]
-module = "debugpy"
-ignore_missing_imports = true
-
 [tool.pylint.MASTER]
 ignore-patterns="ulauncher,docs,data,scripts,tests"
 
@@ -85,7 +72,7 @@ ignore = [
 # See https://docs.astral.sh/ruff/rules/ (synced with ruff 0.14.0)
 select = [
   "A",        # flake8-builtins
-  "ANN",      # flake8-annotations (ANN2** are not covered by pyrefly, and ANN204 is not covered by mypy)
+  "ANN",      # flake8-annotations (ANN2** are not covered by pyrefly)
   "ARG",      # flake8-unused-arguments
   "ASYNC",    # flake8-async
   "B",        # flake8-bugbear
