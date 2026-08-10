@@ -20,6 +20,7 @@ from ulauncher.utils.eventbus import EventBus
 
 events = EventBus("listener_namespace")
 
+
 @events.on
 def something_happened(data):
     # Handle event

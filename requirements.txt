@@ -10,7 +10,7 @@ pygobject-stubs==2.12.0
 pyrefly >= 1.2.0
 pytest
 pytest-mock
-ruff >= 0.15.17, < 0.16.0
+ruff >= 0.16.2, < 0.17.0
 rumdl == 0.2.*; python_version >= '3.9'
 typing-extensions
 typos == 1.*

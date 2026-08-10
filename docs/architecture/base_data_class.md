@@ -15,10 +15,12 @@ Use `BaseDataClass` instead of:
 ```python
 from ulauncher.data import BaseDataClass
 
+
 class MyData(BaseDataClass):
     name: str = ""  # Annotate and give a default
     count: int = 0
     metadata: dict[str, str] = {}  # Deep copied on instantiation
+
 
 data = MyData(name="test", count=5)
 data["name"]  # Works like a dict
@@ -31,10 +33,10 @@ data.name  # Also works like an object
 keyword-only `__init__` signature from the annotated attributes:
 
 ```python
-MyData(name="test")       # checked
-MyData(nickname="test")   # error: unexpected keyword argument `nickname`
-MyData(count="five")      # error: not assignable to parameter `count`
-MyData({"name": "x"})     # error: positional, use MyData(**data) instead
+MyData(name="test")  # checked
+MyData(nickname="test")  # error: unexpected keyword argument `nickname`
+MyData(count="five")  # error: not assignable to parameter `count`
+MyData({"name": "x"})  # error: positional, use MyData(**data) instead
 ```
 
 Only annotated attributes become fields. Runtime behavior is unchanged, so an
@@ -60,10 +62,10 @@ removing it later leaves the instance contradicting its own type. The dict
 methods that can do that are marked deprecated for type checkers:
 
 ```python
-data.pop("name")   # error
-data.popitem()     # error
-data.clear()       # error
-del data["name"]   # error
+data.pop("name")  # error
+data.popitem()  # error
+data.clear()  # error
+del data["name"]  # error
 ```
 
 None of this is enforced at runtime.
@@ -77,8 +79,8 @@ restores.
 Writes are not covered, only removals:
 
 ```python
-del data.name              # not reported
-data["count"] = "5"        # not reported
+del data.name  # not reported
+data["count"] = "5"  # not reported
 data.update({"count": 5})  # not reported
 ```
 

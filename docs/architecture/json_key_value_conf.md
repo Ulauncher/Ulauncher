@@ -17,11 +17,14 @@ Use [`JsonConf`](json_conf.md) instead for files with a known set of named field
 ```python
 from ulauncher.data import JsonConf, JsonKeyValueConf
 
+
 class Record(JsonConf):
     name = ""
 
+
 class Store(JsonKeyValueConf[str, Record]):
     pass
+
 
 store = Store.load("/path/to/store.json")
 store["key"] = {"name": "example"}  # raw dict is coerced to Record

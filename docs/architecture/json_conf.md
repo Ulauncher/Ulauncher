@@ -18,9 +18,11 @@ Use [`JsonKeyValueConf`](json_key_value_conf.md) instead when the file represent
 ```python
 from ulauncher.data import JsonConf
 
+
 class MyConfig(JsonConf):
     setting1 = "default"
     setting2 = 42
+
 
 config = MyConfig.load("/path/to/config.json")
 config["setting1"] = "new value"
@@ -76,6 +78,7 @@ class UserPreferences(JsonConf):
     hotkey = "<Primary>space"
     show_tray_icon = True
 
+
 prefs = UserPreferences.load("~/.config/ulauncher/settings.json")
 ```
 
@@ -86,6 +89,7 @@ class ExtensionConfig(JsonConf):
     api_key = ""
     refresh_interval = 300
     enabled_features = []
+
 
 config = ExtensionConfig.load(f"{extension_dir}/config.json")
 ```
