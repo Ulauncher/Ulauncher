@@ -58,12 +58,13 @@ def get_ext_registry() -> ExtensionRegistry:
 
 def get_ext_record(input_arg: str) -> ExtensionRecord | None:
     """Parses the input argument and returns an ExtensionRecord instance if it's installed, otherwise None."""
+    from ulauncher.data import Ok
     from ulauncher.modes.extensions.extension_remote import parse_extension_url
 
     arg = normalize_ext_arg(input_arg)
-    with contextlib.suppress(ValueError):
-        parse_result = parse_extension_url(arg)
-        arg = parse_result.ext_id
+    parse_result = parse_extension_url(arg)
+    if isinstance(parse_result, Ok):
+        arg = parse_result.value.ext_id
 
     return get_ext_registry().get(arg)
 

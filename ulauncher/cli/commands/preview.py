@@ -9,6 +9,7 @@ from typing import IO, Callable
 
 from ulauncher import app_id, paths
 from ulauncher.cli import CLIArguments
+from ulauncher.data import Err
 from ulauncher.gi import Gio, GLib
 from ulauncher.init_helpers import use_color
 from ulauncher.internals import log_wire
@@ -83,11 +84,11 @@ def _resolve_ext_id(path: Path) -> str | None:
             url_to_parse = git_url
             logger.debug("Found git remote URL: %s", git_url)
 
-    try:
-        return parse_extension_url(url_to_parse).ext_id
-    except (ValueError, ext_exceptions.ExtensionError):
-        logger.exception("Error: Failed to parse extension URL/path")
+    result = parse_extension_url(url_to_parse)
+    if isinstance(result, Err):
+        logger.error("Error: Failed to parse extension URL/path: %s", result.error)
         return None
+    return result.value.ext_id
 
 
 class PreviewLogTail:
