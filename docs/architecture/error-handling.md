@@ -45,6 +45,33 @@ errors as extraneous, so the DOC rules stay off.
 Callback chains model failure as a value through their `on_error` parameter: the caller is
 forced to provide the failure path up front, so failure handling cannot be forgotten.
 
+For synchronous functions where failure is an expected outcome the caller must branch on
+(bad user input, an invalid file), return `Fallible` from `ulauncher.data` instead of raising.
+This is the only contract a type checker enforces: `Ok`/`Err` form a union with no `unwrap`,
+so the value is unreachable until the caller narrows with `isinstance`. A callee change
+cannot silently widen the failure surface, it changes the return type and the checker flags
+every caller.
+
+```python
+from ulauncher.data import Err, Fallible, Ok
+
+
+def parse_port(raw: str) -> Fallible[int, str]:
+    if not raw.isdigit():
+        return Err(f"Not a number: {raw}")
+    return Ok(int(raw))
+
+
+result = parse_port(user_input)
+if isinstance(result, Err):
+    return notify(result.error)
+use(result.value)
+```
+
+Do not use `Fallible` wholesale. Code that cannot reasonably fail should just return its
+value, and unexpected failures (a bug, a full disk mid-write) should raise and travel to
+the barrier.
+
 ## Rules of thumb
 
 - Never catch bare `except:`. It swallows `KeyboardInterrupt` and `SystemExit`.
