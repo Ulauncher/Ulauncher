@@ -81,6 +81,7 @@ def _migrate_user_prefs(ext_id: str, user_prefs: dict[str, dict[str, Any]]) -> d
 
 
 def v5_to_v6() -> None:
+    """Migrate v5 and pre-release v6 config files to v6"""
     # Migrate extension state to individual files
     from configparser import ConfigParser
     from functools import partial
@@ -153,6 +154,7 @@ def v5_to_v6() -> None:
 
 
 def v5_to_v6_destructive() -> None:
+    """Prune v5 and pre-release v6 config paths"""
     from shutil import rmtree
     # Currently optional changes that breaks your conf if you want to revert back to v5 for some reason
     # We probably want to run these later as part of the v7 migration instead.
@@ -174,6 +176,13 @@ def v5_to_v6_destructive() -> None:
         if Path(cache_dir).is_dir():
             print(f"Removing deprecated cache directory '{cache_dir}'")  # noqa: T201
             rmtree(cache_dir)
+
+    # Purge the 6.0 beta dirs that lived inside the scanned extensions dir. Both hold only
+    # disposable data: staging leftovers, and a bare clone that is re-cloned when missing.
+    for legacy_scratch_dir in (f"{paths.USER_EXTENSIONS}/.staging", f"{paths.USER_EXTENSIONS}/.git"):
+        if Path(legacy_scratch_dir).is_dir():
+            print(f"Removing 6.0 beta directory '{legacy_scratch_dir}'")  # noqa: T201
+            rmtree(legacy_scratch_dir)
 
     # Delete old preferences
     from ulauncher.data import JsonConf

@@ -156,7 +156,7 @@ class ExtensionRemote(UrlParseResult):
         super().__init__(**parsed.value)
 
         self.url = stripped_url
-        self._repo = _BareRepo(f"{paths.USER_EXTENSIONS}/.git/{self.ext_id}.git", self.remote_url, self.url)
+        self._repo = _BareRepo(f"{paths.REPO_CACHE}/{self.ext_id}.git", self.remote_url, self.url)
 
     def _network_error(self) -> ext_exceptions.NetworkError:
         return ext_exceptions.NetworkError(f"Could not fetch remote {self.url}.")
