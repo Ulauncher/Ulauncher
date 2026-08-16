@@ -28,26 +28,36 @@ CSS_RESET = """
 """
 
 
+def _load_legacy_theme(manifest_path: Path) -> LegacyTheme | None:
+    """Loads a legacy manifest theme, or logs and returns None if the manifest is unusable."""
+    try:
+        # dict() rejects JSON that isn't an object, KeyError guards keys shadowing a class member.
+        data = dict(json.loads(manifest_path.read_text()))
+        if data.get("extend_theme", "") is None:
+            del data["extend_theme"]
+        data["base_path"] = str(manifest_path.parent)
+        return LegacyTheme(**data)
+    except (OSError, TypeError, ValueError, KeyError) as e:
+        logger.warning("Ignoring theme manifest '%s' (%s): %s", manifest_path, type(e).__name__, e)
+        return None
+
+
 def get_themes() -> dict[str, Theme]:
     """
     Gets a dict with the theme name as the key and theme as the value
     """
     themes: dict[str, Theme] = {}
+    user_themes = Path(paths.USER_THEMES)
+    # legacy Ulauncher manifest themes
+    manifest_themes = [t for t in map(_load_legacy_theme, user_themes.glob("**/manifest.json")) if t is not None]
 
     css_theme_paths = [
         *Path(paths.SYSTEM_THEMES).glob("*.css"),
-        *Path(paths.USER_THEMES).glob("*.css"),
+        *user_themes.glob("*.css"),
     ]
 
     all_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in css_theme_paths]
-
-    # legacy Ulauncher manifest themes
-    for manifest_path in Path(paths.USER_THEMES).glob("**/manifest.json"):
-        data = json.loads(manifest_path.read_text())
-        if data.get("extend_theme", "") is None:
-            del data["extend_theme"]
-        data["base_path"] = str(manifest_path.parent)
-        all_themes.append(LegacyTheme(**data))
+    all_themes.extend(manifest_themes)
 
     for theme in all_themes:
         try:
