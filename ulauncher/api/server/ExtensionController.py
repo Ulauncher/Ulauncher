@@ -23,7 +23,6 @@ class ExtensionController(WebSocket):
     manifest = None
     preferences = None
     _debounced_send_event = None
-    _allowed_extension_origins = ['http://127.0.0.1:5054']
 
     def __init__(self, controllers, *args, **kw):
         self.controllers = controllers
@@ -53,6 +52,14 @@ class ExtensionController(WebSocket):
         else:
             self._debounced_send_event(event)
         return self.result_renderer.handle_event(event, self)
+
+    def _own_origin(self):
+        """
+        The address extensions connect to, which is what the client sends as the origin.
+        Taken from the listening socket, because the port is not always the preferred one
+        """
+        host, port = self.server.serversocket.getsockname()[:2]
+        return 'http://%s:%s' % (host, port)
 
     def get_manifest(self):
         return self.manifest
@@ -89,7 +96,9 @@ class ExtensionController(WebSocket):
 
         # check if origin is allowed to avoid connections from Web browsers
         origin_header = self.request.headers.get('origin')
-        if origin_header not in self._allowed_extension_origins:
+        own_origin = self._own_origin()
+        if origin_header != own_origin:
+            logger.warning('Rejecting a connection from "%s". Expected "%s"', origin_header, own_origin)
             self.close()
             return
 

@@ -10,10 +10,14 @@ from ulauncher.api.shared.event import KeywordQueryEvent
 from ulauncher.search.Query import Query
 
 
-valid_headers = HTTPMessage()
-valid_headers.add_header('Origin', 'http://127.0.0.1:5054')
-invalid_headers = HTTPMessage()
-invalid_headers.add_header('Origin', 'https://example.com')
+def headers_for(origin):
+    headers = HTTPMessage()
+    headers.add_header('Origin', origin)
+    return headers
+
+
+valid_headers = headers_for('http://127.0.0.1:5054')
+invalid_headers = headers_for('https://example.com')
 
 
 class TestExtensionController:
@@ -38,8 +42,14 @@ class TestExtensionController:
             'ulauncher.api.server.ExtensionController.ExtensionManifest.open').return_value
 
     @pytest.fixture
-    def controller(self, controllers, mocker):
-        server, sock, address = (None, None, None)
+    def server(self):
+        server = mock.Mock()
+        server.serversocket.getsockname.return_value = ('127.0.0.1', 5054)
+        return server
+
+    @pytest.fixture
+    def controller(self, controllers, server, mocker):
+        sock, address = (None, None)
         controller = ExtensionController(controllers, server, sock, address)
         controller._debounced_send_event = controller._send_event
 
@@ -69,6 +79,16 @@ class TestExtensionController:
         controller.request.headers = invalid_headers
         controller.handleConnected()
         assert not controller.sendMessage.called
+
+    def test_handleConnected__origin_on_another_port__extension_id_is_stored(
+            self, controller, controllers, server, extPrefs):
+        extPrefs.get_dict.return_value = {}
+        server.serversocket.getsockname.return_value = ('127.0.0.1', 5055)
+        controller.request = mock.Mock()
+        controller.request.path = '/extension-name'
+        controller.request.headers = headers_for('http://127.0.0.1:5055')
+        controller.handleConnected()
+        assert controllers['extension-name'] == controller
 
     def test_handleConnected__preferences__sent_to_client(self, controller, extPrefs, mocker):
         extPrefs.get_dict.return_value = {}
