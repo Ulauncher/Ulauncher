@@ -43,6 +43,26 @@ class TestCalcMode:
         assert normalize_expr('12 / 1,5') == '12 / 1.5'
         assert normalize_expr('3^2') == '3**2'
         assert normalize_expr('((1+2') == '((1+2))'
+        assert normalize_expr('5*sqrt(') == '5'
+        assert normalize_expr('sqrt(2') == 'sqrt(2)'
+
+    def test_is_enabled__functions_and_constants(self, mode):
+        assert mode.is_enabled('sqrt(9)')
+        assert mode.is_enabled('2*pi')
+        assert mode.is_enabled('ln(e)')
+        assert mode.is_enabled('5*sqrt(')
+
+        # a name on its own is a word, not a question
+        assert not mode.is_enabled('pi')
+        assert not mode.is_enabled('sqrt')
+        # an unknown name is not math, even next to numbers
+        assert not mode.is_enabled('5*foo(')
+
+    def test_eval_expr_functions_and_constants(self):
+        assert eval_expr('sqrt(9)') == Decimal('3')
+        assert eval_expr('log10(1000)') == Decimal('3')
+        assert eval_expr('sin(0)') == Decimal('0')
+        assert eval_expr('2^10+sqrt(4)') == Decimal('1026')
 
     def test_number_value_reads_the_pre_3_8_number_node(self):
         # python 3.7 and older parse a number into ast.Num, which has no value attribute.
