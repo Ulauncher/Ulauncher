@@ -1,6 +1,6 @@
 from decimal import Decimal
 import pytest
-from ulauncher.search.calc.CalcMode import CalcMode, eval_expr
+from ulauncher.search.calc.CalcMode import CalcMode, eval_expr, normalize_expr
 
 
 class TestCalcMode:
@@ -30,6 +30,14 @@ class TestCalcMode:
         assert not mode.is_enabled('e3')
         assert not mode.is_enabled('a+b')
 
+    def test_normalize_expr(self):
+        assert normalize_expr('2*6+') == '2*6'
+        assert normalize_expr('5**') == '5'
+        assert normalize_expr('5.') == '5'
+        assert normalize_expr('12 / 1,5') == '12 / 1.5'
+        assert normalize_expr('3^2') == '3**2'
+        assert normalize_expr('((1+2') == '((1+2))'
+
     def test_eval_expr_no_floating_point_errors(self):
         assert eval_expr('110 / 3') == Decimal('36.66666666666666666666666667')
         assert eval_expr('1.1 + 2.2') == Decimal('3.3')
@@ -43,6 +51,10 @@ class TestCalcMode:
         assert mode.handle_query('3+2') == RenderResultListAction.return_value
         assert mode.handle_query('3+2*') == RenderResultListAction.return_value
         RenderResultListAction.assert_called_with([CalcResultItem.return_value])
+        CalcResultItem.assert_called_with(result=5)
+
+    def test_handle_query__unfinished_bracket(self, mode, RenderResultListAction, CalcResultItem):
+        assert mode.handle_query('(3+2') == RenderResultListAction.return_value
         CalcResultItem.assert_called_with(result=5)
 
     def test_handle_query__invalid_expr(self, mode, RenderResultListAction, CalcResultItem):

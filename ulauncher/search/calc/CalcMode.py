@@ -13,6 +13,22 @@ operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
              ast.USub: op.neg}
 
+_trailing_operator_re = re.compile(r'\s*[.+\-*/]\*?\s*$')
+
+
+def normalize_expr(expr):
+    """
+    Makes a half-written expression evaluable, so that it shows a result
+    while the user is still typing instead of an error
+    """
+    # dot is the Python notation for decimals
+    expr = expr.replace(',', '.')
+    # ^ means xor in Python, ** is the Python notation for pow
+    expr = expr.replace('^', '**')
+    expr = _trailing_operator_re.sub('', expr)
+    # complete unfinished brackets
+    return expr + ')' * (expr.count('(') - expr.count(')'))
+
 
 def eval_expr(expr):
     """
@@ -25,13 +41,7 @@ def eval_expr(expr):
     >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
     -5.0
     """
-    expr = expr.replace("^", "**").replace(",", ".")
-    try:
-        return _eval(ast.parse(expr, mode='eval').body)
-    # pylint: disable=broad-except
-    except Exception:
-        # if failed, try without the last symbol
-        return _eval(ast.parse(expr[:-1], mode='eval').body)
+    return _eval(ast.parse(normalize_expr(expr), mode='eval').body)
 
 
 def _eval(node):
