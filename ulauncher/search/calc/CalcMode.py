@@ -4,6 +4,7 @@ import contextlib
 import logging
 import math
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
@@ -98,6 +99,7 @@ def normalize_expr(expr):
     return expr + ')' * (expr.count('(') - expr.count(')'))
 
 
+@lru_cache(maxsize=1000)
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
@@ -131,6 +133,7 @@ def _matches_name(partial, name):
     return all(char in remaining for char in partial)
 
 
+@lru_cache(maxsize=1000)
 def get_completions(query):
     """
     A query ending in a partial name, like "5*sq", completes to a full query like "5*sqrt(".
@@ -183,6 +186,7 @@ def _is_math_operand(node):
     return False
 
 
+@lru_cache(maxsize=1000)
 def _is_enabled(expr):
     try:
         node = ast.parse(expr, mode='eval').body
