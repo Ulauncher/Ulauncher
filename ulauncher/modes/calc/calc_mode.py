@@ -210,9 +210,7 @@ def _is_enabled(query_str: str) -> bool:
 
 def _eval(node: ast.expr) -> int | float | Decimal:
     if isinstance(node, ast.Constant):  # <constant> (number)
-        # older versions of python has .n instead of .value
-        value = node.value if hasattr(node, "value") else node.n  # pyrefly: ignore[deprecated]
-        return Decimal(str(value))
+        return Decimal(str(node.value))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         operator = operators.get(type(node.op))
         if not operator:
@@ -228,12 +226,7 @@ def _eval(node: ast.expr) -> int | float | Decimal:
     if isinstance(node, ast.Name) and node.id in constants:  # <name>
         return constants[node.id]
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in functions:  # <func>(<args>)
-        func = functions.get(node.func.id)
-        if func:
-            value = Decimal(func(_eval(node.args[0])))
-            if isinstance(value, float):
-                value = Decimal(value)
-            return value
+        return Decimal(functions[node.func.id](_eval(node.args[0])))
 
     raise TypeError(node)
 
