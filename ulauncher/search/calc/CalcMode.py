@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # supported operators
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
-             ast.USub: op.neg}
+             ast.USub: op.neg, ast.Mod: op.mod}
 
 functions = {
     'sqrt': Decimal.sqrt,
@@ -42,10 +42,10 @@ functions = {
 
 constants = {'pi': Decimal(math.pi), 'e': Decimal(math.e)}
 
-_trailing_operator_re = re.compile(r'\s*[.+\-*/]\*?\s*$')
+_trailing_operator_re = re.compile(r'\s*[.+\-*/%]\*?\s*$')
 # only known function names, so that an app search like "5*foo(" isn't reduced to the math prefix "5"
 _incomplete_call_re = re.compile(
-    r'\s*[.+\-*/]?\*?\s*(?:(?<![\w.])(?:' + '|'.join(functions) + r'))?\(\s*$')
+    r'\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])(?:' + '|'.join(functions) + r'))?\(\s*$')
 
 
 def normalize_expr(expr):
