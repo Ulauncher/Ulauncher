@@ -8,6 +8,7 @@ import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
+from ulauncher.search.calc.CalcCompletionResultItem import CalcCompletionResultItem
 from ulauncher.search.calc.CalcResultItem import CalcResultItem
 
 logger = logging.getLogger(__name__)
@@ -43,12 +44,39 @@ functions = {
 
 constants = {'pi': Decimal(math.pi), 'e': Decimal(math.e)}
 
+descriptions = {
+    'sqrt': 'Square root',
+    'exp': 'Exponential (e to the power of x)',
+    'ln': 'Natural logarithm',
+    'log10': 'Base-10 logarithm',
+    'sin': 'Sine (radians)',
+    'cos': 'Cosine (radians)',
+    'tan': 'Tangent (radians)',
+    'asin': 'Arc sine (radians)',
+    'acos': 'Arc cosine (radians)',
+    'atan': 'Arc tangent (radians)',
+    'sinh': 'Hyperbolic sine',
+    'cosh': 'Hyperbolic cosine',
+    'tanh': 'Hyperbolic tangent',
+    'asinh': 'Inverse hyperbolic sine',
+    'acosh': 'Inverse hyperbolic cosine',
+    'atanh': 'Inverse hyperbolic tangent',
+    'erf': 'Error function',
+    'erfc': 'Complementary error function',
+    'gamma': 'Gamma function',
+    'lgamma': 'Natural logarithm of the gamma function',
+    'pi': 'Pi (3.14159...)',
+    'e': "Euler's number (2.71828...)",
+}
+
 _max_result_exponent = 1000
 
 _trailing_operator_re = re.compile(r'\s*[.+\-*/%]\*?\s*$')
 # only known function names, so that an app search like "5*foo(" isn't reduced to the math prefix "5"
 _incomplete_call_re = re.compile(
     r'\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])(?:' + '|'.join(functions) + r'))?\(\s*$')
+# a name can only be completed where an operand can start, so it must follow an operator or a bracket
+_partial_name_re = re.compile(r'^(?P<head>.*[-+*/%^(]\s*)(?P<partial>[a-zA-Z_]\w*)$')
 
 
 def normalize_expr(expr):
@@ -93,6 +121,34 @@ def eval_expr(expr):
         return str(int_result)
     # normalize strips the trailing zeros that quantize added
     return str(result.normalize())
+
+
+def _matches_name(partial, name):
+    # anchoring on the first character keeps "5*a" from listing every name containing an "a"
+    if not name.startswith(partial[0]):
+        return False
+    remaining = iter(name)
+    return all(char in remaining for char in partial)
+
+
+def get_completions(query):
+    """
+    A query ending in a partial name, like "5*sq", completes to a full query like "5*sqrt(".
+    The partial name matches as a subsequence, so "5*st" also completes to "5*sqrt(".
+    Returns pairs of the function or constant name and the completed query.
+    """
+    query = query.rstrip()
+    match = _partial_name_re.match(query)
+    if not match:
+        return ()
+    head, partial = match.group('head'), match.group('partial')
+    # substituting a number for the partial name tells us whether the rest is math
+    if not _is_enabled(normalize_expr(head + '1')):
+        return ()
+    names = sorted((name for name in list(functions) + list(constants) if _matches_name(partial, name)),
+                   key=lambda name: (not name.startswith(partial), name))
+    completions = ((name, head + name + '(' if name in functions else head + name) for name in names)
+    return tuple((name, completion) for name, completion in completions if completion != query)
 
 
 def _number_value(node):
@@ -171,17 +227,29 @@ def _eval(node):
     raise TypeError(node)
 
 
+def _evaluate(expr):
+    try:
+        return CalcResultItem(result=eval_expr(expr))
+    # ArithmeticError covers the decimal errors (dividing by zero, the square root of a
+    # negative number), ValueError the domain errors of the math module
+    except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError) as e:
+        # half-written and impossible expressions are both normal while typing, so this is
+        # only worth a debug line, and only worth one that says what went wrong
+        logger.debug('Calc mode cannot evaluate "%s": %s', expr, e)
+        return CalcResultItem(error='Invalid expression')
+
+
 class CalcMode(BaseSearchMode):
 
     def is_enabled(self, query):
-        return _is_enabled(normalize_expr(query))
+        return bool(get_completions(query)) or _is_enabled(normalize_expr(query))
 
     def handle_query(self, query):
-        try:
-            result_item = CalcResultItem(result=eval_expr(query))
-        # ArithmeticError covers the decimal errors (dividing by zero, the square root of a
-        # negative number), ValueError the domain errors of the math module
-        except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError):
-            logger.warning('Calc mode error for query: "%s"', query)
-            result_item = CalcResultItem(error='Invalid expression')
-        return RenderResultListAction([result_item])
+        completions = get_completions(query)
+        result_items = []
+        # a half-written name has no value to show, but a complete one like "5*e" has both
+        if not completions or _is_enabled(normalize_expr(query)):
+            result_items.append(_evaluate(query))
+        result_items.extend(CalcCompletionResultItem(completion=completion, description=descriptions[name])
+                            for name, completion in completions)
+        return RenderResultListAction(result_items)

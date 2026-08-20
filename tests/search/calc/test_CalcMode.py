@@ -1,5 +1,11 @@
 import pytest
-from ulauncher.search.calc.CalcMode import CalcMode, _number_value, eval_expr, normalize_expr
+from ulauncher.search.calc.CalcMode import (
+    CalcMode,
+    _number_value,
+    eval_expr,
+    get_completions,
+    normalize_expr,
+)
 
 
 class TestCalcMode:
@@ -11,6 +17,10 @@ class TestCalcMode:
     @pytest.fixture
     def CalcResultItem(self, mocker):
         return mocker.patch('ulauncher.search.calc.CalcMode.CalcResultItem')
+
+    @pytest.fixture
+    def CalcCompletionResultItem(self, mocker):
+        return mocker.patch('ulauncher.search.calc.CalcMode.CalcCompletionResultItem')
 
     @pytest.fixture
     def mode(self):
@@ -56,6 +66,33 @@ class TestCalcMode:
         assert not mode.is_enabled('sqrt')
         # an unknown name is not math, even next to numbers
         assert not mode.is_enabled('5*foo(')
+
+    def test_get_completions(self):
+        assert get_completions('5*sq') == (('sqrt', '5*sqrt('),)
+        # the half-written name matches as a subsequence
+        assert get_completions('5*st') == (('sqrt', '5*sqrt('),)
+        # a constant completes without a bracket
+        assert get_completions('2*p') == (('pi', '2*pi'),)
+
+        # a name needs an operator before it, or every query starting with "sq" would offer sqrt
+        assert get_completions('sq') == ()
+        # the rest of the query has to be math
+        assert get_completions('foo*sq') == ()
+        # nothing to add
+        assert get_completions('2*pi') == ()
+
+    def test_handle_query__completion(self, mode, RenderResultListAction, CalcCompletionResultItem):
+        assert mode.handle_query('5*sq') == RenderResultListAction.return_value
+        RenderResultListAction.assert_called_with([CalcCompletionResultItem.return_value])
+        CalcCompletionResultItem.assert_called_with(completion='5*sqrt(', description='Square root')
+
+    def test_handle_query__value_before_completions(self, mode, RenderResultListAction, CalcResultItem,
+                                                    CalcCompletionResultItem):
+        # "5*e" is a value of its own, and also the start of longer names
+        mode.handle_query('5*e')
+        items = RenderResultListAction.call_args[0][0]
+        assert items[0] == CalcResultItem.return_value
+        assert len(items) > 1
 
     def test_eval_expr_functions_and_constants(self):
         assert eval_expr('sqrt(9)') == '3'
