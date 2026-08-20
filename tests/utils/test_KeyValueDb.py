@@ -1,4 +1,5 @@
 import os
+import pickle
 import pytest
 from ulauncher.utils.db.KeyValueDb import KeyValueDb
 
@@ -28,6 +29,22 @@ class TestKeyValueDb:
 
         db = KeyValueDb(db_name).open()
         assert db.find('hello') == 123
+
+    def test_open__truncated_file__starts_empty(self, db_name):
+        db = KeyValueDb(db_name).open()
+        db.put('hello', 123)
+        db.commit()
+        # dropping the last byte is what an interrupted commit leaves behind
+        with open(db_name, 'r+b') as file:
+            file.truncate(os.path.getsize(db_name) - 1)
+
+        assert KeyValueDb(db_name).open().get_records() == {}
+
+    def test_open__file_holding_a_list__starts_empty(self, db_name):
+        with open(db_name, 'wb') as file:
+            pickle.dump(['hello'], file)
+
+        assert KeyValueDb(db_name).open().get_records() == {}
 
     def test_remove(self, db):
         db.put('john', {'name': 'john', 'description': 'test', 'desktop_file': 'john.desktop', 'icon': 'icon'})

@@ -34,12 +34,21 @@ class KeyValueDb(Generic[Key, Value]):
 
             if os.path.getsize(self._name) > 0:
                 with open(self._name, 'rb') as reader:
+                    # a half-written file raises whatever the truncated stream happens to
+                    # hit, so there is no set of error types to catch here
+                    # pylint: disable=broad-except
                     try:
                         records = pickle.load(reader)
-                        self.set_records(records)
-                        return self
-                    except (pickle.UnpicklingError, UnicodeDecodeError):
-                        logger.error("Corrupted pickle file: %s. Will overwrite.", self._name)
+                    except Exception as e:
+                        logger.error("Cannot read %s, so it will be overwritten. %s: %s",
+                                     self._name, type(e).__name__, e)
+                    else:
+                        if isinstance(records, dict):
+                            self.set_records(records)
+                            return self
+
+                        logger.error("%s holds %s instead of a dict, so it will be overwritten",
+                                     self._name, type(records).__name__)
 
         # make sure path exists
         os.makedirs(os.path.dirname(self._name), exist_ok=True)
