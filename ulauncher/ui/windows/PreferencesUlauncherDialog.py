@@ -198,7 +198,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
             mime_type = mimetypes.guess_type(file_path)[0]
             stream = Gio.file_new_for_path(file_path).read()
-            scheme_request.finish(stream, -1, mime_type)
+            # this method runs in a separate thread, and WebKit is not thread-safe
+            GLib.idle_add(scheme_request.finish, stream, -1, mime_type)
         except Exception as e:
             logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
             scheme_request.finish_error(e if isinstance(e, GLib.Error) else GLib.Error(str(e)))
@@ -245,8 +246,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         try:
             stream = Gio.MemoryInputStream.new_from_data(callback.encode())
-            # send response
-            scheme_request.finish(stream, -1, 'text/javascript')
+            # this method runs in a separate thread, and WebKit is not thread-safe
+            GLib.idle_add(scheme_request.finish, stream, -1, 'text/javascript')
         except Exception as e:
             logger.exception('Unexpected API error. %s: %s', type(e).__name__, e)
 
@@ -428,6 +429,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         OpenAction(EXTENSIONS_DIR).run()
 
     @rt.route('/close')
+    @glib_idle_add
     def prefs_close(self, url_params):
         logger.info('Close preferences')
         self.hide()

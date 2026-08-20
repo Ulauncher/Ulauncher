@@ -93,6 +93,18 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_showhotkey_dialog.original(dialog, {'query': {'name': 'hotkey-name'}})
         hotkey_dialog.present.assert_called_with()
 
+    def test_prefs_close_hides_dialog_in_the_main_loop(self, dialog, mocker, idle_add):
+        hide = mocker.patch.object(dialog, 'hide')
+        url_params = {'query': {}}
+        dialog.prefs_close(url_params)
+
+        # the request handler runs in a separate thread, so it must not touch the dialog directly
+        hide.assert_not_called()
+        idle_add.assert_called_with(dialog.prefs_close.original, dialog, url_params)
+
+        dialog.prefs_close.original(dialog, url_params)
+        hide.assert_called_with()
+
     def test_prefs_set_grab_mouse_pointer(self, dialog, settings):
         dialog.prefs_set_grab_mouse_pointer({'query': {'value': 'true'}})
         settings.set_property.assert_called_with('grab-mouse-pointer', True)
