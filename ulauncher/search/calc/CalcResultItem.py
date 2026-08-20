@@ -20,7 +20,7 @@ class CalcResultItem(ResultItem):
         pass
 
     def get_description(self, query) -> str:
-        return 'Enter to copy to the clipboard' if self.result else self.error
+        return 'Enter to copy to the clipboard' if self.result is not None else self.error
 
     def get_icon(self):
         return load_image(get_data_file('media/calculator-icon.png'), self.get_icon_size())

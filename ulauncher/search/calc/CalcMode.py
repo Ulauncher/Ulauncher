@@ -1,8 +1,9 @@
 import re
 import ast
+import contextlib
 import logging
 import math
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
@@ -42,6 +43,8 @@ functions = {
 
 constants = {'pi': Decimal(math.pi), 'e': Decimal(math.e)}
 
+_max_result_exponent = 1000
+
 _trailing_operator_re = re.compile(r'\s*[.+\-*/%]\*?\s*$')
 # only known function names, so that an app search like "5*foo(" isn't reduced to the math prefix "5"
 _incomplete_call_re = re.compile(
@@ -70,15 +73,26 @@ def normalize_expr(expr):
 def eval_expr(expr):
     """
     >>> eval_expr('2^6')
-    64
-    >>> eval_expr('2**6')
-    64
+    '64'
     >>> eval_expr('2*6+')
-    12
-    >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
-    -5.0
+    '12'
+    >>> eval_expr('110/3')
+    '36.666666666666667'
     """
-    return _eval(ast.parse(normalize_expr(expr), mode='eval').body)
+    result = Decimal(_eval(ast.parse(normalize_expr(expr), mode='eval').body))
+    # check the exponent before int() has to materialize every digit, which takes seconds
+    if result.adjusted() > _max_result_exponent:
+        raise OverflowError('Result has too many digits to display: 1e%s' % result.adjusted())
+    # the last digits of a division are noise, and Decimal keeps 28 of them. It raises instead
+    # of rounding when too few are left for 15 decimals, and then there is no noise to cut
+    with contextlib.suppress(InvalidOperation):
+        result = result.quantize(Decimal('1e-15'))
+    # must follow the rounding, which is what makes 99.99999999999999999999999996 integral
+    int_result = int(result)
+    if result == int_result:
+        return str(int_result)
+    # normalize strips the trailing zeros that quantize added
+    return str(result.normalize())
 
 
 def _number_value(node):
@@ -158,16 +172,7 @@ class CalcMode(BaseSearchMode):
 
     def handle_query(self, query):
         try:
-            result = eval_expr(query)
-            if result is None:
-                raise ValueError()
-
-            # fixes issue with division where result is represented as a float (e.g., 1.0)
-            # although it is an integer (1)
-            if int(result) == result:
-                result = int(result)
-
-            result_item = CalcResultItem(result=result)
+            result_item = CalcResultItem(result=eval_expr(query))
         # pylint: disable=broad-except
         except Exception:
             result_item = CalcResultItem(error='Invalid expression')

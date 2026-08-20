@@ -19,6 +19,7 @@ class TestCalcResultItem:
 
     def test_get_description(self):
         assert CalcResultItem(52).get_description('q') == 'Enter to copy to the clipboard'
+        assert CalcResultItem('0').get_description('q') == 'Enter to copy to the clipboard'
         assert CalcResultItem(error='message').get_description('q') == 'message'
 
     def test_on_enter(self, CopyToClipboardAction):
