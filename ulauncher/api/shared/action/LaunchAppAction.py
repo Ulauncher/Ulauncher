@@ -35,8 +35,13 @@ class LaunchAppAction(BaseAction):
 
     def run(self):
         app = read_desktop_file(self.filename)
-        app_id = Path(app.get_id()).stem
+        if not app:
+            logger.error("Cannot launch %s, because its desktop file cannot be read", self.filename)
+            return
+
+        app_id = Path(app.get_id() or self.filename).stem
         app_exec = app.get_string('Exec')
+        exec = []
         if app.get_boolean('DBusActivatable'):
             # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
             exec = ['gapplication', 'launch', app_id]
