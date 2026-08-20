@@ -121,6 +121,11 @@ class TestCalcMode:
         RenderResultListAction.assert_called_with([CalcResultItem.return_value])
         CalcResultItem.assert_called_with(error='Invalid expression')
 
+    def test_handle_query__unsupported_operator(self, mode, RenderResultListAction, CalcResultItem):
+        # deciding whether a query is math doesn't check the operator, so this gets here
+        assert mode.handle_query('5 & 3') == RenderResultListAction.return_value
+        CalcResultItem.assert_called_with(error='Invalid expression')
+
     def test_handle_query__result_is_0__returns_0(self, mode, CalcResultItem):
         mode.handle_query('2-2')
         CalcResultItem.assert_called_with(result='0')

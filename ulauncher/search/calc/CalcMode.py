@@ -154,9 +154,15 @@ def _eval(node):
     if value is not None:  # <constant> (number)
         return Decimal(str(value))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
-        return operators[type(node.op)](_eval(node.left), _eval(node.right))
+        operator = operators.get(type(node.op))
+        if not operator:
+            raise TypeError('Unsupported operator: %s' % node.op)
+        return operator(_eval(node.left), _eval(node.right))
     if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
-        return operators[type(node.op)](_eval(node.operand))
+        operator = operators.get(type(node.op))
+        if not operator:
+            raise TypeError('Unsupported operator: %s' % node.op)
+        return operator(_eval(node.operand))
     if isinstance(node, ast.Name) and node.id in constants:  # <name>
         return constants[node.id]
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in functions:
@@ -173,7 +179,9 @@ class CalcMode(BaseSearchMode):
     def handle_query(self, query):
         try:
             result_item = CalcResultItem(result=eval_expr(query))
-        # pylint: disable=broad-except
-        except Exception:
+        # ArithmeticError covers the decimal errors (dividing by zero, the square root of a
+        # negative number), ValueError the domain errors of the math module
+        except (SyntaxError, TypeError, IndexError, ArithmeticError, ValueError):
+            logger.warning('Calc mode error for query: "%s"', query)
             result_item = CalcResultItem(error='Invalid expression')
         return RenderResultListAction([result_item])
