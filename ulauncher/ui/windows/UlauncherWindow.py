@@ -2,7 +2,6 @@
 import os
 import time
 import logging
-import threading
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -151,8 +150,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this is a simple workaround to avoid hiding window
         # when user hits Alt+key combination or changes input source, etc.
         self.is_focused = False
-        t = threading.Timer(0.07, lambda: self.is_focused or self.hide())
-        t.start()
+
+        def check_focus_and_hide():
+            if not self.is_focused:
+                self.hide()
+            return GLib.SOURCE_REMOVE
+
+        GLib.timeout_add(70, check_focus_and_hide)
 
     def on_focus_in_event(self, *args):
         if self.settings.get_property('grab-mouse-pointer'):
