@@ -97,8 +97,10 @@ class TestAutostartPreference:
         autostart.switch(False)
         assert 'X-GNOME-Autostart-enabled=false' in self.get_lines(ul_autostart_path)
 
-    def test_switch__raises_SwitchError(self, autostart, mocker):
+    def test_switch__raises_SwitchError_naming_the_file(self, autostart, mocker):
         desktop_parser = mocker.patch('ulauncher.utils.AutostartPreference.DesktopParser').return_value
-        desktop_parser.write.side_effect = IOError
-        with pytest.raises(SwitchError):
+        path = '/home/user/.config/autostart/ulauncher.desktop'
+        desktop_parser.write.side_effect = PermissionError(13, 'Permission denied', path)
+        with pytest.raises(SwitchError) as e:
             autostart.switch(True)
+        assert str(e.value) == 'Could not update the autostart file. Permission denied: %s' % path

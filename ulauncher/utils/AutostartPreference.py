@@ -69,6 +69,8 @@ class AutostartPreference:
             autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_on)).lower())
             autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
             autostart_info.write()
+        except OSError as e:
+            raise SwitchError('Could not update the autostart file. %s: %s' % (e.strerror, e.filename)) from e
         except Exception as e:
             raise SwitchError('Unexpected exception: %s' % e) from e
 

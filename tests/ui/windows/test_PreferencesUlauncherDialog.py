@@ -1,6 +1,7 @@
 import pytest
 import mock
-from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog
+from ulauncher.ui.windows.PreferencesUlauncherDialog import PreferencesUlauncherDialog, PrefsApiError
+from ulauncher.utils.AutostartPreference import SwitchError
 
 
 class TestPreferencesUlauncherDialog:
@@ -74,6 +75,13 @@ class TestPreferencesUlauncherDialog:
 
         dialog.prefs_set_autostart({'query': {'value': 'false'}})
         autostart_pref.switch.assert_called_with(False)
+
+    def test_prefs_set_autostart__keeps_the_switch_error_message(self, dialog, autostart_pref):
+        message = 'Could not update the autostart file. Permission denied: /home/user/x.desktop'
+        autostart_pref.switch.side_effect = SwitchError(message)
+        with pytest.raises(PrefsApiError) as e:
+            dialog.prefs_set_autostart({'query': {'value': 'true'}})
+        assert str(e.value) == message
 
     def test_prefs_set_theme_name(self, dialog, settings, ulauncherWindow):
         dialog.prefs_set_theme_name.original(dialog, {'query': {'value': 'light'}})

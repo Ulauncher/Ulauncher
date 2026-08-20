@@ -20,23 +20,25 @@
       </template>
 
       <div class="selectable">
-        <p>An unexpected error has occurred.</p>
-        <p>
-          Please copy error details and create a bug in
-          <a
-            href
-            @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
-          >GitHub Issues</a>.
-        </p>
-        <small>
-          <i class="fa fa-copy"></i>
-          <a
-            class="text-muted"
-            href
-            @click.prevent
-            v-clipboard:copy="errorDetails"
-          >Copy error details to clipboard</a>
-        </small>
+        <p>{{ errorMessage }}</p>
+        <template v-if="!isExpectedError">
+          <p>
+            Please copy error details and create a bug in
+            <a
+              href
+              @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
+            >GitHub Issues</a>.
+          </p>
+          <small>
+            <i class="fa fa-copy"></i>
+            <a
+              class="text-muted"
+              href
+              @click.prevent
+              v-clipboard:copy="errorDetails"
+            >Copy error details to clipboard</a>
+          </small>
+        </template>
       </div>
     </b-modal>
   </div>
@@ -65,6 +67,15 @@ export default {
     bus.$off('error', this.onError)
   },
   computed: {
+    isExpectedError() {
+      return !!(this.error && this.error.expected)
+    },
+    errorMessage() {
+      if (this.isExpectedError) {
+        return this.error.message
+      }
+      return 'An unexpected error has occurred.'
+    },
     errorDetails() {
       if (!this.error) {
         return ''

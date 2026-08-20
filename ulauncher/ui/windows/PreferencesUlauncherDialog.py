@@ -37,7 +37,7 @@ from ulauncher.utils.decorator.run_async import run_async
 from ulauncher.utils.wayland import is_wayland
 from ulauncher.utils.Settings import Settings
 from ulauncher.utils.Router import Router, get_url_params
-from ulauncher.utils.AutostartPreference import AutostartPreference
+from ulauncher.utils.AutostartPreference import AutostartPreference, SwitchError
 from ulauncher.utils.WebKit2 import WebKit2
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.search.shortcuts.ShortcutsDb import ShortcutsDb
@@ -228,6 +228,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
                 'message': str(e),
                 'type': error_type,
                 'errorName': e.error_name,
+                # the message was written for the user, so the UI can show it instead of asking for a bug report
+                'expected': True,
                 'stacktrace': traceback.format_exc()
             }))
         except Exception as e:
@@ -237,6 +239,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
                 'message': str(e),
                 'type': type(e).__name__,
                 'errorName': ErrorName.UnhandledError.value,
+                'expected': False,
                 'stacktrace': traceback.format_exc()
             }))
 
@@ -297,8 +300,10 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
         try:
             self.autostart_pref.switch(is_on)
-        except Exception as e:
-            raise PrefsApiError('Caught an error while switching "autostart": %s' % e) from e
+        except SwitchError as e:
+            # the traceback is not part of the API error, so this is the only place it gets logged
+            logger.exception('Could not switch autostart')
+            raise PrefsApiError(str(e)) from e
 
     @rt.route('/set/show-recent-apps')
     def prefs_set_show_recent_apps(self, url_params):
