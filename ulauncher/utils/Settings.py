@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import gi
 gi.require_version('GObject', '2.0')
 # pylint: disable=wrong-import-position
@@ -7,6 +8,8 @@ from gi.repository import GObject
 
 from ulauncher.utils.decorator.singleton import singleton
 from ulauncher.config import SETTINGS_FILE_PATH
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_BLACKLISTED_DIRS = [
     '/usr/share/locale',
@@ -113,9 +116,22 @@ class Settings(GObject.GObject):
             if not os.path.isfile(filename):
                 raise IOError("%s exists and is not a file" % filename)
 
-            with open(filename, 'r') as f:
-                # Convert underscore to dash, in case user migrated to v6, saved settings and reverted
-                self._properties = {key.replace("_", "-"): val for key, val in json.load(f).items()}
+            try:
+                with open(filename, 'r') as f:
+                    properties = json.load(f)
+            # the file is written in place, so a logout during the write truncates it
+            except ValueError as e:
+                logger.error("Cannot read %s, so the default settings are used. %s: %s",
+                             filename, type(e).__name__, e)
+                return
+
+            if not isinstance(properties, dict):
+                logger.error("%s holds %s instead of a dict, so the default settings are used",
+                             filename, type(properties).__name__)
+                return
+
+            # Convert underscore to dash, in case user migrated to v6, saved settings and reverted
+            self._properties = {key.replace("_", "-"): val for key, val in properties.items()}
         else:
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             self.save_to_file()

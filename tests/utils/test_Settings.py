@@ -38,6 +38,18 @@ class TestSettings:
         settings.set_property("hotkey-show-app", "foo")
         on_notify.assert_called_with(settings, mock.ANY)
 
+    def test_load_from_file__truncated_file__keeps_the_defaults(self, settings, filename):
+        with open(filename, 'w') as f:
+            f.write('{"theme-name": "dar')
+        settings.load_from_file(filename)
+        assert settings.get_property('theme-name') == 'light'
+
+    def test_load_from_file__file_holding_a_list__keeps_the_defaults(self, settings, filename):
+        with open(filename, 'w') as f:
+            f.write('["theme-name"]')
+        settings.load_from_file(filename)
+        assert settings.get_property('theme-name') == 'light'
+
     def test_get_property_default(self, settings, filename):
         with open(filename, 'w') as f:
             f.write("{}")
