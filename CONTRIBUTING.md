@@ -78,6 +78,6 @@ Please note that no more releases are planned for Ulauncher v5 unless they are c
 
 Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GObject documentation and similar.
 
-There are some more helpful developer and maintainer commands provided by the `ul` wrapper. `./ul` lists all of them, but most of them are only useful to the maintainers and/or require docker/podman.
+There are more some helpful developer and maintainer commands provided by the makefile. `make` lists all of them, but most of them are only useful to the maintainers and/or require docker/podman.
 
 If you have any questions, feel free to ask in our [Code Contributions](https://github.com/Ulauncher/Ulauncher/discussions/categories/code-contributions) Discussions.

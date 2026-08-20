@@ -27,15 +27,8 @@ jobs:
           pip install -r requirements.txt
           apt update && apt install -y gir1.2-notify-0.7 gir1.2-keybinder-3.0 python3-pyinotify python3-levenshtein gir1.2-keybinder-3.0 python3-websocket
 
-          flake8 .
-          mypy .
-          pylint ulauncher
-          DISPLAY=:1 xvfb-run pytest tests
+          make check
       - name: Build docs
-        run: |
-          cd docs
-          sphinx-apidoc -d 5 -o source ../ulauncher
-          make html
-          cd -
+        run: make docs
       - name: Build preferences
-        run: ./ul build-preferences --skip-if-built
+        run: make prefs SKIP_IF_BUILT=1

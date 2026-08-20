@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
+# Implements the build and packaging commands. The makefile is the front door for them,
+# and the release scripts below call each other through this file.
+
 . scripts/common.sh
-. scripts/help.sh
 . scripts/init-dev-env.sh
 . scripts/cleanup-dev-env.sh
-. scripts/rm-python-cache.sh
-. scripts/tests.sh
 . scripts/dev-container.sh
 . scripts/build-deb.sh
 . scripts/build-rpm.sh
@@ -13,25 +13,14 @@
 . scripts/build-doc.sh
 . scripts/build-preferences.sh
 . scripts/build-release.sh
-. scripts/send-signal.sh
 . scripts/watch-doc.sh
-. scripts/edit-ui.sh
 
 
 main () {
   case "$1" in
     init-dev-env) init-dev-env ;;
     cleanup-dev-env) cleanup-dev-env ;;
-    run) exec ./bin/ulauncher -v --dev $2 ;;
-    rm-python-cache) rm-python-cache ;;
-    test-mypy) warn-if-not-in-docker && test-mypy ;;
-    test-pylint) warn-if-not-in-docker && test-pylint ;;
-    test-flake8) warn-if-not-in-docker && test-flake8 ;;
-    test-pytest) warn-if-not-in-docker && test-pytest ;;
-    test) warn-if-not-in-docker && test-mypy && test-flake8 && test-pylint && test-pytest ;;
     dev-container) dev-container $2 ;;
-    send-signal) send-signal $2 ;;
-    edit-ui) edit-ui $2 ;;
     build-deb) build-deb $2 $3 ;;
     build-rpm) build-rpm $2 $3 $4 ;;
     build-targz) build-targz $2 ;;
@@ -43,15 +32,19 @@ main () {
 
     *)
       echo "${red}[!] Unrecognized command '${1}'${normal}"
-      echo
-      help
+      usage
       exit 1
       ;;
   esac
 }
 
+usage () {
+  echo "Run '${bold}make${normal}' for the list of commands"
+}
+
 if [ $# -eq 0 ]; then
-  help
+  usage
+  exit 1
 else
   main $@
 fi

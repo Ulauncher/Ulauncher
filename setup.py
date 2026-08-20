@@ -161,6 +161,7 @@ def main():
     original_find_src = exclude_files([
         "*.sh",
         "ul",
+        "makefile",
         "Dockerfile.build*",
         "PKGBUILD.template",
         "scripts/*",

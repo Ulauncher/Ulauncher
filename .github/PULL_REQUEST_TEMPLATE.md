@@ -11,6 +11,6 @@ This is where we want contributions. We won't make more v5 releases unless it's 
 -->
 
 ### Checklist
-- [ ] Verify that the test command `./ul test` is passing (the CI server will check this if you don't)
+- [ ] Verify that the test command `make check` is passing (the CI server will check this if you don't)
 - [ ] Update the documentation according to your changes (when applicable)
 - [ ] Write unit tests for your changes (when applicable)

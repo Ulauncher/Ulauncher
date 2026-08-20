@@ -24,7 +24,7 @@ jobs:
           echo -n "$LAUNCHPAD_SSH_TAR" | base64 -d > scripts/launchpad.ssh.tar
           echo -n "$LAUNCHPAD_PUB_KEY" | base64 -d > scripts/launchpad-public.key
           echo -n "$LAUNCHPAD_SECRET_KEY" | base64 -d > scripts/launchpad-secret.key
-          ./ul upload-release $GITHUB_REF_NAME
+          make upload-release VERSION="$GITHUB_REF_NAME"
       - name: Publish to AUR
         uses: friday/aur-publish-action@master
         with:

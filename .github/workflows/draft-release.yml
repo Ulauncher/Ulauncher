@@ -17,7 +17,7 @@ jobs:
           echo "Tag is created: $GITHUB_REF_NAME"
           source ./scripts/common.sh
           docker pull $BUILD_IMAGE
-          ./ul build-release $GITHUB_REF_NAME
+          make build-release VERSION="$GITHUB_REF_NAME"
 
       - name: Make draft GitHub release
         uses: softprops/action-gh-release@v1
