@@ -38,13 +38,16 @@ class Theme:
     def get_current(cls):
         default = 'light'
         current_name = Settings.get_instance().get_property('theme-name') or default
-        try:
-            current = themes[current_name]
-        except KeyError:
-            logger.warning('No theme with name %s', current_name)
-            current = themes[default]
+        if current_name in themes:
+            return themes[current_name]
 
-        return current
+        logger.warning('No theme with name %s', current_name)
+
+        if default in themes:
+            return themes[default]
+
+        # Rather start with an arbitrary theme than not at all
+        return next(iter(themes.values()))
 
     _data = None
 
