@@ -14,12 +14,15 @@ class RunScriptAction(BaseAction):
     Runs a user script
 
     :param str script: script content
-    :param list args: arguments
+    :param str args: arguments, passed to the shell as written
     """
 
     def __init__(self, script, args=None):
         self.script = script
         self.args = args
+
+    def get_command(self, file_name):
+        return f'{file_name} {self.args}' if self.args else file_name
 
     def run(self):
         file = tempfile.NamedTemporaryFile(prefix='ulauncher_RunScript_', delete=False)
@@ -35,7 +38,7 @@ class RunScriptAction(BaseAction):
         try:
             os.chmod(file.name, 0o777)
             logger.debug('Running a script from %s', file.name)
-            subprocess.Popen(["%s %s" % (file.name, self.args)],
+            subprocess.Popen([self.get_command(file.name)],
                              shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
             self.remove_temp_file(file.name)
         except Exception:
