@@ -1,6 +1,6 @@
 from decimal import Decimal
 import pytest
-from ulauncher.search.calc.CalcMode import CalcMode, eval_expr, normalize_expr
+from ulauncher.search.calc.CalcMode import CalcMode, _number_value, eval_expr, normalize_expr
 
 
 class TestCalcMode:
@@ -30,6 +30,12 @@ class TestCalcMode:
         assert not mode.is_enabled('e3')
         assert not mode.is_enabled('a+b')
 
+        # the old regex claimed these, and then had to show "Invalid expression" for them
+        assert not mode.is_enabled('5e')
+        assert not mode.is_enabled('1 2 3')
+        assert not mode.is_enabled('3--')
+        assert not mode.is_enabled('True')
+
     def test_normalize_expr(self):
         assert normalize_expr('2*6+') == '2*6'
         assert normalize_expr('5**') == '5'
@@ -37,6 +43,18 @@ class TestCalcMode:
         assert normalize_expr('12 / 1,5') == '12 / 1.5'
         assert normalize_expr('3^2') == '3**2'
         assert normalize_expr('((1+2') == '((1+2))'
+
+    def test_number_value_reads_the_pre_3_8_number_node(self):
+        # python 3.7 and older parse a number into ast.Num, which has no value attribute.
+        # that node type is gone in 3.14, so it can only be stood in for here
+        class Num:
+            def __init__(self, n):
+                self.n = n
+
+        assert _number_value(Num(5)) == 5
+        assert _number_value(Num(0.5)) == 0.5
+        assert _number_value(Num(True)) is None
+        assert _number_value(Num('5')) is None
 
     def test_eval_expr_no_floating_point_errors(self):
         assert eval_expr('110 / 3') == Decimal('36.66666666666666666666666667')

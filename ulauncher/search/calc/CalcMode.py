@@ -1,11 +1,14 @@
 import re
 import ast
+import logging
 from decimal import Decimal
 import operator as op
 
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.search.BaseSearchMode import BaseSearchMode
 from ulauncher.search.calc.CalcResultItem import CalcResultItem
+
+logger = logging.getLogger(__name__)
 
 
 # supported operators
@@ -44,6 +47,49 @@ def eval_expr(expr):
     return _eval(ast.parse(normalize_expr(expr), mode='eval').body)
 
 
+def _number_value(node):
+    """
+    Returns the number a constant node holds, or None if it holds anything else.
+    Python 3.7 and older parse a number into ast.Num, which keeps it in .n instead of .value
+    """
+    value = node.value if isinstance(node, ast.Constant) else getattr(node, 'n', None)
+    # bools are ints, but "True" is a word rather than a number
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return value
+
+
+def _is_math_operand(node):
+    """
+    Ensures every leaf is a number, but doesn't validate the operator type, because an
+    invalid expression should still count as one, so we can show an error message for it
+    """
+    if _number_value(node) is not None:
+        return True
+    if isinstance(node, ast.BinOp):
+        return _is_math_operand(node.left) and _is_math_operand(node.right)
+    if isinstance(node, ast.UnaryOp):
+        return _is_math_operand(node.operand)
+    return False
+
+
+def _is_enabled(expr):
+    try:
+        node = ast.parse(expr, mode='eval').body
+        if _number_value(node) is not None:
+            return True
+        if isinstance(node, ast.BinOp):
+            return _is_math_operand(node)
+        if isinstance(node, ast.UnaryOp):
+            # a leading minus makes a negative number, a leading plus is more likely not math at all
+            return isinstance(node.op, ast.USub) and _is_math_operand(node.operand)
+    except SyntaxError:
+        pass
+    except (ValueError, TypeError, AttributeError, RecursionError, MemoryError) as e:
+        logger.warning('Calc mode parse error for query: "%s", (%s)', expr, e)
+    return False
+
+
 def _eval(node):
     # python 3.7 and older parse a number into ast.Num, which keeps it in .n instead of .value
     value = node.value if isinstance(node, ast.Constant) else getattr(node, 'n', None)
@@ -58,10 +104,9 @@ def _eval(node):
 
 
 class CalcMode(BaseSearchMode):
-    RE_CALC = re.compile(r'^[\d\-\(\.,][\d\*+\/\-\.,e\(\)\^ ]*$', flags=re.IGNORECASE)
 
     def is_enabled(self, query):
-        return re.match(self.RE_CALC, query)
+        return _is_enabled(normalize_expr(query))
 
     def handle_query(self, query):
         try:
