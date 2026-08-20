@@ -140,6 +140,23 @@ class TestCalcMode:
         assert eval_expr("5.5 + 3.50") == "9"
         assert eval_expr("10 / 3.0") == "3.333333333333333"
 
+    def test_eval_expr_numbers_too_large_to_round(self) -> None:
+        # Rounding these to 15 decimals needs more significant digits than Decimal keeps
+        assert eval_expr("2^50") == "1125899906842624"
+        assert eval_expr("10^30") == "1" + "0" * 30
+        assert eval_expr("10000000000000.5") == "10000000000000.5"
+        assert eval_expr("123456789012345.6789") == "123456789012345.67"
+
+    def test_eval_expr_rounds_before_checking_for_an_integer(self) -> None:
+        # exp(ln(x)) lands just short of x, and only rounding makes it integral
+        assert eval_expr("exp(ln(100))") == "100"
+        assert eval_expr("exp(ln(1000000))") == "1000000"
+
+    def test_eval_expr_rejects_results_with_too_many_digits(self) -> None:
+        assert eval_expr("10^1000") == "1" + "0" * 1000
+        with pytest.raises(OverflowError):
+            eval_expr("2^1000000")
+
     def test_eval_expr_syntax_variation(self) -> None:
         assert eval_expr("5.5 * 10") == "55"
         assert eval_expr("12 / 1,5") == eval_expr("12 / 1.5") == "8"

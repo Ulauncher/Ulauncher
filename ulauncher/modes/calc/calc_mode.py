@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import ast
+import contextlib
 import logging
 import math
 import operator as op
 import re
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Callable
 
 from ulauncher.internals import effects
@@ -82,6 +83,8 @@ descriptions = {
 
 logger = logging.getLogger(__name__)
 
+_max_result_exponent = 1000
+
 _trailing_operator_re = re.compile(r"\s*[.+\-*/%]\*?\s*$")
 # Only known function names, so an app search like "5*foo(" isn't reduced to the math prefix "5"
 _incomplete_call_re = re.compile(rf"\s*[.+\-*/%]?\*?\s*(?:(?<![\w.])(?:{'|'.join(functions)}))?\(\s*$")
@@ -153,7 +156,15 @@ def eval_expr(expr: str) -> str:
 @lru_cache(maxsize=1000)
 def _eval_normalized(expr: str) -> str:
     tree = ast.parse(expr, mode="eval").body
-    result = Decimal(_eval(tree)).quantize(Decimal("1e-15"))
+    result = Decimal(_eval(tree))
+    # Check the exponent before int() has to materialize every digit, which takes seconds
+    if result.adjusted() > _max_result_exponent:
+        msg = f"Result has too many digits to display: 1e{result.adjusted()}"
+        raise OverflowError(msg)
+    # Too few significant digits left for 15 decimals, but then there are no noise digits to cut
+    with contextlib.suppress(InvalidOperation):
+        result = result.quantize(Decimal("1e-15"))
+    # Must follow the rounding, which is what makes 99.99999999999999999999999996 integral
     int_result = int(result)
     if result == int_result:
         return str(int_result)
