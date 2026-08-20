@@ -35,8 +35,9 @@ def eval_expr(expr):
 
 
 def _eval(node):
-    if isinstance(node, ast.Constant):  # <constant> (number)
-        value = node.value if hasattr(node, "value") else node.n  # older versions of python has .n instead of .value
+    # python 3.7 and older parse a number into ast.Num, which keeps it in .n instead of .value
+    value = node.value if isinstance(node, ast.Constant) else getattr(node, 'n', None)
+    if value is not None:  # <constant> (number)
         return Decimal(str(value))
     if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](_eval(node.left), _eval(node.right))
