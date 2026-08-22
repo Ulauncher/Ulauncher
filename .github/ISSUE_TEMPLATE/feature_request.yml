@@ -25,9 +25,9 @@ body:
     id: not-extension
     attributes:
       label: Feature isn't possible to support as an extension.
-      description: Ulauncher's developers doesn't have the time to support all features directly. We rely on third party extensions for this.
+      description: Ulauncher's developers don't have the time to support all features directly. We rely on third party extensions for this.
       options:
-        - label: This feature request cannot satisfactory be supported as a third party extension.
+        - label: This feature request cannot be satisfactorily supported as a third party extension.
           required: true
   - type: checkboxes
     id: latest

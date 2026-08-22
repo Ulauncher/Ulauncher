@@ -100,7 +100,7 @@ Use the Ulauncher main branch, and verify that the issue or feature hasn't alrea
 1. Commit and push your changes. When possible, try to make your changes so that each commit changes just one thing, and please use [Conventional Commits](https://www.conventionalcommits.org/) for your commit messages.
 1. Create a pull request (provide the relevant information suggested by the template). Use the main branch as the base branch and target.
 
-Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GOjbject documentation and similar.
+Check out our [Developer resources](https://github.com/Ulauncher/Ulauncher/discussions/879) for links for GTK/GObject documentation and similar.
 
 There are some more helpful developer and maintainer commands provided by using our `make` targets. Run `make` to list them all.
 
