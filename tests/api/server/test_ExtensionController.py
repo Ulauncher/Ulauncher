@@ -17,7 +17,15 @@ def headers_for(origin):
 
 
 valid_headers = headers_for('http://127.0.0.1:5054')
-invalid_headers = headers_for('https://example.com')
+
+disallowed_origins = [
+    'https://example.com',
+    'http://example.com:5054',
+    'http://localhost:5054',
+    'http://127.0.0.1:5055',
+    'null',
+    None,
+]
 
 
 class TestExtensionController:
@@ -73,11 +81,17 @@ class TestExtensionController:
         with pytest.raises(Exception):
             controller.handleConnected()
 
-    def test_handleConnected__invalid_origin__doesnt_call_sendMessage(self, controller):
+    @pytest.mark.parametrize('origin', disallowed_origins)
+    def test_handleConnected__disallowed_origin__connection_is_closed(
+            self, controller, controllers, mocker, origin):
+        # GHSA-5vr2-67v3-4c7f: a Web page must not be able to drive the extension server
+        mocker.patch.object(controller, 'close')
         controller.request = mock.Mock()
-        controller.request.path = '/'
-        controller.request.headers = invalid_headers
+        controller.request.path = '/extension-name'
+        controller.request.headers = HTTPMessage() if origin is None else headers_for(origin)
         controller.handleConnected()
+        assert 'extension-name' not in controllers
+        assert controller.close.called
         assert not controller.sendMessage.called
 
     def test_handleConnected__origin_on_another_port__extension_id_is_stored(
