@@ -28,7 +28,7 @@ from ulauncher.utils.Settings import Settings
 from ulauncher.utils.setup_logging import setup_logging
 from ulauncher.api.version import api_version
 
-logger = logging.getLogger('ulauncher')
+logger = logging.getLogger(__name__)
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
 DBUS_PATH = '/net/launchpad/ulauncher'
