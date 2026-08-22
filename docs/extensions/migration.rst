@@ -31,7 +31,7 @@ API version 2 was introduced along with Ulauncher v5 after migrating from Python
 
     [
       { "required_api_version": "1", "commit": "python2" },
-      { "required_api_version": "2, "commit": "master" }
+      { "required_api_version": "2", "commit": "master" }
     ]
 
 ----

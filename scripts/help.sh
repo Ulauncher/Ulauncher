@@ -60,8 +60,11 @@ The commands below are useful for maintainers:
   ${bold}./ul build-preferences
     ${dim}Builds JS/HTML/CSS files for Preferences UI${normal}
 
-  ${bold}./ul build-release
-    ${dim}[CI only] script to build the tag/release and upload the package files to it, and distro repositories ${normal}
+  ${bold}./ul build-release <VERSION>
+    ${dim}[CI only] Builds the package files for a tag/release${normal}
+
+  ${bold}./ul upload-release <VERSION>
+    ${dim}[CI only] Uploads the package files to the distro repositories${normal}
 
   ${bold}./ul build-doc
     ${dim}Builds API docs for extensions using sphinx${normal}
