@@ -27,7 +27,7 @@
         </div>
         <p
           v-else-if="errorName === 'GithubApiError'"
-        >Unable to connect to Github. Please try again later, or install the extension manually.</p>
+        >Unable to connect to GitHub. Please try again later, or install the extension manually.</p>
         <p
           v-else-if="errorName === 'ExtensionAlreadyAdded'"
         >You've already installed this extension.</p>
@@ -42,11 +42,11 @@
           <a
             href
             @click.prevent="openUrlInBrowser(`${extUrl}/issues`)"
-          >Github issues</a>.
+          >GitHub issues</a>.
         </p>
         <p v-else-if="['InvalidGithubUrl', 'IncompatibleVersion', 'ExtensionAlreadyAdded'].indexOf(errorName) === -1">
           To install extensions you need a working internet connection that can access GitHub's APIs.<br/>
-          If you don't have this, or if it doesn't work for other reasons, then you can install extensons manually by putting them in
+          If you don't have this, or if it doesn't work for other reasons, then you can install extensions manually by putting them in
           <a href @click.prevent="openExtensionsDir()">your extensions directory</a>.
         </p>
       </small>

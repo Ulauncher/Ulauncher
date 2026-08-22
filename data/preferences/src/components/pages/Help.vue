@@ -38,7 +38,7 @@ export default {
         {
           icon: 'fa-github',
           label: 'Discussions',
-          text: 'Discussion page on Github, for questions and help',
+          text: 'Discussion page on GitHub, for questions and help',
           url: 'https://github.com/Ulauncher/Ulauncher/discussions/'
         }
       ]

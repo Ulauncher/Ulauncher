@@ -26,7 +26,7 @@
           <a
             href
             @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/issues')"
-          >Github Issues</a>.
+          >GitHub Issues</a>.
         </p>
         <small>
           <i class="fa fa-copy"></i>
