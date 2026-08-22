@@ -63,7 +63,7 @@ rm-python-cache:
 
 #=Lint/test Commands
 
-.PHONY: lint check check-container check-all flake8 mypy pylint pytest
+.PHONY: lint check in-container check-container check-all flake8 mypy pylint pytest require-targets
 
 # Run all linters
 lint: flake8 mypy pylint
@@ -71,16 +71,26 @@ lint: flake8 mypy pylint
 # Run all linters and unit tests
 check: lint pytest
 
-# Run all linters and unit tests inside the Docker build container
-check-container:
+# Run other targets inside the Docker build container. Ex: `make in-container TARGETS="check docs"`
+in-container: require-targets
 	@source ./scripts/common.sh
 	# SELinux needs the ":z" label on mounted volumes
 	if command -v selinuxenabled >/dev/null && selinuxenabled; then vol_suffix=":z"; else vol_suffix=""; fi
-	exec $(DOCKER_BIN) run --rm -v "$(ROOT_DIR):/root/ulauncher$$vol_suffix" $$BUILD_IMAGE make check
+	exec $(DOCKER_BIN) run --rm -v "$(ROOT_DIR):/root/ulauncher$$vol_suffix" $$BUILD_IMAGE make $(TARGETS)
+
+# Run all linters and unit tests inside the Docker build container
+check-container:
+	@exec $(MAKE) --no-print-directory in-container TARGETS=check
 
 # Run all checks locally and in the Docker build container
 check-all: check
 	@$(MAKE) --no-print-directory check-container
+
+require-targets:
+	@if [ -z "$(TARGETS)" ]; then
+	  echo -e "$(BOLD)$(RED)[!] Set the targets, ex: make $(MAKECMDGOALS) TARGETS=check$(RESET)"
+	  exit 1
+	fi
 
 # Lint with flake8
 flake8:
