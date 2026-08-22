@@ -15,12 +15,14 @@ except AttributeError:
 
 
 class DesktopAppInfo:
-    _app_info: Gio.DesktopAppInfo
     """
     Wrapper for Gio.DesktopAppInfo because it is broken in Debian Forky/Testing
     """
 
-    def __init__(self, app_info: Gio.DesktopAppInfo) -> None:
+    # Quoted so the annotations are not evaluated where Gio.DesktopAppInfo is missing
+    _app_info: "Gio.DesktopAppInfo"
+
+    def __init__(self, app_info: "Gio.DesktopAppInfo") -> None:
         self._app_info = app_info
 
     @staticmethod
