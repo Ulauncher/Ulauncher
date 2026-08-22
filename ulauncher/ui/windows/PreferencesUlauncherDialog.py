@@ -201,7 +201,7 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
             scheme_request.finish(stream, -1, mime_type)
         except Exception as e:
             logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
-            return
+            scheme_request.finish_error(e if isinstance(e, GLib.Error) else GLib.Error(str(e)))
 
     @run_async
     def on_scheme_callback(self, scheme_request):
