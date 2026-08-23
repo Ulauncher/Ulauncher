@@ -63,7 +63,7 @@
       </small>
     </b-alert>
 
-    <div class="ext-form" v-if="!extension.error && extension.is_running" ref="ext-form">
+    <div class="ext-form" v-if="!extension.error" ref="ext-form">
       <template v-for="pref in extension.preferences">
         <b-form-fieldset
           v-if="pref.type == 'keyword'"
@@ -173,10 +173,15 @@ export default {
   name: 'extension-config',
   props: ['extension'],
   mounted() {
-    this.$refs['ext-form'].addEventListener('click', this.handleNativeClick)
+    // an extension with a manifest error renders an explanation instead of the form
+    if (this.$refs['ext-form']) {
+      this.$refs['ext-form'].addEventListener('click', this.handleNativeClick)
+    }
   },
   beforeDestroy() {
-    this.$refs['ext-form'].removeEventListener('click', this.handleNativeClick)
+    if (this.$refs['ext-form']) {
+      this.$refs['ext-form'].removeEventListener('click', this.handleNativeClick)
+    }
   },
   data() {
     return {
@@ -195,8 +200,7 @@ export default {
     },
     canSave() {
       const { preferences } = this.$props.extension
-      const isRunning = this.$props.extension.is_running
-      return isRunning && !this.$props.extension.error && preferences && !!preferences.length
+      return !this.$props.extension.error && preferences && !!preferences.length
     },
     canCheckUpdates() {
       return !!this.$props.extension.url
@@ -255,6 +259,12 @@ export default {
       }
       jsonp('prefs://extension/update-prefs', updates).then(
         () => {
+          // the inputs are bound one way, so without this the list this component renders from
+          // still holds the old values, and they come back when you switch extensions and return
+          for (let i = 0; i < this.extension.preferences.length; i++) {
+            let pref = this.extension.preferences[i]
+            pref.value = updates[`pref.${pref.id}`]
+          }
           this.showSavedMsg = true
           setTimeout(() => {
             this.showSavedMsg = false
