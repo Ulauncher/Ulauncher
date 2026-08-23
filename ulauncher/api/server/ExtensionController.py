@@ -125,10 +125,9 @@ class ExtensionController(WebSocket):
     def handleClose(self):
         """
         Implements abstract method of :class:`WebSocket`
+
+        Reports only extensions we still track, so connections that never finished the handshake
+        stay quiet, and so do all of them once Ulauncher drops them to exit.
         """
-        logger.info('Extension "%s" disconnected', self.extension_id)
-        try:
-            del self.controllers[self.extension_id]
-        # pylint: disable=broad-except
-        except Exception:
-            pass
+        if self.controllers.pop(self.extension_id, None):
+            logger.info('Extension "%s" disconnected', self.extension_id)

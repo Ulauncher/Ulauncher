@@ -25,6 +25,7 @@ from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.utils.Settings import Settings
+from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.utils.setup_logging import setup_logging
 from ulauncher.api.version import api_version
 
@@ -62,8 +63,19 @@ def reload_config(win):
     win.init_theme()
 
 
+def close_extensions():
+    """
+    Ulauncher going away drops the websockets, which is what makes the extensions exit. Forget
+    them here so we report the number once instead of a disconnect per extension on the way out.
+    """
+    controllers = ExtensionServer.get_instance().controllers
+    logger.info("Closing %s extension(s)", len(controllers))
+    controllers.clear()
+
+
 def graceful_exit(data):
     logger.info("Exiting gracefully nesting level %s: %s", Gtk.main_level(), data)
+    close_extensions()
     # Gtk.main_quit()
     sys.exit(0)
 
@@ -151,4 +163,5 @@ def main():
     try:
         Gtk.main()
     except KeyboardInterrupt:
-        logger.warning('On KeyboardInterrupt')
+        logger.info('Interrupted')
+        close_extensions()
