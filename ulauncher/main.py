@@ -64,7 +64,6 @@ def reload_config(win):
 
 def graceful_exit(data):
     logger.info("Exiting gracefully nesting level %s: %s", Gtk.main_level(), data)
-    # ExtensionServer.get_instance().stop()
     # Gtk.main_quit()
     sys.exit(0)
 
