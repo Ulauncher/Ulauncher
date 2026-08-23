@@ -24,6 +24,9 @@ def setup_logging():
     if os.getenv('VERBOSE'):
         root.setLevel(logging.DEBUG)
 
+    # it announces the same connects and disconnects that Ulauncher reports itself
+    logging.getLogger('websocket').setLevel(logging.WARNING)
+
 
 def get_extension_name():
     return os.path.basename(os.path.dirname(sys.argv[0]))
