@@ -103,10 +103,13 @@ class ExtensionRunner:
             self.unset_extension_error(extension_id)
 
             while proc.poll() is None:
-                line = proc.stderr.readline().decode()
-                if line != "":
-                    lasterr = line
-                    print(line, end='')
+                line = proc.stderr.readline()
+                if line != b"":
+                    lasterr = line.decode()
+                    # Write to the fd rather than print(). This runs on a daemon thread, and a
+                    # buffered write can hold the stream lock when the interpreter starts
+                    # finalizing, which aborts the process instead of exiting it.
+                    os.write(1, line)
 
             code = proc.returncode
 
