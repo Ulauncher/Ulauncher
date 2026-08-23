@@ -67,7 +67,9 @@ class AutostartPreference:
                 autostart_info.set_filename(self._ulauncher_autostart_desktop)
 
             autostart_info.set(self.AUTOSTART_FLAG, str(bool(is_on)).lower())
-            autostart_info.set('Exec', '%s %s' % (autostart_info.get('Exec'), '--hide-window'))
+            exec_command = autostart_info.get('Exec')
+            if '--hide-window' not in exec_command:
+                autostart_info.set('Exec', '%s --hide-window' % exec_command)
             autostart_info.write()
         except OSError as e:
             raise SwitchError('Could not update the autostart file. %s: %s' % (e.strerror, e.filename)) from e
