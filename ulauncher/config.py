@@ -81,6 +81,10 @@ def get_options():
     parser.add_option(
         "--dev", action="store_true",
         help=gettext("Enables context menu in the Preferences UI"))
+    # Does nothing here. Autostart managers copy the desktop file, so this marks the copies as
+    # XDG autostart entries, which lets Ulauncher 6 reject them in favor of its systemd unit.
+    parser.add_option(
+        "--autostart-method-xdg", action="store_true", help=optparse.SUPPRESS_HELP)
     (options, _) = parser.parse_args()
 
     return options
