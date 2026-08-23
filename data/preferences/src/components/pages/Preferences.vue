@@ -13,20 +13,23 @@
             @focus.native="showHotkeyDialog($event)"
             :value="prefs.hotkey_show_app"
           ></b-form-input>
-          <div v-if="prefs.is_wayland" class="hotkey-warning">
-            <b-alert show variant="warning">
-              <small>
-                It appears that your are in Wayland session.
-                This hotkey may not work all the time.
-                <br />Check
-                <a
-                  href
-                  @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/wiki/Hotkey-In-Wayland')"
-                >this</a>
-                to get better user experience
-              </small>
-            </b-alert>
-          </div>
+        </td>
+      </tr>
+
+      <tr v-if="prefs.is_wayland">
+        <td colspan="2" class="hotkey-warning">
+          <b-alert show variant="warning">
+            <small>
+              Global hotkeys is supported on X11 only, and you are using Wayland.<br/>
+              You can still set them in your desktop environment's keyboard settings, bound to the command: <code>ulauncher-toggle</code>.<br/>
+              See
+              <a
+                href
+                @click.prevent="openUrlInBrowser('https://github.com/Ulauncher/Ulauncher/discussions/1347')"
+              >troubleshooting</a>
+              for more details
+            </small>
+          </b-alert>
         </td>
       </tr>
 
@@ -400,13 +403,16 @@ label + small {
   cursor: pointer;
   width: 200px;
 }
-.hotkey-warning {
-  width: 550px;
+/* overrides the width and padding that td:first-child gives this full-width cell */
+td.hotkey-warning {
+  width: auto;
+  padding-right: 0;
 }
 .hotkey-warning .alert {
-  margin: 10px 0 0 0;
+  max-width: 550px;
+  margin: 0;
   padding: 0.4em 0.7em;
-  line-height: 95%;
+  line-height: 1.4;
 }
 .theme-select,
 .render-on-screen-select {
