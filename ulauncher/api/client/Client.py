@@ -32,12 +32,14 @@ class Client:
         Connects to WS server and blocks thread
         """
         websocket.enableTrace(False)
+        # websocket-client has changed how many arguments it passes between versions, so swallow
+        # any beyond the ones we use. The lambdas also make it pass the socket to every version.
         # pylint: disable=unnecessary-lambda
         self.ws = websocket.WebSocketApp(self.ws_api_url,
-                                         on_message=lambda ws, msg: self.on_message(ws, msg),
-                                         on_error=lambda ws, error: self.on_error(ws, error),
-                                         on_open=lambda ws: self.on_open(ws),
-                                         on_close=lambda ws: self.on_close(ws))
+                                         on_message=lambda ws, msg, *_: self.on_message(ws, msg),
+                                         on_error=lambda ws, error, *_: self.on_error(ws, error),
+                                         on_open=lambda ws, *_: self.on_open(ws),
+                                         on_close=lambda ws, *_: self.on_close(ws))
         self.ws.run_forever()
 
     # pylint: disable=unused-argument

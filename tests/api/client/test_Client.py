@@ -40,6 +40,25 @@ class TestClient:
         client.connect()
         websocket.WebSocketApp.return_value.run_forever.assert_called_with()
 
+    def test_connect__on_close_gets_status_and_reason__extension_still_exits(
+            self, client, websocket, extension, SystemExitEvent, Timer):
+        client.connect()
+        on_close = websocket.WebSocketApp.call_args[1]['on_close']
+
+        on_close(mock.Mock(), 1000, 'going away')
+
+        extension.trigger_event.assert_called_with(SystemExitEvent.return_value)
+        assert Timer.called
+
+    def test_connect__callbacks__ignore_arguments_they_do_not_use(self, client, websocket):
+        client.connect()
+        callbacks = websocket.WebSocketApp.call_args[1]
+        ws = mock.Mock()
+
+        callbacks['on_open'](ws, 'extra')
+        callbacks['on_message'](ws, pickle.dumps({'hello': 'world'}), 'extra')
+        callbacks['on_error'](ws, Exception('failed'), 'extra')
+
     def test_on_message__trigger_event__is_called(self, client, extension):
         client.on_message(mock.Mock(), pickle.dumps({'hello': 'world'}))
         extension.trigger_event.assert_called_with({'hello': 'world'})
