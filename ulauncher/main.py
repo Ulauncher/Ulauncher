@@ -25,6 +25,7 @@ from ulauncher.utils.wayland import is_wayland, is_wayland_compatibility_on
 from ulauncher.ui.windows.UlauncherWindow import UlauncherWindow
 from ulauncher.ui.AppIndicator import AppIndicator
 from ulauncher.utils.Settings import Settings
+from ulauncher.utils.desktop.notification import show_notification
 from ulauncher.api.server.ExtensionServer import ExtensionServer
 from ulauncher.utils.setup_logging import setup_logging
 from ulauncher.api.version import api_version
@@ -128,6 +129,7 @@ def main():
         toggle_window()
         return
 
+    is_first_run = not os.path.exists(CONFIG_DIR)
     _create_dirs()
 
     options = get_options()
@@ -148,6 +150,13 @@ def main():
     UlauncherDbusService(window)
     if not options.hide_window:
         window.show()
+
+    if is_first_run and is_wayland():
+        show_notification(
+            "Ulauncher",
+            "Wayland doesn't let apps bind global hotkeys reliably. Bind a keyboard shortcut "
+            'that runs "ulauncher-toggle" in your desktop environment\'s keyboard settings.'
+        )
 
     if Settings.get_instance().get_property('show-indicator-icon'):
         AppIndicator.get_instance().show()
