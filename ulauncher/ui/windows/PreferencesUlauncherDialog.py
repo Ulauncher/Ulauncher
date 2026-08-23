@@ -191,6 +191,8 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         """
         Serves file with custom file2:// protocol because file:// breaks for some
         """
+        # this method runs in a separate thread, and WebKit is not thread-safe, so every
+        # answer to the request goes on the GLib main loop
         # pylint: disable=broad-except
         try:
             params = get_url_params(scheme_request.get_uri())
@@ -198,11 +200,11 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
 
             mime_type = mimetypes.guess_type(file_path)[0]
             stream = Gio.file_new_for_path(file_path).read()
-            # this method runs in a separate thread, and WebKit is not thread-safe
             GLib.idle_add(scheme_request.finish, stream, -1, mime_type)
         except Exception as e:
             logger.exception('Unable to send file. %s: %s', type(e).__name__, e)
-            scheme_request.finish_error(e if isinstance(e, GLib.Error) else GLib.Error(str(e)))
+            error = e if isinstance(e, GLib.Error) else GLib.Error(str(e))
+            GLib.idle_add(scheme_request.finish_error, error)
 
     @run_async
     def on_scheme_callback(self, scheme_request):
