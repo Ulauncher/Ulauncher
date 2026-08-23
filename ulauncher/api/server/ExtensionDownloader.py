@@ -94,16 +94,17 @@ class ExtensionDownloader:
     def download_missing(self) -> None:
         already_downloaded = {id for id, _ in find_extensions(EXTENSIONS_DIR)}
         for id, ext in self.ext_db.get_records().items():
-            if id in already_downloaded:
+            url = ext.get('url')
+            if not url or id in already_downloaded:
                 continue
 
             logger.info('Downloading missing extension %s', id)
             try:
-                ext_id = self.download(ext['url'])
+                ext_id = self.download(url)
                 self.ext_runner.run(ext_id)
             # pylint: disable=broad-except
             except Exception as e:
-                logger.error('%s: %s', type(e).__name__, e)
+                logger.error('Could not download extension %s: %s: %s', id, type(e).__name__, e)
 
     def remove(self, ext_id: str) -> None:
         try:
