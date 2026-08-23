@@ -123,3 +123,10 @@ class TestUlauncherWindow:
             GtkBuilder.return_value, result_item, 0, 'test')
         GtkBuilder.return_value.add_from_file.assert_called_with(get_data_file.return_value)
         get_data_file.assert_called_with('ui', '%s.ui' % result_item.UI_FILE)
+
+    def test_extension_server_fails_to_bind__window_still_starts(self, extServer, extRunner):
+        extServer.start.side_effect = OSError('Address already in use')
+
+        assert UlauncherWindow()
+
+        extRunner.run_all.assert_not_called()

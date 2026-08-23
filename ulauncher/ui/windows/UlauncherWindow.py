@@ -108,8 +108,13 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             GLib.idle_add(self.bind_show_app_hotkey, accel_name)
 
         start_app_watcher()
-        ExtensionServer.get_instance().start()
-        ExtensionRunner.get_instance().run_all()
+        try:
+            ExtensionServer.get_instance().start()
+        except Exception:
+            # binding happens here now, and Ulauncher itself is still usable without extensions
+            logger.exception('Could not start the extension server. Extensions will not run')
+        else:
+            ExtensionRunner.get_instance().run_all()
         if not get_options().no_extensions:
             ExtensionDownloader.get_instance().download_missing()
 
