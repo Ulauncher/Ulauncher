@@ -54,6 +54,8 @@ class AppIndicator:
         window = UlauncherWindow.get_instance()
         indicator = cls("ulauncher")
         indicator.set_icon('ulauncher-indicator')
+        # without this there is no way to open Ulauncher when the hotkey isn't set or didn't bind
+        indicator.add_menu_item(lambda *_: window.show_window(), "Show Ulauncher")
         indicator.add_menu_item(window.on_mnu_preferences_activate, "Preferences")
         indicator.add_menu_item(window.on_mnu_about_activate, "About")
         indicator.add_separator()
