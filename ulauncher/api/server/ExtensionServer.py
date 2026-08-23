@@ -36,19 +36,21 @@ class ExtensionServer:
     def start(self):
         """
         Starts WS server
+
+        Binds the socket before returning, so callers can generate URLs for it right away.
         """
         if self.ws_server:
             raise ServerIsRunningError()
 
-        self._start_thread()
-
-    @run_async(daemon=True)
-    def _start_thread(self):
         self.port = self.port or find_unused_port(5054)
         logger.info('Starting WS server on port %s', self.port)
         self.ws_server = SimpleWebSocketServer(self.hostname,
                                                self.port,
                                                partial(ExtensionController, self.controllers))
+        self._serve_forever()
+
+    @run_async(daemon=True)
+    def _serve_forever(self):
         self.ws_server.serveforever()
 
     def is_running(self):

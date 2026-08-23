@@ -20,14 +20,18 @@ class TestExtensionServer:
     def server(self):
         return ExtensionServer()
 
-    @pytest.fixture(autouse=True)
-    def run_async(self, mocker):
-        return mocker.patch('ulauncher.api.server.ExtensionServer.run_async')
-
     def test_start__SimpleWebSocketServer__is_created(self, server, SWS, find_unused_port):
         server.start()
-        sleep(0.02)
         SWS.assert_called_with('127.0.0.1', find_unused_port.return_value, mock.ANY)
+
+    def test_start__slow_to_bind__url_is_available_when_start_returns(self, server, find_unused_port):
+        def slow_find_unused_port(default):
+            sleep(0.1)
+            return 5054
+
+        find_unused_port.side_effect = slow_find_unused_port
+        server.start()
+        assert server.generate_ws_url('test_extension') == 'ws://127.0.0.1:5054/test_extension'
 
     def test_start__serveforever__is_called(self, server, SWS):
         server.start()

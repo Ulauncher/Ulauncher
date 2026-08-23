@@ -109,7 +109,6 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
         start_app_watcher()
         ExtensionServer.get_instance().start()
-        time.sleep(0.01)
         ExtensionRunner.get_instance().run_all()
         if not get_options().no_extensions:
             ExtensionDownloader.get_instance().download_missing()
