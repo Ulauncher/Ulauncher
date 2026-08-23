@@ -24,6 +24,7 @@ def _stub_gapplication(tmp_path: Path, *, exit_code: int = 0) -> tuple[Path, dic
     ("flag", "hint"),
     [
         ("--hide-window", "use start"),
+        ("--autostart-method-xdg", ""),
         ("--no-extensions", "see --help for available commands"),
         ("--no-window-shadow", "the Window shadow size setting"),
     ],

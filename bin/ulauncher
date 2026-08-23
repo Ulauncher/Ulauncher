@@ -23,6 +23,12 @@ walked=0
 while [ "$walked" -lt "$orig_count" ]; do
   arg=$1; shift; walked=$((walked + 1))
   case "$arg" in
+    # --autostart-method-xdg exists only to tell Ulauncher v6 that it was started from Ulauncher v5 desktop entry
+    # (likely via xdg autostart), and that we should refuse to start so the bus name isn't taken before the systemd
+    # unit claims it. However it was added to v5 first in v5.16.0. Before then `--hide-window` was in the v5 desktop
+    # entry, so we need to reject both.
+    --autostart-method-xdg)
+      print_color 33 "The --autostart-method-xdg argument has been removed"; exit 2 ;;
     --hide-window)
       print_color 33 "The --hide-window argument has been removed (use start)"; exit 2 ;;
     --no-extensions)
