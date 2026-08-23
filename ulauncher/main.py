@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 DBUS_SERVICE = 'net.launchpad.ulauncher'
 DBUS_PATH = '/net/launchpad/ulauncher'
+V6_DBUS_SERVICE = 'io.ulauncher.Ulauncher'
 
 
 def _create_dirs():
@@ -118,6 +119,11 @@ def main():
     # start DBus loop
     DBusGMainLoop(set_as_default=True)
     bus = dbus.SessionBus()
+
+    if bus.name_has_owner(V6_DBUS_SERVICE):
+        print("Ulauncher 6 is running. Quit it before starting Ulauncher 5.", file=sys.stderr)
+        return
+
     instance = bus.request_name(DBUS_SERVICE)
 
     if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
