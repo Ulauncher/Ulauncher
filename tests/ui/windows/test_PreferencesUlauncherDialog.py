@@ -114,3 +114,28 @@ class TestPreferencesUlauncherDialog:
     def test_get_app_hotkey(self, dialog, settings):
         settings.get_property.return_value = '<Primary>B'
         assert dialog.get_app_hotkey() == 'Ctrl+B'
+
+    @pytest.fixture
+    def ext_preferences(self, mocker):
+        create_instance = mocker.patch(
+            'ulauncher.ui.windows.PreferencesUlauncherDialog.ExtensionPreferences.create_instance')
+        create_instance.return_value.get.return_value = {'value': 'old'}
+        return create_instance.return_value
+
+    @pytest.fixture
+    def ext_server(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.ExtensionServer.get_instance').return_value
+
+    def test_prefs_extension_update_prefs__notifies_a_connected_extension(self, dialog, ext_preferences, ext_server):
+        controller = ext_server.get_controller.return_value
+        dialog.prefs_extension_update_prefs({'query': {'id': 'com.example.ext', 'pref.city': 'new'}})
+
+        ext_preferences.set.assert_called_once_with('city', 'new')
+        assert controller.trigger_event.call_count == 1
+
+    def test_prefs_extension_update_prefs__saves_when_the_extension_is_not_connected(
+            self, dialog, ext_preferences, ext_server):
+        ext_server.get_controller.return_value = None
+        dialog.prefs_extension_update_prefs({'query': {'id': 'com.example.ext', 'pref.city': 'new'}})
+
+        ext_preferences.set.assert_called_once_with('city', 'new')

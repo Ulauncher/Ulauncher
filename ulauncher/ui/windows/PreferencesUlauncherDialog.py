@@ -491,16 +491,15 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         ext_id = query['id']
         logger.info('Update extension preferences: %s', query)
         prefix = 'pref.'
+        # the store is the same object the controller uses, so the values persist whether or not the
+        # extension is connected. Only a connected one can be told about the change (#848)
+        preferences = ExtensionPreferences.create_instance(ext_id)
         controller = ExtensionServer.get_instance().get_controller(ext_id)
-        if not controller:
-            raise PrefsApiError("Cannot update preferences. The extension controller is not registered. \
-            Try relaunching or restarting Ulauncher, and check the extension readme for external dependencies \
-            you may have to install manually")
-        preferences = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
-        for pref_id, value in preferences:
-            old_value = controller.preferences.get(pref_id)['value']
-            controller.preferences.set(pref_id, value)
-            if value != old_value:
+        updates = [(key[len(prefix):], value) for key, value in query.items() if key.startswith(prefix)]
+        for pref_id, value in updates:
+            old_value = preferences.get(pref_id)['value']
+            preferences.set(pref_id, value)
+            if controller and value != old_value:
                 controller.trigger_event(PreferencesUpdateEvent(pref_id, old_value, value))
 
     @rt.route('/extension/check-updates')
