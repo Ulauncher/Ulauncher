@@ -2,7 +2,7 @@ import logging
 import os
 import signal
 
-from ulauncher import first_v6_run
+from ulauncher.gi import GLib
 
 logger = logging.getLogger(__name__)
 v5_service_name = "net.launchpad.ulauncher"
@@ -12,17 +12,19 @@ def kill_ulauncher_v5() -> None:
     """
     Kills the Ulauncher v5 instance if it is running.
 
-    The purpose of this is to ensure that v5 is not running when v6 is started.
-    This check is necessary only on the first run of v6 during the upgrade.
+    The purpose of this is to ensure that v5 is not running when v6 is started. The two share the
+    settings, the extension preferences and the extensions, so running both corrupts the config and
+    starts every extension twice. v5 refuses to start while v6 is running, so only v6 kills.
     See https://github.com/Ulauncher/Ulauncher/issues/1093 for more.
     """
-    if not first_v6_run:
-        return
-
     # Find the Ulauncher v5 service on the session bus
     from ulauncher.utils.dbus import get_app_pid
 
-    pid = get_app_pid(v5_service_name)
+    try:
+        pid = get_app_pid(v5_service_name)
+    except GLib.Error:
+        # No session bus to ask, so there is nothing running to kill either
+        return
 
     if not pid:
         return
