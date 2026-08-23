@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from ulauncher.api.shared.Response import Response
 from ulauncher.api.shared.action.BaseAction import BaseAction
-from ulauncher.api.shared.event import PreferencesEvent, PreferencesUpdateEvent
+from ulauncher.api.shared.event import PreferencesEvent, PreferencesUpdateEvent, SystemExitEvent
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Client import Client
 from ulauncher.api.client.setup_logging import setup_logging
@@ -45,7 +45,9 @@ class Extension:
         """
         listeners = self.get_listeners_for_event(event)
         if not listeners:
-            self.logger.debug('No listeners for event %s', type(event).__name__)
+            # every extension gets this on exit and almost none subscribe
+            if not isinstance(event, SystemExitEvent):
+                self.logger.debug('No listeners for event %s', type(event).__name__)
             return
 
         for listener in listeners:
