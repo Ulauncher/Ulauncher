@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from ulauncher.ui.helpers.theme import LegacyTheme, _load_legacy_theme
+from ulauncher import paths
+from ulauncher.ui.helpers.theme import LegacyTheme, _load_legacy_theme, get_themes
 
 
 def _write_manifest(dir_path: Path, data: object) -> Path:
@@ -34,3 +35,37 @@ def test_load_legacy_theme__unusable_manifest__returns_none(tmp_path: Path, cont
 
 def test_load_legacy_theme__missing_file__returns_none(tmp_path: Path) -> None:
     assert _load_legacy_theme(tmp_path / "manifest.json") is None
+
+
+@pytest.fixture
+def user_themes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    themes_dir = tmp_path / "user-themes"
+    themes_dir.mkdir()
+    monkeypatch.setattr(paths, "USER_THEMES", str(themes_dir))
+    monkeypatch.setattr(paths, "SYSTEM_THEMES", str(tmp_path / "no-system-themes"))
+    return themes_dir
+
+
+def test_get_themes__manifest_in_the_user_themes_root__wins_over_the_css_glob(user_themes: Path) -> None:
+    (user_themes / "dark.css").write_text("")
+    _write_manifest(user_themes, {"name": "dark", "css_file": "dark.css", "extend_theme": "light"})
+
+    theme = get_themes()["dark"]
+
+    assert isinstance(theme, LegacyTheme)
+    assert theme.extend_theme == "light"
+
+
+def test_get_themes__css_the_root_manifest_does_not_describe__is_still_a_theme(user_themes: Path) -> None:
+    (user_themes / "dark.css").write_text("")
+    (user_themes / "blue.css").write_text("")
+    _write_manifest(user_themes, {"name": "dark", "css_file": "dark.css"})
+
+    assert sorted(get_themes()) == ["blue", "dark"]
+
+
+def test_get_themes__unusable_root_manifest__leaves_the_css_themes_alone(user_themes: Path) -> None:
+    (user_themes / "dark.css").write_text("")
+    _write_manifest(user_themes, "{not json")
+
+    assert sorted(get_themes()) == ["dark"]
