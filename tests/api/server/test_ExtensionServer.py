@@ -44,11 +44,6 @@ class TestExtensionServer:
         server.port = 3297
         assert server.generate_ws_url('test_extension') == 'ws://127.0.0.1:3297/test_extension'
 
-    def test_stop__close__is_called(self, server):
-        server.ws_server = mock.Mock()
-        server.stop()
-        server.ws_server.close.assert_called_with()
-
     def test_get_controller_by_keyword__keyword_found__controller_returned(self, server):
         controller = mock.Mock()
         controller.preferences.get_active_keywords.return_value = ['yt', 'af']

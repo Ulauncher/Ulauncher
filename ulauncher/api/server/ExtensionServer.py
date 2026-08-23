@@ -50,17 +50,6 @@ class ExtensionServer:
                                                self.port,
                                                partial(ExtensionController, self.controllers))
         self.ws_server.serveforever()
-        self.ws_server = None
-        logger.warning('WS server exited')
-
-    def stop(self):
-        """
-        Stops WS server
-        """
-        if not self.is_running():
-            raise ServerIsNotRunningError()
-
-        self.ws_server.close()
 
     def is_running(self):
         """
