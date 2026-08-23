@@ -59,7 +59,12 @@ class Client:
             traceback.print_exc(file=sys.stderr)
 
     def on_error(self, ws, error):
-        logger.error('WS Client error %s', error)
+        # Ctrl+C reaches extensions too, and the library reports it here before closing cleanly
+        if isinstance(error, KeyboardInterrupt):
+            return
+
+        # repr, because a bare str is empty for several of the exceptions that land here
+        logger.error('WS Client error: %r', error)
 
     def on_close(self, ws):
         """
