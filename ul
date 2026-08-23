@@ -30,6 +30,18 @@ main () {
     upload-release) upload-release $2 ;;
     watch-doc) watch-doc ;;
 
+    # Undocumented aliases for the commands that moved to the makefile, so anything
+    # still calling them (packaging scripts) keeps working
+    run) exec make run ARGS="${*:2}" ;;
+    rm-python-cache) exec make rm-python-cache ;;
+    test-mypy) exec make mypy ;;
+    test-pylint) exec make pylint ;;
+    test-flake8) exec make flake8 ;;
+    test-pytest) exec make pytest ;;
+    test) exec make check ;;
+    send-signal) exec make send-signal SIGNAL="$2" ;;
+    edit-ui) exec make edit-ui FILE="$2" ;;
+
     *)
       echo "${red}[!] Unrecognized command '${1}'${normal}"
       usage
