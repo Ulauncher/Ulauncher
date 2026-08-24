@@ -3,7 +3,7 @@ issue_enrichment:
   auto_enrich:
     enabled: false
 reviews:
-  profile: assertive
+  profile: chill
 
   # Suppress redundant posts and collapse the "walkthrough" post
   review_status: false          # removes the "Actions performed" status comment
@@ -33,9 +33,8 @@ reviews:
 
   # Focus reviews on changed code only
   path_instructions:
-    - path: "**"
+    - path: "ulauncher/**"
       instructions: |
-        Only review what changed in this PR (added/modified lines and their immediate context).
-        Do not flag pre-existing issues unless they are correctness, crash, or security risks.
-        If you notice repo-wide improvement opportunities, summarize them under a single
-        collapsed "Non‑blocking: repo‑wide observations" section in the walkthrough; avoid inline comments for these.
+        ALWAYS verify and NEVER assume input is untrusted.
+        Ulauncher controls both sides of the extension IPC and passes the environment to the
+        extensions too, so we MUST NOT validate these as if it's untrusted input.
