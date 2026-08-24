@@ -33,6 +33,9 @@ def _migrate_file(
 ) -> None:
     if os.path.isfile(from_path) and (overwrite or not os.path.exists(to_path)):
         data = _load_legacy(Path(from_path))
+        if data and not isinstance(data, dict):  # all v5 config files store dicts
+            _logger.warning('Skipping migration of "%s": expected an object, got %s', from_path, type(data).__name__)
+            return
         if data:
             _logger.info("Migrating %s to %s", from_path, to_path)
             if callable(transform):
