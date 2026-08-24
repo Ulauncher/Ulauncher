@@ -13,11 +13,28 @@ if TYPE_CHECKING:
     from typing_extensions import TypeGuard
 
 _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in EffectType.__annotations__)
+# Mirrors the required keys of the TypedDicts in effects.py, which cannot be read at runtime (at least not in py3.8)
+_REQUIRED_EFFECT_FIELDS: Final = {
+    EffectType.SET_QUERY: ("query",),
+    EffectType.RENDER_RESULTS: ("results",),
+    EffectType.OPEN: ("path",),
+    EffectType.LEGACY_COPY: ("text",),
+    EffectType.LEGACY_RUN_SCRIPT: ("args",),
+    EffectType.LEGACY_RUN_MANY: ("effects",),
+    EffectType.LEGACY_ACTIVATE_CUSTOM: ("ref", "keep_app_open"),
+}
 _events = EventBus()
 
 
 def is_effect_message(value: Any) -> TypeGuard[EffectMessage]:
-    return isinstance(value, dict) and value.get("type") in _VALID_EFFECT_TYPES
+    if (
+        isinstance(value, dict)
+        and (effect_type := value.get("type"))
+        and isinstance(effect_type, str)
+        and effect_type in _VALID_EFFECT_TYPES
+    ):
+        return all(field in value for field in _REQUIRED_EFFECT_FIELDS.get(effect_type, ()))
+    return False
 
 
 def should_close(effect_msg: EffectMessage) -> bool:

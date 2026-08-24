@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,6 +12,31 @@ from ulauncher.internals import effect_utils, effects
 def run_many(*children: effects.EffectMessage) -> effects.LegacyRunMany:
     """Build a legacy ActionList effect without going through the deprecated api shim."""
     return {"type": effects.EffectType.LEGACY_RUN_MANY, "effects": list(children)}
+
+
+class TestIsEffectMessage:
+    def test_non_dict_and_unknown_type_are_rejected(self) -> None:
+        assert not effect_utils.is_effect_message("effect:do_nothing")
+        assert not effect_utils.is_effect_message({"type": "effect:bogus"})
+        assert not effect_utils.is_effect_message({})
+
+    @pytest.mark.parametrize(
+        "effect_msg",
+        [
+            {"type": effects.EffectType.DO_NOTHING},
+            {"type": effects.EffectType.SET_QUERY, "query": "hello"},
+            {"type": effects.EffectType.RENDER_RESULTS, "results": []},
+            {"type": effects.EffectType.OPEN, "path": "/path/to/file"},
+            {"type": effects.EffectType.LEGACY_COPY, "text": "hi"},
+            {"type": effects.EffectType.LEGACY_RUN_SCRIPT, "args": ["script", ""]},
+            {"type": effects.EffectType.LEGACY_RUN_MANY, "effects": []},
+            {"type": effects.EffectType.LEGACY_ACTIVATE_CUSTOM, "ref": 1, "keep_app_open": False},
+        ],
+    )
+    def test_effect_is_rejected_without_a_field_its_consumers_index(self, effect_msg: dict[str, Any]) -> None:
+        assert effect_utils.is_effect_message(effect_msg)
+        for field in effect_msg.keys() - {"type"}:
+            assert not effect_utils.is_effect_message({k: v for k, v in effect_msg.items() if k != field})
 
 
 class TestShouldClose:
