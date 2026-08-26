@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -10,10 +11,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 BIN_ULAUNCHER = REPO_ROOT / "bin/ulauncher"
 
 
-def _stub_gapplication(tmp_path: Path, *, exit_code: int = 0) -> tuple[Path, dict[str, str]]:
+def _stub_gapplication(tmp_path: Path, *, exit_code: int = 0, stderr: str = "") -> tuple[Path, dict[str, str]]:
     log_path = tmp_path / "gapplication.log"
     stub = tmp_path / "gapplication"
-    stub.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {log_path}\nexit {exit_code}\n", encoding="utf-8")
+    emit_stderr = f"printf '%s\\n' {shlex.quote(stderr)} >&2\n" if stderr else ""
+    stub.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {log_path}\n{emit_stderr}exit {exit_code}\n", encoding="utf-8")
     stub.chmod(0o755)
     env = os.environ.copy()
     env["PATH"] = f"{tmp_path}:{env['PATH']}"
@@ -78,6 +80,39 @@ def test_fast_path_execs_gapplication(tmp_path: Path, argv: list[str], expected_
     log_path, env = _stub_gapplication(tmp_path)
     subprocess.run([str(BIN_ULAUNCHER), *argv], check=True, env=env)
     assert log_path.read_text(encoding="utf-8").splitlines() == expected_lines
+
+
+# dbus-daemon and dbus-broker word the same ServiceUnknown error differently.
+GDBUS_ERROR_PREFIX = "error sending ActivateAction message to application: GDBus.Error:"
+SERVICE_UNKNOWN_ERRORS = [
+    (
+        f"{GDBUS_ERROR_PREFIX}org.freedesktop.DBus.Error.ServiceUnknown: "
+        "The name io.ulauncher.Ulauncher was not provided by any .service files"
+    ),
+    f"{GDBUS_ERROR_PREFIX}org.freedesktop.DBus.Error.ServiceUnknown: The name is not activatable",
+]
+
+
+@pytest.mark.parametrize("error", SERVICE_UNKNOWN_ERRORS)
+@pytest.mark.parametrize("argv", [[], ["show"], ["show", "foo"], ["toggle"]])
+def test_service_unknown_reports_that_ulauncher_is_not_running(tmp_path: Path, argv: list[str], error: str) -> None:
+    _, env = _stub_gapplication(tmp_path, exit_code=1, stderr=error)
+    result = subprocess.run([str(BIN_ULAUNCHER), *argv], capture_output=True, text=True, env=env, check=False)
+
+    assert result.returncode == 1
+    assert "Ulauncher is not running" in result.stderr
+    assert "ulauncher start" in result.stderr
+    assert "systemctl --user enable --now ulauncher" in result.stderr
+    assert "GDBus.Error" not in result.stderr
+
+
+def test_other_gapplication_errors_pass_through_unchanged(tmp_path: Path) -> None:
+    _, env = _stub_gapplication(tmp_path, exit_code=3, stderr="some other failure")
+    result = subprocess.run([str(BIN_ULAUNCHER)], capture_output=True, text=True, env=env, check=False)
+
+    assert result.returncode == 3
+    assert "some other failure" in result.stderr
+    assert "Ulauncher is not running" not in result.stderr
 
 
 @pytest.mark.parametrize(

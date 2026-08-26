@@ -16,6 +16,29 @@ print_color() {
   fi
 }
 
+# Send an action to the running Ulauncher instance and exit. ServiceUnknown means nothing owns
+# the bus name and no service file can activate it, which both come down to "it isn't running".
+send_action() {
+  # Only capture stderr after a failure - it costs a subshell, and a failed action delivered
+  # nothing, so repeating it changes nothing.
+  if gapplication action io.ulauncher.Ulauncher "$@" 2>/dev/null; then
+    exit 0
+  fi
+
+  action_error=$(gapplication action io.ulauncher.Ulauncher "$@" 2>&1 >/dev/null)
+  action_status=$?
+  if [ "$action_status" -eq 0 ]; then
+    exit 0
+  fi
+  case "$action_error" in
+    *ServiceUnknown*)
+      print_color 33 "Ulauncher is not running.\nStart it with \`ulauncher start\`, or run it on login with \`systemctl --user enable --now ulauncher\`." ;;
+    *)
+      printf '%s\n' "$action_error" >&2 ;;
+  esac
+  exit "$action_status"
+}
+
 # Rewrite legacy flags before any further argv handling. Direct `python -m ulauncher`
 # invocations bypass this and get argparse's "unrecognized arguments" error instead.
 orig_count=$#
@@ -69,13 +92,13 @@ done
 
 if [ "$needs_argparse" -eq 0 ]; then
   case "$subcmd" in
-    '')      exec gapplication action io.ulauncher.Ulauncher show-window ;;
-    toggle)  exec gapplication action io.ulauncher.Ulauncher toggle-window ;;
+    '')      send_action show-window ;;
+    toggle)  send_action toggle-window ;;
     show)
       if [ "$has_query" -eq 1 ]; then
-        exec gapplication action io.ulauncher.Ulauncher set-query "$(gvariant_string "$query")"
+        send_action set-query "$(gvariant_string "$query")"
       else
-        exec gapplication action io.ulauncher.Ulauncher show-window
+        send_action show-window
       fi
       ;;
   esac
