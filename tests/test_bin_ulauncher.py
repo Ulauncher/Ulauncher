@@ -11,12 +11,30 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 BIN_ULAUNCHER = REPO_ROOT / "bin/ulauncher"
 
 
-def _stub_gapplication(tmp_path: Path, *, exit_code: int = 0, stderr: str = "") -> tuple[Path, dict[str, str]]:
-    log_path = tmp_path / "gapplication.log"
-    stub = tmp_path / "gapplication"
-    emit_stderr = f"printf '%s\\n' {shlex.quote(stderr)} >&2\n" if stderr else ""
-    stub.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {log_path}\n{emit_stderr}exit {exit_code}\n", encoding="utf-8")
-    stub.chmod(0o755)
+def _write_stub(path: Path, *, stdout: str = "", stderr: str = "", exit_code: int = 0) -> Path:
+    """Create an executable that logs its argv to <name>.log, then prints and exits as told."""
+    log_path = path.with_suffix(".log")
+    script = f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {log_path}\n"
+    if stdout:
+        script += f"printf '%s\\n' {shlex.quote(stdout)}\n"
+    if stderr:
+        script += f"printf '%s\\n' {shlex.quote(stderr)} >&2\n"
+    path.write_text(f"{script}exit {exit_code}\n", encoding="utf-8")
+    path.chmod(0o755)
+    return log_path
+
+
+def _stub_gapplication(
+    tmp_path: Path,
+    *,
+    exit_code: int = 0,
+    stderr: str = "",
+    name_has_owner: bool = True,
+) -> tuple[Path, dict[str, str]]:
+    # A bare invocation from a checkout (which is how the suite runs it) consults gdbus, so stub
+    # it too and default to "an instance is already running".
+    _write_stub(tmp_path / "gdbus", stdout=f"({str(name_has_owner).lower()},)")
+    log_path = _write_stub(tmp_path / "gapplication", stderr=stderr, exit_code=exit_code)
     env = os.environ.copy()
     env["PATH"] = f"{tmp_path}:{env['PATH']}"
     return log_path, env
@@ -113,6 +131,49 @@ def test_other_gapplication_errors_pass_through_unchanged(tmp_path: Path) -> Non
     assert result.returncode == 3
     assert "some other failure" in result.stderr
     assert "Ulauncher is not running" not in result.stderr
+
+
+def test_bare_invocation_from_a_checkout_starts_it_rather_than_the_installed_ulauncher(tmp_path: Path) -> None:
+    gapplication_log, env = _stub_gapplication(tmp_path, name_has_owner=False)
+    python_log = _write_stub(tmp_path / "python3")
+
+    result = subprocess.run([str(BIN_ULAUNCHER)], capture_output=True, text=True, env=env, check=False)
+
+    assert "starting this checkout" in result.stderr
+    assert not gapplication_log.exists(), "D-Bus activation would have started the installed Ulauncher"
+    assert python_log.read_text(encoding="utf-8").splitlines() == ["-m", "ulauncher", "start"]
+
+
+@pytest.mark.parametrize("argv", [["show"], ["show", "foo"], ["toggle"]])
+def test_explicit_show_and_toggle_never_start_ulauncher(tmp_path: Path, argv: list[str]) -> None:
+    _, env = _stub_gapplication(tmp_path, exit_code=1, stderr=SERVICE_UNKNOWN_ERRORS[0], name_has_owner=False)
+    python_log = _write_stub(tmp_path / "python3")
+
+    result = subprocess.run([str(BIN_ULAUNCHER), *argv], capture_output=True, text=True, env=env, check=False)
+
+    assert result.returncode == 1
+    assert "Ulauncher is not running" in result.stderr
+    assert not python_log.exists()
+
+
+def test_installed_ulauncher_activates_without_asking_dbus_for_the_name_owner(tmp_path: Path) -> None:
+    # An install has no `ulauncher` package dir next to bin/, so the checkout branch is skipped
+    # and the fast path stays a single gapplication call.
+    install_root = tmp_path / "install"
+    (install_root / "bin").mkdir(parents=True)
+    installed_bin = install_root / "bin/ulauncher"
+    installed_bin.write_bytes(BIN_ULAUNCHER.read_bytes())
+    installed_bin.chmod(0o755)
+
+    gapplication_log, env = _stub_gapplication(tmp_path, name_has_owner=False)
+    subprocess.run([str(installed_bin)], check=True, env=env)
+
+    assert gapplication_log.read_text(encoding="utf-8").splitlines() == [
+        "action",
+        "io.ulauncher.Ulauncher",
+        "show-window",
+    ]
+    assert not (tmp_path / "gdbus.log").exists()
 
 
 @pytest.mark.parametrize(

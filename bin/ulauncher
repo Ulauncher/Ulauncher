@@ -92,7 +92,16 @@ done
 
 if [ "$needs_argparse" -eq 0 ]; then
   case "$subcmd" in
-    '')      send_action show-window ;;
+    '')
+      # D-Bus would activate the installed Ulauncher rather than this checkout. Skipping readlink
+      # keeps forks off the fast path, at the cost of missing a checkout reached via a symlink.
+      if [ -d "${0%/*}/../ulauncher" ] && [ "$(gdbus call --session --dest org.freedesktop.DBus \
+        --object-path /org/freedesktop/DBus --method org.freedesktop.DBus.NameHasOwner \
+        io.ulauncher.Ulauncher 2>/dev/null)" != "(true,)" ]; then
+        print_color 33 "No Ulauncher instance is running - starting this checkout."
+        exec "$0" start
+      fi
+      send_action show-window ;;
     toggle)  send_action toggle-window ;;
     show)
       if [ "$has_query" -eq 1 ]; then
