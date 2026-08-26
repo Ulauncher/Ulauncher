@@ -5,35 +5,32 @@ logged exactly once with its traceback. No Python tool can track exception propa
 statically, so the policy leans on a small set of structural rules instead of per-function
 annotations.
 
-## Barriers
+## Where `Exception` should be caught
 
-A barrier is a place where control enters our code from the outside (the GLib main loop, a
-Gio async callback, a subprocess result, an IPC message). An exception that escapes through
-a barrier is dumped to stderr by PyGObject, bypassing our logging, and can kill the source
-that dispatched it.
-
-Barriers catch `Exception` and log with `logger.exception`. They live in the dispatchers,
-not in the callbacks:
+`Exception` is the catch-all Exception type. It should be caught at the entry points where
+control enters our code from outside (the GLib main loop, a Gio async callback, a subprocess
+result, an IPC message):
 
 - `scheduling.Context._trigger` covers everything scheduled via `timer`, `interval`, and
   `run_when_idle`.
 - `EventBus.emit` covers all event listeners, and isolates listeners from each other.
 
-Code running under these dispatchers must not add its own catch-all. Raising to the barrier
-is the designed error path. Add a local try/except only to act on a specific expected error.
+Code running inside one of these must not add its own catch-all. Raising to the entry
+point is the designed error path. Add a local try/except only to act on a specific expected
+error. Never catch bare `except:` - it swallows `KeyboardInterrupt` and `SystemExit`.
 
 GTK signal handlers are not centrally dispatched. PyGObject already contains their
 exceptions (printed to stderr, the loop survives), so they are an accepted gap.
 
-## Boundary error types
+## Errors raised by public functions
 
 A subsystem's public functions may raise only its own error family (for extensions:
 `ExtensionError` and its subclasses in `ext_exceptions`), `OSError`, or nothing. Internals
 raise freely and the subsystem's public surface translates.
 
 This is what makes callee changes safe: the contract callers depend on is the error type at
-the boundary, not the concrete exceptions inside. Specific errors may be broadened when
-crossing outward (a `ManifestError` may surface as `ExtensionError`, file errors as
+the public surface, not the concrete exceptions inside. Specific errors may be broadened
+when crossing outward (a `ManifestError` may surface as `ExtensionError`, file errors as
 `OSError`), never narrowed.
 
 Document the contract with a `:raises` docstring on the public function. This is prose for
@@ -70,13 +67,4 @@ use(result.value)
 
 Do not use `Fallible` wholesale. Code that cannot reasonably fail should just return its
 value, and unexpected failures (a bug, a full disk mid-write) should raise and travel to
-the barrier.
-
-## Rules of thumb
-
-- Never catch bare `except:`. It swallows `KeyboardInterrupt` and `SystemExit`.
-- Prefer guard clauses (`is_file()`, `hasattr()`) over try/except when the check is cheap.
-- Catch a specific type only where you act on it differently, and catch it where that
-  decision belongs.
-- Never catch-and-log in mid-layers "just in case". That logs the failure twice or hides it
-  from the caller. Let it travel to the barrier or the boundary.
+the entry point.
