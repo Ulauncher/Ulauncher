@@ -2,9 +2,8 @@ import logging
 import gi
 gi.require_version('GObject', '2.0')
 gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
 # pylint: disable=wrong-import-position
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, GObject
 
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.ui.windows.WindowHelper import WindowHelper
@@ -61,12 +60,7 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
         return True
 
     def on_hotkey_input_key_press_event(self, _, event):
-        # remove GDK_MOD2_MASK, because it seems unnecessary
-        mask = event.state
-        if mask & Gdk.ModifierType.MOD2_MASK:
-            mask ^= Gdk.ModifierType.MOD2_MASK
-        if mask & Gdk.ModifierType.MOD4_MASK:
-            mask ^= Gdk.ModifierType.MOD4_MASK
+        mask = event.state & Gtk.accelerator_get_default_mod_mask()
 
         accel_name = Gtk.accelerator_name(event.keyval, mask)
         display_name = Gtk.accelerator_get_label(event.keyval, mask)
