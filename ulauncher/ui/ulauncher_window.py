@@ -153,6 +153,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         if not is_composited:
             # without a compositor deferred would lead to "flash of unstyled content"
             self.apply_styling()
+        self.position_window()
 
         self.set_keep_above(True)
         self.present()
@@ -168,7 +169,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
     def apply_styling(self) -> None:
         """
-        Apply styling and position the window.
+        Apply styling.
 
         Note that this method is slow and should be called after the window is shown if possible.
         """
@@ -182,7 +183,6 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.prefs_btn.set_image(Gtk.Image.new_from_surface(prefs_icon_surface))
 
         self.apply_theme()
-        self.position_window()
         self.set_opacity(1)
 
     def deferred_init(self) -> None:
@@ -194,6 +194,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             # used when user turns off "start with blank query" setting
             self.prompt_input.select_region(0, -1)
         self.apply_styling()
+        self.update_results_max_height()
         self.get_app().window_ready()
 
     ######################################
@@ -363,15 +364,18 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return monitor.get_geometry()
         return None
 
+    def update_results_max_height(self) -> None:
+        if layout_size := self.get_layout_size():
+            max_height = layout_size.height * 0.8 - self.prompt.get_allocated_height()
+            self.results_view.set_max_height(int(max_height))
+
     def position_window(self) -> None:
         if layout_size := self.get_layout_size():
             window_width = self.settings.base_width
             pos_x = (layout_size.width - window_width) / 2
             pos_y = layout_size.height * 0.1
 
-            prompt_height = self.prompt.get_allocated_height()
-            max_height = layout_size.height - prompt_height - pos_y * 2
-            self.results_view.set_max_height(int(max_height))
+            self.update_results_max_height()
 
             # Part II of the Gnome Wayland fix (see above in __init__)
             # Use margins to center the visible content within the full-screen window
