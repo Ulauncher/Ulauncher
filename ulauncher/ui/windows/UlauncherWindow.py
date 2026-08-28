@@ -284,10 +284,9 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
                   screen['height'] / 5 + screen['y'])
 
     def show_window(self):
-        # works only when the following methods are called in that exact order
+        self.position_window()
         self.window.set_sensitive(True)
         self.window.present()
-        self.position_window()
         if not is_wayland_compatibility_on():
             self.present_with_time(Keybinder.get_current_event_time())
 
