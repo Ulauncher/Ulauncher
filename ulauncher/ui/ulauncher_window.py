@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
     is_dragging = False
+    is_focused = False
     layer_shell_enabled = False
     settings: Settings
 
@@ -217,10 +218,20 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         scheduling.run_when_idle(self.deferred_init)
 
     def on_focus_out(self) -> None:
+        # The WM can briefly take focus away when a global hotkey fires, so delay the close to
+        # give the window a chance to regain focus before it's actually closed
+        self.is_focused = False
         if self.settings.close_on_focus_out and not self.is_dragging:
-            self.close(save_query=True)
+            scheduling.timer(0.07, self._close_if_unfocused)
+
+    def _close_if_unfocused(self) -> None:
+        # Runs from a timer, so the window may already be closed.
+        if self.is_focused or not self.get_application():
+            return
+        self.close(save_query=True)
 
     def on_focus_in(self) -> None:
+        self.is_focused = True
         if self.settings.grab_mouse_pointer:
             self.toggle_grab_pointer_device(True)
 
