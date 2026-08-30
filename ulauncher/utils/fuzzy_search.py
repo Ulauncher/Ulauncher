@@ -29,10 +29,17 @@ except ImportError:
     _get_matching_blocks = _get_matching_blocks_native  # type: ignore[assignment]
 
 
+# characters that should be stripped during normalization:
+# "Mn" = combining marks (accents/diacritics), non-ASCII punctuation (e.g. curly quotes)
+def _is_stripped(char: str) -> bool:
+    cat = unicodedata.category(char)
+    return cat == "Mn" or (cat[0] == "P" and not char.isascii())
+
+
 # convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
 @lru_cache(maxsize=2000)
 def _normalize(string: str) -> str:
-    return unicodedata.normalize("NFD", string.casefold()).encode("ascii", "ignore").decode("utf-8")
+    return "".join(char for char in unicodedata.normalize("NFD", string.casefold()) if not _is_stripped(char))
 
 
 @lru_cache(maxsize=1000)

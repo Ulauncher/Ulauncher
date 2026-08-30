@@ -6,6 +6,8 @@ def test_normalize() -> None:
     assert _normalize("Éditeur d’image GIMP") == "editeur dimage gimp"  # noqa: RUF001
     assert _normalize("Ögbelgilengen Uyğulamalar") == "ogbelgilengen uygulamalar"
     assert _normalize("Füße") == "fusse"
+    assert _normalize("Вычислитель") == "вычислитель"
+    assert _normalize("مُحَرِّر") == "محرر"
 
 
 def test_get_matching_indexes() -> None:
