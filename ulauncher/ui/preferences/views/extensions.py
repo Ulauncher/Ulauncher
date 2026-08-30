@@ -190,10 +190,10 @@ class ExtensionsView(BaseView):
         details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15, margin=20, margin_top=15)
 
         details_box.pack_start(self._create_extension_status_info(ext), False, False, 0)
+        details_box.pack_start(self._create_error_section(ext), False, False, 0)
         details_box.pack_start(self._create_installation_instructions_section(ext), False, False, 0)
         details_box.pack_start(self._create_triggers_section(ext), False, False, 0)
         details_box.pack_start(self._create_preferences_section(ext), False, False, 0)
-        details_box.pack_start(self._create_error_section(ext), False, False, 0)
 
         scrolled.add(details_box)
         container.pack_start(scrolled, True, True, 0)
