@@ -32,7 +32,7 @@ class ResultsView(Gtk.ScrolledWindow):
         activate_result: Callable[[bool], None],
     ) -> None:
         super().__init__(
-            can_focus=True,
+            can_focus=False,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             propagate_natural_height=True,
             shadow_type=Gtk.ShadowType.IN,
