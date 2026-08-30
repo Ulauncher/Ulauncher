@@ -214,10 +214,8 @@ export default {
         return this.prefs.autostart_enabled
       },
       set(value) {
-        return jsonp('prefs://set/autostart-enabled', { value: value }).then(
-          () => this.setPrefs({ autostart_enabled: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ autostart_enabled: value })
+        jsonp('prefs://set/autostart-enabled', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -226,10 +224,8 @@ export default {
         return this.prefs.show_indicator_icon
       },
       set(value) {
-        return jsonp('prefs://set/show-indicator-icon', { value: value }).then(
-          () => this.setPrefs({ show_indicator_icon: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ show_indicator_icon: value })
+        jsonp('prefs://set/show-indicator-icon', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -243,10 +239,8 @@ export default {
         return this.prefs.show_recent_apps
       },
       set(value) {
-        return jsonp('prefs://set/show-recent-apps', { value: value }).then(
-          () => this.setPrefs({ show_recent_apps: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ show_recent_apps: value })
+        jsonp('prefs://set/show-recent-apps', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -255,10 +249,8 @@ export default {
         return this.prefs.terminal_command
       },
       set(value) {
-        return jsonp('prefs://set/terminal-command', { value: value }).then(
-          () => this.setPrefs({ terminal_command: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ terminal_command: value })
+        jsonp('prefs://set/terminal-command', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -267,10 +259,8 @@ export default {
         return this.prefs.theme_name
       },
       set(value) {
-        return jsonp('prefs://set/theme-name', { value: value }).then(
-          () => this.setPrefs({ theme_name: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ theme_name: value })
+        jsonp('prefs://set/theme-name', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -279,10 +269,8 @@ export default {
         return this.prefs.clear_previous_query
       },
       set(value) {
-        return jsonp('prefs://set/clear-previous-query', { value: value }).then(
-          () => this.setPrefs({ clear_previous_query: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ clear_previous_query: value })
+        jsonp('prefs://set/clear-previous-query', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -291,10 +279,8 @@ export default {
         return this.prefs.grab_mouse_pointer
       },
       set(value) {
-        return jsonp('prefs://set/grab-mouse-pointer', { value: value }).then(
-          () => this.setPrefs({ grab_mouse_pointer: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ grab_mouse_pointer: value })
+        jsonp('prefs://set/grab-mouse-pointer', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -303,13 +289,9 @@ export default {
         return this.prefs.blacklisted_desktop_dirs
       },
       set(value) {
-        return jsonp('prefs://set/blacklisted-desktop-dirs', { value: value.join(':') }).then(
-          () => {
-            this.setPrefs({ blacklisted_desktop_dirs: value })
-            this.blacklistedDirsChanged = true
-          },
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ blacklisted_desktop_dirs: value })
+        this.blacklistedDirsChanged = true
+        jsonp('prefs://set/blacklisted-desktop-dirs', { value: value.join(':') }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -318,13 +300,9 @@ export default {
         return this.prefs.disable_desktop_filters
       },
       set(value) {
-        return jsonp('prefs://set/disable-desktop-filters', { value: value }).then(
-          () => {
-            this.setPrefs({ disable_desktop_filters: value })
-            this.disableDesktopFiltersChanged = true
-          },
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ disable_desktop_filters: value })
+        this.disableDesktopFiltersChanged = true
+        jsonp('prefs://set/disable-desktop-filters', { value: value }).catch(err => bus.$emit('error', err))
       }
     },
 
@@ -333,10 +311,8 @@ export default {
         return this.prefs.render_on_screen
       },
       set(value) {
-        return jsonp('prefs://set/render-on-screen', { value: value }).then(
-          () => this.setPrefs({ render_on_screen: value }),
-          err => bus.$emit('error', err)
-        )
+        this.setPrefs({ render_on_screen: value })
+        jsonp('prefs://set/render-on-screen', { value: value }).catch(err => bus.$emit('error', err))
       }
     }
   },
