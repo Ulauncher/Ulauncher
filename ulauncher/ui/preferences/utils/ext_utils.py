@@ -73,6 +73,12 @@ def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: s
     if error.type in static_messages:
         return static_messages[error.type]
 
+    if error.type == "Exited":
+        message = f"The extension exited with an error.\n\n<small>Details: {error_message}</small>"
+        if report_link := _report_link(website_url, issues_url):
+            message += f"\n\n<small>You can {report_link}</small>"
+        return message
+
     if error.type == "Terminated":
         message = (
             "The extension crashed. Ensure that you read and followed the instructions on the "

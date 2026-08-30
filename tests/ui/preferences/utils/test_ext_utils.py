@@ -22,7 +22,8 @@ class TestGetErrorMessage:
         self, website_url: str, issues_url: str, expected_suffix: str
     ) -> None:
         error = ExtensionErrorData(type="Exited", message="boom")
-        assert get_error_message(error, website_url, issues_url) == f"boom{expected_suffix}"
+        expected = f"The extension exited with an error.\n\n<small>Details: boom</small>{expected_suffix}"
+        assert get_error_message(error, website_url, issues_url) == expected
 
     def test_missing_module_links_the_issue_tracker(self) -> None:
         error = ExtensionErrorData(type="MissingModule", message="requests")
