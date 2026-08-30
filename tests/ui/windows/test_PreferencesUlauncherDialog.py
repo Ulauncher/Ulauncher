@@ -139,3 +139,25 @@ class TestPreferencesUlauncherDialog:
         dialog.prefs_extension_update_prefs({'query': {'id': 'com.example.ext', 'pref.city': 'new'}})
 
         ext_preferences.set.assert_called_once_with('city', 'new')
+
+    @pytest.fixture
+    def gio(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.PreferencesUlauncherDialog.Gio')
+
+    def serve(self, dialog, uri):
+        scheme_request = mock.MagicMock()
+        scheme_request.get_uri.return_value = uri
+        dialog.serve_file(scheme_request).join()
+        return scheme_request
+
+    def test_serve_file_percent_decodes_the_path(self, dialog, gio, idle_add):
+        scheme_request = self.serve(dialog, 'file2:///home/user/My%20Pics/pic.png')
+
+        gio.file_new_for_path.assert_called_with('/home/user/My Pics/pic.png')
+        idle_add.assert_called_with(scheme_request.finish,
+                                    gio.file_new_for_path.return_value.read.return_value, -1, 'image/png')
+
+    def test_serve_file_strips_the_null_authority(self, dialog, gio):
+        self.serve(dialog, 'file2://null/home/user/pic.png')
+
+        gio.file_new_for_path.assert_called_with('/home/user/pic.png')
