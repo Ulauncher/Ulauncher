@@ -249,7 +249,7 @@ class ExtensionHandlers:
             primary_text = f"{operation.title()} Failed"
             secondary_text = (
                 "An unexpected error occurred.\n\n"
-                "Please copy the technical details and report this problem via Github issues:\n"
+                "Please copy the technical details and report this problem via GitHub issues:\n"
                 "https://github.com/Ulauncher/Ulauncher/issues\n\n"
                 f"Technical details:\n{error_type}: {error_message}"
             )
