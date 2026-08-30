@@ -167,9 +167,7 @@ class TestExtensionRuntime:
         runtime._subprocess.get_exit_status.return_value = 9
         time.return_value = curtime
         runtime.handle_exit(runtime._subprocess, Mock())
-        exit_handler.assert_called_once_with(
-            "Exited", 'Extension "mock.test_handle_exit" exited with code 9 after 5.0 seconds.'
-        )
+        exit_handler.assert_called_once_with("Exited", "")
 
     def test_stop(self, mock_timer: MagicMock) -> None:
         """Test that stop() closes the connection and schedules a kill timer."""

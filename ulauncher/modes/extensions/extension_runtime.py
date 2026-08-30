@@ -186,7 +186,6 @@ class ExtensionRuntime:
 
         elif self._exit_handler:
             uptime_seconds = time() - self._start_time
-            exit_status = self._subprocess.get_exit_status()
             error_msg = "\n".join(self._recent_errors)
             if "ModuleNotFoundError" in error_msg:
                 package_name = error_msg.split("'")[1].split(".")[0]
@@ -200,8 +199,5 @@ class ExtensionRuntime:
                 logger.error('Extension "%s" terminated before it could start', self._ext_id)
                 self._exit_handler("Terminated", error_msg)
                 return
-
-            if not error_msg:
-                error_msg = f'Extension "{self._ext_id}" exited with code {exit_status} after {uptime_seconds} seconds.'
 
             self._exit_handler("Exited", error_msg)
