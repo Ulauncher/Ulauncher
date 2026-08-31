@@ -1,4 +1,3 @@
-import logging
 import gi
 gi.require_version('GObject', '2.0')
 gi.require_version('Gtk', '3.0')
@@ -8,8 +7,6 @@ from gi.repository import Gtk, GObject
 from ulauncher.ui.windows.Builder import Builder
 from ulauncher.ui.windows.WindowHelper import WindowHelper
 
-
-logger = logging.getLogger('ulauncher')
 
 FORBIDDEN_ACCEL_KEYS = ('Delete', 'Page_Down', 'Page_Up', 'Home', 'End', 'Up', 'Down', 'Left', 'Right', 'Return',
                         'BackSpace', 'Alt_L', 'Alt_R', 'Shift_L', 'Shift_R', 'Control_L', 'Control_R', 'space',
@@ -74,9 +71,8 @@ class HotkeyDialog(Gtk.Dialog, WindowHelper):
             self.hide()
             return
 
-        # do nothing for invalid hotkeys
+        # The user likely pressed just a modifier key. Ignore until they press a full hotkey.
         if not self.is_valid_hotkey(display_name, accel_name):
-            logger.debug("Invalid hotkey '%s', ('%s') is not allowed", display_name, accel_name)
             return
 
         self._accel_name = accel_name
