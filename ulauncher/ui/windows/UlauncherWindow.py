@@ -31,7 +31,7 @@ from ulauncher.utils.display import get_current_screen_geometry, get_primary_scr
 from ulauncher.utils.image_loader import load_image
 from ulauncher.utils.version_cmp import gtk_version_is_gte
 from ulauncher.utils.desktop.notification import show_notification
-from ulauncher.utils.wayland import is_wayland_compatibility_on
+from ulauncher.utils.wayland import is_wayland
 from ulauncher.utils.Theme import Theme, load_available_themes
 from ulauncher.search.apps.app_watcher import start as start_app_watcher
 from ulauncher.search.Query import Query
@@ -100,7 +100,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         # this will trigger to show frequent apps if necessary
         self.show_results([])
 
-        if not is_wayland_compatibility_on():
+        if not is_wayland():
             # bind hotkey
             Keybinder.init()
             accel_name = self.settings.get_property('hotkey-show-app')
@@ -287,7 +287,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         self.position_window()
         self.window.set_sensitive(True)
         self.window.present()
-        if not is_wayland_compatibility_on():
+        if not is_wayland():
             self.present_with_time(Keybinder.get_current_event_time())
 
         if not self.input.get_text():
@@ -305,7 +305,7 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
             self.show_window()
 
     def bind_show_app_hotkey(self, accel_name):
-        if is_wayland_compatibility_on():
+        if is_wayland():
             return
 
         if self._current_accel_name == accel_name:
