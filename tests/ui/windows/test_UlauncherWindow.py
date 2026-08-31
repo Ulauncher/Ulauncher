@@ -70,6 +70,10 @@ class TestUlauncherWindow:
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionRunner.get_instance').return_value
 
     @pytest.fixture(autouse=True)
+    def is_wayland_compatibility_on(self, mocker):
+        return mocker.patch('ulauncher.ui.windows.UlauncherWindow.is_wayland_compatibility_on', return_value=False)
+
+    @pytest.fixture(autouse=True)
     def extServer(self, mocker):
         return mocker.patch('ulauncher.ui.windows.UlauncherWindow.ExtensionServer.get_instance').return_value
 
