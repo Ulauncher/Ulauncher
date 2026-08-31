@@ -4,7 +4,9 @@ Documentation=https://ulauncher.io/
 
 [Service]
 Type=simple
-Restart=always
+# Clean exits (losing the DBus name race to an XDG-autostarted instance, or a user-initiated
+# quit) would otherwise restart the service until systemd's start limit fails the unit.
+Restart=on-failure
 RestartSec=1
 ExecStart=env GDK_BACKEND=x11 /usr/bin/ulauncher --hide-window
 
