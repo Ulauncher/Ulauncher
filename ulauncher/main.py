@@ -126,7 +126,12 @@ def main():
 
     instance = bus.request_name(DBUS_SERVICE)
 
+    options = get_options()
+
     if instance != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        if options.hide_window:
+            print("Ulauncher is already running.", file=sys.stderr)
+            return
         print(
             "DBus name already taken. Ulauncher is probably backgrounded. Did you mean `ulauncher-toggle`?",
             file=sys.stderr
@@ -138,7 +143,6 @@ def main():
     is_first_run = not os.path.exists(CONFIG_DIR)
     _create_dirs()
 
-    options = get_options()
     setup_logging(options)
     logger.info('Ulauncher version %s', get_version())
     logger.info('Extension API version %s', api_version)
