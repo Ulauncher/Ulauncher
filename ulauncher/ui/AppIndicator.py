@@ -7,32 +7,20 @@ gi.require_version('Gtk', '3.0')
 # AppIndicator support is optional. It'll work if you install
 # gir1.2-ayatanaappindicator3-0.1 or an equivalent package for your distro
 # pylint: disable=wrong-import-position
-appIndicatorSupported = False
-try:
-    gi.require_version('AppIndicator3', '0.1')
-    appIndicatorSupported = True
-except ValueError:
-    pass
-
 try:
     gi.require_version('AyatanaAppIndicator3', '0.1')
-    appIndicatorSupported = True
-except ValueError:
-    pass
-
-try:
-    from gi.repository import AppIndicator3
-except ImportError:
-    pass
-
-try:
-    from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type: ignore # noqa: F811
-except ImportError:
-    pass
+    from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+except (ValueError, ImportError):
+    try:
+        gi.require_version('AppIndicator3', '0.1')
+        from gi.repository import AppIndicator3  # type: ignore
+    except (ValueError, ImportError):
+        pass
 
 from gi.repository import Gtk
 from ulauncher.utils.decorator.singleton import singleton
 
+appIndicatorSupported = 'AppIndicator3' in globals()
 logger = logging.getLogger(__name__)
 
 
