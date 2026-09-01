@@ -100,7 +100,7 @@ class ExtensionRunner:
             proc = Popen(cmd, env=env, stderr=PIPE)
             lasterr = ""
             logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
-            self.unset_extension_error(extension_id)
+            self.extension_errors.pop(extension_id, None)
 
             while proc.poll() is None:
                 line = proc.stderr.readline()
@@ -131,10 +131,7 @@ class ExtensionRunner:
                     self.set_extension_error(extension_id, ExtRunErrorName.MissingModule,
                                              error_info.get_missing_package_name())
 
-                try:
-                    del self.extension_procs[extension_id]
-                except KeyError:
-                    pass
+                self.extension_procs.pop(extension_id, None)
 
                 break
 
@@ -151,10 +148,7 @@ class ExtensionRunner:
 
         logger.info('Terminating extension "%s"', extension_id)
         proc = self.extension_procs[extension_id]
-        try:
-            del self.extension_procs[extension_id]
-        except KeyError:
-            pass
+        self.extension_procs.pop(extension_id, None)
 
         terminate = run_async(proc.terminate)
         terminate()
@@ -172,12 +166,6 @@ class ExtensionRunner:
             'name': errorName.value,
             'message': message
         }
-
-    def unset_extension_error(self, extension_id: str):
-        try:
-            del self.extension_errors[extension_id]
-        except KeyError:
-            pass
 
     def get_extension_error(self, extension_id: str) -> Optional[ExtRunError]:
         return self.extension_errors.get(extension_id)
