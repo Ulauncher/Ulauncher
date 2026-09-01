@@ -220,10 +220,13 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         # pylint: disable=broad-except
         try:
             params = get_url_params(scheme_request.get_uri())
-            callback_name = params['query']['callback']
+            query = params['query'] or {}
+            callback_name = query.get('callback')
             assert callback_name
         except Exception as e:
             logger.exception('API call failed. %s: %s', type(e).__name__, e)
+            error = e if isinstance(e, GLib.Error) else GLib.Error(str(e))
+            GLib.idle_add(scheme_request.finish_error, error)
             return
 
         try:
