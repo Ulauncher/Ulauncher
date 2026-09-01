@@ -8,7 +8,7 @@ def highlight_text(query, text: str, open_tag='<span foreground="white">', close
     """
     text = text.replace("&amp;", "&")
 
-    positions = get_matching_indexes(query, text)
+    positions = set(get_matching_indexes(query, text))
 
     # use positions to highlight text with tags
     hl_started = False
