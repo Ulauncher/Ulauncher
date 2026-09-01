@@ -333,11 +333,15 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
         return Query(self.input.get_text())
 
     def select_result_item(self, index, onHover=False):
+        if not self.results_nav:
+            return
         if time.time() - self._results_render_time > 0.1:
             # Work around issue #23 -- don't automatically select item if cursor is hovering over it upon render
             self.results_nav.select(index)
 
     def enter_result_item(self, index=None, alt=False):
+        if not self.results_nav:
+            return
         if not self.results_nav.enter(self._get_user_query(), index, alt=alt):
             # hide the window if it has to be closed on enter
             self.hide_and_clear_input()
@@ -345,13 +349,16 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def hide(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """Override the hide method to ensure the pointer grab is released."""
         if self.settings.get_property('grab-mouse-pointer'):
-            self.get_pointer_device().ungrab(0)
+            ptr_dev = self.get_pointer_device()
+            if ptr_dev:
+                ptr_dev.ungrab(0)
         super().hide(*args, **kwargs)
 
     def get_pointer_device(self):
-        return (self
-                .window
-                .get_window()
+        gdk_window = self.window.get_window()
+        if not gdk_window:
+            return None
+        return (gdk_window
                 .get_display()
                 .get_device_manager()
                 .get_client_pointer())
@@ -397,24 +404,34 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
     def _render_prefs_icon(self):
         scale_factor = get_monitor_scale_factor()
         prefs_pixbuf = load_image(get_data_file('media', 'gear.svg'), 16 * scale_factor)
-        surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scale_factor, self.get_window())
-        prefs_image = Gtk.Image.new_from_surface(surface)
-        self.prefs_btn.set_image(prefs_image)
+        if not prefs_pixbuf:
+            return
+        try:
+            surface = Gdk.cairo_surface_create_from_pixbuf(prefs_pixbuf, scale_factor, self.get_window())
+            prefs_image = Gtk.Image.new_from_surface(surface)
+            self.prefs_btn.set_image(prefs_image)
+        except Exception:
+            # get_window() may be None during init or tests may mock pixbuf
+            try:
+                self.prefs_btn.set_image(Gtk.Image.new_from_pixbuf(prefs_pixbuf))
+            except Exception:
+                pass
 
     @staticmethod
     def create_item_widgets(items, query):
         results = []
-        for index, result_item in enumerate(items):
+        for result_item in items:
             glade_filename = get_data_file('ui', '%s.ui' % result_item.UI_FILE)
             if not os.path.exists(glade_filename):
-                glade_filename = None
+                logger.warning("UI file not found: %s", glade_filename)
+                continue
 
             builder = Gtk.Builder()
             builder.set_translation_domain('ulauncher')
             builder.add_from_file(glade_filename)
 
             item_frame = builder.get_object('item-frame')
-            item_frame.initialize(builder, result_item, index, query)
+            item_frame.initialize(builder, result_item, len(results), query)
 
             results.append(item_frame)
 

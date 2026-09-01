@@ -47,7 +47,7 @@ class Builder(Gtk.Builder):
         # Look for the ui file that describes the user interface.
         ui_filename = get_data_file('ui', '%s.ui' % (builder_file_name,))
         if not os.path.exists(ui_filename):
-            ui_filename = None
+            raise FileNotFoundError(f"UI file not found: {ui_filename}")
 
         builder = cls()
         builder.set_translation_domain('ulauncher')
