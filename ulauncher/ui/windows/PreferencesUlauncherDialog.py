@@ -485,11 +485,15 @@ class PreferencesUlauncherDialog(Gtk.Dialog, WindowHelper):
         logger.info('Add extension: %s', url)
         downloader = ExtensionDownloader.get_instance()
         ext_id = downloader.download(url)
-        ExtensionRunner.get_instance().run(ext_id)
+        ext_runner = ExtensionRunner.get_instance()
+        ext_server = ExtensionServer.get_instance()
+        ext_runner.run(ext_id)
 
-        # Looping until either runner.is_running() or runner.get_extension_error() returns something would be better
-        # to avoid race condition and needless waiting
-        time.sleep(1)
+        deadline = time.time() + 5
+        while time.time() < deadline:
+            if ext_server.get_controller(ext_id) or ext_runner.get_extension_error(ext_id):
+                break
+            time.sleep(0.1)
 
         return self._get_all_extensions()
 

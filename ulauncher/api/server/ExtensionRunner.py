@@ -100,6 +100,7 @@ class ExtensionRunner:
             proc = Popen(cmd, env=env, stderr=PIPE)
             lasterr = ""
             logger.info('Extension "%s" started. PID %s', extension_id, proc.pid)
+            self.extension_procs[extension_id] = proc
             self.extension_errors.pop(extension_id, None)
 
             while proc.poll() is None:
@@ -113,9 +114,17 @@ class ExtensionRunner:
 
             code = proc.returncode
 
-            if code == 0:
-                self.extension_procs[extension_id] = proc
-            else:
+            self.extension_procs.pop(extension_id, None)
+
+            # Like v6, check for missing module before uptime so slow imports are still caught
+            error_info = ProcessErrorExtractor(lasterr)
+            if error_info.is_import_error():
+                missing = error_info.get_missing_package_name()
+                logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
+                self.set_extension_error(extension_id, ExtRunErrorName.MissingModule, missing)
+                break
+
+            if code is not None and code <= 0:
                 error_msg = 'Extension "%s" was terminated with code %s' % (extension_id, code)
                 logger.error(error_msg)
                 self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
@@ -125,19 +134,12 @@ class ExtensionRunner:
                 error_msg = 'Extension "%s" exited instantly with code %s' % (extension_id, code)
                 logger.error(error_msg)
                 self.set_extension_error(extension_id, ExtRunErrorName.Terminated, error_msg)
-                error_info = ProcessErrorExtractor(lasterr)
-                logger.error('Extension "%s" failed with an error: %s', extension_id, error_info.error)
-                if error_info.is_import_error():
-                    self.set_extension_error(extension_id, ExtRunErrorName.MissingModule,
-                                             error_info.get_missing_package_name())
-
-                self.extension_procs.pop(extension_id, None)
-
                 break
 
-            error_msg = 'Extension "%s" exited with code %s. Restarting...' % (extension_id, code)
+            error_msg = 'Extension "%s" exited with code %s' % (extension_id, code)
             self.set_extension_error(extension_id, ExtRunErrorName.Exited, error_msg)
             logger.error(error_msg)
+            break
 
     def stop(self, extension_id):
         """
