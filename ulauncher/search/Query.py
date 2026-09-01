@@ -11,7 +11,7 @@ class Query(str):
         Mode is active when query starts with keyword + space
         """
         kw = self.get_keyword()
-        return kw and self.startswith('%s ' % kw)
+        return kw and self.lstrip().startswith('%s ' % kw)
 
     def get_argument(self, default=None):
         try:

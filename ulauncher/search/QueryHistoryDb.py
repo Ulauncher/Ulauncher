@@ -19,8 +19,8 @@ class QueryHistoryDb(KeyValueDb):
         so later ulauncher can autoselect item with that name
         if the same query is entered
         """
-        if not query:
-            # ignore cases when item is selected from the list of frequent apps
+        if not query or not query.strip():
+            # ignore empty or whitespace-only queries
             return
 
         self.put(query, item_name)
