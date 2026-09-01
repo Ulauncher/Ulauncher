@@ -45,7 +45,7 @@ class SortedList:
     def append(self, result_item):
         # get_search_name() returns a string with the app display name, but it may contain a
         # second line in which case that line is the name of the executable
-        search_fields = result_item.get_search_name()
+        search_fields = result_item.get_search_name() or ''
         name, exec_name, *_ = '{}\n'.format(search_fields).split('\n')
         score = max(
             get_score(self._query, name),
