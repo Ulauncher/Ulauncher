@@ -1,8 +1,10 @@
 import os
 import logging
 import tarfile
+import tempfile
+from pathlib import Path
 from urllib.request import urlretrieve
-from tempfile import mktemp, mkdtemp
+from tempfile import mkdtemp
 from shutil import rmtree, move
 from datetime import datetime
 from ulauncher.utils.mypy_extensions import TypedDict
@@ -15,7 +17,6 @@ from ulauncher.api.server.ExtensionDb import ExtensionDb, ExtensionRecord
 from ulauncher.api.server.GithubExtension import GithubExtension
 from ulauncher.api.server.ExtensionRunner import ExtensionRunner, ExtensionIsNotRunningError
 from ulauncher.api.server.extension_finder import find_extensions
-
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,14 @@ LastCommit = TypedDict('LastCommit', {
     'last_commit': str,
     'last_commit_time': str
 })
+
+
+def _is_relative_to(child_path, root_path):
+    try:
+        Path(child_path).resolve().relative_to(Path(root_path).resolve())
+        return True
+    except ValueError:
+        return False
 
 
 class ExtensionDownloader:
@@ -181,17 +190,31 @@ def untar(filename: str, ext_path: str) -> None:
         rmtree(ext_path)
 
     temp_ext_path = mkdtemp(prefix='ulauncher_dl_')
+    try:
+        with tarfile.open(filename, mode="r") as archive:
+            strip = 0
+            for member in archive.getmembers():
+                if not _is_relative_to(Path(temp_ext_path, member.name), temp_ext_path):
+                    strip = -1
+                member.name = member.name.split("/", strip)[-1]
 
-    tarfile.open(filename, mode="r").extractall(temp_ext_path)
+            archive.extractall(temp_ext_path)
 
-    for dir in os.listdir(temp_ext_path):
-        move(os.path.join(temp_ext_path, dir), ext_path)
-        # there is only one directory here, so return immediately
-        return
+        for entry in os.listdir(temp_ext_path):
+            move(os.path.join(temp_ext_path, entry), ext_path)
+            # there is only one directory here, so return immediately
+            return
+    finally:
+        rmtree(temp_ext_path, ignore_errors=True)
+        try:
+            os.remove(filename)
+        except OSError:
+            pass
 
 
 def download_tarball(url: str) -> str:
-    dest_tar = mktemp('.tar.gz', prefix='ulauncher_dl_')
+    fd, dest_tar = tempfile.mkstemp('.tar.gz', prefix='ulauncher_dl_')
+    os.close(fd)
     filename, _ = urlretrieve(url, dest_tar)
 
     return filename
