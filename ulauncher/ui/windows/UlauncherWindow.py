@@ -272,10 +272,14 @@ class UlauncherWindow(Gtk.Window, WindowHelper):
 
     def position_window(self):
         window_width = self.get_size()[0]
-        screen = get_current_screen_geometry()
+        try:
+            screen = get_current_screen_geometry()
 
-        if self.settings.get_property('render-on-screen') == "default-monitor":
-            screen = get_primary_screen_geometry()
+            if self.settings.get_property('render-on-screen') == "default-monitor":
+                screen = get_primary_screen_geometry()
+        except RuntimeError as e:
+            logger.warning("Could not position window: %s", e)
+            return
 
         # The topmost pixel of the window should be at 1/5 of the current screen's height
         # Window should be positioned in the center horizontally
