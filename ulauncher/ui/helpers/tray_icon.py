@@ -34,15 +34,15 @@ if IS_X11_COMPATIBLE:
 
 if tray_icon_lib is None:
     try:
-        gi.require_version("AppIndicator3", "0.1")
-        from gi.repository import AppIndicator3 as AyatanaIndicator
+        gi.require_version("AyatanaAppIndicator3", "0.1")
+        from gi.repository import AyatanaAppIndicator3 as AyatanaIndicator
 
         tray_icon_lib = "AyatanaIndicator"
 
     except (ImportError, ValueError):
         with contextlib.suppress(ImportError, ValueError):
-            gi.require_version("AyatanaAppIndicator3", "0.1")
-            from gi.repository import AyatanaAppIndicator3 as AyatanaIndicator  # type: ignore[no-redef]
+            gi.require_version("AppIndicator3", "0.1")
+            from gi.repository import AppIndicator3 as AyatanaIndicator  # type: ignore[no-redef]
 
             tray_icon_lib = "AyatanaIndicator"
 
