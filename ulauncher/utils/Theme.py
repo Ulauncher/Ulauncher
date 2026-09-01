@@ -47,7 +47,12 @@ class Theme:
             return themes[default]
 
         # Rather start with an arbitrary theme than not at all
-        return next(iter(themes.values()))
+        if themes:
+            return next(iter(themes.values()))
+
+        # Nothing loaded means a broken install. Fall back to the bundled light theme
+        logger.error('No themes available, falling back to bundled "light" theme')
+        return Theme(os.path.join(get_data_path(), 'themes', 'light'))
 
     _data = None
 

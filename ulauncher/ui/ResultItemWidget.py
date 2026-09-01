@@ -75,7 +75,7 @@ class ResultItemWidget(Gtk.EventBox):
         try:
             surface = Gdk.cairo_surface_create_from_pixbuf(icon, scale_factor, self.get_window())
             iconWgt.set_from_surface(surface)
-        except AttributeError:  # Fallback for GTK+ older than 3.10
+        except (AttributeError, TypeError):  # Fallback for older GTK or unrealized window
             iconWgt.set_from_pixbuf(icon)
 
     def set_name_highlighted(self, is_selected: bool = False) -> None:
