@@ -38,15 +38,10 @@ V6_DBUS_SERVICE = 'io.ulauncher.Ulauncher'
 
 
 def _create_dirs():
-    if not os.path.exists(CONFIG_DIR):
-        os.makedirs(CONFIG_DIR)
-
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
-
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
     # make sure ~/.cache/ulauncher exists
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
+    os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 class UlauncherDbusService(dbus.service.Object):
@@ -60,9 +55,10 @@ class UlauncherDbusService(dbus.service.Object):
         self.window.toggle_window()
 
 
-def reload_config(win):
+def reload_config(win, *args):
     logger.info("Reloading config")
     win.init_theme()
+    return True
 
 
 def close_extensions():
