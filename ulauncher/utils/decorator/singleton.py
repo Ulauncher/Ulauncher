@@ -13,7 +13,8 @@ def singleton(fn):
     Call a decorated function with `spawn=True` in order to get a new instance
     """
     def wrapper(*args, **kwargs):
-        if not kwargs.get('spawn') and objects.get(fn):
+        spawn = kwargs.pop('spawn', False)
+        if not spawn and fn in objects:
             return objects[fn]
 
         instance = fn(*args, **kwargs)
