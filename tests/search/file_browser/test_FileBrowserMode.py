@@ -49,9 +49,9 @@ class TestFileBrowserMode:
     def test_list_files(self, mode, mocker, file_queries):
         listdir = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.os.listdir')
         listdir.return_value = ['a', 'd', 'b', 'c']
-        file_queries.find.side_effect = lambda i: i
+        file_queries.find.side_effect = lambda i: {'path/a': 1, 'path/b': 3, 'path/c': 2}.get(i, 0)
         assert mode.list_files('path') == sorted(listdir.return_value)
-        assert mode.list_files('path', sort_by_usage=True) == sorted(listdir.return_value, reverse=True)
+        assert mode.list_files('path', sort_by_usage=True) == ['b', 'c', 'a', 'd']
 
     def test_create_result_item(self, mode, mocker):
         FileBrowserResultItem = mocker.patch('ulauncher.search.file_browser.FileBrowserMode.FileBrowserResultItem')

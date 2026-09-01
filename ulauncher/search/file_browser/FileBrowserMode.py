@@ -41,7 +41,7 @@ class FileBrowserMode(BaseSearchMode):
             return self._file_queries.find(os.path.join(path_str, file)) or 0
 
         if sort_by_usage:
-            return sorted(files, reverse=True, key=get_last_used_time)
+            return sorted(files, key=lambda f: (-get_last_used_time(f), f))
 
         return sorted(files)
 
@@ -52,7 +52,7 @@ class FileBrowserMode(BaseSearchMode):
         return list(filter(lambda f: not f.startswith('.'), file_list))
 
     def handle_query(self, query: str) -> BaseAction:
-        if query == '~':
+        if query.strip() == '~':
             return SetUserQueryAction('~/')
 
         path = Path(query)
