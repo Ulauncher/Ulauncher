@@ -41,7 +41,8 @@ class SocketMsgController:
     def __init__(self, file_descriptor: int, on_close: Callable[[], None] | None = None) -> None:
         self.file_descriptor = file_descriptor
         self._on_close = on_close
-        unix_in_stream = GioUnix.InputStream.new(file_descriptor, True)
+        # The socket (or its caller) owns the fd; close_fd=True would double-close it
+        unix_in_stream = GioUnix.InputStream.new(file_descriptor, False)
         unix_out_stream = GioUnix.OutputStream.new(file_descriptor, False)
         self._input_stream = Gio.DataInputStream.new(unix_in_stream)
         self._output_stream = Gio.DataOutputStream.new(unix_out_stream)
