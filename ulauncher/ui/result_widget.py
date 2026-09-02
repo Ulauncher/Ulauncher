@@ -131,13 +131,14 @@ class ResultWidget(Gtk.EventBox):
         if not viewport or not isinstance(viewport, Gtk.Viewport):
             return
         viewport_height = viewport.get_allocation().height
-        scroll_y = viewport.get_vadjustment().get_value()
+        adjustment = viewport.get_vadjustment()
+        scroll_y = adjustment.get_value()
         allocation = self.get_allocation()
         bottom = allocation.y + allocation.height
         if scroll_y > allocation.y:  # Scroll up if the widget is above visible area
-            viewport.set_vadjustment(Gtk.Adjustment(allocation.y, 0, 2**32, 1, 10, 0))
+            adjustment.set_value(allocation.y)
         elif viewport_height + scroll_y < bottom:  # Scroll down if the widget is below visible area
-            viewport.set_vadjustment(Gtk.Adjustment(bottom - viewport_height, 0, 2**32, 1, 10, 0))
+            adjustment.set_value(bottom - viewport_height)
 
     def highlight_name(self) -> None:
         if self.result.wrap:
