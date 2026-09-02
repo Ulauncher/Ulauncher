@@ -57,8 +57,9 @@ class FileBrowserMode(Mode):
                 return
             path = Path(expandvars(path_str.strip())).expanduser()
 
-            closest_parent = str(next(parent for parent in [path, *list(path.parents)] if parent.exists()))
-            remainder = "/".join(path.parts[closest_parent.count("/") + 1 :])
+            closest = next(p for p in (path, *path.parents) if p.exists())
+            closest_parent = str(closest)
+            remainder = "/".join(path.parts[len(closest.parts) :])
 
             if closest_parent != ".":  # valid path
                 if not remainder:
