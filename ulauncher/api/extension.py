@@ -197,25 +197,39 @@ class Extension:
         args: tuple[Any, ...],
         input_request_id: int | None = None,
     ) -> None:
-        result = method(*args)
+        # Handler code is third-party and may raise; a dead thread would leave the request unanswered
+        try:
+            result = method(*args)
+        except Exception:
+            self.logger.exception("Unhandled error in handler %s", getattr(method, "__qualname__", method))
+            if request_id is not None:
+                self._send_do_nothing_response(request_id, event, input_request_id)
+            return
         if request_id is None:
             return
 
         # A generator streams its results in batches: `yield result` appends one, `yield [results]`
         # replaces the list. Anything else (a returned list, effect, bool, ...) is a single response.
-        if inspect.isgenerator(result):
-            self._stream_response(request_id, event, result, input_request_id)
-        else:
-            # Schedule the response on the main thread to avoid races on shared state
-            effect_msg = convert_to_effect_message(result)
-            if event["type"] == EventType.INPUT_TRIGGER and not effect_utils.is_valid_input_effect(effect_msg):
-                self.logger.warning(
-                    "Invalid effect %s from input handler. Supported types are: results, `effect.do_nothing()`,"
-                    "legacy `DoNothingAction()` or a legacy `ActionList()` which doesn't close the window",
-                    effect_msg["type"],
-                )
-                effect_msg = effects.do_nothing()
-            scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
+        try:
+            if inspect.isgenerator(result):
+                self._stream_response(request_id, event, result, input_request_id)
+            else:
+                # Schedule the response on the main thread to avoid races on shared state
+                effect_msg = convert_to_effect_message(result)
+                if event["type"] == EventType.INPUT_TRIGGER and not effect_utils.is_valid_input_effect(effect_msg):
+                    self.logger.warning(
+                        "Invalid effect %s from input handler. Supported types are: results, `effect.do_nothing()`,"
+                        "legacy `DoNothingAction()` or a legacy `ActionList()` which doesn't close the window",
+                        effect_msg["type"],
+                    )
+                    effect_msg = effects.do_nothing()
+                scheduling.run_when_idle(self._send_response, request_id, event, effect_msg, input_request_id)
+        except Exception:
+            self.logger.exception("Unhandled error while handling response for %s", event.get("type"))
+            self._send_do_nothing_response(request_id, event, input_request_id)
+
+    def _send_do_nothing_response(self, request_id: int, event: ipc.Event, input_request_id: int | None) -> None:
+        scheduling.run_when_idle(self._send_response, request_id, event, effects.do_nothing(), input_request_id)
 
     def _stream_response(
         self,
@@ -232,8 +246,8 @@ class Extension:
         it clears any prior results (append=False).
 
         A superseding input stops the loop with no closing batch, since that input renders its own; an
-        exception raised mid-stream propagates and likewise sends none. Ulauncher keeps the request's
-        callback alive until a closing batch or the next input, so partial results stay on screen.
+        exception raised mid-stream propagates to the caller, which answers with do_nothing() to clear
+        the pending callback. Partial batches already sent stay on screen.
         """
 
         def emit(effect_msg: effects.RenderResults) -> None:
