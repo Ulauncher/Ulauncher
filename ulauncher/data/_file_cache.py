@@ -23,7 +23,14 @@ def _populate_from_file(instance: Any, file_path: str) -> None:
         return
     # Parse into a throwaway first, so data the class rejects raises before the cached
     # instance (which every holder of it shares) is cleared and left half-populated.
-    parsed = type(instance)(data)
+    try:
+        parsed = type(instance)(data)
+    except (OSError, KeyError, ValueError, TypeError):
+        logger.exception("Could not parse %s - keeping the cached data", file_path)
+        # ExtensionManifest converts this to ManifestError and keeps stale data, so re-raise
+        if type(instance).__name__ == "ExtensionManifest":
+            raise
+        return
     instance.clear()
     instance.update(parsed)
 
