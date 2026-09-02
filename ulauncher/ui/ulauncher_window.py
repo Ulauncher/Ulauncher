@@ -9,10 +9,11 @@ from typing import TYPE_CHECKING, Any, cast
 from gi.repository import Gdk, Gtk
 
 from ulauncher import paths
+from ulauncher.gi import GLib
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
 from ulauncher.ui.helpers.monitor import get_monitor, get_monitor_geometries
-from ulauncher.ui.helpers.theme import Theme
+from ulauncher.ui.helpers.theme import DEFAULT_THEME, Theme
 from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.results_view import ResultsView
 from ulauncher.utils import scheduling
@@ -348,11 +349,21 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     def apply_theme(self) -> None:
         if not self._css_provider:
             self._css_provider = Gtk.CssProvider()
-        # Load theme CSS and apply shadow
-        theme_css = Theme.load(self.settings.theme_name).get_css(self._get_shadow_size())
-        self._css_provider.load_from_data(theme_css.encode())
+        theme = Theme.load(self.settings.theme_name)
+        try:
+            self._css_provider.load_from_data(theme.get_css(self._get_shadow_size()).encode())
+        except (OSError, GLib.Error):
+            logger.exception('Could not apply theme "%s"', theme.name)
+            fallback = Theme.load(DEFAULT_THEME)
+            if fallback.name != theme.name:
+                logger.info('Falling back to theme "%s"', fallback.name)
+                theme = fallback
+                try:
+                    self._css_provider.load_from_data(theme.get_css(self._get_shadow_size()).encode())
+                except (OSError, GLib.Error):
+                    logger.exception('Could not apply fallback theme "%s"', theme.name)
         self.apply_css(self)
-        logger.info('Applying theme "%s"', self.settings.theme_name)
+        logger.info('Applying theme "%s"', theme.name)
         visual = self.get_screen().get_rgba_visual()
         if visual:
             self.set_visual(visual)

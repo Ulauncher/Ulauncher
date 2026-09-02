@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from ulauncher import paths
-from ulauncher.ui.helpers.theme import LegacyTheme, _load_legacy_theme, get_themes
+from ulauncher.ui.helpers.theme import LegacyTheme, Theme, _load_legacy_theme, get_themes
 
 
 def _write_manifest(dir_path: Path, data: object) -> Path:
@@ -35,6 +35,16 @@ def test_load_legacy_theme__unusable_manifest__returns_none(tmp_path: Path, cont
 
 def test_load_legacy_theme__missing_file__returns_none(tmp_path: Path) -> None:
     assert _load_legacy_theme(tmp_path / "manifest.json") is None
+
+
+def test_get_css__missing_file__raises(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        Theme(name="dark", base_path=str(tmp_path)).get_css(0)
+
+
+def test_legacy_get_css__missing_file__raises(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        LegacyTheme(name="dark", css_file="dark.css", base_path=str(tmp_path)).get_css(0)
 
 
 @pytest.fixture

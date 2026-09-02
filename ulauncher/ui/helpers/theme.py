@@ -134,8 +134,8 @@ class LegacyTheme(Theme):
         # Convert relative links to absolute
         css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
         if self.extend_theme:
-            parent_theme = LegacyTheme.load(self.extend_theme)
-            if parent_theme.get_css_path().is_file():
+            parent_theme = get_themes().get(self.extend_theme)
+            if parent_theme and parent_theme.get_css_path().is_file():
                 css = f"{parent_theme.get_css(shadow_size)}\n\n{css}"
             else:
                 logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
