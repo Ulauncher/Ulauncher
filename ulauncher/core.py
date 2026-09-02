@@ -139,9 +139,11 @@ class UlauncherCore:
         if not query_str:
             return []
 
-        flattened_ = itertools.chain.from_iterable(self._trigger_cache.values())
-        sorted_ = sorted(flattened_, key=lambda i: i.search_score(query_str), reverse=True)[:limit]
-        return list(filter(lambda searchable: searchable.search_score(query_str) > min_score, sorted_))
+        scored = [
+            (item, item.search_score(query_str)) for item in itertools.chain.from_iterable(self._trigger_cache.values())
+        ]
+        scored.sort(key=lambda pair: pair[1], reverse=True)
+        return [item for item, score in scored[:limit] if score > min_score]
 
     def get_home_results(self) -> Iterable[Result]:
         if limit := Settings.load().max_recent_apps:
