@@ -34,18 +34,23 @@ def dbus_query_freedesktop(
     )
 
 
+@lru_cache(maxsize=1)
+def _get_session_bus() -> Gio.DBusConnection:
+    return Gio.bus_get_sync(Gio.BusType.SESSION, None)
+
+
 def check_app_running(app_id: str, bus: Gio.DBusConnection | None = None) -> bool:
     """Check if app is running by checking if the D-Bus service name is owned."""
     params = GLib.Variant("(s)", (app_id,))
     response_type = GLib.VariantType("(b)")
-    bus = bus or Gio.bus_get_sync(Gio.BusType.SESSION)
+    bus = bus or _get_session_bus()
     (is_running,) = dbus_query_freedesktop(bus, "NameHasOwner", params, response_type).unpack()
     return bool(is_running)
 
 
 def get_app_pid(app_id: str) -> int | None:
     """Get the PID of a D-Bus app"""
-    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+    bus = _get_session_bus()
 
     if not check_app_running(app_id, bus):
         return None
@@ -61,20 +66,21 @@ def get_app_pid(app_id: str) -> int | None:
 
 
 @lru_cache(maxsize=1)
-def get_ulauncher_dbus_action_group(bus: Gio.DBusConnection) -> Gio.DBusActionGroup:
+def get_ulauncher_dbus_action_group() -> Gio.DBusActionGroup:
+    bus = _get_session_bus()
     return Gio.DBusActionGroup.get(bus, ulauncher.app_id, ulauncher.dbus_path)
 
 
 def dbus_trigger_event(name: str, *args: Any) -> None:
     """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name."""
-    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+    bus = _get_session_bus()
 
     if not check_app_running(ulauncher.app_id, bus):
         logger.debug("Ulauncher app is not running, skipping D-Bus trigger event: %s", name)
         return
 
     json_message = json.dumps({"name": name, "args": list(args)})
-    get_ulauncher_dbus_action_group(bus).activate_action("trigger-event", GLib.Variant.new_string(json_message))
+    get_ulauncher_dbus_action_group().activate_action("trigger-event", GLib.Variant.new_string(json_message))
     # activate_action only queues the message; flush it so it reaches the bus before the short-lived
     # CLI process exits and drops the still-pending write.
     try:
