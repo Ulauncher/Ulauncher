@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import unicodedata
 from difflib import Match, SequenceMatcher
+from typing import NamedTuple
 
 from ulauncher.utils.lru_cache import lru_cache
 
@@ -36,23 +37,54 @@ def _is_stripped(char: str) -> bool:
     return cat == "Mn" or (cat[0] == "P" and not char.isascii())
 
 
-# convert strings to easily typable ones without accents, so ex "motorhead" matches "motörhead"
+# casefold, decompose (NFD) and strip, so ex "motörhead" matches "Motorhead"
+def _normalize_char(char: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", char.casefold()) if not _is_stripped(c))
+
+
 @lru_cache(maxsize=2000)
 def _normalize(string: str) -> str:
-    return "".join(char for char in unicodedata.normalize("NFD", string.casefold()) if not _is_stripped(char))
+    # per char, so _normalize_with_map can reuse the same normalization
+    return "".join(map(_normalize_char, string))
+
+
+class _NormalizedText(NamedTuple):
+    """Normalized text with a map from each normalized char back to its original char index."""
+
+    text: str
+    orig_indexes: list[int]
+
+    def orig_span(self, index: int, length: int) -> tuple[int, int]:
+        """Map a span in normalized text to its (start, end) span in the original text."""
+        # no map entry past the last kept char, hence last char index + 1
+        return self.orig_indexes[index], self.orig_indexes[index + length - 1] + 1
+
+
+def _normalize_with_map(text: str) -> _NormalizedText:
+    chars: list[str] = []
+    orig_indexes: list[int] = []
+    for orig_idx, char in enumerate(text):
+        normalized = _normalize_char(char)
+        # a char may expand (ß -> ss) or be dropped (stripped marks)
+        orig_indexes.extend([orig_idx] * len(normalized))
+        chars.append(normalized)
+    return _NormalizedText("".join(chars), orig_indexes)
 
 
 @lru_cache(maxsize=1000)
 def get_matching_blocks(query_str: str, text: str) -> tuple[list[tuple[int, str]], int]:
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
-    :returns: list of tuples, containing the index and matching block, number of characters that matched
+    :returns: list of tuples, containing the index and matching block sliced from `text`,
+              number of characters that matched
     """
-    blocks = _get_matching_blocks(_normalize(query_str), _normalize(text))[:-1]
+    norm_text = _normalize_with_map(text)
+    blocks = _get_matching_blocks(_normalize(query_str), norm_text.text)[:-1]
     output = []
     total_len = 0
     for _, text_index, length in blocks:
-        output.append((text_index, text[text_index : text_index + length]))
+        orig_start, orig_end = norm_text.orig_span(text_index, length)
+        output.append((orig_start, text[orig_start:orig_end]))
         total_len += length
     return output, total_len
 

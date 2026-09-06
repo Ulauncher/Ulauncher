@@ -7,3 +7,5 @@ def test_highlight_text() -> None:
     assert list(hl("dome", "Documents")) == [("Do", True), ("cu", False), ("me", True), ("nts", False)]
     assert list(hl("e tom", "São tomé & príncipe")) == [("São", False), (" tom", True), ("é & príncipe", False)]
     assert list(hl("date", "Date &amp; Time")) == [("Date", True), (" &amp; Time", False)]
+    assert list(hl("or", "Örebro")) == [("Ör", True), ("ebro", False)]
+    assert list(hl("ör", "Örebro")) == [("Ör", True), ("ebro", False)]

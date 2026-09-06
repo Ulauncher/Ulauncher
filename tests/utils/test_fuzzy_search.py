@@ -12,6 +12,8 @@ def test_normalize() -> None:
 
 def test_get_matching_indexes() -> None:
     assert get_matching_blocks("thfima", "Thunar File Manager") == ([(0, "Th"), (7, "Fi"), (12, "Ma")], 6)
+    assert get_matching_blocks("fuss", "Fußball") == ([(0, "Fuß")], 4)
+    assert get_matching_blocks("gimp", "Éditeur d’image GIMP") == ([(16, "GIMP")], 4)  # noqa: RUF001
 
 
 def test_get_score() -> None:
