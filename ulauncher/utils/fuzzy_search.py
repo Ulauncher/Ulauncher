@@ -80,13 +80,18 @@ def get_matching_blocks(query_str: str, text: str) -> tuple[list[tuple[int, str]
     """
     norm_text = _normalize_with_map(text)
     blocks = _get_matching_blocks(_normalize(query_str), norm_text.text)[:-1]
-    output = []
+    spans: list[tuple[int, int]] = []
     total_len = 0
     for _, text_index, length in blocks:
-        orig_start, orig_end = norm_text.orig_span(text_index, length)
-        output.append((orig_start, text[orig_start:orig_end]))
+        start, end = norm_text.orig_span(text_index, length)
         total_len += length
-    return output, total_len
+        # chars expanded by normalization (ß -> ss) can be matched by separate blocks,
+        # so the translated spans may overlap and need to be merged
+        if spans and start < spans[-1][1]:
+            spans[-1] = (spans[-1][0], end)
+        else:
+            spans.append((start, end))
+    return [(start, text[start:end]) for start, end in spans], total_len
 
 
 def get_score(query_str: str, text: str) -> float:
