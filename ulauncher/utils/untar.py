@@ -19,11 +19,8 @@ def untar(archive_path: str, output_path: str, overwrite: bool = True, strip: in
         for member in archive.getmembers():
             # Tarfiles allow file names starting with "/", or containing "../" etc
             # See https://github.com/advisories/GHSA-gw9q-c7gh-j9vm
-            if not is_relative_to(Path(output_path, member.name), output_path):
-                # Normalise the path to just the basename
-                strip = -1
-
+            is_traversal = not is_relative_to(Path(output_path, member.name), output_path)
             # Change member paths to strip N levels, like untar --strip-components=N
-            member.name = member.name.split("/", strip)[-1]
+            member.name = member.name.split("/", -1 if is_traversal else strip)[-1]
 
         archive.extractall(output_path)  # noqa: S202
