@@ -60,6 +60,7 @@ class _NormalizedText(NamedTuple):
         return self.orig_indexes[index], self.orig_indexes[index + length - 1] + 1
 
 
+@lru_cache(maxsize=10000)
 def _normalize_with_map(text: str) -> _NormalizedText:
     chars: list[str] = []
     orig_indexes: list[int] = []
@@ -71,7 +72,7 @@ def _normalize_with_map(text: str) -> _NormalizedText:
     return _NormalizedText("".join(chars), orig_indexes)
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=20000)
 def get_matching_blocks(query_str: str, text: str) -> tuple[list[tuple[int, str]], int]:
     """
     Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
