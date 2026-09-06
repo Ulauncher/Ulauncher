@@ -9,7 +9,6 @@ import pytest
 
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
-from ulauncher.utils.json_utils import json_stringify
 
 valid_manifest: dict[str, Any] = {
     "api_version": "1",
@@ -197,17 +196,15 @@ class TestExtensionManifest:
         manifest = ExtensionManifest(name="Test", api_version="3")
         manifest.check_compatibility()
 
-    def test_defaults_not_included_in_stringify(self) -> None:
-        # Ensure defaults don't leak. "urls" survives empty because the blacklist drops values before recursing.
-        blacklist: list[Any] = [[], {}, None, ""]
-        assert json_stringify(ExtensionManifest(), value_blacklist=blacklist) == '{"input_debounce": 0.05, "urls": {}}'
-        # __setitem__ converts the raw dict into ExtensionManifestPreference instances.
-        raw: dict[str, Any] = {"preferences": {"ns": {"k": "v"}}}
-        manifest = ExtensionManifest(**raw)
-        assert (
-            json_stringify(manifest, value_blacklist=blacklist)
-            == '{"input_debounce": 0.05, "urls": {}, "preferences": {"ns": {"k": "v"}}}'
-        )
+    def test_save_roundtrip(self, tmp_path: Path) -> None:
+        """Values save as-is, except None which means "cleared" and is dropped instead of saved as null."""
+        path = str(tmp_path / "manifest.json")
+        manifest = ExtensionManifest.load(path)
+        # __setitem__ converts the raw dict into ExtensionManifestPreference/Urls instances.
+        manifest.update({"preferences": {"ns": {"k": "v"}}, "urls": {"website": "https://example.com"}})
+        manifest.save()
+        assert "null" not in Path(path).read_text()
+        assert ExtensionManifest.load(path, force=True) == manifest
 
     def test_manifest_backwards_compatibility(self) -> None:
         # Legacy key names, renamed by ExtensionManifest.__setitem__ rather than declared as fields.

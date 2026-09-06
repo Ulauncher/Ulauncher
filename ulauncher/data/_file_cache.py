@@ -10,8 +10,18 @@ logger = logging.getLogger(__name__)
 FileInstanceT = TypeVar("FileInstanceT")
 _instance_paths: dict[int, str] = {}
 
-# Values considered "unset" defaults rather than actual data, so they're omitted from the saved file.
-_EMPTY_VALUES: tuple[Any, ...] = ([], {}, None, "")
+
+def _strip_none(data: Any) -> Any:
+    """Drop None values, which JsonConf save() uses to mean "cleared", so they don't persist as nulls.
+
+    json_load_dict strips nulls from objects on load, but not from list items, so those are dropped
+    here as well - otherwise a null in a list would survive the round trip.
+    """
+    if isinstance(data, dict):
+        return {k: _strip_none(v) for k, v in data.items() if v is not None}
+    if isinstance(data, list):
+        return [_strip_none(v) for v in data if v is not None]
+    return data
 
 
 def _populate_from_file(instance: Any, file_path: str) -> None:
@@ -56,4 +66,4 @@ def _save_cached_file_instance(instance: object, data: Any, *, sort_keys: bool =
         logger.error("Could not resolve file path for instance %s", instance.__class__.__name__)
         return False
 
-    return json_save(data, file_path, sort_keys=sort_keys, value_blacklist=_EMPTY_VALUES)
+    return json_save(_strip_none(data), file_path, sort_keys=sort_keys)

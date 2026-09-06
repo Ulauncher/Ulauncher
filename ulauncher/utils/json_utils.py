@@ -6,7 +6,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +14,6 @@ logger = logging.getLogger(__name__)
 # remove json nulls
 def sanitize_json(d: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None}
-
-
-def _filter_recursive(data: Any, blacklist: Iterable[Any]) -> Any:
-    if isinstance(data, dict):
-        return {k: _filter_recursive(v, blacklist) for k, v in data.items() if v not in blacklist}
-    if isinstance(data, list):
-        return [_filter_recursive(v, blacklist) for v in data]
-    return data
 
 
 def json_load_dict(path: str | Path) -> dict[str, Any]:
@@ -52,13 +44,6 @@ def json_load_dict(path: str | Path) -> dict[str, Any]:
     return data
 
 
-def json_stringify(
-    data: Any, indent: int | str | None = None, sort_keys: bool = False, value_blacklist: Iterable[Any] | None = None
-) -> str:
-    filtered_data = data if value_blacklist is None else _filter_recursive(data, value_blacklist)
-    return json.dumps(filtered_data, indent=indent, sort_keys=sort_keys)
-
-
 def _atomic_write_text(file_path: Path, content: str) -> None:
     """Write to a temp file and rename, so readers never observe a partially written file."""
     # Sibling of the target so the rename stays on the same filesystem, and per-pid so that the app
@@ -80,13 +65,12 @@ def json_save(
     path: str | Path,
     indent: int | str | None = 2,
     sort_keys: bool = False,
-    value_blacklist: Iterable[Any] | None = None,
 ) -> bool:
     """Save data to file path as JSON. Returns whether it was written, logging any failure."""
     file_path = Path(path).resolve()
     try:
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        stringified_data = json_stringify(data, indent=indent, sort_keys=sort_keys, value_blacklist=value_blacklist)
+        stringified_data = json.dumps(data, indent=indent, sort_keys=sort_keys)
         _atomic_write_text(file_path, stringified_data)
     # Serializing raises TypeError or ValueError depending on what the data holds, and writing
     # raises OSError. Callers only act on the bool, so treat every failure the same.

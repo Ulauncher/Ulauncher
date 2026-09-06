@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from ulauncher.data import JsonConf
-from ulauncher.utils.json_utils import json_load_dict, json_save, json_stringify
+from ulauncher.utils.json_utils import json_load_dict, json_save
 
 
 class TestJsonConf:
@@ -35,14 +35,6 @@ class TestJsonConf:
         jc1 = JsonConf.load(file_path)
         jc2 = JsonConf.load(file_path)
         assert id(jc2) == id(jc1)
-
-    def test_stringify(self) -> None:
-        assert json_stringify(JsonConf(a=1, c=3, b=2)) == '{"a": 1, "c": 3, "b": 2}'
-        assert json_stringify(JsonConf(a=1, c=3, b=2), sort_keys=True) == '{"a": 1, "b": 2, "c": 3}'
-        assert json_stringify(JsonConf(a=1, b=2), indent=4) == '{\n    "a": 1,\n    "b": 2\n}'
-        conf = JsonConf(a=None, b=[], c={}, d=1)
-        assert json_stringify(conf) == '{"a": null, "b": [], "c": {}, "d": 1}'
-        assert json_stringify(conf, value_blacklist=[[], {}, None, ""]) == '{"d": 1}'
 
     def test_save(self, tmp_path: Path) -> None:
         """Test that save() writes the correct data using json_save"""
@@ -101,7 +93,7 @@ class TestJsonConf:
         assert ClassWDefault(a=9).sum() == 10
         inst = ClassWDefault()
         assert inst.sum() == 3
-        assert json_stringify(SubclassWDefault(), sort_keys=True) == '{"a": 2, "b": 1, "c": 3}'
+        assert SubclassWDefault() == {"a": 2, "b": 1, "c": 3}
 
         # Test file operations with real files
         json_ko_file = str(tmp_path / "jsonconf-key-order.json")
@@ -128,7 +120,7 @@ class TestJsonConf:
         data.update({"two": 2})
         data.three = 3
         data["four"] = 4
-        assert json_stringify(data) == '{"_one": 1, "_two": 2, "_three": 3, "_four": 4}'
+        assert data == {"_one": 1, "_two": 2, "_three": 3, "_four": 4}
 
     def test_file_cache(self, tmp_path: Path) -> None:
         """Test that different JsonConf subclasses maintain separate file caches"""
