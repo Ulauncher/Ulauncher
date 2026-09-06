@@ -88,7 +88,6 @@ let
 
     # runtime dependencies / binaries prepended to PATH
     propagatedBuildInputs = with python3Packages; [
-      levenshtein
       mock
       pycairo
       pygobject3

@@ -1,33 +1,10 @@
 from __future__ import annotations
 
-import logging
 import unicodedata
-from difflib import Match, SequenceMatcher
+from difflib import SequenceMatcher
 from typing import NamedTuple
 
 from ulauncher.utils.lru_cache import lru_cache
-
-logger = logging.getLogger(__name__)
-
-
-def _get_matching_blocks_native(query_str: str, text: str) -> list[Match]:
-    return SequenceMatcher(None, query_str, text).get_matching_blocks()
-
-
-# Using Levenshtein is ~10x faster, but some older distro releases might not package Levenshtein
-# with these methods. So we fall back on difflib.SequenceMatcher (native Python library) to be sure.
-try:
-    from Levenshtein import editops, matching_blocks  # type: ignore[import-not-found, unused-ignore]
-
-    def _get_matching_blocks(query_str: str, text: str) -> list[tuple[int, int, int]]:
-        return matching_blocks(editops(query_str, text), query_str, text)  # type: ignore[no-any-return, unused-ignore]
-
-except ImportError:
-    logger.info(
-        "Using fuzzy-matching with Native Python SequenceMatcher module. "
-        "optional dependency 'python-Levenshtein' is recommended for better performance"
-    )
-    _get_matching_blocks = _get_matching_blocks_native  # type: ignore[assignment]
 
 
 # characters that should be stripped during normalization:
@@ -75,12 +52,12 @@ def _normalize_with_map(text: str) -> _NormalizedText:
 @lru_cache(maxsize=20000)
 def get_matching_blocks(query_str: str, text: str) -> tuple[list[tuple[int, str]], int]:
     """
-    Uses our _get_matching_blocks wrapper method to find the blocks using "Longest Common Substrings",
+    Find the blocks using "Longest Common Substrings",
     :returns: list of tuples, containing the index and matching block sliced from `text`,
               number of characters that matched
     """
     norm_text = _normalize_with_map(text)
-    blocks = _get_matching_blocks(_normalize(query_str), norm_text.text)[:-1]
+    blocks = SequenceMatcher(None, _normalize(query_str), norm_text.text).get_matching_blocks()[:-1]
     spans: list[tuple[int, int]] = []
     total_len = 0
     for _, text_index, length in blocks:
