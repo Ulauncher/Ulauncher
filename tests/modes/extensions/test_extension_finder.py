@@ -12,6 +12,6 @@ def test_find_extensions__test_extension__is_found() -> None:
 
 
 def test_scratch_dirs__are_outside_every_scanned_dir() -> None:
-    for scratch_dir in (paths.EXTENSIONS_STAGING, paths.REPO_CACHE):
+    for scratch_dir in (*paths.STAGING_ROOTS, paths.REPO_CACHE):
         for scanned_dir in paths.ALL_EXTENSIONS_DIRS:
             assert not scratch_dir.startswith(f"{scanned_dir}{os.sep}")

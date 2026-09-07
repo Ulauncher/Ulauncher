@@ -21,6 +21,8 @@ USER_EXTENSIONS = os.path.join(DATA, "extensions")
 # Scratch dirs, kept out of every scanned install root so a partial download can never be
 # mistaken for an installed extension. Under DATA so the post-install swap is a same-filesystem rename.
 EXTENSIONS_STAGING = os.path.join(DATA, ".staging", "extensions")
+# Every scratch root, so startup cleanup can sweep them without naming the kinds again.
+STAGING_ROOTS = (EXTENSIONS_STAGING,)
 # Bare-clone cache keyed by extension id. Disposable: a missing or half-written clone is re-cloned.
 REPO_CACHE = os.path.join(DATA, ".repo-cache")
 ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS, *[os.path.join(p, "ulauncher", "extensions") for p in XDG_DATA_DIRS]]
