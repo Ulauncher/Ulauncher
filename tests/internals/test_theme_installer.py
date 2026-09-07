@@ -60,7 +60,7 @@ def test_finalize_install__rejects_non_theme_staged_dir(theme_dirs: SimpleNamesp
     extension = tmp_path / "staged-extension"
     extension.mkdir()
     write_extension(extension)
-    with pytest.raises(install_errors.InstallError):
+    with pytest.raises(install_errors.InstallError, match="is an extension, not a theme"):
         theme_installer.finalize_install(str(extension), "test_finalize_extension", INSTALL_URL, "abc", 1700000000.0)
 
     assert theme_dirs.installed.exists()

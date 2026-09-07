@@ -5,7 +5,9 @@ from pathlib import Path
 from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
-from ulauncher.internals.install_source import InstallSource, resolve_source
+from ulauncher.data import Ok
+from ulauncher.internals import install_errors
+from ulauncher.internals.install_source import InstallSource, categorize, resolve_source
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
@@ -213,7 +215,11 @@ class ExtensionRegistry:
         on_done: Done,
         on_error: OnError,
     ) -> None:
-        """Deps, stop, swap, state for the staged tree. Rejects incompatible trees before the swap."""
+        """Deps, stop, swap, state for the staged tree. Rejects themes and incompatible trees before the swap."""
+        kind = categorize(staging_dir)
+        if isinstance(kind, Ok) and kind.value == "theme":
+            on_error(install_errors.InstallError(f"{source.url} is a theme, not an extension"))
+            return
         try:
             # Staging path is reused, so force a fresh manifest load.
             manifest = ExtensionManifest.load(staging_dir, force=True)

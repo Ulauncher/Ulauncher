@@ -94,6 +94,8 @@ class ExtensionHandlers:
 
     def install_extension(self, url: str, callback: Callable[[ExtensionRecord], None]) -> None:
         """Install extension from URL"""
+        # TODO: once prefs has a theme tab, offer to redirect theme URLs there instead of
+        # erroring with "is a theme, not an extension"
         progress_dialog = self._show_progress_dialog(
             "Installing extension...", "Please wait while the extension is being installed."
         )
