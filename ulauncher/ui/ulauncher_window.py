@@ -134,8 +134,8 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.connect("focus-in-event", lambda *_: self.on_focus_in())
         self.connect("focus-out-event", lambda *_: self.on_focus_out())
+        self.connect("button-release-event", self.on_mouse_up)
         drag_listener.connect("button-press-event", self.on_mouse_down)
-        self.connect("button-release-event", lambda *_: self.on_mouse_up())
         self.prompt_input.connect("changed", lambda *_: self.on_input_changed())
         self.prompt_input.connect("key-press-event", self.on_input_key_press)
         self.connect("draw", self.on_initial_draw)
@@ -317,8 +317,15 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             self.is_dragging = True
             self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
 
-    def on_mouse_up(self) -> None:
+    def on_mouse_up(self, _widget: Gtk.Widget, event: Gdk.EventButton) -> bool:
         self.is_dragging = False
+        # With the fullscreen positioning the window is a transparent background, so clicks directly on it
+        # means it's a background click and we should treat it as lost focus.
+        is_background_click = event.window == self.get_window()
+        if _use_fullscreen_to_position and is_background_click and self.settings.close_on_focus_out:
+            self.close(save_query=True)
+            return True
+        return False
 
     ######################################
     # Helpers
