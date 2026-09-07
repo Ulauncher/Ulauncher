@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     from ulauncher.ui.app import UlauncherApp
 
 logger = logging.getLogger(__name__)
+# Gnome Wayland doesn't allow apps to position their windows, so we render a fullscreen transparent window
+# and position the visible window inside of it via margins
+_use_fullscreen_to_position = DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -39,10 +42,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         width_request = self.settings.base_width
         height_request = -1
 
-        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE and (layout_size := self.get_layout_size()):
-            # Give the window the size of a monitor, so the visible content can be positioned
-            # within it using margins. Needed because Gnome Wayland gives no control over where
-            # the window goes, it only centers it on the monitor Mutter picks.
+        if _use_fullscreen_to_position and (layout_size := self.get_layout_size()):
             width_request = layout_size.width
             height_request = layout_size.height
 
@@ -374,7 +374,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # it picked, so use the smallest monitor to ensure the window fits on all of them. A window
         # taller than the monitor gets its top edge clamped to the work area, which would shift the
         # content down relative to the monitor.
-        if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
+        if _use_fullscreen_to_position:
             if not (geometries := get_monitor_geometries()):
                 return None
             layout_size = Gdk.Rectangle()
@@ -399,9 +399,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
             self.update_results_max_height()
 
-            # Part II of the Gnome Wayland fix (see above in __init__)
-            # Use margins to center the visible content within the full-screen window
-            if DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE:
+            if _use_fullscreen_to_position:
                 self.frame.set_properties(
                     margin_top=pos_y,
                     margin_bottom=pos_y,
