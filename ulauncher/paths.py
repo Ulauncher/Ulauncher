@@ -19,10 +19,11 @@ DATA = os.path.join(os.environ.get("XDG_DATA_HOME") or f"{HOME}/.local/share", "
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME") or f"{HOME}/.local/state", "ulauncher")
 USER_EXTENSIONS = os.path.join(DATA, "extensions")
 # Scratch dirs, kept out of every scanned install root so a partial download can never be
-# mistaken for an installed extension. Under DATA so the post-install swap is a same-filesystem rename.
+# mistaken for an installed extension or theme. Under DATA so the post-install swap is a same-filesystem rename.
 EXTENSIONS_STAGING = os.path.join(DATA, ".staging", "extensions")
-# Every scratch root, so startup cleanup can sweep them without naming the kinds again.
-STAGING_ROOTS = (EXTENSIONS_STAGING,)
+THEMES_STAGING = os.path.join(DATA, ".staging", "themes")
+PENDING_STAGING = os.path.join(DATA, ".staging", "pending")
+STAGING_ROOTS = (EXTENSIONS_STAGING, THEMES_STAGING, PENDING_STAGING)
 # Bare-clone cache keyed by extension id. Disposable: a missing or half-written clone is re-cloned.
 REPO_CACHE = os.path.join(DATA, ".repo-cache")
 ALL_EXTENSIONS_DIRS = [USER_EXTENSIONS, *[os.path.join(p, "ulauncher", "extensions") for p in XDG_DATA_DIRS]]
@@ -30,5 +31,7 @@ EXTENSIONS_CONFIG = os.path.join(CONFIG, "ext_preferences")
 EXTENSIONS_STATE = os.path.join(STATE, "ext_state")
 USER_THEMES = os.path.join(CONFIG, "user-themes")
 SYSTEM_THEMES = os.path.join(ASSETS, "themes")
+INSTALLED_THEMES = os.path.join(DATA, "themes")
+THEMES_STATE = os.path.join(STATE, "theme_state")
 LOG_FILE = os.path.join(STATE, "last.log")
 PREVIEW_LOG_FILE = os.path.join(STATE, "preview.log")
