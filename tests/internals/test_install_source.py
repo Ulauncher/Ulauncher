@@ -9,7 +9,7 @@ import pytest
 
 from ulauncher import api_version
 from ulauncher.data import Err, Ok
-from ulauncher.internals import install_errors
+from ulauncher.internals import install_errors, install_source
 from ulauncher.internals.install_source import (
     InstallSource,
     UrlParseResult,
@@ -248,3 +248,86 @@ class TestDownload:
         result, error = _download(source, self.target_dir)
         assert result is None
         assert isinstance(error, install_errors.InstallError)
+
+
+class TestCategorize:
+    def test_root_manifest_with_css_file_is_theme(self, tmp_path: Any) -> None:
+        (tmp_path / "manifest.json").write_text('{"name": "x", "css_file": "theme.css"}')
+        (tmp_path / "theme.css").write_text(".app {}")
+        assert install_source.categorize(str(tmp_path)) == Ok("theme")
+
+    def test_root_manifest_with_missing_css_file_is_extension(self, tmp_path: Any) -> None:
+        # LegacyTheme.validate() requires the css file, so a missing one would install but never be discovered
+        (tmp_path / "manifest.json").write_text('{"name": "x", "css_file": "theme.css"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_root_manifest_with_gtk_only_css_file_is_extension(self, tmp_path: Any) -> None:
+        # LegacyTheme.validate() requires css_file, so a css_file_gtk_3.20+-only manifest cannot load as a theme
+        (tmp_path / "manifest.json").write_text('{"name": "x", "css_file_gtk_3.20+": "theme.css"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_root_manifest_without_name_is_extension(self, tmp_path: Any) -> None:
+        # LegacyTheme.validate() requires name, so a css_file-only manifest cannot load as a theme
+        (tmp_path / "manifest.json").write_text('{"css_file": "theme.css"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_root_manifest_without_css_file_is_extension(self, tmp_path: Any) -> None:
+        (tmp_path / "manifest.json").write_text('{"name": "x", "api_version": "3"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_root_manifest_wins_over_nested_theme_manifest(self, tmp_path: Any) -> None:
+        (tmp_path / "manifest.json").write_text('{"name": "x", "api_version": "3"}')
+        variant = tmp_path / "variant"
+        variant.mkdir()
+        (variant / "manifest.json").write_text('{"name": "y", "css_file": "theme.css"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_nested_theme_manifest_is_theme(self, tmp_path: Any) -> None:
+        variant = tmp_path / "variant"
+        variant.mkdir()
+        (variant / "manifest.json").write_text('{"name": "y", "css_file": "theme.css"}')
+        (variant / "theme.css").write_text(".app {}")
+        assert install_source.categorize(str(tmp_path)) == Ok("theme")
+
+    def test_nested_manifests_without_css_file_are_extension(self, tmp_path: Any) -> None:
+        variant = tmp_path / "variant"
+        variant.mkdir()
+        (variant / "manifest.json").write_text('{"name": "y", "api_version": "3"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_nested_manifest_without_name_is_extension(self, tmp_path: Any) -> None:
+        variant = tmp_path / "variant"
+        variant.mkdir()
+        (variant / "manifest.json").write_text('{"css_file": "theme.css"}')
+        assert install_source.categorize(str(tmp_path)) == Ok("extension")
+
+    def test_bare_css_without_manifest_is_theme(self, tmp_path: Any) -> None:
+        (tmp_path / "my-theme.css").write_text(".app {}")
+        assert install_source.categorize(str(tmp_path)) == Ok("theme")
+
+    def test_empty_dir_is_err(self, tmp_path: Any) -> None:
+        result = install_source.categorize(str(tmp_path))
+        assert isinstance(result, Err)
+
+    def test_unrecognized_content_is_err(self, tmp_path: Any) -> None:
+        (tmp_path / "readme.txt").write_text("hello")
+        result = install_source.categorize(str(tmp_path))
+        assert isinstance(result, Err)
+
+    def test_unreadable_dir_is_err(self, tmp_path: Any) -> None:
+        (tmp_path / "readme.txt").write_text("hello")
+        with patch.object(Path, "iterdir", side_effect=OSError("denied")):
+            result = install_source.categorize(str(tmp_path))
+        assert isinstance(result, Err)
+        assert "denied" in result.error
+
+    def test_invalid_root_manifest_with_css_falls_through_to_theme(self, tmp_path: Any) -> None:
+        (tmp_path / "manifest.json").write_text("{not json")
+        (tmp_path / "theme.css").write_text(".app {}")
+        assert install_source.categorize(str(tmp_path)) == Ok("theme")
+
+    def test_only_unparsable_nested_manifests_are_not_extension(self, tmp_path: Any) -> None:
+        variant = tmp_path / "variant"
+        variant.mkdir()
+        (variant / "manifest.json").write_text("{not json")
+        assert isinstance(install_source.categorize(str(tmp_path)), Err)

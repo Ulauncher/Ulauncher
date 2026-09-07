@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import logging
 import os
 from datetime import datetime, timezone
 from os.path import basename, getmtime, isdir
+from pathlib import Path
 from shutil import move, rmtree, which
 from tarfile import TarError
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import Callable
+from typing import Callable, Literal
 from urllib.parse import urlparse
 
 from ulauncher import (
@@ -22,6 +24,8 @@ from ulauncher.utils.untar import untar
 from ulauncher.utils.version import get_version, satisfies
 
 logger = logging.getLogger(__name__)
+
+SourceKind = Literal["extension", "theme"]
 
 RefsSuccess = Callable[["dict[str, str]"], None]
 HashSuccess = Callable[[str], None]
@@ -407,3 +411,59 @@ def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:
             download_url_template=download_url_template,
         )
     )
+
+
+def _is_theme_manifest(data: object, base_dir: str) -> bool:
+    """Whether data is a legacy theme manifest LegacyTheme would accept: name, css_file, and the css file present."""
+    if not isinstance(data, dict) or not data.get("name") or not data.get("css_file"):
+        return False
+    # LegacyTheme.get_css_path() prefers the gtk 3.20 field when the key is present, so match that
+    css_file = data["css_file_gtk_3.20+"] if "css_file_gtk_3.20+" in data else data["css_file"]
+    return isinstance(css_file, str) and Path(base_dir, css_file).is_file()
+
+
+def categorize(staged_dir: str) -> Fallible[SourceKind, str]:
+    """Classify a staged repository tree as an extension or a theme.
+
+    Rule order (first match wins): root manifest > nested theme manifests >
+    extension manifests > root *.css. Returns Err when the tree is neither or
+    cannot be read. Filesystem failures map to Err, never a raw OSError.
+    """
+    # A repo root manifest is authoritative and the common case, so it settles the kind
+    # without scanning the tree. Unreadable or invalid JSON falls through to the scan below.
+    root_manifest = Path(staged_dir, "manifest.json")
+    if root_manifest.is_file():
+        with contextlib.suppress(OSError, ValueError):
+            data = json.loads(root_manifest.read_text())
+            if isinstance(data, dict):
+                # LegacyTheme.validate() also requires the css file to exist, so an install that
+                # passed on the fields alone would succeed but never be discovered by the loader
+                kind: SourceKind = "theme" if _is_theme_manifest(data, staged_dir) else "extension"
+                return Ok(kind)
+
+    # Manifest themes may nest a variant per subdir, matching the loader's **/manifest.json scan.
+    manifest_paths = [
+        os.path.join(root, "manifest.json") for root, _dirs, files in os.walk(staged_dir) if "manifest.json" in files
+    ]
+    parsed_manifest = False
+    for manifest_path in manifest_paths:
+        try:
+            data = json.loads(Path(manifest_path).read_text())
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        parsed_manifest = True
+        if _is_theme_manifest(data, os.path.dirname(manifest_path)):
+            return Ok("theme")
+    if parsed_manifest:
+        return Ok("extension")
+    # Flat theme: the css sits at the repo root, matching the loader's <repo_id>/*.css glob. Nested
+    # css is deliberately not recognized, since the loader would never find it.
+    try:
+        has_root_css = any(p.is_file() and p.suffix == ".css" for p in Path(staged_dir).iterdir())
+    except OSError as e:
+        return Err(f"Could not read {staged_dir}: {e}")
+    if has_root_css:
+        return Ok("theme")
+    return Err(f"{staged_dir} is not a recognized extension or theme")
