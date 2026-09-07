@@ -15,3 +15,4 @@ def test_scratch_dirs__are_outside_every_scanned_dir() -> None:
     for scratch_dir in (*paths.STAGING_ROOTS, paths.REPO_CACHE):
         for scanned_dir in paths.ALL_EXTENSIONS_DIRS:
             assert not scratch_dir.startswith(f"{scanned_dir}{os.sep}")
+        assert not scratch_dir.startswith(f"{paths.INSTALLED_THEMES}{os.sep}")
