@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from shutil import move, rmtree
 from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
@@ -10,6 +9,7 @@ from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.modes.extensions.extension_remote import ExtensionRemote
+from ulauncher.utils.fs import StagingDir, swap_dir
 from ulauncher.utils.subprocess_utils import OnError
 
 logger = logging.getLogger(__name__)
@@ -27,37 +27,6 @@ def resolve_remote(url: str, on_error: OnError) -> ExtensionRemote | None:
     except ext_exceptions.UrlError as error:
         on_error(error)
         return None
-
-
-def _swap_dir(new_dir: str, target: str) -> bool:
-    """Replace `target` with `new_dir`, rolling back to the original on failure. Returns whether it succeeded."""
-    previous = f"{new_dir}.bak"
-    # A stale .bak would be an existing dir, so move() nests target inside it instead of replacing.
-    rmtree(previous, ignore_errors=True)
-    backed_up = False
-    if Path(target).exists():
-        try:
-            move(target, previous)
-            backed_up = True
-        except OSError:
-            logger.exception("Could not back up the current version of %s; keeping it in place", target)
-            rmtree(new_dir, ignore_errors=True)
-            return False
-    try:
-        move(new_dir, target)
-    except OSError:
-        logger.exception("Could not swap extension into %s; keeping the previous version", target)
-        # A cross-device move can fail after partially creating target; clear it before restoring.
-        rmtree(target, ignore_errors=True)
-        if backed_up:
-            try:
-                move(previous, target)
-            except OSError:
-                logger.exception("Could not restore the previous version of %s; it remains at %s", target, previous)
-        rmtree(new_dir, ignore_errors=True)
-        return False
-    rmtree(previous, ignore_errors=True)
-    return True
 
 
 class ExtensionLifecycle(Protocol):
@@ -230,16 +199,15 @@ class ExtensionRegistry:
         target_dir = record.path
         # Fixed path per extension so failed installs don't accumulate.
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
-        staging_dir = str(Path(paths.EXTENSIONS_STAGING) / record.id)
-        rmtree(staging_dir, ignore_errors=True)
+        staging = StagingDir(paths.EXTENSIONS_STAGING, record.id)
         try:
-            Path(staging_dir).mkdir(parents=True)
+            staging_dir = staging.prepare()
         except OSError as error:
             on_error(error)
             return
 
         def fail(error: Exception) -> None:
-            rmtree(staging_dir, ignore_errors=True)
+            staging.discard()
             on_error(error)
 
         def on_downloaded(download_result: tuple[str, float]) -> None:
@@ -248,7 +216,7 @@ class ExtensionRegistry:
             def on_deps_installed(_stdout: str) -> None:
                 def swap_and_finish() -> None:
                     error: Exception | None = None
-                    if _swap_dir(staging_dir, target_dir):
+                    if swap_dir(staging_dir, target_dir):
                         try:
                             # Saved together, so an update to a declared remote can't leave the
                             # state pointing half at the previous host
@@ -261,7 +229,7 @@ class ExtensionRegistry:
                             error = save_error
                     else:
                         error = OSError(f"Failed to swap the staged extension into {target_dir}")
-                    rmtree(staging_dir, ignore_errors=True)
+                    staging.discard()
                     if error:
                         on_error(error)
                     else:
