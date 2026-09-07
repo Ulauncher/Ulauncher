@@ -34,6 +34,24 @@ def test_iterate__orders_preview_enabled_error_disabled(mocker: MockerFixture) -
     assert list(registry.iterate(sort=True)) == [preview, enabled, errored, disabled]
 
 
+def test_install_from_staging__rejects_theme_tree(tmp_path: Any, monkeypatch: Any) -> None:
+    """A theme URL pasted into the extension installer fails naming the kind, and swaps nothing in."""
+    staged = tmp_path / "staged-theme"
+    staged.mkdir()
+    (staged / "manifest.json").write_text('{"name": "x", "css_file": "theme.css"}')
+    (staged / "theme.css").write_text(".app {}")
+    monkeypatch.setattr(paths, "USER_EXTENSIONS", str(tmp_path / "extensions"))
+
+    installed: list[Any] = []
+    errors: list[Exception] = []
+    source = InstallSource("https://example.com/user/repo")
+    ExtensionRegistry().install_from_staging(source, str(staged), "abc", 1700000000.0, installed.append, errors.append)
+    assert installed == []
+    assert len(errors) == 1
+    assert "is a theme, not an extension" in str(errors[0])
+    assert not (tmp_path / "extensions").exists()
+
+
 def test_install_from_staging__rejects_api_incompatible_extension(tmp_path: Any, monkeypatch: Any) -> None:
     """An extension too new for the API is rejected before anything is swapped in."""
     staged = tmp_path / "staged-incompatible"

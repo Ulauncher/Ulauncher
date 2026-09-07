@@ -59,7 +59,7 @@ def finalize_install(staging_dir: str, repo_id: str, url: str, commit_hash: str,
     if isinstance(kind, Err):
         raise install_errors.InstallError(kind.error)
     if kind.value != "theme":
-        msg = f"{url} does not contain a theme"
+        msg = f"{url} is an extension, not a theme"
         raise install_errors.InstallError(msg)
     target = installed_dir(repo_id)
     if not swap_dir(staging_dir, target):
