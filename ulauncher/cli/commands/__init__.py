@@ -56,17 +56,28 @@ def get_ext_registry() -> ExtensionRegistry:
     return ExtensionRegistry()
 
 
-def get_ext_record(input_arg: str) -> ExtensionRecord | None:
-    """Parses the input argument and returns an ExtensionRecord instance if it's installed, otherwise None."""
+def _install_arg_id(input_arg: str) -> str:
+    """Normalize the argument and derive its repo id, falling back on the input as-is."""
     from ulauncher.data import Ok
     from ulauncher.internals.install_source import parse_repo_url
 
     arg = normalize_install_arg(input_arg)
-    parse_result = parse_repo_url(arg)
-    if isinstance(parse_result, Ok):
-        arg = parse_result.value.repo_id
+    if isinstance(parse_result := parse_repo_url(arg), Ok):
+        return parse_result.value.repo_id
+    return arg
 
-    return get_ext_registry().get(arg)
+
+def get_ext_record(input_arg: str) -> ExtensionRecord | None:
+    """Returns an ExtensionRecord instance if the argument matches an installed extension, otherwise None."""
+    return get_ext_registry().get(_install_arg_id(input_arg))
+
+
+def get_theme_id(input_arg: str) -> str | None:
+    """Resolve an argument to an installed theme's repo id, or None if no installed theme matches."""
+    from ulauncher.internals import theme_installer
+
+    arg = _install_arg_id(input_arg)
+    return arg if arg in theme_installer.installed_ids() else None
 
 
 def normalize_install_arg(path: str) -> str:

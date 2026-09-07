@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import tarfile
 from pathlib import Path
+from shutil import copyfile
 from types import SimpleNamespace
 from typing import Callable
 
@@ -8,7 +10,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher import paths
-from ulauncher.internals import install_errors, theme_installer
+from ulauncher.internals import install_errors, install_source, theme_installer
 
 THEME_MANIFEST = '{"name": "x", "css_file": "theme.css"}'
 EXTENSION_MANIFEST = '{"name": "x", "api_version": "3"}'
@@ -156,6 +158,34 @@ def test_download__failure__leaves_themes_staging_empty(theme_dirs: SimpleNamesp
     assert len(errors) == 1
     assert list(staging_root.iterdir()) == []
     assert list(theme_dirs.installed.iterdir()) == []
+
+
+def test_download__tarball_host_installs_a_theme(
+    theme_dirs: SimpleNamespace, tmp_path: Path, mocker: MockerFixture
+) -> None:
+    """Tarball hosts share the extension download path; a theme manifest must not be rejected there."""
+    payload = tmp_path / "repo-abc"
+    payload.mkdir()
+    write_theme(payload)
+    tar_path = tmp_path / "repo-abc.tar.gz"
+    with tarfile.open(tar_path, "w:gz") as tar:
+        tar.add(payload, arcname="repo-abc")
+
+    def fake_download_file(
+        _url: str, target: str, on_success: Callable[[str], None], _on_error: Callable[[Exception], None]
+    ) -> None:
+        copyfile(tar_path, target)
+        on_success(target)
+
+    mocker.patch.object(install_source, "download_file", fake_download_file)
+
+    installed: list[str] = []
+    errors: list[Exception] = []
+    theme_installer.download("https://github.com/user/repo", installed.append, errors.append, "abc")
+
+    assert installed == ["com.github.user.repo"]
+    assert errors == []
+    assert (theme_dirs.installed / "com.github.user.repo" / "theme.css").is_file()
 
 
 @pytest.mark.usefixtures("theme_dirs")

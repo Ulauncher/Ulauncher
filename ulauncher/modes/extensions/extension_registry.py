@@ -177,6 +177,32 @@ class ExtensionRegistry:
 
         source.get_compatible_hash(on_hash, on_error)
 
+    def install_from_staging(
+        self,
+        source: InstallSource,
+        staging_dir: str,
+        commit_hash: str,
+        commit_timestamp: float,
+        on_success: InstallSuccess,
+        on_error: OnError,
+    ) -> None:
+        """Finish an install whose repo is already downloaded into staging_dir, which the caller owns.
+
+        The CLI downloads once into pending staging so it can categorize the repo before routing;
+        this runs the extension half (deps, stop, swap, state) without downloading again.
+        """
+        ext_id = source.repo_id
+        target_dir = f"{paths.USER_EXTENSIONS}/{ext_id}"
+        if Path(target_dir).exists():
+            logger.info('Extension with URL "%s" is already installed. Updating', source.url)
+        record = ExtensionRecord(ext_id, target_dir)
+
+        def done() -> None:
+            logger.info("Extension %s installed successfully", record.id)
+            on_success(record)
+
+        self._finalize_staged(record, source, staging_dir, commit_hash, commit_timestamp, done, on_error)
+
     def _finalize_staged(
         self,
         record: ExtensionRecord,

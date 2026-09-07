@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 events = EventBus("app")
+theme_events = EventBus("themes")
 
 
 class UlauncherApp(Gtk.Application):
@@ -54,6 +55,7 @@ class UlauncherApp(Gtk.Application):
         super().__init__(*args, **kwargs)
         self.windows = WeakValueDictionary()
         events.set_self(self)
+        theme_events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
 
     @events.on
@@ -83,6 +85,12 @@ class UlauncherApp(Gtk.Application):
     def reload_query(self) -> None:
         if "main" in self.windows:
             self.core.set_query(self.query, self.show_results)
+
+    @theme_events.on
+    def reload(self) -> None:
+        """Re-apply the active theme after a CLI theme install or upgrade rewrote it on disk."""
+        if isinstance(main_window := self.windows.get("main"), UlauncherWindow):
+            main_window.apply_theme()
 
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)

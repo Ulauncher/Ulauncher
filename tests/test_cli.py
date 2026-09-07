@@ -27,6 +27,7 @@ class TestCLIParse:
             pytest.param(["--verbose"], {"command": "show", "verbose": True}, id="bare-verbose"),
             pytest.param(["start"], {"command": "start"}, id="start"),
             pytest.param(["extensions"], {"command": "extensions"}, id="extensions"),
+            pytest.param(["themes"], {"command": "themes"}, id="themes"),
             pytest.param(["install", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
             pytest.param(["uninstall", "ext-id"], {"command": "uninstall", "input": "ext-id"}, id="uninstall"),
             pytest.param(["upgrade"], {"command": "upgrade", "input": ""}, id="upgrade-all"),
@@ -65,6 +66,7 @@ class TestCLIParse:
         ("input_args", "expected_attrs"),
         [
             pytest.param(["e"], {"command": "extensions"}, id="extensions"),
+            pytest.param(["t"], {"command": "themes"}, id="themes"),
             pytest.param(["i", "git://example"], {"command": "install", "input": "git://example"}, id="install"),
             pytest.param(["rm", "ext-id"], {"command": "uninstall", "input": "ext-id"}, id="uninstall"),
             pytest.param(["up"], {"command": "upgrade", "input": ""}, id="upgrade"),
@@ -145,7 +147,7 @@ class TestCLIHelp:
         app_group_index = help_text.index("App commands:")
         show_index = help_text.index("Show the Ulauncher window (default command)")
         help_index = help_text.index("Show help")
-        extension_group_index = help_text.index("Extension commands:")
+        extension_group_index = help_text.index("Extension & theme commands:")
         extensions_index = help_text.index("List installed extensions")
         preview_index = help_text.index("Preview extension")
 
@@ -153,7 +155,7 @@ class TestCLIHelp:
         assert "Available commands" not in help_text
         assert "Options:" not in help_text
         assert "\nApp commands:\n  start" in help_text
-        assert "\nExtension commands:\n  extensions (e)" in help_text
+        assert "\nExtension & theme commands:\n  extensions (e)" in help_text
         assert f"start {start_summary}" in " ".join(help_text.split())
 
     def test_subcommand_help_does_not_repeat_top_level_command_groups(self, capsys: pytest.CaptureFixture[str]) -> None:
@@ -164,6 +166,6 @@ class TestCLIHelp:
 
         captured = capsys.readouterr()
         assert "App commands:" not in captured.out
-        assert "Extension commands:" not in captured.out
+        assert "Extension & theme commands:" not in captured.out
         assert "\nOptions:\n" in captured.out
         assert captured.err == ""

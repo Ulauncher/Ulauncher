@@ -11,8 +11,8 @@ from ulauncher.data import BaseDataClass
 from ulauncher.init_helpers import configure_logging, ensure_runtime_dirs, use_color
 from ulauncher.utils.lru_cache import lru_cache
 
-CommandName = Literal["show", "toggle", "start", "extensions", "install", "uninstall", "upgrade", "preview"]
-CommandGroupName = Literal["App", "Extension"]
+CommandName = Literal["show", "toggle", "start", "extensions", "themes", "install", "uninstall", "upgrade", "preview"]
+CommandGroupName = Literal["App", "Extension & theme"]
 
 
 class CLIArguments(BaseDataClass):
@@ -149,36 +149,46 @@ def _get_commands() -> dict[CommandName, CLICommand]:
             aliases=("e",),
             summary="List installed extensions",
             description="List all installed extensions with their status and information",
-            group="Extension",
+            group="Extension & theme",
+        ),
+        "themes": CLICommand(
+            aliases=("t",),
+            summary="List installed themes",
+            description="List themes installed with the install command. Legacy and system themes are not listed",
+            group="Extension & theme",
         ),
         "install": CLICommand(
             aliases=("i",),
-            summary="Install an extension from URL",
-            description="Install an extension from a Git URL or local path",
-            group="Extension",
+            summary="Install an extension or a theme from URL",
+            description="Install an extension or a theme from a Git URL or local path",
+            group="Extension & theme",
             arguments=(
-                CLICommandArgument(args=("input",), kwargs={"help": "Git URL or path of the extension to install"}),
+                CLICommandArgument(
+                    args=("input",), kwargs={"help": "Git URL or path of the extension or theme to install"}
+                ),
             ),
         ),
         "uninstall": CLICommand(
             aliases=("rm",),
-            summary="Uninstall an extension",
-            description="Remove an installed extension by ID or URL",
-            group="Extension",
-            arguments=(CLICommandArgument(args=("input",), kwargs={"help": "Extension ID or URL to uninstall"}),),
+            summary="Uninstall an extension or a theme",
+            description="Remove an installed extension or theme by ID or URL",
+            group="Extension & theme",
+            arguments=(
+                CLICommandArgument(args=("input",), kwargs={"help": "Extension or theme ID or URL to uninstall"}),
+            ),
         ),
         "upgrade": CLICommand(
             aliases=("up",),
-            summary="Upgrade extensions",
-            description="Upgrade one or all installed extensions to their latest versions",
-            group="Extension",
+            summary="Upgrade extensions and themes",
+            description="Upgrade one or all installed extensions and themes to their latest versions",
+            group="Extension & theme",
             arguments=(
                 CLICommandArgument(
                     args=("input",),
                     kwargs={
                         "nargs": argparse.OPTIONAL,
                         "default": "",
-                        "help": "Optional extension ID or URL to upgrade (upgrades all if not specified)",
+                        "help": "Optional extension or theme ID or URL to upgrade (upgrades all if not specified)",
                     },
                 ),
             ),
@@ -187,7 +197,7 @@ def _get_commands() -> dict[CommandName, CLICommand]:
             aliases=("pr",),
             summary="Preview extension",
             description="Starts extension from a local path for development and debugging purposes",
-            group="Extension",
+            group="Extension & theme",
             arguments=(
                 CLICommandArgument(
                     args=("--with-debugger",),
