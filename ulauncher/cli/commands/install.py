@@ -17,7 +17,7 @@ def run(args: CLIArguments) -> int:
         dbus_trigger_event("extensions:reload", [record.id])
     except (ValueError, ext_exceptions.UrlError):  # error already logged
         return 1
-    except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
+    except (ext_exceptions.NetworkError, ext_exceptions.InstallSourceError):
         logger.error("Network error: Could not install %s", args.input)  # noqa: TRY400 - traceback is noise here
         return 1
     except (ext_exceptions.ExtensionError, OSError) as e:

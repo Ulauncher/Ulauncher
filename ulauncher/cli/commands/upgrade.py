@@ -40,7 +40,7 @@ def _upgrade_all_extensions() -> list[str]:
                 updated_extensions.append(record.id)
         except ext_exceptions.UrlError:
             _log_url_error(record.id, record.update_url, fatal=False)
-        except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
+        except (ext_exceptions.NetworkError, ext_exceptions.InstallSourceError):
             logger.warning("Network error: Could not upgrade %s", record.id)
         except (ext_exceptions.ExtensionError, OSError):
             # update() already logged the details; keep the batch going for the other extensions
@@ -58,7 +58,7 @@ def upgrade_one(record: ExtensionRecord) -> bool:
     except ext_exceptions.UrlError:
         _log_url_error(record.id, record.update_url, fatal=True)
         return False
-    except (ext_exceptions.NetworkError, ext_exceptions.RemoteError):
+    except (ext_exceptions.NetworkError, ext_exceptions.InstallSourceError):
         logger.error("Network error: Could not upgrade %s", record.id)  # noqa: TRY400 - traceback is noise here
         return False
     except (ext_exceptions.ExtensionError, OSError):

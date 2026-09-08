@@ -17,8 +17,8 @@ class UrlError(ExtensionError):
     """Raised when extension URL/path cannot be parsed."""
 
 
-class RemoteError(ExtensionError):
-    """Raised when there's an error with the remote extension repository (not network-related)."""
+class InstallSourceError(ExtensionError):
+    """Raised when there's an error with the remote repository being installed from (not network-related)."""
 
 
 class CompatibilityError(ExtensionError):

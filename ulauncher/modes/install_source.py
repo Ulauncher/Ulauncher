@@ -67,8 +67,8 @@ class _BareRepo:
         return lambda _error: on_error(ext_exceptions.NetworkError(f"Could not fetch remote {self._url}."))
 
     def _remote_failure(self, on_error: OnError, message: str) -> OnError:
-        """Wrap a raw git error as a RemoteError prefixed with message"""
-        return lambda error: on_error(ext_exceptions.RemoteError(f"{message}: {error}"))
+        """Wrap a raw git error as a InstallSourceError prefixed with message"""
+        return lambda error: on_error(ext_exceptions.InstallSourceError(f"{message}: {error}"))
 
     def _fetch(self, on_done: Callable[[], None], on_error: OnError) -> None:
         """Fetch bare repo, or clone a fresh one."""
@@ -272,31 +272,35 @@ class InstallSource(UrlParseResult):
 
             def on_download_failed(error: Exception) -> None:
                 remove_tmp()
-                on_error(ext_exceptions.RemoteError(f"Failed to download extension from {download_url}: {error}"))
+                on_error(
+                    ext_exceptions.InstallSourceError(f"Failed to download extension from {download_url}: {error}")
+                )
 
             download_file(download_url, tmp_path, on_downloaded, on_download_failed)
             return
 
         if not which("git"):
-            on_error(ext_exceptions.RemoteError("This extension URL can only be supported if you have git installed."))
+            on_error(
+                ext_exceptions.InstallSourceError("This extension URL can only be supported if you have git installed.")
+            )
             return
 
         try:
             os.makedirs(target_dir, exist_ok=True)
         except OSError as e:
-            on_error(ext_exceptions.RemoteError(f"Failed to create extension directory {target_dir}: {e}"))
+            on_error(ext_exceptions.InstallSourceError(f"Failed to create extension directory {target_dir}: {e}"))
             return
 
         def on_timestamp(stdout: str) -> None:
             if not stdout:
-                on_error(ext_exceptions.RemoteError(f"Failed to read commit {commit_hash}"))
+                on_error(ext_exceptions.InstallSourceError(f"Failed to read commit {commit_hash}"))
                 return
             try:
                 commit_timestamp = float(stdout.strip())
                 # Rejected here, not when the record formats it as a date after the swap
                 datetime.fromtimestamp(commit_timestamp, timezone.utc)
             except (ValueError, OverflowError, OSError):
-                on_error(ext_exceptions.RemoteError(f"Failed to parse commit timestamp for {commit_hash}"))
+                on_error(ext_exceptions.InstallSourceError(f"Failed to parse commit timestamp for {commit_hash}"))
                 return
             on_success((commit_hash, commit_timestamp))
 
@@ -308,7 +312,7 @@ class InstallSource(UrlParseResult):
     def _extract_and_install(self, target_dir: str, tar_path: str, commit_hash: str) -> tuple[str, float]:
         # All filesystem steps share the same failure semantics, so they live under one guard.
         # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
-        # RemoteError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
+        # InstallSourceError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
         # This must not let a raw OSError escape: it runs inside a Gio callback, where an uncaught
         # exception would be swallowed and hang a blocking caller (see cli.commands.run_blocking)
         # instead of reaching it.
@@ -318,7 +322,7 @@ class InstallSource(UrlParseResult):
                 subdirs = os.listdir(tmp_root_dir)
                 if len(subdirs) != 1:
                     msg = f"Invalid archive for {self.url}."
-                    raise ext_exceptions.RemoteError(msg)
+                    raise ext_exceptions.InstallSourceError(msg)
                 tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
                 manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
                 if not satisfies(api_version, manifest.api_version):
@@ -333,7 +337,7 @@ class InstallSource(UrlParseResult):
             return commit_hash, getmtime(target_dir)
         except (TarError, OSError) as e:
             msg = f"Failed to install extension from {tar_path}: {e}"
-            raise ext_exceptions.RemoteError(msg) from e
+            raise ext_exceptions.InstallSourceError(msg) from e
 
 
 def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:

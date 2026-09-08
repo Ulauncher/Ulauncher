@@ -207,7 +207,7 @@ class TestDownload:
         remote = InstallSource("https://github.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.RemoteError)
+        assert isinstance(error, ext_exceptions.InstallSourceError)
 
     @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.modes.install_source.run_command")
@@ -220,7 +220,7 @@ class TestDownload:
         remote = InstallSource("https://example.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.RemoteError)
+        assert isinstance(error, ext_exceptions.InstallSourceError)
 
     @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.modes.install_source.run_command")
@@ -234,7 +234,7 @@ class TestDownload:
         remote = InstallSource("https://example.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.RemoteError)
+        assert isinstance(error, ext_exceptions.InstallSourceError)
 
     @patch("ulauncher.modes.install_source.untar", side_effect=OSError("disk full"))
     @patch("ulauncher.modes.install_source.download_file")
@@ -247,4 +247,4 @@ class TestDownload:
         remote = InstallSource("https://github.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.RemoteError)
+        assert isinstance(error, ext_exceptions.InstallSourceError)
