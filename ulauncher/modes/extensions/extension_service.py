@@ -214,7 +214,7 @@ class ExtensionService(ExtensionRegistry):
         remote = resolve_remote(url, on_error)
         if remote is None:
             return
-        ext_id = remote.ext_id
+        ext_id = remote.repo_id
         run = super().install
 
         def job(release: Callable[[], None]) -> None:

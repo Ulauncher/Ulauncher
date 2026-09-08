@@ -138,25 +138,25 @@ class _BareRepo:
 
 
 class UrlParseResult(BaseDataClass):
-    ext_id: str
+    repo_id: str
     remote_url: str
     browser_url: str | None = None
     download_url_template: str | None = None
 
 
-class ExtensionRemote(UrlParseResult):
+class InstallSource(UrlParseResult):
     url: str
 
     def __init__(self, url: str) -> None:
         stripped_url = url.strip()
-        parsed = parse_extension_url(stripped_url)
+        parsed = parse_repo_url(stripped_url)
         if isinstance(parsed, Err):
             logger.warning(parsed.error)
             raise ext_exceptions.UrlError(parsed.error)
         super().__init__(**parsed.value)
 
         self.url = stripped_url
-        self._repo = _BareRepo(f"{paths.REPO_CACHE}/{self.ext_id}.git", self.remote_url, self.url)
+        self._repo = _BareRepo(f"{paths.REPO_CACHE}/{self.repo_id}.git", self.remote_url, self.url)
 
     def _network_error(self) -> ext_exceptions.NetworkError:
         return ext_exceptions.NetworkError(f"Could not fetch remote {self.url}.")
@@ -336,8 +336,8 @@ class ExtensionRemote(UrlParseResult):
             raise ext_exceptions.RemoteError(msg) from e
 
 
-def parse_extension_url(input_url: str) -> Fallible[UrlParseResult, str]:
-    """Parse the extension URL into its derived ids and urls, or an error message if it is invalid."""
+def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:
+    """Parse the repo URL into its derived ids and urls, or an error message if it is invalid."""
     browser_url: str | None = None
     download_url_template: str | None = None
     input_url_is_ssl = False
@@ -388,11 +388,11 @@ def parse_extension_url(input_url: str) -> Fallible[UrlParseResult, str]:
     if not remote_url.startswith("file://") and not host:
         return Err(f"Invalid URL: {input_url}")
 
-    ext_id = ".".join(([*reversed(host.split("."))] if host else []) + path.lower().split("/"))
+    repo_id = ".".join(([*reversed(host.split("."))] if host else []) + path.lower().split("/"))
 
     return Ok(
         UrlParseResult(
-            ext_id=ext_id,
+            repo_id=repo_id,
             remote_url=remote_url,
             browser_url=browser_url,
             download_url_template=download_url_template,

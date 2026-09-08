@@ -16,8 +16,8 @@ from ulauncher.internals import log_wire
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
-from ulauncher.modes.extensions.extension_remote import parse_extension_url
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT
+from ulauncher.modes.install_source import parse_repo_url
 from ulauncher.utils import scheduling
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
@@ -84,11 +84,11 @@ def _resolve_ext_id(path: Path) -> str | None:
             url_to_parse = git_url
             logger.debug("Found git remote URL: %s", git_url)
 
-    result = parse_extension_url(url_to_parse)
+    result = parse_repo_url(url_to_parse)
     if isinstance(result, Err):
         logger.error("Error: Failed to parse extension URL/path: %s", result.error)
         return None
-    return result.value.ext_id
+    return result.value.repo_id
 
 
 class PreviewLogTail:

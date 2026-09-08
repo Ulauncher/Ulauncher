@@ -8,7 +8,7 @@ from ulauncher import paths
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
-from ulauncher.modes.extensions.extension_remote import ExtensionRemote
+from ulauncher.modes.install_source import InstallSource
 from ulauncher.utils.fs import StagingDir, swap_dir
 from ulauncher.utils.subprocess_utils import OnError
 
@@ -20,10 +20,10 @@ CheckUpdateSuccess = Callable[[bool, str], None]
 Done = Callable[[], None]
 
 
-def resolve_remote(url: str, on_error: OnError) -> ExtensionRemote | None:
+def resolve_remote(url: str, on_error: OnError) -> InstallSource | None:
     """Parse url into a remote, or report the UrlError to on_error and return None."""
     try:
-        return ExtensionRemote(url)
+        return InstallSource(url)
     except ext_exceptions.UrlError as error:
         on_error(error)
         return None
@@ -100,11 +100,11 @@ class ExtensionRegistry:
         remote = resolve_remote(url, on_error)
         if remote is None:
             return
-        target_dir = f"{paths.USER_EXTENSIONS}/{remote.ext_id}"
+        target_dir = f"{paths.USER_EXTENSIONS}/{remote.repo_id}"
         if Path(target_dir).exists():
             logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
 
-        record = ExtensionRecord(remote.ext_id, target_dir)
+        record = ExtensionRecord(remote.repo_id, target_dir)
 
         def done() -> None:
             logger.info("Extension %s installed successfully", record.id)
@@ -188,7 +188,7 @@ class ExtensionRegistry:
     def _install_from_remote(
         self,
         record: ExtensionRecord,
-        remote: ExtensionRemote,
+        remote: InstallSource,
         commit_hash: str | None,
         on_done: Done,
         on_error: OnError,
