@@ -16,6 +16,7 @@ from ulauncher import (
     paths,
 )
 from ulauncher.data import BaseDataClass, Err, Fallible, Ok
+from ulauncher.internals import install_errors
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.subprocess_utils import OnError, OnSuccess, download_file, run_command
@@ -47,7 +48,7 @@ def _parse_refs_response(response_text: str) -> dict[str, str]:
 class _BareRepo:
     """Owns the cached bare clone at git_dir.
 
-    Each method maps its own git/OS failure to the matching ext_exceptions error before reporting it to
+    Each method maps its own git/OS failure to the matching install_errors error before reporting it to
     the caller's on_error, so callers thread their raw on_error through without wrapping it per command.
     """
 
@@ -64,11 +65,11 @@ class _BareRepo:
 
     def _network_failure(self, on_error: OnError) -> OnError:
         """Wrap a raw fetch/clone error as the NetworkError the caller expects"""
-        return lambda _error: on_error(ext_exceptions.NetworkError(f"Could not fetch remote {self._url}."))
+        return lambda _error: on_error(install_errors.NetworkError(f"Could not fetch remote {self._url}."))
 
     def _remote_failure(self, on_error: OnError, message: str) -> OnError:
-        """Wrap a raw git error as a InstallSourceError prefixed with message"""
-        return lambda error: on_error(ext_exceptions.InstallSourceError(f"{message}: {error}"))
+        """Wrap a raw git error as an InstallError prefixed with message"""
+        return lambda error: on_error(install_errors.InstallError(f"{message}: {error}"))
 
     def _fetch(self, on_done: Callable[[], None], on_error: OnError) -> None:
         """Fetch bare repo, or clone a fresh one."""
@@ -152,14 +153,14 @@ class InstallSource(UrlParseResult):
         parsed = parse_repo_url(stripped_url)
         if isinstance(parsed, Err):
             logger.warning(parsed.error)
-            raise ext_exceptions.UrlError(parsed.error)
+            raise install_errors.UrlError(parsed.error)
         super().__init__(**parsed.value)
 
         self.url = stripped_url
         self._repo = _BareRepo(f"{paths.REPO_CACHE}/{self.repo_id}.git", self.remote_url, self.url)
 
-    def _network_error(self) -> ext_exceptions.NetworkError:
-        return ext_exceptions.NetworkError(f"Could not fetch remote {self.url}.")
+    def _network_error(self) -> install_errors.NetworkError:
+        return install_errors.NetworkError(f"Could not fetch remote {self.url}.")
 
     def _get_refs(self, on_success: RefsSuccess, on_error: OnError) -> None:
         if not which("git"):
@@ -187,7 +188,7 @@ class InstallSource(UrlParseResult):
                 os.remove(refs_path)
 
         def access_error() -> Exception:
-            return ext_exceptions.NetworkError(f'Could not access repository resource "{self.url}"')
+            return install_errors.NetworkError(f'Could not access repository resource "{self.url}"')
 
         def on_downloaded(_path: str) -> None:
             try:
@@ -263,7 +264,7 @@ class InstallSource(UrlParseResult):
                 try:
                     try:
                         result = self._extract_and_install(target_dir, tmp_path, commit_hash)
-                    except ext_exceptions.ExtensionError as install_error:
+                    except (install_errors.InstallError, ext_exceptions.ExtensionError) as install_error:
                         on_error(install_error)
                         return
                     on_success(result)
@@ -272,31 +273,31 @@ class InstallSource(UrlParseResult):
 
             def on_download_failed(error: Exception) -> None:
                 remove_tmp()
-                on_error(ext_exceptions.InstallSourceError(f"Failed to download from {download_url}: {error}"))
+                on_error(install_errors.InstallError(f"Failed to download from {download_url}: {error}"))
 
             download_file(download_url, tmp_path, on_downloaded, on_download_failed)
             return
 
         if not which("git"):
-            on_error(ext_exceptions.InstallSourceError("This URL can only be installed if you have git installed."))
+            on_error(install_errors.InstallError("This URL can only be installed if you have git installed."))
             return
 
         try:
             os.makedirs(target_dir, exist_ok=True)
         except OSError as e:
-            on_error(ext_exceptions.InstallSourceError(f"Failed to create directory {target_dir}: {e}"))
+            on_error(install_errors.InstallError(f"Failed to create directory {target_dir}: {e}"))
             return
 
         def on_timestamp(stdout: str) -> None:
             if not stdout:
-                on_error(ext_exceptions.InstallSourceError(f"Failed to read commit {commit_hash}"))
+                on_error(install_errors.InstallError(f"Failed to read commit {commit_hash}"))
                 return
             try:
                 commit_timestamp = float(stdout.strip())
                 # Rejected here, not when the record formats it as a date after the swap
                 datetime.fromtimestamp(commit_timestamp, timezone.utc)
             except (ValueError, OverflowError, OSError):
-                on_error(ext_exceptions.InstallSourceError(f"Failed to parse commit timestamp for {commit_hash}"))
+                on_error(install_errors.InstallError(f"Failed to parse commit timestamp for {commit_hash}"))
                 return
             on_success((commit_hash, commit_timestamp))
 
@@ -308,7 +309,7 @@ class InstallSource(UrlParseResult):
     def _extract_and_install(self, target_dir: str, tar_path: str, commit_hash: str) -> tuple[str, float]:
         # All filesystem steps share the same failure semantics, so they live under one guard.
         # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
-        # InstallSourceError/CompatibilityError raises are ExtensionError (not OSError) and propagate as-is.
+        # The intentional InstallError/ExtensionError raises (not OSError) propagate as-is.
         # This must not let a raw OSError escape: it runs inside a Gio callback, where an uncaught
         # exception would be swallowed and hang a blocking caller (see cli.commands.run_blocking)
         # instead of reaching it.
@@ -318,7 +319,7 @@ class InstallSource(UrlParseResult):
                 subdirs = os.listdir(tmp_root_dir)
                 if len(subdirs) != 1:
                     msg = f"Invalid archive for {self.url}."
-                    raise ext_exceptions.InstallSourceError(msg)
+                    raise install_errors.InstallError(msg)
                 tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
                 manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
                 if not satisfies(api_version, manifest.api_version):
@@ -333,7 +334,7 @@ class InstallSource(UrlParseResult):
             return commit_hash, getmtime(target_dir)
         except (TarError, OSError) as e:
             msg = f"Failed to install from {tar_path}: {e}"
-            raise ext_exceptions.InstallSourceError(msg) from e
+            raise install_errors.InstallError(msg) from e
 
 
 def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:

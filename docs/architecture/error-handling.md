@@ -24,8 +24,9 @@ exceptions (printed to stderr, the loop survives), so they are an accepted gap.
 
 ## Errors raised by public functions
 
-A subsystem's public functions may raise only its own error family (for extensions:
-`ExtensionError` and its subclasses in `ext_exceptions`), `OSError`, or nothing. Internals
+A subsystem's public functions may raise only its own error family, `OSError`, or nothing.
+For extensions that family is `ExtensionError` and its subclasses in `ext_exceptions`.
+For repo installs it is `InstallError` and its subclasses in `install_errors`. Internals
 raise freely and the subsystem's public surface translates.
 
 This is what makes callee changes safe: the contract callers depend on is the error type at

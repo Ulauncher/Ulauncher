@@ -4,6 +4,7 @@ import logging
 
 from ulauncher.cli import CLIArguments
 from ulauncher.cli.commands import get_ext_record, get_ext_registry, run_blocking
+from ulauncher.internals import install_errors
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.utils.dbus import dbus_trigger_event
@@ -38,11 +39,11 @@ def _upgrade_all_extensions() -> list[str]:
         try:
             if _update_blocking(record):
                 updated_extensions.append(record.id)
-        except ext_exceptions.UrlError:
+        except install_errors.UrlError:
             _log_url_error(record.id, record.update_url, fatal=False)
-        except ext_exceptions.NetworkError:
+        except install_errors.NetworkError:
             logger.warning("Network error: Could not upgrade %s", record.id)
-        except ext_exceptions.InstallSourceError as e:
+        except install_errors.InstallError as e:
             logger.warning("Could not upgrade %s: %s", record.id, e)
         except (ext_exceptions.ExtensionError, OSError):
             # update() already logged the details; keep the batch going for the other extensions
@@ -57,13 +58,13 @@ def upgrade_one(record: ExtensionRecord) -> bool:
         return False
     try:
         updated = _update_blocking(record)
-    except ext_exceptions.UrlError:
+    except install_errors.UrlError:
         _log_url_error(record.id, record.update_url, fatal=True)
         return False
-    except ext_exceptions.NetworkError:
+    except install_errors.NetworkError:
         logger.error("Network error: Could not upgrade %s", record.id)  # noqa: TRY400 - traceback is noise here
         return False
-    except ext_exceptions.InstallSourceError as e:
+    except install_errors.InstallError as e:
         logger.error("Could not upgrade %s: %s", record.id, e)  # noqa: TRY400 - traceback is noise here
         return False
     except (ext_exceptions.ExtensionError, OSError):

@@ -9,12 +9,12 @@ import pytest
 
 from ulauncher import api_version
 from ulauncher.data import Err, Ok
+from ulauncher.internals import install_errors
 from ulauncher.internals.install_source import (
     InstallSource,
     UrlParseResult,
     parse_repo_url,
 )
-from ulauncher.modes.extensions import ext_exceptions
 
 
 def parse_ok(url: str) -> UrlParseResult:
@@ -33,7 +33,7 @@ class TestInstallSource:
         return InstallSource("https://github.com/Ulauncher/ulauncher-timer")
 
     def test_invalid_url(self) -> None:
-        with pytest.raises(ext_exceptions.UrlError):
+        with pytest.raises(install_errors.UrlError):
             InstallSource("INVALID URL")
 
 
@@ -170,7 +170,7 @@ class TestGetCompatibleHash:
         remote = InstallSource("https://github.com/user/repo")
         result, error = _call(remote.get_compatible_hash)
         assert result is None
-        assert isinstance(error, ext_exceptions.NetworkError)
+        assert isinstance(error, install_errors.NetworkError)
 
 
 def _download(remote: InstallSource, target_dir: str) -> tuple[Any, Exception | None]:
@@ -207,7 +207,7 @@ class TestDownload:
         remote = InstallSource("https://github.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.InstallSourceError)
+        assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.internals.install_source.run_command")
@@ -220,7 +220,7 @@ class TestDownload:
         remote = InstallSource("https://example.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.InstallSourceError)
+        assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.internals.install_source.run_command")
@@ -234,7 +234,7 @@ class TestDownload:
         remote = InstallSource("https://example.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.InstallSourceError)
+        assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.untar", side_effect=OSError("disk full"))
     @patch("ulauncher.internals.install_source.download_file")
@@ -247,4 +247,4 @@ class TestDownload:
         remote = InstallSource("https://github.com/user/repo")
         result, error = _download(remote, self.target_dir)
         assert result is None
-        assert isinstance(error, ext_exceptions.InstallSourceError)
+        assert isinstance(error, install_errors.InstallError)

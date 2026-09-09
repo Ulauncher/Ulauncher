@@ -6,6 +6,7 @@ from typing import Callable
 from gi.repository import Gtk
 
 from ulauncher import paths
+from ulauncher.internals import install_errors
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_record import ExtensionRecord
 from ulauncher.modes.extensions.extension_service import ext_service
@@ -197,7 +198,7 @@ class ExtensionHandlers:
         error_message = str(error)
 
         # Determine primary and secondary text based on error type
-        if isinstance(error, ext_exceptions.UrlError):
+        if isinstance(error, install_errors.UrlError):
             primary_text = "Invalid Extension URL"
             secondary_text = (
                 "The URL should be a HTTPS git repository link or a path to a local git repository.\n\n"
@@ -215,7 +216,7 @@ class ExtensionHandlers:
                 "Please make sure that the URL you have entered is for a Ulauncher extension, "
                 "and that you are running the latest version of Ulauncher."
             )
-        elif isinstance(error, ext_exceptions.NetworkError):
+        elif isinstance(error, install_errors.NetworkError):
             primary_text = "Network Error"
             if operation == "update":
                 secondary_text = (
@@ -239,8 +240,8 @@ class ExtensionHandlers:
                 "If nothing seems clearly wrong on your end, consider contacting the extension "
                 "author and let them know about this problem."
             )
-        elif isinstance(error, ext_exceptions.ExtensionError):
-            # Last of the extension errors, since every case above subclasses it. These are
+        elif isinstance(error, (ext_exceptions.ExtensionError, install_errors.InstallError)):
+            # Last of the explained failures, since every case above subclasses one of these. These are
             # explained failures, so the message stands on its own and asking for a bug report
             # would be wrong. Only a non-extension error is genuinely unexpected.
             primary_text = f"{operation.title()} Failed"

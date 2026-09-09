@@ -9,18 +9,6 @@ class ManifestError(ExtensionError):
     """Raised when extension manifest is invalid or missing required fields."""
 
 
-class NetworkError(ExtensionError):
-    """Raised when there's a network error accessing the extension repository."""
-
-
-class UrlError(ExtensionError):
-    """Raised when extension URL/path cannot be parsed."""
-
-
-class InstallSourceError(ExtensionError):
-    """Raised when there's an error with the remote repository being installed from (not network-related)."""
-
-
 class CompatibilityError(ExtensionError):
     """Raised when extension is incompatible with current Ulauncher API version."""
 

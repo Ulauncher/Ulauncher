@@ -2,6 +2,7 @@ import logging
 
 from ulauncher.cli import CLIArguments
 from ulauncher.cli.commands import get_ext_registry, normalize_install_arg, run_blocking
+from ulauncher.internals import install_errors
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.dbus import dbus_trigger_event
 
@@ -15,12 +16,12 @@ def run(args: CLIArguments) -> int:
     try:
         record = run_blocking(lambda done, fail: registry.install(url, done, fail))
         dbus_trigger_event("extensions:reload", [record.id])
-    except (ValueError, ext_exceptions.UrlError):  # error already logged
+    except (ValueError, install_errors.UrlError):  # error already logged
         return 1
-    except ext_exceptions.NetworkError:
+    except install_errors.NetworkError:
         logger.error("Network error: Could not install %s", args.input)  # noqa: TRY400 - traceback is noise here
         return 1
-    except ext_exceptions.InstallSourceError as e:
+    except install_errors.InstallError as e:
         logger.error("Could not install %s: %s", args.input, e)  # noqa: TRY400 - traceback is noise here
         return 1
     except (ext_exceptions.ExtensionError, OSError) as e:

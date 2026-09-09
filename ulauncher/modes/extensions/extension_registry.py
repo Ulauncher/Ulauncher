@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
+from ulauncher.internals import install_errors
 from ulauncher.internals.install_source import InstallSource
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
@@ -24,7 +25,7 @@ def resolve_remote(url: str, on_error: OnError) -> InstallSource | None:
     """Parse url into a remote, or report the UrlError to on_error and return None."""
     try:
         return InstallSource(url)
-    except ext_exceptions.UrlError as error:
+    except install_errors.UrlError as error:
         on_error(error)
         return None
 
