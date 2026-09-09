@@ -279,13 +279,15 @@ class InstallSource(UrlParseResult):
             return
 
         if not which("git"):
-            on_error(install_errors.InstallError("This URL can only be installed if you have git installed."))
+            on_error(
+                install_errors.InstallError(f"Could not fetch from {self.url} without git. Install git and try again.")
+            )
             return
 
         try:
             os.makedirs(target_dir, exist_ok=True)
         except OSError as e:
-            on_error(install_errors.InstallError(f"Failed to create directory {target_dir}: {e}"))
+            on_error(install_errors.InstallError(f"Failed to stage install of {self.url}: {e}"))
             return
 
         def on_timestamp(stdout: str) -> None:
@@ -333,7 +335,7 @@ class InstallSource(UrlParseResult):
                 move(tmp_dir, target_dir)
             return commit_hash, getmtime(target_dir)
         except (TarError, OSError) as e:
-            msg = f"Failed to install from {tar_path}: {e}"
+            msg = f"Failed to install {self.url}: {e}"
             raise install_errors.InstallError(msg) from e
 
 
