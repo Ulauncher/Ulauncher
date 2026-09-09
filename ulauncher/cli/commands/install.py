@@ -1,7 +1,7 @@
 import logging
 
 from ulauncher.cli import CLIArguments
-from ulauncher.cli.commands import get_ext_registry, normalize_ext_arg, run_blocking
+from ulauncher.cli.commands import get_ext_registry, normalize_install_arg, run_blocking
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.utils.dbus import dbus_trigger_event
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def run(args: CLIArguments) -> int:
     # registry.install is idempotent and will also upgrade to latest (if installed) or shadow non-manageable.
-    url = normalize_ext_arg(args.input)
+    url = normalize_install_arg(args.input)
     registry = get_ext_registry()
     try:
         record = run_blocking(lambda done, fail: registry.install(url, done, fail))

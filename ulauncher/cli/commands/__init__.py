@@ -61,7 +61,7 @@ def get_ext_record(input_arg: str) -> ExtensionRecord | None:
     from ulauncher.data import Ok
     from ulauncher.modes.install_source import parse_repo_url
 
-    arg = normalize_ext_arg(input_arg)
+    arg = normalize_install_arg(input_arg)
     parse_result = parse_repo_url(arg)
     if isinstance(parse_result, Ok):
         arg = parse_result.value.repo_id
@@ -69,7 +69,7 @@ def get_ext_record(input_arg: str) -> ExtensionRecord | None:
     return get_ext_registry().get(arg)
 
 
-def normalize_ext_arg(path: str) -> str:
+def normalize_install_arg(path: str) -> str:
     if "://" in path:
         return path
     with contextlib.suppress(OSError):

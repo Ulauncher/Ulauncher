@@ -236,7 +236,7 @@ class InstallSource(UrlParseResult):
         on_error: OnError,
         commit_hash: str | None = None,
     ) -> None:
-        """Populate target_dir with the extension. It is replaced wholesale, so pass a staging dir."""
+        """Populate target_dir with the repo. It is replaced wholesale, so pass a staging dir."""
 
         def on_hash(resolved_hash: str) -> None:
             self._download_with_hash(target_dir, resolved_hash, on_success, on_error)
@@ -272,23 +272,19 @@ class InstallSource(UrlParseResult):
 
             def on_download_failed(error: Exception) -> None:
                 remove_tmp()
-                on_error(
-                    ext_exceptions.InstallSourceError(f"Failed to download extension from {download_url}: {error}")
-                )
+                on_error(ext_exceptions.InstallSourceError(f"Failed to download from {download_url}: {error}"))
 
             download_file(download_url, tmp_path, on_downloaded, on_download_failed)
             return
 
         if not which("git"):
-            on_error(
-                ext_exceptions.InstallSourceError("This extension URL can only be supported if you have git installed.")
-            )
+            on_error(ext_exceptions.InstallSourceError("This URL can only be installed if you have git installed."))
             return
 
         try:
             os.makedirs(target_dir, exist_ok=True)
         except OSError as e:
-            on_error(ext_exceptions.InstallSourceError(f"Failed to create extension directory {target_dir}: {e}"))
+            on_error(ext_exceptions.InstallSourceError(f"Failed to create directory {target_dir}: {e}"))
             return
 
         def on_timestamp(stdout: str) -> None:
@@ -317,7 +313,7 @@ class InstallSource(UrlParseResult):
         # exception would be swallowed and hang a blocking caller (see cli.commands.run_blocking)
         # instead of reaching it.
         try:
-            with TemporaryDirectory(prefix="ulauncher_ext_") as tmp_root_dir:
+            with TemporaryDirectory(prefix="ulauncher_install_") as tmp_root_dir:
                 untar(tar_path, tmp_root_dir)
                 subdirs = os.listdir(tmp_root_dir)
                 if len(subdirs) != 1:
@@ -336,7 +332,7 @@ class InstallSource(UrlParseResult):
                 move(tmp_dir, target_dir)
             return commit_hash, getmtime(target_dir)
         except (TarError, OSError) as e:
-            msg = f"Failed to install extension from {tar_path}: {e}"
+            msg = f"Failed to install from {tar_path}: {e}"
             raise ext_exceptions.InstallSourceError(msg) from e
 
 

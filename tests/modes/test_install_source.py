@@ -37,7 +37,7 @@ class TestInstallSource:
             InstallSource("INVALID URL")
 
 
-class TestParseExtensionUrl:
+class TestParseRepoUrl:
     def test_https_url(self) -> None:
         result = parse_ok("https://example.com/user/repo")
         assert result.remote_url == "https://example.com/user/repo"
