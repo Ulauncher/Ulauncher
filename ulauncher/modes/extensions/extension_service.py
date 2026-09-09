@@ -23,7 +23,7 @@ from ulauncher.modes.extensions.extension_registry import (
     ExtensionRegistry,
     InstallSuccess,
     UpdateSuccess,
-    resolve_remote,
+    resolve_source,
 )
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.utils import scheduling
@@ -107,7 +107,7 @@ class ExtensionService(ExtensionRegistry):
       enqueue time, through `get_installed` rather than `get`, so an id that is being previewed
       resolves to the installed copy instead of the developer's dev checkout.
 
-    `check_update` is inherited unchanged: it only reads the remote, so it doesn't need to hold
+    `check_update` is inherited unchanged: it only reads the source, so it doesn't need to hold
     the id and isn't a job.
     """
 
@@ -211,10 +211,10 @@ class ExtensionService(ExtensionRegistry):
         self._reconcile(record.id)
 
     def install(self, url: str, on_success: InstallSuccess, on_error: OnError, commit_hash: str | None = None) -> None:
-        remote = resolve_remote(url, on_error)
-        if remote is None:
+        source = resolve_source(url, on_error)
+        if source is None:
             return
-        ext_id = remote.repo_id
+        ext_id = source.repo_id
         run = super().install
 
         def job(release: Callable[[], None]) -> None:

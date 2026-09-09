@@ -67,7 +67,7 @@ class _BareRepo:
         """Wrap a raw fetch/clone error as the NetworkError the caller expects"""
         return lambda _error: on_error(install_errors.NetworkError(f"Could not fetch remote {self._url}."))
 
-    def _remote_failure(self, on_error: OnError, message: str) -> OnError:
+    def _source_failure(self, on_error: OnError, message: str) -> OnError:
         """Wrap a raw git error as an InstallError prefixed with message"""
         return lambda error: on_error(install_errors.InstallError(f"{message}: {error}"))
 
@@ -89,7 +89,7 @@ class _BareRepo:
         try:
             os.makedirs(self._git_dir)
         except OSError as error:
-            self._remote_failure(on_error, f"Failed to create repository directory {self._git_dir}")(error)
+            self._source_failure(on_error, f"Failed to create repository directory {self._git_dir}")(error)
             return
         self._run_git(["clone", "--bare", self.remote_url, "."], lambda _stdout: on_done(), fail, skip_sync=True)
 
@@ -122,7 +122,7 @@ class _BareRepo:
         error_message: str | None = None,
     ) -> None:
         """Run a git subcommand in the repo's git_dir. Will git fetch first if needed unless passing skip_sync=True."""
-        fail = self._remote_failure(on_error, error_message) if error_message else self._network_failure(on_error)
+        fail = self._source_failure(on_error, error_message) if error_message else self._network_failure(on_error)
 
         def run() -> None:
             run_command(["git", *args], on_success, fail, cwd=self._git_dir)

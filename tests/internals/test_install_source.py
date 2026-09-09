@@ -29,7 +29,7 @@ def parse_ok(url: str) -> UrlParseResult:
 
 class TestInstallSource:
     @pytest.fixture
-    def remote(self) -> InstallSource:
+    def source(self) -> InstallSource:
         return InstallSource("https://github.com/Ulauncher/ulauncher-timer")
 
     def test_invalid_url(self) -> None:
@@ -149,8 +149,8 @@ class TestGetCompatibleHash:
             on_success(ls_remote_output if "ls-remote" in cmd else "")
 
         mock_run.side_effect = side_effect
-        remote = InstallSource("https://github.com/user/repo")
-        result, error = _call(remote.get_compatible_hash)
+        source = InstallSource("https://github.com/user/repo")
+        result, error = _call(source.get_compatible_hash)
         assert error is None
         assert result == "def456"
 
@@ -167,14 +167,14 @@ class TestGetCompatibleHash:
                 on_success("")
 
         mock_run.side_effect = side_effect
-        remote = InstallSource("https://github.com/user/repo")
-        result, error = _call(remote.get_compatible_hash)
+        source = InstallSource("https://github.com/user/repo")
+        result, error = _call(source.get_compatible_hash)
         assert result is None
         assert isinstance(error, install_errors.NetworkError)
 
 
-def _download(remote: InstallSource, target_dir: str) -> tuple[Any, Exception | None]:
-    return _call(lambda on_success, on_error: remote.download(target_dir, on_success, on_error, commit_hash="abc123"))
+def _download(source: InstallSource, target_dir: str) -> tuple[Any, Exception | None]:
+    return _call(lambda on_success, on_error: source.download(target_dir, on_success, on_error, commit_hash="abc123"))
 
 
 class TestDownload:
@@ -193,58 +193,58 @@ class TestDownload:
 
         mock_run.side_effect = side_effect
         # example.com has no download_url_template, so download() takes the git checkout path
-        remote = InstallSource("https://example.com/user/repo")
-        result, error = _download(remote, self.target_dir)
+        source = InstallSource("https://example.com/user/repo")
+        result, error = _download(source, self.target_dir)
         assert error is None
         assert result == ("abc123", 1700000000.0)
 
     @patch("ulauncher.internals.install_source.download_file")
-    def test_download_failure_maps_to_remote_error(self, mock_download: MagicMock) -> None:
+    def test_download_failure_maps_to_install_error(self, mock_download: MagicMock) -> None:
         def side_effect(_url: str, _dest: str, _on_success: Any, on_error: Callable[[Any], None]) -> None:
             on_error(OSError("boom"))
 
         mock_download.side_effect = side_effect
-        remote = InstallSource("https://github.com/user/repo")
-        result, error = _download(remote, self.target_dir)
+        source = InstallSource("https://github.com/user/repo")
+        result, error = _download(source, self.target_dir)
         assert result is None
         assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.internals.install_source.run_command")
-    def test_unparsable_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
+    def test_unparsable_commit_timestamp_maps_to_install_error(self, mock_run: MagicMock, *_: Any) -> None:
         # A raw ValueError from float() would otherwise escape the Gio callback and hang the bridge.
         def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
             on_success("not-a-timestamp" if "show" in cmd else "")
 
         mock_run.side_effect = side_effect
-        remote = InstallSource("https://example.com/user/repo")
-        result, error = _download(remote, self.target_dir)
+        source = InstallSource("https://example.com/user/repo")
+        result, error = _download(source, self.target_dir)
         assert result is None
         assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
     @patch("ulauncher.internals.install_source.run_command")
-    def test_out_of_range_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
+    def test_out_of_range_commit_timestamp_maps_to_install_error(self, mock_run: MagicMock, *_: Any) -> None:
         # The repo picks this number. No date can hold it, so save_installed_state would raise
         # after the new files were already swapped in.
         def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
             on_success("99999999999999" if "show" in cmd else "")
 
         mock_run.side_effect = side_effect
-        remote = InstallSource("https://example.com/user/repo")
-        result, error = _download(remote, self.target_dir)
+        source = InstallSource("https://example.com/user/repo")
+        result, error = _download(source, self.target_dir)
         assert result is None
         assert isinstance(error, install_errors.InstallError)
 
     @patch("ulauncher.internals.install_source.untar", side_effect=OSError("disk full"))
     @patch("ulauncher.internals.install_source.download_file")
-    def test_install_oserror_maps_to_remote_error(self, mock_download: MagicMock, *_: Any) -> None:
+    def test_install_oserror_maps_to_install_error(self, mock_download: MagicMock, *_: Any) -> None:
         # A raw OSError from the filesystem install steps must be mapped, not escape the callback.
         def side_effect(_url: str, dest: str, on_success: Callable[[Any], None], _on_error: Any) -> None:
             on_success(dest)
 
         mock_download.side_effect = side_effect
-        remote = InstallSource("https://github.com/user/repo")
-        result, error = _download(remote, self.target_dir)
+        source = InstallSource("https://github.com/user/repo")
+        result, error = _download(source, self.target_dir)
         assert result is None
         assert isinstance(error, install_errors.InstallError)

@@ -21,8 +21,8 @@ CheckUpdateSuccess = Callable[[bool, str], None]
 Done = Callable[[], None]
 
 
-def resolve_remote(url: str, on_error: OnError) -> InstallSource | None:
-    """Parse url into a remote, or report the UrlError to on_error and return None."""
+def resolve_source(url: str, on_error: OnError) -> InstallSource | None:
+    """Parse url into a source, or report the UrlError to on_error and return None."""
     try:
         return InstallSource(url)
     except install_errors.UrlError as error:
@@ -46,14 +46,14 @@ class _NoLifecycle:
 
 
 class ExtensionRegistry:
-    """Finds installed extensions, hands out records for them, and runs the remote
+    """Finds installed extensions, hands out records for them, and runs the install
     operations (install, update, uninstall).
 
     Instantiated exactly once per runtime. The CLI creates a plain instance. The app instead uses
     ExtensionService, a subclass that also resolves the previewed extension from its dev path and
     owns the running extension processes.
 
-    The remote operations report back through callbacks (Gio dispatches them on the caller's
+    The install operations report back through callbacks (Gio dispatches them on the caller's
     thread-default GLib main context). Errors go to on_error, including ones detected
     synchronously, so callers have a single error path.
     """
@@ -98,20 +98,20 @@ class ExtensionRegistry:
 
     def install(self, url: str, on_success: InstallSuccess, on_error: OnError, commit_hash: str | None = None) -> None:
         logger.info("Installing extension: %s", url)
-        remote = resolve_remote(url, on_error)
-        if remote is None:
+        source = resolve_source(url, on_error)
+        if source is None:
             return
-        target_dir = f"{paths.USER_EXTENSIONS}/{remote.repo_id}"
+        target_dir = f"{paths.USER_EXTENSIONS}/{source.repo_id}"
         if Path(target_dir).exists():
-            logger.info('Extension with URL "%s" is already installed. Updating', remote.url)
+            logger.info('Extension with URL "%s" is already installed. Updating', source.url)
 
-        record = ExtensionRecord(remote.repo_id, target_dir)
+        record = ExtensionRecord(source.repo_id, target_dir)
 
         def done() -> None:
             logger.info("Extension %s installed successfully", record.id)
             on_success(record)
 
-        self._install_from_remote(record, remote, commit_hash, done, on_error)
+        self._install_from_source(record, source, commit_hash, done, on_error)
 
     def uninstall(self, record: ExtensionRecord, on_done: Done, on_error: OnError) -> None:
         def remove_files() -> None:
@@ -168,28 +168,28 @@ class ExtensionRegistry:
             if update_url != record.state.url:
                 logger.info("Extension %s is updated from %s, which its manifest declares", record.id, update_url)
 
-            remote = resolve_remote(update_url, fail)
-            if remote is None:
+            source = resolve_source(update_url, fail)
+            if source is None:
                 return
-            self._install_from_remote(record, remote, commit_hash, done, fail)
+            self._install_from_source(record, source, commit_hash, done, fail)
 
         self.check_update(record, on_checked, on_error)
 
     def check_update(self, record: ExtensionRecord, on_success: CheckUpdateSuccess, on_error: OnError) -> None:
         """Reports whether a new compatible version exists, and its commit hash."""
-        remote = resolve_remote(record.update_url, on_error)
-        if remote is None:
+        source = resolve_source(record.update_url, on_error)
+        if source is None:
             return
 
         def on_hash(commit_hash: str) -> None:
             on_success(record.state.commit_hash != commit_hash, commit_hash)
 
-        remote.get_compatible_hash(on_hash, on_error)
+        source.get_compatible_hash(on_hash, on_error)
 
-    def _install_from_remote(
+    def _install_from_source(
         self,
         record: ExtensionRecord,
-        remote: InstallSource,
+        source: InstallSource,
         commit_hash: str | None,
         on_done: Done,
         on_error: OnError,
@@ -219,10 +219,10 @@ class ExtensionRegistry:
                     error: Exception | None = None
                     if swap_dir(staging_dir, target_dir):
                         try:
-                            # Saved together, so an update to a declared remote can't leave the
+                            # Saved together, so an update to a declared source can't leave the
                             # state pointing half at the previous host
                             record.save_installed_state(
-                                downloaded_hash, commit_timestamp, url=remote.url, browser_url=remote.browser_url or ""
+                                downloaded_hash, commit_timestamp, url=source.url, browser_url=source.browser_url or ""
                             )
                         # Reloading the manifest can reject the swapped-in files. This runs in a
                         # Gio callback, so an escape would report neither done nor error.
@@ -240,4 +240,4 @@ class ExtensionRegistry:
 
             ExtensionDependencies(record.id, staging_dir).install(on_deps_installed, fail)
 
-        remote.download(staging_dir, on_downloaded, fail, commit_hash)
+        source.download(staging_dir, on_downloaded, fail, commit_hash)
