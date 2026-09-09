@@ -9,6 +9,7 @@ from typing import Any, Literal, Union
 
 from ulauncher import paths
 from ulauncher.data import BaseDataClass, JsonConf
+from ulauncher.internals.install_source import clear_repo_cache
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_manifest import (
     ExtensionManifest,
@@ -221,6 +222,8 @@ class ExtensionRecord:
             self._state_path.unlink()
         # The JsonConf cache keeps state instance alive - clearing it ensures the old data won't resurface
         self.state.clear()
+        # The bare-clone cache is disposable and keyed by id; drop it so the disk is reclaimed
+        clear_repo_cache(self.id)
         return True
 
     def save_installed_state(self, commit_hash: str, commit_timestamp: float, **extra_state: Any) -> None:

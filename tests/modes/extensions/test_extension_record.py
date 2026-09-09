@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pytest_mock import MockerFixture
 
-from ulauncher.modes.extensions import ext_exceptions
+from ulauncher import paths
+from ulauncher.modes.extensions import ext_exceptions, extension_record
 from ulauncher.modes.extensions.extension_record import ExtensionErrorData, ExtensionRecord
 
 
@@ -113,3 +115,20 @@ def test_display_manifest__unreadable__falls_back_without_raising(tmp_path: Path
     assert record.get_icon_value() == ""
     assert record.website_url == INSTALL_URL
     assert record.issues_url == ""
+
+
+def test_remove__reclaims_the_bare_clone_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture
+) -> None:
+    """Uninstalling reclaims the extension's disposable bare-clone cache entry."""
+    ext_id = "test_record_reclaims_clone_cache"
+    monkeypatch.setattr(paths, "REPO_CACHE", str(tmp_path / "repo-cache"))
+    cache_dir = Path(paths.REPO_CACHE) / f"{ext_id}.git"
+    cache_dir.mkdir(parents=True)
+    record_dir = tmp_path / ext_id
+    record_dir.mkdir()
+    record = record_with_manifest(ext_id, record_dir, {"name": "x", "api_version": "3"})
+    mocker.patch.object(extension_record.extension_finder, "is_manageable", return_value=True)
+
+    assert record.remove() is True
+    assert not cache_dir.exists()

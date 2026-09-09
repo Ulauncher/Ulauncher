@@ -45,6 +45,16 @@ def _parse_refs_response(response_text: str) -> dict[str, str]:
     return refs
 
 
+def repo_cache_path(repo_id: str) -> str:
+    """The repo's disposable bare-clone cache entry, named <repo_id>.git to mark it as a bare repo."""
+    return f"{paths.REPO_CACHE}/{repo_id}.git"
+
+
+def clear_repo_cache(repo_id: str) -> None:
+    """Reclaim the repo's disposable bare-clone cache entry."""
+    rmtree(repo_cache_path(repo_id), ignore_errors=True)
+
+
 class _BareRepo:
     """Owns the cached bare clone at git_dir.
 
@@ -157,7 +167,7 @@ class InstallSource(UrlParseResult):
         super().__init__(**parsed.value)
 
         self.url = stripped_url
-        self._repo = _BareRepo(f"{paths.REPO_CACHE}/{self.repo_id}.git", self.remote_url, self.url)
+        self._repo = _BareRepo(repo_cache_path(self.repo_id), self.remote_url, self.url)
 
     def _network_error(self) -> install_errors.NetworkError:
         return install_errors.NetworkError(f"Could not fetch remote {self.url}.")
