@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
+from ulauncher.internals.install_source import InstallSource
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
-from ulauncher.modes.install_source import InstallSource
 from ulauncher.utils.fs import StagingDir, swap_dir
 from ulauncher.utils.subprocess_utils import OnError
 

@@ -59,7 +59,7 @@ def get_ext_registry() -> ExtensionRegistry:
 def get_ext_record(input_arg: str) -> ExtensionRecord | None:
     """Parses the input argument and returns an ExtensionRecord instance if it's installed, otherwise None."""
     from ulauncher.data import Ok
-    from ulauncher.modes.install_source import parse_repo_url
+    from ulauncher.internals.install_source import parse_repo_url
 
     arg = normalize_install_arg(input_arg)
     parse_result = parse_repo_url(arg)

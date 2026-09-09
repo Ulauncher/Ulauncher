@@ -9,12 +9,12 @@ import pytest
 
 from ulauncher import api_version
 from ulauncher.data import Err, Ok
-from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.install_source import (
+from ulauncher.internals.install_source import (
     InstallSource,
     UrlParseResult,
     parse_repo_url,
 )
+from ulauncher.modes.extensions import ext_exceptions
 
 
 def parse_ok(url: str) -> UrlParseResult:
@@ -77,14 +77,14 @@ class TestParseRepoUrl:
             == "https://gitlab.com/user/repo/-/archive/[commit]/repo-[commit].tar.gz"
         )
 
-    @patch("ulauncher.modes.install_source.isdir")
+    @patch("ulauncher.internals.install_source.isdir")
     def test_invalid_local_path_returns_error(self, mock_isdir: MagicMock) -> None:
         mock_isdir.return_value = False
         result = parse_repo_url("/nonexistent/path")
         assert isinstance(result, Err)
         assert "Invalid path" in result.error
 
-    @patch("ulauncher.modes.install_source.isdir")
+    @patch("ulauncher.internals.install_source.isdir")
     def test_local_file_path(self, mock_isdir: MagicMock) -> None:
         mock_isdir.return_value = True
         result = parse_ok("/local/path/to/extension")
@@ -139,9 +139,9 @@ def _call(
 
 
 class TestGetCompatibleHash:
-    @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.install_source.isdir", return_value=True)
-    @patch("ulauncher.modes.install_source.run_command")
+    @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
+    @patch("ulauncher.internals.install_source.isdir", return_value=True)
+    @patch("ulauncher.internals.install_source.run_command")
     def test_returns_compatible_apiv_ref(self, mock_run: MagicMock, *_: Any) -> None:
         ls_remote_output = f"def456\trefs/heads/apiv{api_version}\nabc123\tHEAD\n"
 
@@ -154,9 +154,9 @@ class TestGetCompatibleHash:
         assert error is None
         assert result == "def456"
 
-    @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.install_source.isdir", return_value=True)
-    @patch("ulauncher.modes.install_source.run_command")
+    @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
+    @patch("ulauncher.internals.install_source.isdir", return_value=True)
+    @patch("ulauncher.internals.install_source.run_command")
     def test_maps_command_failure_to_network_error(self, mock_run: MagicMock, *_: Any) -> None:
         def side_effect(
             cmd: list[str], on_success: Callable[[Any], None], on_error: Callable[[Any], None], **_kw: Any
@@ -185,8 +185,8 @@ class TestDownload:
         # download() replaces the target wholesale, so it must never be pointed at a real install
         self.target_dir = str(tmp_path / "staging")
 
-    @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.install_source.run_command")
+    @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
+    @patch("ulauncher.internals.install_source.run_command")
     def test_git_checkout_path_returns_hash_and_timestamp(self, mock_run: MagicMock, *_: Any) -> None:
         def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
             on_success("1700000000\n" if "show" in cmd else "")
@@ -198,7 +198,7 @@ class TestDownload:
         assert error is None
         assert result == ("abc123", 1700000000.0)
 
-    @patch("ulauncher.modes.install_source.download_file")
+    @patch("ulauncher.internals.install_source.download_file")
     def test_download_failure_maps_to_remote_error(self, mock_download: MagicMock) -> None:
         def side_effect(_url: str, _dest: str, _on_success: Any, on_error: Callable[[Any], None]) -> None:
             on_error(OSError("boom"))
@@ -209,8 +209,8 @@ class TestDownload:
         assert result is None
         assert isinstance(error, ext_exceptions.InstallSourceError)
 
-    @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.install_source.run_command")
+    @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
+    @patch("ulauncher.internals.install_source.run_command")
     def test_unparsable_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
         # A raw ValueError from float() would otherwise escape the Gio callback and hang the bridge.
         def side_effect(cmd: list[str], on_success: Callable[[Any], None], _on_error: Any, **_kw: Any) -> None:
@@ -222,8 +222,8 @@ class TestDownload:
         assert result is None
         assert isinstance(error, ext_exceptions.InstallSourceError)
 
-    @patch("ulauncher.modes.install_source.which", return_value="/usr/bin/git")
-    @patch("ulauncher.modes.install_source.run_command")
+    @patch("ulauncher.internals.install_source.which", return_value="/usr/bin/git")
+    @patch("ulauncher.internals.install_source.run_command")
     def test_out_of_range_commit_timestamp_maps_to_remote_error(self, mock_run: MagicMock, *_: Any) -> None:
         # The repo picks this number. No date can hold it, so save_installed_state would raise
         # after the new files were already swapped in.
@@ -236,8 +236,8 @@ class TestDownload:
         assert result is None
         assert isinstance(error, ext_exceptions.InstallSourceError)
 
-    @patch("ulauncher.modes.install_source.untar", side_effect=OSError("disk full"))
-    @patch("ulauncher.modes.install_source.download_file")
+    @patch("ulauncher.internals.install_source.untar", side_effect=OSError("disk full"))
+    @patch("ulauncher.internals.install_source.download_file")
     def test_install_oserror_maps_to_remote_error(self, mock_download: MagicMock, *_: Any) -> None:
         # A raw OSError from the filesystem install steps must be mapped, not escape the callback.
         def side_effect(_url: str, dest: str, on_success: Callable[[Any], None], _on_error: Any) -> None:

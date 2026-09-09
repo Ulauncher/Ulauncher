@@ -13,11 +13,11 @@ from ulauncher.data import Err
 from ulauncher.gi import Gio, GLib
 from ulauncher.init_helpers import use_color
 from ulauncher.internals import log_wire
+from ulauncher.internals.install_source import parse_repo_url
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT
-from ulauncher.modes.install_source import parse_repo_url
 from ulauncher.utils import scheduling
 from ulauncher.utils.dbus import check_app_running, dbus_trigger_event
 from ulauncher.utils.logging_color_formatter import ColoredFormatter
