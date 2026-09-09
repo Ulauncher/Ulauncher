@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 from ulauncher.ui.helpers.hotkey_controller import HotkeyController
-from ulauncher.ui.helpers.theme import get_themes
+from ulauncher.ui.helpers.theme import get_theme_source, get_themes
 from ulauncher.ui.preferences.views import BaseView, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
@@ -15,6 +15,14 @@ from ulauncher.utils.systemd_controller import SystemdController
 
 logger = logging.getLogger(__name__)
 events = EventBus()
+
+
+def _theme_label_markup(name: str, source: str | None) -> str:
+    """A theme's name, with its dimmed, smaller "owner/repo" source on a second line when known."""
+    label = GLib.markup_escape_text(name)
+    if source:
+        label += f'\n<span size="x-small" alpha="55%">{GLib.markup_escape_text(source)}</span>'
+    return label
 
 
 class PreferencesView(BaseView):
@@ -167,14 +175,8 @@ class PreferencesView(BaseView):
             self._add_setting_row(general_box, "Hotkey", unavailable_label, warning_text, is_warning=True)
 
         # Color theme
-        theme_combo = Gtk.ComboBoxText()
-        themes = get_themes()
-        for theme in themes:
-            theme_combo.append(theme, theme)
-        theme_combo.set_active_id(self.settings.theme_name)
-        theme_combo.connect("changed", self._on_theme_changed)
         theme_desc = "Switch between installed themes. Changes apply immediately when you relaunch the UI."
-        self._add_setting_row(general_box, "Color theme", theme_combo, theme_desc)
+        self._add_setting_row(general_box, "Color theme", self._create_theme_combo(), theme_desc)
 
         # Screen to show on
         screen_combo = Gtk.ComboBoxText()
@@ -202,6 +204,29 @@ class PreferencesView(BaseView):
         grab_mouse_switch.connect("notify::active", self._on_grab_mouse_toggled)
         grab_desc = "Capture the pointer to prevent focus-follows-mouse setups from stealing the launcher focus."
         self._add_setting_row(general_box, "Grab mouse pointer focus", grab_mouse_switch, grab_desc)
+
+    def _create_theme_combo(self) -> Gtk.ComboBox:
+        """Theme picker showing each theme's source as a dimmed second line.
+
+        Not ComboBoxText: the source needs markup, and the active id stays the plain theme name
+        (the value persisted in settings and resolved by Theme.load).
+        """
+        theme_store = Gtk.ListStore(str, str)
+        for name, theme in get_themes().items():
+            theme_store.append([name, _theme_label_markup(name, get_theme_source(theme))])
+
+        combo = Gtk.ComboBox(model=theme_store)
+        combo.set_id_column(0)
+        # A list combo aligns the popup to the selected row, which offsets the menu and leaves
+        # a blank strip above the first visible row. A wrap width picks GTK's plain
+        # place-below-the-widget path instead (one column, so it still reads as a list).
+        combo.set_wrap_width(1)
+        renderer = Gtk.CellRendererText()
+        combo.pack_start(renderer, False)
+        combo.add_attribute(renderer, "markup", 1)
+        combo.set_active_id(self.settings.theme_name)
+        combo.connect("changed", self._on_theme_changed)
+        return combo
 
     def _add_applications_section(self, parent: Gtk.Box) -> None:
         """Add applications settings section"""
@@ -305,8 +330,8 @@ class PreferencesView(BaseView):
     def _on_hotkey_clicked(self, _: Gtk.Button) -> None:
         HotkeyController.show_dialog()
 
-    def _on_theme_changed(self, combo: Gtk.ComboBoxText) -> None:
-        theme_name = combo.get_active_text()
+    def _on_theme_changed(self, combo: Gtk.ComboBox) -> None:
+        theme_name = combo.get_active_id()
         if theme_name:
             self.settings.save({"theme_name": theme_name})
 

@@ -4,9 +4,10 @@ import json
 import logging
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 from ulauncher import paths
-from ulauncher.data import JsonConf
+from ulauncher.data import Err, JsonConf
 
 logger = logging.getLogger(__name__)
 DEFAULT_THEME = "light"
@@ -42,21 +43,55 @@ def _load_legacy_theme(manifest_path: Path) -> LegacyTheme | None:
         return None
 
 
+def _legacy_css_paths(theme: LegacyTheme) -> set[Path]:
+    """Every css file a legacy manifest can describe (both the fallback and the gtk 3.20 variant)."""
+    css_paths = set()
+    if theme.css_file:
+        css_paths.add(Path(theme.base_path, theme.css_file))
+    gtk_css_file = theme.get("css_file_gtk_3.20+")
+    if isinstance(gtk_css_file, str) and gtk_css_file:
+        css_paths.add(Path(theme.base_path, gtk_css_file))
+    return css_paths
+
+
 def get_themes() -> dict[str, Theme]:
     """
     Gets a dict with the theme name as the key and theme as the value
     """
+    # Deferred so startup and tests loading theme helpers don't pull in the extension stack.
+    from ulauncher.internals import theme_installer
+
     user_themes = Path(paths.USER_THEMES)
+    installed_roots = [Path(paths.INSTALLED_THEMES, repo_id) for repo_id in theme_installer.installed_ids()]
     # legacy Ulauncher manifest themes
-    manifest_themes = [t for t in map(_load_legacy_theme, user_themes.glob("**/manifest.json")) if t is not None]
+    manifest_paths = [
+        *user_themes.glob("**/manifest.json"),
+        *(p for root in installed_roots for p in root.glob("**/manifest.json")),
+    ]
+    manifest_themes = [t for t in map(_load_legacy_theme, manifest_paths) if t is not None]
 
     # A css file a manifest already describes is the same theme found twice. The name collision
     # below resolves to whichever came first, so drop the css duplicate rather than order these.
-    manifest_css_paths = {theme.get_css_path() for theme in manifest_themes}
+    manifest_css_paths = set()
+    for theme in manifest_themes:
+        manifest_css_paths.update(_legacy_css_paths(theme))
+
+    # An installed repo owned by a valid root manifest is a single manifest theme: its css files
+    # (the declared ones and any stray like a build artifact) must not surface as standalone themes.
+    # The user themes root is shared, so its css files are only dropped by exact path above.
+    manifest_dirs = set()
+    for theme in manifest_themes:
+        try:
+            theme.validate()
+        except (ValueError, OSError):
+            continue
+        manifest_dirs.add(theme.base_path)
     system_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in Path(paths.SYSTEM_THEMES).glob("*.css")]
-    css_themes = [
-        Theme(name=p.stem, base_path=str(p.parent)) for p in user_themes.glob("*.css") if p not in manifest_css_paths
+    css_paths = [
+        *user_themes.glob("*.css"),
+        *(p for root in installed_roots if str(root) not in manifest_dirs for p in root.glob("*.css")),
     ]
+    css_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in css_paths if p not in manifest_css_paths]
 
     themes: dict[str, Theme] = {}
     for theme in [*system_themes, *manifest_themes, *css_themes]:
@@ -76,6 +111,26 @@ def get_themes() -> dict[str, Theme]:
             )
 
     return themes
+
+
+def get_theme_source(theme: Theme) -> str | None:
+    """The "owner/repo" an installed theme came from, or None for user and system themes."""
+    from ulauncher.internals import theme_installer
+    from ulauncher.internals.install_source import parse_repo_url
+
+    base_path = Path(theme.base_path)
+    for repo_id in theme_installer.installed_ids():
+        installed_root = Path(paths.INSTALLED_THEMES, repo_id)
+        if base_path != installed_root and installed_root not in base_path.parents:
+            continue
+        parsed = parse_repo_url(theme_installer.load_state(repo_id).url)
+        if isinstance(parsed, Err) or not parsed.value.browser_url:
+            return None
+        url_parts = urlparse(parsed.value.browser_url)
+        if url_parts.scheme not in ("http", "https") or not url_parts.netloc:
+            return None
+        return url_parts.path.strip("/")
+    return None
 
 
 class Theme(JsonConf):
