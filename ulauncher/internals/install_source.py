@@ -349,6 +349,15 @@ class InstallSource(UrlParseResult):
             raise install_errors.InstallError(msg) from e
 
 
+def resolve_source(url: str, on_error: OnError) -> InstallSource | None:
+    """Parse url into a source, or report the UrlError to on_error and return None."""
+    try:
+        return InstallSource(url)
+    except install_errors.UrlError as error:
+        on_error(error)
+        return None
+
+
 def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:
     """Parse the repo URL into its derived ids and urls, or an error message if it is invalid."""
     browser_url: str | None = None

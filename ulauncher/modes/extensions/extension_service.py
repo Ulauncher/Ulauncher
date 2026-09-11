@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol
 from ulauncher import cli, paths
 from ulauncher.gi import GLib
 from ulauncher.internals import log_wire
+from ulauncher.internals.install_source import resolve_source
 from ulauncher.modes.extensions import ext_exceptions
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import (
@@ -23,7 +24,6 @@ from ulauncher.modes.extensions.extension_registry import (
     ExtensionRegistry,
     InstallSuccess,
     UpdateSuccess,
-    resolve_source,
 )
 from ulauncher.modes.extensions.extension_runtime import DEBUGPY_HOST, DEBUGPY_PORT, ExtensionRuntime
 from ulauncher.utils import scheduling

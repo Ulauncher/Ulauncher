@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import Callable, Iterator, Protocol
 
 from ulauncher import paths
-from ulauncher.internals import install_errors
-from ulauncher.internals.install_source import InstallSource
+from ulauncher.internals.install_source import InstallSource, resolve_source
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
@@ -19,15 +18,6 @@ InstallSuccess = Callable[[ExtensionRecord], None]
 UpdateSuccess = Callable[[bool], None]
 CheckUpdateSuccess = Callable[[bool, str], None]
 Done = Callable[[], None]
-
-
-def resolve_source(url: str, on_error: OnError) -> InstallSource | None:
-    """Parse url into a source, or report the UrlError to on_error and return None."""
-    try:
-        return InstallSource(url)
-    except install_errors.UrlError as error:
-        on_error(error)
-        return None
 
 
 class ExtensionLifecycle(Protocol):
