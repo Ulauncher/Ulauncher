@@ -17,8 +17,6 @@ from ulauncher import (
 )
 from ulauncher.data import BaseDataClass, Err, Fallible, Ok
 from ulauncher.internals import install_errors
-from ulauncher.modes.extensions import ext_exceptions
-from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.utils.subprocess_utils import OnError, OnSuccess, download_file, run_command
 from ulauncher.utils.untar import untar
 from ulauncher.utils.version import get_version, satisfies
@@ -272,14 +270,13 @@ class InstallSource(UrlParseResult):
 
             def on_downloaded(_path: str) -> None:
                 try:
-                    try:
-                        result = self._extract_and_install(target_dir, tmp_path, commit_hash)
-                    except (install_errors.InstallError, ext_exceptions.ExtensionError) as install_error:
-                        on_error(install_error)
-                        return
-                    on_success(result)
+                    result = self._extract_and_install(target_dir, tmp_path, commit_hash)
+                except install_errors.InstallError as install_error:
+                    on_error(install_error)
+                    return
                 finally:
                     remove_tmp()
+                on_success(result)
 
             def on_download_failed(error: Exception) -> None:
                 remove_tmp()
@@ -319,12 +316,8 @@ class InstallSource(UrlParseResult):
         self._repo.checkout(target_dir, commit_hash, on_checked_out, on_error)
 
     def _extract_and_install(self, target_dir: str, tar_path: str, commit_hash: str) -> tuple[str, float]:
-        # All filesystem steps share the same failure semantics, so they live under one guard.
-        # shutil.Error subclasses OSError, so move() failures are covered too. The intentional
-        # The intentional InstallError/ExtensionError raises (not OSError) propagate as-is.
-        # This must not let a raw OSError escape: it runs inside a Gio callback, where an uncaught
-        # exception would be swallowed and hang a blocking caller (see cli.commands.run_blocking)
-        # instead of reaching it.
+        # One guard: shutil.Error is an OSError, intentional InstallError passes through.
+        # No raw OSError may escape: Gio callbacks swallow it and hang blocking callers.
         try:
             with TemporaryDirectory(prefix="ulauncher_install_") as tmp_root_dir:
                 untar(tar_path, tmp_root_dir)
@@ -333,12 +326,6 @@ class InstallSource(UrlParseResult):
                     msg = f"Invalid archive for {self.url}."
                     raise install_errors.InstallError(msg)
                 tmp_dir = f"{tmp_root_dir}/{subdirs[0]}"
-                manifest = ExtensionManifest.load(f"{tmp_dir}/manifest.json")
-                if not satisfies(api_version, manifest.api_version):
-                    if not satisfies("2.0", manifest.api_version):
-                        msg = f"{manifest.name} does not support Ulauncher API v{api_version}."
-                        raise ext_exceptions.CompatibilityError(msg)
-                    logger.warning("Falling back on using API 2.0 version for %s.", self.url)
                 # move() would nest tmp_dir inside an existing target instead of replacing it
                 if isdir(target_dir):
                     rmtree(target_dir)

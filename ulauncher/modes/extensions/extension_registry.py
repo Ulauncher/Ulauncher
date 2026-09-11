@@ -8,6 +8,7 @@ from ulauncher import paths
 from ulauncher.internals.install_source import InstallSource, resolve_source
 from ulauncher.modes.extensions import ext_exceptions, extension_finder
 from ulauncher.modes.extensions.extension_dependencies import ExtensionDependencies
+from ulauncher.modes.extensions.extension_manifest import ExtensionManifest
 from ulauncher.modes.extensions.extension_record import ExtensionRecord, PreviewExtensionRecord
 from ulauncher.utils.fs import StagingDir, swap_dir
 from ulauncher.utils.subprocess_utils import OnError
@@ -176,6 +177,48 @@ class ExtensionRegistry:
 
         source.get_compatible_hash(on_hash, on_error)
 
+    def _finalize_staged(
+        self,
+        record: ExtensionRecord,
+        source: InstallSource,
+        staging_dir: str,
+        commit_hash: str,
+        commit_timestamp: float,
+        on_done: Done,
+        on_error: OnError,
+    ) -> None:
+        """Deps, stop, swap, state for the staged tree. Rejects incompatible trees before the swap."""
+        try:
+            # Staging path is reused, so force a fresh manifest load.
+            manifest = ExtensionManifest.load(staging_dir, force=True)
+            manifest.check_compatibility(verbose=True)
+        except (OSError, ext_exceptions.ManifestError, ext_exceptions.CompatibilityError) as error:
+            on_error(error)
+            return
+
+        def on_deps_installed(_stdout: str) -> None:
+            def swap_and_finish() -> None:
+                error: Exception | None = None
+                if swap_dir(staging_dir, record.path):
+                    try:
+                        # Saved together to avoid half-updated state on source change.
+                        record.save_installed_state(
+                            commit_hash, commit_timestamp, url=source.url, browser_url=source.browser_url or ""
+                        )
+                    # Must not escape: Gio callbacks swallow exceptions, hanging blocking callers.
+                    except (OSError, ext_exceptions.ExtensionError) as save_error:
+                        error = save_error
+                else:
+                    error = OSError(f"Failed to swap the staged extension into {record.path}")
+                if error:
+                    on_error(error)
+                else:
+                    on_done()
+
+            self._lifecycle.stop_extension(record, swap_and_finish)
+
+        ExtensionDependencies(record.id, staging_dir).install(on_deps_installed, on_error)
+
     def _install_from_source(
         self,
         record: ExtensionRecord,
@@ -187,7 +230,6 @@ class ExtensionRegistry:
         """Install (atomically): download, stop and swap. Restarting is the caller's concern
         (in the app, the service reconciles once the job wrapping this operation releases).
         """
-        target_dir = record.path
         # Fixed path per extension so failed installs don't accumulate.
         # Concurrent installs of the same id clobber each other (wouldn't have worked anyway).
         staging = StagingDir(paths.EXTENSIONS_STAGING, record.id)
@@ -204,30 +246,22 @@ class ExtensionRegistry:
         def on_downloaded(download_result: tuple[str, float]) -> None:
             downloaded_hash, commit_timestamp = download_result
 
-            def on_deps_installed(_stdout: str) -> None:
-                def swap_and_finish() -> None:
-                    error: Exception | None = None
-                    if swap_dir(staging_dir, target_dir):
-                        try:
-                            # Saved together, so an update to a declared source can't leave the
-                            # state pointing half at the previous host
-                            record.save_installed_state(
-                                downloaded_hash, commit_timestamp, url=source.url, browser_url=source.browser_url or ""
-                            )
-                        # Reloading the manifest can reject the swapped-in files. This runs in a
-                        # Gio callback, so an escape would report neither done nor error.
-                        except (OSError, ext_exceptions.ExtensionError) as save_error:
-                            error = save_error
-                    else:
-                        error = OSError(f"Failed to swap the staged extension into {target_dir}")
-                    staging.discard()
-                    if error:
-                        on_error(error)
-                    else:
-                        on_done()
+            def done() -> None:
+                staging.discard()
+                on_done()
 
-                self._lifecycle.stop_extension(record, swap_and_finish)
+            def finalize_failed(error: Exception) -> None:
+                staging.discard()
+                on_error(error)
 
-            ExtensionDependencies(record.id, staging_dir).install(on_deps_installed, fail)
+            self._finalize_staged(
+                record,
+                source,
+                staging_dir,
+                downloaded_hash,
+                commit_timestamp,
+                done,
+                finalize_failed,
+            )
 
         source.download(staging_dir, on_downloaded, fail, commit_hash)
