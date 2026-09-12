@@ -53,14 +53,13 @@ def get_themes() -> dict[str, Theme]:
     # A css file a manifest already describes is the same theme found twice. The name collision
     # below resolves to whichever came first, so drop the css duplicate rather than order these.
     manifest_css_paths = {theme.get_css_path() for theme in manifest_themes}
-    css_paths = [
-        *Path(paths.SYSTEM_THEMES).glob("*.css"),
-        *user_themes.glob("*.css"),
+    system_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in Path(paths.SYSTEM_THEMES).glob("*.css")]
+    css_themes = [
+        Theme(name=p.stem, base_path=str(p.parent)) for p in user_themes.glob("*.css") if p not in manifest_css_paths
     ]
-    css_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in css_paths if p not in manifest_css_paths]
 
     themes: dict[str, Theme] = {}
-    for theme in [*manifest_themes, *css_themes]:
+    for theme in [*system_themes, *manifest_themes, *css_themes]:
         try:
             theme.validate()
             if themes.get(theme.name):
