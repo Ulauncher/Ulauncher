@@ -485,6 +485,7 @@ class ExtensionsView(BaseView):
         current_value = str(pref.get("value", ""))
         active_index = -1
         combo = Gtk.ComboBoxText()
+        combo.set_wrap_width(1)
 
         for i, option in enumerate(options):
             if isinstance(option, dict):

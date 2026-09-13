@@ -183,6 +183,7 @@ class PreferencesView(BaseView):
         screen_combo = Gtk.ComboBoxText()
         screen_combo.append("mouse-pointer-monitor", "The screen with the mouse pointer")
         screen_combo.append("default-monitor", "The default screen")
+        screen_combo.set_wrap_width(1)
         screen_combo.set_active_id(self.settings.render_on_screen)
         screen_combo.connect("changed", self._on_screen_changed)
         screen_desc = "Decide which monitor presents Ulauncher when you press the hotkey."
