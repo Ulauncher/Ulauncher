@@ -12,6 +12,7 @@ from gi.repository import Gdk, Gtk
 import ulauncher
 from ulauncher import app_id, first_run, paths
 from ulauncher.core import UlauncherCore
+from ulauncher.data import Err
 from ulauncher.gi import Gio, GLib
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.ulauncher_window import UlauncherWindow
@@ -220,12 +221,32 @@ class UlauncherApp(Gtk.Application):
             != self._startup_display_backend
         )
 
+    def _restart(self) -> None:
+        """Restart via systemd when supervised, else re-exec via CLI.
+
+        Quit releases the D-Bus name watched by the Type=dbus unit, so restart first.
+        """
+        from ulauncher.utils.systemd_controller import SystemdController
+
+        systemd = SystemdController("ulauncher")
+        result = systemd.status()
+        if isinstance(result, Err) or result.value.is_active:
+            # Queue the restart before quit, so the fresh process doesn't land in the
+            # cgroup being torn down. An unknown status may still mean the unit is
+            # active, and re-exec would put the fresh process there too.
+            if isinstance(systemd.restart(no_block=True), Err):
+                # Quitting after a rejected restart would leave Ulauncher down.
+                logger.error("Could not ask systemd to restart Ulauncher; keeping the current process")
+                return
+        else:
+            self.restart_requested = True
+        # Still unwinding the destroy handler; quit when idle.
+        scheduling.run_when_idle(self.quit)
+
     def _on_window_destroyed(self, _window: Gtk.Window, key: Literal["main", "preferences"]) -> None:
         self.windows.pop(key, None)
         if key == "preferences" and self.needs_restart():
-            # Defer the quit: quitting inside the destroy handler would tear down the window we're unwinding.
-            self.restart_requested = True
-            scheduling.run_when_idle(self.quit)
+            self._restart()
             return
         if not self.windows and not self._persistent:
             # Clipboard contents only live as long as the owning app, and clipboard managers

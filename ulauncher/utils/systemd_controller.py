@@ -71,11 +71,16 @@ class SystemdController:
                 return result
         return Ok(SystemdUnitStatus(result.value.splitlines()))
 
-    def restart(self) -> Fallible[None, str]:
-        """Ask systemd to restart the unit. Err when the job was not accepted."""
+    def restart(self, *, no_block: bool = False) -> Fallible[None, str]:
+        """Ask systemd to restart the unit. Err when the job was not accepted.
+
+        no_block is not a latency optimization: a blocking restart stop-kills the
+        caller's cgroup, so it is required whenever the caller is inside the unit.
+        """
         if not self.supported:
             return Err("systemctl not found")
-        result = systemctl_run("restart", self._unit)
+        args = ["--no-block"] if no_block else []
+        result = systemctl_run(*args, "restart", self._unit)
         if isinstance(result, Err):
             return result
         return Ok(None)

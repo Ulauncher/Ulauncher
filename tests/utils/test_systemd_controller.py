@@ -105,6 +105,11 @@ class TestSystemdController:
         assert controller.restart() == expected
         assert systemctl_run.call_args.args == ("restart", "ulauncher")
 
+    def test_restart_passes_no_block(self, controller: SystemdController, systemctl_run: MagicMock) -> None:
+        systemctl_run.return_value = Ok("")
+        controller.restart(no_block=True)
+        assert systemctl_run.call_args.args == ("--no-block", "restart", "ulauncher")
+
     def test_restart_without_systemctl_is_err(self, mocker: MockerFixture) -> None:
         mocker.patch("ulauncher.utils.systemd_controller.which", return_value=None)
         assert isinstance(SystemdController("ulauncher").restart(), Err)
