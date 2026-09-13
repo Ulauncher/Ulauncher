@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from ulauncher import paths
-from ulauncher.ui.helpers.theme import LegacyTheme, Theme, _load_legacy_theme, get_themes
+from ulauncher.ui.helpers.theme import LegacyTheme, Theme, _load_legacy_theme, get_theme_source, get_themes
 
 
 def _write_manifest(dir_path: Path, data: object) -> Path:
@@ -152,3 +152,77 @@ def test_get_themes__installed_themes__show_up_alongside_user_and_system_ones(
     monkeypatch.setattr(paths, "INSTALLED_THEMES", str(installed_dir))
 
     assert sorted(get_themes()) == ["installed", "system", "user"]
+
+
+def _install_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repo_id: str, url: str) -> Path:
+    installed = tmp_path / "installed-themes"
+    state = tmp_path / "theme-state"
+    repo_dir = installed / repo_id
+    repo_dir.mkdir(parents=True)
+    state.mkdir()
+    (state / f"{repo_id}.json").write_text(json.dumps({"url": url}))
+    monkeypatch.setattr(paths, "INSTALLED_THEMES", str(installed))
+    monkeypatch.setattr(paths, "THEMES_STATE", str(state))
+    return repo_dir
+
+
+def test_get_theme_source__installed_theme__returns_owner_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_dir = _install_state(
+        tmp_path,
+        monkeypatch,
+        "com.github.heidefinnischen.ulauncher-elementary_flat",
+        "https://github.com/heidefinnischen/ULauncher-elementary_Flat",
+    )
+
+    theme = Theme(name="Odin Dark", base_path=str(repo_dir))
+    assert get_theme_source(theme) == "heidefinnischen/ULauncher-elementary_Flat"
+
+
+def test_get_theme_source__nested_variant__returns_owner_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_dir = _install_state(tmp_path, monkeypatch, "com.github.owner.repo", "https://github.com/owner/repo")
+
+    theme = Theme(name="dark", base_path=str(repo_dir / "variants" / "dark"))
+    assert get_theme_source(theme) == "owner/repo"
+
+
+def test_get_theme_source__user_theme__returns_user(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(paths, "INSTALLED_THEMES", str(tmp_path / "installed-themes"))
+
+    theme = Theme(name="dark", base_path=str(tmp_path / "user-themes" / "dark"))
+    assert get_theme_source(theme) == "User"
+
+
+def test_get_theme_source__system_theme__returns_built_in(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    system_dir = tmp_path / "system-themes"
+    monkeypatch.setattr(paths, "INSTALLED_THEMES", str(tmp_path / "installed-themes"))
+    monkeypatch.setattr(paths, "SYSTEM_THEMES", str(system_dir))
+
+    assert get_theme_source(Theme(name="light", base_path=str(system_dir))) == "Built-in"
+
+
+def test_get_theme_source__foreign_host__returns_host_and_repo_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_dir = _install_state(tmp_path, monkeypatch, "com.example.owner.repo", "https://git.example.com/owner/repo")
+
+    assert get_theme_source(Theme(name="dark", base_path=str(repo_dir))) == "git.example.com/owner/repo"
+
+
+def test_get_theme_source__local_install__returns_filesystem_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_dir = _install_state(tmp_path, monkeypatch, "local.repo", f"file://{tmp_path}")
+
+    assert get_theme_source(Theme(name="dark", base_path=str(repo_dir))) == str(tmp_path)
+
+
+def test_get_theme_source__installed_without_state__returns_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    installed = tmp_path / "installed-themes"
+    repo_dir = installed / "manual.repo"
+    repo_dir.mkdir(parents=True)
+    monkeypatch.setattr(paths, "INSTALLED_THEMES", str(installed))
+    monkeypatch.setattr(paths, "THEMES_STATE", str(tmp_path / "theme-state"))
+
+    assert get_theme_source(Theme(name="dark", base_path=str(repo_dir))) == "Unknown"

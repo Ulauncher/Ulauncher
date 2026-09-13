@@ -4,9 +4,10 @@ import json
 import logging
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 from ulauncher import paths
-from ulauncher.data import JsonConf
+from ulauncher.data import Err, JsonConf
 
 logger = logging.getLogger(__name__)
 DEFAULT_THEME = "light"
@@ -108,6 +109,43 @@ def get_themes() -> dict[str, Theme]:
             )
 
     return themes
+
+
+def _within(path: Path, root: str) -> bool:
+    root_path = Path(root)
+    return path == root_path or root_path in path.parents
+
+
+def _display_source(url: str) -> str:
+    """Shorten an install url to what identifies the repo: owner/repo for known browsers, host/path otherwise."""
+    from ulauncher.internals.install_source import parse_repo_url
+
+    parsed = parse_repo_url(url)
+    if isinstance(parsed, Err):
+        # A manually placed theme directory has no state file, so there is no url to show
+        return url or "Unknown"
+    parts = urlparse(parsed.value.browser_url or parsed.value.remote_url)
+    if parts.scheme == "file":
+        return parts.path
+    path = parts.path.strip("/")
+    if path.endswith(".git"):
+        path = path[:-4]
+    if parsed.value.browser_url:
+        return path
+    return f"{parts.netloc}/{path}" if path else parts.netloc
+
+
+def get_theme_source(theme: Theme) -> str:
+    """Where a theme came from: its repo path for installed themes, otherwise "Built-in" or "User"."""
+    from ulauncher.internals import theme_installer
+
+    base_path = Path(theme.base_path)
+    for repo_id in theme_installer.installed_ids():
+        if _within(base_path, theme_installer.installed_dir(repo_id)):
+            return _display_source(theme_installer.load_state(repo_id).url)
+    if _within(base_path, paths.SYSTEM_THEMES):
+        return "Built-in"
+    return "User"
 
 
 class Theme(JsonConf):
