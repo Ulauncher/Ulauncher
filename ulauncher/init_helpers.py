@@ -19,6 +19,7 @@ def ensure_runtime_dirs() -> None:
         paths.CONFIG,
         paths.STATE,
         paths.USER_EXTENSIONS,
+        paths.INSTALLED_THEMES,
         paths.EXTENSIONS_CONFIG,
         paths.USER_THEMES,
     ):

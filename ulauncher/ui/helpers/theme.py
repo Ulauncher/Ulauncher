@@ -42,21 +42,53 @@ def _load_legacy_theme(manifest_path: Path) -> LegacyTheme | None:
         return None
 
 
+def _legacy_css_paths(theme: LegacyTheme) -> set[Path]:
+    """Every css file a legacy manifest can describe (both the fallback and the gtk 3.20 variant)."""
+    css_paths = set()
+    if theme.css_file:
+        css_paths.add(Path(theme.base_path, theme.css_file))
+    gtk_css_file = theme.get("css_file_gtk_3.20+")
+    if isinstance(gtk_css_file, str) and gtk_css_file:
+        css_paths.add(Path(theme.base_path, gtk_css_file))
+    return css_paths
+
+
 def get_themes() -> dict[str, Theme]:
     """
     Gets a dict with the theme name as the key and theme as the value
     """
-    user_themes = Path(paths.USER_THEMES)
-    # legacy Ulauncher manifest themes
-    manifest_themes = [t for t in map(_load_legacy_theme, user_themes.glob("**/manifest.json")) if t is not None]
+    # Deferred so startup and tests loading theme helpers don't pull in the extension stack.
+    from ulauncher.internals import theme_installer
 
-    # A css file a manifest already describes is the same theme found twice. The name collision
-    # below resolves to whichever came first, so drop the css duplicate rather than order these.
-    manifest_css_paths = {theme.get_css_path() for theme in manifest_themes}
-    system_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in Path(paths.SYSTEM_THEMES).glob("*.css")]
-    css_themes = [
-        Theme(name=p.stem, base_path=str(p.parent)) for p in user_themes.glob("*.css") if p not in manifest_css_paths
+    user_themes = Path(paths.USER_THEMES)
+    installed_roots = [Path(paths.INSTALLED_THEMES, repo_id) for repo_id in theme_installer.installed_ids()]
+    # legacy Ulauncher manifest themes
+    manifest_paths = [
+        *user_themes.glob("**/manifest.json"),
+        *(p for root in installed_roots for p in root.glob("**/manifest.json")),
     ]
+    manifest_themes = [t for t in map(_load_legacy_theme, manifest_paths) if t is not None]
+
+    # A css file a manifest already describes is the same theme found twice, so drop the duplicate.
+    manifest_css_paths = set()
+    for theme in manifest_themes:
+        manifest_css_paths.update(_legacy_css_paths(theme))
+
+    # An installed repo with a valid root manifest is one theme: its css files must not
+    # surface as standalone themes. The shared user themes root is only de-duped by exact path.
+    manifest_dirs = set()
+    for theme in manifest_themes:
+        try:
+            theme.validate()
+        except (ValueError, OSError):
+            continue
+        manifest_dirs.add(theme.base_path)
+    system_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in Path(paths.SYSTEM_THEMES).glob("*.css")]
+    css_paths = [
+        *user_themes.glob("*.css"),
+        *(p for root in installed_roots if str(root) not in manifest_dirs for p in root.glob("*.css")),
+    ]
+    css_themes = [Theme(name=p.stem, base_path=str(p.parent)) for p in css_paths if p not in manifest_css_paths]
 
     themes: dict[str, Theme] = {}
     for theme in [*system_themes, *manifest_themes, *css_themes]:
