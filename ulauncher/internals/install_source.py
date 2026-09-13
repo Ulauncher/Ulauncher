@@ -375,14 +375,15 @@ def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:
         browser_url = remote_url = f"file:///{path}"
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
-        # Sanitize URLs with known hosts and invalid trailing paths like /blob/master or /issues, /wiki etc
-        user, _, rest = path.partition("/")
-        repo = rest.split("/", 1)[0]
+        # GitLab projects can live in nested groups, and separate the project path from sub-pages
+        # with "/-" (ex. /group/subgroup/repo/-/issues); the other hosts are always owner/repo.
+        path = path.rstrip("/")
+        path = path.split("/-/", 1)[0] if host == "gitlab.com" else "/".join(path.split("/", 2)[:2])
+        if path.endswith(".git"):
+            path = path[:-4]
+        user, _, repo = path.rpartition("/")
         if not user or not repo:
             return Err(f"Invalid URL: {input_url}")
-        if repo.endswith(".git"):
-            repo = repo[:-4]
-        path = f"{user}/{repo}"
         browser_url = base_url = f"https://{host}/{path}"
         remote_url = f"{base_url}.git"
         download_url_template = (

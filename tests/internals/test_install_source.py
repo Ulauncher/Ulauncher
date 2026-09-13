@@ -50,16 +50,31 @@ class TestParseRepoUrl:
         assert parse_ok("https://github.com/user/repo").remote_url == "https://github.com/user/repo.git"
         assert parse_ok("git@gitlab.com:user/repo.git").remote_url == "https://gitlab.com/user/repo.git"
         assert parse_ok("https://github.com/user/repo/blob/master").remote_url == "https://github.com/user/repo.git"
-        assert parse_ok("https://gitlab.com/u/repo/issues").remote_url == "https://gitlab.com/u/repo.git"
+        assert parse_ok("https://gitlab.com/u/repo/-/issues").remote_url == "https://gitlab.com/u/repo.git"
         assert parse_ok("https://codeberg.org/u/repo/wiki").remote_url == "https://codeberg.org/u/repo.git"
 
     def test_browser_url(self) -> None:
         assert parse_ok("git@gitlab.com:user/repo.git").browser_url == "https://gitlab.com/user/repo"
 
+    def test_gitlab_subgroups(self) -> None:
+        result = parse_ok("https://gitlab.com/group/subgroup/repo")
+        assert result.repo_id == "com.gitlab.group.subgroup.repo"
+        assert result.browser_url == "https://gitlab.com/group/subgroup/repo"
+        assert result.remote_url == "https://gitlab.com/group/subgroup/repo.git"
+        assert result.download_url_template == (
+            "https://gitlab.com/group/subgroup/repo/-/archive/[commit]/repo-[commit].tar.gz"
+        )
+        assert parse_ok("git@gitlab.com:group/subgroup/repo.git").browser_url == (
+            "https://gitlab.com/group/subgroup/repo"
+        )
+        assert parse_ok("https://gitlab.com/group/subgroup/repo/-/issues").remote_url == (
+            "https://gitlab.com/group/subgroup/repo.git"
+        )
+
     def test_repo_id(self) -> None:
         assert parse_ok("https://github.com/user/repo").repo_id == "com.github.user.repo"
         assert parse_ok("https://example.co.uk/user/repo").repo_id == "uk.co.example.user.repo"
-        assert parse_ok("https://gitlab.com/user/repo/issues").repo_id == "com.gitlab.user.repo"
+        assert parse_ok("https://gitlab.com/user/repo/-/issues").repo_id == "com.gitlab.user.repo"
         assert parse_ok("https://local/path/to/extension").repo_id == "local.path.to.extension"
         assert parse_ok("https://localhost/extension").repo_id == "localhost.extension"
 
