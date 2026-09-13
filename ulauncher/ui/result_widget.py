@@ -44,9 +44,10 @@ class ResultWidget(Gtk.EventBox):
         self.jump_keys = jump_keys
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
-        inner_margin_x = int(12.0 * text_scaling_factor)
-        outer_margin_x = int(18.0 * text_scaling_factor)
-        margin_y = (3 if result.compact else 5) * text_scaling_factor
+        icon_box = 25 if result.compact else 50
+        inner_margin_x = int(5.0 * text_scaling_factor)
+        outer_margin_x = int((23.0 if result.compact else 20.0) * text_scaling_factor)
+        margin_y = (2 if result.compact else 3) * text_scaling_factor
 
         super().__init__()
         self.get_style_context().add_class("item-frame")
@@ -62,6 +63,7 @@ class ResultWidget(Gtk.EventBox):
 
         icon = Gtk.Image()
         icon.set_from_surface(load_icon_surface(result.icon or "gtk-missing-image", icon_size, self.get_scale_factor()))
+        icon.set_size_request(icon_box, icon_box)
         icon.get_style_context().add_class("item-icon")
         item_container.pack_start(icon, False, True, 0)
 
