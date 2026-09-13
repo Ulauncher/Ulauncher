@@ -225,6 +225,10 @@ class InstallSource(UrlParseResult):
         and tags names starting with "apiv", ex "apiv3" and "apiv3.2"
         New method for v6. The new behavior is intentionally undocumented because we still
         want extension devs to use the old way until Ulauncher 5/apiv2 is fully phased out
+
+        The apiv matching is extension-specific, but it stays in InstallSource because every
+        install, themes included, resolves a revision through download() before the staged tree
+        can be categorized. Factoring it out would only make each caller run it first anyway.
         """
 
         def on_refs(remote_refs: dict[str, str]) -> None:
