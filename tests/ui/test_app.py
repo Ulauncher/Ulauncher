@@ -9,8 +9,10 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher import paths
+from ulauncher.data import Err, Ok
 from ulauncher.modes.extensions import extension_service
 from ulauncher.ui.app import UlauncherApp
+from ulauncher.utils.systemd_controller import SystemdUnitStatus
 
 
 def _backdate(path: Path, seconds_old: float = 7200) -> None:
@@ -68,11 +70,46 @@ def test_prefs_close__quits_normally_when_not_persistent(mocker: MockerFixture) 
     app._persistent = False
     app._startup_display_backend = None
     mocker.patch("ulauncher.ui.app.preferred_backend", return_value="x11")
-    run_when_idle = mocker.patch("ulauncher.utils.scheduling.run_when_idle")
+    restart = mocker.patch("ulauncher.ui.app.UlauncherApp._restart")
     timer = mocker.patch("ulauncher.utils.scheduling.timer")
 
     app._on_window_destroyed(mocker.Mock(), "preferences")
 
-    assert app.restart_requested is False
-    assert not run_when_idle.called
+    restart.assert_not_called()
     assert timer.called
+
+
+@pytest.mark.parametrize(
+    ("active", "known", "restart_accepted", "expect_restart", "expect_quit", "expect_reexec"),
+    [
+        (True, True, True, True, True, False),
+        (True, True, False, True, False, False),
+        (False, False, False, True, False, False),
+        (False, True, False, False, True, True),
+    ],
+)
+def test_restart__decides_by_unit_state(
+    mocker: MockerFixture,
+    active: bool,
+    known: bool,
+    restart_accepted: bool,
+    expect_restart: bool,
+    expect_quit: bool,
+    expect_reexec: bool,
+) -> None:
+    app = UlauncherApp.__new__(UlauncherApp)
+    app.restart_requested = False
+    controller = mocker.patch("ulauncher.utils.systemd_controller.SystemdController").return_value
+    controller.status.return_value = (
+        Ok(SystemdUnitStatus(["ActiveState=active"] if active else [])) if known else Err("unknown")
+    )
+    controller.restart.return_value = Ok(None) if restart_accepted else Err("rejected")
+    run_when_idle = mocker.patch("ulauncher.utils.scheduling.run_when_idle")
+
+    app._restart()
+
+    assert controller.restart.called == expect_restart
+    if expect_restart:
+        controller.restart.assert_called_once_with(no_block=True)
+    assert run_when_idle.called == expect_quit
+    assert app.restart_requested == expect_reexec
