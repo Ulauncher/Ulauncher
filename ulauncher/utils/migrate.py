@@ -130,17 +130,6 @@ def v5_to_v6() -> None:
     _migrate_file(f"{paths.DATA}/query_history.db", f"{paths.STATE}/query_history.json")
     del sys.modules["ulauncher.search.Query"]  # <-- Don't want this hack to remain in the runtime afterwards
 
-    # Convert show_recent_apps to max_recent_apps
-    # Not using settings class because we don't want to convert the keys
-    from ulauncher.data import JsonConf
-
-    settings = JsonConf.load(f"{paths.CONFIG}/settings.json")
-    legacy_recent_apps = settings.get("show_recent_apps") or settings.get("show-recent-apps")
-    if legacy_recent_apps and settings.get("max_recent_apps") is None:
-        # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
-        # If people haven't changed their settings since 2020 it'll be set to 0
-        settings.save(max_recent_apps=int(legacy_recent_apps) if str(legacy_recent_apps).isnumeric() else 0)
-
     # Migrate autostart conf from XDG autostart file to systemd
     if first_v6_run:
         try:

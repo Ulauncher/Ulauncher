@@ -1,11 +1,29 @@
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from ulauncher import paths
 from ulauncher.data import JsonConf
+from ulauncher.utils.json_utils import json_load_dict, json_save
+from ulauncher.utils.lru_cache import lru_cache
 
 _settings_file = f"{paths.CONFIG}/settings.json"
+
+
+# TODO: Remove this some time after v6 stable (give people some month to migrate)
+@lru_cache(maxsize=None)  # cached so it only runs once per session
+def _drop_legacy_recent_apps(path: str) -> None:
+    """
+    Drop show_recent_apps to prevent it from overriding max_recent_apps. Needed because
+    The old migration left the legacy show_recent_apps in the file.
+    """
+    with contextlib.suppress(OSError):
+        data = json_load_dict(path)
+        if "max_recent_apps" in data and ("show_recent_apps" in data or "show-recent-apps" in data):
+            data.pop("show_recent_apps", None)
+            data.pop("show-recent-apps", None)
+            json_save(data, path, sort_keys=True)
 
 
 class Settings(JsonConf):
@@ -40,6 +58,11 @@ class Settings(JsonConf):
         elif normalized == "clear_previous_query":
             normalized = "auto_resume"
             value = not value
+        elif normalized == "show_recent_apps":
+            # This used to be a boolean, but was converted to a numeric string in PR #576 in 2020
+            # If people haven't changed their settings since 2020 it'll be set to 0
+            value = int(value) if str(value).isnumeric() else 0
+            normalized = "max_recent_apps"
         super().__setitem__(normalized, value)
 
     def get_jump_keys(self) -> list[str]:
@@ -60,4 +83,6 @@ class Settings(JsonConf):
 
     @classmethod
     def load(cls, *, force: bool = False) -> Settings:  # type: ignore[override]
+        _drop_legacy_recent_apps(_settings_file)
+
         return super().load(_settings_file, force=force)
