@@ -9,8 +9,15 @@ logger = logging.getLogger(__name__)
 
 def systemctl_run(*args: str) -> str:
     try:
-        return subprocess.check_output(["systemctl", "--user", *args]).decode("utf-8").rstrip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+        result = subprocess.run(["systemctl", "--user", *args], capture_output=True, text=True, check=True)
+        return result.stdout.rstrip()
+    except subprocess.CalledProcessError as e:
+        logger.warning(
+            "systemctl --user %s failed (%s): %s", " ".join(args), e.returncode, (e.stderr or e.stdout or "").strip()
+        )
+        return ""
+    except (subprocess.TimeoutExpired, OSError) as e:
+        logger.warning("systemctl --user %s failed: %s", " ".join(args), e)
         return ""
 
 
