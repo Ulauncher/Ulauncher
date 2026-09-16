@@ -131,7 +131,16 @@ class Settings(GObject.GObject):
                 return
 
             # Convert underscore to dash, in case user migrated to v6, saved settings and reverted
-            self._properties = {key.replace("_", "-"): val for key, val in properties.items()}
+            properties = {key.replace("_", "-"): val for key, val in properties.items()}
+            # V6 changes some names. This convert them back, so no setting resets when
+            # switching back and forth. v6 does the inverse in its Settings.__setitem__.
+            if "show-tray-icon" in properties:
+                properties.setdefault("show-indicator-icon", properties.pop("show-tray-icon"))
+            if "auto-resume" in properties:
+                properties.setdefault("clear-previous-query", not properties.pop("auto-resume"))
+            if "max-recent-apps" in properties:
+                properties.setdefault("show-recent-apps", str(properties.pop("max-recent-apps")))
+            self._properties = properties
         else:
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             self.save_to_file()
