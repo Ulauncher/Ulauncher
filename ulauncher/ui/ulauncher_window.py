@@ -36,7 +36,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     layer_shell_enabled = False
     settings: Settings
 
-    def __init__(self, **kwargs: Any) -> None:  # noqa: PLR0915
+    def __init__(self, **kwargs: Any) -> None:
         logger.info("Opening Ulauncher window")
         self.settings = Settings.load(force=True)
         width_request = self.settings.base_width
@@ -132,14 +132,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         self.frame.show_all()
 
-        self.connect("focus-in-event", lambda *_: self.on_focus_in())
-        self.connect("focus-out-event", lambda *_: self.on_focus_out())
-        self.connect("button-release-event", self.on_mouse_up)
-        drag_listener.connect("button-press-event", self.on_mouse_down)
-        self.prompt_input.connect("changed", lambda *_: self.on_input_changed())
-        self.prompt_input.connect("key-press-event", self.on_input_key_press)
-        self.connect("draw", self.on_initial_draw)
-        self.prefs_btn.connect("clicked", lambda *_: self.get_app().show_preferences())
+        self._connect_signals(drag_listener)
 
         # Try setting a transparent background
         screen = self.get_screen()
@@ -168,6 +161,16 @@ class UlauncherWindow(Gtk.ApplicationWindow):
 
         if self.query_str:
             self.set_input(self.query_str)
+
+    def _connect_signals(self, drag_listener: Gtk.EventBox) -> None:
+        self.connect("focus-in-event", lambda *_: self.on_focus_in())
+        self.connect("focus-out-event", lambda *_: self.on_focus_out())
+        self.connect("button-release-event", self.on_mouse_up)
+        drag_listener.connect("button-press-event", self.on_mouse_down)
+        self.prompt_input.connect("changed", lambda *_: self.on_input_changed())
+        self.prompt_input.connect("key-press-event", self.on_input_key_press)
+        self.connect("draw", self.on_initial_draw)
+        self.prefs_btn.connect("clicked", lambda *_: self.get_app().show_preferences())
 
     def apply_styling(self) -> None:
         """
