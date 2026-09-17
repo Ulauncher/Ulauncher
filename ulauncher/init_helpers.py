@@ -67,9 +67,9 @@ def init_x11_threads() -> None:
     """Initialize Xlib thread support before importing GTK on X11-compatible sessions."""
     from ctypes import cdll
 
-    from ulauncher.utils.environment import IS_X11_COMPATIBLE
+    from ulauncher.utils.environment import is_x11_compatible
 
-    if not IS_X11_COMPATIBLE:
+    if not is_x11_compatible():
         return
 
     # Using libX11.so.6 may seem a bit hard-coded, but a quick search on the Internet indicates

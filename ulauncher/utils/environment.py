@@ -15,14 +15,11 @@ from typing import Literal
 
 logger = logging.getLogger(__name__)
 
-GDK_BACKEND = os.environ.get("GDK_BACKEND", "").upper()
 XDG_SESSION_TYPE = os.environ.get("XDG_SESSION_TYPE", "").upper()
 DESKTOP_NAME = os.environ.get("XDG_CURRENT_DESKTOP", "").upper() or "Unknown Desktop"
 DISTRO = "Unknown Distro"
 DESKTOP_ID: Literal["GNOME", "XFCE", "PLASMA"] | None = None
 IS_X11 = XDG_SESSION_TYPE == "X11"
-# This means either X11 or XWayland
-IS_X11_COMPATIBLE = IS_X11 or GDK_BACKEND.startswith("X11")
 
 if "XFCE" in DESKTOP_NAME:
     DESKTOP_ID = "XFCE"
@@ -39,3 +36,12 @@ if os_release_path.exists():
             DISTRO = dict(reader).get("PRETTY_NAME", DISTRO)
     except (OSError, ValueError):
         logger.info("Distro does not provide any version info")
+
+
+def is_x11_compatible() -> bool:
+    """X11 session or XWayland.
+
+    Reads GDK_BACKEND live rather than freezing it at import, because the CLI may force it
+    after this module is imported. Only call this once that has happened.
+    """
+    return IS_X11 or os.environ.get("GDK_BACKEND", "").upper().startswith("X11")

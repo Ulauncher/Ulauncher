@@ -16,7 +16,7 @@ def run(_: CLIArguments) -> int:
 
     from ulauncher import api_version, version
     from ulauncher.ui.app import UlauncherApp  # noqa: TID251
-    from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, IS_X11_COMPATIBLE, XDG_SESSION_TYPE
+    from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME, DISTRO, XDG_SESSION_TYPE, is_x11_compatible
     from ulauncher.utils.migrate import v5_to_v6
     from ulauncher.utils.v5_killer import kill_ulauncher_v5
 
@@ -63,7 +63,7 @@ def run(_: CLIArguments) -> int:
                 "\n╚═════════════════════════════════════════════════════════════════════════════╝"
                 "\n\n"
             )
-        logger.info("X11 backend: %s", ("Yes" if IS_X11_COMPATIBLE else "No"))
+        logger.info("X11 backend: %s", ("Yes" if is_x11_compatible() else "No"))
 
     # Ensure that Ulauncher v5 is not running
     # TODO: Remove this 4-6 months after v6 release

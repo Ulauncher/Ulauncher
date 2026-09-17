@@ -17,7 +17,7 @@ from ulauncher.ui.helpers.theme import DEFAULT_THEME, Theme
 from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.results_view import ResultsView
 from ulauncher.utils import scheduling
-from ulauncher.utils.environment import DESKTOP_ID, IS_X11_COMPATIBLE
+from ulauncher.utils.environment import DESKTOP_ID, is_x11_compatible
 from ulauncher.utils.settings import Settings
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 # Gnome Wayland doesn't allow apps to position their windows, so we render a fullscreen transparent window
 # and position the visible window inside of it via margins
-_use_fullscreen_to_position = DESKTOP_ID == "GNOME" and not IS_X11_COMPATIBLE
+_use_fullscreen_to_position = DESKTOP_ID == "GNOME" and not is_x11_compatible()
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -63,7 +63,12 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             **kwargs,
         )
         # avoid checking layer shell support for known cases it does not apply (for performance reasons)
-        if not IS_X11_COMPATIBLE and DESKTOP_ID != "GNOME" and self.settings.layer_shell and layer_shell.is_supported():
+        if (
+            not is_x11_compatible()
+            and DESKTOP_ID != "GNOME"
+            and self.settings.layer_shell
+            and layer_shell.is_supported()
+        ):
             self.layer_shell_enabled = layer_shell.enable(self)
             if self.layer_shell_enabled:
                 logger.info("Layer shell support is enabled")

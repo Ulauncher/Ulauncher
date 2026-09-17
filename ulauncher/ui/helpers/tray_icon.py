@@ -12,7 +12,7 @@ import gi
 from gi.repository import GObject, Gtk
 
 from ulauncher import paths
-from ulauncher.utils.environment import IS_X11_COMPATIBLE
+from ulauncher.utils.environment import is_x11_compatible
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
@@ -23,7 +23,7 @@ icon_asset_path = f"{paths.ASSETS}/icons/system/status"
 default_icon_name = Settings.tray_icon_name  # intentionally using the class, not the instance, to get the default
 
 
-if IS_X11_COMPATIBLE:
+if is_x11_compatible():
     with contextlib.suppress(ImportError, ValueError):
         gi.require_version("XApp", "1.0")
         from gi.repository import XApp
