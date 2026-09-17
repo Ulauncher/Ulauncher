@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Callable
 
 from gi.repository import GLib, Gtk, Pango
 
@@ -141,71 +141,84 @@ class PreferencesView(BaseView):
 
         parent.pack_start(row_box, False, False, 0)
 
+    def _add_switch_row(
+        self,
+        parent: Gtk.Box,
+        label_text: str,
+        description: str,
+        active: bool,
+        handler: Callable[..., None],
+        sensitive: bool = True,
+    ) -> Gtk.Switch:
+        switch = Gtk.Switch(active=active, sensitive=sensitive)
+        switch.connect("notify::active", handler)
+        self._add_setting_row(parent, label_text, switch, description)
+        return switch
+
+    def _add_spin_row(
+        self,
+        parent: Gtk.Box,
+        label_text: str,
+        description: str,
+        value: float,
+        lower: float,
+        upper: float,
+        handler: Callable[..., None],
+        step_increment: float = 1,
+    ) -> Gtk.SpinButton:
+        adjustment = Gtk.Adjustment(value=value, lower=lower, upper=upper, step_increment=step_increment)
+        spin = Gtk.SpinButton(adjustment=adjustment)
+        spin.connect("value-changed", handler)
+        self._add_setting_row(parent, label_text, spin, description)
+        return spin
+
+    def _add_entry_row(
+        self, parent: Gtk.Box, label_text: str, description: str, text: str, handler: Callable[..., None]
+    ) -> Gtk.Entry:
+        entry = Gtk.Entry(text=text, width_chars=50)
+        entry.connect("changed", handler)
+        self._add_setting_row(parent, label_text, entry, description, full_width=True)
+        return entry
+
     def _add_general_section(self, parent: Gtk.Box) -> None:
         """Add general settings section"""
         general_box = self._create_section_container(parent, "General")
-        run_in_bg_footer = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
-
-        # Run in background (via systemd autostart, or keep-alive fallback)
-        autostart_status = self.autostart_pref.status()
-        if autostart_status.can_start:
-            autostart_switch = Gtk.Switch(active=autostart_status.is_enabled)
-            autostart_switch.connect("notify::active", self._on_autostart_toggled)
-            desc = "Start Ulauncher automatically with your desktop session so it's ready when you need it."
-            self._add_setting_row(general_box, "Run in background", autostart_switch, f"{desc}{run_in_bg_footer}")
-        else:
-            keep_alive_switch = Gtk.Switch(active=self.settings.keep_alive)
-            keep_alive_switch.connect("notify::active", self._on_keep_alive_toggled)
-            desc = "Keep Ulauncher running in the background after first use so it stays ready"
-            self._add_setting_row(general_box, "Run in background", keep_alive_switch, f"{desc}{run_in_bg_footer}")
-
+        self._add_run_in_background_row(general_box)
         self._add_tray_icon_row(general_box)
-
-        # Hotkey
-        if HotkeyController.is_supported():
-            hotkey_button = Gtk.Button.new_with_label("Set hotkey")
-            hotkey_button.connect("clicked", self._on_hotkey_clicked)
-            hotkey_desc = "Choose the global keyboard shortcut that opens Ulauncher."
-            self._add_setting_row(general_box, "Hotkey", hotkey_button, hotkey_desc)
-        else:
-            warning_text = (
-                "Ulauncher doesn't support setting global shortcuts for your desktop environment. "
-                "Bind this command in your DE settings: gapplication launch io.ulauncher.Ulauncher"
-            )
-            unavailable_label = Gtk.Label(label="Not available", sensitive=False)
-            self._add_setting_row(general_box, "Hotkey", unavailable_label, warning_text, is_warning=True)
-
-        # Color theme
-        theme_desc = "Switch between installed themes. Changes apply immediately when you relaunch the UI."
-        self._add_setting_row(general_box, "Color theme", self._create_theme_combo(), theme_desc)
-
-        # Screen to show on
-        screen_combo = Gtk.ComboBoxText()
-        screen_combo.append("mouse-pointer-monitor", "The screen with the mouse pointer")
-        screen_combo.append("default-monitor", "The default screen")
-        screen_combo.set_wrap_width(1)
-        screen_combo.set_active_id(self.settings.render_on_screen)
-        screen_combo.connect("changed", self._on_screen_changed)
-        screen_desc = "Decide which monitor presents Ulauncher when you press the hotkey."
-        self._add_setting_row(general_box, "Screen to show on", screen_combo, screen_desc)
-
-        # Auto resume
-        auto_resume_switch = Gtk.Switch(active=self.settings.auto_resume)
-        auto_resume_switch.connect("notify::active", self._on_auto_resume_toggled)
-        auto_resume_desc = "If you close Ulauncher without running the query, restore it on the next session."
-        self._add_setting_row(general_box, "Auto-resume unfinished sessions", auto_resume_switch, auto_resume_desc)
-
-        # Close on focus out
-        close_focus_switch = Gtk.Switch(active=self.settings.close_on_focus_out)
-        close_focus_switch.connect("notify::active", self._on_close_focus_toggled)
-        focus_desc = "Hide the Ulauncher window automatically as soon as another app grabs focus."
-        self._add_setting_row(general_box, "Close Ulauncher when losing focus", close_focus_switch, focus_desc)
-
-        # Grab mouse pointer
-        grab_mouse_switch = Gtk.Switch(active=self.settings.grab_mouse_pointer)
-        grab_mouse_switch.connect("notify::active", self._on_grab_mouse_toggled)
-        grab_desc = "Capture the pointer to prevent focus-follows-mouse setups from stealing the launcher focus."
-        self._add_setting_row(general_box, "Grab mouse pointer focus", grab_mouse_switch, grab_desc)
+        self._add_hotkey_row(general_box)
+        self._add_setting_row(
+            general_box,
+            "Color theme",
+            self._create_theme_combo(),
+            "Switch between installed themes. Changes apply immediately when you relaunch the UI.",
+        )
+        self._add_setting_row(
+            general_box,
+            "Screen to show on",
+            self._create_screen_combo(),
+            "Decide which monitor presents Ulauncher when you press the hotkey.",
+        )
+        self._add_switch_row(
+            general_box,
+            "Auto-resume unfinished sessions",
+            "If you close Ulauncher without running the query, restore it on the next session.",
+            self.settings.auto_resume,
+            self._on_auto_resume_toggled,
+        )
+        self._add_switch_row(
+            general_box,
+            "Close Ulauncher when losing focus",
+            "Hide the Ulauncher window automatically as soon as another app grabs focus.",
+            self.settings.close_on_focus_out,
+            self._on_close_focus_toggled,
+        )
+        self._add_switch_row(
+            general_box,
+            "Grab mouse pointer focus",
+            "Capture the pointer to prevent focus-follows-mouse setups from stealing the launcher focus.",
+            self.settings.grab_mouse_pointer,
+            self._on_grab_mouse_toggled,
+        )
 
     def _create_theme_combo(self) -> Gtk.ComboBox:
         """Theme picker showing each theme's source as a dimmed second line.
@@ -231,89 +244,143 @@ class PreferencesView(BaseView):
         combo.connect("changed", self._on_theme_changed)
         return combo
 
+    def _create_screen_combo(self) -> Gtk.ComboBoxText:
+        combo = Gtk.ComboBoxText()
+        combo.append("mouse-pointer-monitor", "The screen with the mouse pointer")
+        combo.append("default-monitor", "The default screen")
+        combo.set_wrap_width(1)
+        combo.set_active_id(self.settings.render_on_screen)
+        combo.connect("changed", self._on_screen_changed)
+        return combo
+
     def _add_applications_section(self, parent: Gtk.Box) -> None:
         """Add applications settings section"""
         applications_box = self._create_section_container(parent, "Applications")
-
-        # Enable application mode
-        app_mode_switch = Gtk.Switch(active=self.settings.enable_application_mode)
-        app_mode_switch.connect("notify::active", self._on_app_mode_toggled)
-        desc = "Include desktop applications alongside shortcuts and extensions in search results."
-        self._add_setting_row(applications_box, "Include applications in search", app_mode_switch, desc)
-
-        # Raise if started
-        raise_switch = Gtk.Switch(active=self.settings.raise_if_started, sensitive=IS_X11)
-        raise_switch.connect("notify::active", self._on_raise_toggled)
-        desc = "Focus an already running application instead of launching a duplicate instance. Works only on X11."
-
-        self._add_setting_row(applications_box, "Switch to application if already running", raise_switch, desc)
-
-        # Window width
-        width_adjustment = Gtk.Adjustment(value=self.settings.base_width, lower=540, upper=2000, step_increment=10)
-        width_spin = Gtk.SpinButton(adjustment=width_adjustment)
-        width_spin.connect("value-changed", self._on_width_changed)
-        desc = "Set the launcher width between 540 and 2000 pixels to match your workspace."
-        self._add_setting_row(applications_box, "Window width", width_spin, desc)
-
-        # Top apps
-        recent_adjustment = Gtk.Adjustment(value=self.settings.max_recent_apps, lower=0, upper=20, step_increment=1)
-        recent_spin = Gtk.SpinButton(adjustment=recent_adjustment)
-        recent_spin.connect("value-changed", self._on_recent_apps_changed)
-        desc = "Control how many frequently used applications remain pinned near the top of the results."
-        self._add_setting_row(applications_box, "Number of frequent apps to show", recent_spin, desc)
+        self._add_switch_row(
+            applications_box,
+            "Include applications in search",
+            "Include desktop applications alongside shortcuts and extensions in search results.",
+            self.settings.enable_application_mode,
+            self._on_app_mode_toggled,
+        )
+        self._add_switch_row(
+            applications_box,
+            "Switch to application if already running",
+            "Focus an already running application instead of launching a duplicate instance. Works only on X11.",
+            self.settings.raise_if_started,
+            self._on_raise_toggled,
+            sensitive=IS_X11,
+        )
+        self._add_spin_row(
+            applications_box,
+            "Window width",
+            "Set the launcher width between 540 and 2000 pixels to match your workspace.",
+            self.settings.base_width,
+            540,
+            2000,
+            self._on_width_changed,
+            step_increment=10,
+        )
+        self._add_spin_row(
+            applications_box,
+            "Number of frequent apps to show",
+            "Control how many frequently used applications remain pinned near the top of the results.",
+            self.settings.max_recent_apps,
+            0,
+            20,
+            self._on_recent_apps_changed,
+        )
 
     def _add_advanced_section(self, parent: Gtk.Box) -> None:
         """Add advanced settings section"""
         advanced_box = self._create_section_container(parent, "Advanced")
-
-        # Desktop filters
-        filters_switch = Gtk.Switch(active=self.settings.disable_desktop_filters)
-        filters_switch.connect("notify::active", self._on_filters_toggled)
-        desc = "Show applications that are hidden for your desktop environment by ignoring desktop filters."
-        self._add_setting_row(advanced_box, "Include foreign desktop apps", filters_switch, desc)
-
-        # Window shadow
-        shadow_adjustment = Gtk.Adjustment(value=self.settings.window_shadow, lower=0, upper=25, step_increment=1)
-        shadow_spin = Gtk.SpinButton(adjustment=shadow_adjustment)
-        shadow_spin.connect("value-changed", self._on_shadow_changed)
-        desc = (
+        self._add_switch_row(
+            advanced_box,
+            "Include foreign desktop apps",
+            "Show applications that are hidden for your desktop environment by ignoring desktop filters.",
+            self.settings.disable_desktop_filters,
+            self._on_filters_toggled,
+        )
+        self._add_spin_row(
+            advanced_box,
+            "Window shadow size",
             "The window shadow size. Set to 0 to disable. "
-            "Shadows are also disabled if we detect your window manager cannot support them."
+            "Shadows are also disabled if we detect your window manager cannot support them.",
+            self.settings.window_shadow,
+            0,
+            25,
+            self._on_shadow_changed,
         )
-        self._add_setting_row(advanced_box, "Window shadow size", shadow_spin, desc)
-
-        # GTK Layer Shell
-        layer_switch = Gtk.Switch(active=self.settings.layer_shell, sensitive=not IS_X11)
-        layer_switch.connect("notify::active", self._on_layer_toggled)
-        desc = (
+        self._add_switch_row(
+            advanced_box,
+            "Enable Layer Shell",
             "Use Layer Shell for positioning on Wayland (when supported). "
-            "Recommended unless your desktop handles Wayland positioning separately (Hyprland)"
+            "Recommended unless your desktop handles Wayland positioning separately (Hyprland)",
+            self.settings.layer_shell,
+            self._on_layer_toggled,
+            sensitive=not IS_X11,
         )
-        self._add_setting_row(advanced_box, "Enable Layer Shell", layer_switch, desc)
-
-        # Jump keys
-        jump_entry = Gtk.Entry(text=self.settings.jump_keys, width_chars=50)
-        jump_entry.connect("changed", self._on_jump_keys_changed)
-        desc = "Configure the characters used for jumping directly to a result with modifier shortcuts."
-        self._add_setting_row(advanced_box, "Jump keys", jump_entry, desc, full_width=True)
-
-        # Terminal command
-        terminal_entry = Gtk.Entry(text=self.settings.terminal_command, width_chars=50)
-        terminal_entry.connect("changed", self._on_terminal_changed)
-        desc = (
-            "Override the terminal binary for desktop entries that request a terminal. Leave blank to use the default."
+        self._add_entry_row(
+            advanced_box,
+            "Jump keys",
+            "Configure the characters used for jumping directly to a result with modifier shortcuts.",
+            self.settings.jump_keys,
+            self._on_jump_keys_changed,
         )
-        self._add_setting_row(advanced_box, "Terminal command", terminal_entry, desc, full_width=True)
+        self._add_entry_row(
+            advanced_box,
+            "Terminal command",
+            "Override the terminal binary for desktop entries that request a terminal. Leave blank to use the default.",
+            self.settings.terminal_command,
+            self._on_terminal_changed,
+        )
+
+    def _add_run_in_background_row(self, parent: Gtk.Box) -> None:
+        # Systemd autostart when available, otherwise a keep-alive fallback switch.
+        footer = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
+        autostart_status = self.autostart_pref.status()
+        if autostart_status.can_start:
+            self._add_switch_row(
+                parent,
+                "Run in background",
+                f"Start Ulauncher automatically with your desktop session so it's ready when you need it.{footer}",
+                autostart_status.is_enabled,
+                self._on_autostart_toggled,
+            )
+        else:
+            self._add_switch_row(
+                parent,
+                "Run in background",
+                f"Keep Ulauncher running in the background after first use so it stays ready{footer}",
+                self.settings.keep_alive,
+                self._on_keep_alive_toggled,
+            )
 
     def _add_tray_icon_row(self, parent: Gtk.Box) -> None:
         # Placed next to "Run in background" because the tray icon is only effective while persistent.
-        self._tray_switch = Gtk.Switch(active=self.settings.show_tray_icon, sensitive=self.settings.is_persistent())
-        self._tray_switch.connect("notify::active", self._on_tray_toggled)
-        desc = (
+        self._tray_switch = self._add_switch_row(
+            parent,
+            "Show tray icon",
             "Display a tray icon for quick actions. Only available while Ulauncher is set to "
-            "run in the background. Also requires AppIndicator3 or XApp on X11."
+            "run in the background. Also requires AppIndicator3 or XApp on X11.",
+            self.settings.show_tray_icon,
+            self._on_tray_toggled,
+            sensitive=self.settings.is_persistent(),
         )
-        self._add_setting_row(parent, "Show tray icon", self._tray_switch, desc)
+
+    def _add_hotkey_row(self, parent: Gtk.Box) -> None:
+        if HotkeyController.is_supported():
+            hotkey_button = Gtk.Button.new_with_label("Set hotkey")
+            hotkey_button.connect("clicked", self._on_hotkey_clicked)
+            desc = "Choose the global keyboard shortcut that opens Ulauncher."
+            self._add_setting_row(parent, "Hotkey", hotkey_button, desc)
+        else:
+            warning_text = (
+                "Ulauncher doesn't support setting global shortcuts for your desktop environment. "
+                "Bind this command in your DE settings: gapplication launch io.ulauncher.Ulauncher"
+            )
+            unavailable_label = Gtk.Label(label="Not available", sensitive=False)
+            self._add_setting_row(parent, "Hotkey", unavailable_label, warning_text, is_warning=True)
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
