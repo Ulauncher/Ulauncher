@@ -4,7 +4,7 @@ import contextlib
 from typing import Any
 
 from ulauncher import paths
-from ulauncher.data import JsonConf
+from ulauncher.data import Err, JsonConf
 from ulauncher.utils.json_utils import json_load_dict, json_save
 from ulauncher.utils.lru_cache import lru_cache
 
@@ -76,7 +76,10 @@ class Settings(JsonConf):
         """
         from ulauncher.utils.systemd_controller import SystemdController
 
-        status = SystemdController("ulauncher").status()
+        result = SystemdController("ulauncher").status()
+        if isinstance(result, Err):
+            return self.keep_alive
+        status = result.value
         if status.can_start:
             return status.is_enabled
         return self.keep_alive

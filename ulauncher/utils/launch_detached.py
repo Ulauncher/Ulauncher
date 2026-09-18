@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+from ulauncher.data import Err
 from ulauncher.gi import GLib
 from ulauncher.utils.systemd_controller import SystemdController
 
@@ -39,7 +40,8 @@ def detach_child() -> None:
 
 
 def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
-    use_systemd_run = SystemdController("ulauncher").status().is_active
+    status = SystemdController("ulauncher").status()
+    use_systemd_run = not isinstance(status, Err) and status.value.is_active
     if use_systemd_run:
         cmd = ["systemd-run", "--user", "--scope", *cmd]
 

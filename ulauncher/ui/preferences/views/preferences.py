@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 from gi.repository import GLib, Gtk, Pango
 
+from ulauncher.data import Err
 from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 from ulauncher.ui.helpers.theme import get_theme_source, get_themes
 from ulauncher.ui.preferences.views import BaseView, styled
@@ -339,12 +340,12 @@ class PreferencesView(BaseView):
         # Systemd autostart when available, otherwise a keep-alive fallback switch.
         footer = "\n<b>Recommended:</b> Enabling this will make Ulauncher open noticeably faster."
         autostart_status = self.autostart_pref.status()
-        if autostart_status.can_start:
+        if not isinstance(autostart_status, Err) and autostart_status.value.can_start:
             self._add_switch_row(
                 parent,
                 "Run in background",
                 f"Start Ulauncher automatically with your desktop session so it's ready when you need it.{footer}",
-                autostart_status.is_enabled,
+                autostart_status.value.is_enabled,
                 self._on_autostart_toggled,
             )
         else:
@@ -385,8 +386,9 @@ class PreferencesView(BaseView):
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
+        status = self.autostart_pref.status()
         # Skip if already in sync - notably when set_active() below re-fires this handler.
-        if is_enabled == self.autostart_pref.status().is_enabled:
+        if not isinstance(status, Err) and is_enabled == status.value.is_enabled:
             return
         try:
             self.autostart_pref.toggle(is_enabled)

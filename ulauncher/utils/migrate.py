@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from ulauncher import first_v6_run, paths
+from ulauncher.data import Err
 from ulauncher.utils.json_utils import json_load_dict, json_save
 
 _logger = logging.getLogger(__name__)
@@ -135,7 +136,11 @@ def v5_to_v6() -> None:
         try:
             systemd_unit = SystemdController("ulauncher")
             autostart_file = Path(f"{paths.CONFIG}/../autostart/ulauncher.desktop").resolve()
-            if os.path.exists(autostart_file) and systemd_unit.status().can_start:
+            if (
+                os.path.exists(autostart_file)
+                and not isinstance(status := systemd_unit.status(), Err)
+                and status.value.can_start
+            ):
                 autostart_config = ConfigParser()
                 autostart_config.read(autostart_file)
                 if autostart_config["Desktop Entry"]["X-GNOME-Autostart-enabled"] == "true":
