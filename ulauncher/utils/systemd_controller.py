@@ -71,9 +71,14 @@ class SystemdController:
                 return result
         return Ok(SystemdUnitStatus(result.value.splitlines()))
 
-    def restart(self) -> None:
-        if self.supported:
-            systemctl_run("restart", self._unit)
+    def restart(self) -> Fallible[None, str]:
+        """Ask systemd to restart the unit. Err when the job was not accepted."""
+        if not self.supported:
+            return Err("systemctl not found")
+        result = systemctl_run("restart", self._unit)
+        if isinstance(result, Err):
+            return result
+        return Ok(None)
 
     def stop(self) -> None:
         if self.supported:

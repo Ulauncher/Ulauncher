@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from ulauncher.data import Err, Ok
+from ulauncher.data import Err, Fallible, Ok
 from ulauncher.utils.systemd_controller import SystemdController, SystemdUnitStatus
 from ulauncher.utils.systemd_controller import systemctl_run as run_systemctl
 
@@ -86,6 +86,28 @@ class TestSystemdController:
         result = SystemdController("ulauncher").status()
         assert isinstance(result, Ok)
         assert not result.value.is_active
+
+    @pytest.mark.parametrize(
+        ("systemctl_result", "expected"),
+        [
+            (Ok(""), Ok(None)),
+            (Err("boom"), Err("boom")),
+        ],
+    )
+    def test_restart_returns_the_systemctl_result(
+        self,
+        controller: SystemdController,
+        systemctl_run: MagicMock,
+        systemctl_result: Fallible[str, str],
+        expected: Fallible[None, str],
+    ) -> None:
+        systemctl_run.return_value = systemctl_result
+        assert controller.restart() == expected
+        assert systemctl_run.call_args.args == ("restart", "ulauncher")
+
+    def test_restart_without_systemctl_is_err(self, mocker: MockerFixture) -> None:
+        mocker.patch("ulauncher.utils.systemd_controller.which", return_value=None)
+        assert isinstance(SystemdController("ulauncher").restart(), Err)
 
     def test_toggle_enables(self, controller: SystemdController, systemctl_run: MagicMock) -> None:
         systemctl_run.return_value = Ok("CanStart=yes")
