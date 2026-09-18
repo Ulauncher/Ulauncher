@@ -16,7 +16,7 @@ def systemctl_run(*args: str) -> str:
             "systemctl --user %s failed (%s): %s", " ".join(args), e.returncode, (e.stderr or e.stdout or "").strip()
         )
         return ""
-    except (subprocess.TimeoutExpired, OSError) as e:
+    except OSError as e:
         logger.warning("systemctl --user %s failed: %s", " ".join(args), e)
         return ""
 
