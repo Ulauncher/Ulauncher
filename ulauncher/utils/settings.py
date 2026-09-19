@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Any
+from typing import Any, Literal
 
 from ulauncher import paths
 from ulauncher.data import Err, JsonConf
@@ -9,6 +9,7 @@ from ulauncher.utils.json_utils import json_load_dict, json_save
 from ulauncher.utils.lru_cache import lru_cache
 
 _settings_file = f"{paths.CONFIG}/settings.json"
+DisplayBackend = Literal["auto", "system", "x11"]
 
 
 # TODO: Remove this some time after v6 stable (give people some month to migrate)
@@ -32,6 +33,7 @@ class Settings(JsonConf):
     base_width: int = 750
     close_on_focus_out: bool = True
     disable_desktop_filters: bool = False
+    display_backend: DisplayBackend = "auto"
     enable_application_mode: bool = True
     grab_mouse_pointer: bool = False
     hotkey_show_app: str = ""  # Note that this is no longer used, other than for migrating to the DE wrapper

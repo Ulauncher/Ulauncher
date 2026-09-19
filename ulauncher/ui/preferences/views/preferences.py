@@ -20,11 +20,13 @@ events = EventBus()
 COMBO_LABEL_MAX_CHARS = 50
 
 
-def _combo_label_markup(title: str, description: str | None = None) -> str:
+def _combo_label_markup(title: str, description: str | None = None, dimmed: bool = False) -> str:
     """A combo row's title, with an optional dimmed, smaller second line."""
-    label = GLib.markup_escape_text(title)
+    # Alpha only dims the text; the row stays fully interactive.
+    title_alpha, description_alpha = ("45%", "30%") if dimmed else ("100%", "55%")
+    label = f'<span alpha="{title_alpha}">{GLib.markup_escape_text(title)}</span>'
     if description:
-        label += f'\n<span size="x-small" alpha="55%">{GLib.markup_escape_text(description)}</span>'
+        label += f'\n<span size="x-small" alpha="{description_alpha}">{GLib.markup_escape_text(description)}</span>'
     return label
 
 
@@ -32,14 +34,17 @@ def _create_combo(
     rows: Sequence[tuple[str, str, str | None]],
     active_id: str,
     on_changed: Callable[[Gtk.ComboBox], None],
+    fallback_id: str | None = None,
+    dimmed_ids: set[str] | None = None,
 ) -> Gtk.ComboBox:
     """Build a combo from (id, title, optional second line) rows.
 
     Not ComboBoxText: rows may need markup for their second line, while the active id stays plain.
     """
+    dimmed = dimmed_ids or set()
     store = Gtk.ListStore(str, str)
     for item_id, title, description in rows:
-        store.append([item_id, _combo_label_markup(title, description)])
+        store.append([item_id, _combo_label_markup(title, description, item_id in dimmed)])
 
     combo = Gtk.ComboBox(model=store)
     combo.set_id_column(0)
@@ -52,7 +57,8 @@ def _create_combo(
     renderer.set_property("max-width-chars", COMBO_LABEL_MAX_CHARS)
     combo.pack_start(renderer, False)
     combo.add_attribute(renderer, "markup", 1)
-    combo.set_active_id(active_id)
+    if not combo.set_active_id(active_id) and fallback_id:
+        combo.set_active_id(fallback_id)
     combo.connect("changed", on_changed)
     return combo
 
@@ -77,9 +83,10 @@ def _description_label(text: str, *, warning: bool = False) -> Gtk.Label:
 class PreferencesView(BaseView):
     """General preferences page"""
 
-    def __init__(self) -> None:
+    def __init__(self, external_backend: str | None = None) -> None:
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.settings: Settings = Settings.load()
+        self._external_backend = external_backend
         self.autostart_pref: SystemdController = SystemdController("ulauncher")
 
         scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
@@ -218,6 +225,8 @@ class PreferencesView(BaseView):
         general_box = self._create_section_container(parent, "General")
         self._add_run_in_background_row(general_box)
         self._add_tray_icon_row(general_box)
+        self._add_display_backend_row(general_box)
+
         self._add_hotkey_row(general_box)
         self._add_setting_row(
             general_box,
@@ -380,6 +389,33 @@ class PreferencesView(BaseView):
             sensitive=self.settings.is_persistent(),
         )
 
+    def _add_display_backend_row(self, parent: Gtk.Box) -> None:
+        if IS_X11:
+            return
+        external = self._external_backend
+        rows = [
+            ("auto", "Auto", "Picks the backend best suited for your desktop"),
+            ("system", "System display server", "Use the display server your session provides"),
+            ("x11", "Prefer XWayland", "Run Ulauncher through X11 compatibility"),
+        ]
+        # Dim rather than disable, so the user can still choose a row the export overrides.
+        dimmed = {"auto", "system"} if external else set()
+        combo = _create_combo(
+            rows,
+            self.settings.display_backend,
+            self._on_display_backend_changed,
+            fallback_id="auto",
+            dimmed_ids=dimmed,
+        )
+        if external:
+            desc: str | Gtk.Widget = _description_label(
+                f"GDK_BACKEND is set to {GLib.markup_escape_text(external)} and overrides Auto and System.",
+                warning=True,
+            )
+        else:
+            desc = "Choose the display backend. Takes effect after Ulauncher restarts."
+        self._add_setting_row(parent, "Display backend", combo, desc)
+
     def _add_hotkey_row(self, parent: Gtk.Box) -> None:
         if HotkeyController.is_supported():
             hotkey_button = Gtk.Button.new_with_label("Set hotkey")
@@ -454,6 +490,12 @@ class PreferencesView(BaseView):
 
     def _on_layer_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         self.settings.save({"layer_shell": switch.get_active()})
+
+    def _on_display_backend_changed(self, combo: Gtk.ComboBox) -> None:
+        backend = combo.get_active_id()
+        if not backend:
+            return
+        self.settings.save({"display_backend": backend})
 
     def _on_tray_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
