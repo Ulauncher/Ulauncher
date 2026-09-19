@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 from gi.repository import GLib, Gtk, Pango
 
@@ -17,14 +17,44 @@ from ulauncher.utils.systemd_controller import SystemdController
 logger = logging.getLogger(__name__)
 events = EventBus()
 
-THEME_SOURCE_MAX_CHARS = 50
+COMBO_LABEL_MAX_CHARS = 50
 
 
-def _theme_label_markup(name: str, source: str) -> str:
-    """A theme's name, with its dimmed, smaller source on a second line."""
-    label = GLib.markup_escape_text(name)
-    label += f'\n<span size="x-small" alpha="55%">{GLib.markup_escape_text(source)}</span>'
+def _combo_label_markup(title: str, description: str | None = None) -> str:
+    """A combo row's title, with an optional dimmed, smaller second line."""
+    label = GLib.markup_escape_text(title)
+    if description:
+        label += f'\n<span size="x-small" alpha="55%">{GLib.markup_escape_text(description)}</span>'
     return label
+
+
+def _create_combo(
+    rows: Sequence[tuple[str, str, str | None]],
+    active_id: str,
+    on_changed: Callable[[Gtk.ComboBox], None],
+) -> Gtk.ComboBox:
+    """Build a combo from (id, title, optional second line) rows.
+
+    Not ComboBoxText: rows may need markup for their second line, while the active id stays plain.
+    """
+    store = Gtk.ListStore(str, str)
+    for item_id, title, description in rows:
+        store.append([item_id, _combo_label_markup(title, description)])
+
+    combo = Gtk.ComboBox(model=store)
+    combo.set_id_column(0)
+    # A list combo offsets the popup to the selected row, leaving a blank strip above the
+    # first row. A wrap width picks GTK's plain place-below-the-widget path instead.
+    combo.set_wrap_width(1)
+    renderer = Gtk.CellRendererText()
+    # Let the cell grow to a readable width, then middle-ellipsize each line
+    renderer.set_property("ellipsize", Pango.EllipsizeMode.MIDDLE)
+    renderer.set_property("max-width-chars", COMBO_LABEL_MAX_CHARS)
+    combo.pack_start(renderer, False)
+    combo.add_attribute(renderer, "markup", 1)
+    combo.set_active_id(active_id)
+    combo.connect("changed", on_changed)
+    return combo
 
 
 class PreferencesView(BaseView):
@@ -222,37 +252,16 @@ class PreferencesView(BaseView):
         )
 
     def _create_theme_combo(self) -> Gtk.ComboBox:
-        """Theme picker showing each theme's source as a dimmed second line.
+        """Theme picker showing each theme's source as a dimmed second line."""
+        rows = [(name, name, get_theme_source(theme)) for name, theme in get_themes().items()]
+        return _create_combo(rows, self.settings.theme_name, self._on_theme_changed)
 
-        Not ComboBoxText: the source needs markup, and the active id stays the plain theme name.
-        """
-        theme_store = Gtk.ListStore(str, str)
-        for name, theme in get_themes().items():
-            theme_store.append([name, _theme_label_markup(name, get_theme_source(theme))])
-
-        combo = Gtk.ComboBox(model=theme_store)
-        combo.set_id_column(0)
-        # A list combo offsets the popup to the selected row, leaving a blank strip above the
-        # first row. A wrap width picks GTK's plain place-below-the-widget path instead.
-        combo.set_wrap_width(1)
-        renderer = Gtk.CellRendererText()
-        # Let the cell grow to a readable width, then middle-ellipsize each line (the name and the source)
-        renderer.set_property("ellipsize", Pango.EllipsizeMode.MIDDLE)
-        renderer.set_property("max-width-chars", THEME_SOURCE_MAX_CHARS)
-        combo.pack_start(renderer, False)
-        combo.add_attribute(renderer, "markup", 1)
-        combo.set_active_id(self.settings.theme_name)
-        combo.connect("changed", self._on_theme_changed)
-        return combo
-
-    def _create_screen_combo(self) -> Gtk.ComboBoxText:
-        combo = Gtk.ComboBoxText()
-        combo.append("mouse-pointer-monitor", "The screen with the mouse pointer")
-        combo.append("default-monitor", "The default screen")
-        combo.set_wrap_width(1)
-        combo.set_active_id(self.settings.render_on_screen)
-        combo.connect("changed", self._on_screen_changed)
-        return combo
+    def _create_screen_combo(self) -> Gtk.ComboBox:
+        rows = [
+            ("mouse-pointer-monitor", "The screen with the mouse pointer", None),
+            ("default-monitor", "The default screen", None),
+        ]
+        return _create_combo(rows, self.settings.render_on_screen, self._on_screen_changed)
 
     def _add_applications_section(self, parent: Gtk.Box) -> None:
         """Add applications settings section"""
@@ -407,7 +416,7 @@ class PreferencesView(BaseView):
         if theme_name:
             self.settings.save({"theme_name": theme_name})
 
-    def _on_screen_changed(self, combo: Gtk.ComboBoxText) -> None:
+    def _on_screen_changed(self, combo: Gtk.ComboBox) -> None:
         screen = combo.get_active_id()
         if screen:
             self.settings.save({"render_on_screen": screen})
