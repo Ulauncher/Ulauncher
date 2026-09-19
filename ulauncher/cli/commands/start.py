@@ -7,10 +7,24 @@ import sys
 from types import TracebackType
 
 from ulauncher.cli import CLIArguments
+from ulauncher.utils.display_backend import preferred_backend
 
 
-def run(_: CLIArguments) -> int:
+def apply_preferred_backend(external_backend: str | None) -> None:
+    from ulauncher.utils.settings import Settings
+
+    if backend := preferred_backend(Settings.load().display_backend, external_backend):
+        os.environ["GDK_BACKEND"] = backend
+
+
+def run(args: CLIArguments) -> int:
     from ulauncher import init_helpers
+
+    # Re-exec starts from the inherited env, not the forced one.
+    restart_env = dict(os.environ)
+    external_backend = restart_env.get("GDK_BACKEND")
+    # GDK_BACKEND must be set before the first GTK import.
+    apply_preferred_backend(external_backend)
 
     init_helpers.init_x11_threads()
 
@@ -73,7 +87,7 @@ def run(_: CLIArguments) -> int:
     # Migrate user data to v6 compatible
     v5_to_v6()
 
-    app = UlauncherApp()
+    app = UlauncherApp(external_backend=external_backend)
 
     # Perf-test probe (see UlauncherWindow.on_initial_draw): when ULAUNCHER_PERF_START_BOOTTIME
     # is set, schedule the launcher to open as soon as the main loop is idle so the probe can
@@ -86,5 +100,11 @@ def run(_: CLIArguments) -> int:
 
     with contextlib.suppress(KeyboardInterrupt):
         app.start(activate=False)
+
+    if app.restart_requested:
+        cmd = [sys.executable, "-m", "ulauncher", "start"]
+        if args.verbose:
+            cmd.append("--verbose")
+        os.execve(sys.executable, cmd, restart_env)
 
     return 0
