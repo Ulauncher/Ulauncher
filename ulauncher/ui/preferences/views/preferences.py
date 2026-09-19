@@ -57,6 +57,23 @@ def _create_combo(
     return combo
 
 
+def _description_label(text: str, *, warning: bool = False) -> Gtk.Label:
+    label = styled(
+        Gtk.Label(
+            label=text,
+            halign=Gtk.Align.START,
+            wrap=True,
+            max_width_chars=70,
+            margin_top=2,
+            use_markup=True,
+        ),
+        "preferences-setting-description",
+        *(["warning-label"] if warning else []),
+    )
+    label.set_xalign(0.0)
+    return label
+
+
 class PreferencesView(BaseView):
     """General preferences page"""
 
@@ -111,9 +128,8 @@ class PreferencesView(BaseView):
         parent: Gtk.Box,
         label_text: str,
         widget: Gtk.Widget,
-        description: str,
+        description: str | Gtk.Widget,
         full_width: bool = False,
-        is_warning: bool = False,
     ) -> None:
         """Add a settings row with label and widget
 
@@ -121,9 +137,8 @@ class PreferencesView(BaseView):
             parent: The parent container
             label_text: The setting label
             widget: The control widget
-            description: Description text
+            description: Description text or a widget
             full_width: If True, widget takes full width below label (for long inputs like Entry)
-            is_warning: If True, style the description as a warning using GTK's 'warning' class
         """
         row_box = styled(Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=24), "preferences-setting-row")
         row_box.set_hexpand(True)
@@ -139,21 +154,8 @@ class PreferencesView(BaseView):
         label.set_xalign(0.0)
         label_container.pack_start(label, False, False, 0)
 
-        desc_label = styled(
-            Gtk.Label(
-                label=description,
-                halign=Gtk.Align.START,
-                wrap=True,
-                max_width_chars=70,
-                margin_top=2,
-                use_markup=True,
-            ),
-            "preferences-setting-description",
-        )
-        desc_label.set_xalign(0.0)
-        if is_warning:
-            desc_label.get_style_context().add_class("warning-label")
-        label_container.pack_start(desc_label, False, False, 0)
+        desc = _description_label(description) if isinstance(description, str) else description
+        label_container.pack_start(desc, False, False, 0)
 
         if full_width:
             # For long inputs: stack vertically
@@ -390,7 +392,7 @@ class PreferencesView(BaseView):
                 "Bind this command in your DE settings: gapplication launch io.ulauncher.Ulauncher"
             )
             unavailable_label = Gtk.Label(label="Not available", sensitive=False)
-            self._add_setting_row(parent, "Hotkey", unavailable_label, warning_text, is_warning=True)
+            self._add_setting_row(parent, "Hotkey", unavailable_label, _description_label(warning_text, warning=True))
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
