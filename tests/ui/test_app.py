@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import time
 from pathlib import Path
+from weakref import WeakValueDictionary
 
 import pytest
 from pytest_mock import MockerFixture
@@ -37,3 +38,41 @@ def test_cleanup__sweeps_every_staging_root(
         assert not (root / "old-dir").exists()
         assert not (root / "old-file").exists()
         assert (root / "recent-dir").is_dir()
+
+
+@pytest.mark.parametrize(
+    ("persistent", "backend_changed", "expect_restart"),
+    [
+        (True, True, True),
+        (True, False, False),
+        (False, True, False),
+    ],
+)
+def test_needs_restart__only_for_persistent_processes(
+    mocker: MockerFixture, persistent: bool, backend_changed: bool, expect_restart: bool
+) -> None:
+    """A non-persistent process just quits, so the next activation applies the change."""
+    app = UlauncherApp.__new__(UlauncherApp)
+    app._persistent = persistent
+    app._startup_display_backend = None
+    mocker.patch("ulauncher.ui.app.preferred_backend", return_value="x11" if backend_changed else None)
+    # Keep the test hermetic: the real load would read the user's settings.json and could rewrite it
+    mocker.patch("ulauncher.ui.app.Settings.load", return_value=mocker.Mock(display_backend="auto"))
+
+    assert app.needs_restart() == expect_restart
+
+
+def test_prefs_close__quits_normally_when_not_persistent(mocker: MockerFixture) -> None:
+    app = UlauncherApp.__new__(UlauncherApp)
+    app.windows = WeakValueDictionary()
+    app._persistent = False
+    app._startup_display_backend = None
+    mocker.patch("ulauncher.ui.app.preferred_backend", return_value="x11")
+    run_when_idle = mocker.patch("ulauncher.utils.scheduling.run_when_idle")
+    timer = mocker.patch("ulauncher.utils.scheduling.timer")
+
+    app._on_window_destroyed(mocker.Mock(), "preferences")
+
+    assert app.restart_requested is False
+    assert not run_when_idle.called
+    assert timer.called
