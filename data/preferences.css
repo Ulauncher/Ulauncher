@@ -153,7 +153,7 @@ notebook tab {
 /* override styles above: */
 
 .warning-label {
-  color: @warning_color; /* use standard warning color from theme */
+  color: #c08000;
   font-style: italic;
 }
 
