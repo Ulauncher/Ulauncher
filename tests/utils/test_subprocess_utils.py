@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from typing import Any, Callable
 
+import pytest
+
 from ulauncher.gi import GLib
 from ulauncher.utils.subprocess_utils import download_file, run_command
 
@@ -63,6 +65,19 @@ def test_run_command_spawn_failure() -> None:
     result, error = _drive(lambda ok, err: run_command(["definitely-not-a-real-binary-xyz"], ok, err))
     assert result is None
     assert isinstance(error, GLib.Error)
+
+
+# remove GDK_BACKEND=x11 but not GDK_BACKEND=wayland
+@pytest.mark.parametrize(("backend", "expected"), [("x11", "unset"), ("wayland", "wayland")])
+def test_run_command_gdk_backend(monkeypatch: pytest.MonkeyPatch, backend: str, expected: str) -> None:
+    monkeypatch.setenv("GDK_BACKEND", backend)
+    result, error = _drive(
+        lambda ok, err: run_command(
+            [sys.executable, "-c", "import os; print(os.environ.get('GDK_BACKEND', 'unset'))"], ok, err
+        )
+    )
+    assert error is None
+    assert result.strip() == expected
 
 
 def test_run_command_spawn_failure_does_not_hang_private_loop() -> None:

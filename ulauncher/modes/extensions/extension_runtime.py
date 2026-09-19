@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import signal
 import socket
 from collections import deque
@@ -52,6 +53,9 @@ class ExtensionRuntime:
 
         extension_env: dict[str, str] = env.copy() if env else {}
         launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE)
+
+        if os.environ.get("GDK_BACKEND") != "wayland":
+            launcher.unsetenv("GDK_BACKEND")
 
         for env_name, env_value in extension_env.items():
             launcher.setenv(env_name, env_value, True)

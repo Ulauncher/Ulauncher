@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from typing import Callable
@@ -14,6 +15,8 @@ def run_command(cmd: list[str], on_success: OnSuccess, on_error: OnError, *, cwd
     """Run a one-shot command via Gio.Subprocess, delivering its stdout to on_success or an error
     to on_error."""
     launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE)
+    if os.environ.get("GDK_BACKEND") != "wayland":
+        launcher.unsetenv("GDK_BACKEND")
     if cwd:
         launcher.set_cwd(cwd)
 
