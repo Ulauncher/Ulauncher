@@ -157,6 +157,16 @@ notebook tab {
   font-style: italic;
 }
 
+.restart-banner {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.restart-banner label {
+  font-weight: 500;
+}
+
 .ext-error-box {
   border-radius: 6px;
   border: 1px solid alpha(@warning_color, 0.3);

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from gi.repository import Gdk, Gtk
 
@@ -12,6 +12,9 @@ from ulauncher.ui.preferences.views.extensions import ExtensionsView
 from ulauncher.ui.preferences.views.help import HelpView
 from ulauncher.ui.preferences.views.preferences import PreferencesView
 from ulauncher.ui.preferences.views.shortcuts import ShortcutsView
+
+if TYPE_CHECKING:
+    from ulauncher.ui.app import UlauncherApp
 
 VIEW_CONFIG: list[tuple[str, type[BaseView]]] = [
     ("Preferences", PreferencesView),
@@ -54,6 +57,9 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(main_box)
 
+        self._restart_banner: Gtk.InfoBar = self._create_restart_banner()
+        main_box.pack_start(self._restart_banner, False, False, 0)
+
         # Create stack for view navigation
         self.stack: Gtk.Stack = Gtk.Stack(
             transition_type=Gtk.StackTransitionType.SLIDE_LEFT_RIGHT, transition_duration=200
@@ -63,14 +69,36 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         # Place navigation in the header bar
         self._create_headerbar()
 
+        app = cast("UlauncherApp | None", self.get_application())
         for name, view_class in VIEW_CONFIG:
-            view = view_class()
+            if view_class is PreferencesView:
+                view: BaseView = PreferencesView(external_backend=app.external_backend if app else None)
+            else:
+                view = view_class()
             self._add_view(view, name)
 
         # Setup custom styling
         self._setup_custom_styling()
 
         main_box.show_all()
+        self.update_restart_banner()
+
+    def _create_restart_banner(self) -> Gtk.InfoBar:
+        banner = Gtk.InfoBar(message_type=Gtk.MessageType.WARNING, show_close_button=False)
+        banner.get_style_context().add_class("restart-banner")
+        label = Gtk.Label(
+            label="Ulauncher needs to restart to apply some settings. Close this window to restart now.",
+            wrap=True,
+            justify=Gtk.Justification.CENTER,
+            xalign=0.5,
+        )
+        label.set_hexpand(True)
+        banner.get_content_area().pack_start(label, True, True, 0)
+        return banner
+
+    def update_restart_banner(self) -> None:
+        app = cast("UlauncherApp | None", self.get_application())
+        self._restart_banner.set_revealed(bool(app and app.needs_restart()))
 
     def _create_headerbar(self) -> None:
         header_bar = Gtk.HeaderBar()

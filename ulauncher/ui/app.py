@@ -16,6 +16,7 @@ from ulauncher.gi import Gio, GLib
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.ulauncher_window import UlauncherWindow
 from ulauncher.utils import scheduling
+from ulauncher.utils.display_backend import preferred_backend
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
 
@@ -36,6 +37,11 @@ class UlauncherApp(Gtk.Application):
     # Whether the app should keep running with no windows open. Set in setup() from the
     # systemd unit state (or keep_alive fallback) and kept in sync by toggle_hold().
     _persistent: bool = False
+    # Effective display backend at startup, so needs_restart() can detect a change.
+    _startup_display_backend: str | None = None
+    _external_backend: str | None = None
+    # Set when the preferences window closes with a changed backend, read by the CLI to re-exec.
+    restart_requested: bool = False
     # App-scoped query/mode controller, shared by every launcher window.
     core: UlauncherCore
     windows: WeakValueDictionary[Literal["main", "preferences"], Gtk.ApplicationWindow]
@@ -49,9 +55,10 @@ class UlauncherApp(Gtk.Application):
     def get_pygobject_version() -> tuple[int, int, int]:
         return gi.version_info  # type: ignore[attr-defined]
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, external_backend: str | None = None, **kwargs: Any) -> None:
         kwargs.update(application_id=app_id)
         super().__init__(*args, **kwargs)
+        self._external_backend = external_backend
         self.windows = WeakValueDictionary()
         events.set_self(self)
         self.connect("startup", lambda *_: self.setup())  # runs only once on the main instance
@@ -121,6 +128,7 @@ class UlauncherApp(Gtk.Application):
 
     def setup(self) -> None:
         settings = Settings.load()
+        self._startup_display_backend = preferred_backend(settings.display_backend, self._external_backend)
         self.core = UlauncherCore()
         # Always hold on app start (conditionally release after closing window)
         self.hold()
@@ -194,8 +202,31 @@ class UlauncherApp(Gtk.Application):
             main_window.connect("destroy", self._on_window_destroyed, "main")
             self.windows["main"] = main_window
 
+    @property
+    def external_backend(self) -> str | None:
+        """GDK_BACKEND exported by the user at startup, if any."""
+        return self._external_backend
+
+    def needs_restart(self) -> bool:
+        """Whether closing the preferences window should restart Ulauncher.
+
+        Only persistent processes are restarted: a non-persistent one quits as usual and
+        picks up the change on its next activation.
+        """
+        return self._persistent and (
+            # Read from disk, not the cache: save() updates the cache before the write, so
+            # a failed write must not queue a restart that would reload the old value anyway.
+            preferred_backend(Settings.load(force=True).display_backend, self._external_backend)
+            != self._startup_display_backend
+        )
+
     def _on_window_destroyed(self, _window: Gtk.Window, key: Literal["main", "preferences"]) -> None:
         self.windows.pop(key, None)
+        if key == "preferences" and self.needs_restart():
+            # Defer the quit: quitting inside the destroy handler would tear down the window we're unwinding.
+            self.restart_requested = True
+            scheduling.run_when_idle(self.quit)
+            return
         if not self.windows and not self._persistent:
             # Clipboard contents only live as long as the owning app, and clipboard managers
             # (klipper, gpaste, wl-clip-persist, ...) need time to snapshot them after we set
@@ -292,6 +323,11 @@ class UlauncherApp(Gtk.Application):
             self._persistent = value
             self.hold() if value else self.release()
             self.toggle_tray_icon(Settings.load().show_tray_icon)
+            # Persistence decides whether a pending backend change is still applied by a restart
+            if preferences := self.windows.get("preferences"):
+                from ulauncher.ui.preferences.preferences_window import PreferencesWindow
+
+                cast("PreferencesWindow", preferences).update_restart_banner()
 
     def _cleanup(self) -> None:
         import os

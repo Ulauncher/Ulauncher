@@ -8,7 +8,7 @@ from gi.repository import GLib, Gtk, Pango
 from ulauncher.data import Err
 from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 from ulauncher.ui.helpers.theme import get_theme_source, get_themes
-from ulauncher.ui.preferences.views import BaseView, styled
+from ulauncher.ui.preferences.views import BaseView, get_window_for_widget, styled
 from ulauncher.utils.environment import IS_X11
 from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.settings import Settings
@@ -496,6 +496,11 @@ class PreferencesView(BaseView):
         if not backend:
             return
         self.settings.save({"display_backend": backend})
+        # Imported late: preferences_window imports this module at module level
+        from ulauncher.ui.preferences.preferences_window import PreferencesWindow
+
+        if isinstance(window := get_window_for_widget(self), PreferencesWindow):
+            window.update_restart_banner()
 
     def _on_tray_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         is_enabled = switch.get_active()
