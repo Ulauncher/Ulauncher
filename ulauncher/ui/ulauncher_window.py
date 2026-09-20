@@ -33,6 +33,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     _css_provider: Gtk.CssProvider | None = None
     is_dragging = False
     is_focused = False
+    # focus-out events before deferred_init completes are WM noise, not user intent, and
+    # must not trigger close_on_focus_out (muffin 6.6 unfocuses the window mid-init: #1801)
+    is_ready = False
     layer_shell_enabled = False
     settings: Settings
 
@@ -201,6 +204,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         self.apply_styling()
         self.update_results_max_height()
         self.get_app().window_ready()
+        self.is_ready = True
 
     ######################################
     # GTK Signal Handlers
@@ -225,7 +229,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # The WM can briefly take focus away when a global hotkey fires, so delay the close to
         # give the window a chance to regain focus before it's actually closed
         self.is_focused = False
-        if self.settings.close_on_focus_out and not self.is_dragging:
+        if self.is_ready and self.settings.close_on_focus_out and not self.is_dragging:
             scheduling.timer(0.07, self._close_if_unfocused)
 
     def _close_if_unfocused(self) -> None:
