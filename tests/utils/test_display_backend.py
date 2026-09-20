@@ -27,20 +27,21 @@ def test_preferred_backend(display_backend: DisplayBackend, external_backend: st
 
 
 @pytest.mark.parametrize(
-    ("stored_value", "expected"),
+    ("stored_value", "de_verdict", "external_backend", "expected"),
     [
         # The UI falls back to showing Auto for values missing from the dropdown; so must the resolver
-        ("prefer_x11", None),
+        ("prefer_x11", False, None, None),
+        # The normalized value feeds the DE verdict, which picks XWayland here
+        ("prefer_x11", True, None, "x11"),
         # An export still wins over a normalized value
-        ("prefer_x11", "wayland"),
+        ("prefer_x11", False, "wayland", "wayland"),
     ],
 )
 def test_preferred_backend__unknown_value_is_auto(
-    mocker: MockerFixture, stored_value: str, expected: str | None
+    mocker: MockerFixture, stored_value: str, de_verdict: bool, external_backend: str | None, expected: str | None
 ) -> None:
-    # Normalizing to auto leaves the resolution to the DE verdict, which is forced to decline here
-    mocker.patch("ulauncher.utils.display_backend.xwayland_preferable_for_de", return_value=False)
-    assert preferred_backend(cast("DisplayBackend", stored_value), "wayland" if expected else None) == expected
+    mocker.patch("ulauncher.utils.display_backend.xwayland_preferable_for_de", return_value=de_verdict)
+    assert preferred_backend(cast("DisplayBackend", stored_value), external_backend) == expected
 
 
 @pytest.mark.parametrize(
