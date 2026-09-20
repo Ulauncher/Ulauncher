@@ -375,5 +375,7 @@ class UlauncherApp(Gtk.Application):
 
     @events.on
     def quit(self) -> None:
-        self._cleanup()
-        super().quit()
+        try:
+            self._cleanup()
+        finally:
+            super().quit()
