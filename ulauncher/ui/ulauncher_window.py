@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 import time
 from typing import TYPE_CHECKING, Any, cast
@@ -366,7 +367,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         theme = Theme.load(self.settings.theme_name)
         try:
             self._css_provider.load_from_data(theme.get_css(self._get_shadow_size()).encode())
-        except (OSError, GLib.Error):
+        except (OSError, GLib.Error, ValueError, re.error):
             logger.exception('Could not apply theme "%s"', theme.name)
             fallback = Theme.load(DEFAULT_THEME)
             if fallback.name != theme.name:
@@ -374,7 +375,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 theme = fallback
                 try:
                     self._css_provider.load_from_data(theme.get_css(self._get_shadow_size()).encode())
-                except (OSError, GLib.Error):
+                except (OSError, GLib.Error, ValueError, re.error):
                     logger.exception('Could not apply fallback theme "%s"', theme.name)
         self.apply_css(self)
         logger.info('Applying theme "%s"', theme.name)
