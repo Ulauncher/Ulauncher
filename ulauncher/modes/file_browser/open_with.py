@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from ulauncher.gi import Gio, GioUnix, GLib
 from ulauncher.internals.result import Result
@@ -55,8 +56,11 @@ def open_path_with_app(app_id: str, path: str) -> bool:
         logger.error("Could not load app %s to open %s", app_id, path)
         return False
     uri = Gio.File.new_for_path(path).get_uri()
+    launch_context = Gio.AppLaunchContext()
+    if os.environ.get("GDK_BACKEND") != "wayland":
+        launch_context.unsetenv("GDK_BACKEND")
     try:
-        return app_info.launch_uris([uri])
+        return app_info.launch_uris([uri], launch_context)
     except GLib.Error:
         logger.exception("Could not open %s with app %s", uri, app_id)
         return False
