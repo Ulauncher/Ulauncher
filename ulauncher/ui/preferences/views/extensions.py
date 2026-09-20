@@ -544,7 +544,11 @@ class ExtensionsView(BaseView):
                 max_width_chars=80,
             )
 
-            error_label.connect("activate-link", lambda _, uri: open_detached(uri))
+            def on_activate_link(_label: Gtk.Label, uri: str) -> bool:
+                open_detached(uri)
+                return True
+
+            error_label.connect("activate-link", on_activate_link)
             warning_frame.pack_start(error_label, False, False, 0)
             error_box.pack_start(warning_frame, False, False, 0)
             container.pack_start(error_box, False, False, 0)
