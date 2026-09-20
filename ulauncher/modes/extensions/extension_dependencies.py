@@ -45,7 +45,7 @@ class ExtensionDependencies:
         """
         try:
             requirements = self._read_requirements()
-        except OSError as e:
+        except (OSError, UnicodeDecodeError) as e:
             on_error(ext_exceptions.DependencyError(f"Could not read {self.path}/requirements.txt: {e}"))
             return
 
