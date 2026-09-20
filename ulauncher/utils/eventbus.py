@@ -49,7 +49,7 @@ class EventBus:
 
     def emit(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # Exception barrier: a raising listener must not break the emitter or the other listeners
-        for listener in _listeners[event_name]:
+        for listener in _listeners.get(event_name, ()):
             try:
                 listener(*args, **kwargs)
             except Exception:
