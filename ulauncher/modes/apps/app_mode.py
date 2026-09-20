@@ -47,6 +47,8 @@ class AppMode(Mode):
 
     def get_home_results(self, limit: int) -> list[AppResult]:
         """Get the top {N} apps (by recency-weighted score) to show when the query is empty"""
+        if not Settings.load().enable_application_mode:
+            return []
         return list(filter(None, map(AppResult.from_id, AppRankings.load().get_app_ids())))[:limit]
 
     def activate_result(
