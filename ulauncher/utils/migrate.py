@@ -96,7 +96,11 @@ def v5_to_v6() -> None:
 
     extension_db = json_load_dict(f"{paths.CONFIG}/extensions.json")
     for legacy_state in extension_db.values():
-        ext_id = legacy_state["id"]
+        if not isinstance(legacy_state, dict):
+            continue
+        ext_id = legacy_state.get("id")
+        if not ext_id:
+            continue
         state = ExtensionState.load(f"{paths.EXTENSIONS_STATE}/{ext_id}.json")
         if not state.id:  # don't overwrite if already migrated
             state.save(legacy_state)
