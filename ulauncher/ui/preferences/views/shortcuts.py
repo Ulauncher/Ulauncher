@@ -289,6 +289,7 @@ class ShortcutsView(views.BaseView):
 
     def _show_placeholder(self) -> None:
         """Show placeholder when no shortcut is selected"""
+        self.save_button = None
         has_shortcuts = any(self.shortcuts.values())
         heading = "Select a shortcut to edit" if has_shortcuts else "Create your first shortcut"
         hint = (
