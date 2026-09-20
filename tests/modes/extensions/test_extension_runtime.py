@@ -169,6 +169,29 @@ class TestExtensionRuntime:
         runtime.handle_exit(runtime._subprocess, Mock())
         exit_handler.assert_called_once_with("Exited", "")
 
+    @pytest.mark.parametrize(
+        ("stderr", "cause", "detail"),
+        [
+            ("ModuleNotFoundError: No module named 'requests'", "MissingModule", "requests"),
+            (
+                "ModuleNotFoundError: No module named 'ulauncher.foo'",
+                "MissingInternals",
+                "ModuleNotFoundError: No module named 'ulauncher.foo'",
+            ),
+            ("ModuleNotFoundError: no quoted module", "Exited", "ModuleNotFoundError: no quoted module"),
+        ],
+    )
+    def test_handle_exit__module_not_found(self, time: MagicMock, stderr: str, cause: str, detail: str) -> None:
+        exit_handler = Mock()
+        time.return_value = 0.0
+        runtime: Any = ExtensionRuntime("mock.test_exit_module", ["mock/path/to/ext"], None, exit_handler)
+        runtime._recent_errors.append(stderr)
+        time.return_value = 100.0
+
+        runtime.handle_exit(runtime._subprocess, Mock())
+
+        exit_handler.assert_called_once_with(cause, detail)
+
     def test_stop(self, mock_timer: MagicMock) -> None:
         """Test that stop() closes the connection and schedules a kill timer."""
         extid = "mock.test_stop"

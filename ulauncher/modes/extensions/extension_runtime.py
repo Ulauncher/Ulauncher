@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import signal
 import socket
 from collections import deque
@@ -193,7 +194,8 @@ class ExtensionRuntime:
             uptime_seconds = time() - self._start_time
             error_msg = "\n".join(self._recent_errors)
             if "ModuleNotFoundError" in error_msg:
-                package_name = error_msg.split("'")[1].split(".")[0]
+                match = re.search(r"No module named '([^']+)'", error_msg)
+                package_name = match.group(1).split(".")[0] if match else ""
                 if package_name == "ulauncher":
                     self._exit_handler("MissingInternals", error_msg)
                     return
