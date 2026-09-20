@@ -40,6 +40,7 @@ class PreferencesWindow(Gtk.ApplicationWindow):
         # Store views keyed by stack page name for keybinding access
         self.views: dict[str, BaseView] = {}
         self._theme_watcher: SystemThemeWatcher | None = None
+        self._css_provider: Gtk.CssProvider | None = None
 
         self._watch_system_theme()
 
@@ -152,12 +153,14 @@ class PreferencesWindow(Gtk.ApplicationWindow):
 
     def _setup_custom_styling(self) -> None:
         """Setup custom CSS styling for softer appearance"""
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_path(f"{paths.ASSETS}/preferences.css")
+        self._css_provider = Gtk.CssProvider()
+        self._css_provider.load_from_path(f"{paths.ASSETS}/preferences.css")
 
         screen = Gdk.Screen.get_default()
         if screen:
-            Gtk.StyleContext.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            Gtk.StyleContext.add_provider_for_screen(
+                screen, self._css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            )
 
     def _watch_system_theme(self) -> None:
         self._theme_watcher = SystemThemeWatcher(self._apply_system_theme)
@@ -170,3 +173,5 @@ class PreferencesWindow(Gtk.ApplicationWindow):
     def _on_destroy(self, *_args: Any) -> None:
         if self._theme_watcher:
             self._theme_watcher.disconnect()
+        if self._css_provider and (screen := Gdk.Screen.get_default()):
+            Gtk.StyleContext.remove_provider_for_screen(screen, self._css_provider)
