@@ -119,6 +119,25 @@ class TestSocketMsgController:
 
         assert on_close.called
 
+    def test_handler_exception_does_not_stop_listening(
+        self, controller_pair: tuple[SocketMsgController, socket.socket]
+    ) -> None:
+        """A raising handler must not prevent the next message from being read."""
+        controller, peer = controller_pair
+        received: list[dict[str, Any]] = []
+
+        def on_message(message: dict[str, Any]) -> None:
+            received.append(message)
+            if message.get("fail"):
+                raise RuntimeError
+
+        controller.listen(on_message)
+        peer.sendall(b'{"fail": true}\n')
+        process_pending_events()
+        peer.sendall(b'{"ok": true}\n')
+        process_pending_events()
+        assert received == [{"fail": True}, {"ok": True}]
+
     def test_two_way_communication(self, controller_pair: tuple[SocketMsgController, socket.socket]) -> None:
         """Test sending and receiving in both directions."""
         controller, peer = controller_pair

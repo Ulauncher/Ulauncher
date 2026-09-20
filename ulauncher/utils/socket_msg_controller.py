@@ -112,6 +112,8 @@ class SocketMsgController:
                 on_message(json.loads(message_str))
             except json.JSONDecodeError:
                 logger.warning("Invalid JSON received: %s", message_str)
+            except Exception:
+                logger.exception("Error handling message: %s", message_str)
 
             # Continue reading next message
             self.listen(on_message)
