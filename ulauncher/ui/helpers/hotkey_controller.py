@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
+from shutil import which
 from typing import Callable
 
-from ulauncher.utils.environment import DESKTOP_NAME
+from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.global_shortcut_portal import GlobalShortcutsPortal
+from ulauncher.utils.launch_detached import launch_detached
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +47,33 @@ class HotkeyController:
 
     @staticmethod
     def show_config() -> bool:
-        """Ask the portal to show the DE's shortcut configuration UI."""
-        if HotkeyController._portal and HotkeyController._portal.session_handle:
-            return HotkeyController._portal.configure()
-        return False
+        """Open the desktop's shortcut configuration UI for our bound shortcut."""
+        if HotkeyController._portal and HotkeyController._portal.configure():
+            return True
+        return HotkeyController._open_de_shortcut_settings()
+
+    @staticmethod
+    def _open_de_shortcut_settings() -> bool:
+        """Open the DE's keyboard settings app, where portal-bound shortcuts are shown.
+
+        Fallback for backends without the portal's ConfigureShortcuts (v2), which as
+        of GNOME 50 / Plasma 6.7 none implement.
+        """
+        if DESKTOP_ID == "GNOME":
+            cmd = ["gnome-control-center", "keyboard"]
+        elif DESKTOP_ID == "PLASMA":
+            # The shortcuts KCM is `kcm_keys`; the systemsettings binary was renamed to systemsettings5
+            settings_cmd = next((alias for alias in ("systemsettings", "systemsettings5") if which(alias)), None)
+            if not settings_cmd:
+                logger.warning("Could not find Plasma's shortcut settings (systemsettings)")
+                return False
+            cmd = [settings_cmd, "kcm_keys"]
+        else:
+            logger.warning("Ulauncher doesn't know where '%s' configures keyboard shortcuts", DESKTOP_NAME)
+            return False
+
+        launch_detached(cmd)
+        return True
 
     @staticmethod
     def describe_unsupported() -> str:

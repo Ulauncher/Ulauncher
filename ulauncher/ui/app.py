@@ -149,21 +149,19 @@ class UlauncherApp(Gtk.Application):
         if settings.show_tray_icon and self._persistent:
             self.toggle_tray_icon(True)
 
-        if first_run or settings.hotkey_show_app:
-            from ulauncher.ui.helpers.hotkey_controller import HotkeyController
+        # Portal sessions are tied to the D-Bus connection, so the shortcut must be
+        # (re)bound on every app start. Backends reuse the keys chosen previously.
+        from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 
-            if HotkeyController.is_supported():
-                # The portal shows the DE's own consent/shortcut dialog on first bind,
-                # so a notification is only needed when no portal backend exists.
-                HotkeyController.setup_default(self.show_launcher)
-            else:
-                self.show_notification(
-                    "de_hotkey_unsupported",
-                    "Cannot create global shortcut",
-                    HotkeyController.describe_unsupported(),
-                    "app.show-preferences",
-                )
-
+        if HotkeyController.is_supported():
+            HotkeyController.setup_default(self.show_launcher)
+        elif first_run or settings.hotkey_show_app:
+            self.show_notification(
+                "de_hotkey_unsupported",
+                "Cannot create global shortcut",
+                HotkeyController.describe_unsupported(),
+                "app.show-preferences",
+            )
             # Remove json file setting so the notification won't show again
             settings.save(hotkey_show_app="")
 
