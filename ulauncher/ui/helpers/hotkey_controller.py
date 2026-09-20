@@ -93,7 +93,7 @@ class HotkeyController:
         if DESKTOP_ID == "PLASMA":
             hotkey = "Ctrl+Space"
             config_path = ["--file", "kglobalshortcutsrc", "--group", f"{app_id}.desktop", "--key"]
-            config = subprocess.check_output(["kreadconfig5", *config_path, '"_launch"'])
+            config = subprocess.check_output(["kreadconfig5", *config_path, "_launch"])
             # only proceed if it's not already set up (don't override user prefs)
             if config.decode().strip():
                 logger.debug("Ulauncher Plasma global shortcut already created")
