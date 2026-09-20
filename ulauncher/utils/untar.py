@@ -23,4 +23,9 @@ def untar(archive_path: str, output_path: str, overwrite: bool = True, strip: in
             # Change member paths to strip N levels, like untar --strip-components=N
             member.name = member.name.split("/", -1 if is_traversal else strip)[-1]
 
-        archive.extractall(output_path)  # noqa: S202
+        # The data filter rejects escaping paths and symlinks/hardlinks, and drops special files.
+        # It is standard from 3.12 and backported to patched 3.8.17+/3.9.17+/3.10.12+/3.11.4+.
+        if hasattr(tarfile, "data_filter"):
+            archive.extractall(output_path, filter="data")
+        else:
+            archive.extractall(output_path)  # noqa: S202
