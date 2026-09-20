@@ -10,6 +10,15 @@ from ulauncher.utils.lru_cache import lru_cache
 
 _settings_file = f"{paths.CONFIG}/settings.json"
 DisplayBackend = Literal["auto", "system", "x11"]
+# Custom commands saved before terminal apps got their Exec as separate argv items. These flags take one string.
+LEGACY_TERMINAL_COMMANDS = {
+    "blackbox -c": "blackbox --",
+    "gnome-terminal -e": "gnome-terminal --",
+    "mate-terminal -e": "mate-terminal -x",
+    "ptyxis -x": "ptyxis --",
+    "terminator -e": "terminator -x",
+    "xfce4-terminal -e": "xfce4-terminal -x",
+}
 
 
 # TODO: Remove this some time after v6 stable (give people some month to migrate)
@@ -65,6 +74,8 @@ class Settings(JsonConf):
             # If people haven't changed their settings since 2020 it'll be set to 0
             value = int(value) if str(value).isnumeric() else 0
             normalized = "max_recent_apps"
+        elif normalized == "terminal_command":
+            value = LEGACY_TERMINAL_COMMANDS.get(" ".join(str(value).split()), value)
         super().__setitem__(normalized, value)
 
     def get_jump_keys(self) -> list[str]:
