@@ -4,7 +4,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from ulauncher import paths
 from ulauncher.data import Err, JsonConf
@@ -126,7 +126,7 @@ def _display_source(url: str) -> str:
         return url or "Unknown"
     parts = urlparse(parsed.value.browser_url or parsed.value.remote_url)
     if parts.scheme == "file":
-        return parts.path
+        return unquote(parts.path)
     path = parts.path.strip("/")
     if path.endswith(".git"):
         path = path[:-4]

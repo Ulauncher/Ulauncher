@@ -379,8 +379,9 @@ def parse_repo_url(input_url: str) -> Fallible[UrlParseResult, str]:
     if url_parts.scheme in ("", "file"):
         if not isdir(url_parts.path):
             return Err(f"Invalid path: {input_url}")
-        path = os.path.abspath(url_parts.path).lstrip("/")
-        browser_url = remote_url = f"file:///{path}"
+        local_path = os.path.abspath(url_parts.path)
+        path = local_path.lstrip("/")
+        browser_url = remote_url = Path(local_path).as_uri()
 
     elif host in ("github.com", "gitlab.com", "codeberg.org"):
         # GitLab projects can live in nested groups, and separate the project path from sub-pages
