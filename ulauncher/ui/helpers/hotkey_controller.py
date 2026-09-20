@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from shutil import which
 from typing import Callable
 
 from gi.repository import Gdk, Gtk
 
+from ulauncher import app_id
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.global_shortcut_portal import GlobalShortcutsPortal
 from ulauncher.utils.launch_detached import launch_detached
@@ -105,13 +107,15 @@ class HotkeyController:
 
     @staticmethod
     def _open_de_shortcut_settings() -> bool:
-        """Open the DE's keyboard settings app, where portal-bound shortcuts are shown.
+        """Open the DE's shortcut settings, where portal-bound shortcuts are shown.
 
         Fallback for backends without the portal's ConfigureShortcuts (v2), which as
         of GNOME 50 / Plasma 6.7 none implement.
         """
         if DESKTOP_ID == "GNOME":
-            cmd = ["gnome-control-center", "keyboard"]
+            # Portal shortcuts live on the app's page in the Applications panel (the
+            # Keyboard panel doesn't list them)
+            cmd = ["gnome-control-center", "applications", app_id]
         elif DESKTOP_ID == "PLASMA":
             # The shortcuts KCM is `kcm_keys`; the systemsettings binary was renamed to systemsettings5
             settings_cmd = next((alias for alias in ("systemsettings", "systemsettings5") if which(alias)), None)
@@ -125,6 +129,16 @@ class HotkeyController:
 
         launch_detached(cmd)
         return True
+
+    @staticmethod
+    def current_trigger_label() -> str:
+        """Human text of the currently assigned keys, for display in the preferences."""
+        portal = HotkeyController._portal
+        description = portal.trigger_description if portal else None
+        if not description:
+            return "Ctrl+Space"
+        # The DE may prefix an instruction, e.g. GNOME returns "Press <Control>space"
+        return re.sub(r"^press\s+", "", description.strip(), flags=re.IGNORECASE)
 
     @staticmethod
     def describe_unsupported() -> str:

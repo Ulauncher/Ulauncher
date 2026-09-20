@@ -28,7 +28,7 @@ def test_show_config__opens_the_portals_config_ui(mocker: MockerFixture) -> None
 @pytest.mark.parametrize(
     ("desktop_id", "expected_cmd"),
     [
-        ("GNOME", ["gnome-control-center", "keyboard"]),
+        ("GNOME", ["gnome-control-center", "applications", "io.ulauncher.Ulauncher"]),
         ("PLASMA", ["systemsettings5", "kcm_keys"]),
     ],
 )
@@ -89,6 +89,18 @@ def test_trigger_keyval__unparsable_description_returns_none() -> None:
 
 def test_trigger_keyval__none_without_portal() -> None:
     assert HotkeyController.trigger_keyval() is None
+
+
+def test_current_trigger_label__uses_the_de_text_without_the_press_instruction() -> None:
+    set_trigger("Press <Control><Alt>space")
+    assert HotkeyController.current_trigger_label() == "<Control><Alt>space"
+
+    set_trigger("Ctrl+Space")
+    assert HotkeyController.current_trigger_label() == "Ctrl+Space"
+
+
+def test_current_trigger_label__falls_back_to_the_preferred_trigger() -> None:
+    assert HotkeyController.current_trigger_label() == "Ctrl+Space"
 
 
 def test_swallow_leaked_trigger__eats_the_trigger_key_after_activation(mocker: MockerFixture) -> None:

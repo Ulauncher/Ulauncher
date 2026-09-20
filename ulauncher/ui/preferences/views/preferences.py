@@ -420,7 +420,8 @@ class PreferencesView(BaseView):
         if HotkeyController.is_supported():
             hotkey_button = Gtk.Button.new_with_label("Configure in desktop settings")
             hotkey_button.connect("clicked", self._on_hotkey_clicked)
-            desc = "The global shortcut that opens Ulauncher is configured by your desktop environment."
+            trigger = GLib.markup_escape_text(HotkeyController.current_trigger_label())
+            desc = f"Opens Ulauncher with {trigger}, configured by your desktop environment."
             self._add_setting_row(parent, "Hotkey", hotkey_button, desc)
         else:
             unavailable_label = Gtk.Label(label="Not available", sensitive=False)
