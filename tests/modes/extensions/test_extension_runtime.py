@@ -182,6 +182,14 @@ class TestExtensionRuntime:
         runtime._msg_controller.close.assert_called_once()
         mock_timer.assert_called_once_with(0.5, runtime._kill)
 
+    def test_stop__already_reaped__records_abort(self) -> None:
+        runtime: Any = ExtensionRuntime("mock.test_stop_reaped", ["mock/path/to/ext"])
+        runtime._subprocess.get_identifier.return_value = None
+
+        runtime.stop()
+
+        assert runtime._subprocess in aborted_subprocesses
+
     def test_kill__sends_sigkill(self) -> None:
         """Test that _kill() sends SIGKILL if the process is still running."""
 

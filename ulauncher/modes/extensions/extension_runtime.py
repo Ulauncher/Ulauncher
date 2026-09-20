@@ -106,12 +106,13 @@ class ExtensionRuntime:
         """
         Terminates extension
         """
+        aborted_subprocesses.add(self._subprocess)
+
         if not self._subprocess.get_identifier():
             logger.info("Cannot stop '%s'. It has already been terminated, or was never started", self._ext_id)
             return
 
         logger.info('Terminating extension "%s"', self._ext_id)
-        aborted_subprocesses.add(self._subprocess)
 
         self._msg_controller.close()
         # wait for graceful shutdown before forcibly killing
