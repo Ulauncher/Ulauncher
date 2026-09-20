@@ -13,7 +13,7 @@ SPECIAL_DIRS = {
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_TEMPLATES): "folder-templates",
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_VIDEOS): "folder-videos",
     GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP): "user-desktop",
-    Path("~").expanduser(): "folder-home",
+    str(Path("~").expanduser()): "folder-home",
 }
 
 
