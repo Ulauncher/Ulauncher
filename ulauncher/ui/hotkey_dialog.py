@@ -37,7 +37,7 @@ class HotkeyDialog(Gtk.Dialog):
     def handle_response(self, _widget: HotkeyDialog, response_id: int) -> None:
         if response_id == RESPONSES.OK:
             self.save_and_close()
-        if response_id == RESPONSES.CLOSE:
+        else:
             self.close()
 
     def set_hotkey(self, key_name: str = "") -> None:
