@@ -12,6 +12,7 @@ from ulauncher import paths
 from ulauncher.gi import GLib
 from ulauncher.internals.results_update import ResultsUpdate
 from ulauncher.ui.helpers import layer_shell
+from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 from ulauncher.ui.helpers.monitor import get_monitor, get_monitor_geometries
 from ulauncher.ui.helpers.theme import DEFAULT_THEME, Theme
 from ulauncher.ui.load_icon_surface import load_icon_surface
@@ -262,6 +263,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         Return True to stop other handlers from being invoked for the event
         """
         keyname = Gdk.keyval_name(event.keyval)
+        if HotkeyController.swallow_leaked_trigger(event):
+            # Mutter may replay the shortcut's last key into the just-activated window
+            return True
         alt = bool(event.state & Gdk.ModifierType.MOD1_MASK)
         ctrl = bool(event.state & Gdk.ModifierType.CONTROL_MASK)
         jump_keys = self.settings.get_jump_keys()

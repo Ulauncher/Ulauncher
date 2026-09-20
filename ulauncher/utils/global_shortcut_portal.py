@@ -19,6 +19,7 @@ Response signals), so everything is callback-based on the GLib main loop.
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from typing import Callable
 
@@ -44,6 +45,10 @@ class GlobalShortcutsPortal:
     """One GlobalShortcuts portal session, binding Ulauncher's shortcut."""
 
     session_handle: str | None = None
+    # DE-provided human text of the currently assigned keys, e.g. "Press <Control>space"
+    trigger_description: str | None = None
+    # time.monotonic() of the last Activated signal for our shortcut
+    activated_at: float | None = None
     on_activate: Callable[[], None]
     _portal: Gio.DBusProxy
 
@@ -158,9 +163,13 @@ class GlobalShortcutsPortal:
             logger.warning("Failed to call BindShortcuts: %s", e)
 
     def _on_bound(self, results: GLib.Variant) -> None:
-        if not results.unpack()["shortcuts"]:
+        bound = results.unpack()["shortcuts"]
+        if not bound:
             logger.warning("Global shortcut binding was rejected or cancelled")
             return
+        for shortcut_id, props in bound:
+            if shortcut_id == SHORTCUT_ID and "trigger_description" in props:
+                self.trigger_description = props["trigger_description"]
         logger.debug("Global shortcut bound: %s", SHORTCUT_TRIGGER)
         self._portal.connect("g-signal", self._on_g_signal)
 
@@ -170,9 +179,12 @@ class GlobalShortcutsPortal:
         if signal_name == "Activated":
             session_handle, shortcut_id, _timestamp, _options = parameters.unpack()
             if session_handle == self.session_handle and shortcut_id == SHORTCUT_ID:
+                self.activated_at = time.monotonic()
                 self.on_activate()
         elif signal_name == "ShortcutsChanged":
-            logger.debug("Portal shortcuts changed: %s", parameters)
+            for shortcut_id, props in parameters.unpack()[1]:
+                if shortcut_id == SHORTCUT_ID and "trigger_description" in props:
+                    self.trigger_description = props["trigger_description"]
 
     def configure(self) -> bool:
         """Ask the portal to show its shortcut configuration UI (portal interface version 2)."""

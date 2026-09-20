@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import logging
+import time
 from shutil import which
 from typing import Callable
+
+from gi.repository import Gdk, Gtk
 
 from ulauncher.utils.environment import DESKTOP_ID, DESKTOP_NAME
 from ulauncher.utils.global_shortcut_portal import GlobalShortcutsPortal
 from ulauncher.utils.launch_detached import launch_detached
 
 logger = logging.getLogger(__name__)
+
+# How long after activation a replayed trigger key is dropped. Mutter can leave the
+# shortcut's last key stuck in the activated window (mutter#4416), autorepeating until
+# another key is pressed. Without a cap the key would stay swallowed for legit typing.
+LEAK_SWALLOW_SECONDS = 3.0
 
 
 class HotkeyController:
@@ -51,6 +59,49 @@ class HotkeyController:
         if HotkeyController._portal and HotkeyController._portal.configure():
             return True
         return HotkeyController._open_de_shortcut_settings()
+
+    @staticmethod
+    def swallow_leaked_trigger(event: Gdk.EventKey) -> bool:
+        """Consume key events replaying the shortcut's last key right after activation.
+
+        Mutter can leave the last key of a shortcut stuck in XWayland windows that gain
+        focus from it (mutter#4416), so it autorepeats into the prompt until another key
+        is pressed. Queries never start with the trigger's character (input is
+        lstripped), so dropping it is safe. Active until another key arrives, the
+        swallow window expires, or the window closes.
+        """
+        portal = HotkeyController._portal
+        if not portal or not portal.trigger_description or portal.activated_at is None:
+            return False
+        if time.monotonic() - portal.activated_at > LEAK_SWALLOW_SECONDS:
+            portal.activated_at = None
+            return False
+        if event.keyval != HotkeyController.trigger_keyval():
+            # Any other key ends the replay: the stuck key only repeats until then
+            portal.activated_at = None
+            return False
+        return True
+
+    @staticmethod
+    def trigger_keyval() -> int | None:
+        """Best-effort GDK keyval of the assigned trigger, parsed from the DE's text.
+
+        Handles formats like "Press <Control><Alt>space" (GNOME, a GTK accelerator)
+        and "Ctrl+Alt+Space" (KDE). Modifier words don't parse as keyvals, so the
+        first matching token is the key. None when nothing parses.
+        """
+        portal = HotkeyController._portal
+        description = portal.trigger_description if portal else None
+        if not description:
+            return None
+        for token in reversed(description.split()):
+            if keyval := Gtk.accelerator_parse(token)[0]:
+                return keyval
+            # KDE-style "Ctrl+Alt+Space" isn't GTK accelerator syntax; try the bare key name
+            for name in reversed(token.replace("+", " ").split()):
+                if keyval := Gtk.accelerator_parse(name)[0] or Gtk.accelerator_parse(name.lower())[0]:
+                    return keyval
+        return None
 
     @staticmethod
     def _open_de_shortcut_settings() -> bool:

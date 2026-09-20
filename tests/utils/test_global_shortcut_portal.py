@@ -141,7 +141,16 @@ def test_bind__flow(gio: MagicMock, portal_proxy: MagicMock) -> None:
     assert description == SHORTCUT_DESCRIPTION
     assert trigger == SHORTCUT_TRIGGER
     bind_token = bind_options["handle_token"]
-    gio.portal_bus.deliver_response(bind_token, 0, {"shortcuts": GLib.Variant("a(sa{sv})", [(SHORTCUT_ID, {})])})
+    gio.portal_bus.deliver_response(
+        bind_token,
+        0,
+        {
+            "shortcuts": GLib.Variant(
+                "a(sa{sv})", [(SHORTCUT_ID, {"trigger_description": GLib.Variant("s", "Press <Control>space")})]
+            )
+        },
+    )
+    assert portal.trigger_description == "Press <Control>space"
 
     # Bound: listens for portal signals on the interface proxy
     signal_handler = portal_proxy.connect.call_args[0][1]
@@ -150,6 +159,15 @@ def test_bind__flow(gio: MagicMock, portal_proxy: MagicMock) -> None:
     activated_variant = GLib.Variant("(osta{sv})", (SESSION_HANDLE, SHORTCUT_ID, 1000, {}))
     signal_handler(portal_proxy, SENDER, "Activated", activated_variant)
     assert activated == [True]
+    assert portal.activated_at is not None
+
+    # ShortcutsChanged updates the DE-provided trigger text (e.g. after a rebind)
+    changed_variant = GLib.Variant(
+        "(oa(sa{sv}))",
+        (SESSION_HANDLE, [(SHORTCUT_ID, {"trigger_description": GLib.Variant("s", "Press <Alt>k")})]),
+    )
+    signal_handler(portal_proxy, SENDER, "ShortcutsChanged", changed_variant)
+    assert portal.trigger_description == "Press <Alt>k"
 
     # Other sessions/shortcuts must not activate us
     signal_handler(portal_proxy, SENDER, "Activated", GLib.Variant("(osta{sv})", ("/other", SHORTCUT_ID, 1000, {})))
