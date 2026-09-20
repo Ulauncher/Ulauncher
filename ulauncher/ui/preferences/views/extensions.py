@@ -135,6 +135,8 @@ class ExtensionsView(BaseView):
 
     def _on_extension_item_activated(self, item: SidebarItem) -> None:
         """Handle extension selection in sidebar"""
+        if self.active_ext and self.active_ext.id == item.id:
+            return
         if ext := ext_service.get(item.id):
             self.active_ext = ext
             self._show_extension_details(ext)
