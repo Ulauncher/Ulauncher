@@ -79,7 +79,7 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
         try:
             cmd = shlex.split(shell_string)
             if use_custom_terminal:
-                cmd = [*cmd, app_exec]
+                cmd = [*cmd, *shlex.split(app_exec)]
         except ValueError:
             logger.exception("Could not parse command for app %s: %r", app_id, shell_string)
             return False
