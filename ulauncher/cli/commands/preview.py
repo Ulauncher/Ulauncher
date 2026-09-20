@@ -74,8 +74,8 @@ def _resolve_ext_id(path: Path) -> str | None:
             .decode()
             .strip()
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        # Not a git repository or git not available, use path as is
+    except (subprocess.CalledProcessError, OSError):
+        # Not a git repository, or git is missing/unusable, use path as is
         logger.debug("No git remote found, using path as URL input")
     except subprocess.TimeoutExpired:
         logger.debug("git remote lookup timed out, using path as URL input")
