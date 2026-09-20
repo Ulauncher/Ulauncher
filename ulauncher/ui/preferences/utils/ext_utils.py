@@ -67,7 +67,7 @@ def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: s
         "Incompatible": "The extension is not compatible with this version of Ulauncher.",
         "FailedToStart": (
             "Ulauncher could not start the extension process. This is usually a problem with the "
-            f"system rather than the extension itself.\n\n<small>Details: {error_message}</small>"
+            f"system rather than the extension itself.\n\n<small>Details: {html.escape(error_message)}</small>"
         ),
     }
     if error.type in static_messages:
@@ -76,7 +76,7 @@ def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: s
     if error.type == "Exited":
         message = "The extension exited with an error."
         if error_message:
-            message += f"\n\n<small>Details: {error_message}</small>"
+            message += f"\n\n<small>Details: {html.escape(error_message)}</small>"
         if report_link := _report_link(website_url, issues_url):
             message += f"\n\n<small>You can {report_link}</small>"
         return message
@@ -101,7 +101,7 @@ def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: s
     if error.type == "MissingModule":
         module_name = error_message
         message = (
-            f"The extension crashed because it could not import module <b>{module_name}</b>.\n\n"
+            f"The extension crashed because it could not import module <b>{html.escape(module_name)}</b>.\n\n"
             f"Try installing this module manually:\n"
             f"{fmt_pango_code_block(f'pip3 install {module_name} --user')}\n\n"
             f"Then restart Ulauncher."
@@ -110,7 +110,7 @@ def get_error_message(error: ExtensionErrorData, website_url: str, issues_url: s
             message += f"\n\n<small>If that doesn't help, {report_link}</small>"
         return message
 
-    message = error_message or f"Unknown error type: {error.type}"
+    message = html.escape(error_message) or f"Unknown error type: {error.type}"
     if report_link := _report_link(website_url, issues_url):
         message += f"\n\n<small>You can {report_link}</small>"
     return message

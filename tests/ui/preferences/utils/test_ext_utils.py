@@ -1,6 +1,6 @@
 import pytest
 
-from ulauncher.modes.extensions.extension_record import ExtensionErrorData
+from ulauncher.modes.extensions.extension_record import ExtensionErrorData, ExtensionState
 from ulauncher.ui.preferences.utils.ext_utils import autofmt_pango_code_block, get_error_message
 
 WEBSITE = "https://host.tld/u/r"
@@ -36,6 +36,18 @@ class TestGetErrorMessage:
         message = get_error_message(error, WEBSITE, ISSUES)
         assert f"You can report the issue: {ISSUES_LINK}" in message
         assert WEBSITE not in message
+
+    @pytest.mark.parametrize("error_type", ["FailedToStart", "Exited", "MissingModule", "SomeUnknown"])
+    def test_error_text_is_escaped_into_the_markup(self, error_type: str) -> None:
+        # Built the way it loads from disk, which is the only way an unknown type gets in
+        state = ExtensionState()
+        state["error"] = {"type": error_type, "message": "<b>boom</b> & <a href='x'>l</a>"}
+        error = state.error
+        assert error is not None
+        message = get_error_message(error, WEBSITE, ISSUES)
+        assert "<b>boom</b>" not in message
+        assert "href='x'" not in message
+        assert "&lt;b&gt;boom&lt;/b&gt;" in message
 
     def test_url_is_escaped_into_the_markup(self) -> None:
         error = ExtensionErrorData(type="Exited", message="boom")
