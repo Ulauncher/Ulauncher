@@ -418,17 +418,14 @@ class PreferencesView(BaseView):
 
     def _add_hotkey_row(self, parent: Gtk.Box) -> None:
         if HotkeyController.is_supported():
-            hotkey_button = Gtk.Button.new_with_label("Set hotkey")
+            hotkey_button = Gtk.Button.new_with_label("Configure in desktop settings")
             hotkey_button.connect("clicked", self._on_hotkey_clicked)
-            desc = "Choose the global keyboard shortcut that opens Ulauncher."
+            desc = "The global shortcut that opens Ulauncher is configured by your desktop environment."
             self._add_setting_row(parent, "Hotkey", hotkey_button, desc)
         else:
-            warning_text = (
-                "Ulauncher doesn't support setting global shortcuts for your desktop environment. "
-                "Bind this command in your DE settings: gapplication launch io.ulauncher.Ulauncher"
-            )
             unavailable_label = Gtk.Label(label="Not available", sensitive=False)
-            self._add_setting_row(parent, "Hotkey", unavailable_label, _description_label(warning_text, warning=True))
+            desc = HotkeyController.describe_unsupported()
+            self._add_setting_row(parent, "Hotkey", unavailable_label, _description_label(desc, warning=True))
 
     # Event handlers
     def _on_autostart_toggled(self, switch: Gtk.Switch, _: Any) -> None:
@@ -447,7 +444,8 @@ class PreferencesView(BaseView):
         events.emit("app:toggle_hold", is_enabled)
 
     def _on_hotkey_clicked(self, _: Gtk.Button) -> None:
-        HotkeyController.show_dialog()
+        if not HotkeyController.show_config():
+            logger.warning("Could not open the desktop's shortcut configuration UI")
 
     def _on_theme_changed(self, combo: Gtk.ComboBox) -> None:
         theme_name = combo.get_active_id()

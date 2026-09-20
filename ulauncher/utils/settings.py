@@ -36,7 +36,7 @@ class Settings(JsonConf):
     display_backend: DisplayBackend = "auto"
     enable_application_mode: bool = True
     grab_mouse_pointer: bool = False
-    hotkey_show_app: str = ""  # Note that this is no longer used, other than for migrating to the DE wrapper
+    hotkey_show_app: str = ""  # No longer used, other than to trigger the global shortcut setup on first run
     jump_keys: str = "1234567890abcdefghijklmnopqrstuvwxyz"
     keep_alive: bool = True
     layer_shell: bool = True

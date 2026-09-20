@@ -153,20 +153,15 @@ class UlauncherApp(Gtk.Application):
             from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 
             if HotkeyController.is_supported():
-                hotkey = "<Primary>space"
-                if settings.hotkey_show_app and not HotkeyController.is_plasma():
-                    hotkey = settings.hotkey_show_app
-                if HotkeyController.setup_default(hotkey):
-                    display_name = Gtk.accelerator_get_label(*Gtk.accelerator_parse(hotkey))
-                    body = f'Ulauncher has added a global keyboard shortcut: "{display_name}" to your desktop settings'
-                    self.show_notification("de_hotkey_auto_created", "Global shortcut created", body)
+                # The portal shows the DE's own consent/shortcut dialog on first bind,
+                # so a notification is only needed when no portal backend exists.
+                HotkeyController.setup_default(self.show_launcher)
             else:
-                body = (
-                    "Ulauncher doesn't support setting global keyboard shortcuts for your desktop. "
-                    "There are more details on this in the preferences view (click here to open)."
-                )
                 self.show_notification(
-                    "de_hotkey_unsupported", "Cannot create global shortcut", body, "app.show-preferences"
+                    "de_hotkey_unsupported",
+                    "Cannot create global shortcut",
+                    HotkeyController.describe_unsupported(),
+                    "app.show-preferences",
                 )
 
             # Remove json file setting so the notification won't show again
