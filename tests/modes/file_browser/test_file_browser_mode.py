@@ -89,6 +89,13 @@ class TestFileBrowserMode:
         flattened_results = [str(r.path) for r in get_results(FileBrowserMode(), query)]
         assert flattened_results == ["/tmp/B", "/tmp/D", "/tmp/c", "/tmp/a"]
 
+    def test_handle_query__existing_file_path__returns_file(self, mode: FileBrowserMode, tmp_path: Path) -> None:
+        # Not __file__: the fixture path lives under $HOME, which handle_query rewrites to ~
+        file_path = tmp_path / "file.txt"
+        file_path.write_text("x")
+        results = get_results(mode, Query(None, str(file_path)))
+        assert [str(r.path) for r in results] == [str(file_path)]
+
     def test_handle_query__invalid_path__empty_list_rendered(self, mode: FileBrowserMode) -> None:
         query = Query(None, "~~")
         assert get_results(mode, query) == []

@@ -83,10 +83,13 @@ class FileBrowserMode(Mode):
 
             if closest_parent != ".":  # valid path
                 if not remainder:
-                    file_names = self.list_files(str(path), sort_by_atime=True)
-                    for name in self.filter_dot_files(file_names)[: self.LIMIT]:
-                        file_path = join(closest_parent, name)
-                        results.append(FileResult(file_path))
+                    if not path.is_dir():
+                        results.append(FileResult(str(path)))
+                    else:
+                        file_names = self.list_files(str(path), sort_by_atime=True)
+                        for name in self.filter_dot_files(file_names)[: self.LIMIT]:
+                            file_path = join(closest_parent, name)
+                            results.append(FileResult(file_path))
 
                 else:
                     file_names = self.list_files(closest_parent)
