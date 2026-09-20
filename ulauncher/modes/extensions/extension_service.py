@@ -265,7 +265,7 @@ class ExtensionService(ExtensionRegistry):
             ]
 
         prefs = {p_id: pref.value for p_id, pref in record.preferences.items()}
-        triggers = {t_id: t.default_keyword for t_id, t in record.manifest.triggers.items() if t.default_keyword}
+        triggers = {t_id: t.keyword for t_id, t in record.triggers.items()}
         # backwards compatible v2 preferences format (with keywords added back)
         v2_prefs = {**triggers, **prefs}
         env = {

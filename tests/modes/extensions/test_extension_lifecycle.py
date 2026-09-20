@@ -54,6 +54,7 @@ class FakeRecord:
         self.state = FakeState()
         self.manifest = FakeManifest()
         self.preferences: dict[str, Any] = {}
+        self.triggers: dict[str, Any] = {}
 
     @property
     def is_enabled(self) -> bool:
