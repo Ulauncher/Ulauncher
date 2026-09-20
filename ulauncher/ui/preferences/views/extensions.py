@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from gi.repository import Gtk, Pango
@@ -288,7 +289,7 @@ class ExtensionsView(BaseView):
         parts.append(status_label)
 
         # Open source location link
-        folder_link = Gtk.LinkButton.new_with_label(f"file://{ext.path}", "installation location")
+        folder_link = Gtk.LinkButton.new_with_label(Path(ext.path).as_uri(), "installation location")
         folder_link.set_halign(Gtk.Align.CENTER)
         folder_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
         folder_icon = styled(Gtk.Label(label="📁"), "caption")
