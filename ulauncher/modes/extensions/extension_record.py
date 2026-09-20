@@ -195,6 +195,8 @@ class ExtensionRecord:
 
     def get_icon_value(self, icon: str | None = None) -> str:
         icon_value = icon or self.display_manifest.icon
+        if not isinstance(icon_value, str):
+            return ""
         expanded_path = join(self.path, icon_value)
         if isfile(expanded_path):
             return expanded_path
