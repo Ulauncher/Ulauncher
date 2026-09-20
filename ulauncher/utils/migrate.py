@@ -53,9 +53,9 @@ def _migrate_app_state(old_format: dict[str, int]) -> dict[str, int]:
 
 
 def _normalize_app_rankings(old_data: dict[str, int]) -> dict[str, float]:
-    # Convert integer launch counts to the adaptive decay score scale.
-    # Dividing by (DECAY_RATE + 1) satisfies the invariant sum = (N + DECAY_RATE) / (DECAY_RATE + 1),
-    # so the implied total launch count is recovered correctly on first use.
+    # Convert integer launch counts to the adaptive decay score scale, preserving their relative order.
+    # The sum understates the true total by DECAY_RATE (the first bump adds a full +1 with no decay),
+    # but the total only sets the decay rate and self-corrects over the next few launches.
     from ulauncher.modes.apps import app_rankings
 
     return {app_id: count / (app_rankings.DECAY_RATE + 1) for app_id, count in old_data.items() if count > 0}
