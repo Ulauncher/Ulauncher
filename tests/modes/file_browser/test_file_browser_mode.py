@@ -59,7 +59,7 @@ class TestFileBrowserMode:
     def test_is_enabled(self, mode: FileBrowserMode) -> None:
         assert mode.matches_query_str("~/Downloads")
         assert mode.matches_query_str("~")
-        assert mode.matches_query_str("$USER/Videos")
+        assert mode.matches_query_str("$HOME/Videos")
         assert mode.matches_query_str("/usr/bin")
         assert mode.matches_query_str("/")
         assert mode.matches_query_str(" /foo/bar")

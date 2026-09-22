@@ -26,7 +26,7 @@ class FileBrowserMode(Mode):
         """
         Enabled for queries like:
         ~/Downloads
-        $USER/Downloads
+        $HOME/Downloads
         /usr/bin/foo
         """
         return f"{query_str.lstrip()} "[0] in ("~", "/", "$")
