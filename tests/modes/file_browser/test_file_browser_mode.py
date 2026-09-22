@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
 
-from ulauncher.internals.effects import EffectType
+from ulauncher.internals import effects
+from ulauncher.internals.effects import EffectMessage, EffectType
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
 from ulauncher.modes.file_browser.file_browser_mode import FileBrowserMode
@@ -22,6 +24,13 @@ def get_results(mode: FileBrowserMode, query: Query) -> list[Result]:
 
     mode.handle_query(query, collect)
     return results
+
+
+def get_effects(mode: FileBrowserMode, query: Query) -> list[EffectMessage]:
+    """Helper to collect all effect messages from callback-based handle_query."""
+    effects_sent: list[EffectMessage] = []
+    mode.handle_query(query, effects_sent.append)
+    return effects_sent
 
 
 class MockDirEntry:
@@ -83,3 +92,24 @@ class TestFileBrowserMode:
     def test_handle_query__invalid_path__empty_list_rendered(self, mode: FileBrowserMode) -> None:
         query = Query(None, "~~")
         assert get_results(mode, query) == []
+
+    @pytest.mark.parametrize(
+        ("query_arg", "rewritten"),
+        [
+            ("$HOME/", "~/"),
+            ("$HOME/Downloads", "~/Downloads"),
+            ("$HOME/Downloads/", "~/Downloads/"),
+            (f"{Path.home()}/", "~/"),
+            (f"{Path.home()}/Downloads", "~/Downloads"),
+        ],
+    )
+    def test_handle_query__terminated_home_path__rewritten_to_tilde(
+        self, mode: FileBrowserMode, query_arg: str, rewritten: str
+    ) -> None:
+        assert get_effects(mode, Query(None, query_arg)) == [effects.set_query(rewritten)]
+
+    @pytest.mark.parametrize("query_arg", ["$HOME", "$USER/"])
+    def test_handle_query__unfinished_variable_query__listed_without_rewrite(
+        self, mode: FileBrowserMode, query_arg: str
+    ) -> None:
+        assert [msg["type"] for msg in get_effects(mode, Query(None, query_arg))] == [EffectType.RENDER_RESULTS]

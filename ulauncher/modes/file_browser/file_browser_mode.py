@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
-from os.path import dirname, expandvars, join
+import re
+from os.path import dirname, expanduser, expandvars, join
 from pathlib import Path
 from typing import Callable
 
@@ -16,6 +17,9 @@ from ulauncher.utils.fold_user_path import fold_user_path
 
 _events = EventBus()
 logger = logging.getLogger(__name__)
+
+# A variable at the end of a query could still grow into another name ($HOME -> $HOME2)
+_UNTERMINATED_VAR_RE = re.compile(r"\$\w+$")
 
 
 class FileBrowserMode(Mode):
@@ -51,12 +55,20 @@ class FileBrowserMode(Mode):
     def handle_query(self, query: Query, callback: Callable[[effects.EffectMessage], None]) -> None:
         results: list[Result] = []
         try:
-            path_str = query.argument
-            if not path_str:
+            raw_path_str = (query.argument or "").strip()
+            if not raw_path_str:
                 callback(effects.render_results([]))
                 return
-            path = Path(expandvars(path_str.strip())).expanduser()
 
+            path_str = expanduser(expandvars(raw_path_str))
+            folded_path = fold_user_path(path_str)
+
+            # fold normalized paths into the ~ short form with variables removed
+            if path_str != folded_path != raw_path_str and not _UNTERMINATED_VAR_RE.search(raw_path_str):
+                callback(effects.set_query(str(Query(query.keyword, folded_path))))
+                return
+
+            path = Path(path_str)
             closest = next(p for p in (path, *path.parents) if p.exists())
             closest_parent = str(closest)
             remainder = "/".join(path.parts[len(closest.parts) :])
