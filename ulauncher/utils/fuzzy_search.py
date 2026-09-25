@@ -97,4 +97,6 @@ def get_score(query_str: str, text: str) -> float:
             base_similarity -= 0.5 / query_len
 
     # Rank matches lower for each extra character, to slightly favor shorter ones.
-    return 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.001)
+    score = 100 * base_similarity * query_len / (query_len + (max_len - query_len) * 0.001)
+    # Clamping, not dividing by the normalized length, which would rescale every other score
+    return min(100, score)
