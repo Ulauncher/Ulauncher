@@ -36,7 +36,7 @@ class Result(BaseDataClass):
             return 0
         from ulauncher.utils.fuzzy_search import get_score
 
-        return max(get_score(query_str, field) * weight for field, weight in self.get_searchable_fields() if field)
+        return max(get_score(query_str, field) * weight for field, weight in self.get_searchable_fields())
 
 
 class ActionResult(Result):
