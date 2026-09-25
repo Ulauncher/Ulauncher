@@ -55,6 +55,10 @@ class HotkeyDialog(Gtk.Dialog):
         self.hide()
 
     def on_key_press(self, _entry_widget: Gtk.Entry, event: Gdk.EventKey) -> None:
+        # A held modifier arrives as a press of itself, and would be recorded as the hotkey
+        if event.is_modifier:
+            return
+
         mods = event.state & Gtk.accelerator_get_default_mod_mask()
         key_name = Gtk.accelerator_name(event.keyval, mods)
 
