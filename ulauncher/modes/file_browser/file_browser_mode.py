@@ -42,10 +42,18 @@ class FileBrowserMode(Mode):
                 _paths[path] = path.stat().st_atime if sort_by_atime else path.name.lower()
             except OSError:  # ignore broken symlinks etc
                 continue
+
+        def is_dir(entry: os.DirEntry[str]) -> bool:
+            # A symlink loop makes is_dir() raise, which the loop above cannot catch
+            try:
+                return entry.is_dir()
+            except OSError:
+                return False
+
         paths = sorted(
             _paths.keys(),
             reverse=sort_by_atime,
-            key=lambda p: (p.is_dir(), _paths[p]),
+            key=lambda p: (is_dir(p), _paths[p]),
         )
         return [p.name for p in paths]
 

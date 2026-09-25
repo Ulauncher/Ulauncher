@@ -113,3 +113,13 @@ class TestFileBrowserMode:
         self, mode: FileBrowserMode, query_arg: str
     ) -> None:
         assert [msg["type"] for msg in get_effects(mode, Query(None, query_arg))] == [EffectType.RENDER_RESULTS]
+
+
+# Outside the class, which patches os.scandir. "b_dir" sorts between the other two names, so
+# treating the loop as a directory would give a different order.
+def test_list_files__symlink_loop__sorts_as_a_file(tmp_path: Path) -> None:
+    (tmp_path / "a_file").touch()
+    (tmp_path / "b_dir").mkdir()
+    (tmp_path / "loop").symlink_to(tmp_path / "loop")
+
+    assert FileBrowserMode().list_files(str(tmp_path)) == ["a_file", "loop", "b_dir"]
