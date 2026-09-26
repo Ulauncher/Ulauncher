@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from html import unescape
 from typing import Callable
 
 from gi.repository import Gdk, Gtk, Pango
@@ -103,7 +102,7 @@ class ResultWidget(Gtk.EventBox):
             descr_label = self._make_text_label()
             descr_label.get_style_context().add_class("item-descr")
             descr_label.get_style_context().add_class("item-text")
-            descr_label.set_text(unescape(result.description))
+            descr_label.set_text(result.description)
             self.text_container.pack_start(descr_label, False, True, 0)
         self.highlight_name()
 
@@ -153,7 +152,7 @@ class ResultWidget(Gtk.EventBox):
             for label_text, is_highlight in highlight_text(highlightable_input, self.result.name):
                 ellipsize_min = ELLIPSIZE_MIN_LENGTH if not is_highlight else ELLIPSIZE_FORCE_AT_LENGTH
                 ellipsize = Pango.EllipsizeMode.MIDDLE if len(label_text) > ellipsize_min else Pango.EllipsizeMode.NONE
-                label = Gtk.Label(label=unescape(label_text), ellipsize=ellipsize)
+                label = Gtk.Label(label=label_text, ellipsize=ellipsize)
                 if is_highlight:
                     label.get_style_context().add_class("item-highlight")
                 labels.append(label)

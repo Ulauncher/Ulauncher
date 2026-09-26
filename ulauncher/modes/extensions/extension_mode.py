@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import html
 import logging
 from typing import TYPE_CHECKING, Callable, Iterator
 
@@ -142,8 +141,8 @@ class ExtensionMode(Mode):
     def get_triggers(self) -> Iterator[Result]:
         self._trigger_cache.clear()
         for ext, trigger_id, trigger in self._iter_enabled_triggers():
-            name = html.escape(trigger.name)
-            description = html.escape(trigger.description)
+            name = trigger.name
+            description = trigger.description
             icon = ext.get_icon_value(trigger.icon)
 
             if trigger.keyword:
