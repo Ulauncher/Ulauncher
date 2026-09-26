@@ -71,7 +71,7 @@ def get_ulauncher_dbus_action_group() -> Gio.DBusActionGroup:
     return Gio.DBusActionGroup.get(bus, ulauncher.app_id, ulauncher.dbus_path)
 
 
-def dbus_trigger_event(name: str, *args: Any) -> None:
+def _dbus_trigger_event(name: str, *args: Any) -> None:
     """Sends a D-Bus message to the Ulauncher App, which is delegated to the EventBus listener matching the name."""
     bus = _get_session_bus()
 
@@ -87,3 +87,11 @@ def dbus_trigger_event(name: str, *args: Any) -> None:
         bus.flush_sync(None)
     except GLib.Error as e:
         logger.warning("DBus flush failed: %s", e)
+
+
+def dbus_trigger_event(name: str, *args: Any) -> None:
+    """Notifies the app, best effort, because the caller's own work has usually succeeded by then."""
+    try:
+        _dbus_trigger_event(name, *args)
+    except GLib.Error as e:
+        logger.warning("Could not notify the Ulauncher app of %s: %s", name, e)

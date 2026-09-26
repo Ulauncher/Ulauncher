@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, call
 import pytest
 from pytest_mock import MockerFixture
 
+from ulauncher.gi import GLib
 from ulauncher.utils import dbus
 
 
@@ -41,3 +42,8 @@ class TestDbusTriggerEvent:
 
         action_group.activate_action.assert_not_called()
         gio.bus_get_sync.return_value.flush_sync.assert_not_called()
+
+    def test_swallows_a_glib_error(self, mocker: MockerFixture) -> None:
+        mocker.patch("ulauncher.utils.dbus._get_session_bus", side_effect=GLib.Error("no session bus"))
+
+        dbus.dbus_trigger_event("extensions:reload", ["com.example"])
