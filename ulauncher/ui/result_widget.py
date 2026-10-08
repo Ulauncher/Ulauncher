@@ -16,14 +16,75 @@ ELLIPSIZE_FORCE_AT_LENGTH = 20
 logger = logging.getLogger(__name__)
 
 
-class ResultWidget(Gtk.EventBox):
+class ResultWidgetBase(Gtk.EventBox):
+    """Selection, scrolling and mouse handling shared by the result widgets.
+
+    Subclasses build their own layout and must call `_init_base`, assign `item_box` (the widget
+    carrying the "selected" class) and assign `shortcut_label` if they render one.
+    """
+
     index: int = 0
-    name: str
     query: Query
     result: Result
     jump_keys: list[str]
     item_box: Gtk.EventBox
-    shortcut_label: Gtk.Label
+    shortcut_label: Gtk.Label | None = None
+
+    def _init_base(
+        self,
+        result: Result,
+        query: Query,
+        on_select: Callable[[int], None],
+        on_activate: Callable[[int, bool], None],
+        jump_keys: list[str],
+    ) -> None:
+        self.result = result
+        self.query = query
+        self._on_select = on_select
+        self._on_activate = on_activate
+        self.jump_keys = jump_keys
+
+    def set_index(self, index: int) -> None:
+        """
+        Set index for the item and assign shortcut
+        """
+        self.index = index
+        if self.shortcut_label and index < len(self.jump_keys):
+            self.shortcut_label.set_text(f"Alt+{self.jump_keys[index]}")
+
+    def select(self) -> None:
+        self.item_box.get_style_context().add_class("selected")
+        self.scroll_to_focus()
+
+    def deselect(self) -> None:
+        self.item_box.get_style_context().remove_class("selected")
+
+    def scroll_to_focus(self) -> None:
+        viewport = self.get_ancestor(Gtk.Viewport)
+        if not viewport or not isinstance(viewport, Gtk.Viewport):
+            return
+        viewport_height = viewport.get_allocation().height
+        adjustment = viewport.get_vadjustment()
+        scroll_y = adjustment.get_value()
+        allocation = self.get_allocation()
+        bottom = allocation.y + allocation.height
+        if scroll_y > allocation.y:  # Scroll up if the widget is above visible area
+            adjustment.set_value(allocation.y)
+        elif viewport_height + scroll_y < bottom:  # Scroll down if the widget is below visible area
+            adjustment.set_value(bottom - viewport_height)
+
+    def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
+        alt = bool(event and event.button != 1)  # right click
+        self._on_activate(self.index, alt)
+
+    def on_mouse_hover(self, _widget: Gtk.Widget, event: Gdk.EventCrossing) -> None:
+        # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
+        if event.time:
+            self._on_select(self.index)
+
+
+class ResultWidget(ResultWidgetBase):
+    name: str
     title_box: Gtk.Box
     text_container: Gtk.Box
 
@@ -36,11 +97,7 @@ class ResultWidget(Gtk.EventBox):
         on_activate: Callable[[int, bool], None],
         jump_keys: list[str],
     ) -> None:
-        self.result = result
-        self.query = query
-        self._on_select = on_select
-        self._on_activate = on_activate
-        self.jump_keys = jump_keys
+        self._init_base(result, query, on_select, on_activate, jump_keys)
         text_scaling_factor = get_text_scaling_factor()
         icon_size = 25 if result.compact else 40
         icon_box = 25 if result.compact else 50
@@ -112,35 +169,6 @@ class ResultWidget(Gtk.EventBox):
         # max_width_chars=1 lets the label shrink below its natural size so ellipsizing kicks in
         return Gtk.Label(label=text, hexpand=True, max_width_chars=1, xalign=0, ellipsize=Pango.EllipsizeMode.MIDDLE)
 
-    def set_index(self, index: int) -> None:
-        """
-        Set index for the item and assign shortcut
-        """
-        self.index = index
-        if index < len(self.jump_keys):
-            self.shortcut_label.set_text(f"Alt+{self.jump_keys[index]}")
-
-    def select(self) -> None:
-        self.item_box.get_style_context().add_class("selected")
-        self.scroll_to_focus()
-
-    def deselect(self) -> None:
-        self.item_box.get_style_context().remove_class("selected")
-
-    def scroll_to_focus(self) -> None:
-        viewport = self.get_ancestor(Gtk.Viewport)
-        if not viewport or not isinstance(viewport, Gtk.Viewport):
-            return
-        viewport_height = viewport.get_allocation().height
-        adjustment = viewport.get_vadjustment()
-        scroll_y = adjustment.get_value()
-        allocation = self.get_allocation()
-        bottom = allocation.y + allocation.height
-        if scroll_y > allocation.y:  # Scroll up if the widget is above visible area
-            adjustment.set_value(allocation.y)
-        elif viewport_height + scroll_y < bottom:  # Scroll down if the widget is below visible area
-            adjustment.set_value(bottom - viewport_height)
-
     def highlight_name(self) -> None:
         if self.result.wrap:
             # highlighting splits the name into labels that cannot reflow as one paragraph
@@ -163,12 +191,3 @@ class ResultWidget(Gtk.EventBox):
         expand = self.result.wrap
         for label in labels:
             self.title_box.pack_start(label, expand, expand, 0)
-
-    def on_click(self, _widget: Gtk.Widget, event: Gdk.EventButton | None = None) -> None:
-        alt = bool(event and event.button != 1)  # right click
-        self._on_activate(self.index, alt)
-
-    def on_mouse_hover(self, _widget: Gtk.Widget, event: Gdk.EventCrossing) -> None:
-        # event.time is 0 it means the mouse didn't move, but the window scrolled behind the mouse
-        if event.time:
-            self._on_select(self.index)

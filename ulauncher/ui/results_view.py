@@ -11,10 +11,15 @@ if TYPE_CHECKING:
     from ulauncher.internals.query import Query
     from ulauncher.internals.result import Result
     from ulauncher.internals.results_update import ResultsUpdate
-    from ulauncher.ui.result_widget import ResultWidget
+    from ulauncher.ui.result_widget import ResultWidgetBase
     from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger(__name__)
+
+# What a tile adds around its icon horizontally: the 4px left and right of the `padding: 8px 4px`
+# on .grid-item-container in RESULT_GRID_CSS. Only used to estimate how many tiles fit a row, so a
+# theme overriding that padding just makes the estimate less exact, never the layout wrong.
+TILE_EXTRA_WIDTH = 8
 
 
 class ResultsView(Gtk.ScrolledWindow):
@@ -24,6 +29,8 @@ class ResultsView(Gtk.ScrolledWindow):
     _index = 0
     _user_selected = False  # True once the user actively moved the selection (keyboard/mouse)
     _query = ""
+    _columns = 1  # tiles per row; 1 for a list, and also for a single-column grid
+    _is_grid = False  # tracked separately: a 1-column grid still lives in a Gtk.Grid
 
     def __init__(
         self,
@@ -40,7 +47,7 @@ class ResultsView(Gtk.ScrolledWindow):
         self._settings = settings
         self._apply_css = apply_css
         self._activate_result = activate_result
-        self._widgets: list[ResultWidget] = []
+        self._widgets: list[ResultWidgetBase] = []
         self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self._box.get_style_context().add_class("result-box")
         self._box.connect("size-allocate", self._fit_results_height)
@@ -49,6 +56,11 @@ class ResultsView(Gtk.ScrolledWindow):
     @property
     def has_results(self) -> bool:
         return bool(self._widgets)
+
+    @property
+    def columns(self) -> int:
+        """Tiles per row, or 1 when the results are a plain vertical list."""
+        return self._columns
 
     def set_max_height(self, height: int) -> None:
         self.set_property("max-content-height", height)
@@ -59,7 +71,8 @@ class ResultsView(Gtk.ScrolledWindow):
             self._query = str(update["query"])
             self._user_selected = False
 
-        if update["append"] and self._widgets:
+        # A grid is always rendered in one go, so an append would have to mix rows into it.
+        if update["append"] and self._widgets and not self._is_grid:
             self._append_results(update)
         else:
             self._replace_results(update)
@@ -73,11 +86,41 @@ class ResultsView(Gtk.ScrolledWindow):
         self._user_selected = True
 
     def go_up(self) -> None:
-        self.select((self._index or len(self._widgets)) - 1)
+        if self._columns > 1:
+            self._go_rows(-1)
+            return
+        self._go_previous()
 
     def go_down(self) -> None:
+        if self._columns > 1:
+            self._go_rows(1)
+            return
+        self._go_next()
+
+    def go_left(self) -> None:
+        self._go_previous()
+
+    def go_right(self) -> None:
+        self._go_next()
+
+    def _go_previous(self) -> None:
+        self.select((self._index or len(self._widgets)) - 1)
+
+    def _go_next(self) -> None:
         next_index = self._index + 1
         self.select(next_index if next_index < len(self._widgets) else 0)
+
+    def _go_rows(self, direction: int) -> None:
+        """Move the selection a whole row, wrapping around within the same column."""
+        total = len(self._widgets)
+        if not total:
+            return
+        index = self._index + direction * self._columns
+        if not 0 <= index < total:
+            column = self._index % self._columns
+            # off the bottom goes to the top of this column, off the top to its last populated row
+            index = column if direction > 0 else column + ((total - 1 - column) // self._columns) * self._columns
+        self.select(index)
 
     def _replace_results(self, update: ResultsUpdate) -> None:
         previous_pick = self.get_active_result() if self._user_selected else None
@@ -86,8 +129,12 @@ class ResultsView(Gtk.ScrolledWindow):
         self._index = 0
 
         result_list = update["results"][: self._limit()]
-        # stock sizing works for single-line results; only wrapped ones need _fit_results_height
-        self._has_wrapped_results = any(result.wrap for result in result_list)
+        grid_columns = self._grid_columns(update)
+        self._columns = grid_columns or 1
+        self._is_grid = bool(grid_columns)
+        # stock sizing works for single-line results; only wrapped ones need _fit_results_height.
+        # Grid tiles wrap their names, so they need it too.
+        self._has_wrapped_results = bool(grid_columns) or any(result.wrap for result in result_list)
         if not self._has_wrapped_results:
             self.set_min_content_height(-1)  # restore stock sizing
 
@@ -99,7 +146,10 @@ class ResultsView(Gtk.ScrolledWindow):
             logger.debug("Hiding results container, no results found")
             return
 
-        self._add_widgets(result_list, update["query"], start_index=0)
+        if grid_columns:
+            self._add_grid_widgets(result_list, update["query"], grid_columns)
+        else:
+            self._add_widgets(result_list, update["query"], start_index=0)
         self._apply_selection(update["selected_name"], previous_pick)
         self._box.set_margin_bottom(10)
         self._box.set_margin_top(3)
@@ -132,6 +182,47 @@ class ResultsView(Gtk.ScrolledWindow):
             self._widgets.append(widget)
             self._box.add(widget)
 
+    def _grid_columns(self, update: ResultsUpdate) -> int:
+        """Tiles per row for this update, or 0 to render the regular list."""
+        if not update["is_home"] or self._settings.recent_apps_layout != "grid":
+            return 0
+        # The column count and the icon size are capped individually, but their product is not:
+        # 12 columns of 128px icons need more than a 540px window can give, and horizontal
+        # scrolling is off, so the window would be forced wider than base_width. Drop columns
+        # until the row fits instead.
+        tile_width = self._settings.recent_apps_grid_icon_size + TILE_EXTRA_WIDTH
+        fits = self._settings.base_width // tile_width
+        return max(1, min(self._settings.recent_apps_grid_columns, fits))
+
+    def _add_grid_widgets(self, results: list[Result], query: Query, columns: int) -> None:
+        from ulauncher.ui.grid_result_widget import GridResultWidget
+
+        jump_keys = self._settings.get_jump_keys()
+        grid = Gtk.Grid(column_homogeneous=True, row_homogeneous=True)
+        grid.get_style_context().add_class("result-grid")
+        for index, result in enumerate(results):
+            widget = GridResultWidget(
+                result,
+                index,
+                query,
+                self.select,
+                self._select_and_activate,
+                jump_keys,
+                icon_size=self._settings.recent_apps_grid_icon_size,
+                labels=self._settings.recent_apps_grid_labels,
+            )
+            self._widgets.append(widget)
+            grid.attach(widget, index % columns, index // columns, 1, 1)
+
+        # Pad the last row, otherwise the homogeneous columns only span the tiles that exist
+        # and a partly filled last row would stretch its tiles wider than the rows above.
+        if remainder := len(results) % columns:
+            last_row = (len(results) - 1) // columns
+            for column in range(remainder, columns):
+                grid.attach(Gtk.Box(), column, last_row, 1, 1)
+
+        self._box.add(grid)
+
     def _select_and_activate(self, index: int, alt: bool) -> None:
         self.select(index)
         self._activate_result(alt)
@@ -157,7 +248,7 @@ class ResultsView(Gtk.ScrolledWindow):
         self._widgets[index].select()
 
     @property
-    def _selected(self) -> ResultWidget | None:
+    def _selected(self) -> ResultWidgetBase | None:
         if len(self._widgets) > self._index:
             return self._widgets[self._index]
         return None

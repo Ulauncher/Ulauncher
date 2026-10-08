@@ -311,6 +311,74 @@ class PreferencesView(BaseView):
             20,
             self._on_recent_apps_changed,
         )
+        self._add_recent_apps_layout_rows(applications_box)
+
+    def _add_recent_apps_layout_rows(self, parent: Gtk.Box) -> None:
+        """Layout picker for the frequent apps, plus the rows that only apply to the grid."""
+        is_grid = self.settings.recent_apps_layout == "grid"
+        self._add_setting_row(
+            parent,
+            "Frequent apps layout",
+            _create_combo(
+                [
+                    ("list", "List", "One app per row, with its description"),
+                    ("grid", "Grid of icons", "Tiles of app icons, several per row"),
+                ],
+                self.settings.recent_apps_layout,
+                self._on_recent_apps_layout_changed,
+                fallback_id="list",
+            ),
+            "Choose how the frequent apps are shown while the search input is empty.",
+        )
+        self._grid_rows = [
+            self._add_spin_row(
+                parent,
+                "Icons per row",
+                "Wrap the grid onto a new row after this many app icons.",
+                self.settings.recent_apps_grid_columns,
+                1,
+                12,
+                self._on_recent_apps_columns_changed,
+            ),
+            self._add_setting_row_widget(
+                parent,
+                "Grid labels",
+                _create_combo(
+                    [
+                        ("none", "Icons only", None),
+                        ("name", "Icon and name", None),
+                        ("shortcut", "Icon and shortcut", None),
+                        ("name-and-shortcut", "Icon, name and shortcut", None),
+                    ],
+                    self.settings.recent_apps_grid_labels,
+                    self._on_recent_apps_labels_changed,
+                    fallback_id="name-and-shortcut",
+                ),
+                "Pick what is written under each icon in the grid.",
+            ),
+            self._add_spin_row(
+                parent,
+                "Grid icon size",
+                "Size of the app icons in the grid, in pixels.",
+                self.settings.recent_apps_grid_icon_size,
+                16,
+                128,
+                self._on_recent_apps_icon_size_changed,
+                step_increment=4,
+            ),
+        ]
+        self._set_grid_rows_sensitive(is_grid)
+
+    def _add_setting_row_widget(
+        self, parent: Gtk.Box, label_text: str, widget: Gtk.Widget, description: str
+    ) -> Gtk.Widget:
+        """_add_setting_row, but handing back the widget so it can be toggled later."""
+        self._add_setting_row(parent, label_text, widget, description)
+        return widget
+
+    def _set_grid_rows_sensitive(self, sensitive: bool) -> None:
+        for widget in getattr(self, "_grid_rows", []):
+            widget.set_sensitive(sensitive)
 
     def _add_advanced_section(self, parent: Gtk.Box) -> None:
         """Add advanced settings section"""
@@ -484,6 +552,22 @@ class PreferencesView(BaseView):
     def _on_recent_apps_changed(self, spin: Gtk.SpinButton) -> None:
         count = spin.get_value_as_int()
         self.settings.save({"max_recent_apps": count})
+
+    def _on_recent_apps_layout_changed(self, combo: Gtk.ComboBox) -> None:
+        layout = combo.get_active_id()
+        if layout:
+            self.settings.save({"recent_apps_layout": layout})
+            self._set_grid_rows_sensitive(layout == "grid")
+
+    def _on_recent_apps_columns_changed(self, spin: Gtk.SpinButton) -> None:
+        self.settings.save({"recent_apps_grid_columns": spin.get_value_as_int()})
+
+    def _on_recent_apps_labels_changed(self, combo: Gtk.ComboBox) -> None:
+        if labels := combo.get_active_id():
+            self.settings.save({"recent_apps_grid_labels": labels})
+
+    def _on_recent_apps_icon_size_changed(self, spin: Gtk.SpinButton) -> None:
+        self.settings.save({"recent_apps_grid_icon_size": spin.get_value_as_int()})
 
     def _on_shadow_changed(self, spin: Gtk.SpinButton) -> None:
         self.settings.save({"window_shadow": spin.get_value_as_int()})

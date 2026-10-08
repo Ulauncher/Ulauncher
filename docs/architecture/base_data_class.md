@@ -93,6 +93,10 @@ to get them checked, but that means declaring every prop twice, in two places
 that drift apart. Attribute access stays fully checked either way, so prefer
 `data.count = 5` over the dict API when the key is known.
 
+Nothing catches a wrongly typed write at runtime either, so a `JsonConf`
+subclass backed by a hand-editable file has to normalize the value itself. See
+[normalizing untrusted values](json_conf.md#normalizing-untrusted-values).
+
 The `# error` labels above are what pyrefly reports. Other checkers may be weaker
 (as of writing this, this includes ty and Pyright).
 

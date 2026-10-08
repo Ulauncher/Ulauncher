@@ -21,6 +21,8 @@ class ResultsUpdate(TypedDict):
     selected_name: str | None
     # True adds to the end of the current list, False replaces the whole list.
     append: bool
+    # True for the frequent apps shown on an empty query, which the view may lay out as a grid.
+    is_home: bool
 
 
 def results_update(
@@ -28,5 +30,12 @@ def results_update(
     query: Query,
     selected_name: str | None = None,
     append: bool = False,
+    is_home: bool = False,
 ) -> ResultsUpdate:
-    return {"results": results, "query": query, "selected_name": selected_name, "append": append}
+    return {
+        "results": results,
+        "query": query,
+        "selected_name": selected_name,
+        "append": append,
+        "is_home": is_home,
+    }

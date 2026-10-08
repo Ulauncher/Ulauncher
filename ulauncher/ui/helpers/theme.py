@@ -28,6 +28,27 @@ CSS_RESET = """
 }
 """
 
+# Layout for the frequent apps grid. Appended to every theme (as CSS_RESET is prepended to it) so
+# that themes written before the grid existed still render it sensibly: tiles carry the regular
+# .item-* classes, so colors keep coming from the theme and only the geometry is set here.
+# .result-grid is part of each selector so a theme's own .item-* rules don't win on specificity.
+RESULT_GRID_CSS = """
+.result-grid .grid-item-box {
+  border-radius: 4px;
+}
+.result-grid .grid-item-container {
+  padding: 8px 4px;
+}
+.result-grid .grid-item-name {
+  font-size: 95%;
+  padding-top: 6px;
+}
+.result-grid .grid-item-shortcut {
+  font-size: 80%;
+  padding-top: 2px;
+}
+"""
+
 
 def _load_legacy_theme(manifest_path: Path) -> LegacyTheme | None:
     """Loads a legacy manifest theme, or logs and returns None if the manifest is unusable."""
@@ -164,6 +185,7 @@ class Theme(JsonConf):
         return (
             CSS_RESET
             + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
+            + RESULT_GRID_CSS
             + self.get_shadow_css(shadow_size)
         )
 
@@ -212,7 +234,7 @@ class LegacyTheme(Theme):
             css += f".item-highlight {{ color: {highlight_color} }}"
         if selected_highlight_color := self.matched_text_hl_colors.get("when_selected"):
             css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
-        return css + self.get_shadow_css(shadow_size)
+        return css + RESULT_GRID_CSS + self.get_shadow_css(shadow_size)
 
     def validate(self) -> None:
         for prop in ["name", "css_file"]:

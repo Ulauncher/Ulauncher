@@ -293,6 +293,9 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             return True
 
         if self.results_view.has_results:
+            if self._handle_grid_navigation(keyname, entry_widget.get_text(), has_modifier=ctrl or alt):
+                return True
+
             if keyname in ("Up", "ISO_Left_Tab") or (ctrl and keyname == up_alias):
                 self.results_view.go_up()
                 return True
@@ -315,6 +318,26 @@ class UlauncherWindow(Gtk.ApplicationWindow):
             if alt and event.string in jump_keys:
                 self.results_view.select(jump_keys.index(event.string))
                 return True
+        return False
+
+    def _handle_grid_navigation(self, keyname: str | None, input_text: str, has_modifier: bool) -> bool:
+        """In a grid, left/right walk tile by tile while up/down jump a whole row.
+
+        Only plain keys, and only while the input is empty:
+        - Ctrl and Alt combinations stay with the handlers below and with the entry. Shift is not
+          included, because Shift+Tab arrives as ISO_Left_Tab and does belong to the grid.
+        - The grid is rendered for an empty query, but stays on screen until the next update
+          replaces it, so an extension still working on a freshly typed query leaves it visible -
+          and by then these keys belong to the text cursor again.
+        """
+        if has_modifier or input_text or self.results_view.columns < 2:  # noqa: PLR2004
+            return False
+        if keyname in ("Left", "ISO_Left_Tab"):
+            self.results_view.go_left()
+            return True
+        if keyname in ("Right", "Tab"):
+            self.results_view.go_right()
+            return True
         return False
 
     def on_mouse_down(self, _event_box: Gtk.EventBox, event: Gdk.EventButton) -> None:

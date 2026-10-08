@@ -42,6 +42,33 @@ config.save()
 
 Every field needs a default, so required fields are off-limits: file data is partial, so a missing key falls back to a default, and `clear()` restores them. This reverses the in-memory `BaseDataClass` rule. Prefer a falsy default over `None`, since the data is untrusted (see [choosing a field's default](base_data_class.md#choosing-a-fields-default)).
 
+## Normalizing untrusted values
+
+A field annotation is not enforced on writes (see [gaps](base_data_class.md#gaps)), and the file behind a `JsonConf` is hand-editable. So a field annotated `int` can hold `"4"` at runtime, and nothing reports it: not the type checker, not the loader. Consumers then fail far from the cause - a string where a number is expected makes `Gtk.Adjustment` raise, and arithmetic like `max(1, value)` raises too.
+
+Normalize in `__setitem__` rather than at every read. `update()` routes every key through it, so one place covers loading the file, saving from the UI, and hand edits:
+
+```python
+_INT_SETTINGS: dict[str, tuple[int, int]] = {  # key -> (lower, upper)
+    "base_width": (540, 2000),
+    "window_shadow": (0, 25),
+}
+
+
+class Settings(JsonConf):
+    base_width: int = 750
+    window_shadow: int = 5
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in _INT_SETTINGS:
+            value = _as_bounded_int(key, value)
+        super().__setitem__(key, value)
+```
+
+Normalize unconditionally rather than only when the type looks wrong: an `int` that is already an `int` can still be out of range, and a range is as much a part of the contract as the type. The same goes for a field typed as a `Literal`, where an unknown value usually means every consumer silently falls through its branches.
+
+Clamp what can be clamped and fall back to the declared default for what cannot, so a single bad line in the file degrades that one setting instead of breaking whatever reads it. Watch the exception type while converting: `json.loads` accepts `Infinity` and `1e400`, and `int()` rejects the resulting float with `OverflowError`, not `ValueError`.
+
 ## Why Instance Deduplication Matters
 
 Without deduplication:

@@ -38,6 +38,8 @@ class TestResultWidget:
 
     def test_shortcut(self) -> None:
         result_wgt = ResultWidget(Result(), 0, Query("query", None), noop, noop, JUMP_KEYS)
+        # the list widget always renders a shortcut; only grid tiles may leave it out
+        assert result_wgt.shortcut_label is not None
         assert result_wgt.shortcut_label.get_text() == "Alt+1"
         result_wgt.set_index(2)
         assert result_wgt.shortcut_label.get_text() == "Alt+3"

@@ -107,7 +107,7 @@ class UlauncherCore:
             self._mode = None
             self.query = Query(None, "")
             self._result_buffer.reset()
-            self._render_results(self.get_home_results(), callback, append=False)
+            self._render_results(self.get_home_results(), callback, append=False, is_home=True)
             return
 
         self._mode = None
@@ -152,10 +152,12 @@ class UlauncherCore:
                 self._mode_map[app_result] = app_mode
                 yield app_result
 
-    def _render_results(self, results: Iterable[Result], callback: ResultsCallback, append: bool) -> None:
+    def _render_results(
+        self, results: Iterable[Result], callback: ResultsCallback, append: bool, is_home: bool = False
+    ) -> None:
         """Hand a result list to the view. Stream state is owned by ResultBuffer and untouched here."""
         self._clear_placeholder_timer()
-        callback(results_update(list(results), self.query, self.last_query_result_pick, append))
+        callback(results_update(list(results), self.query, self.last_query_result_pick, append, is_home))
 
     def _show_placeholder(self, callback: ResultsCallback) -> None:
         placeholder = Result(name="Loading...", icon=(self._mode.get_placeholder_icon() if self._mode else None) or "")
