@@ -385,9 +385,7 @@ class ExtensionsView(BaseView):
             if trigger.keyword:
                 trigger_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
 
-                keyword_label = styled(
-                    Gtk.Label(label=f"{trigger.name} keyword", use_markup=True, halign=Gtk.Align.START), "body"
-                )
+                keyword_label = styled(Gtk.Label(label=f"{trigger.name} keyword", halign=Gtk.Align.START), "body")
                 trigger_box.pack_start(keyword_label, False, False, 0)
 
                 # Keyword input field
