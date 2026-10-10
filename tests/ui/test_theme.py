@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from ulauncher import paths
+from ulauncher.ui.helpers import theme as theme_module
 from ulauncher.ui.helpers.theme import LegacyTheme, Theme, _load_legacy_theme, get_theme_source, get_themes
 
 
@@ -45,6 +46,22 @@ def test_get_css__missing_file__raises(tmp_path: Path) -> None:
 def test_legacy_get_css__missing_file__raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         LegacyTheme(name="dark", css_file="dark.css", base_path=str(tmp_path)).get_css(0)
+
+
+@pytest.mark.parametrize("b_extends", ["a", "b"], ids=["mutual", "self"])
+def test_legacy_get_css__extend_cycle__terminates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, b_extends: str
+) -> None:
+    for name in ("a", "b"):
+        (tmp_path / f"{name}.css").write_text(f".{name} {{}}")
+    a = LegacyTheme(name="a", css_file="a.css", base_path=str(tmp_path), extend_theme="b")
+    b = LegacyTheme(name="b", css_file="b.css", base_path=str(tmp_path), extend_theme=b_extends)
+    monkeypatch.setattr(theme_module, "get_themes", lambda: {"a": a, "b": b})
+
+    css = a.get_css(0)
+
+    assert ".a {}" in css
+    assert ".b {}" in css
 
 
 @pytest.fixture

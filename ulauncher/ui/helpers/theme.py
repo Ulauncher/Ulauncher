@@ -159,6 +159,9 @@ class Theme(JsonConf):
         return "\n.app { box-shadow: 0 0 " + str(max(0, shadow_size)) + "px rgba(0, 0, 0, 0.5); }"
 
     def get_css(self, shadow_size: int) -> str:
+        return self.get_own_css(shadow_size)
+
+    def get_own_css(self, shadow_size: int) -> str:
         css = self.get_css_path().read_text()
         # Convert relative links to absolute
         return (
@@ -199,20 +202,28 @@ class LegacyTheme(Theme):
         return Path(self.base_path, self.get("css_file_gtk_3.20+", self.css_file))
 
     def get_css(self, shadow_size: int) -> str:
-        css = self.get_css_path().read_text()
-        # Convert relative links to absolute
-        css = CSS_RESET + re.sub(r"(?<=url\([\"\'])(\./)?(?!\/)", f"{self.base_path}/", css)
-        if self.extend_theme:
-            parent_theme = get_themes().get(self.extend_theme)
-            if parent_theme and parent_theme.get_css_path().is_file():
-                css = f"{parent_theme.get_css(shadow_size)}\n\n{css}"
-            else:
-                logger.error('Cannot extend theme "%s". It does not exist', self.extend_theme)
+        themes = get_themes()
+        chain: list[Theme] = [self]
+        current: Theme = self
+        while isinstance(current, LegacyTheme) and current.extend_theme:
+            parent = themes.get(current.extend_theme)
+            if parent is None:
+                logger.error('Cannot extend theme "%s". It does not exist', current.extend_theme)
+                break
+            if parent.name in {t.name for t in chain}:
+                logger.error('Theme "%s" cannot extend "%s" because that forms a cycle', current.name, parent.name)
+                break
+            chain.append(parent)
+            current = parent
+        return "\n\n".join(t.get_own_css(shadow_size) for t in reversed(chain))
+
+    def get_own_css(self, shadow_size: int) -> str:
+        css = super().get_own_css(shadow_size)
         if highlight_color := self.matched_text_hl_colors.get("when_not_selected"):
             css += f".item-highlight {{ color: {highlight_color} }}"
         if selected_highlight_color := self.matched_text_hl_colors.get("when_selected"):
             css += f".selected.item-box .item-highlight {{ color: {selected_highlight_color} }}"
-        return css + self.get_shadow_css(shadow_size)
+        return css
 
     def validate(self) -> None:
         for prop in ["name", "css_file"]:
