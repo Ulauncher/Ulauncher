@@ -9,7 +9,9 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ulauncher.api import extension as extension_module
+from ulauncher.api._utils import legacy_custom_data_store
 from ulauncher.api.extension import Extension
+from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 from ulauncher.internals.result import Result
 
 if TYPE_CHECKING:
@@ -35,6 +37,17 @@ class TestExtension:
             Extension()
 
         assert basic_config.call_args_list[0].kwargs["level"] == logging.DEBUG
+
+    def test_input_clears_legacy_custom_data_without_an_item_enter_listener(self, mocker: MockerFixture) -> None:
+        mocker.patch("ulauncher.api.extension.Client")
+        mocker.patch("ulauncher.api.extension.signal.signal")
+        with patch.dict(os.environ, {"ULAUNCHER_EXTENSION_ID": "com.example.test"}):
+            ext = Extension()
+        ExtensionCustomAction({"key": "value"})
+
+        ext._do_trigger_event(_INPUT_EVENT, 1)
+
+        assert not legacy_custom_data_store
 
 
 def _batches(ext: Extension) -> list[tuple[bool, bool, list[str], list[int]]]:

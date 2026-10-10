@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ulauncher.api._logging import get_extension_logger
 from ulauncher.internals import effect_utils, effects
 
 if TYPE_CHECKING:
     from ulauncher.internals.result import Result
+
+# Data for the legacy ExtensionCustomAction, which only sends a reference to it to the app, so the
+# data never has to be serializable. Lives outside the legacy module so clearing it doesn't import
+# that module and trigger its deprecation warning.
+legacy_custom_data_store: dict[int, Any] = {}
 
 
 def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | str | None) -> effects.EffectMessage:

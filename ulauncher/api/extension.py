@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
 from ulauncher.api._deprecation import warn_legacy_api
 from ulauncher.api._logging import get_extension_handler, get_extension_logger
-from ulauncher.api._utils import convert_to_effect_message
+from ulauncher.api._utils import convert_to_effect_message, legacy_custom_data_store
 from ulauncher.api.event import BaseEvent, EventType, LegacyKeywordQueryEvent, PreferencesUpdateEvent, events
 from ulauncher.api.socket_client import Client
 from ulauncher.internals import effect_utils, effects, ipc
@@ -99,10 +99,6 @@ class Extension:
             return None
 
         if event["type"] == EventType.LEGACY_ACTIVATE_CUSTOM:
-            # Only reachable if the extension used the legacy ExtensionCustomAction, so import its store
-            # lazily here to avoid loading the legacy module (and its deprecation warning) otherwise.
-            from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
-
             data = legacy_custom_data_store.get(event["ref"])
             return event_constructor([data])
 
@@ -156,12 +152,7 @@ class Extension:
 
         # A new render replaces the old result list, so drop its custom-action data (dropping it on
         # activation instead would lose sibling actions still on screen under keep_app_open).
-        if (
-            event["type"] in (EventType.INPUT_TRIGGER, EventType.LAUNCH_TRIGGER)
-            and self._listeners[events[EventType.LEGACY_ACTIVATE_CUSTOM]]
-        ):
-            from ulauncher.api.shared.action.ExtensionCustomAction import custom_data_store as legacy_custom_data_store
-
+        if event["type"] in (EventType.INPUT_TRIGGER, EventType.LAUNCH_TRIGGER):
             legacy_custom_data_store.clear()
 
         # Keep preferences in sync before dispatching, so a user on_preferences_update handler reading
