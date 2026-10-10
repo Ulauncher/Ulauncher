@@ -80,3 +80,14 @@ def test_run__batch_skips_themes_without_source(mocker: MockerFixture) -> None:
 
     assert upgrade.run(CLIArguments()) == 0
     check_update.assert_not_called()
+
+
+def test_run__batch_reports_failure_when_upgrades_fail(mocker: MockerFixture) -> None:
+    mocker.patch.object(upgrade, "get_ext_registry", return_value=SimpleNamespace(iterate=list))
+    mocker.patch.object(upgrade.theme_installer, "installed_ids", return_value=["com.example.theme"])
+    mocker.patch.object(
+        upgrade.theme_installer, "load_state", return_value=SimpleNamespace(url="https://example.com", commit_hash="")
+    )
+    mocker.patch.object(upgrade, "run_blocking", side_effect=upgrade.install_errors.NetworkError)
+
+    assert upgrade.run(CLIArguments()) == 1

@@ -102,13 +102,15 @@ def run(args: CLIArguments) -> int:
         return 1
 
     records = [record for record in get_ext_registry().iterate() if record.is_manageable and record.update_url]
-    updated_extensions = [record.id for record in records if _upgrade_extension(record, fatal=False) == "updated"]
+    ext_outcomes = {record.id: _upgrade_extension(record, fatal=False) for record in records}
+    updated_extensions = [ext_id for ext_id, outcome in ext_outcomes.items() if outcome == "updated"]
     if updated_extensions:
         dbus_trigger_event("extensions:reload", updated_extensions)
 
     # Themes without a recorded source are not upgradeable (same as extensions)
     theme_ids = [repo_id for repo_id in theme_installer.installed_ids() if theme_installer.load_state(repo_id).url]
-    updated_themes = [repo_id for repo_id in theme_ids if _upgrade_theme(repo_id, fatal=False) == "updated"]
+    theme_outcomes = {repo_id: _upgrade_theme(repo_id, fatal=False) for repo_id in theme_ids}
+    updated_themes = [repo_id for repo_id, outcome in theme_outcomes.items() if outcome == "updated"]
 
     logger.info("\n%s extensions and %s themes updated", len(updated_extensions), len(updated_themes))
-    return 0
+    return 1 if "failed" in [*ext_outcomes.values(), *theme_outcomes.values()] else 0
