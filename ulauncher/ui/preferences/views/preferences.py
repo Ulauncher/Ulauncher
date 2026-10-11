@@ -6,6 +6,7 @@ from typing import Any, Callable, Sequence
 from gi.repository import GLib, Gtk, Pango
 
 from ulauncher.data import Err
+from ulauncher.modes.apps.terminal_emulators import get_terminal_emulators
 from ulauncher.ui.helpers.hotkey_controller import HotkeyController
 from ulauncher.ui.helpers.theme import get_theme_source, get_themes
 from ulauncher.ui.preferences.views import BaseView, get_window_for_widget, styled
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 events = EventBus()
 
 COMBO_LABEL_MAX_CHARS = 50
+CUSTOM_TERMINAL_ID = "custom"
 
 
 def _combo_label_markup(title: str, description: str | None = None, dimmed: bool = False) -> str:
@@ -348,13 +350,7 @@ class PreferencesView(BaseView):
             self.settings.jump_keys,
             self._on_jump_keys_changed,
         )
-        self._add_entry_row(
-            advanced_box,
-            "Terminal command",
-            "Override the terminal binary for desktop entries that request a terminal. Leave blank to use the default.",
-            self.settings.terminal_command,
-            self._on_terminal_changed,
-        )
+        self._add_terminal_row(advanced_box)
 
     def _add_run_in_background_row(self, parent: Gtk.Box) -> None:
         # Systemd autostart when available, otherwise a keep-alive fallback switch.
@@ -376,6 +372,40 @@ class PreferencesView(BaseView):
                 self.settings.keep_alive,
                 self._on_keep_alive_toggled,
             )
+
+    def _add_terminal_row(self, parent: Gtk.Box) -> None:
+        terminals = get_terminal_emulators()
+        rows = [
+            ("", "System default", "Your desktop picks the terminal"),
+            *[
+                (t.command, t.name, t.executable_name if t.executable_name.lower() != t.name.lower() else None)
+                for t in terminals
+            ],
+            (CUSTOM_TERMINAL_ID, "Custom command", "Include any flags (usually --, -e or -x)"),
+        ]
+        combo = _create_combo(
+            rows,
+            self.settings.terminal_command,
+            self._on_terminal_selected,
+            fallback_id=CUSTOM_TERMINAL_ID,
+        )
+        self._terminal_entry = Gtk.Entry(
+            text=self.settings.terminal_command,
+            width_chars=30,
+            placeholder_text="alacritty -e",
+            no_show_all=True,
+            visible=combo.get_active_id() == CUSTOM_TERMINAL_ID,
+        )
+        self._terminal_entry.connect("changed", self._on_terminal_changed)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box.pack_start(combo, False, False, 0)
+        box.pack_start(self._terminal_entry, False, False, 0)
+        self._add_setting_row(
+            parent,
+            "Terminal",
+            box,
+            "Which terminal to run terminal apps in",
+        )
 
     def _add_tray_icon_row(self, parent: Gtk.Box) -> None:
         # Placed next to "Run in background" because the tray icon is only effective while persistent.
@@ -518,6 +548,14 @@ class PreferencesView(BaseView):
 
     def _on_jump_keys_changed(self, entry: Gtk.Entry) -> None:
         self.settings.save({"jump_keys": entry.get_text()})
+
+    def _on_terminal_selected(self, combo: Gtk.ComboBox) -> None:
+        terminal_id = combo.get_active_id()
+        is_custom = terminal_id == CUSTOM_TERMINAL_ID
+        self._terminal_entry.set_visible(is_custom)
+        if terminal_id is not None and not is_custom:
+            # Saved by the entry's changed handler, which also lets Custom start from this command
+            self._terminal_entry.set_text(terminal_id)
 
     def _on_terminal_changed(self, entry: Gtk.Entry) -> None:
         self.settings.save({"terminal_command": entry.get_text()})

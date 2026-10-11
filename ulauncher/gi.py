@@ -164,6 +164,9 @@ class DesktopAppInfo:
     def get_generic_name(self) -> str | None:
         return DesktopAppInfo._raw.get_generic_name(self._app_info)
 
+    def get_categories(self) -> str | None:
+        return DesktopAppInfo._raw.get_categories(self._app_info)
+
     def get_filename(self) -> str | None:
         return DesktopAppInfo._raw.get_filename(self._app_info)
 
