@@ -14,13 +14,12 @@ def try_raise_app(app_id: str) -> bool:
     """
     if IS_X11:
         try:
-            from ulauncher.utils.ewmh import EWMH
+            from Xlib.display import Display
 
-            ewmh = EWMH()
-            for win in reversed(ewmh.getClientListStacking()):
-                if win is None:
-                    logger.warning("Skipping empty client list stacking result")
-                    continue
+            from ulauncher.utils.x11_window_stack import activate_window, get_client_windows_top_first
+
+            display = Display()
+            for win in get_client_windows_top_first(display):
                 wm_class = win.get_wm_class()
                 if not wm_class:
                     logger.warning('Could not get the WM class for "%s". Will not be able to activate it.', app_id)
@@ -33,8 +32,7 @@ def try_raise_app(app_id: str) -> bool:
                     win_app_id = "thunar --bulk-rename"
                 if app_id == win_app_id or app_id == class_name.lower():
                     logger.info("Raising application %s", app_id)
-                    ewmh.setActiveWindow(win)
-                    ewmh.display.flush()
+                    activate_window(display, win)
                     return True
 
         except (ModuleNotFoundError, ImportError):

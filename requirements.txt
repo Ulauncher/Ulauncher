@@ -13,5 +13,6 @@ pytest
 pytest-mock
 ruff >= 0.16.8, < 0.17.0
 rumdl == 0.2.*; python_version >= '3.9'
+types-python-xlib
 typing-extensions
 typos == 1.*
