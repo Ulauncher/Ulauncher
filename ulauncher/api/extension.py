@@ -310,7 +310,8 @@ class Extension:
             msg = f'Clipboard text "{text}" is invalid. It must be a string'
             raise TypeError(msg)
 
-        self._client.send({"name": "clipboard_store", "text": text})
+        # Called from handler threads, and the socket stream fails on overlapping writes
+        scheduling.run_when_idle(self._client.send, {"name": "clipboard_store", "text": text})
 
     def notify(self, body: str = "", notification_id: str | None = None) -> None:
         """
@@ -326,7 +327,10 @@ class Extension:
             msg = f'Notification ID "{notification_id}" is invalid. It must be a string or None'
             raise TypeError(msg)
 
-        self._client.send({"name": "notify", "body": body, "notification_id": notification_id})
+        # Called from handler threads, and the socket stream fails on overlapping writes
+        scheduling.run_when_idle(
+            self._client.send, {"name": "notify", "body": body, "notification_id": notification_id}
+        )
 
     def on_input(self, _query_str: str, _trigger_id: str) -> Iterable[Result | list[Result]]:
         # Return a list of results, or yield to stream them: `yield result` appends one,
