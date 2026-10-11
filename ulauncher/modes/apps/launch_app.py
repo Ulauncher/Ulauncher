@@ -4,14 +4,17 @@ import logging
 import os
 import re
 import shlex
+import shutil
 from pathlib import Path
 
 from ulauncher.gi import Gio, GioUnix, GLib
 from ulauncher.modes.apps.try_raise_app import try_raise_app
+from ulauncher.utils.eventbus import EventBus
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
 
 logger = logging.getLogger(__name__)
+events = EventBus()
 
 
 def _get_action_exec(action_name: str, desktop_entry_path: str | None) -> str | None:
@@ -44,6 +47,26 @@ def _load_app(desktop_entry_name: str) -> GioUnix.DesktopAppInfo | None:
     return app
 
 
+def _split_runnable_terminal_command(terminal_command: str) -> list[str] | None:
+    """Split the custom terminal command into argv, or warn and return None if it can't run."""
+    try:
+        argv = shlex.split(terminal_command)
+    except ValueError:
+        argv = None
+    if argv and shutil.which(argv[0]):
+        return argv
+    logger.warning("Terminal command %r can't run. Using the default terminal instead", terminal_command)
+    events.emit(
+        "app:show_notification",
+        "terminal_command_unavailable",
+        "Terminal not found",
+        f'Could not run the terminal command "{terminal_command}", so the default terminal was used. '
+        "Click here to change it in the preferences.",
+        "app.show-preferences",
+    )
+    return None
+
+
 def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
     app_id = Path(desktop_entry_name).stem if desktop_entry_name.endswith(".desktop") else desktop_entry_name
     settings = Settings.load()
@@ -53,10 +76,14 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
 
     is_dbus = app.get_boolean("DBusActivatable")
     is_terminal = app.get_boolean("Terminal")
-    use_custom_terminal = is_terminal and bool(settings.terminal_command)
+    terminal_argv = (
+        _split_runnable_terminal_command(settings.terminal_command)
+        if is_terminal and settings.terminal_command
+        else None
+    )
     app_exec = _get_exec(app, action_name)
 
-    if action_name is not None and (is_dbus or not app_exec or (is_terminal and not use_custom_terminal)):
+    if action_name is not None and (is_dbus or not app_exec or (is_terminal and terminal_argv is None)):
         # for actions where we have no command to spawn, let Gio invoke the action
         launch_context = Gio.AppLaunchContext()
         if os.environ.get("GDK_BACKEND") != "wayland":
@@ -72,17 +99,15 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
     if is_dbus:  # an action with DBus activation already returned above
         # https://wiki.gnome.org/HowDoI/DBusApplicationLaunching
         cmd = ["gapplication", "launch", app_id]
-    elif is_terminal and not use_custom_terminal:
+    elif is_terminal and terminal_argv is None:
         cmd = ["gtk-launch", app_id]
     elif app_exec:
-        shell_string = settings.terminal_command if use_custom_terminal else app_exec
         try:
-            cmd = shlex.split(shell_string)
-            if use_custom_terminal:
-                cmd = [*cmd, *shlex.split(app_exec)]
+            app_argv = shlex.split(app_exec)
         except ValueError:
-            logger.exception("Could not parse command for app %s: %r", app_id, shell_string)
+            logger.exception("Could not parse Exec for app %s: %r", app_id, app_exec)
             return False
+        cmd = [*terminal_argv, *app_argv] if terminal_argv else app_argv
     else:
         logger.error("Could not get Exec for app %s", app_id)
         return False
