@@ -28,7 +28,7 @@ def _get_action_exec(action_name: str, desktop_entry_path: str | None) -> str | 
         return None
 
 
-def _get_exec(app: GioUnix.DesktopAppInfo, action_name: str | None = None) -> str | None:
+def get_exec(app: GioUnix.DesktopAppInfo, action_name: str | None = None) -> str | None:
     """Return the launch command for the app, or one of its actions, with field codes resolved."""
     desktop_entry_path = app.get_filename()
     exec_line = _get_action_exec(action_name, desktop_entry_path) if action_name else app.get_commandline()
@@ -81,7 +81,7 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
         if is_terminal and settings.terminal_command
         else None
     )
-    app_exec = _get_exec(app, action_name)
+    app_exec = get_exec(app, action_name)
 
     if action_name is not None and (is_dbus or not app_exec or (is_terminal and terminal_argv is None)):
         # for actions where we have no command to spawn, let Gio invoke the action
