@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from gi.repository import Gtk, Pango
+from gi.repository import GLib, Gtk, Pango
 
 from ulauncher.modes.extensions.extension_record import (
     ExtensionPreference,
@@ -460,7 +460,7 @@ class ExtensionsView(BaseView):
             adjustment = Gtk.Adjustment(
                 value=int(pref.get("value", 0) or 0),
                 lower=pref.get("min", 0) or 0,
-                upper=pref.get("max", 100) or 100,
+                upper=GLib.MAXINT32 if pref.max is None else pref.max,
                 step_increment=1,
             )
             spin = Gtk.SpinButton(adjustment=adjustment)
