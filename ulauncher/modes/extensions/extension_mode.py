@@ -195,6 +195,8 @@ class ExtensionMode(Mode):
             self._send_request(custom_event, callback)
             return
 
+        if self._active_ext:
+            effect_msg = self._resolve_queries(self._active_ext, effect_msg)
         callback(effect_msg)
 
     def _send_request(self, event: ipc.Request, callback: Callable[[EffectMessage], None]) -> None:
@@ -234,7 +236,8 @@ class ExtensionMode(Mode):
                 logger.debug("Ignoring outdated extension response")
                 return
             response = message["response"]
-            response["effect"] = self._rehydrate_results(self._active_ext, response["effect"])
+            effect_msg = self._rehydrate_results(self._active_ext, response["effect"])
+            response["effect"] = self._resolve_queries(self._active_ext, effect_msg)
             self._handle_response(response)
         elif message["name"] == "clipboard_store":
             if "text" not in message:
@@ -321,4 +324,33 @@ class ExtensionMode(Mode):
 
             rendered.append(result)
         effect_msg["results"] = rendered
+        return effect_msg
+
+    def _resolve_queries(self, ext: ExtensionRecord, effect_msg: EffectMessage) -> EffectMessage:
+        """Return the effect with its set_query effects pointed at the keywords the user set for the
+        extension's triggers.
+
+        A whole query that starts with a trigger's default keyword gets the user's keyword instead,
+        since extensions that predate trigger ids hardcode it.
+        """
+        if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
+            effect_msg["effects"] = [self._resolve_queries(ext, nested) for nested in effect_msg["effects"]]
+            return effect_msg
+
+        if effect_msg["type"] == EffectType.SET_TRIGGER_QUERY:
+            trigger = ext.triggers.get(effect_msg["trigger_id"])
+            if not trigger or not trigger.keyword:
+                logger.warning("Extension %s has no trigger '%s' with a keyword", ext.id, effect_msg["trigger_id"])
+                return effects.do_nothing()
+            return effects.set_query(f"{trigger.keyword} {effect_msg['argument']}")
+
+        if effect_msg["type"] == EffectType.SET_QUERY:
+            keyword, separator, argument = effect_msg["query"].partition(" ")
+            triggers = ext.triggers.values()
+            if any(trigger.keyword == keyword for trigger in triggers):
+                return effect_msg
+            for trigger in triggers:
+                if trigger.keyword and trigger.default_keyword == keyword:
+                    return effects.set_query(f"{trigger.keyword}{separator}{argument}")
+
         return effect_msg

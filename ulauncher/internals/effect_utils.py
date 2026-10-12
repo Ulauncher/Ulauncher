@@ -16,6 +16,7 @@ _VALID_EFFECT_TYPES: Final = frozenset(getattr(EffectType, key) for key in Effec
 # Mirrors the required keys of the TypedDicts in effects.py, which cannot be read at runtime (at least not in py3.8)
 _REQUIRED_EFFECT_FIELDS: Final = {
     EffectType.SET_QUERY: ("query",),
+    EffectType.SET_TRIGGER_QUERY: ("trigger_id", "argument"),
     EffectType.RENDER_RESULTS: ("results",),
     EffectType.OPEN: ("path",),
     EffectType.LEGACY_COPY: ("text",),
@@ -39,7 +40,12 @@ def is_effect_message(value: Any) -> TypeGuard[EffectMessage]:
 
 def should_close(effect_msg: EffectMessage) -> bool:
     """Whether or not the effect should close the window."""
-    if effect_msg.get("type") in (EffectType.DO_NOTHING, EffectType.SET_QUERY, EffectType.RENDER_RESULTS):
+    if effect_msg.get("type") in (
+        EffectType.DO_NOTHING,
+        EffectType.SET_QUERY,
+        EffectType.SET_TRIGGER_QUERY,
+        EffectType.RENDER_RESULTS,
+    ):
         return False
     if effect_msg["type"] == EffectType.LEGACY_RUN_MANY:
         return all(map(should_close, effect_msg["effects"]))

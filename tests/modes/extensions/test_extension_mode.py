@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 from ulauncher.internals import effects
 from ulauncher.internals.query import Query
 from ulauncher.internals.result import Result
-from ulauncher.modes.extensions.extension_record import ExtensionRecord
+from ulauncher.modes.extensions.extension_record import ExtensionRecord, ExtensionRecordTrigger
 
 if TYPE_CHECKING:
     from ulauncher.modes.extensions.extension_mode import ExtensionMode
@@ -160,3 +160,59 @@ def test_handle_response__streamed_batches_keep_callback_until_final() -> None:
     assert mode._pending_callback is None, "the final batch clears the callback"
 
     assert callback.call_args_list == [call(non_final), call(final)]
+
+
+def _make_ext_with_triggers() -> MagicMock:
+    return MagicMock(
+        id="test.ext",
+        triggers={
+            "main": ExtensionRecordTrigger(default_keyword="kw", keyword="userkw"),
+            "other": ExtensionRecordTrigger(default_keyword="other", keyword="other"),
+            "launcher": ExtensionRecordTrigger(),
+        },
+    )
+
+
+def test_handle_message__trigger_query_gets_user_keyword() -> None:
+    mode, _service = _make_mode()
+    mode._active_ext = _make_ext_with_triggers()
+    mode._request_id = 1
+    callback = MagicMock()
+    mode._pending_callback = callback
+
+    mode.handle_message(
+        "test.ext", {"name": "response", "request_id": 1, "response": {"effect": effects.set_query("arg", "main")}}
+    )
+
+    callback.assert_called_once_with(effects.set_query("userkw arg"))
+
+
+def test_resolve_queries__trigger_without_keyword_does_nothing() -> None:
+    mode, _service = _make_mode()
+    ext = _make_ext_with_triggers()
+
+    assert mode._resolve_queries(ext, effects.set_query("arg", "launcher")) == effects.do_nothing()
+    assert mode._resolve_queries(ext, effects.set_query("arg", "missing")) == effects.do_nothing()
+
+
+def test_resolve_queries__whole_query_with_default_keyword_gets_user_keyword() -> None:
+    mode, _service = _make_mode()
+    ext = _make_ext_with_triggers()
+
+    assert mode._resolve_queries(ext, effects.set_query("kw arg")) == effects.set_query("userkw arg")
+    assert mode._resolve_queries(ext, effects.set_query("userkw arg")) == effects.set_query("userkw arg")
+    assert mode._resolve_queries(ext, effects.set_query("unrelated arg")) == effects.set_query("unrelated arg")
+
+
+def test_resolve_queries__resolves_nested_effects() -> None:
+    mode, _service = _make_mode()
+    ext = _make_ext_with_triggers()
+    run_many: effects.LegacyRunMany = {
+        "type": effects.EffectType.LEGACY_RUN_MANY,
+        "effects": [effects.set_query("arg", "other")],
+    }
+
+    assert mode._resolve_queries(ext, run_many) == {
+        "type": effects.EffectType.LEGACY_RUN_MANY,
+        "effects": [effects.set_query("other arg")],
+    }

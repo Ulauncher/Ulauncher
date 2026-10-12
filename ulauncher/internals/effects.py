@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, Iterable, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Final, Iterable, Literal, TypedDict, Union, overload
 
 # if type checking import Result
 if TYPE_CHECKING:
@@ -13,6 +13,7 @@ class EffectType:
     DO_NOTHING: Final = "effect:do_nothing"
     CLOSE_WINDOW: Final = "effect:close_window"
     SET_QUERY: Final = "effect:set_query"
+    SET_TRIGGER_QUERY: Final = "effect:set_trigger_query"
     RENDER_RESULTS: Final = "effect:render_results"
     OPEN: Final = "effect:open"
     LEGACY_COPY: Final = "effect:legacy_copy"
@@ -32,6 +33,14 @@ class CloseWindow(TypedDict):
 class SetQuery(TypedDict):
     type: Literal["effect:set_query"]
     query: str
+
+
+class SetTriggerQuery(TypedDict):
+    """Sent by extensions, which can't know their keywords. ExtensionMode turns it into a SetQuery."""
+
+    type: Literal["effect:set_trigger_query"]
+    trigger_id: str
+    argument: str
 
 
 class RenderResults(TypedDict):
@@ -73,6 +82,7 @@ NonRenderEffectMessage = Union[
     DoNothing,
     CloseWindow,
     SetQuery,
+    SetTriggerQuery,
     Open,
     LegacyCopy,
     LegacyRunScript,
@@ -96,11 +106,31 @@ def close_window() -> CloseWindow:
     return {"type": EffectType.CLOSE_WINDOW}
 
 
-def set_query(query: str) -> SetQuery:
+@overload
+def set_query(query: str) -> SetQuery: ...
+
+
+@overload
+def set_query(query: str, trigger_id: str) -> SetTriggerQuery: ...
+
+
+def set_query(query: str, trigger_id: str | None = None) -> SetQuery | SetTriggerQuery:
+    """
+    Set the query in the input field.
+
+    :param query: The query argument for the trigger, or the whole query if trigger_id is not given
+        (deprecated for extensions, since they can't know the keyword the user set for the trigger)
+    :param trigger_id: The trigger whose keyword (as set by the user) to prefix the argument with
+    """
     if not isinstance(query, str):
         msg = f'Query argument "{query}" is invalid. It must be a string'
         raise TypeError(msg)
-    return {"type": EffectType.SET_QUERY, "query": query}
+    if trigger_id is None:
+        return {"type": EffectType.SET_QUERY, "query": query}
+    if not isinstance(trigger_id, str):
+        msg = f'Trigger id "{trigger_id}" is invalid. It must be a string'
+        raise TypeError(msg)
+    return {"type": EffectType.SET_TRIGGER_QUERY, "trigger_id": trigger_id, "argument": query}
 
 
 def render_results(results: list[Result], append: bool = False, final: bool = True) -> RenderResults:

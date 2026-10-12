@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from ulauncher.api._deprecation import warn_legacy_api
 from ulauncher.api._logging import get_extension_logger
 from ulauncher.internals import effect_utils, effects
 
@@ -32,12 +33,18 @@ def convert_to_effect_message(input_data: effects.EffectMessageInput | bool | st
 
     if isinstance(input_data, str):
         get_extension_logger().warning(
-            "Returning a string from extension handlers is deprecated. Use effects.set_query(<query>) instead."
+            "Returning a string from extension handlers is deprecated. "
+            "Use effects.set_query(<argument>, <trigger_id>) instead."
         )
         return effects.set_query(input_data)
 
     if isinstance(input_data, dict):
         if effect_utils.is_effect_message(input_data):
+            if input_data["type"] == effects.EffectType.SET_QUERY:
+                warn_legacy_api(
+                    "effects.set_query(<query>)",
+                    "Use effects.set_query(<argument>, <trigger_id>) so Ulauncher can add the user's keyword.",
+                )
             return input_data
         err_msg = f"Invalid effect message dict: {input_data}"
         raise ValueError(err_msg)
