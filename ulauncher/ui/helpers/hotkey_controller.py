@@ -82,7 +82,7 @@ class HotkeyController:
             # and if we have to support more than these, but at least systemsettings5 is the old one
             for syssettings_alias in ("systemsettings", "systemsettings5"):
                 if which(syssettings_alias):
-                    launch_detached([syssettings_alias, "kcm_keys"])
+                    launch_detached([syssettings_alias, "kcm_keys"], startup_notify_id=None)
                     return
 
         elif IS_SUPPORTED:

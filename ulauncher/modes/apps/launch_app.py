@@ -7,9 +7,10 @@ import shlex
 import shutil
 from pathlib import Path
 
-from ulauncher.gi import Gio, GioUnix, GLib
+from ulauncher.gi import GioUnix, GLib
 from ulauncher.modes.apps.try_raise_app import try_raise_app
 from ulauncher.utils.eventbus import EventBus
+from ulauncher.utils.launch_context import get_launch_context
 from ulauncher.utils.launch_detached import launch_detached
 from ulauncher.utils.settings import Settings
 
@@ -85,7 +86,7 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
 
     if action_name is not None and (is_dbus or not app_exec or (is_terminal and terminal_argv is None)):
         # for actions where we have no command to spawn, let Gio invoke the action
-        launch_context = Gio.AppLaunchContext()
+        launch_context = get_launch_context()
         if os.environ.get("GDK_BACKEND") != "wayland":
             launch_context.unsetenv("GDK_BACKEND")
         app.launch_action(action_name, launch_context)
@@ -113,5 +114,10 @@ def launch_app(desktop_entry_name: str, action_name: str | None = None) -> bool:
         return False
 
     logger.info("Run %s (%s) Exec %s", f"action {action_name}" if action_name else "application", app_id, cmd)
-    launch_detached(cmd, app.get_string("Path"))
+    # GLib also only asks for a startup ID when the entry opts in, since one that is never
+    # completed leaves the busy cursor until it times out
+    startup_notify_id = (
+        get_launch_context().get_startup_notify_id(app.unwrap(), []) if app.get_boolean("StartupNotify") else None
+    )
+    launch_detached(cmd, app.get_string("Path"), startup_notify_id=startup_notify_id)
     return True

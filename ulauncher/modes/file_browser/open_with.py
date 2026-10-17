@@ -5,6 +5,7 @@ import os
 
 from ulauncher.gi import Gio, GioUnix, GLib
 from ulauncher.internals.result import Result
+from ulauncher.utils.launch_context import get_launch_context
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def open_path_with_app(app_id: str, path: str) -> bool:
         logger.error("Could not load app %s to open %s", app_id, path)
         return False
     uri = Gio.File.new_for_path(path).get_uri()
-    launch_context = Gio.AppLaunchContext()
+    launch_context = get_launch_context()
     if os.environ.get("GDK_BACKEND") != "wayland":
         launch_context.unsetenv("GDK_BACKEND")
     try:

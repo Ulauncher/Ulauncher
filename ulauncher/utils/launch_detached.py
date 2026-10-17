@@ -43,7 +43,7 @@ def detach_child(_data: object | None = None) -> None:
             os.dup2(null_fd, orig_fd)
 
 
-def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
+def launch_detached(cmd: list[str], working_dir: str | None = None, *, startup_notify_id: str | None) -> None:
     status = SystemdController("ulauncher").status()
     use_systemd_run = not isinstance(status, Err) and status.value.is_active
     if use_systemd_run:
@@ -54,6 +54,10 @@ def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
     # under X11 for proper centering.
     if env.get("GDK_BACKEND") != "wayland":
         env.pop("GDK_BACKEND", None)
+    # Same as GLib sets: X11 apps read the first, Wayland apps the second
+    if startup_notify_id:
+        env["DESKTOP_STARTUP_ID"] = startup_notify_id
+        env["XDG_ACTIVATION_TOKEN"] = startup_notify_id
 
     try:
         envp = [f"{k}={v}" for k, v in env.items()]
@@ -70,4 +74,4 @@ def launch_detached(cmd: list[str], working_dir: str | None = None) -> None:
 
 
 def open_detached(path_or_url: str) -> None:
-    launch_detached(["xdg-open", path_or_url])
+    launch_detached(["xdg-open", path_or_url], startup_notify_id=None)

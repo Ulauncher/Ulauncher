@@ -128,6 +128,10 @@ class DesktopAppInfo:
     def get_all() -> list[DesktopAppInfo]:
         return [DesktopAppInfo(app_info) for app_info in DesktopAppInfo._raw.get_all()]  # type: ignore[arg-type]
 
+    def unwrap(self) -> Gio.DesktopAppInfo:
+        """The wrapped object, for Gio calls that take an AppInfo argument."""
+        return self._app_info
+
     # Methods copied from GioUnix.DesktopAppInfo (these work fine)
 
     def get_id(self) -> str | None:
