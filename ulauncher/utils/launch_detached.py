@@ -11,10 +11,14 @@ from ulauncher.utils.systemd_controller import SystemdController
 logger = logging.getLogger(__name__)
 
 
-def detach_child() -> None:
+def detach_child(_data: object | None = None) -> None:
     """
     A utility function which runs in the child process launched by spawn_async
     and before execing the supplied command.
+
+    GLib calls its `SpawnChildSetupFunc(data)` with the spawn_async user_data
+    (None here). Newer PyGObject passes it, older versions call with no
+    arguments, so keep the parameter optional.
     """
     # Use setsid to take "session leader" status so that the child pid is
     # definitely detached from the parent ulauncher process
