@@ -207,9 +207,10 @@ class PreferencesView(BaseView):
         upper: float,
         handler: Callable[..., None],
         step_increment: float = 1,
+        sensitive: bool = True,
     ) -> Gtk.SpinButton:
         adjustment = Gtk.Adjustment(value=value, lower=lower, upper=upper, step_increment=step_increment)
-        spin = Gtk.SpinButton(adjustment=adjustment)
+        spin = Gtk.SpinButton(adjustment=adjustment, sensitive=sensitive)
         spin.connect("value-changed", handler)
         self._add_setting_row(parent, label_text, spin, description)
         return spin
@@ -264,6 +265,17 @@ class PreferencesView(BaseView):
             self._on_grab_mouse_toggled,
         )
 
+        self._add_spin_row(
+            general_box,
+            "Window width",
+            "Set the launcher width between 540 and 2000 pixels to match your workspace.",
+            self.settings.base_width,
+            540,
+            2000,
+            self._on_width_changed,
+            step_increment=10,
+        )
+
     def _create_theme_combo(self) -> Gtk.ComboBox:
         """Theme picker showing each theme's source as a dimmed second line."""
         rows = [(name, name, get_theme_source(theme)) for name, theme in get_themes().items()]
@@ -286,25 +298,23 @@ class PreferencesView(BaseView):
             self.settings.enable_application_mode,
             self._on_app_mode_toggled,
         )
-        self._add_switch_row(
+        self._raise_switch = self._add_switch_row(
             applications_box,
             "Switch to application if already running",
             "Focus an already running application instead of launching a duplicate instance. Works only on X11.",
             self.settings.raise_if_started,
             self._on_raise_toggled,
-            sensitive=IS_X11,
+            sensitive=self.settings.enable_application_mode and IS_X11,
         )
-        self._add_spin_row(
+        self._filters_switch = self._add_switch_row(
             applications_box,
-            "Window width",
-            "Set the launcher width between 540 and 2000 pixels to match your workspace.",
-            self.settings.base_width,
-            540,
-            2000,
-            self._on_width_changed,
-            step_increment=10,
+            "Include foreign desktop apps",
+            "Show applications that are hidden for your desktop environment by ignoring desktop filters.",
+            self.settings.disable_desktop_filters,
+            self._on_filters_toggled,
+            sensitive=self.settings.enable_application_mode,
         )
-        self._add_spin_row(
+        self._recent_apps_spin = self._add_spin_row(
             applications_box,
             "Number of frequent apps to show",
             "Control how many frequently used applications remain pinned near the top of the results.",
@@ -312,18 +322,13 @@ class PreferencesView(BaseView):
             0,
             20,
             self._on_recent_apps_changed,
+            sensitive=self.settings.enable_application_mode,
         )
+        self._add_terminal_row(applications_box)
 
     def _add_advanced_section(self, parent: Gtk.Box) -> None:
         """Add advanced settings section"""
         advanced_box = self._create_section_container(parent, "Advanced")
-        self._add_switch_row(
-            advanced_box,
-            "Include foreign desktop apps",
-            "Show applications that are hidden for your desktop environment by ignoring desktop filters.",
-            self.settings.disable_desktop_filters,
-            self._on_filters_toggled,
-        )
         self._add_spin_row(
             advanced_box,
             "Window shadow size",
@@ -350,7 +355,6 @@ class PreferencesView(BaseView):
             self.settings.jump_keys,
             self._on_jump_keys_changed,
         )
-        self._add_terminal_row(advanced_box)
 
     def _add_run_in_background_row(self, parent: Gtk.Box) -> None:
         # Systemd autostart when available, otherwise a keep-alive fallback switch.
@@ -397,9 +401,10 @@ class PreferencesView(BaseView):
             visible=combo.get_active_id() == CUSTOM_TERMINAL_ID,
         )
         self._terminal_entry.connect("changed", self._on_terminal_changed)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, sensitive=self.settings.enable_application_mode)
         box.pack_start(combo, False, False, 0)
         box.pack_start(self._terminal_entry, False, False, 0)
+        self._terminal_box = box
         self._add_setting_row(
             parent,
             "Terminal",
@@ -499,7 +504,12 @@ class PreferencesView(BaseView):
         self.settings.save({"grab_mouse_pointer": switch.get_active()})
 
     def _on_app_mode_toggled(self, switch: Gtk.Switch, _: Any) -> None:
-        self.settings.save({"enable_application_mode": switch.get_active()})
+        is_enabled = switch.get_active()
+        self.settings.save({"enable_application_mode": is_enabled})
+        self._raise_switch.set_sensitive(is_enabled and IS_X11)
+        self._filters_switch.set_sensitive(is_enabled)
+        self._recent_apps_spin.set_sensitive(is_enabled)
+        self._terminal_box.set_sensitive(is_enabled)
 
     def _on_raise_toggled(self, switch: Gtk.Switch, _: Any) -> None:
         self.settings.save({"raise_if_started": switch.get_active()})
