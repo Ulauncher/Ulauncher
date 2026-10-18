@@ -19,6 +19,7 @@ from ulauncher.ui.load_icon_surface import load_icon_surface
 from ulauncher.ui.results_view import ResultsView
 from ulauncher.utils import scheduling
 from ulauncher.utils.environment import DESKTOP_ID, is_x11_compatible
+from ulauncher.utils.launch_context import take_activation_pending
 from ulauncher.utils.settings import Settings
 
 if TYPE_CHECKING:
@@ -28,6 +29,11 @@ logger = logging.getLogger(__name__)
 # Gnome Wayland doesn't allow apps to position their windows, so we render a fullscreen transparent window
 # and position the visible window inside of it via margins
 _use_fullscreen_to_position = DESKTOP_ID == "GNOME" and not is_x11_compatible()
+# Native Wayland Mutter accepts a launched app's activation token only while the surface that requested it
+# still has keyboard focus, checked when the app uses the token. XWayland startup IDs only need to be recent.
+_activation_needs_focus = DESKTOP_ID == "GNOME" and not is_x11_compatible()
+# Long enough for a running app to take focus, short enough not to hold the window up through a cold start
+_APP_FOCUS_TIMEOUT_SEC = 0.5
 
 
 class UlauncherWindow(Gtk.ApplicationWindow):
@@ -39,6 +45,7 @@ class UlauncherWindow(Gtk.ApplicationWindow):
     is_ready = False
     layer_shell_enabled = False
     settings: Settings
+    _awaiting_app_focus = False
 
     def __init__(self, **kwargs: Any) -> None:
         logger.info("Opening Ulauncher window")
@@ -230,14 +237,19 @@ class UlauncherWindow(Gtk.ApplicationWindow):
         # The WM can briefly take focus away when a global hotkey fires, so delay the close to
         # give the window a chance to regain focus before it's actually closed
         self.is_focused = False
-        if self.is_ready and self.settings.close_on_focus_out and not self.is_dragging:
+        if self.is_ready and not self.is_dragging and (self.settings.close_on_focus_out or self._awaiting_app_focus):
             scheduling.timer(0.07, self._close_if_unfocused)
 
     def _close_if_unfocused(self) -> None:
         # Runs from a timer, so the window may already be closed.
         if self.is_focused or not self.get_application():
             return
-        self.close(save_query=True)
+        self.close(save_query=not self._awaiting_app_focus)
+
+    def _close_if_open(self) -> None:
+        # Runs from a timer, so the window may already be closed.
+        if self.get_application():
+            self.close()
 
     def on_focus_in(self) -> None:
         self.is_focused = True
@@ -428,6 +440,11 @@ class UlauncherWindow(Gtk.ApplicationWindow):
                 self.move(int(pos_x + layout_size.x), int(pos_y + layout_size.y))
 
     def close(self, save_query: bool = False) -> None:
+        if take_activation_pending() and _activation_needs_focus and self.is_focused:
+            logger.info("Waiting for the launched app to take focus")
+            self._awaiting_app_focus = True
+            scheduling.timer(_APP_FOCUS_TIMEOUT_SEC, self._close_if_open)
+            return
         logger.info("Closing Ulauncher window")
         if not save_query or not self.settings.auto_resume:
             self.get_app().set_query("", update_input=False)

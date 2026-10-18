@@ -10,8 +10,22 @@ from __future__ import annotations
 from ulauncher.gi import Gio
 
 
+class _ActivationPending:
+    value = False
+
+
 def get_launch_context() -> Gio.AppLaunchContext:
     from gi.repository import Gdk  # noqa: TID251 - only called from the UI process, where GTK is loaded
 
     display = Gdk.Display.get_default()
-    return display.get_app_launch_context() if display else Gio.AppLaunchContext()
+    if not display:
+        return Gio.AppLaunchContext()
+    _ActivationPending.value = True
+    return display.get_app_launch_context()
+
+
+def take_activation_pending() -> bool:
+    """Whether a launch context was handed out since the last call."""
+    pending = _ActivationPending.value
+    _ActivationPending.value = False
+    return pending
