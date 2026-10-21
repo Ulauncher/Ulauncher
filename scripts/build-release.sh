@@ -96,7 +96,7 @@ launchpad_upload() {
     fi
 
     resolute="PPA=$PPA RELEASE=resolute ./ul build-deb $VERSION --upload"
-    questing="PPA=$PPA RELEASE=questing ./ul build-deb $VERSION --upload"
+    stonking="PPA=$PPA RELEASE=stonking ./ul build-deb $VERSION --upload"
     noble="PPA=$PPA RELEASE=noble ./ul build-deb $VERSION --upload"
     jammy="PPA=$PPA RELEASE=jammy ./ul build-deb $VERSION --upload"
     focal="PPA=$PPA RELEASE=focal ./ul build-deb $VERSION --upload"
@@ -109,6 +109,6 @@ launchpad_upload() {
         --rm \
         -v $(pwd):/root/ulauncher \
         $BUILD_IMAGE \
-        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $focal && $jammy && $noble && $questing && $resolute"
+        bash -c "tar -xvf scripts/launchpad.ssh.tar -C / && $resolute && $stonking && $noble && $jammy && $focal"
     set +x
 }
