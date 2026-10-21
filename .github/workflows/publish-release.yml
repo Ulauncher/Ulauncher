@@ -3,6 +3,12 @@ name: Publish release
 on:
   release:
     types: [published]
+  # Uploads an existing release to the supported Ubuntu releases that don't have it yet
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, ex: v6.0.0"
+        required: true
 
 jobs:
   release:
@@ -10,6 +16,8 @@ jobs:
     container: ulauncher/build-image:6.7
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag }}
       - name: Publish to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
@@ -41,6 +49,10 @@ jobs:
           echo "Ubuntu releases:" $DISTROS
           for DISTRO in $DISTROS; do
             DEB_VERSION="$(echo $VERSION | tr "-" "~")-0ubuntu1ppa1~${DISTRO}"
+            # Launchpad never accepts a version twice, even after it's superseded or removed,
+            # and this query returns uploads in any of those states.
+            UPLOADS=$(curl -fsS "https://api.launchpad.net/devel/~${PPA%/*}/+archive/ubuntu/${PPA#*/}?ws.op=getPublishedSources&source_name=ulauncher&exact_match=true&version=${DEB_VERSION}&ws.show=total_size")
+            if [ "$UPLOADS" != 0 ]; then echo "Skipping ${DEB_VERSION}, already uploaded"; continue; fi
             make deb DEB_VERSION="${DEB_VERSION}" DEB_DISTRO="${DISTRO}" DPKG_ARGS="--post-clean --build=source -sa --sign-key=${GPGKEY}"
             echo "Uploading to launchpad PPA:${PPA}"
             dput -f "ppa:${PPA}" dist/*.changes
@@ -48,7 +60,7 @@ jobs:
           done;
 
       - name: Publish to AUR
-        if: "${{ !contains(github.ref_name, '-') }}"
+        if: "${{ github.event_name == 'release' && !contains(github.ref_name, '-') }}"
         uses: friday/aur-publish-action@master
         with:
           new_release: ${{ github.ref_name }}
