@@ -31,11 +31,15 @@ jobs:
           tar -xvf scripts/launchpad.ssh.tar -C /
           gpg --import "scripts/launchpad-public.key"
           gpg --import "scripts/launchpad-secret.key"
-          # jammy    22.04 LTS EOL 2027-06
-          # noble    24.04 LTS EOL 2029-06
-          # resolute 26.04 LTS EOL 2031-06
-          # stonking 26.10     EOL 2027-07
-          for DISTRO in $(echo "resolute stonking noble jammy"); do
+          # Ubuntu's own release table. The eol column is the end of standard support,
+          # so LTS releases in ESM, which Launchpad still lists as supported, are excluded.
+          # Newest first, so the likely most used releases are uploaded before a failure stops the loop.
+          DISTROS=$(curl -fsS https://salsa.debian.org/debian/distro-info-data/-/raw/main/ubuntu.csv \
+            | awk -F, -v today="$(date -u +%F)" 'NR > 1 && $5 <= today && today < $6 { print $3 }' \
+            | tac)
+          if [ -z "$DISTROS" ]; then echo "Found no supported Ubuntu releases"; exit 1; fi
+          echo "Ubuntu releases:" $DISTROS
+          for DISTRO in $DISTROS; do
             DEB_VERSION="$(echo $VERSION | tr "-" "~")-0ubuntu1ppa1~${DISTRO}"
             make deb DEB_VERSION="${DEB_VERSION}" DEB_DISTRO="${DISTRO}" DPKG_ARGS="--post-clean --build=source -sa --sign-key=${GPGKEY}"
             echo "Uploading to launchpad PPA:${PPA}"
