@@ -3,12 +3,10 @@ name: Publish release
 on:
   release:
     types: [published]
-  # Uploads an existing release to the supported Ubuntu releases that don't have it yet
+  # Uploads an existing release to the supported Ubuntu releases that don't have it yet.
+  # Use from https://github.com/Ulauncher/Ulauncher/actions/workflows/publish-release.yml
+  # Run it from a release tag, or from a branch to use the latest tag on that branch.
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Release tag, ex: v6.0.0"
-        required: true
 
 jobs:
   release:
@@ -17,7 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.tag }}
+          # git describe needs the history and tags
+          fetch-depth: 0
+      - name: Check out the latest tag
+        if: github.ref_type == 'branch'
+        run: git checkout "$(git describe --tags --abbrev=0)"
       - name: Publish to Launchpad
         env:
           LAUNCHPAD_SSH_TAR: ${{ secrets.LAUNCHPAD_SSH_TAR }}
