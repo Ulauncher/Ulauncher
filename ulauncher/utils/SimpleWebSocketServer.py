@@ -20,7 +20,6 @@ import hashlib
 import base64
 import socket
 import struct
-import ssl
 import errno
 import codecs
 import traceback
@@ -28,8 +27,7 @@ from collections import deque
 from select import select
 
 __all__ = ['WebSocket',
-           'SimpleWebSocketServer',
-           'SimpleSSLWebSocketServer']
+           'SimpleWebSocketServer']
 
 
 def _check_unicode(val):
@@ -100,7 +98,6 @@ class WebSocket:
         self.lengtharray = None
         self.index = 0
         self.request = None
-        self.usingssl = False
 
         self.frag_start = False
         self.frag_type = BINARY
@@ -677,23 +674,3 @@ class SimpleWebSocketServer:
                 client.handleClose()
                 del self.connections[failed]
                 self.listeners.remove(failed)
-
-
-class SimpleSSLWebSocketServer(SimpleWebSocketServer):
-
-    def __init__(self, host, port, websocketclass, certfile,
-                 keyfile, version=ssl.PROTOCOL_TLSv1, selectInterval=0.1):
-
-        SimpleWebSocketServer.__init__(self, host, port, websocketclass, selectInterval)
-
-        self.context = ssl.SSLContext(version)
-        self.context.load_cert_chain(certfile, keyfile)
-
-    def _decorateSocket(self, sock):
-        sslsock = self.context.wrap_socket(sock, server_side=True)
-        return sslsock
-
-    def _constructWebSocket(self, sock, address):
-        ws = self.websocketclass(self, sock, address)
-        ws.usingssl = True
-        return ws
